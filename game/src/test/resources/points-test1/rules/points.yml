@@ -1,0 +1,41 @@
+points:
+  - event: qa
+    id: defect-assigned
+    condition: "status == 'ASSIGNED'"
+    amount: "4 - severity"
+    additionalPoints:
+      - toUser: "assignedTo"
+        id: defect-get-assigned
+        amount: -4
+
+  - event: qa
+    id: defect-fixed
+    condition: "status == 'FIXED'"
+    amount: 2
+    additionalPoints:
+      - toUser: "createdBy"
+        id: defect-accepted
+        amount: 1
+
+  - event: qa-test
+    id: test-case-written
+    condition: "true"
+    amount: 4
+
+#  - event: qa
+#    id: defect-not-relevant
+#    condition: "status == 'OUT-OF-SCOPE' || status == 'AS-DESIGNED'"
+#    amount: 4
+#    additionalPoints:
+#      - toUser: "createdBy"
+#        id: defect-not-relevant-created
+#        amount: -4
+#
+#  - event: qa-mod
+#    id: defect-severity-change
+#    condition: "fromSeverity > 0 && toSeverity > 0"
+#    amount: "fromSeverity - toSeverity"
+#    additionalPoints:
+#      - toUser: "createdBy"
+#        id: defect-severity-change-affected
+#        amount: "toSeverity - fromSeverity"

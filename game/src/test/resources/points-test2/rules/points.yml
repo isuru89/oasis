@@ -1,0 +1,26 @@
+points:
+  - event: submission
+    id: churn
+    condition: "totalCode >= 50"
+    amount: "totalCode / 100"
+
+  - event: submission
+    id: heavy-commit
+    condition: "totalCode >= 500"
+    amount: 5
+
+  - event: submission
+    id: fix-violations
+    condition: "fixedViolations > 0"
+    amount: "fixedViolations"
+
+  - event: submission
+    id: minus-nvd
+    condition: "nvd < 0 && introducedViolations <= 0"
+    amount: 1
+
+  - event: submission
+    source: POINTS
+    id: submission_bonus_points
+    condition: "$TOTAL >= 10"
+    amount: "5 + ($TOTAL - 10) * 2"

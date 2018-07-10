@@ -1,0 +1,13 @@
+$DSL.select {
+    TARGET (TABLE('Badges').alias('b'))
+    
+    FETCH ()
+    
+    WHERE {
+      ALL {
+        EQ (b.user_id, PARAM('userId'))
+        EQ (b.event_type, PARAM('eventType'))
+        EQ (b.badge_id, PARAM('badgeId'))
+      }
+    }
+}

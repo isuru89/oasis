@@ -1,0 +1,14 @@
+
+$DSL.insert {
+    TARGET (TABLE('Points').alias('p'))
+    
+    SET {
+        EQ (p.user_id, PARAM('userId'))
+        EQ (p.event_type, PARAM('eventType'))
+        EQ (p.ext_id, PARAM('externalId'))
+        EQ (p.ts, PARAM('ts'))
+        EQ (p.point_id, PARAM('pointId'))
+        EQ (p.sub_point_id, PARAM('subPointId'))
+        EQ (p.points, PARAM('points'))
+    }
+}

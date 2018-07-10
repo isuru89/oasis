@@ -1,0 +1,13 @@
+{
+  "nyql.connections": [
+    {
+      "name": "oasis-local",
+      "host": "localhost",
+      "port": 3306,
+      "dialect": "MySQL",
+      "username": "root",
+      "password": "root",
+      "databaseName": "oasis"
+    }
+  ]
+}

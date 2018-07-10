@@ -1,0 +1,83 @@
+badges:
+  - id: quality-streak
+    from:
+      pointsId: minus-nvd
+      within: 7 days
+      streak: 30
+      subBadges:
+        - streak: 50
+          id: bronze
+        - streak: 70
+          id: silver
+        - streak: 100
+          id: gold
+        - streak: 200
+          id: platinum
+
+  - id: first-time-right
+    event: submission
+    condition: "totalCode >= 50 && introducedViolations == 0 && fixedViolations == 0"
+    streak: 30
+    subBadges:
+      - streak: 50
+        id: bronze
+      - streak: 70
+        id: silver
+      - streak: 100
+        id: gold
+      - streak: 200
+        id: platinum
+
+  - id: developer
+    from:
+      milestoneId: total-codes
+      level: 10
+      subBadges:
+        - id: intermediate
+          level: 30
+        - id: expert
+          level: 40
+        - id: guru
+          level: 50
+
+  - id: heavy-coder
+    event: submission
+    condition: "addedLines >= 100000"
+    subBadges:
+      - condition: "addedLines >= 1000000"
+        id: mega-committer
+      - condition: "addedLines >= 5000000"
+        id: giga committer
+
+  - id: heavy-commit-streak
+    from:
+      pointsId: heavy-commit
+      streak: 50
+
+  - id: other-fixer
+    from:
+      pointsId: fixed-violations-of-others
+      streak: 3
+
+  - id: welcome-badge
+    event: login
+    condition: "true"
+    maxBadges: 1
+
+  - id: tech-lead
+    from:
+      pointsId: remark-raised
+      #within: 7 days
+      streak: 5
+      subBadges:
+        - id: level-1
+          streak: 10
+        - id: level-2
+          streak: 20
+        - id: level-3
+          streak: 30
+        - id: level-4
+          streak: 40
+        - id: level-5
+          streak: 50
+

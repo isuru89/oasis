@@ -1,0 +1,20 @@
+leaderboards:
+  - id: goc-all
+    from: points
+    ruleIds: all
+    order: desc
+
+  - id: top-fixer
+    from: points
+    ruleIds:
+      - fix-violations
+      - fixed-violations-of-others
+      - fixed-violations-of-others-bonus
+    order: desc
+
+  - id: coding-leader
+    from: points
+    ruleIds:
+      - churn
+      - heavy-commit
+    order: desc

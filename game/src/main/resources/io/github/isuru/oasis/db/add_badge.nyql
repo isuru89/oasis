@@ -1,0 +1,17 @@
+
+$DSL.insert {
+
+    TARGET (TABLE('Badges').alias('b'))
+
+    SET {
+        EQ (b.user_id, PARAM('userId'))
+        EQ (b.event_type, PARAM('eventType'))
+        EQ (b.ext_id, PARAM('externalId'))
+        EQ (b.ts, PARAM('ts'))
+        EQ (b.badge_id, PARAM('badgeId'))
+        EQ (b.sub_badge_id, PARAM('subBadgeId'))
+        EQ (b.start_ext_id, PARAM('startExtId'))
+        EQ (b.end_ext_id, PARAM('endExtId'))
+    }
+
+}

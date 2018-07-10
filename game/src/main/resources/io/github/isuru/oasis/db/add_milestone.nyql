@@ -1,0 +1,13 @@
+
+$DSL.insert {
+    TARGET (TABLE('Milestones').alias('m'))
+    
+    SET {
+        EQ (m.user_id, PARAM('userId'))
+        EQ (m.event_type, PARAM('eventType'))
+        EQ (m.ext_id, PARAM('externalId'))
+        EQ (m.ts, PARAM('ts'))
+        EQ (m.milestone_id, PARAM('milestoneId'))
+        EQ (m.level, PARAM('level'))
+    }
+}

@@ -1,0 +1,8 @@
+#userId,pointRule,subPointRuleId,points,eventId
+100,defect-assigned,,1,1
+102,defect-assigned,defect-get-assigned,-4,1
+101,defect-assigned,,3,2
+103,defect-assigned,defect-get-assigned,-4,2
+102,defect-fixed,,2,3
+100,defect-fixed,defect-accepted,1,3
+100,test-case-written,,4,40

@@ -1,0 +1,8 @@
+badges:
+  - id: heavy-coder
+    from:
+      milestoneId: total-codes
+      level: 2
+      subBadges:
+        - id: ultra
+          level: 5

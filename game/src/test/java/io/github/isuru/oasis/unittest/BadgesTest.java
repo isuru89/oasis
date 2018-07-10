@@ -1,0 +1,20 @@
+package io.github.isuru.oasis.unittest;
+
+import org.junit.jupiter.api.Test;
+
+/**
+ * @author iweerarathna
+ */
+class BadgesTest extends AbstractTest {
+
+    @Test
+    void testBadges() throws Exception {
+        beginTest("badge-test1");
+    }
+
+    @Test
+    void testTimeBadges() throws Exception {
+        beginTest("badge-time-test");
+    }
+
+}

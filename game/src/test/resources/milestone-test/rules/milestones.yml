@@ -1,0 +1,40 @@
+milestones:
+  - id: total-codes
+    event: submission
+    aggregator: sum
+    accumulatorType: long
+    accumulator: "addedLines"
+    levels:
+      1: 100
+      2: 200
+      3: 500
+      4: 700
+      5: 1000
+
+  - id: deleter
+    event: submission
+    aggregator: sum
+    accumulator: "deletedLines"
+    levels:
+      1: 100
+      2: 200
+      3: 500
+      4: 700
+      5: 1000
+
+  - id: engagement
+    event: submission
+    aggregator: count
+    levels:
+      1: 10
+      2: 20
+      3: 50
+
+  - id: neutral-subs
+    event: submission
+    aggregator: count
+    condition: "introducedViolations == 0 && fixedViolations == 0"
+    levels:
+      1: 3
+      2: 5
+      3: 10

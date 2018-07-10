@@ -1,0 +1,12 @@
+calculations:
+  - event: submission
+    field: totalCode
+    expression: "addedLines + changedLines"
+
+  - event: submission
+    field: nvd
+    expression: "(introducedViolations - fixedViolations) / totalCode"
+
+  - event: submission
+    field: otherFixed
+    expression: "0"

@@ -1,0 +1,33 @@
+{
+  "version": 2,
+
+  "activate": "mysql",
+
+  "caching": {
+    "compiledScripts": true,
+    "generatedQueries": true,
+    "allowRecompilation": false,
+    "checkCacheValidations": true
+  },
+
+  "repository": {
+    "mapper": "resources",
+    "mapperArgs": {
+      "resourceRoot": "io/github/isuru/oasis/db/"
+    }
+  },
+
+  "executor": {
+    "impl": "jdbc",
+
+    "url": "jdbc:mysql://localhost/oasis",
+    "username": "root",
+    "password": "cm9vdA==",
+
+    "pooling": {
+      "impl": "hikari"
+    }
+  },
+
+  "registerMXBeans": false
+}
