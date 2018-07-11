@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.persist;
 
 import io.github.isuru.oasis.OasisConfigurations;
+import io.github.isuru.oasis.db.DbProperties;
 import io.github.isuru.oasis.persist.h2.H2DbConnection;
 
 import java.io.File;

@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.persist;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
 

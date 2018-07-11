@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.factory.badges;
 
-import io.github.isuru.oasis.model.BadgeEvent;
+import io.github.isuru.oasis.model.events.BadgeEvent;
 import io.github.isuru.oasis.model.handlers.BadgeNotification;
 import io.github.isuru.oasis.model.handlers.IBadgeHandler;
 import org.apache.flink.api.common.functions.MapFunction;

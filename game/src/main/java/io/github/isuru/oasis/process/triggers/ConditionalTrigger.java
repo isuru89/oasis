@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.process.triggers;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.triggers.TriggerResult;

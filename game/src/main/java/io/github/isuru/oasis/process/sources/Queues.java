@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.process.sources;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 
 import java.util.Map;
 import java.util.Queue;

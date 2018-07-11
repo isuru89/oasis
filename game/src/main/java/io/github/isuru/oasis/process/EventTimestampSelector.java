@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.process;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 
 /**

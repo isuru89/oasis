@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.factory.badges;
 
 import io.github.isuru.oasis.model.Badge;
-import io.github.isuru.oasis.model.BadgeEvent;
-import io.github.isuru.oasis.model.MilestoneEvent;
+import io.github.isuru.oasis.model.events.BadgeEvent;
+import io.github.isuru.oasis.model.events.MilestoneEvent;
 import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;

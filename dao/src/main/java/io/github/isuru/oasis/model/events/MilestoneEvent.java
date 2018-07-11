@@ -1,60 +1,53 @@
-package io.github.isuru.oasis.model;
+package io.github.isuru.oasis.model.events;
 
-import io.github.isuru.oasis.Event;
-import io.github.isuru.oasis.model.rules.BadgeRule;
+import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.Milestone;
 
-import java.util.List;
 import java.util.Map;
 
 /**
  * @author iweerarathna
  */
-public class BadgeEvent implements Event {
+public class MilestoneEvent implements Event {
 
-    private Long user;
-    private Badge badge;
-    private BadgeRule rule;
-    private List<? extends Event> events;
-    private Event causedEvent;
+    private final Milestone milestone;
+    private final int level;
+    private final Event causedEvent;
+    private final Long user;
 
-    public BadgeEvent(Long userId, Badge badge, BadgeRule rule, List<? extends Event> events, Event causedEvent) {
-        this.badge = badge;
-        this.rule = rule;
+    public MilestoneEvent(Long userId, Milestone milestone, int level, Event causedEvent) {
+        this.milestone = milestone;
+        this.level = level;
         this.causedEvent = causedEvent;
-        this.events = events;
         this.user = userId;
     }
 
-    public List<? extends Event> getEvents() {
-        return events;
+    public int getLevel() {
+        return level;
     }
 
-    public BadgeRule getRule() {
-        return rule;
-    }
-
-    public Badge getBadge() {
-        return badge;
+    public Milestone getMilestone() {
+        return milestone;
     }
 
     @Override
     public Map<String, Object> getAllFieldValues() {
-        return null;
+        return causedEvent.getAllFieldValues();
     }
 
     @Override
     public void setFieldValue(String fieldName, Object value) {
-
+        throw new RuntimeException("Milestone events cannot be modified!");
     }
 
     @Override
     public Object getFieldValue(String fieldName) {
-        if ("badge".equals(fieldName)) {
-            return badge;
-        } else if ("rule".equals(fieldName)) {
-            return rule;
+        if (fieldName.equals("level")) {
+            return level;
+        } else if (fieldName.equals("milestone")) {
+            return milestone;
         } else {
-            return causedEvent.getFieldValue(fieldName);
+            return null;
         }
     }
 
@@ -86,5 +79,10 @@ public class BadgeEvent implements Event {
     @Override
     public Long getScope(int level) {
         return causedEvent.getScope(level);
+    }
+
+    @Override
+    public String toString() {
+        return getEventType() + "#" + getExternalId();
     }
 }

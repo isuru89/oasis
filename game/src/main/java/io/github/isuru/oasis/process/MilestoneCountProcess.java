@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.process;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
-import io.github.isuru.oasis.model.MilestoneEvent;
+import io.github.isuru.oasis.model.events.MilestoneEvent;
 import io.github.isuru.oasis.process.triggers.StreakTrigger;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.state.ReducingState;
@@ -44,6 +44,8 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
                 currentLevel.update(currentLevel.value() + 1);
                 out.collect(new MilestoneEvent(value.getUser(), milestone, nextLevel, value));
             }
+
+            // @TODO update count in db
         }
     }
 

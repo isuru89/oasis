@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.persist;
+package io.github.isuru.oasis.db;
 
 /**
  * @author iweerarathna

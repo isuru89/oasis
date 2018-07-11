@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.unittest;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.Oasis;
 import io.github.isuru.oasis.OasisConfigurations;
 import io.github.isuru.oasis.OasisExecution;

@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.process;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.utils.Utils;
 import io.github.isuru.oasis.model.Milestone;
-import io.github.isuru.oasis.model.MilestoneEvent;
+import io.github.isuru.oasis.model.events.MilestoneEvent;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
@@ -69,6 +69,8 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
                     accSum.update(currSum + acc);
                 }
             }
+
+            // @TODO update sum in db
         }
     }
 

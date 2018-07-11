@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.factory.badges;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.utils.Utils;
 import io.github.isuru.oasis.model.Badge;
-import io.github.isuru.oasis.model.BadgeEvent;
+import io.github.isuru.oasis.model.events.BadgeEvent;
 import io.github.isuru.oasis.model.rules.BadgeFromEvents;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;

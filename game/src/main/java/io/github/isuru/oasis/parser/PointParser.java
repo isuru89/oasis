@@ -1,12 +1,10 @@
 package io.github.isuru.oasis.parser;
 
-import io.github.isuru.oasis.Event;
-import io.github.isuru.oasis.utils.Utils;
 import io.github.isuru.oasis.model.rules.PointRule;
 import io.github.isuru.oasis.parser.model.PointDef;
 import io.github.isuru.oasis.parser.model.PointsAdditional;
 import io.github.isuru.oasis.parser.model.PointsDef;
-import org.apache.flink.api.common.functions.FilterFunction;
+import io.github.isuru.oasis.utils.Utils;
 import org.apache.flink.util.Preconditions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -37,20 +35,20 @@ public class PointParser {
                 if (amount instanceof Number) {
                     pr.setAmount(((Number) amount).intValue());
                 } else if (amount instanceof String) {
-                    pr.setAmountExpression(amount.toString());
+                    pr.setAmountExpression(Utils.compileExpression(amount.toString()));
                 } else {
                     throw new IllegalArgumentException("'amount' field missing or does not have type neither number nor string!");
                 }
             }
 
-            Object conditionClass = record.getConditionClass();
-            if (conditionClass != null) {
-                FilterFunction<Event> o = Utils.loadInstanceOfClz(conditionClass.toString(),
-                        Thread.currentThread().getContextClassLoader());
-                pr.setConditionClass(o);
-            }
+//            Object conditionClass = record.getConditionClass();
+//            if (conditionClass != null) {
+//                FilterFunction<Event> o = Utils.loadInstanceOfClz(conditionClass.toString(),
+//                        Thread.currentThread().getContextClassLoader());
+//                pr.setConditionClass(o);
+//            }
 
-            pr.setCondition(record.getCondition());
+            pr.setCondition(Utils.compileExpression(record.getCondition()));
 
             if (record.getAdditionalPoints() != null) {
                 List<PointRule.AdditionalPointReward> rewards = new LinkedList<>();

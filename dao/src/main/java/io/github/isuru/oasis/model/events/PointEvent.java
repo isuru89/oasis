@@ -1,8 +1,8 @@
-package io.github.isuru.oasis.model;
+package io.github.isuru.oasis.model.events;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.rules.PointRule;
-import org.apache.flink.api.java.tuple.Tuple2;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class PointEvent implements Event {
 
-    private final Map<String, Tuple2<Double, PointRule>> receivedPoints = new HashMap<>();
+    private final Map<String, Pair<Double, PointRule>> receivedPoints = new HashMap<>();
     private double totalScore = 0.0;
     private Event refEvent;
 
@@ -20,13 +20,13 @@ public class PointEvent implements Event {
         refEvent = event;
     }
 
-    public Map<String, Tuple2<Double, PointRule>> getReceivedPoints() {
+    public Map<String, Pair<Double, PointRule>> getReceivedPoints() {
         return receivedPoints;
     }
 
-    public void setPointEvents(Map<String, Tuple2<Double, PointRule>> pointEvents) {
-        for (Map.Entry<String, Tuple2<Double, PointRule>> entry : pointEvents.entrySet()) {
-            totalScore += entry.getValue().f0;
+    public void setPointEvents(Map<String, Pair<Double, PointRule>> pointEvents) {
+        for (Map.Entry<String, Pair<Double, PointRule>> entry : pointEvents.entrySet()) {
+            totalScore += entry.getValue().getValue0();
             receivedPoints.put(entry.getKey(), entry.getValue());
         }
     }

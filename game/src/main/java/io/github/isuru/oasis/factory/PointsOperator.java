@@ -1,18 +1,22 @@
 package io.github.isuru.oasis.factory;
 
-import io.github.isuru.oasis.Event;
-import io.github.isuru.oasis.utils.Utils;
-import io.github.isuru.oasis.model.PointEvent;
+import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.events.PointEvent;
+import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.handlers.IErrorHandler;
 import io.github.isuru.oasis.model.rules.PointRule;
+import io.github.isuru.oasis.utils.Utils;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.util.Collector;
 import org.mvel2.MVEL;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -40,7 +44,7 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
 
     @Override
     public void flatMap(IN value, Collector<PointEvent> out) {
-        Map<String, Tuple2<Double, PointRule>> scoredPoints = new HashMap<>();
+        Map<String, Pair<Double, PointRule>> scoredPoints = new HashMap<>();
         double totalPoints = 0.0;
         List<PointRule> rulesForEvent = pointRules.get(value.getEventType());
         if (Utils.isNullOrEmpty(rulesForEvent)) {
@@ -52,7 +56,7 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
                 Optional<Double> result = executeRuleConditionAndValue(value, pointRule, value.getAllFieldValues());
                 if (result.isPresent()) {
                     double d = result.get();
-                    scoredPoints.put(pointRule.getId(), new Tuple2<>(d, pointRule));
+                    scoredPoints.put(pointRule.getId(), Pair.of(d, pointRule));
 
                     // calculate points for other users other than main user of this event belongs to
                     calculateRedirectedPoints(value, pointRule, out);
@@ -81,8 +85,8 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
                     Double amount = evaluateExpression(reward.getAmount(), value.getAllFieldValues());
 
                     PointEvent pointEvent = new RedirectedPointEvent(value, reward.getToUser());
-                    Map<String, Tuple2<Double, PointRule>> scoredPoints = new HashMap<>();
-                    scoredPoints.put(reward.getId(), Tuple2.of(amount, rule));
+                    Map<String, Pair<Double, PointRule>> scoredPoints = new HashMap<>();
+                    scoredPoints.put(reward.getId(), Pair.of(amount, rule));
                     pointEvent.setPointEvents(scoredPoints);
                     out.collect(pointEvent);
                 }
@@ -90,7 +94,7 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
         }
     }
 
-    private void evalSelfRules(IN value, Map<String, Tuple2<Double, PointRule>> points, double totalPoints) {
+    private void evalSelfRules(IN value, Map<String, Pair<Double, PointRule>> points, double totalPoints) {
         if (Utils.isNonEmpty(pointSelfRules)) {
             Map<String, Object> vars = new HashMap<>(value.getAllFieldValues());
             vars.put("$TOTAL", totalPoints);
@@ -99,7 +103,7 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
                 if (rule.getForEvent().equals(value.getEventType())) {
                     try {
                         executeRuleConditionAndValue(value, rule, vars)
-                                .ifPresent(p -> points.put(rule.getId(), new Tuple2<>(p, rule)));
+                                .ifPresent(p -> points.put(rule.getId(), Pair.of(p, rule)));
 
                     } catch (Throwable t) {
                         errorHandler.onError(t, value, rule);
@@ -111,15 +115,16 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
 
     private Optional<Double> executeRuleConditionAndValue(IN value, PointRule rule, Map<String, Object> variables) throws IOException {
         Boolean status;
-        if (rule.getConditionClass() != null) {
-            try {
-                status = rule.getConditionClass().filter(value);
-            } catch (Exception e) {
-                throw new IOException("Failed to evaluate condition expression for rule '" + rule.getId() + "'!", e);
-            }
-        } else {
-            status = Utils.evaluateCondition(rule.getConditionExpression(), variables);
-        }
+//        if (rule.getConditionClass() != null) {
+//            try {
+//                status = rule.getConditionClass().filter(value);
+//            } catch (Exception e) {
+//                throw new IOException("Failed to evaluate condition expression for rule '" + rule.getId() + "'!", e);
+//            }
+//        } else {
+//
+//        }
+        status = Utils.evaluateCondition(rule.getConditionExpression(), variables);
 
         if (status == Boolean.TRUE) {
             double p;

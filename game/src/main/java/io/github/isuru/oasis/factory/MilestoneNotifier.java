@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.factory;
 
-import io.github.isuru.oasis.model.MilestoneEvent;
+import io.github.isuru.oasis.model.events.MilestoneEvent;
 import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
 import org.apache.flink.api.common.functions.MapFunction;
 

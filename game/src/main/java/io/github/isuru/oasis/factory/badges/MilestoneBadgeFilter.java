@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.factory.badges;
 
-import io.github.isuru.oasis.model.MilestoneEvent;
+import io.github.isuru.oasis.model.events.MilestoneEvent;
 import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
 import org.apache.flink.api.common.functions.FilterFunction;
 

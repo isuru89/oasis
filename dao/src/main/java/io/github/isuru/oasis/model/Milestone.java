@@ -1,7 +1,5 @@
 package io.github.isuru.oasis.model;
 
-import io.github.isuru.oasis.process.AggregatorType;
-
 import java.io.Serializable;
 import java.util.List;
 

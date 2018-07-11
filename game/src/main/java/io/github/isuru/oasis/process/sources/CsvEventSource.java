@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.process.sources;
 
-import io.github.isuru.oasis.Event;
-import io.github.isuru.oasis.JsonEvent;
+import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.events.JsonEvent;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;

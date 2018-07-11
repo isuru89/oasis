@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.unittest.utils;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
 import org.apache.flink.api.java.tuple.Tuple3;

@@ -1,10 +1,10 @@
 package io.github.isuru.oasis.factory.badges;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.utils.Utils;
-import io.github.isuru.oasis.model.BadgeEvent;
-import io.github.isuru.oasis.model.MilestoneEvent;
-import io.github.isuru.oasis.model.PointEvent;
+import io.github.isuru.oasis.model.events.BadgeEvent;
+import io.github.isuru.oasis.model.events.MilestoneEvent;
+import io.github.isuru.oasis.model.events.PointEvent;
 import io.github.isuru.oasis.model.rules.BadgeFromEvents;
 import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
 import io.github.isuru.oasis.model.rules.BadgeFromPoints;

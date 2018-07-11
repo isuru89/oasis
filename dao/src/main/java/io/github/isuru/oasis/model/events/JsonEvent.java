@@ -1,4 +1,6 @@
-package io.github.isuru.oasis;
+package io.github.isuru.oasis.model.events;
+
+import io.github.isuru.oasis.model.Event;
 
 import java.util.HashMap;
 import java.util.Map;

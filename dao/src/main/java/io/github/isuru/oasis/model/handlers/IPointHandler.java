@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.model.handlers;
 
-import io.github.isuru.oasis.model.PointEvent;
+import io.github.isuru.oasis.model.events.PointEvent;
 import io.github.isuru.oasis.model.rules.PointRule;
 
 import java.io.Serializable;

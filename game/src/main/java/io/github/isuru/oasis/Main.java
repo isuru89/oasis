@@ -2,7 +2,6 @@ package io.github.isuru.oasis;
 
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
-import io.github.isuru.oasis.model.handlers.NoneOutputHandler;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import io.github.isuru.oasis.parser.BadgeParser;
@@ -10,7 +9,7 @@ import io.github.isuru.oasis.parser.FieldCalculationParser;
 import io.github.isuru.oasis.parser.MilestoneParser;
 import io.github.isuru.oasis.parser.PointParser;
 import io.github.isuru.oasis.persist.DbPool;
-import io.github.isuru.oasis.persist.DbProperties;
+import io.github.isuru.oasis.db.DbProperties;
 import io.github.isuru.oasis.persist.IDbConnection;
 import io.github.isuru.oasis.persist.PersistFactory;
 import io.github.isuru.oasis.persist.DbOutputHandler;

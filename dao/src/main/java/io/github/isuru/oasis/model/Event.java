@@ -1,4 +1,4 @@
-package io.github.isuru.oasis;
+package io.github.isuru.oasis.model;
 
 import java.io.Serializable;
 import java.util.Map;

@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.process.triggers;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeutils.base.LongSerializer;

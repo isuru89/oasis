@@ -1,7 +1,7 @@
 package io.github.isuru.oasis;
 
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
-import io.github.isuru.oasis.persist.DbProperties;
+import io.github.isuru.oasis.db.DbProperties;
 
 import java.io.Serializable;
 import java.util.HashMap;

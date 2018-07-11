@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.process;
+package io.github.isuru.oasis.model;
 
 /**
  * @author iweerarathna

@@ -1,9 +1,5 @@
 package io.github.isuru.oasis.model.rules;
 
-import io.github.isuru.oasis.Event;
-import io.github.isuru.oasis.utils.Utils;
-import org.apache.flink.api.common.functions.FilterFunction;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -15,7 +11,6 @@ public class PointRule implements Serializable {
     private String forEvent;
     private String source;
     private String id;
-    private FilterFunction<Event> conditionClass;
     private Serializable conditionExpression;
     private double amount;
     private Serializable amountExpression;
@@ -63,8 +58,8 @@ public class PointRule implements Serializable {
         return amountExpression;
     }
 
-    public void setAmountExpression(String amountExpression) {
-        this.amountExpression = Utils.compileExpression(amountExpression);
+    public void setAmountExpression(Serializable amountExpression) {
+        this.amountExpression = amountExpression;
     }
 
     public List<AdditionalPointReward> getAdditionalPoints() {
@@ -95,16 +90,8 @@ public class PointRule implements Serializable {
         return conditionExpression;
     }
 
-    public FilterFunction<Event> getConditionClass() {
-        return conditionClass;
-    }
-
-    public void setConditionClass(FilterFunction<Event> conditionClass) {
-        this.conditionClass = conditionClass;
-    }
-
-    public void setCondition(String condition) {
-        this.conditionExpression = Utils.compileExpression(condition);
+    public void setCondition(Serializable condition) {
+        this.conditionExpression = condition;
     }
 
     public double getAmount() {

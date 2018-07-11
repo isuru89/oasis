@@ -4,7 +4,7 @@ import io.github.isuru.oasis.utils.Utils;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.parser.model.MilestoneDef;
 import io.github.isuru.oasis.parser.model.MilestonesDef;
-import io.github.isuru.oasis.process.AggregatorType;
+import io.github.isuru.oasis.model.AggregatorType;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;

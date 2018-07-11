@@ -1,11 +1,11 @@
 package io.github.isuru.oasis.factory;
 
-import io.github.isuru.oasis.model.PointEvent;
+import io.github.isuru.oasis.model.events.PointEvent;
+import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.handlers.IPointHandler;
 import io.github.isuru.oasis.model.handlers.PointNotification;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.java.tuple.Tuple2;
 
 import java.util.Collections;
 import java.util.Map;
@@ -25,12 +25,12 @@ public class PointsNotifier implements MapFunction<PointEvent, PointEvent> {
     public PointEvent map(PointEvent event) {
         handler.beforeAllPointsNotified(event);
 
-        for (Map.Entry<String, Tuple2<Double, PointRule>> entry : event.getReceivedPoints().entrySet()) {
+        for (Map.Entry<String, Pair<Double, PointRule>> entry : event.getReceivedPoints().entrySet()) {
             handler.pointsScored(event.getUser(),
                     new PointNotification(
                             Collections.singletonList(event),
-                            entry.getValue().f1,
-                            entry.getValue().f0));
+                            entry.getValue().getValue1(),
+                            entry.getValue().getValue0()));
         }
 
         handler.afterAllPointsNotifier(event);

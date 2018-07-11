@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.unittest.utils;
 
-import io.github.isuru.oasis.Event;
+import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.handlers.BadgeNotification;
 import io.github.isuru.oasis.model.handlers.IBadgeHandler;
 import io.github.isuru.oasis.model.rules.BadgeRule;
