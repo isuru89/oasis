@@ -2,6 +2,7 @@ package io.github.isuru.oasis.model;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author iweerarathna
@@ -9,12 +10,30 @@ import java.util.List;
 public class Milestone implements Serializable {
 
     private String id;
+    private String from;
+    private Set<String> pointIds;
     private String event;
     private boolean realValues;
     private Serializable accumulatorExpr;
     private Serializable condition;
     private AggregatorType aggregator = AggregatorType.COUNT;
     private List<Level> levels;
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public Set<String> getPointIds() {
+        return pointIds;
+    }
+
+    public void setPointIds(Set<String> pointIds) {
+        this.pointIds = pointIds;
+    }
 
     public boolean isRealValues() {
         return realValues;

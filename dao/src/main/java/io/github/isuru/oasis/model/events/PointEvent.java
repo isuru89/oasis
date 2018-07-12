@@ -35,6 +35,10 @@ public class PointEvent implements Event {
         return totalScore;
     }
 
+    public Pair<Double, PointRule> getPointScore(String pointId) {
+        return getReceivedPoints().get(pointId);
+    }
+
     public boolean containsPoint(String pointEventId) {
         return receivedPoints.containsKey(pointEventId);
     }

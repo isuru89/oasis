@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.parser.model;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -8,12 +9,30 @@ import java.util.Map;
 public class MilestoneDef {
 
     private String id;
+    private String from;
+    private List<String> pointIds;
     private String event;
     private String aggregator;
     private String accumulator;
     private String condition;
     private String accumulatorType;
     private Map<Integer, Object> levels;
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public List<String> getPointIds() {
+        return pointIds;
+    }
+
+    public void setPointIds(List<String> pointIds) {
+        this.pointIds = pointIds;
+    }
 
     public String getAccumulatorType() {
         return accumulatorType;

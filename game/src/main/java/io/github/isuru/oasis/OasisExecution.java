@@ -93,11 +93,15 @@ public class OasisExecution {
                 .uid(String.format("%s-points-notifier", oasisId));
         pointStream.addSink(new OasisSink<>());
 
+        KeyedStream<PointEvent, Long> userPointStream = pointStream.keyBy(new EventUserSelector<>());
+
         // create milestone stream
         DataStream<MilestoneEvent> milestoneStream = null;
         if (milestones != null) {
             for (Milestone milestone : milestones) {
-                DataStream<MilestoneEvent> mStream = MilestoneOperator.createPipeline(userStream, milestone, oasis);
+                DataStream<MilestoneEvent> mStream = MilestoneOperator.createPipeline(userStream,
+                        userPointStream,
+                        milestone, oasis);
                 if (milestoneStream == null) {
                     milestoneStream = mStream;
                 } else {
@@ -120,7 +124,7 @@ public class OasisExecution {
         if (badgeRules != null) {
             for (BadgeRule badgeRule : badgeRules) {
                 DataStream<BadgeEvent> badgeFromPoints = BadgeOperator.createBadgeFromPoints(
-                        pointStream.keyBy(new EventUserSelector<>()),
+                        userPointStream,
                         userStream,
                         keyedMilestoneStream,
                         badgeRule

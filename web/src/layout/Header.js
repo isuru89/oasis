@@ -23,7 +23,9 @@ const MyWrapper = styled.div`
   height: 100%;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   background-color: #20465E;
+  padding: 0 20px;
 `
 
 export default class Header extends Component {

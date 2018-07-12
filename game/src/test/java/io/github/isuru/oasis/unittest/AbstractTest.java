@@ -112,7 +112,7 @@ abstract class AbstractTest {
             Assertions.assertNotNull(expected);
             Assertions.assertNotNull(actual);
             Assertions.assertNull(Memo.getPointErrors(id));
-            Assertions.assertEquals(expected.size(), actual.size());
+            Assertions.assertEquals(expected.size(), actual.size(), "Expected points are not equal!");
 
             assertPoints(actual, expected);
         }
@@ -123,7 +123,7 @@ abstract class AbstractTest {
             Assertions.assertNotNull(expected);
             Assertions.assertNotNull(actual);
             Assertions.assertNull(Memo.getMilestoneErrors(id));
-            Assertions.assertEquals(expected.size(), actual.size());
+            Assertions.assertEquals(expected.size(), actual.size(), "Expected milestone count is not equal!");
 
             assertMilestones(actual, expected);
         }
@@ -134,7 +134,7 @@ abstract class AbstractTest {
             Assertions.assertNotNull(expected);
             Assertions.assertNotNull(actual);
             Assertions.assertNull(Memo.getBadgeErrors(id));
-            Assertions.assertEquals(expected.size(), actual.size());
+            Assertions.assertEquals(expected.size(), actual.size(), "Expected badges are not equal!");
 
             assertBadges(actual, expected);
         }

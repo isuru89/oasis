@@ -9,6 +9,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,10 @@ public class MilestoneParser {
             Milestone milestone = new Milestone();
             milestone.setId(milestoneDef.getId());
             milestone.setEvent(milestoneDef.getEvent());
+            milestone.setFrom(milestoneDef.getFrom());
+            if (Utils.isNonEmpty(milestoneDef.getPointIds())) {
+                milestone.setPointIds(new HashSet<>(milestoneDef.getPointIds()));
+            }
 
             String type = milestoneDef.getAggregator() != null
                     ? milestoneDef.getAggregator()

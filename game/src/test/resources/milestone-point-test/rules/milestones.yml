@@ -1,0 +1,22 @@
+milestones:
+  - id: total-score
+    from: points
+    aggregator: sum
+    levels:
+      1: 10
+      2: 20
+      3: 50
+      4: 70
+      5: 100
+
+  - id: total-50-score
+    from: points
+    pointIds:
+      - mark-50-value
+    aggregator: sum
+    levels:
+      1: 100
+      2: 200
+      3: 500
+      4: 700
+      5: 1000

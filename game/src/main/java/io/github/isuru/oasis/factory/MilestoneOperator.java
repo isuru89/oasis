@@ -2,6 +2,8 @@ package io.github.isuru.oasis.factory;
 
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.Oasis;
+import io.github.isuru.oasis.model.events.PointEvent;
+import io.github.isuru.oasis.process.MilestonePointSumProcess;
 import io.github.isuru.oasis.utils.Utils;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
@@ -22,7 +24,9 @@ import java.util.stream.Collectors;
  */
 public class MilestoneOperator {
 
-    public static DataStream<MilestoneEvent> createPipeline(KeyedStream<Event, Long> userStream, Milestone milestone,
+    public static DataStream<MilestoneEvent> createPipeline(KeyedStream<Event, Long> userStream,
+                                                            KeyedStream<PointEvent, Long> userPointStream,
+                                                            Milestone milestone,
                                                             Oasis oasis) {
         FilterFunction<Event> filterFunction = null;
         if (milestone.getCondition() != null) {
@@ -42,12 +46,16 @@ public class MilestoneOperator {
             stream = userStream.process(new MilestoneCountProcess(levels, filterFunction, milestone));
 
         } else {
-            if (milestone.isRealValues()) {
+            if (milestone.isRealValues() || milestone.getFrom() != null) {
                 List<Double> levels = milestone.getLevels().stream()
                         .map(l -> l.getNumber().doubleValue())
                         .collect(Collectors.toList());
-                stream = userStream.process(new MilestoneSumDoubleProcess(levels,
-                        filterFunction, milestone.getAccumulatorExpr(), milestone));
+                if (milestone.getFrom() != null && milestone.getFrom().equals("points")) {
+                    stream = userPointStream.process(new MilestonePointSumProcess(levels, milestone));
+                } else {
+                    stream = userStream.process(new MilestoneSumDoubleProcess(levels,
+                            filterFunction, milestone.getAccumulatorExpr(), milestone));
+                }
             } else {
                 List<Long> levels = milestone.getLevels().stream()
                         .map(l -> l.getNumber().longValue())

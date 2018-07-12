@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
-import ProfilePage from '../pages/ProfilePage';
+import ProfilePage from '../pages/profile/ProfilePage';
 
 const Wrapper = styled.div`
   width: 100%;
