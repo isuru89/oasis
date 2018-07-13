@@ -1,9 +1,26 @@
 import React, { Component } from 'react'
 import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 const Wrapper = styled.div`
   padding: 5px;
   margin: 2px;
+`
+
+const Expander = styled.span`
+  color: #739CAE;
+  opacity: 0.5;
+  cursor: pointer;
+  min-width: 30px;
+  text-align: center;
+
+  &:hover {
+    opacity: 1;
+  }
+`
+
+const Title = styled.span`
+  flex: 1;
 `
 
 const TitleBar = styled.div`
@@ -11,6 +28,7 @@ const TitleBar = styled.div`
   padding-bottom: 4px;
   border: 2px solid #739CAE;
   border-radius: 5px 5px 0 0;
+  display: flex;
 `
 
 const Content = styled.div`
@@ -21,16 +39,30 @@ const Content = styled.div`
 `
 
 export default class Panel extends Component {
+
+  state = {
+    expanded: true
+  }
+
   render() {
+    const { expanded } = this.state;
+
     return (
       <Wrapper>
         <TitleBar>
-          {this.props.title}
+          <Title>{this.props.title}</Title>
+          <Expander onClick={this._whenExpandClicked}>
+            {
+              expanded ? <FontAwesomeIcon icon="caret-down" /> : <FontAwesomeIcon icon="caret-right" />
+            }
+          </Expander>
         </TitleBar>
         <Content>
-          {this.props.children}
+          {expanded && this.props.children}
         </Content>
       </Wrapper>
     )
   }
+
+  _whenExpandClicked = e => this.setState({ expanded: !this.state.expanded });
 }

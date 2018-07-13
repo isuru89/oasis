@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 import ProfilePage from '../pages/profile/ProfilePage';
+import ProgressPage from '../pages/progress/ProgressPage';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -11,7 +12,7 @@ export default class Content extends Component {
   render() {
     return (
       <Wrapper>
-        <ProfilePage />
+        <ProgressPage />
       </Wrapper>
     )
   }

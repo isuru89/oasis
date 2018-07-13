@@ -7,6 +7,7 @@ import { formatInt } from '../../utils'
 const Wrapper = styled.div`
   line-height: 2;
   display: flex;
+  background-color: ${props => props.active ? '#20465E22' : '#ffffff00'};
   opacity: ${props => props.active ? 1 : 0.7};
   padding: 0 10px;
   

@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import PointLabel from '../../components/PointLabel';
 import BadgeView from '../../components/BadgeView';
 import TeamHistoryRecord from './TeamHistoryRecord';
+import RankView from './RankView';
 
 const Content = styled.div`
   height: 100%;
@@ -73,6 +74,12 @@ const UserProfileHeader = styled.div`
   justify-content: space-around;
 `
 
+const leaderboardData = [
+  { leaderboard: 'Heavy Coder', points: (Math.random() * 10000).toFixed(0), rank: 2 },
+  { leaderboard: 'Top Fixer', points: (Math.random() * 500).toFixed(0), rank: 15 },
+
+]
+
 
 export default class ProfilePage extends Component {
   render() {
@@ -114,6 +121,9 @@ export default class ProfilePage extends Component {
               <TeamHistoryRecord team="Team-1" active={true} />
               <TeamHistoryRecord />
               <TeamHistoryRecord />
+            </Panel>
+            <Panel title="Leaderboard Ranks">
+              <RankView data={leaderboardData} />
             </Panel>
           </Column2>
         </UserContent>

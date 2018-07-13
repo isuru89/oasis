@@ -50,7 +50,7 @@ export default class Badge extends Component {
     return (
       <Wrapper>
         <Image acquired={acquired} {...this.props}>
-          <img src={image} width={100} height={120} title={title} />
+          <img src={image} width={80} height={90} title={title} />
         </Image>
         {
           !imageOnly && <Details>
