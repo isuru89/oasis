@@ -9,6 +9,7 @@ import PointLabel from '../../components/PointLabel';
 import BadgeView from '../../components/BadgeView';
 import TeamHistoryRecord from './TeamHistoryRecord';
 import RankView from './RankView';
+import RankPoint from './RankPoint';
 
 const Content = styled.div`
   height: 100%;
@@ -36,7 +37,7 @@ const UserContent = styled.div`
 `
 
 const Column1 = styled.div`
-  flex: 1;
+  width: 300px;
   text-align: center;
   background-color: #1E2B34;
   padding: 10px 5px;
@@ -75,7 +76,7 @@ const UserProfileHeader = styled.div`
 `
 
 const leaderboardData = [
-  { leaderboard: 'Heavy Coder', points: (Math.random() * 10000).toFixed(0), rank: 2 },
+  { leaderboard: 'Heavy Coder', points: (Math.random() * 100000).toFixed(0), rank: 2 },
   { leaderboard: 'Top Fixer', points: (Math.random() * 500).toFixed(0), rank: 15 },
 
 ]
@@ -96,6 +97,8 @@ export default class ProfilePage extends Component {
               value="QA-Testings" />
             <ImageTitleValue image={<FontAwesomeIcon icon="at" />}
               title="john@product.com" />
+
+            <RankView data={leaderboardData} />
 
           </Column1>
           <Column2>
@@ -121,9 +124,6 @@ export default class ProfilePage extends Component {
               <TeamHistoryRecord team="Team-1" active={true} />
               <TeamHistoryRecord />
               <TeamHistoryRecord />
-            </Panel>
-            <Panel title="Leaderboard Ranks">
-              <RankView data={leaderboardData} />
             </Panel>
           </Column2>
         </UserContent>

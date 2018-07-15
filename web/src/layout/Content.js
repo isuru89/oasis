@@ -12,7 +12,7 @@ export default class Content extends Component {
   render() {
     return (
       <Wrapper>
-        <ProgressPage />
+        <ProfilePage />
       </Wrapper>
     )
   }

@@ -21,6 +21,7 @@
     <modules>
         <module>game</module>
         <module>dao</module>
+        <module>services</module>
     </modules>
 
     <dependencies>

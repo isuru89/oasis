@@ -3,15 +3,17 @@ import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 const Wrapper = styled.div`
-  padding: 5px;
-  margin: 2px;
+  margin: 20px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 1px 1px 2px 2px #739CAE33;
 `
 
 const Expander = styled.span`
   color: #739CAE;
   opacity: 0.5;
   cursor: pointer;
-  min-width: 30px;
+  min-width: 20px;
   text-align: center;
 
   &:hover {
@@ -25,17 +27,19 @@ const Title = styled.span`
 
 const TitleBar = styled.div`
   padding: 5px;
-  padding-bottom: 4px;
-  border: 2px solid #739CAE;
+  margin: 0 5px;
   border-radius: 5px 5px 0 0;
+  border-bottom: 1px solid #739CAE88;
+  margin-bottom: 5px;
   display: flex;
+  background-color: white;
 `
 
 const Content = styled.div`
   padding: 5px;
   border-radius: 0 0 5px 5px;
-  border: 1px solid #739CAE;
   border-top: none;
+  background-color: white;
 `
 
 export default class Panel extends Component {

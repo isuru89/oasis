@@ -1,4 +1,4 @@
-export function formatInt(value, dashWhenZero = true) {
+export function formatInt(value, dashWhenZero = true, zeroChar = "-") {
   let v;
   if (typeof value === 'number') {
     v = value;
@@ -7,7 +7,7 @@ export function formatInt(value, dashWhenZero = true) {
   }
 
   if ((isNaN(v) || v === 0) && dashWhenZero) {
-    return '-';
+    return zeroChar;
   } else {
     return v.toLocaleString();
   }

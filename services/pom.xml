@@ -11,10 +11,14 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>oasis-dao</artifactId>
+    <artifactId>oasis-services</artifactId>
 
     <dependencies>
-
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>retrofit</artifactId>
+            <version>2.3.0</version>
+        </dependency>
     </dependencies>
 
 </project>

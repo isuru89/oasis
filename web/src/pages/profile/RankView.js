@@ -2,9 +2,14 @@ import React, { Component } from 'react'
 import styled from 'styled-components';
 
 import { formatInt } from '../../utils' 
+import { ImageContent } from '../../components/ImageTitleValue';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import RankPoint from './RankPoint';
 
 const Wrapper = styled.div`
   padding: 0 10px;
+  background-color: #00000055;
+  border-radius: 4px;
 `
 
 const Table = styled.table`
@@ -13,8 +18,9 @@ const Table = styled.table`
 
 const TableHeader = styled.thead`
   padding: 10px;
-  font-weight: bold;
+  font-weight: light;
   text-transform: uppercase;
+  font-size: 20px;
 `
 
 const LabelCell = styled.td`
@@ -34,19 +40,23 @@ export default class RankView extends Component {
         <Table>
           <TableHeader>
             <tr>
-              <LabelCell style={{ paddingBottom: 5 }}>Leaderboard</LabelCell>
-              <ValueCell>Gold</ValueCell>
-              <ValueCell>Rank</ValueCell>
+              <LabelCell style={{ textAlign: 'left', paddingTop: 10 }}>Rankings</LabelCell>
+              <ValueCell></ValueCell>
             </tr>
           </TableHeader>
           <tbody>
             {
               data.map(d => {
                 return (
-                  <tr>
-                    <LabelCell>{d.leaderboard}</LabelCell>
-                    <ValueCell>{formatInt(d.points)}</ValueCell>
-                    <ValueCell>{d.rank}</ValueCell>
+                  <tr key={d.leaderboard}>
+                    <LabelCell>
+                      <ImageContent image={<FontAwesomeIcon icon="coins" />}>
+                        <div>{d.leaderboard}</div>
+                      </ImageContent>
+                    </LabelCell>
+                    <ValueCell>
+                      <RankPoint {...d} suffix={<FontAwesomeIcon icon="coins" />} />
+                    </ValueCell>
                   </tr>
                 )
               })
