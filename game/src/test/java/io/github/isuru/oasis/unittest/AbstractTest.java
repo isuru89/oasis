@@ -153,7 +153,7 @@ abstract class AbstractTest {
             for (Tuple4<Long, Integer, Event, Milestone> given : dupActual) {
                 if (row.f0.equals(given.f0)
                         && row.f3.equals(given.f2.getExternalId())
-                        && row.f1.equals(given.f3.getId())
+                        && row.f1.equals(given.f3.getName())
                         && row.f2.equals(given.f1)) {
                     foundFlag = true;
                     found = given;
@@ -206,7 +206,7 @@ abstract class AbstractTest {
             Tuple4<Long, List<? extends Event>, PointRule, Double> found = null;
             for (Tuple4<Long, List<? extends Event>, PointRule, Double> given : dupActual) {
                 if (row.f0.equals(given.f0)
-                        && row.f1.equals(given.f2.getId())
+                        && row.f1.equals(given.f2.getName())
                         && (row.f2.isEmpty() || findSubRuleInPointRule(given.f2, row.f2))
                         && row.f4.equals(given.f1.get(0).getExternalId())
                         && row.f3.equals(given.f3)) {

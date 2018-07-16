@@ -22,11 +22,13 @@ public class PointParser {
         Yaml yaml = new Yaml();
         PointsDef pointsDef = yaml.loadAs(inputStream, PointsDef.class);
 
+        int p = 0;
         List<PointRule> pointRules = new LinkedList<>();
         List<PointDef> pointsRef = pointsDef.getPoints();
         for (PointDef record : pointsRef) {
             PointRule pr = new PointRule();
-            pr.setId(record.getId());
+            pr.setId(++p);
+            pr.setName(record.getId());
             pr.setForEvent(record.getEvent());
             pr.setSource(record.getSource());
 

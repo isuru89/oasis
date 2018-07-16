@@ -26,7 +26,7 @@ class MilestoneBadgeFilter implements FilterFunction<MilestoneEvent> {
 
     @Override
     public boolean filter(MilestoneEvent value) {
-        return value.getMilestone().getId().equals(milestone.getMilestoneId())
+        return value.getMilestone().getName().equals(milestone.getMilestoneId())
                 && levels.contains((long) value.getLevel());
     }
 }

@@ -22,6 +22,7 @@
         <module>game</module>
         <module>dao</module>
         <module>services</module>
+        <module>model</module>
     </modules>
 
     <dependencies>
@@ -31,11 +32,7 @@
             <version>1.7.7</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jdbi</groupId>
-            <artifactId>jdbi3-core</artifactId>
-            <version>3.3.0</version>
-        </dependency>
+
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>

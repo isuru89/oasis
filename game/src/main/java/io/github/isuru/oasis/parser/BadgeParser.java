@@ -26,6 +26,7 @@ public class BadgeParser {
         Yaml yaml = new Yaml();
         BadgesDef badgesDef = yaml.loadAs(inputStream, BadgesDef.class);
 
+        int b = 0;
         List<BadgeRule> badgeRules = new LinkedList<>();
         for (BadgeDef badgeDef : badgesDef.getBadges()) {
             Badge badge = new Badge(badgeDef.getId());
@@ -33,6 +34,7 @@ public class BadgeParser {
             if (from != null) {
                 if (from.getPointsId() != null) {
                     BadgeFromPoints bp = new BadgeFromPoints();
+                    bp.setId(++b);
                     bp.setMaxBadges(badgeDef.getMaxBadges());
                     bp.setPointsId(from.getPointsId());
                     bp.setDuration(from.getWithin());
@@ -50,6 +52,7 @@ public class BadgeParser {
 
                 } else if (from.getMilestoneId() != null) {
                     BadgeFromMilestone bfm = new BadgeFromMilestone();
+                    bfm.setId(++b);
                     bfm.setMilestoneId(from.getMilestoneId());
                     bfm.setLevel(from.getLevel());
                     bfm.setBadge(badge);
@@ -66,6 +69,7 @@ public class BadgeParser {
 
             } else {
                 BadgeFromEvents bfe = new BadgeFromEvents();
+                bfe.setId(++b);
                 bfe.setBadge(badge);
                 bfe.setEventType(badgeDef.getEvent());
                 bfe.setDuration(badgeDef.getWithin());

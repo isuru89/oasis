@@ -11,19 +11,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>oasis-dao</artifactId>
+    <artifactId>oasis-model</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>io.github.isuru</groupId>
-            <artifactId>oasis-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jdbi</groupId>
-            <artifactId>jdbi3-core</artifactId>
-            <version>3.3.0</version>
-        </dependency>
+
     </dependencies>
 
 </project>

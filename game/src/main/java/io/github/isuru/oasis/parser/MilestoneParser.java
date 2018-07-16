@@ -23,10 +23,12 @@ public class MilestoneParser {
         Yaml yaml = new Yaml();
         MilestonesDef milestonesDef = yaml.loadAs(inputStream, MilestonesDef.class);
 
+        int m = 0;
         List<Milestone> milestones = new LinkedList<>();
         for (MilestoneDef milestoneDef : milestonesDef.getMilestones()) {
             Milestone milestone = new Milestone();
-            milestone.setId(milestoneDef.getId());
+            milestone.setId(++m);
+            milestone.setName(milestoneDef.getId());
             milestone.setEvent(milestoneDef.getEvent());
             milestone.setFrom(milestoneDef.getFrom());
             if (Utils.isNonEmpty(milestoneDef.getPointIds())) {

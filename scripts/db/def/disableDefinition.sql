@@ -1,0 +1,6 @@
+UPDATE OA_DEFINITIONS
+SET IS_ACTIVE = 0
+WHERE
+    ID = :id
+    OR
+    PARENT_ID = :id

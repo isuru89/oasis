@@ -20,9 +20,11 @@ public class FieldCalculationParser {
         Map<String, Object> calcs = yaml.load(inputStream);
         List<Map<String, Object>> calculations = (List<Map<String, Object>>) calcs.get("calculations");
 
+        int f = 0;
         List<FieldCalculator> calculators = new LinkedList<>();
         for (Map<String, Object> item: calculations) {
             FieldCalculator calculator = new FieldCalculator();
+            calculator.setId(++f);
             calculator.setForEvent((String) item.get("event"));
             calculator.setFieldName((String) item.get("field"));
             calculator.setExpression(MVEL.compileExpression((String) item.get("expression")));

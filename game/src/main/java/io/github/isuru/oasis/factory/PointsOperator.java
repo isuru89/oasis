@@ -56,7 +56,7 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
                 Optional<Double> result = executeRuleConditionAndValue(value, pointRule, value.getAllFieldValues());
                 if (result.isPresent()) {
                     double d = result.get();
-                    scoredPoints.put(pointRule.getId(), Pair.of(d, pointRule));
+                    scoredPoints.put(pointRule.getName(), Pair.of(d, pointRule));
 
                     // calculate points for other users other than main user of this event belongs to
                     calculateRedirectedPoints(value, pointRule, out);
@@ -103,7 +103,7 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
                 if (rule.getForEvent().equals(value.getEventType())) {
                     try {
                         executeRuleConditionAndValue(value, rule, vars)
-                                .ifPresent(p -> points.put(rule.getId(), Pair.of(p, rule)));
+                                .ifPresent(p -> points.put(rule.getName(), Pair.of(p, rule)));
 
                     } catch (Throwable t) {
                         errorHandler.onError(t, value, rule);

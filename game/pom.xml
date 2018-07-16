@@ -49,6 +49,11 @@
             <artifactId>oasis-dao</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.isuru</groupId>
+            <artifactId>oasis-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
