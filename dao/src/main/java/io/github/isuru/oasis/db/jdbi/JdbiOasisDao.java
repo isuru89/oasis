@@ -2,6 +2,7 @@ package io.github.isuru.oasis.db.jdbi;
 
 import io.github.isuru.oasis.db.DbProperties;
 import io.github.isuru.oasis.db.IDefinitionDao;
+import io.github.isuru.oasis.db.IGameDao;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.IQueryRepo;
 import org.jdbi.v3.core.HandleCallback;
@@ -19,6 +20,7 @@ public class JdbiOasisDao implements IOasisDao {
 
     private Jdbi jdbi;
     private IDefinitionDao definitionDao;
+    private IGameDao gameDao;
 
     public JdbiOasisDao(IQueryRepo queryRepo) {
         this.queryRepo = queryRepo;
@@ -56,6 +58,14 @@ public class JdbiOasisDao implements IOasisDao {
             definitionDao = new JdbiDefinitionDao(this);
         }
         return definitionDao;
+    }
+
+    @Override
+    public IGameDao getGameDao() {
+        if (gameDao == null) {
+            gameDao = new JdbiGameDao(this);
+        }
+        return gameDao;
     }
 
     @Override

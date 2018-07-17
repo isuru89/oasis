@@ -12,11 +12,20 @@ public class BadgeNotification implements Serializable {
     private List<? extends Event> events;
     private BadgeRule rule;
     private Badge badge;
+    private String tag;
 
     public BadgeNotification(List<? extends Event> events, BadgeRule rule, Badge badge) {
         this.events = events;
         this.rule = rule;
         this.badge = badge;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public List<? extends Event> getEvents() {

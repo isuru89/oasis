@@ -3,6 +3,7 @@ package io.github.isuru.oasis.services.api;
 import io.github.isuru.oasis.model.LeaderboardDef;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.KpiDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
@@ -12,9 +13,10 @@ import java.util.Map;
 
 public interface IGameDefService {
 
-    void createGame();
-    void addGameConstants(Map<String, Object> gameConstants);
-    boolean removeGameConstant(String constName);
+    Long createGame(GameDef gameDef) throws Exception;
+    GameDef readGame(long gameId) throws Exception;
+    boolean addGameConstants(long gameId, Map<String, Object> gameConstants) throws Exception;
+    boolean removeGameConstants(List<String> constName) throws Exception;
 
     void addKpiCalculation(KpiDef fieldCalculator) throws Exception;
     List<KpiDef> listKpiCalculations() throws Exception;

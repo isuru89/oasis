@@ -5,6 +5,7 @@ import io.github.isuru.oasis.model.LeaderboardDef;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.BadgeDef;
 import io.github.isuru.oasis.model.defs.DefWrapper;
+import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.KpiDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
@@ -28,17 +29,71 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public void createGame() {
+    public Long createGame(GameDef gameDef) throws Exception {
+        DefWrapper wrapper = new DefWrapper();
+        wrapper.setKind(OasisDefinition.GAME.getTypeId());
+        wrapper.setName(gameDef.getName());
+        wrapper.setDisplayName(gameDef.getDisplayName());
+        wrapper.setContent(RUtils.toStr(gameDef, getMapper()));
 
+        getDao().getDefinitionDao().addDefinition(wrapper);
+
+        List<DefWrapper> wrappers = getDao().getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
+        for (DefWrapper wrp : wrappers) {
+            if (wrp.getName().equals(gameDef.getName())) {
+                gameId = wrp.getGameId();
+                break;
+            }
+        }
+        return gameId;
     }
 
     @Override
-    public void addGameConstants(Map<String, Object> gameConstants) {
-
+    public GameDef readGame(long gameId) throws Exception {
+        List<DefWrapper> wrappers = getDao().getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
+        for (DefWrapper wrp : wrappers) {
+            if (wrp.getId() == gameId) {
+                GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, getMapper());
+                gameDef.setId(wrp.getId());
+                return gameDef;
+            }
+        }
+        throw new Exception("No game definition is found by id " + gameId + "!");
     }
 
     @Override
-    public boolean removeGameConstant(String constName) {
+    public boolean addGameConstants(long gameId, Map<String, Object> gameConstants) throws Exception {
+        List<DefWrapper> wrappers = getDao().getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
+        for (DefWrapper wrp : wrappers) {
+            if (wrp.getId() == gameId) {
+                GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, getMapper());
+                gameDef.setConstants(gameConstants);
+                wrp.setContent(RUtils.toStr(gameDef, getMapper()));
+
+                getDao().getDefinitionDao().editDefinition(gameId, wrp);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeGameConstants(List<String> gameConstants) throws Exception {
+        List<DefWrapper> wrappers = getDao().getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
+        for (DefWrapper wrp : wrappers) {
+            if (wrp.getId() == gameId) {
+                GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, getMapper());
+                if (!RUtils.isNullOrEmpty(gameDef.getConstants())) {
+                    for (String k : gameConstants) {
+                        gameDef.getConstants().remove(k);
+                    }
+                }
+                wrp.setContent(RUtils.toStr(gameDef, getMapper()));
+
+                getDao().getDefinitionDao().editDefinition(gameId, wrp);
+                return true;
+            }
+        }
         return false;
     }
 

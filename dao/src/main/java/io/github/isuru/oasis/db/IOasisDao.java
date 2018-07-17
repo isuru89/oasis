@@ -15,4 +15,6 @@ public interface IOasisDao extends Closeable {
     long executeCommand(String queryId, Map<String, Object> data) throws Exception;
 
     IDefinitionDao getDefinitionDao();
+
+    IGameDao getGameDao();
 }

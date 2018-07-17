@@ -11,11 +11,20 @@ public class PointNotification implements Serializable {
     private List<? extends Event> events;
     private PointRule rule;
     private double amount;
+    private String tag;
 
     public PointNotification(List<? extends Event> events, PointRule rule, double amount) {
         this.events = events;
         this.rule = rule;
         this.amount = amount;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public List<? extends Event> getEvents() {
