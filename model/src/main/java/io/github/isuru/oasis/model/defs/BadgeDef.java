@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.parser.model;
+package io.github.isuru.oasis.model.defs;
 
 import java.util.List;
 
@@ -7,7 +7,9 @@ import java.util.List;
  */
 public class BadgeDef {
 
-    private String id;
+    private Long id;
+    private String name;
+    private String displayName;
     private BadgeSourceDef from;
     private String event;
     private String condition;
@@ -15,6 +17,22 @@ public class BadgeDef {
     private String within;
     private int maxBadges = Integer.MAX_VALUE;
     private List<SubBadgeDef> subBadges;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 
     public String getWithin() {
         return within;
@@ -56,11 +74,11 @@ public class BadgeDef {
         this.subBadges = subBadges;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -83,8 +101,26 @@ public class BadgeDef {
     public static class SubBadgeDef {
         private Integer streak;
         private String id;
+        private String name;
+        private String displayName;
         private String condition;
         private Integer level;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public void setDisplayName(String displayName) {
+            this.displayName = displayName;
+        }
 
         public Integer getLevel() {
             return level;

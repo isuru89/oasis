@@ -8,9 +8,18 @@ import java.io.Serializable;
 public class FieldCalculator implements Serializable {
 
     private long id;
+    private int priority;
     private String forEvent;
     private String fieldName;
     private Serializable expression;
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
 
     public long getId() {
         return id;

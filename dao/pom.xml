@@ -24,6 +24,11 @@
             <artifactId>jdbi3-core</artifactId>
             <version>3.3.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>3.1.0</version>
+        </dependency>
     </dependencies>
 
 </project>

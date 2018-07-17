@@ -128,7 +128,7 @@ public class OasisExecution {
                         userStream,
                         keyedMilestoneStream,
                         badgeRule
-                ).uid(String.format("%s-badge-calculator-%s", oasisId, badgeRule.getBadge().getId()));
+                ).uid(String.format("%s-badge-calculator-%s", oasisId, badgeRule.getBadge().getName()));
 
                 if (bStream != null) {
                     bStream = bStream.union(badgeFromPoints);

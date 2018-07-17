@@ -1,5 +1,5 @@
 milestones:
-  - id: total-score
+  - name: total-score
     from: points
     aggregator: sum
     levels:
@@ -9,7 +9,7 @@ milestones:
       4: 70
       5: 100
 
-  - id: total-50-score
+  - name: total-50-score
     from: points
     pointIds:
       - mark-50-value

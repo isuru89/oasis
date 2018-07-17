@@ -2,8 +2,8 @@ package io.github.isuru.oasis.parser;
 
 import io.github.isuru.oasis.utils.Utils;
 import io.github.isuru.oasis.model.Milestone;
-import io.github.isuru.oasis.parser.model.MilestoneDef;
-import io.github.isuru.oasis.parser.model.MilestonesDef;
+import io.github.isuru.oasis.model.defs.MilestoneDef;
+import io.github.isuru.oasis.model.defs.MilestonesDef;
 import io.github.isuru.oasis.model.AggregatorType;
 import org.yaml.snakeyaml.Yaml;
 
@@ -28,7 +28,8 @@ public class MilestoneParser {
         for (MilestoneDef milestoneDef : milestonesDef.getMilestones()) {
             Milestone milestone = new Milestone();
             milestone.setId(++m);
-            milestone.setName(milestoneDef.getId());
+            milestone.setName(milestoneDef.getName());
+            milestone.setDisplayName(milestoneDef.getDisplayName());
             milestone.setEvent(milestoneDef.getEvent());
             milestone.setFrom(milestoneDef.getFrom());
             if (Utils.isNonEmpty(milestoneDef.getPointIds())) {

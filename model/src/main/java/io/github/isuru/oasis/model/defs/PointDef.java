@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.parser.model;
+package io.github.isuru.oasis.model.defs;
 
 import java.util.List;
 
@@ -7,9 +7,11 @@ import java.util.List;
  */
 public class PointDef {
 
+    private Long id;
+    private String name;
+    private String displayName;
     private String event;
     private String source;
-    private String id;
     private String condition;
     private String conditionClass;
     private Object amount;
@@ -31,12 +33,28 @@ public class PointDef {
         this.event = event;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getCondition() {

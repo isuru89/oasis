@@ -229,7 +229,7 @@ abstract class AbstractTest {
     private boolean findSubRuleInPointRule(PointRule rule, String subRuleId) {
         if (Utils.isNonEmpty(rule.getAdditionalPoints())) {
             for (PointRule.AdditionalPointReward reward : rule.getAdditionalPoints()) {
-                if (reward.getId().equals(subRuleId)) {
+                if (reward.getName().equals(subRuleId)) {
                     return true;
                 }
             }
@@ -239,10 +239,10 @@ abstract class AbstractTest {
 
     private boolean isBadgeSame(Badge badge, String parentId, String badgeId) {
         if (badgeId == null || badgeId.trim().isEmpty()) {
-            return badge.getId().equals(parentId);
+            return badge.getName().equals(parentId);
         } else {
             return badge.getParent() != null &&
-                    badge.getParent().getId().equals(parentId) && badge.getId().equals(badgeId);
+                    badge.getParent().getName().equals(parentId) && badge.getName().equals(badgeId);
         }
     }
 

@@ -81,8 +81,8 @@ public class BadgeFromPoints extends BadgeRule {
     public static class StreakSubBadge extends Badge implements Serializable {
         private int streak;
 
-        public StreakSubBadge(String id, Badge parent, int streak) {
-            super(id, parent);
+        public StreakSubBadge(String name, Badge parent, int streak) {
+            super(null, name, parent);
             this.streak = streak;
         }
 

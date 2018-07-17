@@ -1,15 +1,15 @@
 points:
-  - id: churn
+  - name: churn
     event: submission
     condition: "totalCode >= 50 && (totalCode / 100) > 0"
     amount: "totalCode / 100"
 
-  - id: minus-nvd
+  - name: minus-nvd
     event: submission
     condition: "nvd < 0 && introducedViolations <= 0"
     amount: 1
 
-  - id: virus
+  - name: virus
     event: submission
     condition: "introducedViolations > 0 && fixedViolations == 0"
     amount: -3

@@ -5,9 +5,9 @@ import io.github.isuru.oasis.model.rules.BadgeFromEvents;
 import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
 import io.github.isuru.oasis.model.rules.BadgeFromPoints;
 import io.github.isuru.oasis.model.rules.BadgeRule;
-import io.github.isuru.oasis.parser.model.BadgeDef;
-import io.github.isuru.oasis.parser.model.BadgeSourceDef;
-import io.github.isuru.oasis.parser.model.BadgesDef;
+import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.BadgeSourceDef;
+import io.github.isuru.oasis.model.defs.BadgesDef;
 import org.mvel2.MVEL;
 import org.yaml.snakeyaml.Yaml;
 
@@ -29,7 +29,7 @@ public class BadgeParser {
         int b = 0;
         List<BadgeRule> badgeRules = new LinkedList<>();
         for (BadgeDef badgeDef : badgesDef.getBadges()) {
-            Badge badge = new Badge(badgeDef.getId());
+            Badge badge = new Badge(badgeDef.getId(), badgeDef.getName());
             BadgeSourceDef from = badgeDef.getFrom();
             if (from != null) {
                 if (from.getPointsId() != null) {
@@ -44,7 +44,7 @@ public class BadgeParser {
                     if (from.getSubBadges() != null) {
                         List<BadgeFromPoints.StreakSubBadge> subBadges = new LinkedList<>();
                         for (BadgeDef.SubBadgeDef sbd : from.getSubBadges()) {
-                            subBadges.add(new BadgeFromPoints.StreakSubBadge(sbd.getId(), badge, sbd.getStreak()));
+                            subBadges.add(new BadgeFromPoints.StreakSubBadge(sbd.getName(), badge, sbd.getStreak()));
                         }
                         bp.setSubBadges(subBadges);
                     }
@@ -60,7 +60,7 @@ public class BadgeParser {
                     if (from.getSubBadges() != null) {
                         List<BadgeFromMilestone.LevelSubBadge> subBadges = new LinkedList<>();
                         for (BadgeDef.SubBadgeDef sbd : from.getSubBadges()) {
-                            subBadges.add(new BadgeFromMilestone.LevelSubBadge(sbd.getId(), badge, sbd.getLevel()));
+                            subBadges.add(new BadgeFromMilestone.LevelSubBadge(sbd.getName(), badge, sbd.getLevel()));
                         }
                         bfm.setSubBadges(subBadges);
                     }
@@ -85,10 +85,10 @@ public class BadgeParser {
                     List<Badge> subBadges = new LinkedList<>();
                     for (BadgeDef.SubBadgeDef sbd : badgeDef.getSubBadges()) {
                         if (sbd.getStreak() != null) {
-                            subBadges.add(new BadgeFromPoints.StreakSubBadge(sbd.getId(), badge, sbd.getStreak()));
+                            subBadges.add(new BadgeFromPoints.StreakSubBadge(sbd.getName(), badge, sbd.getStreak()));
                         } else if (sbd.getCondition() != null) {
                             Serializable serializable = MVEL.compileExpression(sbd.getCondition());
-                            subBadges.add(new BadgeFromEvents.ConditionalSubBadge(sbd.getId(), badge, serializable));
+                            subBadges.add(new BadgeFromEvents.ConditionalSubBadge(sbd.getName(), badge, serializable));
                         } else {
                             throw new IOException("Unknown sub badge type!");
                         }

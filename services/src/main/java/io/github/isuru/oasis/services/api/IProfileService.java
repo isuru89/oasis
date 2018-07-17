@@ -5,10 +5,10 @@ import io.github.isuru.oasis.services.model.UserProfile;
 
 public interface IProfileService {
 
-    void addUserProfile(UserProfile profile);
-    UserProfile readUserProfile(long userId);
-    void editUserProfile(long userId, UserProfile profile);
-    void deleteUserProfile(long userId);
+    void addUserProfile(UserProfile profile) throws Exception;
+    UserProfile readUserProfile(long userId) throws Exception;
+    void editUserProfile(long userId, UserProfile profile) throws Exception;
+    boolean deleteUserProfile(long userId) throws Exception;
 
     void addTeam(TeamProfile teamProfile);
     TeamProfile readTeam(long teamId);

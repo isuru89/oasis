@@ -93,8 +93,8 @@ public class BadgeFromEvents extends BadgeRule {
     public static class ConditionalSubBadge extends Badge implements Serializable {
         private Serializable condition;
 
-        public ConditionalSubBadge(String id, Badge parent, Serializable condition) {
-            super(id, parent);
+        public ConditionalSubBadge(String name, Badge parent, Serializable condition) {
+            super(null, name, parent);
             this.condition = condition;
         }
 

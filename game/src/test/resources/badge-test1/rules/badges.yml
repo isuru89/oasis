@@ -1,47 +1,47 @@
 badges:
-  - id: first-submission
+  - name: first-submission
     event: submission
     condition: "true"
     maxBadges: 1
 
-  - id: heavy-commit-streak
+  - name: heavy-commit-streak
     event: submission
     condition: "totalCode >= 50"
     streak: 3
     subBadges:
       - streak: 5
-        id: bronze
+        name: bronze
       - streak: 7
-        id: silver
+        name: silver
       - streak: 10
-        id: gold
+        name: gold
       - streak: 20
-        id: platinum
+        name: platinum
 
-  - id: quality-coder
+  - name: quality-coder
     from:
       pointsId: minus-nvd
       streak: 3
 
-  - id: germ
+  - name: germ
     from:
       pointsId: virus
       streak: 3
       subBadges:
         - streak: 5
-          id: warning
+          name: warning
         - streak: 10
-          id: danger
+          name: danger
         - streak: 20
-          id: epidemic
+          name: epidemic
 
-  - id: mega-committer
+  - name: mega-committer
     event: submission
     condition: "totalCode >= 500"
     subBadges:
       - condition: "totalCode >= 1000"
-        id: giga-committer
+        name: giga-committer
 
-  - id: bad-commit
+  - name: bad-commit
     event: submission
     condition: "introducedViolations >= 10 && fixedViolations == 0"

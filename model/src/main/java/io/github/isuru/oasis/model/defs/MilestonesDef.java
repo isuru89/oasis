@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.parser.model;
+package io.github.isuru.oasis.model.defs;
 
 import java.util.List;
 

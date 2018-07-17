@@ -1,17 +1,17 @@
-package io.github.isuru.oasis.parser.model;
+package io.github.isuru.oasis.model.defs;
 
 public class PointsAdditional {
 
-    private String id;
+    private String name;
     private String toUser;
     private Object amount;
 
-    public String getId() {
-        return id;
+    public String getName() {
+        return name;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getToUser() {

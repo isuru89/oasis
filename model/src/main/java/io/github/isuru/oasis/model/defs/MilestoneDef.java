@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.parser.model;
+package io.github.isuru.oasis.model.defs;
 
 import java.util.List;
 import java.util.Map;
@@ -8,7 +8,9 @@ import java.util.Map;
  */
 public class MilestoneDef {
 
-    private String id;
+    private Long id;
+    private String name;
+    private String displayName;
     private String from;
     private List<String> pointIds;
     private String event;
@@ -42,12 +44,28 @@ public class MilestoneDef {
         this.accumulatorType = accumulatorType;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getEvent() {

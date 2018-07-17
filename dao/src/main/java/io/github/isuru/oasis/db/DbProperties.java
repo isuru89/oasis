@@ -1,13 +1,33 @@
 package io.github.isuru.oasis.db;
 
+import java.util.Map;
+
 /**
  * @author iweerarathna
  */
 public class DbProperties {
 
+    private String queryLocation;
     private String url;
     private String username;
     private String password;
+    private Map<String, Object> otherOptions;
+
+    public String getQueryLocation() {
+        return queryLocation;
+    }
+
+    public void setQueryLocation(String queryLocation) {
+        this.queryLocation = queryLocation;
+    }
+
+    public Map<String, Object> getOtherOptions() {
+        return otherOptions;
+    }
+
+    public void setOtherOptions(Map<String, Object> otherOptions) {
+        this.otherOptions = otherOptions;
+    }
 
     public String getUrl() {
         return url;

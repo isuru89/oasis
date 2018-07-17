@@ -1,83 +1,83 @@
 badges:
-  - id: quality-streak
+  - name: quality-streak
     from:
       pointsId: minus-nvd
       within: 7 days
       streak: 3
       subBadges:
         - streak: 5
-          id: bronze
+          name: bronze
         - streak: 7
-          id: silver
+          name: silver
         - streak: 10
-          id: gold
+          name: gold
         - streak: 20
-          id: platinum
+          name: platinum
 
-  - id: first-time-right
+  - name: first-time-right
     event: submission
     condition: "totalCode >= 50 && introducedViolations == 0 && fixedViolations == 0"
     streak: 3
     subBadges:
       - streak: 5
-        id: bronze
+        name: bronze
       - streak: 7
-        id: silver
+        name: silver
       - streak: 10
-        id: gold
+        name: gold
       - streak: 20
-        id: platinum
+        name: platinum
 
-  - id: developer
+  - name: developer
     from:
       milestoneId: total-codes
       level: 1
       subBadges:
-        - id: intermediate
+        - name: intermediate
           level: 3
-        - id: expert
+        - name: expert
           level: 4
-        - id: guru
+        - name: guru
           level: 5
 
-  - id: heavy-coder
+  - name: heavy-coder
     event: submission
     condition: "addedLines >= 1000"
     subBadges:
       - condition: "addedLines >= 10000"
-        id: mega-committer
+        name: mega-committer
       - condition: "addedLines >= 50000"
-        id: giga committer
+        name: giga committer
 
-  - id: heavy-commit-streak
+  - name: heavy-commit-streak
     from:
       pointsId: heavy-commit
       streak: 50
 
-  - id: other-fixer
+  - name: other-fixer
     from:
       pointsId: fixed-violations-of-others
       streak: 3
 
-  - id: welcome-badge
+  - name: welcome-badge
     event: login
     condition: "true"
     maxBadges: 1
 
-  - id: tech-lead
+  - name: tech-lead
     from:
       pointsId: remark-raised
       #within: 7 days
       streak: 5
       subBadges:
-        - id: level-1
+        - name: level-1
           streak: 10
-        - id: level-2
+        - name: level-2
           streak: 20
-        - id: level-3
+        - name: level-3
           streak: 30
-        - id: level-4
+        - name: level-4
           streak: 40
-        - id: level-5
+        - name: level-5
           streak: 50
 

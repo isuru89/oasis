@@ -11,6 +11,7 @@ public class Milestone implements Serializable {
 
     private long id;
     private String name;
+    private String displayName;
     private String from;
     private Set<String> pointIds;
     private String event;
@@ -19,6 +20,14 @@ public class Milestone implements Serializable {
     private Serializable condition;
     private AggregatorType aggregator = AggregatorType.COUNT;
     private List<Level> levels;
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 
     public String getFrom() {
         return from;

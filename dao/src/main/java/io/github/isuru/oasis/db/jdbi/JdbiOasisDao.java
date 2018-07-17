@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.db.jdbi;
 
 import io.github.isuru.oasis.db.DbProperties;
+import io.github.isuru.oasis.db.IDefinitionDao;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.IQueryRepo;
 import org.jdbi.v3.core.HandleCallback;
@@ -17,6 +18,7 @@ public class JdbiOasisDao implements IOasisDao {
     private final IQueryRepo queryRepo;
 
     private Jdbi jdbi;
+    private IDefinitionDao definitionDao;
 
     public JdbiOasisDao(IQueryRepo queryRepo) {
         this.queryRepo = queryRepo;
@@ -24,7 +26,7 @@ public class JdbiOasisDao implements IOasisDao {
 
     @Override
     public void init(DbProperties properties) throws Exception {
-        jdbi = Jdbi.create(properties.getUrl(), properties.getUsername(), properties.getPassword());
+        jdbi = Jdbi.create(JdbcPool.createDataSource(properties));
     }
 
     @Override
@@ -46,6 +48,14 @@ public class JdbiOasisDao implements IOasisDao {
         String query = queryRepo.fetchQuery(queryId);
         return jdbi.withHandle((HandleCallback<Integer, Exception>) handle ->
                 handle.createUpdate(query).bindMap(data).execute());
+    }
+
+    @Override
+    public IDefinitionDao getDefinitionDao() {
+        if (definitionDao == null) {
+            definitionDao = new JdbiDefinitionDao(this);
+        }
+        return definitionDao;
     }
 
     @Override

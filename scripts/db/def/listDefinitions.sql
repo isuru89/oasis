@@ -15,4 +15,4 @@ FROM OA_DEFINITIONS
 WHERE
     KIND = :type
     AND
-    GAME_ID = :gameId
+    IS_ACTIVE = 1

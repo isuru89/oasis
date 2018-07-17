@@ -17,4 +17,4 @@ WHERE
     OR
     PARENT_ID = :id
 ORDER BY
-    ID ASC
+    CREATED_AT ASC

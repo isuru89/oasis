@@ -86,7 +86,7 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
 
                     PointEvent pointEvent = new RedirectedPointEvent(value, reward.getToUser());
                     Map<String, Pair<Double, PointRule>> scoredPoints = new HashMap<>();
-                    scoredPoints.put(reward.getId(), Pair.of(amount, rule));
+                    scoredPoints.put(reward.getName(), Pair.of(amount, rule));
                     pointEvent.setPointEvents(scoredPoints);
                     out.collect(pointEvent);
                 }

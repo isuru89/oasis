@@ -6,6 +6,7 @@ public class UserProfile {
     private String name;
     private boolean male;
     private String avatarId;
+    private boolean isActive;
 
     public long getId() {
         return id;
@@ -37,5 +38,13 @@ public class UserProfile {
 
     public void setAvatarId(String avatarId) {
         this.avatarId = avatarId;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

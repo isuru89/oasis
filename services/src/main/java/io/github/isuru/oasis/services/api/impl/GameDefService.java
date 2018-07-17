@@ -1,20 +1,32 @@
 package io.github.isuru.oasis.services.api.impl;
 
-import io.github.isuru.oasis.services.api.IGameDefService;
-import io.github.isuru.oasis.model.FieldCalculator;
+import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.model.LeaderboardDef;
-import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.ShopItem;
-import io.github.isuru.oasis.model.rules.BadgeRule;
-import io.github.isuru.oasis.model.rules.PointRule;
+import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.DefWrapper;
+import io.github.isuru.oasis.model.defs.KpiDef;
+import io.github.isuru.oasis.model.defs.MilestoneDef;
+import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.services.api.IGameDefService;
+import io.github.isuru.oasis.services.model.OasisDefinition;
+import io.github.isuru.oasis.services.utils.RUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna
  */
-public class GameDefService implements IGameDefService {
+public class GameDefService extends BaseService implements IGameDefService {
+
+    private Long gameId;
+
+    GameDefService(IOasisDao dao) {
+        super(dao);
+    }
+
     @Override
     public void createGame() {
 
@@ -26,88 +38,128 @@ public class GameDefService implements IGameDefService {
     }
 
     @Override
-    public void removeGameConstant(String constName) {
-
+    public boolean removeGameConstant(String constName) {
+        return false;
     }
 
     @Override
-    public void addKpiCalculation(FieldCalculator fieldCalculator) {
+    public void addKpiCalculation(KpiDef fieldCalculator) throws Exception {
+        DefWrapper wrapper = new DefWrapper();
+        wrapper.setKind(OasisDefinition.KPI.getTypeId());
+        wrapper.setName(fieldCalculator.getName());
+        wrapper.setDisplayName(wrapper.getName());
+        wrapper.setContent(RUtils.toStr(fieldCalculator, getMapper()));
+        wrapper.setGameId(gameId);
 
+        getDao().getDefinitionDao().addDefinition(wrapper);
     }
 
     @Override
-    public List<FieldCalculator> listKipCalculations() {
-        return null;
+    public List<KpiDef> listKpiCalculations() throws Exception {
+        return getDao().getDefinitionDao().listDefinitions(OasisDefinition.KPI.getTypeId())
+                .stream()
+                .map(this::wrapperToKpi)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public FieldCalculator readKpiCalculation(long id) {
-        return null;
+    public KpiDef readKpiCalculation(long id) throws Exception {
+        return wrapperToKpi(getDao().getDefinitionDao().readDefinition(id));
     }
 
     @Override
-    public void disableKpiCalculation(long id) {
-
+    public boolean disableKpiCalculation(long id) throws Exception {
+        return getDao().getDefinitionDao().disableDefinition(id);
     }
 
     @Override
-    public void addBadgeDef(BadgeRule badge) {
+    public void addBadgeDef(BadgeDef badge) throws Exception {
+        DefWrapper wrapper = new DefWrapper();
+        wrapper.setKind(OasisDefinition.BADGE.getTypeId());
+        wrapper.setName(badge.getName());
+        wrapper.setDisplayName(badge.getDisplayName());
+        wrapper.setContent(RUtils.toStr(badge, getMapper()));
+        wrapper.setGameId(gameId);
 
+        getDao().getDefinitionDao().addDefinition(wrapper);
     }
 
     @Override
-    public List<BadgeRule> listBadgeDefs() {
-        return null;
+    public List<BadgeDef> listBadgeDefs() throws Exception {
+        return getDao().getDefinitionDao().listDefinitions(OasisDefinition.BADGE.getTypeId())
+                .stream()
+                .map(this::wrapperToBadge)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public BadgeRule readBadgeDef(long id) {
-        return null;
+    public BadgeDef readBadgeDef(long id) throws Exception {
+        return wrapperToBadge(getDao().getDefinitionDao().readDefinition(id));
     }
 
     @Override
-    public void disableBadgeDef(long id) {
-
+    public boolean disableBadgeDef(long id) throws Exception {
+        return getDao().getDefinitionDao().disableDefinition(id);
     }
 
     @Override
-    public void addPointDef(PointRule pointRule) {
-
+    public List<PointDef> listPointDefs(long gameId) throws Exception {
+        return getDao().getDefinitionDao().listDefinitions(OasisDefinition.POINT.getTypeId())
+                .stream()
+                .map(this::wrapperToPoint)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<PointRule> listPointDefs() {
-        return null;
+    public void addPointDef(PointDef pointRule) throws Exception {
+        DefWrapper wrapper = new DefWrapper();
+        wrapper.setKind(OasisDefinition.POINT.getTypeId());
+        wrapper.setName(pointRule.getName());
+        wrapper.setDisplayName(pointRule.getDisplayName());
+        wrapper.setContent(RUtils.toStr(pointRule, getMapper()));
+        wrapper.setGameId(gameId);
+
+        getDao().getDefinitionDao().addDefinition(wrapper);
     }
 
     @Override
-    public PointRule readPointDef(long id) {
-        return null;
+    public PointDef readPointDef(long id) throws Exception {
+        return wrapperToPoint(getDao().getDefinitionDao().readDefinition(id));
     }
 
     @Override
-    public void disablePointDef(long id) {
-
+    public boolean disablePointDef(long id) throws Exception {
+        return getDao().getDefinitionDao().disableDefinition(id);
     }
 
     @Override
-    public void addMilestoneDef(Milestone milestone) {
+    public void addMilestoneDef(MilestoneDef milestone) throws Exception {
+        DefWrapper wrapper = new DefWrapper();
+        wrapper.setKind(OasisDefinition.MILESTONE.getTypeId());
+        wrapper.setName(milestone.getName());
+        wrapper.setDisplayName(milestone.getDisplayName());
+        wrapper.setContent(RUtils.toStr(milestone, getMapper()));
+        wrapper.setGameId(gameId);
 
+        getDao().getDefinitionDao().addDefinition(wrapper);
     }
 
     @Override
-    public List<Milestone> listMilestoneDefs() {
-        return null;
+    public List<MilestoneDef> listMilestoneDefs() throws Exception {
+        return getDao().getDefinitionDao().listDefinitions(OasisDefinition.MILESTONE.getTypeId())
+                .stream()
+                .map(this::wrapperToMilestone)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Milestone readMilestoneDef(long id) {
-        return null;
+    public MilestoneDef readMilestoneDef(long id) throws Exception {
+        return wrapperToMilestone(getDao().getDefinitionDao().readDefinition(id));
     }
 
     @Override
-    public void disableMilestoneDef(long id) {
-
+    public boolean disableMilestoneDef(long id) throws Exception {
+        return getDao().getDefinitionDao().disableDefinition(id);
     }
 
     @Override
@@ -126,8 +178,8 @@ public class GameDefService implements IGameDefService {
     }
 
     @Override
-    public void disableLeaderboardDef(long id) {
-
+    public boolean disableLeaderboardDef(long id) throws Exception {
+        return getDao().getDefinitionDao().disableDefinition(id);
     }
 
     @Override
@@ -146,7 +198,38 @@ public class GameDefService implements IGameDefService {
     }
 
     @Override
-    public void disableShopItem(long id) {
-
+    public boolean disableShopItem(long id) {
+        return false;
     }
+
+    private BadgeDef wrapperToBadge(DefWrapper wrapper) {
+        BadgeDef badgeDef = RUtils.toObj(wrapper.getContent(), BadgeDef.class, getMapper());
+        badgeDef.setId(wrapper.getId());
+        badgeDef.setName(wrapper.getName());
+        badgeDef.setDisplayName(wrapper.getDisplayName());
+        return badgeDef;
+    }
+
+    private KpiDef wrapperToKpi(DefWrapper wrapper) {
+        KpiDef kpiDef = RUtils.toObj(wrapper.getContent(), KpiDef.class, getMapper());
+        kpiDef.setId(wrapper.getId());
+        return kpiDef;
+    }
+
+    private PointDef wrapperToPoint(DefWrapper wrapper) {
+        PointDef pointDef = RUtils.toObj(wrapper.getContent(), PointDef.class, getMapper());
+        pointDef.setId(wrapper.getId());
+        pointDef.setName(wrapper.getName());
+        pointDef.setDisplayName(wrapper.getDisplayName());
+        return pointDef;
+    }
+
+    private MilestoneDef wrapperToMilestone(DefWrapper wrapper) {
+        MilestoneDef milestoneDef = RUtils.toObj(wrapper.getContent(), MilestoneDef.class, getMapper());
+        milestoneDef.setId(wrapper.getId());
+        milestoneDef.setName(wrapper.getName());
+        milestoneDef.setDisplayName(wrapper.getDisplayName());
+        return milestoneDef;
+    }
+
 }

@@ -8,29 +8,35 @@ import java.io.Serializable;
 public class Badge implements Serializable {
 
     private final Badge parent;
-    private final String id;
+    private final Long id;
+    private final String name;
 
-    public Badge(String id) {
-        this(id, null);
+    public Badge(Long id, String name) {
+        this(id, name, null);
     }
 
-    public Badge(String id, Badge parent) {
+    public Badge(Long id, String name, Badge parent) {
         this.parent = parent;
         this.id = id;
+        this.name = name;
     }
 
     public Badge getParent() {
         return parent;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override
     public String toString() {
         return "Badge{" +
-                "id='" + id + '\'' +
+                "name='" + name + '\'' +
                 ", parent=" + parent +
                 '}';
     }

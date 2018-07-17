@@ -1,8 +1,11 @@
 package io.github.isuru.oasis.services.api;
 
-import io.github.isuru.oasis.model.*;
-import io.github.isuru.oasis.model.rules.BadgeRule;
-import io.github.isuru.oasis.model.rules.PointRule;
+import io.github.isuru.oasis.model.LeaderboardDef;
+import io.github.isuru.oasis.model.ShopItem;
+import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.KpiDef;
+import io.github.isuru.oasis.model.defs.MilestoneDef;
+import io.github.isuru.oasis.model.defs.PointDef;
 
 import java.util.List;
 import java.util.Map;
@@ -11,35 +14,35 @@ public interface IGameDefService {
 
     void createGame();
     void addGameConstants(Map<String, Object> gameConstants);
-    void removeGameConstant(String constName);
+    boolean removeGameConstant(String constName);
 
-    void addKpiCalculation(FieldCalculator fieldCalculator);
-    List<FieldCalculator> listKipCalculations();
-    FieldCalculator readKpiCalculation(long id);
-    void disableKpiCalculation(long id);
+    void addKpiCalculation(KpiDef fieldCalculator) throws Exception;
+    List<KpiDef> listKpiCalculations() throws Exception;
+    KpiDef readKpiCalculation(long id) throws Exception;
+    boolean disableKpiCalculation(long id) throws Exception;
 
-    void addBadgeDef(BadgeRule badge);
-    List<BadgeRule> listBadgeDefs();
-    BadgeRule readBadgeDef(long id);
-    void disableBadgeDef(long id);
+    void addBadgeDef(BadgeDef badge) throws Exception;
+    List<BadgeDef> listBadgeDefs() throws Exception;
+    BadgeDef readBadgeDef(long id) throws Exception;
+    boolean disableBadgeDef(long id) throws Exception;
 
-    void addPointDef(PointRule pointRule);
-    List<PointRule> listPointDefs();
-    PointRule readPointDef(long id);
-    void disablePointDef(long id);
+    void addPointDef(PointDef pointRule) throws Exception;
+    List<PointDef> listPointDefs(long gameId) throws Exception;
+    PointDef readPointDef(long id) throws Exception;
+    boolean disablePointDef(long id) throws Exception;
 
-    void addMilestoneDef(Milestone milestone);
-    List<Milestone> listMilestoneDefs();
-    Milestone readMilestoneDef(long id);
-    void disableMilestoneDef(long id);
+    void addMilestoneDef(MilestoneDef milestone) throws Exception;
+    List<MilestoneDef> listMilestoneDefs() throws Exception;
+    MilestoneDef readMilestoneDef(long id) throws Exception;
+    boolean disableMilestoneDef(long id) throws Exception;
 
-    void addLeaderboardDef(LeaderboardDef leaderboardDef);
-    List<LeaderboardDef> listLeaderboardDefs();
-    LeaderboardDef readLeaderboardDef();
-    void disableLeaderboardDef(long id);
+    void addLeaderboardDef(LeaderboardDef leaderboardDef) throws Exception;
+    List<LeaderboardDef> listLeaderboardDefs() throws Exception;
+    LeaderboardDef readLeaderboardDef() throws Exception;
+    boolean disableLeaderboardDef(long id) throws Exception;
 
-    void addShopItem(ShopItem item);
-    List<ShopItem> listShopItems();
-    ShopItem readShopItem(long id);
-    void disableShopItem(long id);
+    void addShopItem(ShopItem item) throws Exception;
+    List<ShopItem> listShopItems() throws Exception;
+    ShopItem readShopItem(long id) throws Exception;
+    boolean disableShopItem(long id) throws Exception;
 }

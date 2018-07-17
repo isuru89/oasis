@@ -46,8 +46,8 @@ public class BadgeFromMilestone extends BadgeRule {
     public static class LevelSubBadge extends Badge implements Serializable {
         private int level;
 
-        public LevelSubBadge(String id, Badge parent, int level) {
-            super(id, parent);
+        public LevelSubBadge(String name, Badge parent, int level) {
+            super(null, name, parent);
             this.level = level;
         }
 

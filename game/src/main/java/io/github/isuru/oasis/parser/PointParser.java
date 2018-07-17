@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.parser;
 
 import io.github.isuru.oasis.model.rules.PointRule;
-import io.github.isuru.oasis.parser.model.PointDef;
-import io.github.isuru.oasis.parser.model.PointsAdditional;
-import io.github.isuru.oasis.parser.model.PointsDef;
+import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.PointsAdditional;
+import io.github.isuru.oasis.model.defs.PointsDef;
 import io.github.isuru.oasis.utils.Utils;
 import org.apache.flink.util.Preconditions;
 import org.yaml.snakeyaml.Yaml;
@@ -28,7 +28,7 @@ public class PointParser {
         for (PointDef record : pointsRef) {
             PointRule pr = new PointRule();
             pr.setId(++p);
-            pr.setName(record.getId());
+            pr.setName(record.getName());
             pr.setForEvent(record.getEvent());
             pr.setSource(record.getSource());
 
@@ -59,7 +59,7 @@ public class PointParser {
 
                     PointRule.AdditionalPointReward apr = new PointRule.AdditionalPointReward();
                     apr.setToUser(pa.getToUser());
-                    apr.setId(pa.getId());
+                    apr.setName(pa.getName());
 
                     if (pa.getAmount() instanceof Number) {
                         apr.setAmount((Number) pa.getAmount());
@@ -77,7 +77,7 @@ public class PointParser {
     }
 
     private static void precheck(PointsAdditional pa, PointDef rule) {
-        Preconditions.checkArgument(pa.getId() != null,
+        Preconditions.checkArgument(pa.getName() != null,
                 "missing field 'id' for one of additionalPoint entry in rule '" + rule.getId() + "'!");
         Preconditions.checkArgument(pa.getToUser() != null,
                 "missing field 'toUser' for one of additionalPoint entry in rule '" + rule.getId() + "'!");

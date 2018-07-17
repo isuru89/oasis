@@ -1,24 +1,24 @@
 points:
   - event: qa
-    id: defect-assigned
+    name: defect-assigned
     condition: "status == 'ASSIGNED'"
     amount: "4 - severity"
     additionalPoints:
       - toUser: "assignedTo"
-        id: defect-get-assigned
+        name: defect-get-assigned
         amount: -4
 
   - event: qa
-    id: defect-fixed
+    name: defect-fixed
     condition: "status == 'FIXED'"
     amount: 2
     additionalPoints:
       - toUser: "createdBy"
-        id: defect-accepted
+        name: defect-accepted
         amount: 1
 
   - event: qa-test
-    id: test-case-written
+    name: test-case-written
     condition: "true"
     amount: 4
 
