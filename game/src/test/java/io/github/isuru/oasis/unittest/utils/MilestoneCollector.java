@@ -20,7 +20,7 @@ public class MilestoneCollector implements IMilestoneHandler {
     }
 
     @Override
-    public void onError(Throwable ex, Event e, Milestone rule) {
+    public void onMilestoneError(Throwable ex, Event e, Milestone rule) {
         Memo.addMilestoneError(sinkId, Tuple3.of(ex, e, rule));
     }
 

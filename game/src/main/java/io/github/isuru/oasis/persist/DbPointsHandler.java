@@ -30,12 +30,11 @@ public class DbPointsHandler implements IPointHandler {
         } catch (Exception e) {
             LOG.error("Failed to persist points in db!", e);
         }
-
         pointHandler.pointsScored(userId, pointNotification);
     }
 
     @Override
-    public void onError(Throwable ex, Event e, PointRule rule) {
-        pointHandler.onError(ex, e, rule);
+    public void onPointError(Throwable ex, Event e, PointRule rule) {
+        pointHandler.onPointError(ex, e, rule);
     }
 }

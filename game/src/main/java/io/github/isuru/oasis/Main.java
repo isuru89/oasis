@@ -13,14 +13,19 @@ import io.github.isuru.oasis.parser.FieldCalculationParser;
 import io.github.isuru.oasis.parser.MilestoneParser;
 import io.github.isuru.oasis.parser.PointParser;
 import io.github.isuru.oasis.persist.DbOutputHandler;
+import io.github.isuru.oasis.persist.KafkaSender;
 import io.github.isuru.oasis.process.sources.CsvEventSource;
 import io.github.isuru.oasis.utils.Constants;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Properties;
 
 public class Main {
 
@@ -42,7 +47,8 @@ public class Main {
 //                "gameevents-" + gameName,
 //                deserialization, properties);
 
-        try (IOasisDao dao = OasisDbFactory.create(oasis.getConfigurations().getDbProperties())) {
+        try (IOasisDao dao = OasisDbFactory.create(oasis.getConfigurations().getDbProperties());
+            KafkaSender sender = createKafkaSender(oasis)) {
             OasisExecution execution = new OasisExecution()
                     .withSource(new CsvEventSource(file))
                     .fieldTransformer(getCalculations())
@@ -53,6 +59,16 @@ public class Main {
 
             execution.start();
         }
+    }
+
+    private static KafkaSender createKafkaSender(Oasis oasis) {
+        Properties properties = new Properties();
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        properties.put(ProducerConfig.CLIENT_ID_CONFIG, oasis.getId() + "-producer");
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        KafkaSender.get().init(properties, oasis);
+        return KafkaSender.get();
     }
 
     private static OasisConfigurations createConfigs() throws Exception {

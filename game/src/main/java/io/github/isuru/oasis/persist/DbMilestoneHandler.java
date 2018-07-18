@@ -28,7 +28,7 @@ public class DbMilestoneHandler implements IMilestoneHandler {
         } catch (Exception e) {
             LOG.error("Failed to persist milestone in db!", e);
         }
-
+        //KafkaSender.get().milestoneReached(user, level, event, milestone);
         milestoneHandler.milestoneReached(user, level, event, milestone);
     }
 
@@ -39,6 +39,7 @@ public class DbMilestoneHandler implements IMilestoneHandler {
         } catch (Exception e) {
             LOG.error("Failed to persist milestone state in db!", e);
         }
+        //KafkaSender.get().addMilestoneCurrState(userId, milestone, value);
     }
 
     @Override
@@ -48,10 +49,11 @@ public class DbMilestoneHandler implements IMilestoneHandler {
         } catch (Exception e) {
             LOG.error("Failed to persist milestone state in db!", e);
         }
+        //KafkaSender.get().addMilestoneCurrState(userId, milestone, value);
     }
 
     @Override
-    public void onError(Throwable ex, Event e, Milestone rule) {
-        milestoneHandler.onError(ex, e, rule);
+    public void onMilestoneError(Throwable ex, Event e, Milestone rule) {
+        milestoneHandler.onMilestoneError(ex, e, rule);
     }
 }

@@ -23,7 +23,7 @@ public class BadgeCollector implements IBadgeHandler {
     }
 
     @Override
-    public void onError(Throwable ex, Event e, BadgeRule rule) {
+    public void onBadgeError(Throwable ex, Event e, BadgeRule rule) {
         Memo.addBadgeError(sinkId, Tuple3.of(ex, e, rule));
     }
 }

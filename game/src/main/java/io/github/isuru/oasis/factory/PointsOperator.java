@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.factory;
 
 import io.github.isuru.oasis.model.Event;
-import io.github.isuru.oasis.model.events.PointEvent;
 import io.github.isuru.oasis.model.collect.Pair;
-import io.github.isuru.oasis.model.handlers.IErrorHandler;
+import io.github.isuru.oasis.model.events.PointEvent;
+import io.github.isuru.oasis.model.handlers.IPointHandler;
 import io.github.isuru.oasis.model.rules.PointRule;
 import io.github.isuru.oasis.utils.Utils;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
@@ -26,9 +26,9 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
 
     private Map<String, List<PointRule>> pointRules;
     private List<PointRule> pointSelfRules;
-    private IErrorHandler<PointRule> errorHandler;
+    private IPointHandler errorHandler;
 
-    public PointsOperator(List<PointRule> rules, IErrorHandler<PointRule> errorHandler) {
+    public PointsOperator(List<PointRule> rules, IPointHandler errorHandler) {
         if (rules != null) {
             pointRules = rules.stream()
                     .filter(r -> !"POINTS".equals(r.getSource()))
@@ -64,7 +64,7 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
                 }
 
             } catch (Throwable t) {
-                errorHandler.onError(t, value, pointRule);
+                errorHandler.onPointError(t, value, pointRule);
             }
         }
 
@@ -106,7 +106,7 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
                                 .ifPresent(p -> points.put(rule.getName(), Pair.of(p, rule)));
 
                     } catch (Throwable t) {
-                        errorHandler.onError(t, value, rule);
+                        errorHandler.onPointError(t, value, rule);
                     }
                 }
             }

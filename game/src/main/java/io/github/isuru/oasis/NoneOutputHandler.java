@@ -43,7 +43,7 @@ public class NoneOutputHandler implements IOutputHandler {
         }
 
         @Override
-        public void onError(Throwable ex, Event e, Milestone rule) {
+        public void onMilestoneError(Throwable ex, Event e, Milestone rule) {
             System.out.println("Milestone error!");
         }
     }
@@ -56,7 +56,7 @@ public class NoneOutputHandler implements IOutputHandler {
         }
 
         @Override
-        public void onError(Throwable ex, Event e, BadgeRule rule) {
+        public void onBadgeError(Throwable ex, Event e, BadgeRule rule) {
             System.out.println("Badge error!");
         }
     }
@@ -69,7 +69,7 @@ public class NoneOutputHandler implements IOutputHandler {
         }
 
         @Override
-        public void onError(Throwable ex, Event e, PointRule rule) {
+        public void onPointError(Throwable ex, Event e, PointRule rule) {
             System.out.println("Error!");
         }
     }

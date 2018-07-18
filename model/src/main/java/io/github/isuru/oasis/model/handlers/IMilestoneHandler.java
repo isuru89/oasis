@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * @author iweerarathna
  */
-public interface IMilestoneHandler extends IErrorHandler<Milestone>, Serializable {
+public interface IMilestoneHandler extends Serializable {
 
     void milestoneReached(Long user, int level, Event event, Milestone milestone);
 
@@ -20,4 +20,5 @@ public interface IMilestoneHandler extends IErrorHandler<Milestone>, Serializabl
 
     }
 
+    default void onMilestoneError(Throwable ex, Event e, Milestone rule) {}
 }

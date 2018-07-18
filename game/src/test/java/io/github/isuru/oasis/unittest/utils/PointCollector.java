@@ -21,7 +21,7 @@ public class PointCollector implements IPointHandler {
     }
 
     @Override
-    public void onError(Throwable ex, Event e, PointRule rule) {
+    public void onPointError(Throwable ex, Event e, PointRule rule) {
         Memo.addPointError(sinkId, Tuple3.of(ex, e, rule));
     }
 

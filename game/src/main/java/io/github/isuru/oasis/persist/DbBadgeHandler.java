@@ -30,12 +30,12 @@ public class DbBadgeHandler implements IBadgeHandler {
         } catch (Exception e) {
             LOG.error("Failed to persist badge on the database!", e);
         }
-
+        //KafkaSender.get().badgeReceived(userId, badgeNotification);
         badgeHandler.badgeReceived(userId, badgeNotification);
     }
 
     @Override
-    public void onError(Throwable ex, Event e, BadgeRule rule) {
-        badgeHandler.onError(ex, e, rule);
+    public void onBadgeError(Throwable ex, Event e, BadgeRule rule) {
+        badgeHandler.onBadgeError(ex, e, rule);
     }
 }
