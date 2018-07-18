@@ -19,13 +19,10 @@ import java.util.Map;
  */
 public class MilestoneParser {
 
-    public static List<Milestone> parse(InputStream inputStream) throws IOException {
-        Yaml yaml = new Yaml();
-        MilestonesDef milestonesDef = yaml.loadAs(inputStream, MilestonesDef.class);
-
+    public static List<Milestone> parse(List<MilestoneDef> milestoneDefs) throws IOException {
         int m = 0;
         List<Milestone> milestones = new LinkedList<>();
-        for (MilestoneDef milestoneDef : milestonesDef.getMilestones()) {
+        for (MilestoneDef milestoneDef : milestoneDefs) {
             Milestone milestone = new Milestone();
             milestone.setId(++m);
             milestone.setName(milestoneDef.getName());
@@ -74,6 +71,13 @@ public class MilestoneParser {
             milestones.add(milestone);
         }
         return milestones;
+    }
+
+    public static List<Milestone> parse(InputStream inputStream) throws IOException {
+        Yaml yaml = new Yaml();
+        MilestonesDef milestonesDef = yaml.loadAs(inputStream, MilestonesDef.class);
+
+        return parse(milestonesDef.getMilestones());
     }
 
     private static Number interpretNumber(Object val, boolean asRealValues) {

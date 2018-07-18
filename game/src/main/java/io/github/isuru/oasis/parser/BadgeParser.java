@@ -22,13 +22,10 @@ import java.util.List;
  */
 public class BadgeParser {
 
-    public static List<BadgeRule> parse(InputStream inputStream) throws IOException {
-        Yaml yaml = new Yaml();
-        BadgesDef badgesDef = yaml.loadAs(inputStream, BadgesDef.class);
-
+    public static List<BadgeRule> parse(List<BadgeDef> badgeDefs) throws IOException {
         long b = 0;
         List<BadgeRule> badgeRules = new LinkedList<>();
-        for (BadgeDef badgeDef : badgesDef.getBadges()) {
+        for (BadgeDef badgeDef : badgeDefs) {
             Badge badge = new Badge(badgeDef.getId(), badgeDef.getName());
             BadgeSourceDef from = badgeDef.getFrom();
             if (from != null) {
@@ -103,6 +100,13 @@ public class BadgeParser {
 
         }
         return badgeRules;
+    }
+
+    public static List<BadgeRule> parse(InputStream inputStream) throws IOException {
+        Yaml yaml = new Yaml();
+        BadgesDef badgesDef = yaml.loadAs(inputStream, BadgesDef.class);
+
+        return parse(badgesDef.getBadges());
     }
 
 }

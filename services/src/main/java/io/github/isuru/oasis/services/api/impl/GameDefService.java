@@ -10,7 +10,7 @@ import io.github.isuru.oasis.model.defs.KpiDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.services.api.IGameDefService;
-import io.github.isuru.oasis.services.model.OasisDefinition;
+import io.github.isuru.oasis.model.defs.OasisDefinition;
 import io.github.isuru.oasis.services.utils.RUtils;
 
 import java.util.List;

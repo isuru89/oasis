@@ -18,14 +18,10 @@ import java.util.List;
  */
 public class PointParser {
 
-    public static List<PointRule> parse(InputStream inputStream) throws IOException {
-        Yaml yaml = new Yaml();
-        PointsDef pointsDef = yaml.loadAs(inputStream, PointsDef.class);
-
+    public static List<PointRule> parse(List<PointDef> pointDefs) throws IOException {
         int p = 0;
         List<PointRule> pointRules = new LinkedList<>();
-        List<PointDef> pointsRef = pointsDef.getPoints();
-        for (PointDef record : pointsRef) {
+        for (PointDef record : pointDefs) {
             PointRule pr = new PointRule();
             pr.setId(++p);
             pr.setName(record.getName());
@@ -74,6 +70,13 @@ public class PointParser {
             pointRules.add(pr);
         }
         return pointRules;
+    }
+
+    public static List<PointRule> parse(InputStream inputStream) throws IOException {
+        Yaml yaml = new Yaml();
+        PointsDef pointsDef = yaml.loadAs(inputStream, PointsDef.class);
+
+        return parse(pointsDef.getPoints());
     }
 
     private static void precheck(PointsAdditional pa, PointDef rule) {

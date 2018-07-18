@@ -15,11 +15,7 @@ import java.util.List;
  */
 public class FieldCalculationParser {
 
-    public static List<FieldCalculator> parse(InputStream inputStream) {
-        Yaml yaml = new Yaml();
-        KpisDef calcs = yaml.loadAs(inputStream, KpisDef.class);
-        List<KpiDef> calculations = calcs.getCalculations();
-
+    public static List<FieldCalculator> parse(List<KpiDef> calculations) {
         int f = 0;
         List<FieldCalculator> calculators = new LinkedList<>();
         for (KpiDef item: calculations) {
@@ -33,6 +29,14 @@ public class FieldCalculationParser {
             calculators.add(calculator);
         }
         return calculators;
+    }
+
+    public static List<FieldCalculator> parse(InputStream inputStream) {
+        Yaml yaml = new Yaml();
+        KpisDef calcs = yaml.loadAs(inputStream, KpisDef.class);
+        List<KpiDef> calculations = calcs.getCalculations();
+
+        return parse(calculations);
     }
 
 }
