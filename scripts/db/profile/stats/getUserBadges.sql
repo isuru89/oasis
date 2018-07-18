@@ -1,20 +1,20 @@
 SELECT
-    ID as id,
-    USER_ID as userId,
-    EVENT_TYPE as eventType,
-    EXT_ID as externalId,
-    TS as achievedTime,
-    BADGE_ID as badgeId,
-    SUB_BADGE_ID as subBadgeId,
-    START_EXT_ID as startExtId,
-    END_EXT_ID as endExtId,
-    START_TIME as startTime,
-    END_TIME as endTime,
-    TAG as tag
+    id as id,
+    ext_id as userId,
+    event_type as eventType,
+    ext_id as externalId,
+    ts as achievedTime,
+    badge_id as badgeId,
+    sub_badge_id as subBadgeId,
+    start_ext_id as startExtId,
+    end_ext_id as endExtId,
+    start_time as startTime,
+    end_time as endTime,
+    tag as tag
 
 FROM OA_BADGES bdg
-    INNER JOIN OA_DEFINITIONS odef ON bdg.BADGE_ID = odef.ID
+    INNER JOIN OA_DEFINITION odef ON bdg.badge_id = odef.id
 WHERE
-    bdg.USER_ID = :userId
+    bdg.ext_id = :userId
     AND
-    odef.IS_ACTIVE = 1
+    odef.is_active = 1

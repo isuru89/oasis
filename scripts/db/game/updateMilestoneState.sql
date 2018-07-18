@@ -1,8 +1,8 @@
 INSERT INTO OA_MILESTONE_STATE (
-    USER_ID,
-    MILESTONE_ID,
-    CURRENT_VAL,
-    CURRENT_VAL_I
+    user_id,
+    milestone_id,
+    current_val,
+    current_val_i
 ) VALUES (
     :userId,
     :milestoneId,
@@ -10,4 +10,4 @@ INSERT INTO OA_MILESTONE_STATE (
     :valueLong
 )
 ON DUPLICATE KEY
-UPDATE CURRENT_VAL = :valueDouble, CURRENT_VAL_I = :valueLong
+UPDATE current_val = :valueDouble, current_val_i = :valueLong

@@ -3,6 +3,7 @@ package io.github.isuru.oasis.process;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
+import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
@@ -24,16 +25,19 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
     private FilterFunction<Event> filter;
     private Serializable expression;
     private Milestone milestone;
+    private IMilestoneHandler milestoneHandler;
 
     private transient ValueState<Double> accSum;
     private transient ValueState<Integer> currentLevel;
 
     public MilestoneSumDoubleProcess(List<Double> levels, FilterFunction<Event> filter,
-                                     Serializable expression, Milestone milestone) {
+                                     Serializable expression, Milestone milestone,
+                                     IMilestoneHandler milestoneHandler) {
         this.levels = levels;
         this.filter = filter;
         this.expression = expression;
         this.milestone = milestone;
+        this.milestoneHandler = milestoneHandler;
     }
 
     @Override
@@ -71,18 +75,19 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
                 }
             }
 
-            // @TODO update sum in db
+            // update sum in db
+            milestoneHandler.addMilestoneCurrState(value.getUser(), milestone, accSum.value());
         }
     }
 
     @Override
     public void open(Configuration parameters) {
         ValueStateDescriptor<Integer> currLevelStateDesc =
-                new ValueStateDescriptor<>(String.format("milestone-sd-%s-curr-level", milestone.getId()),
+                new ValueStateDescriptor<>(String.format("milestone-sd-%d-curr-level", milestone.getId()),
                         Integer.class,
                         0);
         ValueStateDescriptor<Double> stateDesc =
-                new ValueStateDescriptor<>(String.format("milestone-sd-%s-sum", milestone.getId()),
+                new ValueStateDescriptor<>(String.format("milestone-sd-%d-sum", milestone.getId()),
                         DoubleSerializer.INSTANCE,
                         0.0);
         currentLevel = getRuntimeContext().getState(currLevelStateDesc);

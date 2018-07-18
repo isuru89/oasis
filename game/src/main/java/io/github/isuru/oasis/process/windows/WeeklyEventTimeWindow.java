@@ -19,8 +19,6 @@ public class WeeklyEventTimeWindow extends OasisTimeWindowAssigner {
         long start = TimeWindow.getWindowStartWithOffset(timestamp, 0, DAY_ONE);
         ZonedDateTime startT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.systemDefault())
                 .with(DayOfWeek.MONDAY);
-//        System.out.println("Weekly Window created " + startT.toInstant() + " to "
-//                + startT.plusDays(7).toInstant());
         return new TimeWindow(startT.toInstant().toEpochMilli(),
                 startT.plusDays(7).toInstant().toEpochMilli());
     }

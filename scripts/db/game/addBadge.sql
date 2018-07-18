@@ -1,15 +1,15 @@
 INSERT INTO OA_BADGES (
-    USER_ID,
-    EVENT_TYPE,
-    EXT_ID,
-    TS,
-    BADGE_ID,
-    SUB_BADGE_ID,
-    START_EXT_ID,
-    END_EXT_ID,
-    START_TIME,
-    END_TIME,
-    TAG
+    user_id,
+    event_type,
+    ext_id,
+    ts,
+    badge_id,
+    sub_badge_id,
+    start_ext_id,
+    end_ext_id,
+    start_time,
+    end_time,
+    tag
 ) VALUES (
     :userId,
     :eventType,

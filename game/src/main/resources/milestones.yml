@@ -1,5 +1,5 @@
 milestones:
-  - id: total-codes
+  - name: total-codes
     event: submission
     aggregator: sum
     accumulator: "totalCode"
@@ -10,7 +10,7 @@ milestones:
       4: 50k
       5: 100k
 
-  - id: total-other-fixes
+  - name: total-other-fixes
     event: submission
     aggregator: sum
     accumulatorType: double
@@ -24,7 +24,7 @@ milestones:
       6: 200
       7: 500
 
-  - id: total-fixes
+  - name: total-fixes
     event: submission
     aggregator: sum
     accumulator: "fixedViolations"
@@ -37,7 +37,7 @@ milestones:
       6: 1000
       7: 5000
 
-  - id: logins
+  - name: logins
     event: login
     aggregator: count
     levels:

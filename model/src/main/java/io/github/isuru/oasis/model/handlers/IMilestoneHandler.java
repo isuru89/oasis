@@ -12,4 +12,12 @@ public interface IMilestoneHandler extends IErrorHandler<Milestone>, Serializabl
 
     void milestoneReached(Long user, int level, Event event, Milestone milestone);
 
+    default void addMilestoneCurrState(Long userId, Milestone milestone, double value) {
+
+    }
+
+    default void addMilestoneCurrState(Long userId, Milestone milestone, long value) {
+
+    }
+
 }

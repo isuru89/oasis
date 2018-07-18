@@ -1,17 +1,19 @@
 package io.github.isuru.oasis.persist;
 
+import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.handlers.IPointHandler;
 import io.github.isuru.oasis.model.handlers.PointNotification;
 import io.github.isuru.oasis.model.rules.PointRule;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author iweerarathna
  */
 public class DbPointsHandler implements IPointHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DbPointsHandler.class);
 
     private final String dbRef;
     private IPointHandler pointHandler;
@@ -23,20 +25,10 @@ public class DbPointsHandler implements IPointHandler {
 
     @Override
     public void pointsScored(Long userId, PointNotification pointNotification) {
-        Event event = pointNotification.getEvents().get(0);
-        Map<String, Object> params = new HashMap<>();
-        params.put("userId", userId);
-        params.put("eventType", event.getEventType());
-        params.put("externalId", event.getExternalId());
-        params.put("ts", event.getTimestamp());
-        params.put("pointId", pointNotification.getRule().getId());
-        params.put("subPointId", null);
-        params.put("points", pointNotification.getAmount());
-
         try {
-            DbPool.get(dbRef).executeCommand("add_point", params);
+            OasisDbPool.getDao(dbRef).getGameDao().addPoint(userId, pointNotification);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Failed to persist points in db!", e);
         }
 
         pointHandler.pointsScored(userId, pointNotification);

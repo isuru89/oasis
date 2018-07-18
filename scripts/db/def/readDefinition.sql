@@ -1,16 +1,16 @@
 SELECT
-    ID as id,
-    KIND as defKind,
-    NAME as name,
-    DISPLAY_NAME as displayName,
-    CONTENT_DATA as content,
-    GAME_ID as gameId,
-    PARENT_ID as parentId,
-    IS_ACTIVE as isActive,
-    EXPIRATION_AT as expiration,
-    CREATED_AT as createdAt,
-    UPDATED_AT as updatedAt
+    id AS id,
+    kind AS defKind,
+    name AS name,
+    display_name AS displayName,
+    content_data AS content,
+    game_id AS gameId,
+    parent_id AS parentId,
+    is_active AS isActive,
+    expiration_at AS expiration,
+    created_at AS createdAt,
+    updated_at AS updatedAt
 
-FROM OA_DEFINITIONS
+FROM OA_DEFINITION
 WHERE
-    ID = :id
+    id = :id

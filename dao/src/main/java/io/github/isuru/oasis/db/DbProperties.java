@@ -7,11 +7,21 @@ import java.util.Map;
  */
 public class DbProperties {
 
+    private final String daoName;
+
     private String queryLocation;
     private String url;
     private String username;
     private String password;
     private Map<String, Object> otherOptions;
+
+    public DbProperties(String daoName) {
+        this.daoName = daoName;
+    }
+
+    public String getDaoName() {
+        return daoName;
+    }
 
     public String getQueryLocation() {
         return queryLocation;

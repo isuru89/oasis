@@ -44,14 +44,16 @@ public class JdbiGameDao implements IGameDao {
         Event last = badgeNotification.getEvents().get(badgeNotification.getEvents().size() - 1);
 
         Badge badge = badgeNotification.getBadge();
+        Long badgeId = badge.getParent() == null ? badge.getId() : badge.getParent().getId();
+        String subBadgeId = badge.getParent() == null ? null : badge.getName();
 
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("eventType", last.getEventType());
         map.put("extId", last.getExternalId());
         map.put("ts", last.getTimestamp());
-        map.put("badgeId", badge.getParent() == null ? badge.getId() : badge.getParent().getId());
-        map.put("subBadgeId", badge.getParent() == null ? null : badge.getId());
+        map.put("badgeId", badgeId);
+        map.put("subBadgeId", subBadgeId);
         map.put("startExtId", first.getExternalId());
         map.put("endExtId", last.getExternalId());
         map.put("startTime", first.getTimestamp());
@@ -82,7 +84,7 @@ public class JdbiGameDao implements IGameDao {
         map.put("valueDouble", value);
         map.put("valueLong", null);
 
-        dao.executeCommand("game/addMilestone", map);
+        dao.executeCommand("game/updateMilestoneState", map);
     }
 
     @Override
@@ -93,6 +95,6 @@ public class JdbiGameDao implements IGameDao {
         map.put("valueDouble", null);
         map.put("valueLong", value);
 
-        dao.executeCommand("game/addMilestone", map);
+        dao.executeCommand("game/updateMilestoneState", map);
     }
 }

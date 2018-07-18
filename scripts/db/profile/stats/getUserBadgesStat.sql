@@ -1,23 +1,23 @@
 SELECT
-    USER_ID as userId,
+    user_id as userId,
     'Badges' as typeId,
     COUNT(*) as totalBadges
 FROM OA_BADGES
 WHERE
-    USER_ID = :userId AND IS_ACTIVE = 1
-GROUP BY USER_ID
+    user_id = :userId AND is_active = 1
+GROUP BY user_id
 
 UNION ALL
 
 SELECT
-    USER_ID as userId,
+    user_id as userId,
     'Last Week Badges' as typeId,
     COUNT(*) as totalPoints
 FROM OA_BADGES
 WHERE
-    USER_ID = :userId
+    user_id = :userId
     AND
-    IS_ACTIVE = 1
+    is_active = 1
     AND
-    TS >= :startDate
-GROUP BY USER_ID
+    ts >= :startDate
+GROUP BY user_id

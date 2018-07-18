@@ -5,7 +5,6 @@ import io.github.isuru.oasis.Oasis;
 import io.github.isuru.oasis.OasisConfigurations;
 import io.github.isuru.oasis.OasisExecution;
 import io.github.isuru.oasis.model.FieldCalculator;
-import io.github.isuru.oasis.persist.DbPool;
 import io.github.isuru.oasis.unittest.utils.BadgeCollector;
 import io.github.isuru.oasis.unittest.utils.MilestoneCollector;
 import io.github.isuru.oasis.unittest.utils.NullOutputHandler;
@@ -90,9 +89,9 @@ public class OasisTest {
 
             execution.start();
         } finally {
-            if (DbPool.get("default") != null) {
-                DbPool.get("default").shutdown();
-            }
+//            if (DbPool.get("default") != null) {
+//                DbPool.get("default").shutdown();
+//            }
             //FileUtils.deleteQuietly(configs.getDataDir());
         }
     }

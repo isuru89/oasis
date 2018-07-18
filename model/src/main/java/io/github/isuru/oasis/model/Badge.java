@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class Badge implements Serializable {
 
     private final Badge parent;
-    private final Long id;
+    private Long id;
     private final String name;
 
     public Badge(Long id, String name) {
@@ -19,6 +19,10 @@ public class Badge implements Serializable {
         this.parent = parent;
         this.id = id;
         this.name = name;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Badge getParent() {

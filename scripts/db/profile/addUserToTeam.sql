@@ -1,7 +1,7 @@
-INSERT INTO OA_TEAM_USERS (
-    TEAM_ID,
-    USER_ID,
-    SINCE
+INSERT INTO OA_TEAM_USER (
+    team_id,
+    user_id,
+    since
 ) VALUES (
     :teamId,
     :userId,

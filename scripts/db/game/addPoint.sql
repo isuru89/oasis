@@ -1,12 +1,12 @@
 INSERT INTO OA_POINTS (
-    USER_ID,
-    EVENT_TYPE,
-    EXT_ID,
-    TS,
-    POINT_ID,
-    SUB_POINT_ID,
-    POINTS,
-    TAG
+    user_id,
+    event_type,
+    ext_id,
+    ts,
+    point_id,
+    sub_point_id,
+    points,
+    tag
 ) VALUES (
     :userId,
     :eventType,
@@ -14,6 +14,6 @@ INSERT INTO OA_POINTS (
     :ts,
     :pointId,
     :subPointId,
-    :points
+    :points,
     :tag
 )

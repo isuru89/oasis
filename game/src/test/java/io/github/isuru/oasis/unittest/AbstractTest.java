@@ -1,24 +1,19 @@
 package io.github.isuru.oasis.unittest;
 
-import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.Oasis;
 import io.github.isuru.oasis.OasisConfigurations;
 import io.github.isuru.oasis.OasisExecution;
 import io.github.isuru.oasis.model.Badge;
+import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
-import io.github.isuru.oasis.persist.DbPool;
-import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.persist.IDbConnection;
-import io.github.isuru.oasis.persist.PersistFactory;
 import io.github.isuru.oasis.unittest.utils.BadgeCollector;
 import io.github.isuru.oasis.unittest.utils.Memo;
 import io.github.isuru.oasis.unittest.utils.MilestoneCollector;
 import io.github.isuru.oasis.unittest.utils.PointCollector;
 import io.github.isuru.oasis.unittest.utils.ResourceFileStream;
 import io.github.isuru.oasis.unittest.utils.TestUtils;
-import io.github.isuru.oasis.utils.Constants;
 import io.github.isuru.oasis.utils.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.flink.api.java.tuple.Tuple4;
@@ -55,17 +50,7 @@ abstract class AbstractTest {
         OasisConfigurations assertConfigs = TestUtils.getAssertConfigs(new PointCollector(id),
                 new BadgeCollector(id),
                 new MilestoneCollector(id));
-        IDbConnection aDefault = DbPool.get(Constants.DEFAULT_DB);
 
-        DbProperties properties = new DbProperties();
-        properties.setUrl("jdbc:h2:file:./data/" + id);
-        assertConfigs.setDbProperties(properties);
-
-        if (aDefault != null) {
-            aDefault.shutdown();
-        }
-        IDbConnection dbConnection = PersistFactory.createDbConnection(assertConfigs);
-        DbPool.put(Constants.DEFAULT_DB, dbConnection);
         Oasis oasis = new Oasis(id, assertConfigs);
 
         String ruleLoc = id + "/rules";

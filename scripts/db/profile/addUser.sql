@@ -1,11 +1,13 @@
-INSERT INTO OA_USERS (
-    USER_ID,
-    NAME,
-    AVATAR_ID,
-    IS_MALE
+INSERT INTO OA_USER (
+    ext_id,
+    name,
+    email,
+    avatar_id,
+    is_male
 ) VALUES (
-    :userId,
+    :extId
     :name,
+    :email,
     :avatarId,
     :isMale
 )

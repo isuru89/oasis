@@ -1,12 +1,11 @@
 package io.github.isuru.oasis.db;
 
-import java.io.Closeable;
 import java.util.Map;
 
 /**
  * @author iweerarathna
  */
-public interface IOasisDao extends Closeable {
+public interface IOasisDao extends AutoCloseable {
 
     void init(DbProperties properties) throws Exception;
 

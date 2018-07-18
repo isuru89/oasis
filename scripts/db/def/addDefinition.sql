@@ -1,9 +1,9 @@
-INSERT INTO OA_DEFINITIONS (
-    KIND,
-    NAME,
-    DISPLAY_NAME,
-    CONTENT_DATA,
-    GAME_ID
+INSERT INTO OA_DEFINITION (
+    kind,
+    name,
+    display_name,
+    content_data,
+    game_id
 ) VALUES (
     :typeId,
     :name,

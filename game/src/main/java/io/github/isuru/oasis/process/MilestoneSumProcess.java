@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.process;
 
 import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
 import io.github.isuru.oasis.utils.Utils;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
@@ -23,16 +24,19 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
     private FilterFunction<Event> filter;
     private Serializable expression;
     private Milestone milestone;
+    private IMilestoneHandler milestoneHandler;
 
     private ValueState<Long> accSum;
     private ValueState<Integer> currentLevel;
 
     public MilestoneSumProcess(List<Long> levels, FilterFunction<Event> filter,
-                               Serializable expression, Milestone milestone) {
+                               Serializable expression, Milestone milestone,
+                               IMilestoneHandler milestoneHandler) {
         this.levels = levels;
         this.filter = filter;
         this.expression = expression;
         this.milestone = milestone;
+        this.milestoneHandler = milestoneHandler;
     }
 
     @Override
@@ -70,17 +74,18 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
                 }
             }
 
-            // @TODO update sum in db
+            // update sum in db
+            milestoneHandler.addMilestoneCurrState(value.getUser(), milestone, accSum.value());
         }
     }
 
     @Override
     public void open(Configuration parameters) {
         ValueStateDescriptor<Integer> currLevelStateDesc =
-                new ValueStateDescriptor<>(String.format("milestone-%s-curr-level", milestone.getId()),
+                new ValueStateDescriptor<>(String.format("milestone-%d-curr-level", milestone.getId()),
                         Integer.class, 0);
         ValueStateDescriptor<Long> stateDesc =
-                new ValueStateDescriptor<>(String.format("milestone-%s-sum", milestone.getId()),
+                new ValueStateDescriptor<>(String.format("milestone-%d-sum", milestone.getId()),
                         Long.class, 0L);
         currentLevel = getRuntimeContext().getState(currLevelStateDesc);
         accSum = getRuntimeContext().getState(stateDesc);

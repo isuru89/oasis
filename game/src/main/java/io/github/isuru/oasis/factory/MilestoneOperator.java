@@ -43,7 +43,8 @@ public class MilestoneOperator {
             List<Long> levels = milestone.getLevels().stream()
                     .map(l -> l.getNumber().longValue())
                     .collect(Collectors.toList());
-            stream = userStream.process(new MilestoneCountProcess(levels, filterFunction, milestone));
+            stream = userStream.process(new MilestoneCountProcess(levels, filterFunction, milestone,
+                    oasis.getOutputHandler().getMilestoneHandler()));
 
         } else {
             if (milestone.isRealValues() || milestone.getFrom() != null) {
@@ -51,17 +52,20 @@ public class MilestoneOperator {
                         .map(l -> l.getNumber().doubleValue())
                         .collect(Collectors.toList());
                 if (milestone.getFrom() != null && milestone.getFrom().equals("points")) {
-                    stream = userPointStream.process(new MilestonePointSumProcess(levels, milestone));
+                    stream = userPointStream.process(new MilestonePointSumProcess(levels, milestone,
+                            oasis.getOutputHandler().getMilestoneHandler()));
                 } else {
                     stream = userStream.process(new MilestoneSumDoubleProcess(levels,
-                            filterFunction, milestone.getAccumulatorExpr(), milestone));
+                            filterFunction, milestone.getAccumulatorExpr(), milestone,
+                            oasis.getOutputHandler().getMilestoneHandler()));
                 }
             } else {
                 List<Long> levels = milestone.getLevels().stream()
                         .map(l -> l.getNumber().longValue())
                         .collect(Collectors.toList());
                 stream = userStream.process(new MilestoneSumProcess(levels, filterFunction,
-                        milestone.getAccumulatorExpr(), milestone));
+                        milestone.getAccumulatorExpr(), milestone,
+                        oasis.getOutputHandler().getMilestoneHandler()));
             }
         }
         return stream.uid(oasis.getId() + "-milestone-calc-" + milestone.getId());

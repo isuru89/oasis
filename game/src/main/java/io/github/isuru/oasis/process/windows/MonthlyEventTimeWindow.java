@@ -23,8 +23,6 @@ public class MonthlyEventTimeWindow extends OasisTimeWindowAssigner {
                 .toInstant(ZoneOffset.UTC).toEpochMilli();
         long end = from.atEndOfMonth().plusDays(1).atStartOfDay()
                 .toInstant(ZoneOffset.UTC).toEpochMilli();
-        System.out.println("Monthly == " + Instant.ofEpochMilli(start) + " to "
-                + Instant.ofEpochMilli(end) + " for " + element);
         return new TimeWindow(start, end);
     }
 }

@@ -1,26 +1,26 @@
 SELECT
-    oms.USER_ID as userId,
-    oms.MILESTONE_ID as milestoneId,
+    oms.user_id as userId,
+    oms.milestone_id as milestoneId,
     mcur.currLevel as currentLevel,
     mcur.achievedTime as achievedTime,
-    oms.CURRENT_VAL as currentValue,
-    oms.CURRENT_VAL_I as currentValueL,
-    oms.UPDATED_AT as lastUpdatedTime
+    oms.current_val as currentValue,
+    oms.current_val_i as currentValueL,
+    oms.updated_at as lastUpdatedTime
 
 FROM OA_MILESTONES_STATE AS oms
     LEFT JOIN (
         SELECT
-            USER_ID as userId,
-            MILESTONE_ID as milestoneId,
-            MAX(LEVEL) as currLevel,
-            MAX(TS) as achievedTime
+            user_id as userId,
+            milestone_id as milestoneId,
+            MAX(level) as currLevel,
+            MAX(ts) as achievedTime
         FROM OA_MILESTONES
         WHERE
-            USER_ID = :userId AND IS_ACTIVE = 1
+            user_id = :userId AND is_active = 1
         GROUP BY
-            USER_ID, MILESTONE_ID
+            user_id, milestone_id
     ) AS mcur
-    ON oms.USER_ID = mcur.userId AND oms.MILESTONE_ID = mcur.milestoneId
+    ON oms.user_id = mcur.userId AND oms.milestone_id = mcur.milestoneId
 
 WHERE
-    USER_ID = :userId
+    user_id = :userId

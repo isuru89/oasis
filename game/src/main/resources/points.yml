@@ -1,84 +1,84 @@
 points:
   - event: submission
-    id: churn
+    name: churn
     condition: "totalCode >= 50 && (totalCode / 100) > 0"
     amount: "totalCode / 100"
 
   - event: submission
-    id: heavy-commit
+    name: heavy-commit
     condition: "totalCode >= 500"
     amount: 5
 
   - event: submission
-    id: fix-violations
+    name: fix-violations
     condition: "fixedViolations > 0"
     amount: "fixedViolations"
 
   - event: submission
-    id: introduced-violations
+    name: introduced-violations
     condition: "introducedViolations > 0"
     amount: "-1 * introducedViolations"
 
   - event: submission
-    id: fixed-violations-of-others
+    name: fixed-violations-of-others
     condition: "otherFixed > 0"
     amount: "otherFixed * 2"
 
   - event: submission
-    id: fixed-violations-of-others-bonus
+    name: fixed-violations-of-others-bonus
     condition: "(otherFixed / 10) > 0"
     amount: "(otherFixed / 10) * 5"
 
   - event: submission
-    id: minus-nvd
+    name: minus-nvd
     condition: "nvd < 0 && introducedViolations <= 0"
     amount: 1
 
   - event: submission
     source: POINTS
-    id: submission_bonus_points
+    name: submission_bonus_points
     condition: "$TOTAL >= 10"
     amount: "5 + ($TOTAL - 10) * 2"
 
   - event: code-review
-    id: remark-raised
+    name: remark-raised
     condition: "remarkRaised == true"
     amount: 1
 
   - event: code-review
-    id: remark-resolved
+    name: remark-resolved
     condition: "remarkResolved == true"
     amount: 1
 
   - event: qa
-    id: defect-assigned
+    name: defect-assigned
     condition: "status == 'ASSIGNED'"
     amount: "4 - severity"
     additionalPoints:
       - toUser: "assignedTo"
-        id: defect-get-assigned
+        name: defect-get-assigned
         amount: -4
 
   - event: qa
-    id: defect-assigned-blocking
+    name: defect-assigned-blocking
     condition: "status == 'ASSIGNED' && severity == 99"
     amount: 2
     additionalPoints:
       - toUser: "assignedTo"
-        id: defect-get-assigned-blocking
+        name: defect-get-assigned-blocking
         amount: -10
 
   - event: qa
-    id: defect-fixed
+    name: defect-fixed
     condition: "status == 'FIXED'"
     amount: 2
 
   - event: qa
-    id: defect-not-relevant
+    name: defect-not-relevant
     condition: "status == 'OUT-OF-SCOPE' || status == 'AS-DESIGNED'"
     amount: 4
     additionalPoints:
       - toUser: "createdBy"
-        id: defect-not-relevant-created
+        name: defect-not-relevant-created
         amount: -4
 

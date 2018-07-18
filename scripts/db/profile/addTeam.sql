@@ -1,10 +1,10 @@
-INSERT INTO OA_TEAMS (
-    TEAM_ID,
-    TEAM_SCOPE,
-    NAME,
-    AVATAR_ID,
+INSERT INTO OA_TEAM (
+    ext_id,
+    team_scope,
+    name,
+    avatar_id,
 ) VALUES (
-    :teamId,
+    :extId,
     :teamScope,
     :name,
     :avatarId

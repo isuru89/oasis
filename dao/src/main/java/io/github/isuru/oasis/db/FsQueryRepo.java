@@ -38,13 +38,18 @@ public class FsQueryRepo implements IQueryRepo {
             String content = Files.readAllLines(path, StandardCharsets.UTF_8).stream()
                     .collect(Collectors.joining("\n"));
             String prefix = root.relativize(path).toString();
+            System.out.println(prefix);
             queries.put(prefix, content);
         }
     }
 
     @Override
     public String fetchQuery(String queryId) throws Exception {
-        return queries.get(queryId);
+        if (queryId.endsWith(".sql")) {
+            return queries.get(queryId);
+        } else {
+            return queries.get(queryId + ".sql");
+        }
     }
 
     @Override

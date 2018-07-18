@@ -3,6 +3,7 @@ package io.github.isuru.oasis.process;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
+import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
 import io.github.isuru.oasis.process.triggers.StreakTrigger;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.state.ReducingState;
@@ -24,15 +25,17 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
     private List<Long> levels;
     private FilterFunction<Event> filter;
     private Milestone milestone;
+    private IMilestoneHandler milestoneHandler;
 
     private transient ReducingState<Long> accCount;
     private transient ValueState<Long> currentLevel;
 
     public MilestoneCountProcess(List<Long> levels, FilterFunction<Event> filter,
-                                 Milestone milestone) {
+                                 Milestone milestone, IMilestoneHandler milestoneHandler) {
         this.levels = levels;
         this.filter = filter;
         this.milestone = milestone;
+        this.milestoneHandler = milestoneHandler;
     }
 
     @Override
@@ -45,17 +48,18 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
                 out.collect(new MilestoneEvent(value.getUser(), milestone, nextLevel, value));
             }
 
-            // @TODO update count in db
+            // update count in db
+            milestoneHandler.addMilestoneCurrState(value.getUser(), milestone, accCount.get());
         }
     }
 
     @Override
     public void open(Configuration parameters) {
         ValueStateDescriptor<Long> currLevelStateDesc =
-                new ValueStateDescriptor<>(String.format("milestone-%s-curr-level", milestone.getId()),
+                new ValueStateDescriptor<>(String.format("milestone-%d-curr-level", milestone.getId()),
                         Long.class, 0L);
         ReducingStateDescriptor<Long> allCountStateDesc =
-                new ReducingStateDescriptor<>(String.format("milestone-%s-allcount", milestone.getId()),
+                new ReducingStateDescriptor<>(String.format("milestone-%d-allcount", milestone.getId()),
                         new StreakTrigger.Sum(), LongSerializer.INSTANCE);
         currentLevel = getRuntimeContext().getState(currLevelStateDesc);
         accCount = getRuntimeContext().getReducingState(allCountStateDesc);

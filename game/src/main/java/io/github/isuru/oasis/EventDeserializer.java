@@ -1,6 +1,7 @@
 package io.github.isuru.oasis;
 
 import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.model.events.JsonEvent;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
@@ -29,7 +30,7 @@ public class EventDeserializer implements KeyedDeserializationSchema<Event> {
 
     @Override
     public boolean isEndOfStream(Event nextElement) {
-        return false;
+        return EventNames.TERMINATE_GAME.equals(nextElement.getEventType());
     }
 
     @Override

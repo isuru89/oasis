@@ -1,9 +1,9 @@
 SELECT
-    USER_ID as id,
-    NAME as name,
-    AVATAR_ID as avatarId,
-    IS_MALE as male,
-    IS_ACTIVE as isActive
-FROM OA_USERS
-WHERE USER_ID = :userId
+    ext_id as id,
+    name as name,
+    avatar_id as avatarId,
+    is_male as male,
+    is_active as isActive
+FROM OA_USER
+WHERE ext_id = :userId
 LIMIT 1
