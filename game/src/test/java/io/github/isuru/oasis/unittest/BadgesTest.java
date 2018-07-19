@@ -17,4 +17,9 @@ class BadgesTest extends AbstractTest {
         beginTest("badge-time-test");
     }
 
+    @Test
+    void testBadgesFromPoints() throws Exception {
+        beginTest("badge-test-points");
+    }
+
 }

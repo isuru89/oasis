@@ -25,7 +25,7 @@ public class PointsFromBadgeMapper implements FlatMapFunction<BadgeNotification,
         if (badgeNoti.getBadge().getAwardPoints() != null) {
             PointNotification pointNotification = new PointNotification(
                     badgeNoti.getUserId(),
-                    Collections.singletonList(badgeNoti.getEvents().get(0)),
+                    Collections.singletonList(badgeNoti.getEvents().get(badgeNoti.getEvents().size() - 1)),
                     associatedRule, // reserved rule for this.
                     badgeNoti.getBadge().getAwardPoints()
             );

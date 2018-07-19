@@ -27,6 +27,8 @@ public class BadgeParser {
         List<BadgeRule> badgeRules = new LinkedList<>();
         for (BadgeDef badgeDef : badgeDefs) {
             Badge badge = new Badge(badgeDef.getId(), badgeDef.getName());
+            badge.setAwardPoints(badgeDef.getAwardPoints());
+
             BadgeSourceDef from = badgeDef.getFrom();
             if (from != null) {
                 if (from.getPointsId() != null) {
@@ -35,7 +37,6 @@ public class BadgeParser {
                     bp.setMaxBadges(badgeDef.getMaxBadges());
                     bp.setPointsId(from.getPointsId());
                     bp.setDuration(from.getWithin());
-                    bp.setAwardPoints(badgeDef.getAwardPoints());
                     bp.setStreak(from.getStreak() != null ? from.getStreak() : 0);
                     if (badge.getId() == null) badge.setId(b);
                     bp.setBadge(badge);
@@ -56,7 +57,6 @@ public class BadgeParser {
                     bfm.setId(++b);
                     bfm.setMilestoneId(from.getMilestoneId());
                     bfm.setLevel(from.getLevel());
-                    bfm.setAwardPoints(badgeDef.getAwardPoints());
                     if (badge.getId() == null) badge.setId(b);
                     bfm.setBadge(badge);
 
@@ -77,7 +77,6 @@ public class BadgeParser {
                 bfe.setId(++b);
                 if (badge.getId() == null) badge.setId(b);
                 bfe.setBadge(badge);
-                bfe.setAwardPoints(badgeDef.getAwardPoints());
                 bfe.setEventType(badgeDef.getEvent());
                 bfe.setDuration(badgeDef.getWithin());
                 bfe.setMaxBadges(badgeDef.getMaxBadges());
