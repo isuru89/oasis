@@ -1,23 +1,19 @@
 package io.github.isuru.oasis.factory;
 
 import io.github.isuru.oasis.model.events.MilestoneEvent;
-import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
+import io.github.isuru.oasis.model.handlers.MilestoneNotification;
 import org.apache.flink.api.common.functions.MapFunction;
 
 /**
  * @author iweerarathna
  */
-public class MilestoneNotifier implements MapFunction<MilestoneEvent, MilestoneEvent> {
-
-    private final IMilestoneHandler handler;
-
-    public MilestoneNotifier(IMilestoneHandler handler) {
-        this.handler = handler;
-    }
+public class MilestoneNotifier implements MapFunction<MilestoneEvent, MilestoneNotification> {
 
     @Override
-    public MilestoneEvent map(MilestoneEvent value) throws Exception {
-        handler.milestoneReached(value.getUser(), value.getLevel(), value, value.getMilestone());
-        return value;
+    public MilestoneNotification map(MilestoneEvent value) {
+        return new MilestoneNotification(value.getUser(),
+                value.getLevel(),
+                value,
+                value.getMilestone());
     }
 }

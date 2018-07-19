@@ -1,6 +1,5 @@
 package io.github.isuru.oasis.model.handlers;
 
-import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
 
 import java.io.Serializable;
@@ -10,7 +9,7 @@ import java.io.Serializable;
  */
 public interface IMilestoneHandler extends Serializable {
 
-    void milestoneReached(Long user, int level, Event event, Milestone milestone);
+    void milestoneReached(MilestoneNotification milestoneNotification);
 
     default void addMilestoneCurrState(Long userId, Milestone milestone, double value) {
 
@@ -20,5 +19,4 @@ public interface IMilestoneHandler extends Serializable {
 
     }
 
-    default void onMilestoneError(Throwable ex, Event e, Milestone rule) {}
 }

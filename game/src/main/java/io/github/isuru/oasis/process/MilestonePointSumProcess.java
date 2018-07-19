@@ -2,8 +2,8 @@ package io.github.isuru.oasis.process;
 
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
+import io.github.isuru.oasis.model.events.MilestoneStateEvent;
 import io.github.isuru.oasis.model.events.PointEvent;
-import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
 import io.github.isuru.oasis.utils.Utils;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
@@ -11,6 +11,7 @@ import org.apache.flink.api.common.typeutils.base.DoubleSerializer;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
+import org.apache.flink.util.OutputTag;
 
 import java.util.List;
 
@@ -21,16 +22,16 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
 
     private List<Double> levels;
     private Milestone milestone;
-    private IMilestoneHandler milestoneHandler;
+    private OutputTag<MilestoneStateEvent> outputTag;
 
     private transient ValueState<Double> accSum;
     private transient ValueState<Integer> currentLevel;
 
     public MilestonePointSumProcess(List<Double> levels, Milestone milestone,
-                                    IMilestoneHandler milestoneHandler) {
+                                    OutputTag<MilestoneStateEvent> outputTag) {
         this.levels = levels;
         this.milestone = milestone;
-        this.milestoneHandler = milestoneHandler;
+        this.outputTag = outputTag;
     }
 
     @Override
@@ -79,8 +80,7 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
         }
 
         // update sum in db
-        milestoneHandler.addMilestoneCurrState(value.getUser(), milestone, accSum.value());
-
+        ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), milestone, accSum.value()));
     }
 
     @Override

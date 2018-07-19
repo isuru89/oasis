@@ -1,9 +1,7 @@
 package io.github.isuru.oasis.unittest.utils;
 
-import io.github.isuru.oasis.model.Event;
-import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
-import org.apache.flink.api.java.tuple.Tuple3;
+import io.github.isuru.oasis.model.handlers.MilestoneNotification;
 import org.apache.flink.api.java.tuple.Tuple4;
 
 public class MilestoneCollector implements IMilestoneHandler {
@@ -15,13 +13,11 @@ public class MilestoneCollector implements IMilestoneHandler {
     }
 
     @Override
-    public void milestoneReached(Long user, int level, Event event, Milestone milestone) {
-        Memo.addMilestone(sinkId, Tuple4.of(user, level, event, milestone));
-    }
-
-    @Override
-    public void onMilestoneError(Throwable ex, Event e, Milestone rule) {
-        Memo.addMilestoneError(sinkId, Tuple3.of(ex, e, rule));
+    public void milestoneReached(MilestoneNotification milestoneNotification) {
+        Memo.addMilestone(sinkId, Tuple4.of(milestoneNotification.getUserId(),
+                milestoneNotification.getLevel(),
+                milestoneNotification.getEvent(),
+                milestoneNotification.getMilestone()));
     }
 
 }

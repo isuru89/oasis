@@ -1,11 +1,11 @@
 package io.github.isuru.oasis.unittest;
 
 import io.github.isuru.oasis.Oasis;
-import io.github.isuru.oasis.OasisConfigurations;
 import io.github.isuru.oasis.OasisExecution;
 import io.github.isuru.oasis.model.Badge;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
+import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import io.github.isuru.oasis.unittest.utils.BadgeCollector;
@@ -47,11 +47,11 @@ abstract class AbstractTest {
     }
 
     private Oasis beginTestExec(String id, String... inputs) throws Exception {
-        OasisConfigurations assertConfigs = TestUtils.getAssertConfigs(new PointCollector(id),
+        IOutputHandler assertOutput = TestUtils.getAssertConfigs(new PointCollector(id),
                 new BadgeCollector(id),
                 new MilestoneCollector(id));
 
-        Oasis oasis = new Oasis(id, assertConfigs);
+        Oasis oasis = new Oasis(id);
 
         String ruleLoc = id + "/rules";
         String rulesPoints = ruleLoc + "/points.yml";
@@ -85,7 +85,8 @@ abstract class AbstractTest {
             execution = execution.setMilestones(TestUtils.getMilestoneRules(rulesMilestones));
         }
 
-        execution = execution.build(oasis, TestUtils.createEnv());
+        execution = execution.outputHandler(assertOutput)
+                .build(oasis, TestUtils.createEnv());
         execution.start();
 
         // assertions

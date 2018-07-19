@@ -37,6 +37,9 @@ public class BadgeOperator {
         } else if (badgeRule instanceof BadgeFromEvents) {
             return createBadgeFromEvents(userStream, (BadgeFromEvents) badgeRule);
         }  else if (badgeRule instanceof BadgeFromMilestone) {
+            if (milestoneStream == null) {
+                throw new RuntimeException("You have NOT defined any milestones to create badges from milestone events!");
+            }
             return createBadgeFromMilestones(milestoneStream, (BadgeFromMilestone) badgeRule);
         } else {
             throw new RuntimeException("Unknown badge type to process!");

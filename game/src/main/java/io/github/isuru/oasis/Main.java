@@ -20,7 +20,6 @@ import io.github.isuru.oasis.parser.BadgeParser;
 import io.github.isuru.oasis.parser.FieldCalculationParser;
 import io.github.isuru.oasis.parser.MilestoneParser;
 import io.github.isuru.oasis.parser.PointParser;
-import io.github.isuru.oasis.persist.DbOutputHandler;
 import io.github.isuru.oasis.persist.KafkaSender;
 import io.github.isuru.oasis.process.sources.CsvEventSource;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -60,11 +59,11 @@ public class Main {
         }
 
         Properties gameProperties = readConfigs(configFile);
-        OasisConfigurations oasisConfigurations = createConfigs(gameProperties);
+        DbProperties dbProperties = createConfigs(gameProperties);
 
-        try (IOasisDao dao = OasisDbFactory.create(oasisConfigurations.getDbProperties())) {
+        try (IOasisDao dao = OasisDbFactory.create(dbProperties)) {
             GameDef gameDef = readGameDef(gameId, dao);
-            Oasis oasis = new Oasis(gameDef.getName(), oasisConfigurations);
+            Oasis oasis = new Oasis(gameDef.getName());
 
             SourceFunction<Event> source = createSource(gameProperties);
             List<FieldCalculator> kpis = getCalculations(dao);
@@ -133,8 +132,7 @@ public class Main {
         }
     }
 
-    private static OasisConfigurations createConfigs(Properties gameProps) throws Exception {
-        OasisConfigurations configurations = new OasisConfigurations();
+    private static DbProperties createConfigs(Properties gameProps) throws Exception {
         String jdbcInst = gameProps.getProperty("jdbc.instance", OasisDbPool.DEFAULT);
 
         File scriptsDir = new File(gameProps.getProperty("db.scripts.dir"));
@@ -142,16 +140,13 @@ public class Main {
             throw new FileNotFoundException("DB scripts folder does not exist! [" + scriptsDir.getAbsolutePath() + "]");
         }
 
-        configurations.setOutputHandler(new DbOutputHandler(new NoneOutputHandler(), jdbcInst));
         DbProperties dbProperties = new DbProperties(jdbcInst);
         dbProperties.setUrl(gameProps.getProperty("jdbc.url"));
         dbProperties.setUsername(gameProps.getProperty("jdbc.username"));
         dbProperties.setPassword(gameProps.getProperty("jdbc.password", null));
 
         dbProperties.setQueryLocation(scriptsDir.getAbsolutePath());
-        configurations.setDbProperties(dbProperties);
-
-        return configurations;
+        return dbProperties;
     }
 
     private static Map<String, Object> filterKeys(Properties properties, String keyPfx) {

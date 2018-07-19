@@ -3,7 +3,7 @@ package io.github.isuru.oasis.process;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
-import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
+import io.github.isuru.oasis.model.events.MilestoneStateEvent;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
@@ -11,6 +11,7 @@ import org.apache.flink.api.common.typeutils.base.DoubleSerializer;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
+import org.apache.flink.util.OutputTag;
 import org.mvel2.MVEL;
 
 import java.io.Serializable;
@@ -25,19 +26,19 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
     private FilterFunction<Event> filter;
     private Serializable expression;
     private Milestone milestone;
-    private IMilestoneHandler milestoneHandler;
+    private OutputTag<MilestoneStateEvent> outputTag;
 
     private transient ValueState<Double> accSum;
     private transient ValueState<Integer> currentLevel;
 
     public MilestoneSumDoubleProcess(List<Double> levels, FilterFunction<Event> filter,
                                      Serializable expression, Milestone milestone,
-                                     IMilestoneHandler milestoneHandler) {
+                                     OutputTag<MilestoneStateEvent> outputTag) {
         this.levels = levels;
         this.filter = filter;
         this.expression = expression;
         this.milestone = milestone;
-        this.milestoneHandler = milestoneHandler;
+        this.outputTag = outputTag;
     }
 
     @Override
@@ -76,7 +77,7 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
             }
 
             // update sum in db
-            milestoneHandler.addMilestoneCurrState(value.getUser(), milestone, accSum.value());
+            ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), milestone, accSum.value()));
         }
     }
 

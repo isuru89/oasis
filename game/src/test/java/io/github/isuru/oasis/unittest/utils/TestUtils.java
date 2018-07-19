@@ -1,10 +1,10 @@
 package io.github.isuru.oasis.unittest.utils;
 
-import io.github.isuru.oasis.OasisConfigurations;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.handlers.IBadgeHandler;
 import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
+import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import io.github.isuru.oasis.model.handlers.IPointHandler;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
@@ -117,13 +117,10 @@ public class TestUtils {
         return env;
     }
 
-    public static OasisConfigurations getAssertConfigs(IPointHandler pointHandler,
-                                                       IBadgeHandler badgeHandler,
-                                                       IMilestoneHandler milestoneHandler) {
-        OasisConfigurations configurations = new OasisConfigurations();
-        configurations.setOutputHandler(new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler));
-        //configurations.setDbConnectionName("default");
-        return configurations;
+    public static IOutputHandler getAssertConfigs(IPointHandler pointHandler,
+                                                  IBadgeHandler badgeHandler,
+                                                  IMilestoneHandler milestoneHandler) {
+        return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler);
     }
 
     public static List<FieldCalculator> getFields(String resourceId) throws IOException {

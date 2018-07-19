@@ -1,13 +1,13 @@
 package io.github.isuru.oasis.unittest;
 
-import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.Oasis;
-import io.github.isuru.oasis.OasisConfigurations;
 import io.github.isuru.oasis.OasisExecution;
+import io.github.isuru.oasis.db.DbProperties;
+import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
+import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import io.github.isuru.oasis.unittest.utils.BadgeCollector;
 import io.github.isuru.oasis.unittest.utils.MilestoneCollector;
-import io.github.isuru.oasis.unittest.utils.NullOutputHandler;
 import io.github.isuru.oasis.unittest.utils.PointCollector;
 import io.github.isuru.oasis.unittest.utils.ResourceFileStream;
 import io.github.isuru.oasis.unittest.utils.TestUtils;
@@ -18,7 +18,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,20 +35,30 @@ public class OasisTest {
 
     @Test
     void createOasis() {
-        OasisConfigurations configurations = getConfigs();
-
-        Oasis oasis = new Oasis("test-name", configurations);
+        Oasis oasis = new Oasis("test-name");
 
         Assertions.assertEquals(oasis.getId(), "test-name");
-        Assertions.assertNotNull(oasis.getOutputHandler());
-        Assertions.assertNotNull(oasis.getConfigurations());
+        Assertions.assertNotNull(oasis.getGameVariables());
+
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("CONST", 100);
+        oasis.setGameVariables(vars);
+
+        Assertions.assertNotNull(oasis.getGameVariables());
+        Assertions.assertEquals(oasis.getGameVariables().size(), 1);
+
+        DbProperties properties = new DbProperties("testing");
+        oasis.setDbProperties(properties);
+
+        Assertions.assertNotNull(oasis.getDbProperties());
+        Assertions.assertEquals(oasis.getDbProperties().getDaoName(), "testing");
     }
 
     @Test
     void buildOasis() throws Exception {
-        OasisConfigurations assertConfigs = TestUtils.getAssertConfigs(new PointCollector("t"),
+        IOutputHandler assertOutputs = TestUtils.getAssertConfigs(new PointCollector("t"),
                 new BadgeCollector("t"), new MilestoneCollector("t"));
-        Oasis oasis = new Oasis("test-1", assertConfigs);
+        Oasis oasis = new Oasis("test-1");
 
         List<FieldCalculator> fields = TestUtils.getFields("fields.yml");
 
@@ -56,6 +68,7 @@ public class OasisTest {
                 //.setBadgeRules(TestUtils.getBadgeRules("badges.yml"))
                 //.setMilestones(TestUtils.getMilestoneRules("milestones.yml"))
                 //.setPointRules(TestUtils.getPointRules("points.yml"))
+                .outputHandler(assertOutputs)
                 .build(oasis, TestUtils.createEnv());
 
         // check field injections exists...
@@ -78,9 +91,8 @@ public class OasisTest {
 
     @Test
     void buildOasisWithoutAnyRule() throws Exception {
-        OasisConfigurations configs = getConfigs();
         try {
-            Oasis oasis = new Oasis("test-1", configs);
+            Oasis oasis = new Oasis("test-1");
             OasisExecution execution = new OasisExecution()
                     .withSource(new ResourceFileStream("subs.csv", false))
                     .build(oasis);
@@ -99,7 +111,7 @@ public class OasisTest {
     @Test
     void buildOasisWithoutSource() {
         try {
-            Oasis oasis = new Oasis("test-should-fail", getConfigs());
+            Oasis oasis = new Oasis("test-should-fail");
             new OasisExecution()
                     .build(oasis);
 
@@ -107,13 +119,6 @@ public class OasisTest {
         } catch (NullPointerException t) {
             Assertions.assertNotNull(t);
         }
-    }
-
-    private OasisConfigurations getConfigs() {
-        NullOutputHandler outputHandler = new NullOutputHandler();
-        OasisConfigurations configurations = new OasisConfigurations();
-        configurations.setOutputHandler(outputHandler);
-        return configurations;
     }
 
     @AfterAll

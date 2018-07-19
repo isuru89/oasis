@@ -14,10 +14,10 @@ public class DbOutputHandler implements IOutputHandler {
     private final IBadgeHandler badgeHandler;
     private final IMilestoneHandler milestoneHandler;
 
-    public DbOutputHandler(IOutputHandler delegator, String dbRef) {
-        pointHandler = new DbPointsHandler(dbRef, delegator.getPointsHandler());
-        badgeHandler = new DbBadgeHandler(dbRef, delegator.getBadgeHandler());
-        milestoneHandler = new DbMilestoneHandler(dbRef, delegator.getMilestoneHandler());
+    public DbOutputHandler(String dbRef) {
+        pointHandler = new DbPointsHandler(dbRef);
+        badgeHandler = new DbBadgeHandler(dbRef);
+        milestoneHandler = new DbMilestoneHandler(dbRef);
     }
 
     @Override

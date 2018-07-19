@@ -1,12 +1,12 @@
 package io.github.isuru.oasis.persist;
 
 import io.github.isuru.oasis.Oasis;
-import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.handlers.BadgeNotification;
 import io.github.isuru.oasis.model.handlers.IBadgeHandler;
 import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
 import io.github.isuru.oasis.model.handlers.IPointHandler;
+import io.github.isuru.oasis.model.handlers.MilestoneNotification;
 import io.github.isuru.oasis.model.handlers.PointNotification;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -55,8 +55,10 @@ public class KafkaSender implements IBadgeHandler, IMilestoneHandler, IPointHand
     }
 
     @Override
-    public void badgeReceived(Long userId, BadgeNotification badgeNotification) {
+    public void badgeReceived(BadgeNotification badgeNotification) {
         try {
+            long userId = badgeNotification.getUserId();
+
             Map<String, Object> map = new HashMap<>();
             map.put("userId", userId);
             map.put("badgeRuleId", badgeNotification.getRule().getId());
@@ -78,13 +80,15 @@ public class KafkaSender implements IBadgeHandler, IMilestoneHandler, IPointHand
     }
 
     @Override
-    public void milestoneReached(Long userId, int level, Event event, Milestone milestone) {
+    public void milestoneReached(MilestoneNotification milestoneNotification) {
         try {
+            long userId = milestoneNotification.getUserId();
+
             Map<String, Object> map = new HashMap<>();
             map.put("userId", userId);
-            map.put("milestoneId", milestone.getId());
-            map.put("level", level);
-            map.put("event", event);
+            map.put("milestoneId", milestoneNotification.getMilestone().getId());
+            map.put("level", milestoneNotification.getLevel());
+            map.put("event", milestoneNotification.getEvent());
 
             ProducerRecord<Long, String> record = new ProducerRecord<>(
                     milestoneStreamTopic,
@@ -102,8 +106,10 @@ public class KafkaSender implements IBadgeHandler, IMilestoneHandler, IPointHand
     }
 
     @Override
-    public void pointsScored(Long userId, PointNotification pointNotification) {
+    public void pointsScored(PointNotification pointNotification) {
         try {
+            long userId = pointNotification.getUserId();
+
             Map<String, Object> map = new HashMap<>();
             map.put("userId", userId);
             map.put("pointId", pointNotification.getRule().getId());

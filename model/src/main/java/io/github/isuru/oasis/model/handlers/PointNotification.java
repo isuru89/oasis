@@ -8,15 +8,21 @@ import java.util.List;
 
 public class PointNotification implements Serializable {
 
+    private long userId;
     private List<? extends Event> events;
     private PointRule rule;
     private double amount;
     private String tag;
 
-    public PointNotification(List<? extends Event> events, PointRule rule, double amount) {
+    public PointNotification(long userId, List<? extends Event> events, PointRule rule, double amount) {
+        this.userId = userId;
         this.events = events;
         this.rule = rule;
         this.amount = amount;
+    }
+
+    public long getUserId() {
+        return userId;
     }
 
     public String getTag() {

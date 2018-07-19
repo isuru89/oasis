@@ -3,7 +3,7 @@ package io.github.isuru.oasis.process;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
-import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
+import io.github.isuru.oasis.model.events.MilestoneStateEvent;
 import io.github.isuru.oasis.process.triggers.StreakTrigger;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.state.ReducingState;
@@ -14,6 +14,7 @@ import org.apache.flink.api.common.typeutils.base.LongSerializer;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
+import org.apache.flink.util.OutputTag;
 
 import java.util.List;
 
@@ -25,17 +26,17 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
     private List<Long> levels;
     private FilterFunction<Event> filter;
     private Milestone milestone;
-    private IMilestoneHandler milestoneHandler;
+    private OutputTag<MilestoneStateEvent> outputTag;
 
     private transient ReducingState<Long> accCount;
     private transient ValueState<Long> currentLevel;
 
     public MilestoneCountProcess(List<Long> levels, FilterFunction<Event> filter,
-                                 Milestone milestone, IMilestoneHandler milestoneHandler) {
+                                 Milestone milestone, OutputTag<MilestoneStateEvent> outputTag) {
         this.levels = levels;
         this.filter = filter;
         this.milestone = milestone;
-        this.milestoneHandler = milestoneHandler;
+        this.outputTag = outputTag;
     }
 
     @Override
@@ -49,7 +50,9 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
             }
 
             // update count in db
-            milestoneHandler.addMilestoneCurrState(value.getUser(), milestone, accCount.get());
+            ctx.output(outputTag, new MilestoneStateEvent(value.getUser(),
+                    milestone,
+                    accCount.get()));
         }
     }
 

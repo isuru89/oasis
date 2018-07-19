@@ -9,15 +9,21 @@ import java.util.List;
 
 public class BadgeNotification implements Serializable {
 
+    private long userId;
     private List<? extends Event> events;
     private BadgeRule rule;
     private Badge badge;
     private String tag;
 
-    public BadgeNotification(List<? extends Event> events, BadgeRule rule, Badge badge) {
+    public BadgeNotification(long userId, List<? extends Event> events, BadgeRule rule, Badge badge) {
         this.events = events;
         this.rule = rule;
         this.badge = badge;
+        this.userId = userId;
+    }
+
+    public long getUserId() {
+        return userId;
     }
 
     public String getTag() {
