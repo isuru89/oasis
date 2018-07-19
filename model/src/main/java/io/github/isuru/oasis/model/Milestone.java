@@ -1,7 +1,9 @@
 package io.github.isuru.oasis.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -20,6 +22,7 @@ public class Milestone implements Serializable {
     private Serializable condition;
     private AggregatorType aggregator = AggregatorType.COUNT;
     private List<Level> levels;
+    private transient Map<Integer, Level> levelMap = null;
 
     public String getDisplayName() {
         return displayName;
@@ -55,6 +58,21 @@ public class Milestone implements Serializable {
 
     public List<Level> getLevels() {
         return levels;
+    }
+
+    public Level getLevel(int level) {
+        if (levelMap == null) {
+            setupCache();
+        }
+        return levelMap.get(level);
+    }
+
+    private void setupCache() {
+        Map<Integer, Level> memo = new HashMap<>();
+        for (Level level : levels) {
+            memo.put(level.getLevel(), level);
+        }
+        this.levelMap = memo;
     }
 
     public void setLevels(List<Level> levels) {
@@ -117,6 +135,15 @@ public class Milestone implements Serializable {
     public static class Level implements Serializable {
         private int level;
         private Number number;
+        private Double awardPoints;
+
+        public Double getAwardPoints() {
+            return awardPoints;
+        }
+
+        public void setAwardPoints(Double awardPoints) {
+            this.awardPoints = awardPoints;
+        }
 
         public int getLevel() {
             return level;

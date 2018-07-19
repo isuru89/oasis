@@ -19,6 +19,18 @@ public class MilestoneDef {
     private String condition;
     private String accumulatorType;
     private Map<Integer, Object> levels;
+    private Map<Integer, Double> awardPoints;
+
+    public Double getAwardPoints(int level) {
+        if (awardPoints != null) {
+            return awardPoints.get(level);
+        }
+        return null;
+    }
+
+    public void setAwardPoints(Map<Integer, Double> awardPoints) {
+        this.awardPoints = awardPoints;
+    }
 
     public String getFrom() {
         return from;

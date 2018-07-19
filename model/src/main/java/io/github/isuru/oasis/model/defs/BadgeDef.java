@@ -15,8 +15,17 @@ public class BadgeDef {
     private String condition;
     private Integer streak;
     private String within;
+    private Double awardPoints = Double.NaN;
     private int maxBadges = Integer.MAX_VALUE;
     private List<SubBadgeDef> subBadges;
+
+    public Double getAwardPoints() {
+        return awardPoints;
+    }
+
+    public void setAwardPoints(Double awardPoints) {
+        this.awardPoints = awardPoints;
+    }
 
     public String getName() {
         return name;
@@ -104,7 +113,16 @@ public class BadgeDef {
         private String name;
         private String displayName;
         private String condition;
+        private Double awardPoints;
         private Integer level;
+
+        public Double getAwardPoints() {
+            return awardPoints;
+        }
+
+        public void setAwardPoints(Double awardPoints) {
+            this.awardPoints = awardPoints;
+        }
 
         public String getName() {
             return name;

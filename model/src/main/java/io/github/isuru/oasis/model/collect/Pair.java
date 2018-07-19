@@ -26,4 +26,12 @@ public class Pair<A extends Serializable, B extends Serializable> implements Ser
     public B getValue1() {
         return value1;
     }
+
+    @Override
+    public String toString() {
+        return "Pair{" +
+                "0=" + value0 +
+                ", 1=" + value1 +
+                '}';
+    }
 }

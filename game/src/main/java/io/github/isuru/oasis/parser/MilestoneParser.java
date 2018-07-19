@@ -54,6 +54,7 @@ public class MilestoneParser {
                 level.setLevel(entry.getKey());
                 Number number = interpretNumber(entry.getValue(), asRealValues);
                 level.setNumber(number);
+                level.setAwardPoints(milestoneDef.getAwardPoints(entry.getKey()));
 
                 if (Double.class.isAssignableFrom(number.getClass())) {
                     doubleCount++;

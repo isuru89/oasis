@@ -11,7 +11,16 @@ public abstract class BadgeRule implements Serializable {
 
     private long id;
     private Badge badge;
+    private Double awardPoints;
     private int maxBadges;
+
+    public Double getAwardPoints() {
+        return awardPoints;
+    }
+
+    public void setAwardPoints(Double awardPoints) {
+        this.awardPoints = awardPoints;
+    }
 
     public long getId() {
         return id;

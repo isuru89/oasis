@@ -35,6 +35,7 @@ public class BadgeParser {
                     bp.setMaxBadges(badgeDef.getMaxBadges());
                     bp.setPointsId(from.getPointsId());
                     bp.setDuration(from.getWithin());
+                    bp.setAwardPoints(badgeDef.getAwardPoints());
                     bp.setStreak(from.getStreak() != null ? from.getStreak() : 0);
                     if (badge.getId() == null) badge.setId(b);
                     bp.setBadge(badge);
@@ -42,7 +43,9 @@ public class BadgeParser {
                     if (from.getSubBadges() != null) {
                         List<BadgeFromPoints.StreakSubBadge> subBadges = new LinkedList<>();
                         for (BadgeDef.SubBadgeDef sbd : from.getSubBadges()) {
-                            subBadges.add(new BadgeFromPoints.StreakSubBadge(sbd.getName(), badge, sbd.getStreak()));
+                            BadgeFromPoints.StreakSubBadge streakSubBadge = new BadgeFromPoints.StreakSubBadge(sbd.getName(), badge, sbd.getStreak());
+                            streakSubBadge.setAwardPoints(sbd.getAwardPoints());
+                            subBadges.add(streakSubBadge);
                         }
                         bp.setSubBadges(subBadges);
                     }
@@ -53,13 +56,16 @@ public class BadgeParser {
                     bfm.setId(++b);
                     bfm.setMilestoneId(from.getMilestoneId());
                     bfm.setLevel(from.getLevel());
+                    bfm.setAwardPoints(badgeDef.getAwardPoints());
                     if (badge.getId() == null) badge.setId(b);
                     bfm.setBadge(badge);
 
                     if (from.getSubBadges() != null) {
                         List<BadgeFromMilestone.LevelSubBadge> subBadges = new LinkedList<>();
                         for (BadgeDef.SubBadgeDef sbd : from.getSubBadges()) {
-                            subBadges.add(new BadgeFromMilestone.LevelSubBadge(sbd.getName(), badge, sbd.getLevel()));
+                            BadgeFromMilestone.LevelSubBadge levelSubBadge = new BadgeFromMilestone.LevelSubBadge(sbd.getName(), badge, sbd.getLevel());
+                            levelSubBadge.setAwardPoints(sbd.getAwardPoints());
+                            subBadges.add(levelSubBadge);
                         }
                         bfm.setSubBadges(subBadges);
                     }
@@ -71,6 +77,7 @@ public class BadgeParser {
                 bfe.setId(++b);
                 if (badge.getId() == null) badge.setId(b);
                 bfe.setBadge(badge);
+                bfe.setAwardPoints(badgeDef.getAwardPoints());
                 bfe.setEventType(badgeDef.getEvent());
                 bfe.setDuration(badgeDef.getWithin());
                 bfe.setMaxBadges(badgeDef.getMaxBadges());
@@ -85,10 +92,14 @@ public class BadgeParser {
                     List<Badge> subBadges = new LinkedList<>();
                     for (BadgeDef.SubBadgeDef sbd : badgeDef.getSubBadges()) {
                         if (sbd.getStreak() != null) {
-                            subBadges.add(new BadgeFromPoints.StreakSubBadge(sbd.getName(), badge, sbd.getStreak()));
+                            BadgeFromPoints.StreakSubBadge streakSubBadge = new BadgeFromPoints.StreakSubBadge(sbd.getName(), badge, sbd.getStreak());
+                            streakSubBadge.setAwardPoints(sbd.getAwardPoints());
+                            subBadges.add(streakSubBadge);
                         } else if (sbd.getCondition() != null) {
                             Serializable serializable = MVEL.compileExpression(sbd.getCondition());
-                            subBadges.add(new BadgeFromEvents.ConditionalSubBadge(sbd.getName(), badge, serializable));
+                            BadgeFromEvents.ConditionalSubBadge conditionalSubBadge = new BadgeFromEvents.ConditionalSubBadge(sbd.getName(), badge, serializable);
+                            conditionalSubBadge.setAwardPoints(sbd.getAwardPoints());
+                            subBadges.add(conditionalSubBadge);
                         } else {
                             throw new IOException("Unknown sub badge type!");
                         }

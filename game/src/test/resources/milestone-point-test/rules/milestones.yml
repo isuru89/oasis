@@ -8,6 +8,9 @@ milestones:
       3: 50
       4: 70
       5: 100
+    awardPoints:
+      3: 30
+      5: 50
 
   - name: total-50-score
     from: points

@@ -9,6 +9,7 @@ public class Badge implements Serializable {
 
     private final Badge parent;
     private Long id;
+    private Double awardPoints;
     private final String name;
 
     public Badge(Long id, String name) {
@@ -35,6 +36,14 @@ public class Badge implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public Double getAwardPoints() {
+        return awardPoints;
+    }
+
+    public void setAwardPoints(Double awardPoints) {
+        this.awardPoints = awardPoints;
     }
 
     @Override

@@ -6,6 +6,7 @@ import io.github.isuru.oasis.factory.PointsNotifier;
 import io.github.isuru.oasis.factory.PointsOperator;
 import io.github.isuru.oasis.factory.badges.BadgeNotifier;
 import io.github.isuru.oasis.factory.badges.BadgeOperator;
+import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
@@ -13,10 +14,13 @@ import io.github.isuru.oasis.model.events.BadgeEvent;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
 import io.github.isuru.oasis.model.events.MilestoneStateEvent;
 import io.github.isuru.oasis.model.events.PointEvent;
+import io.github.isuru.oasis.model.handlers.BadgeNotification;
 import io.github.isuru.oasis.model.handlers.IBadgeHandler;
 import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import io.github.isuru.oasis.model.handlers.IPointHandler;
+import io.github.isuru.oasis.model.handlers.MilestoneNotification;
+import io.github.isuru.oasis.model.handlers.PointNotification;
 import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
 import io.github.isuru.oasis.model.rules.BadgeFromPoints;
 import io.github.isuru.oasis.model.rules.BadgeRule;
@@ -25,6 +29,8 @@ import io.github.isuru.oasis.process.EventTimestampSelector;
 import io.github.isuru.oasis.process.EventUserSelector;
 import io.github.isuru.oasis.process.FieldInjector;
 import io.github.isuru.oasis.process.PointErrorSplitter;
+import io.github.isuru.oasis.process.PointsFromBadgeMapper;
+import io.github.isuru.oasis.process.PointsFromMilestoneMapper;
 import io.github.isuru.oasis.process.sinks.OasisBadgesSink;
 import io.github.isuru.oasis.process.sinks.OasisMilestoneSink;
 import io.github.isuru.oasis.process.sinks.OasisPointsSink;
@@ -107,12 +113,6 @@ public class OasisExecution {
         pointStream = pointSplitStream.select(PointErrorSplitter.NAME_POINT);
         DataStream<PointEvent> errorStream = pointSplitStream.select(PointErrorSplitter.NAME_ERROR);
 
-        // flat-map point event stream
-        pointStream.flatMap(new PointsNotifier())
-                .uid(String.format("points-notifier-%s", oasisId))
-                .addSink(new OasisPointsSink(handler.getPointsHandler()))     // @TODO change sink to kafka
-                .uid(String.format("points-sink-%s", oasisId));
-
         KeyedStream<PointEvent, Long> userPointStream = pointStream.keyBy(new EventUserSelector<>());
 
         // create milestone stream
@@ -143,9 +143,6 @@ public class OasisExecution {
 
         KeyedStream<MilestoneEvent, Long> userMilestoneStream = null;
         if (milestoneStream != null) {
-            milestoneStream.map(new MilestoneNotifier())
-                    .uid(String.format("milestone-notifier-%s", oasisId))
-                    .addSink(new OasisMilestoneSink(handler.getMilestoneHandler())); // @TODO add kafka sink
             userMilestoneStream = milestoneStream.keyBy(new EventUserSelector<>());
         }
 
@@ -169,20 +166,86 @@ public class OasisExecution {
         }
         this.badgeStream = bStream;
 
+
+        //
+        // ---------------------------------------------------------------------------
+        // SETUP NOTIFICATION EVENTS
+        // ---------------------------------------------------------------------------
+        //
+        DataStream<PointNotification> pointNotyStream = pointStream.flatMap(new PointsNotifier())
+                .uid(String.format("points-notifier-%s", oasisId));
+
+        DataStream<MilestoneNotification> milestoneNotyStream = null;
+        if (milestoneStream != null) {
+            milestoneNotyStream = milestoneStream.map(new MilestoneNotifier())
+                    .uid(String.format("milestone-notifier-%s", oasisId));
+        }
+
+        DataStream<BadgeNotification> badgeNotyStream = null;
         if (badgeStream != null) {
-            badgeStream.map(new BadgeNotifier())
-                    .uid(String.format("badge-notifier-%s", oasisId))
-                    .addSink(new OasisBadgesSink(handler.getBadgeHandler()));    // @TODO add kafka sink
+            badgeNotyStream = badgeStream.map(new BadgeNotifier())
+                    .uid(String.format("badge-notifier-%s", oasisId));
         }
 
 
-        // @TODO award points from badges...
-
-        // @TODO award points from milestones...
-
 
         //
-        //  DISCARD KEYED STREAMS, IF NO OTHER OPERATORS USE THEM
+        // ---------------------------------------------------------------------------
+        // SETUP EXTRA POINT CALCULATIONS
+        // ---------------------------------------------------------------------------
+        //
+
+        // award points from badges...
+        if (badgeNotyStream != null) {  // @TODO create reserved point rule
+            PointRule badgePointAwardRule = new PointRule();
+            badgePointAwardRule.setId(100000);
+            badgePointAwardRule.setName(Constants.POINTS_FROM_BADGE_TAG);
+            DataStream<PointNotification> tmp = badgeNotyStream
+                    .flatMap(new PointsFromBadgeMapper(badgePointAwardRule))
+                    .uid(String.format("badge-to-points-%s", oasisId));
+            pointNotyStream = pointNotyStream.union(tmp);
+        }
+
+        // award points from milestones...
+        if (milestoneNotyStream != null) { // @TODO create reserved point rule
+            PointRule milestonePointAwardRule = new PointRule();
+            milestonePointAwardRule.setId(100001);
+            milestonePointAwardRule.setName(Constants.POINTS_FROM_MILESTONE_TAG);
+            DataStream<PointNotification> tmp = milestoneNotyStream
+                    .flatMap(new PointsFromMilestoneMapper(milestonePointAwardRule))
+                    .uid(String.format("milestone-to-points-%s", oasisId));
+            pointNotyStream = pointNotyStream.union(tmp);
+        }
+
+        //
+        // ---------------------------------------------------------------------------
+        // SETUP SINKS
+        // ---------------------------------------------------------------------------
+        //
+
+        // point event stream
+        pointNotyStream
+                .addSink(new OasisPointsSink(handler.getPointsHandler()))     // @TODO change sink to kafka
+                .uid(String.format("points-sink-%s", oasisId));
+
+        // milestone event stream
+        if (milestoneNotyStream != null) {
+            milestoneNotyStream
+                    .addSink(new OasisMilestoneSink(handler.getMilestoneHandler())) // @TODO add kafka sink
+                    .uid(String.format("milestone-sink-%s", oasisId));
+        }
+
+        // badge event stream
+        if (badgeNotyStream != null) {
+            badgeNotyStream
+                    .addSink(new OasisBadgesSink(handler.getBadgeHandler()))    // @TODO add kafka sink
+                    .uid(String.format("badge-sink-%s", oasisId));
+        }
+
+        //
+        // ---------------------------------------------------------------------------
+        // DISCARD KEYED STREAMS, IF NO OTHER OPERATORS USE THEM
+        // ---------------------------------------------------------------------------
         //
         if (!streamMilestoneUsed && userMilestoneStream != null) {
             userMilestoneStream.addSink(new DiscardingSink<>());
@@ -191,6 +254,13 @@ public class OasisExecution {
         if (!streamPointsUsed && userPointStream != null) {
             userPointStream.addSink(new DiscardingSink<>());
         }
+
+        //
+        // ---------------------------------------------------------------------------
+        // SETUP ERROR OUTPUT STREAM
+        // ---------------------------------------------------------------------------
+        //
+        //errorStream
 
         return this;
     }
