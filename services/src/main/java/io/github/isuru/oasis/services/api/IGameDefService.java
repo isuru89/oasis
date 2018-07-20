@@ -22,11 +22,13 @@ public interface IGameDefService {
 
     long addKpiCalculation(KpiDef fieldCalculator) throws Exception;
     List<KpiDef> listKpiCalculations() throws Exception;
+    List<KpiDef> listKpiCalculations(long gameId) throws Exception;
     KpiDef readKpiCalculation(long id) throws Exception;
     boolean disableKpiCalculation(long id) throws Exception;
 
     long addBadgeDef(BadgeDef badge) throws Exception;
     List<BadgeDef> listBadgeDefs() throws Exception;
+    List<BadgeDef> listBadgeDefs(long gameId) throws Exception;
     BadgeDef readBadgeDef(long id) throws Exception;
     boolean disableBadgeDef(long id) throws Exception;
 
@@ -37,6 +39,7 @@ public interface IGameDefService {
 
     long addMilestoneDef(MilestoneDef milestone) throws Exception;
     List<MilestoneDef> listMilestoneDefs() throws Exception;
+    List<MilestoneDef> listMilestoneDefs(long gameId) throws Exception;
     MilestoneDef readMilestoneDef(long id) throws Exception;
     boolean disableMilestoneDef(long id) throws Exception;
 

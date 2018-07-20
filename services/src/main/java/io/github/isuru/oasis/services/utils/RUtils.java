@@ -15,15 +15,6 @@ public class RUtils {
         return map == null || map.isEmpty();
     }
 
-    @SuppressWarnings("unchecked")
-    public static Class<?> loadClz(String clzName) {
-        try {
-            return Thread.currentThread().getContextClassLoader().loadClass(clzName);
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
-    }
-
     public static <T> T toObj(String value, Class<T> clz, ObjectMapper mapper) {
         try {
             return mapper.readValue(value, clz);

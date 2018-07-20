@@ -55,6 +55,20 @@ public class JdbiDefinitionDao implements IDefinitionDao {
     }
 
     @Override
+    public List<DefWrapper> listDefinitionsOfGame(long gameId, int kind) throws Exception {
+        Map<String, Object> data = new HashMap<>();
+        data.put("type", kind);
+        data.put("gameId", gameId);
+
+        Iterable<DefWrapper> defWrappers = dao.executeQuery(DEF_LIST_DEFINITIONS, data, DefWrapper.class);
+        List<DefWrapper> wrappers = new LinkedList<>();
+        for (DefWrapper wrapper : defWrappers) {
+            wrappers.add(wrapper);
+        }
+        return wrappers;
+    }
+
+    @Override
     public long addDefinition(DefWrapper wrapper) throws Exception {
         Map<String, Object> data = new HashMap<>();
         data.put("typeId", wrapper.getKind());

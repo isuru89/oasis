@@ -12,6 +12,7 @@ public interface IDefinitionDao {
     DefWrapper readDefinition(long id) throws Exception;
 
     List<DefWrapper> listDefinitions(int kind) throws Exception;
+    List<DefWrapper> listDefinitionsOfGame(long gameId, int kind) throws Exception;
 
     long addDefinition(DefWrapper wrapper) throws Exception;
 

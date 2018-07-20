@@ -126,6 +126,14 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
+    public List<KpiDef> listKpiCalculations(long gameId) throws Exception {
+        return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.KPI.getTypeId())
+                .stream()
+                .map(this::wrapperToKpi)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public KpiDef readKpiCalculation(long id) throws Exception {
         return wrapperToKpi(getDao().getDefinitionDao().readDefinition(id));
     }
@@ -156,6 +164,14 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
+    public List<BadgeDef> listBadgeDefs(long gameId) throws Exception {
+        return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.BADGE.getTypeId())
+                .stream()
+                .map(this::wrapperToBadge)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public BadgeDef readBadgeDef(long id) throws Exception {
         return wrapperToBadge(getDao().getDefinitionDao().readDefinition(id));
     }
@@ -167,7 +183,7 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public List<PointDef> listPointDefs(long gameId) throws Exception {
-        return getDao().getDefinitionDao().listDefinitions(OasisDefinition.POINT.getTypeId())
+        return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.POINT.getTypeId())
                 .stream()
                 .map(this::wrapperToPoint)
                 .collect(Collectors.toList());
@@ -210,6 +226,14 @@ public class GameDefService extends BaseService implements IGameDefService {
     @Override
     public List<MilestoneDef> listMilestoneDefs() throws Exception {
         return getDao().getDefinitionDao().listDefinitions(OasisDefinition.MILESTONE.getTypeId())
+                .stream()
+                .map(this::wrapperToMilestone)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MilestoneDef> listMilestoneDefs(long gameId) throws Exception {
+        return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.MILESTONE.getTypeId())
                 .stream()
                 .map(this::wrapperToMilestone)
                 .collect(Collectors.toList());

@@ -7,5 +7,5 @@ SELECT
     is_male as male,
     is_active as active
 FROM OA_USER
-WHERE user_id = :userId
+WHERE ext_id = :extId
 LIMIT 1

@@ -3,10 +3,28 @@ package io.github.isuru.oasis.services.model;
 public class UserProfile {
 
     private long id;
+    private Long extId;
     private String name;
+    private String email;
     private boolean male;
     private String avatarId;
-    private boolean isActive;
+    private boolean active;
+
+    public Long getExtId() {
+        return extId;
+    }
+
+    public void setExtId(Long extId) {
+        this.extId = extId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public long getId() {
         return id;
@@ -41,10 +59,10 @@ public class UserProfile {
     }
 
     public boolean isActive() {
-        return isActive;
+        return active;
     }
 
     public void setActive(boolean active) {
-        isActive = active;
+        this.active = active;
     }
 }

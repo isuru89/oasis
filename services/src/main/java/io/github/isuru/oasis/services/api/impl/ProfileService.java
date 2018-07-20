@@ -5,7 +5,9 @@ import io.github.isuru.oasis.services.api.IProfileService;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.utils.Maps;
+import io.github.isuru.oasis.services.utils.Pojos;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -13,20 +15,21 @@ import java.util.Map;
  */
 public class ProfileService extends BaseService implements IProfileService {
 
-    protected ProfileService(IOasisDao dao) {
+    ProfileService(IOasisDao dao) {
         super(dao);
     }
 
     @Override
-    public void addUserProfile(UserProfile profile) throws Exception {
+    public long addUserProfile(UserProfile profile) throws Exception {
         Map<String, Object> data = Maps.create()
-                .put("userId", profile.getId())
                 .put("name", profile.getName())
                 .put("male", profile.isMale())
                 .put("avatarId", profile.getAvatarId())
+                .put("extId", profile.getExtId())
+                .put("email", profile.getEmail())
                 .build();
 
-        getDao().executeCommand("profile/addUser", data);
+        return getDao().executeInsert("profile/addUser", data, "user_id");
     }
 
     @Override
@@ -37,8 +40,22 @@ public class ProfileService extends BaseService implements IProfileService {
     }
 
     @Override
-    public void editUserProfile(long userId, UserProfile profile) {
+    public UserProfile readUserProfileByExtId(long extUserId) throws Exception {
+        return getTheOnlyRecord("profile/readUserByExtId",
+                Maps.create("extId", extUserId),
+                UserProfile.class);
+    }
 
+    @Override
+    public boolean editUserProfile(long userId, UserProfile latest) throws Exception {
+        UserProfile prev = readUserProfile(userId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("name", Pojos.compareWith(latest.getName(), prev.getName()));
+        data.put("avatarId", Pojos.compareWith(latest.getAvatarId(), prev.getAvatarId()));
+        data.put("isMale", latest.isMale());
+        data.put("userId", userId);
+
+        return getDao().executeCommand("profile/editUser", data) > 0;
     }
 
     @Override

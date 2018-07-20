@@ -1,7 +1,7 @@
 UPDATE OA_USER
 SET
-    name = :name,
+    user_name = :name,
     avatar_id = :avatarId,
     is_male = :isMale
 WHERE
-    ext_id = :userId
+    user_id = :userId

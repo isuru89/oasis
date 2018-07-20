@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * @author iweerarathna
  */
-class ApiTest {
+class ApiDefTest extends AbstractApiTest {
 
     private static IOasisDao oasisDao;
     private static IOasisApiService apiService;
@@ -49,6 +49,15 @@ class ApiTest {
         Long gameId2 = gameDefService.createGame(gameDef2);
         Assertions.assertTrue(gameId2 > 0);
         Assertions.assertTrue(gameId2 > gameId);
+
+        List<GameDef> gameDefs = gameDefService.listGames();
+        Assertions.assertNotNull(gameDefs);
+        Assertions.assertEquals(gameDefs.size(), 2);
+
+        assertEmpty(gameDefService.listPointDefs(gameId));
+        assertEmpty(gameDefService.listMilestoneDefs(gameId));
+        assertEmpty(gameDefService.listKpiCalculations(gameId));
+        assertEmpty(gameDefService.listBadgeDefs(gameId));
 
         GameDef game = gameDefService.readGame(gameId);
         Assertions.assertNotNull(game);
@@ -96,6 +105,11 @@ class ApiTest {
         Assertions.assertEquals(kpi.getField(), kpiDef.getField());
         Assertions.assertEquals(kpi.getName(), name);
 
+        assertToSize(gameDefService.listKpiCalculations(gameId), 1);
+        assertEmpty(gameDefService.listBadgeDefs(gameId));
+        assertEmpty(gameDefService.listPointDefs(gameId));
+        assertEmpty(gameDefService.listMilestoneDefs(gameId));
+
         Assertions.assertTrue(gameDefService.disableKpiCalculation(id));
         Assertions.assertTrue(gameDefService.disableGame(gameId));
     }
@@ -138,6 +152,11 @@ class ApiTest {
         Assertions.assertEquals(additional.getName(), p1.getName());
         Assertions.assertEquals(additional.getToUser(), p1.getToUser());
         Assertions.assertEquals(additional.getAmount(), p1.getAmount());
+
+        assertToSize(gameDefService.listPointDefs(gameId), 1);
+        assertEmpty(gameDefService.listBadgeDefs(gameId));
+        assertEmpty(gameDefService.listKpiCalculations(gameId));
+        assertEmpty(gameDefService.listMilestoneDefs(gameId));
 
         Assertions.assertTrue(gameDefService.disablePointDef(id));
         Assertions.assertTrue(gameDefService.disableGame(gameId));
@@ -184,6 +203,11 @@ class ApiTest {
         Assertions.assertEquals(ms.getLevels().get(2), def.getLevels().get(2));
         Assertions.assertEquals(ms.getLevels().get(3), def.getLevels().get(3));
 
+        assertToSize(gameDefService.listMilestoneDefs(gameId), 1);
+        assertEmpty(gameDefService.listBadgeDefs(gameId));
+        assertEmpty(gameDefService.listPointDefs(gameId));
+        assertEmpty(gameDefService.listKpiCalculations(gameId));
+
         Assertions.assertTrue(gameDefService.disableMilestoneDef(id));
         Assertions.assertTrue(gameDefService.disableGame(gameId));
     }
@@ -214,8 +238,21 @@ class ApiTest {
         Assertions.assertEquals(badge.getEvent(), def.getEvent());
         Assertions.assertEquals(badge.getMaxBadges(), def.getMaxBadges());
 
-        Assertions.assertTrue(gameDefService.disableMilestoneDef(id));
+        assertToSize(gameDefService.listBadgeDefs(gameId), 1);
+        assertEmpty(gameDefService.listKpiCalculations(gameId));
+        assertEmpty(gameDefService.listPointDefs(gameId));
+        assertEmpty(gameDefService.listMilestoneDefs(gameId));
+
+        Assertions.assertTrue(gameDefService.disableBadgeDef(id));
         Assertions.assertTrue(gameDefService.disableGame(gameId));
+
+        // non existing game id should throw exception
+        try {
+            gameDefService.readGame(Integer.MAX_VALUE - 1000);
+            Assertions.fail("Non existing game read should fail!");
+        } catch (Exception ex) {
+            // ok ignored
+        }
     }
 
 
@@ -242,6 +279,11 @@ class ApiTest {
         Assertions.assertEquals(0, list.size());
     }
 
+    private void assertToSize(List<?> list, int size) {
+        Assertions.assertNotNull(list);
+        Assertions.assertEquals(size, list.size());
+    }
+
     @BeforeAll
     static void beforeAnyTest() throws Exception {
         DbProperties properties = new DbProperties(OasisDbPool.DEFAULT);
@@ -264,7 +306,11 @@ class ApiTest {
     @AfterAll
     static void afterAnyTest() throws Exception {
         System.out.println("Shutting down db connection.");
-        oasisDao.executeRawCommand("TRUNCATE OA_DEFINITION", new HashMap<>());
+        try {
+            oasisDao.executeRawCommand("TRUNCATE OA_DEFINITION", new HashMap<>());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         oasisDao.close();
         apiService = null;
     }

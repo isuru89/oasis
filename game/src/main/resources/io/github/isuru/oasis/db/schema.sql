@@ -68,8 +68,9 @@ CREATE TABLE IF NOT EXISTS OA_DEFINITION (
 );
 
 CREATE TABLE IF NOT EXISTS OA_USER (
-    user_id         INT,
-    name            VARCHAR(1024),
+    user_id         INT PRIMARY KEY AUTO_INCREMENT,
+    user_name       VARCHAR(1024),
+    ext_id          BIGINT,
     email           VARCHAR(512),
     avatar_id       VARCHAR(1024),
     is_male         TINYINT(1),
