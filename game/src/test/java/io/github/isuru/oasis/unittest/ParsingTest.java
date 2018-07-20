@@ -1,11 +1,11 @@
 package io.github.isuru.oasis.unittest;
 
+import io.github.isuru.oasis.game.parser.BadgeParser;
+import io.github.isuru.oasis.game.parser.MilestoneParser;
+import io.github.isuru.oasis.game.parser.PointParser;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
-import io.github.isuru.oasis.parser.BadgeParser;
-import io.github.isuru.oasis.parser.MilestoneParser;
-import io.github.isuru.oasis.parser.PointParser;
 import io.github.isuru.oasis.unittest.utils.TestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

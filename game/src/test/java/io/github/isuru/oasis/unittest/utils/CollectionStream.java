@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.unittest.utils;
 
+import io.github.isuru.oasis.game.EventSource;
 import io.github.isuru.oasis.model.Event;
-import io.github.isuru.oasis.EventSource;
 
 import java.util.Collection;
 

@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.unittest;
 
-import io.github.isuru.oasis.Oasis;
-import io.github.isuru.oasis.OasisExecution;
 import io.github.isuru.oasis.db.DbProperties;
+import io.github.isuru.oasis.game.Oasis;
+import io.github.isuru.oasis.game.OasisExecution;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;

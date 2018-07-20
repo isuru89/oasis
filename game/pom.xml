@@ -97,7 +97,7 @@
                             </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.github.isuru.oasis.Main</mainClass>
+                                    <mainClass>io.github.isuru.oasis.game.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

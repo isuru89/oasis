@@ -1,7 +1,8 @@
 package io.github.isuru.oasis.unittest;
 
-import io.github.isuru.oasis.Oasis;
-import io.github.isuru.oasis.OasisExecution;
+import io.github.isuru.oasis.game.Oasis;
+import io.github.isuru.oasis.game.OasisExecution;
+import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.Badge;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
@@ -14,7 +15,6 @@ import io.github.isuru.oasis.unittest.utils.MilestoneCollector;
 import io.github.isuru.oasis.unittest.utils.PointCollector;
 import io.github.isuru.oasis.unittest.utils.ResourceFileStream;
 import io.github.isuru.oasis.unittest.utils.TestUtils;
-import io.github.isuru.oasis.utils.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;

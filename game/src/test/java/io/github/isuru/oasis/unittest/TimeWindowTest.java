@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.unittest;
 
-import io.github.isuru.oasis.process.windows.MonthlyEventTimeWindow;
-import io.github.isuru.oasis.process.windows.OasisTimeWindowAssigner;
-import io.github.isuru.oasis.process.windows.WeeklyEventTimeWindow;
+import io.github.isuru.oasis.game.process.windows.MonthlyEventTimeWindow;
+import io.github.isuru.oasis.game.process.windows.OasisTimeWindowAssigner;
+import io.github.isuru.oasis.game.process.windows.WeeklyEventTimeWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

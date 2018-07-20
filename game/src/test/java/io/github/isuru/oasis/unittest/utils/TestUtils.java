@@ -1,5 +1,9 @@
 package io.github.isuru.oasis.unittest.utils;
 
+import io.github.isuru.oasis.game.parser.BadgeParser;
+import io.github.isuru.oasis.game.parser.FieldCalculationParser;
+import io.github.isuru.oasis.game.parser.MilestoneParser;
+import io.github.isuru.oasis.game.parser.PointParser;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.handlers.IBadgeHandler;
@@ -8,10 +12,6 @@ import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import io.github.isuru.oasis.model.handlers.IPointHandler;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
-import io.github.isuru.oasis.parser.BadgeParser;
-import io.github.isuru.oasis.parser.FieldCalculationParser;
-import io.github.isuru.oasis.parser.MilestoneParser;
-import io.github.isuru.oasis.parser.PointParser;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.flink.api.java.tuple.Tuple4;

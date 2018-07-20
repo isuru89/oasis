@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.unittest;
 
-import io.github.isuru.oasis.utils.Utils;
+import io.github.isuru.oasis.game.utils.Utils;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
