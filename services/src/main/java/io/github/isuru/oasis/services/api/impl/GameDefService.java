@@ -13,6 +13,7 @@ import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.model.defs.OasisDefinition;
 import io.github.isuru.oasis.services.utils.RUtils;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,7 +42,7 @@ public class GameDefService extends BaseService implements IGameDefService {
         List<DefWrapper> wrappers = getDao().getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
         for (DefWrapper wrp : wrappers) {
             if (wrp.getName().equals(gameDef.getName())) {
-                gameId = wrp.getGameId();
+                gameId = wrp.getId();
                 break;
             }
         }
@@ -62,43 +63,50 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
+    public List<GameDef> listGames() throws Exception {
+        List<DefWrapper> wrappers = getDao().getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
+        List<GameDef> gameDefs = new LinkedList<>();
+        for (DefWrapper wrp : wrappers) {
+            GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, getMapper());
+            gameDef.setId(wrp.getId());
+            gameDefs.add(gameDef);
+        }
+        return gameDefs;
+    }
+
+    @Override
+    public boolean disableGame(long gameId) throws Exception {
+        return getDao().getDefinitionDao().disableDefinition(gameId);
+    }
+
+    @Override
     public boolean addGameConstants(long gameId, Map<String, Object> gameConstants) throws Exception {
-        List<DefWrapper> wrappers = getDao().getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
-        for (DefWrapper wrp : wrappers) {
-            if (wrp.getId() == gameId) {
-                GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, getMapper());
-                gameDef.setConstants(gameConstants);
-                wrp.setContent(RUtils.toStr(gameDef, getMapper()));
+        DefWrapper wrp = getDao().getDefinitionDao().readDefinition(gameId);
 
-                getDao().getDefinitionDao().editDefinition(gameId, wrp);
-                return true;
-            }
-        }
-        return false;
+        GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, getMapper());
+        gameDef.setConstants(gameConstants);
+        wrp.setContent(RUtils.toStr(gameDef, getMapper()));
+
+        return getDao().getDefinitionDao().editDefinition(wrp.getId(), wrp) > 0;
     }
 
     @Override
-    public boolean removeGameConstants(List<String> gameConstants) throws Exception {
-        List<DefWrapper> wrappers = getDao().getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
-        for (DefWrapper wrp : wrappers) {
-            if (wrp.getId() == gameId) {
-                GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, getMapper());
-                if (!RUtils.isNullOrEmpty(gameDef.getConstants())) {
-                    for (String k : gameConstants) {
-                        gameDef.getConstants().remove(k);
-                    }
-                }
-                wrp.setContent(RUtils.toStr(gameDef, getMapper()));
+    public boolean removeGameConstants(long gameId, List<String> gameConstants) throws Exception {
+        DefWrapper wrp = getDao().getDefinitionDao().readDefinition(gameId);
 
-                getDao().getDefinitionDao().editDefinition(gameId, wrp);
-                return true;
+        GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, getMapper());
+        if (!RUtils.isNullOrEmpty(gameDef.getConstants())) {
+            for (String k : gameConstants) {
+                gameDef.getConstants().remove(k);
             }
         }
-        return false;
+        wrp.setContent(RUtils.toStr(gameDef, getMapper()));
+
+        return getDao().getDefinitionDao().editDefinition(wrp.getId(), wrp) > 0;
     }
 
     @Override
-    public void addKpiCalculation(KpiDef fieldCalculator) throws Exception {
+    public long addKpiCalculation(KpiDef fieldCalculator) throws Exception {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.KPI.getTypeId());
         wrapper.setName(fieldCalculator.getName());
@@ -106,7 +114,7 @@ public class GameDefService extends BaseService implements IGameDefService {
         wrapper.setContent(RUtils.toStr(fieldCalculator, getMapper()));
         wrapper.setGameId(gameId);
 
-        getDao().getDefinitionDao().addDefinition(wrapper);
+        return getDao().getDefinitionDao().addDefinition(wrapper);
     }
 
     @Override
@@ -128,7 +136,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public void addBadgeDef(BadgeDef badge) throws Exception {
+    public long addBadgeDef(BadgeDef badge) throws Exception {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.BADGE.getTypeId());
         wrapper.setName(badge.getName());
@@ -136,7 +144,7 @@ public class GameDefService extends BaseService implements IGameDefService {
         wrapper.setContent(RUtils.toStr(badge, getMapper()));
         wrapper.setGameId(gameId);
 
-        getDao().getDefinitionDao().addDefinition(wrapper);
+        return getDao().getDefinitionDao().addDefinition(wrapper);
     }
 
     @Override
@@ -166,7 +174,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public void addPointDef(PointDef pointRule) throws Exception {
+    public long addPointDef(PointDef pointRule) throws Exception {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.POINT.getTypeId());
         wrapper.setName(pointRule.getName());
@@ -174,7 +182,7 @@ public class GameDefService extends BaseService implements IGameDefService {
         wrapper.setContent(RUtils.toStr(pointRule, getMapper()));
         wrapper.setGameId(gameId);
 
-        getDao().getDefinitionDao().addDefinition(wrapper);
+        return getDao().getDefinitionDao().addDefinition(wrapper);
     }
 
     @Override
@@ -188,7 +196,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public void addMilestoneDef(MilestoneDef milestone) throws Exception {
+    public long addMilestoneDef(MilestoneDef milestone) throws Exception {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.MILESTONE.getTypeId());
         wrapper.setName(milestone.getName());
@@ -196,7 +204,7 @@ public class GameDefService extends BaseService implements IGameDefService {
         wrapper.setContent(RUtils.toStr(milestone, getMapper()));
         wrapper.setGameId(gameId);
 
-        getDao().getDefinitionDao().addDefinition(wrapper);
+        return getDao().getDefinitionDao().addDefinition(wrapper);
     }
 
     @Override

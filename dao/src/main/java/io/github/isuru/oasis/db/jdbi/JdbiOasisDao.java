@@ -7,7 +7,9 @@ import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.IQueryRepo;
 import org.jdbi.v3.core.HandleCallback;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.Update;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.Map;
 
@@ -28,21 +30,22 @@ public class JdbiOasisDao implements IOasisDao {
 
     @Override
     public void init(DbProperties properties) throws Exception {
-        jdbi = Jdbi.create(JdbcPool.createDataSource(properties));
+        DataSource source = JdbcPool.createDataSource(properties);
+        jdbi = Jdbi.create(source);
     }
 
     @Override
     public Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data) throws Exception {
         String query = queryRepo.fetchQuery(queryId);
         return jdbi.withHandle((HandleCallback<Iterable<Map<String, Object>>, Exception>) handle ->
-                handle.createQuery(query).bindMap(data).mapToMap());
+                handle.createQuery(query).bindMap(data).mapToMap().list());
     }
 
     @Override
     public <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws Exception {
         String query = queryRepo.fetchQuery(queryId);
         return jdbi.withHandle((HandleCallback<Iterable<T>, Exception>) handle ->
-                handle.createQuery(query).bindMap(data).mapTo(clz));
+                handle.createQuery(query).bindMap(data).mapToBean(clz).list());
     }
 
     @Override
@@ -50,6 +53,28 @@ public class JdbiOasisDao implements IOasisDao {
         String query = queryRepo.fetchQuery(queryId);
         return jdbi.withHandle((HandleCallback<Integer, Exception>) handle ->
                 handle.createUpdate(query).bindMap(data).execute());
+    }
+
+    @Override
+    public long executeRawCommand(String queryStr, Map<String, Object> data) throws Exception {
+        return jdbi.withHandle((HandleCallback<Long, Exception>) handle -> {
+            Update update = handle.createUpdate(queryStr);
+            if (data != null && !data.isEmpty()) {
+                update = update.bindMap(data);
+            }
+            return (long) update.execute();
+        });
+
+    }
+
+    @Override
+    public Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws Exception {
+        String query = queryRepo.fetchQuery(queryId);
+        return jdbi.withHandle((HandleCallback<Long, Exception>) handle -> handle.createUpdate(query)
+                .bindMap(data)
+                .executeAndReturnGeneratedKeys(keyColumn)
+                .mapTo(Long.class)
+                .findOnly());
     }
 
     @Override

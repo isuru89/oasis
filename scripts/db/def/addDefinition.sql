@@ -9,6 +9,5 @@ INSERT INTO OA_DEFINITION (
     :name,
     :displayName,
     :content,
-    :gameId,
-    :parentId
+    :gameId
 )

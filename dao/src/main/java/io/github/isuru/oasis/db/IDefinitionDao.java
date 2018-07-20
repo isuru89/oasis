@@ -13,10 +13,10 @@ public interface IDefinitionDao {
 
     List<DefWrapper> listDefinitions(int kind) throws Exception;
 
-    void addDefinition(DefWrapper wrapper) throws Exception;
+    long addDefinition(DefWrapper wrapper) throws Exception;
 
     boolean disableDefinition(long id) throws Exception;
 
-    void editDefinition(long id, DefWrapper wrapper) throws Exception;
+    long editDefinition(long id, DefWrapper wrapper) throws Exception;
 
 }

@@ -6,12 +6,24 @@ package io.github.isuru.oasis.model.defs;
 public class KpiDef {
 
     private Long id;
+    private String name;
     private String event;
     private String field;
     private String expression;
 
+    public String assignName() {
+        if (name == null) {
+            name = event + "::" + field;
+        }
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getName() {
-        return event + "::" + field;
+        return name;
     }
 
     public Long getId() {

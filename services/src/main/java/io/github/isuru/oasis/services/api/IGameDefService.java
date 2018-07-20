@@ -15,25 +15,27 @@ public interface IGameDefService {
 
     Long createGame(GameDef gameDef) throws Exception;
     GameDef readGame(long gameId) throws Exception;
+    List<GameDef> listGames() throws Exception;
+    boolean disableGame(long gameId) throws Exception;
     boolean addGameConstants(long gameId, Map<String, Object> gameConstants) throws Exception;
-    boolean removeGameConstants(List<String> constName) throws Exception;
+    boolean removeGameConstants(long gameId, List<String> constName) throws Exception;
 
-    void addKpiCalculation(KpiDef fieldCalculator) throws Exception;
+    long addKpiCalculation(KpiDef fieldCalculator) throws Exception;
     List<KpiDef> listKpiCalculations() throws Exception;
     KpiDef readKpiCalculation(long id) throws Exception;
     boolean disableKpiCalculation(long id) throws Exception;
 
-    void addBadgeDef(BadgeDef badge) throws Exception;
+    long addBadgeDef(BadgeDef badge) throws Exception;
     List<BadgeDef> listBadgeDefs() throws Exception;
     BadgeDef readBadgeDef(long id) throws Exception;
     boolean disableBadgeDef(long id) throws Exception;
 
-    void addPointDef(PointDef pointRule) throws Exception;
+    long addPointDef(PointDef pointRule) throws Exception;
     List<PointDef> listPointDefs(long gameId) throws Exception;
     PointDef readPointDef(long id) throws Exception;
     boolean disablePointDef(long id) throws Exception;
 
-    void addMilestoneDef(MilestoneDef milestone) throws Exception;
+    long addMilestoneDef(MilestoneDef milestone) throws Exception;
     List<MilestoneDef> listMilestoneDefs() throws Exception;
     MilestoneDef readMilestoneDef(long id) throws Exception;
     boolean disableMilestoneDef(long id) throws Exception;

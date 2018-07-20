@@ -1,6 +1,6 @@
 SELECT
     id AS id,
-    kind AS defKind,
+    kind AS kind,
     name AS name,
     display_name AS displayName,
     content_data AS content,

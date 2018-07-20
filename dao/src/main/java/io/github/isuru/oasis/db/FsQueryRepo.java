@@ -38,7 +38,6 @@ public class FsQueryRepo implements IQueryRepo {
             String content = Files.readAllLines(path, StandardCharsets.UTF_8).stream()
                     .collect(Collectors.joining("\n"));
             String prefix = root.relativize(path).toString();
-            System.out.println(prefix);
             queries.put(prefix, content);
         }
     }
@@ -53,7 +52,7 @@ public class FsQueryRepo implements IQueryRepo {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         queries.clear();
     }
 

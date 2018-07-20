@@ -17,6 +17,7 @@ public class JdbiDefinitionDao implements IDefinitionDao {
 
     private static final String DEF_READ_DEFINITION = "def/readDefinition";
     private static final String DEF_DISABLE_DEFINITION = "def/disableDefinition";
+    private static final String DEF_EDIT_DEFINITION = "def/editDefinition";
     private static final String DEF_LIST_DEFINITIONS = "def/listDefinitions";
     private static final String DEF_ADD_DEFINITION = "def/addDefinition";
 
@@ -54,7 +55,7 @@ public class JdbiDefinitionDao implements IDefinitionDao {
     }
 
     @Override
-    public void addDefinition(DefWrapper wrapper) throws Exception {
+    public long addDefinition(DefWrapper wrapper) throws Exception {
         Map<String, Object> data = new HashMap<>();
         data.put("typeId", wrapper.getKind());
         data.put("name", wrapper.getName());
@@ -63,9 +64,11 @@ public class JdbiDefinitionDao implements IDefinitionDao {
         data.put("gameId", wrapper.getGameId());
         data.put("parentId", wrapper.getParentId());
 
-        if (dao.executeCommand(DEF_ADD_DEFINITION, data) < 1) {
+        Long id = dao.executeInsert(DEF_ADD_DEFINITION, data, "id");
+        if (id == null || id < 0) {
             throw new Exception("Unable to add definition to the game!");
         }
+        return id;
     }
 
     @Override
@@ -76,7 +79,33 @@ public class JdbiDefinitionDao implements IDefinitionDao {
     }
 
     @Override
-    public void editDefinition(long id, DefWrapper wrapper) throws Exception {
+    public long editDefinition(long id, DefWrapper latest) throws Exception {
+        DefWrapper prev = dao.getDefinitionDao().readDefinition(id);
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", id);
+        data.put("typeId", prev.getKind());
+        data.put("name", compareWrapper(latest.getName(), prev.getName()));
+        data.put("displayName", compareWrapper(latest.getDisplayName(), prev.getDisplayName()));
+        data.put("content", compareWrapper(latest.getContent(), prev.getContent()));
+        data.put("gameId", compareWrapper(latest.getGameId(), prev.getGameId()));
+        data.put("parentId", compareWrapper(latest.getParentId(), prev.getParentId()));
 
+        return dao.executeCommand(DEF_EDIT_DEFINITION, data);
+    }
+
+    private String compareWrapper(String latest, String prev) {
+        if (latest != null) {
+            return latest.equals(prev) ? prev : latest;
+        } else {
+            return null;
+        }
+    }
+
+    private Long compareWrapper(Long latest, Long prev) {
+        if (latest != null) {
+            return latest;
+        } else {
+            return prev;
+        }
     }
 }

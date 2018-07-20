@@ -28,7 +28,7 @@ public class RUtils {
         try {
             return mapper.readValue(value, clz);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to deserialize given db object!");
+            throw new RuntimeException("Failed to deserialize given db object!", e);
         }
     }
 
@@ -36,7 +36,7 @@ public class RUtils {
         try {
             return mapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize given object " + value + "!");
+            throw new RuntimeException("Failed to serialize given object " + value + "!", e);
         }
     }
 }
