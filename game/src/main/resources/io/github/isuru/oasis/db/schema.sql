@@ -80,10 +80,11 @@ CREATE TABLE IF NOT EXISTS OA_USER (
 );
 
 CREATE TABLE IF NOT EXISTS OA_TEAM (
-    team_id         INT,
+    team_id         INT PRIMARY KEY AUTO_INCREMENT,
     team_scope      INT,
     name            VARCHAR(128),
     avatar_id       VARCHAR(1024),
+    is_active       TINYINT(1) DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

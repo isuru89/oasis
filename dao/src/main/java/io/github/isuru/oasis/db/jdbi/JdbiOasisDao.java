@@ -70,11 +70,17 @@ public class JdbiOasisDao implements IOasisDao {
     @Override
     public Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws Exception {
         String query = queryRepo.fetchQuery(queryId);
-        return jdbi.withHandle((HandleCallback<Long, Exception>) handle -> handle.createUpdate(query)
-                .bindMap(data)
-                .executeAndReturnGeneratedKeys(keyColumn)
-                .mapTo(Long.class)
-                .findOnly());
+        return jdbi.withHandle((HandleCallback<Long, Exception>) handle -> {
+            Update update = handle.createUpdate(query)
+                    .bindMap(data);
+            if (keyColumn != null && !keyColumn.isEmpty()) {
+                return update.executeAndReturnGeneratedKeys(keyColumn)
+                        .mapTo(Long.class)
+                        .findOnly();
+            } else {
+                return (long) update.execute();
+            }
+        });
     }
 
     @Override

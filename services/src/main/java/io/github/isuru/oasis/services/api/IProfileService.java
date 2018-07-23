@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.api;
 
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.UserTeam;
 
 public interface IProfileService {
 
@@ -11,10 +12,12 @@ public interface IProfileService {
     boolean editUserProfile(long userId, UserProfile profile) throws Exception;
     boolean deleteUserProfile(long userId) throws Exception;
 
-    void addTeam(TeamProfile teamProfile);
-    TeamProfile readTeam(long teamId);
+    long addTeam(TeamProfile teamProfile) throws Exception;
+    TeamProfile readTeam(long teamId) throws Exception;
+    boolean editTeam(long teamId, TeamProfile teamProfile) throws Exception;
 
-    void addUserToTeam(long userId, long teamId);
+    boolean addUserToTeam(long userId, long teamId) throws Exception;
+    UserTeam findCurrentTeamOfUser(long userId) throws Exception;
 
     void readUserGameStats(long userId);
     void readUserGameTimeline(long userId);

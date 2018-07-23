@@ -4,6 +4,7 @@ import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.services.api.IProfileService;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
 
@@ -64,18 +65,54 @@ public class ProfileService extends BaseService implements IProfileService {
     }
 
     @Override
-    public void addTeam(TeamProfile teamProfile) {
+    public long addTeam(TeamProfile teamProfile) throws Exception {
+        Map<String, Object> data = Maps.create()
+                .put("teamScope", teamProfile.getTeamScope())
+                .put("name", teamProfile.getName())
+                .put("avatarId", teamProfile.getAvatarId())
+                .build();
 
+        return getDao().executeInsert("profile/addTeam", data, "team_id");
     }
 
     @Override
-    public TeamProfile readTeam(long teamId) {
-        return null;
+    public TeamProfile readTeam(long teamId) throws Exception {
+        return getTheOnlyRecord("profile/readTeam",
+                Maps.create("teamId", teamId),
+                TeamProfile.class);
     }
 
     @Override
-    public void addUserToTeam(long userId, long teamId) {
+    public boolean editTeam(long teamId, TeamProfile latest) throws Exception {
+        TeamProfile prev = readTeam(teamId);
+        Map<String, Object> data = Maps.create()
+                .put("name", Pojos.compareWith(latest.getName(), prev.getName()))
+                .put("avatarId", Pojos.compareWith(latest.getAvatarId(), prev.getAvatarId()))
+                .put("teamScope", Pojos.compareWith(latest.getTeamScope(), prev.getTeamScope()))
+                .put("teamId", teamId)
+                .build();
 
+        return getDao().executeCommand("profile/editTeam", data) > 0;
+    }
+
+    @Override
+    public boolean addUserToTeam(long userId, long teamId) throws Exception {
+        return getDao().executeInsert("profile/addUserToTeam",
+                Maps.create()
+                        .put("userId", userId)
+                        .put("teamId", teamId)
+                        .put("since", System.currentTimeMillis())
+                        .build(),
+                null) > 0;
+    }
+
+    @Override
+    public UserTeam findCurrentTeamOfUser(long userId) throws Exception {
+        return getTheOnlyRecord("profile/findCurrentTeamOfUser",
+                Maps.create().put("userId", userId)
+                    .put("currentEpoch", System.currentTimeMillis())
+                    .build(),
+                UserTeam.class);
     }
 
     @Override

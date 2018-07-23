@@ -13,4 +13,12 @@ public class Pojos {
         }
     }
 
+    public static Integer compareWith(Integer latest, Integer prev) {
+        if (latest != null) {
+            return latest;
+        } else {
+            return prev;
+        }
+    }
+
 }
