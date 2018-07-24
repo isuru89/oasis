@@ -66,9 +66,6 @@ public class OasisExecution {
     private List<BadgeRule> badgeRules;
 
     private DataStream<Event> inputSource;
-    private KeyedStream<Event, Long> userStream;
-    private DataStream<PointEvent> pointStream;
-    private DataStream<BadgeEvent> badgeStream = null;
 
     private IOutputHandler outputHandler;
 
@@ -101,7 +98,7 @@ public class OasisExecution {
                     .assignTimestampsAndWatermarks(new EventTimestampSelector<>());
         }
 
-        userStream = inputSource.keyBy(new EventUserSelector<>());
+        KeyedStream<Event, Long> userStream = inputSource.keyBy(new EventUserSelector<>());
 
         //  create point operator
         PointsOperator<Event> pointsOperator = new PointsOperator<>(pointRules);
@@ -111,7 +108,7 @@ public class OasisExecution {
                 .uid(String.format("points-processor-%s", oasisId))
                 .split(new PointErrorSplitter());
 
-        pointStream = pointSplitStream.select(PointErrorSplitter.NAME_POINT);
+        DataStream<PointEvent> pointStream = pointSplitStream.select(PointErrorSplitter.NAME_POINT);
         DataStream<PointEvent> errorStream = pointSplitStream.select(PointErrorSplitter.NAME_ERROR);
 
         KeyedStream<PointEvent, Long> userPointStream = pointStream.keyBy(new EventUserSelector<>());
@@ -165,7 +162,7 @@ public class OasisExecution {
                 bStream = bStream == null ? badgeFromPoints : bStream.union(badgeFromPoints);
             }
         }
-        this.badgeStream = bStream;
+        DataStream<BadgeEvent> badgeStream = bStream;
 
 
         //

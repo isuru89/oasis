@@ -10,6 +10,7 @@ import BadgeView from '../../components/BadgeView';
 import TeamHistoryRecord from './TeamHistoryRecord';
 import RankView from './RankView';
 import RankPoint from './RankPoint';
+import MilestoneView from "./MilestoneView";
 
 const Content = styled.div`
   height: 100%;
@@ -44,7 +45,11 @@ const Column1 = styled.div`
 `
 
 const Column2 = styled.div`
-  flex: 2.5;
+  flex: 5;
+`
+
+const Column3 = styled.div`
+  flex: 3;
 `
 
 const UserNameTitle = styled.div`
@@ -76,9 +81,15 @@ const UserProfileHeader = styled.div`
 `
 
 const leaderboardData = [
-  { leaderboard: 'Heavy Coder', points: (Math.random() * 100000).toFixed(0), rank: 2 },
-  { leaderboard: 'Top Fixer', points: (Math.random() * 500).toFixed(0), rank: 15 },
+  { leaderboard: 'Top Supporter', points: (Math.random() * 100000).toFixed(0), rank: 2 },
+  { leaderboard: 'Top Finder', points: (Math.random() * 500).toFixed(0), rank: 15 },
+  { leaderboard: 'Top Closer', points: (Math.random() * 500).toFixed(0), rank: (Math.random() * 20).toFixed(0) },
+]
 
+const milestoneData = [
+  { milestone: 'Total Resolves', level: 4, totalLevels: 10, remaining: (Math.random() * 10000).toFixed(0), nextLevel: 10000, progress: 55 },
+  { milestone: 'Quick Resolves', level: 2, totalLevels: 5, remaining: (Math.random() * 10000).toFixed(0), nextLevel: 10000, progress: 32 },
+  { milestone: 'Bugs Found', level: 9, totalLevels: 20, remaining: (Math.random() * 10000).toFixed(0), nextLevel: 10000, progress: 81 },
 ]
 
 
@@ -102,18 +113,26 @@ export default class ProfilePage extends Component {
 
           </Column1>
           <Column2>
-            <UserProfileHeader>
+            <Panel title="Milestone Progress">
+              <MilestoneView data={milestoneData} />
+            </Panel>
 
-            </UserProfileHeader>
-            
-            <Panel title="MY BADGES (5)">
-              <div><BadgeView /></div>
-            </Panel>
-            <Panel title="TEAM HISTORY">
-              <TeamHistoryRecord team="Team-1" active={true} />
-              <TeamHistoryRecord />
-              <TeamHistoryRecord />
-            </Panel>
+            <UserContent>
+              <Column2>
+                <Panel title="MY BADGES (5)">
+                  <div><BadgeView /></div>
+                </Panel>
+              </Column2>
+              <Column3>
+              <Panel title="TEAM HISTORY">
+                <TeamHistoryRecord team="Team-1" active={true} />
+                <TeamHistoryRecord />
+                <TeamHistoryRecord />
+              </Panel>
+              </Column3>
+              
+            </UserContent>
+          
           </Column2>
         </UserContent>
       </Content>

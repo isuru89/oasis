@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 const Wrapper = styled.div`
-  margin: 20px;
+  margin: 5px;
   background-color: white;
   border-radius: 5px;
   box-shadow: 1px 1px 2px 2px #739CAE33;

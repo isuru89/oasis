@@ -7,6 +7,8 @@ import registerServiceWorker from './registerServiceWorker';
 
 import './images'
 
+import 'react-circular-progressbar/dist/styles.css';
+
 const rootEl = document.getElementById('root');
 
 ReactDOM.render(<App />, rootEl);

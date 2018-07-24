@@ -50,7 +50,7 @@ export default class RankView extends Component {
                 return (
                   <tr key={d.leaderboard}>
                     <LabelCell>
-                      <ImageContent image={<FontAwesomeIcon icon="coins" />}>
+                      <ImageContent image={<FontAwesomeIcon icon="list-ol" />}>
                         <div>{d.leaderboard}</div>
                       </ImageContent>
                     </LabelCell>

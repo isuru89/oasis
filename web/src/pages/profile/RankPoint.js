@@ -15,6 +15,7 @@ const RankCell = styled.div`
 const PointsCell = styled.div`
     font-size: 14px;
     color: goldenrod;
+    opacity: 0.7;
 `
 
 const PtsLabel = styled.span`
