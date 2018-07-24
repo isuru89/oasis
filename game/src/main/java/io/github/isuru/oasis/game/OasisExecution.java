@@ -14,6 +14,7 @@ import io.github.isuru.oasis.game.process.PointsFromBadgeMapper;
 import io.github.isuru.oasis.game.process.PointsFromMilestoneMapper;
 import io.github.isuru.oasis.game.process.sinks.OasisBadgesSink;
 import io.github.isuru.oasis.game.process.sinks.OasisMilestoneSink;
+import io.github.isuru.oasis.game.process.sinks.OasisMilestoneStateSink;
 import io.github.isuru.oasis.game.process.sinks.OasisPointsSink;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.Event;
@@ -233,6 +234,12 @@ public class OasisExecution {
             milestoneNotyStream
                     .addSink(new OasisMilestoneSink(handler.getMilestoneHandler())) // @TODO add kafka sink
                     .uid(String.format("milestone-sink-%s", oasisId));
+        }
+
+        if (milestoneStateEventDataStream != null) {
+            milestoneStateEventDataStream
+                    .addSink(new OasisMilestoneStateSink(handler.getMilestoneHandler()))
+                    .uid(String.format("milestone-state-sink-%s", oasisId));
         }
 
         // badge event stream

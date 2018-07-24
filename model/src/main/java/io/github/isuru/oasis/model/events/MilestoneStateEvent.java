@@ -13,20 +13,37 @@ public class MilestoneStateEvent implements Serializable {
     private final Milestone milestone;
     private final double value;
     private final long valueInt;
+    private final Double nextValue;
+    private final Long nextValueInt;
 
-    public MilestoneStateEvent(long userId, Milestone milestone, double value) {
-        this(userId, milestone, value, Long.MIN_VALUE);
+    public MilestoneStateEvent(long userId, Milestone milestone, double value, Double nextValue) {
+        this(userId, milestone, value, Long.MIN_VALUE, nextValue, null);
     }
 
-    public MilestoneStateEvent(long userId, Milestone milestone, long value) {
-        this(userId, milestone, Double.MIN_VALUE, value);
+    public MilestoneStateEvent(long userId, Milestone milestone, long value, Long nextValue) {
+        this(userId, milestone, Double.MIN_VALUE, value, null, nextValue);
     }
 
-    private MilestoneStateEvent(long userId, Milestone milestone, double value, long value_i) {
+    private MilestoneStateEvent(long userId, Milestone milestone, double value, long value_i,
+                                Double nextValue, Long nextValueInt) {
         this.userId = userId;
         this.milestone = milestone;
         this.value = value;
         this.valueInt = value_i;
+        this.nextValue = nextValue;
+        this.nextValueInt = nextValueInt;
+    }
+
+    public boolean isDouble() {
+        return value != Double.MIN_VALUE;
+    }
+
+    public double getNextValue() {
+        return nextValue;
+    }
+
+    public long getNextValueInt() {
+        return nextValueInt;
     }
 
     public long getUserId() {

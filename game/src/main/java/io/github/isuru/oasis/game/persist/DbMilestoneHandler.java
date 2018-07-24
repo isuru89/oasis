@@ -32,9 +32,9 @@ public class DbMilestoneHandler implements IMilestoneHandler {
     }
 
     @Override
-    public void addMilestoneCurrState(Long userId, Milestone milestone, double value) {
+    public void addMilestoneCurrState(Long userId, Milestone milestone, double value, Double nextVal) {
         try {
-            OasisDbPool.getDao(dbRef).getGameDao().addMilestoneCurrState(userId, milestone, value);
+            OasisDbPool.getDao(dbRef).getGameDao().addMilestoneCurrState(userId, milestone, value, nextVal);
         } catch (Exception e) {
             LOG.error("Failed to persist milestone state in db!", e);
         }
@@ -42,9 +42,9 @@ public class DbMilestoneHandler implements IMilestoneHandler {
     }
 
     @Override
-    public void addMilestoneCurrState(Long userId, Milestone milestone, long value) {
+    public void addMilestoneCurrState(Long userId, Milestone milestone, long value, Long nextVal) {
         try {
-            OasisDbPool.getDao(dbRef).getGameDao().addMilestoneCurrState(userId, milestone, value);
+            OasisDbPool.getDao(dbRef).getGameDao().addMilestoneCurrState(userId, milestone, value, nextVal);
         } catch (Exception e) {
             LOG.error("Failed to persist milestone state in db!", e);
         }

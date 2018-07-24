@@ -2,6 +2,9 @@ import React, { Component } from 'react'
 import styled from 'styled-components'
 import Avatar from '../components/Avatar'
 import profile from '../profile.jpg'
+import ImageTitleValue, {ImageContent} from '../components/ImageTitleValue';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import PointLabel from '../components/PointLabel';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -23,9 +26,26 @@ const MyWrapper = styled.div`
   height: 100%;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   background-color: #20465E;
-  padding: 0 20px;
+  padding: 0 0 0 20px;
+`
+
+const UserStats = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+`
+
+const AvatarPane = styled.div`
+  min-width: 60px;
+  background-color: #1E2B34;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
 `
 
 export default class Header extends Component {
@@ -36,7 +56,23 @@ export default class Header extends Component {
           OASIS
         </Logo>
         <MyWrapper>
-          <Avatar size={32} image={profile} />
+          <UserStats>
+            <ImageContent color="#fff" imgColor="gold" imgSize={24} image={<FontAwesomeIcon icon="coins" />}>
+              <PointLabel color="gold" value={(2345).toLocaleString()} delta={432} annotation="THIS WEEK" />
+            </ImageContent>
+            <ImageContent color="#fff" imgColor="#ff7f82" imgSize={24} image={<FontAwesomeIcon icon="award" />}>
+              <PointLabel color="#ff7f82" value={14} />
+            </ImageContent>
+            <ImageContent color="#fff" imgColor="#72e5b7" imgSize={24} image={<FontAwesomeIcon icon="map-marker-alt" />}>
+              <PointLabel color="#72e5b7" value={'73%'} />
+            </ImageContent>
+            <ImageContent color="#fff" imgColor="#ec8c54" imgSize={24} image={<FontAwesomeIcon icon="trophy" />}>
+              <PointLabel color="#ec8c54" value={8} />
+            </ImageContent>
+          </UserStats>
+          <AvatarPane>
+            <Avatar size={32} image={profile} />
+          </AvatarPane>
         </MyWrapper>
       </Wrapper>
     )

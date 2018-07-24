@@ -23,7 +23,7 @@ public class PointParser {
         List<PointRule> pointRules = new LinkedList<>();
         for (PointDef record : pointDefs) {
             PointRule pr = new PointRule();
-            pr.setId(++p);
+            pr.setId(record.getId() != null ? record.getId() : ++p);
             pr.setName(record.getName());
             pr.setForEvent(record.getEvent());
             pr.setSource(record.getSource());

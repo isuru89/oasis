@@ -19,12 +19,12 @@ import java.util.Map;
  */
 public class MilestoneParser {
 
-    public static List<Milestone> parse(List<MilestoneDef> milestoneDefs) throws IOException {
+    public static List<Milestone> parse(List<MilestoneDef> milestoneDefs) {
         int m = 0;
         List<Milestone> milestones = new LinkedList<>();
         for (MilestoneDef milestoneDef : milestoneDefs) {
             Milestone milestone = new Milestone();
-            milestone.setId(++m);
+            milestone.setId(milestoneDef.getId() != null ? milestoneDef.getId() : ++m);
             milestone.setName(milestoneDef.getName());
             milestone.setDisplayName(milestoneDef.getDisplayName());
             milestone.setEvent(milestoneDef.getEvent());

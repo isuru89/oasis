@@ -77,23 +77,27 @@ public class JdbiGameDao implements IGameDao {
     }
 
     @Override
-    public void addMilestoneCurrState(Long userId, Milestone milestone, double value) throws Exception {
+    public void addMilestoneCurrState(Long userId, Milestone milestone, double value, Double nextVal) throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("milestoneId", milestone.getId());
         map.put("valueDouble", value);
         map.put("valueLong", null);
+        map.put("nextVal", nextVal);
+        map.put("nextValInt", null);
 
         dao.executeCommand("game/updateMilestoneState", map);
     }
 
     @Override
-    public void addMilestoneCurrState(Long userId, Milestone milestone, long value) throws Exception {
+    public void addMilestoneCurrState(Long userId, Milestone milestone, long value, Long nextVal) throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("milestoneId", milestone.getId());
         map.put("valueDouble", null);
         map.put("valueLong", value);
+        map.put("nextVal", null);
+        map.put("nextValInt", nextVal);
 
         dao.executeCommand("game/updateMilestoneState", map);
     }

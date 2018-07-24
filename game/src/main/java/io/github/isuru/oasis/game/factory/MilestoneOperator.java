@@ -31,12 +31,21 @@ public class MilestoneOperator {
                                                             Milestone milestone,
                                                             OutputTag<MilestoneStateEvent> stateOutputTag,
                                                             Oasis oasis) {
-        FilterFunction<Event> filterFunction = null;
+        FilterFunction<Event> filterFunction;
         if (milestone.getCondition() != null) {
             filterFunction = new FilterFunction<Event>() {
                 @Override
-                public boolean filter(Event value) throws Exception {
-                    return Utils.evaluateCondition(milestone.getCondition(), value.getAllFieldValues());
+                public boolean filter(Event event) throws Exception {
+                    return event.getEventType().equals(milestone.getEvent())
+                            && (milestone.getCondition() == null
+                            || Utils.evaluateCondition(milestone.getCondition(), event.getAllFieldValues()));
+                }
+            };
+        } else {
+            filterFunction = new FilterFunction<Event>() {
+                @Override
+                public boolean filter(Event event) {
+                    return event.getEventType().equals(milestone.getEvent());
                 }
             };
         }
@@ -86,8 +95,8 @@ public class MilestoneOperator {
         private final DataStream<MilestoneStateEvent> milestoneStateStream;
         private boolean pointStreamUsed = false;
 
-        public MilestoneOpResponse(DataStream<MilestoneEvent> milestoneEventStream,
-                                   DataStream<MilestoneStateEvent> milestoneStateStream) {
+        MilestoneOpResponse(DataStream<MilestoneEvent> milestoneEventStream,
+                            DataStream<MilestoneStateEvent> milestoneStateStream) {
             this.milestoneEventStream = milestoneEventStream;
             this.milestoneStateStream = milestoneStateStream;
         }
@@ -104,7 +113,7 @@ public class MilestoneOperator {
             return pointStreamUsed;
         }
 
-        public MilestoneOpResponse setPointStreamUsed(boolean pointStreamUsed) {
+        MilestoneOpResponse setPointStreamUsed(boolean pointStreamUsed) {
             this.pointStreamUsed = pointStreamUsed;
             return this;
         }

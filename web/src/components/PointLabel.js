@@ -12,7 +12,7 @@ const Wrapper = styled.div`
 `
 
 const Value = styled.span`
-  font-size: 24px;
+  font-size: ${props => props.fontSize ? props.fontSize + 'px' : '32px' };
   padding: 0 5px;
   letter-spacing: 1.4px;
   color: ${props => props.color ? props.color : 'inherit'};

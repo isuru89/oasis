@@ -8,6 +8,7 @@ import io.github.isuru.oasis.game.parser.BadgeParser;
 import io.github.isuru.oasis.game.parser.FieldCalculationParser;
 import io.github.isuru.oasis.game.parser.MilestoneParser;
 import io.github.isuru.oasis.game.parser.PointParser;
+import io.github.isuru.oasis.game.persist.DbOutputHandler;
 import io.github.isuru.oasis.game.persist.KafkaSender;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.model.Event;
@@ -52,13 +53,7 @@ public class Main {
         int gameId = parameters.getInt("game");
         Preconditions.checkArgument(gameId > 0, "Game id must be specified!");
         String configs = parameters.getRequired("configs");
-        File configFile = new File(configs);
-        if (!configFile.exists()) {
-            throw new RuntimeException("Game configuration file does not exist in "
-                    + configFile.getAbsolutePath() + "!");
-        }
-
-        Properties gameProperties = readConfigs(configFile);
+        Properties gameProperties = readConfigs(configs);
         DbProperties dbProperties = createConfigs(gameProperties);
 
         try (IOasisDao dao = OasisDbFactory.create(dbProperties)) {
@@ -77,6 +72,7 @@ public class Main {
                     .setPointRules(pointRules)
                     .setMilestones(milestones)
                     .setBadgeRules(badges)
+                    .outputHandler(new DbOutputHandler(OasisDbPool.DEFAULT))
                     .build(oasis);
 
             execution.start();
@@ -85,16 +81,25 @@ public class Main {
 
     private static GameDef readGameDef(int gameId, IOasisDao dao) throws Exception {
         DefWrapper wrapper = dao.getDefinitionDao().readDefinition(gameId);
-        GameDef gameDef = mapper.convertValue(wrapper.getContent(), GameDef.class);
+        GameDef gameDef = mapper.readValue(wrapper.getContent(), GameDef.class);
         gameDef.setId(wrapper.getId());
         return gameDef;
     }
 
-    private static Properties readConfigs(File file) throws IOException {
-        try (InputStream inputStream = new FileInputStream(file)) {
-            Properties properties = new Properties();
-            properties.load(inputStream);
-            return properties;
+    private static Properties readConfigs(String configFile) throws IOException {
+        if (configFile.startsWith("classpath:")) {
+            String cp = configFile.substring("classpath:".length());
+            try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(cp)) {
+                Properties properties = new Properties();
+                properties.load(inputStream);
+                return properties;
+            }
+        } else {
+            try (InputStream inputStream = new FileInputStream(configFile)) {
+                Properties properties = new Properties();
+                properties.load(inputStream);
+                return properties;
+            }
         }
     }
 

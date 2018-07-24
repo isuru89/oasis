@@ -8,21 +8,30 @@ const Wrapper = styled.div`
   align-items: center;
 `
 
-const Image = styled.div`
-  font-size: ${props => props.imgSize ? props.imgSize + 'px' : '16px'};
-  padding: 0 10px;
+const ImageDiv = styled.div`
+  display: flex;
+  align-items: center;
+  min-width: ${props => props.imgSize ? props.imgSize * 2 + 'px' : '24px'};
+  height: ${props => props.imgSize ? props.imgSize * 2 + 'px' : '24px'};
   line-height: 2;
   text-align: center;
-  margin: 5px 10px 5px 0;
+  justify-content: center;
   border-radius: 50%;
-  color: ${props => props.color};
   background-color: ${props => props.imgColor ? props.imgColor : '#ffffff00'};
+  border: 2px solid #00000022;
+`
+
+const Image = styled.div`
+  font-size: ${props => props.imgSize ? props.imgSize + 'px' : '16px'};
+  width: ${props => props.imgSize ? props.imgSize + 'px' : '16px'};
+  color: ${props => props.color};
 `
 
 const TextContent = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding-left: 5px;
   width: 100%;
 `
 
@@ -43,7 +52,9 @@ export class ImageContent extends Component {
 
     return (
       <Wrapper>
-        <Image {...this.props}>{image}</Image>
+        <ImageDiv {...this.props}>
+          <Image {...this.props}>{image}</Image>
+        </ImageDiv>
         <TextContent>
           {this.props.children}
         </TextContent>

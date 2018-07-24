@@ -11,11 +11,11 @@ public interface IMilestoneHandler extends Serializable {
 
     void milestoneReached(MilestoneNotification milestoneNotification);
 
-    default void addMilestoneCurrState(Long userId, Milestone milestone, double value) {
+    default void addMilestoneCurrState(Long userId, Milestone milestone, double value, Double nextVal) {
 
     }
 
-    default void addMilestoneCurrState(Long userId, Milestone milestone, long value) {
+    default void addMilestoneCurrState(Long userId, Milestone milestone, long value, Long nextVal) {
 
     }
 

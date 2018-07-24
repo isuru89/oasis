@@ -103,18 +103,7 @@ export default class ProfilePage extends Component {
           </Column1>
           <Column2>
             <UserProfileHeader>
-              <ImageContent color="#fff" imgColor="gold" image={<FontAwesomeIcon icon="coins" />}>
-                <PointLabel color="gold" value={(2345).toLocaleString()} delta={432} annotation="THIS WEEK" />
-              </ImageContent>
-              <ImageContent color="#fff" imgColor="#ff7f82" image={<FontAwesomeIcon icon="award" />}>
-                <PointLabel color="#ff7f82" value={14} />
-              </ImageContent>
-              <ImageContent color="#fff" imgColor="#72e5b7" image={<FontAwesomeIcon icon="map-marker-alt" />}>
-                <PointLabel color="#72e5b7" value={'73%'} />
-              </ImageContent>
-              <ImageContent color="#fff" imgColor="#ec8c54" image={<FontAwesomeIcon icon="trophy" />}>
-                <PointLabel color="#ec8c54" value={8} />
-              </ImageContent>
+
             </UserProfileHeader>
             
             <Panel title="MY BADGES (5)">

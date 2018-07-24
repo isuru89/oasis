@@ -28,8 +28,11 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
     private Milestone milestone;
     private OutputTag<MilestoneStateEvent> outputTag;
 
-    private transient ReducingState<Long> accCount;
-    private transient ValueState<Long> currentLevel;
+    private boolean atEnd = false;
+    private Long nextLevelValue = null;
+
+    private ReducingState<Long> accCount;
+    private ValueState<Long> currentLevel;
 
     public MilestoneCountProcess(List<Long> levels, FilterFunction<Event> filter,
                                  Milestone milestone, OutputTag<MilestoneStateEvent> outputTag) {
@@ -47,12 +50,26 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
                 int nextLevel = currentLevel.value().intValue() + 1;
                 currentLevel.update(currentLevel.value() + 1);
                 out.collect(new MilestoneEvent(value.getUser(), milestone, nextLevel, value));
+                nextLevelValue = levels.get(nextLevel);
             }
 
+            if (!atEnd && nextLevelValue == null) {
+                if (levels.size() > currentLevel.value()) {
+                    nextLevelValue = levels.get(Integer.parseInt(currentLevel.value().toString()));
+                } else {
+                    nextLevelValue = null;
+                    atEnd = true;
+                }
+            }
+
+            // figure out how to detect next level threshold
             // update count in db
-            ctx.output(outputTag, new MilestoneStateEvent(value.getUser(),
-                    milestone,
-                    accCount.get()));
+            if (!atEnd) {
+                ctx.output(outputTag, new MilestoneStateEvent(value.getUser(),
+                        milestone,
+                        accCount.get(),
+                        nextLevelValue));
+            }
         }
     }
 

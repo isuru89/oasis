@@ -49,9 +49,14 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONE_STATE (
     milestone_id    INT,
     current_val     FLOAT(4),
     current_val_i   BIGINT,
+    next_val        FLOAT(4),
+    next_val_i      BIGINT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+ALTER TABLE OA_MILESTONE_STATE ADD PRIMARY KEY (user_id, milestone_id);
+
 
 CREATE TABLE IF NOT EXISTS OA_DEFINITION (
     id              INT PRIMARY KEY AUTO_INCREMENT,

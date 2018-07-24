@@ -133,13 +133,15 @@ public class KafkaSender implements IBadgeHandler, IMilestoneHandler, IPointHand
     }
 
     @Override
-    public void addMilestoneCurrState(Long userId, Milestone milestone, double value) {
+    public void addMilestoneCurrState(Long userId, Milestone milestone, double value, Double nextVal) {
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("userId", userId);
             map.put("milestoneId", milestone.getId());
             map.put("value", value);
             map.put("value_i", null);
+            map.put("next_value", nextVal);
+            map.put("next_value_i", null);
 
             ProducerRecord<Long, String> record = new ProducerRecord<>(
                     milestoneStateStreamTopic,
@@ -157,13 +159,15 @@ public class KafkaSender implements IBadgeHandler, IMilestoneHandler, IPointHand
     }
 
     @Override
-    public void addMilestoneCurrState(Long userId, Milestone milestone, long value) {
+    public void addMilestoneCurrState(Long userId, Milestone milestone, long value, Long nextVal) {
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("userId", userId);
             map.put("milestoneId", milestone.getId());
             map.put("value", null);
             map.put("value_i", value);
+            map.put("next_value", null);
+            map.put("next_value_i", nextVal);
 
             ProducerRecord<Long, String> record = new ProducerRecord<>(
                     milestoneStateStreamTopic,

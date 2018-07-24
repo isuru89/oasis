@@ -28,8 +28,11 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
     private Milestone milestone;
     private OutputTag<MilestoneStateEvent> outputTag;
 
-    private transient ValueState<Double> accSum;
-    private transient ValueState<Integer> currentLevel;
+    private boolean atEnd = false;
+    private Double nextLevelValue = null;
+
+    private ValueState<Double> accSum;
+    private ValueState<Integer> currentLevel;
 
     public MilestoneSumDoubleProcess(List<Double> levels, FilterFunction<Event> filter,
                                      Serializable expression, Milestone milestone,
@@ -70,14 +73,27 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
                         }
                     }
                     accSum.update(total);
+                    nextLevelValue = levels.size() > nextLevel ? levels.get(nextLevel) : null;
+                    atEnd = levels.size() >= nextLevel;
 
                 } else {
                     accSum.update(currSum + acc);
                 }
             }
 
+            if (!atEnd && nextLevelValue == null) {
+                if (levels.size() > currentLevel.value()) {
+                    nextLevelValue = levels.get(Integer.parseInt(currentLevel.value().toString()));
+                } else {
+                    nextLevelValue = null;
+                    atEnd = true;
+                }
+            }
+
             // update sum in db
-            ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), milestone, accSum.value()));
+            if (!atEnd) {
+                ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), milestone, accSum.value(), nextLevelValue));
+            }
         }
     }
 

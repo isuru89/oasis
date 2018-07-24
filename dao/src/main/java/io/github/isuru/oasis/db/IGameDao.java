@@ -16,6 +16,6 @@ public interface IGameDao {
 
     void addMilestone(Long userId, int level, Event event, Milestone milestone) throws Exception;
 
-    void addMilestoneCurrState(Long userId, Milestone milestone, double value) throws Exception;
-    void addMilestoneCurrState(Long userId, Milestone milestone, long value) throws Exception;
+    void addMilestoneCurrState(Long userId, Milestone milestone, double value, Double nextVal) throws Exception;
+    void addMilestoneCurrState(Long userId, Milestone milestone, long value, Long nextVal) throws Exception;
 }
