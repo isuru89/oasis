@@ -37,7 +37,6 @@ export default class NavPanel extends Component {
   }
 
   _whenButtonClicked = id => {
-    console.log(id);
     this.setState({ selected: id })
   }
 }

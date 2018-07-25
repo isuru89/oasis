@@ -14,6 +14,7 @@ import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -27,6 +28,25 @@ import java.util.List;
 
 public class TestUtils {
 
+    public static List<Tuple3<Long, Long, Double>> parseWinners(String file) throws IOException {
+        try (InputStream inputStream = TestUtils.loadResource(file)) {
+            LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
+            List<Tuple3<Long, Long, Double>> list = new LinkedList<>();
+            while (lineIterator.hasNext()) {
+                String line = lineIterator.next();
+                if (line.trim().isEmpty()) continue;
+                if (line.startsWith("#")) continue;
+
+                String[] parts = line.split("[,]");
+
+                list.add(Tuple3.of(
+                        Long.parseLong(parts[0]),
+                        Long.parseLong(parts[1]),
+                        Double.parseDouble(parts[2])));
+            }
+            return list;
+        }
+    }
 
     public static List<Tuple5<Long, String, String, Double, Long>> parsePointOutput(String file) throws IOException {
         try (InputStream inputStream = TestUtils.loadResource(file)) {

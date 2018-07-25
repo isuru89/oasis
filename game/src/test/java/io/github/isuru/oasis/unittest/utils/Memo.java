@@ -3,6 +3,7 @@ package io.github.isuru.oasis.unittest.utils;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Badge;
 import io.github.isuru.oasis.model.Milestone;
+import io.github.isuru.oasis.model.events.ChallengeEvent;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.java.tuple.Tuple3;
@@ -21,6 +22,18 @@ public class Memo {
     private static final Map<String, List<Tuple3<Throwable, Event, PointRule>>> pointsErrorMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, BadgeRule>>> badgesErrorMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, Milestone>>> milestoneErrorMap = new ConcurrentHashMap<>();
+
+    private static final Map<String, List<ChallengeEvent>> challengesMap = new ConcurrentHashMap<>();
+
+    public static void addChallenge(String name, ChallengeEvent event) {
+        challengesMap.computeIfAbsent(name, s -> new ArrayList<>())
+                .add(event);
+    }
+
+    public static List<ChallengeEvent> getChallenges(String name) {
+        return challengesMap.getOrDefault(name, new ArrayList<>());
+    }
+
 
     public static void addPoint(String id, Tuple4<Long, List<? extends Event>, PointRule, Double> record) {
         pointsMap.computeIfAbsent(id, s -> new ArrayList<>()).add(record);

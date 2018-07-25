@@ -1,3 +1,4 @@
+
 html, body {
   margin: 0;
   padding: 0;
@@ -9,4 +10,11 @@ html, body {
 
 #root {
   height: 100%;
+}
+
+input {
+  color: #1E2B34;
+  font-size: 14px;
+  line-height: 2;
+  outline: none;
 }

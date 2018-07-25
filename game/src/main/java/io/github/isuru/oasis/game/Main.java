@@ -15,6 +15,7 @@ import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.DefWrapper;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.KpiDef;
@@ -50,7 +51,13 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         ParameterTool parameters = ParameterTool.fromArgs(args);
-        int gameId = parameters.getInt("game");
+        int challengeId = parameters.getInt("challenge", 0);
+        if (challengeId > 0) {
+            startChallenge(parameters, challengeId);
+            return;
+        }
+
+        int gameId = parameters.getInt("game", 0);
         Preconditions.checkArgument(gameId > 0, "Game id must be specified!");
         String configs = parameters.getRequired("configs");
         Properties gameProperties = readConfigs(configs);
@@ -79,11 +86,31 @@ public class Main {
         }
     }
 
+    private static void startChallenge(ParameterTool parameters, int challengeId) throws Exception {
+        String configs = parameters.getRequired("configs");
+        Properties gameProperties = readConfigs(configs);
+        DbProperties dbProperties = createConfigs(gameProperties);
+
+        try (IOasisDao dao = OasisDbFactory.create(dbProperties)) {
+            ChallengeDef challengeDef = readChallenge(challengeId, dao);
+
+        }
+    }
+
     private static GameDef readGameDef(int gameId, IOasisDao dao) throws Exception {
         DefWrapper wrapper = dao.getDefinitionDao().readDefinition(gameId);
         GameDef gameDef = mapper.readValue(wrapper.getContent(), GameDef.class);
         gameDef.setId(wrapper.getId());
         return gameDef;
+    }
+
+    private static ChallengeDef readChallenge(int challengeId, IOasisDao dao) throws Exception {
+        DefWrapper wrapper = dao.getDefinitionDao().readDefinition(challengeId);
+        ChallengeDef challengeDef = mapper.readValue(wrapper.getContent(), ChallengeDef.class);
+        challengeDef.setId(wrapper.getId());
+        challengeDef.setName(wrapper.getName());
+        challengeDef.setDisplayName(wrapper.getDisplayName());
+        return challengeDef;
     }
 
     private static Properties readConfigs(String configFile) throws IOException {
