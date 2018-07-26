@@ -12,4 +12,8 @@ public interface IOutputHandler extends Serializable {
     IBadgeHandler getBadgeHandler();
 
     IMilestoneHandler getMilestoneHandler();
+
+    default IChallengeHandler getChallengeHandler() {
+        return null;
+    }
 }

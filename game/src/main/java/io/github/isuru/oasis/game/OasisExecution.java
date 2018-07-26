@@ -6,6 +6,11 @@ import io.github.isuru.oasis.game.factory.PointsNotifier;
 import io.github.isuru.oasis.game.factory.PointsOperator;
 import io.github.isuru.oasis.game.factory.badges.BadgeNotifier;
 import io.github.isuru.oasis.game.factory.badges.BadgeOperator;
+import io.github.isuru.oasis.game.persist.OasisKafkaSink;
+import io.github.isuru.oasis.game.persist.kafka.BadgeNotificationMapper;
+import io.github.isuru.oasis.game.persist.kafka.MilestoneNotificationMapper;
+import io.github.isuru.oasis.game.persist.kafka.MilestoneStateNotificationMapper;
+import io.github.isuru.oasis.game.persist.kafka.PointNotificationMapper;
 import io.github.isuru.oasis.game.process.EventTimestampSelector;
 import io.github.isuru.oasis.game.process.EventUserSelector;
 import io.github.isuru.oasis.game.process.FieldInjector;
@@ -25,10 +30,7 @@ import io.github.isuru.oasis.model.events.MilestoneEvent;
 import io.github.isuru.oasis.model.events.MilestoneStateEvent;
 import io.github.isuru.oasis.model.events.PointEvent;
 import io.github.isuru.oasis.model.handlers.BadgeNotification;
-import io.github.isuru.oasis.model.handlers.IBadgeHandler;
-import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
-import io.github.isuru.oasis.model.handlers.IPointHandler;
 import io.github.isuru.oasis.model.handlers.MilestoneNotification;
 import io.github.isuru.oasis.model.handlers.PointNotification;
 import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
@@ -36,6 +38,7 @@ import io.github.isuru.oasis.model.rules.BadgeFromPoints;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -45,7 +48,9 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SplitStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
 import org.apache.flink.util.OutputTag;
 
 import java.util.List;
@@ -57,8 +62,8 @@ public class OasisExecution {
 
     private StreamExecutionEnvironment env;
 
+    private OasisKafkaSink kafkaSink;
     private SourceFunction<Event> eventSource;
-    private DataStreamSource<Event> eventStream;
     private MapFunction<Event, Event> fieldInjector;
 
     private List<PointRule> pointRules;
@@ -75,7 +80,6 @@ public class OasisExecution {
 
     public OasisExecution build(Oasis oasis, StreamExecutionEnvironment externalEnv) {
         String oasisId = oasis.getId();
-        IOutputHandler handler = createOrLoadHandler();
 
         if (externalEnv == null) {
             env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -87,7 +91,7 @@ public class OasisExecution {
         }
         String rawSrcStr = String.format("raw-%s", oasisId);
 
-        DataStreamSource<Event> rawSource = eventStream != null ? eventStream : env.addSource(eventSource);
+        DataStreamSource<Event> rawSource = env.addSource(eventSource);
         if (fieldInjector != null) {
             inputSource = rawSource.uid(rawSrcStr)
                     .map(fieldInjector)
@@ -221,30 +225,11 @@ public class OasisExecution {
         // ---------------------------------------------------------------------------
         //
 
-        // point event stream
-        pointNotyStream
-                .addSink(new OasisPointsSink(handler.getPointsHandler()))     // @TODO change sink to kafka
-                .uid(String.format("points-sink-%s", oasisId));
-
-        // milestone event stream
-        if (milestoneNotyStream != null) {
-            milestoneNotyStream
-                    .addSink(new OasisMilestoneSink(handler.getMilestoneHandler())) // @TODO add kafka sink
-                    .uid(String.format("milestone-sink-%s", oasisId));
-        }
-
-        if (milestoneStateEventDataStream != null) {
-            milestoneStateEventDataStream
-                    .addSink(new OasisMilestoneStateSink(handler.getMilestoneHandler()))
-                    .uid(String.format("milestone-state-sink-%s", oasisId));
-        }
-
-        // badge event stream
-        if (badgeNotyStream != null) {
-            badgeNotyStream
-                    .addSink(new OasisBadgesSink(handler.getBadgeHandler()))    // @TODO add kafka sink
-                    .uid(String.format("badge-sink-%s", oasisId));
-        }
+        attachSinks(pointNotyStream,
+                milestoneNotyStream,
+                milestoneStateEventDataStream,
+                badgeNotyStream,
+                oasisId);
 
         //
         // ---------------------------------------------------------------------------
@@ -273,8 +258,87 @@ public class OasisExecution {
         env.execute();
     }
 
+    private void attachSinks(DataStream<PointNotification> pointNotyStream,
+                             DataStream<MilestoneNotification> milestoneNotyStream,
+                             DataStream<MilestoneStateEvent> milestoneStateEventDataStream,
+                             DataStream<BadgeNotification> badgeNotyStream,
+                             String oasisId) {
+
+        if (outputHandler != null) {
+            // point event stream
+            pointNotyStream
+                    .addSink(new OasisPointsSink(outputHandler.getPointsHandler()))
+                    .uid(String.format("points-sink-%s", oasisId));
+
+            // milestone event stream
+            if (milestoneNotyStream != null) {
+                milestoneNotyStream
+                        .addSink(new OasisMilestoneSink(outputHandler.getMilestoneHandler()))
+                        .uid(String.format("milestone-sink-%s", oasisId));
+            }
+
+            if (milestoneStateEventDataStream != null) {
+                milestoneStateEventDataStream
+                        .addSink(new OasisMilestoneStateSink(outputHandler.getMilestoneHandler()))
+                        .uid(String.format("milestone-state-sink-%s", oasisId));
+            }
+
+            // badge event stream
+            if (badgeNotyStream != null) {
+                badgeNotyStream
+                        .addSink(new OasisBadgesSink(outputHandler.getBadgeHandler()))
+                        .uid(String.format("badge-sink-%s", oasisId));
+            }
+
+        } else if (kafkaSink != null) {
+
+            SinkFunction<String> pointSink = new FlinkKafkaProducer011<>(kafkaSink.getKafkaHost(),
+                    kafkaSink.getTopicPoints(), new SimpleStringSchema());
+            SinkFunction<String> milestoneSink = new FlinkKafkaProducer011<>(kafkaSink.getKafkaHost(),
+                    kafkaSink.getTopicMilestones(), new SimpleStringSchema());
+            SinkFunction<String> badgeSink = new FlinkKafkaProducer011<>(kafkaSink.getKafkaHost(),
+                    kafkaSink.getTopicBadges(), new SimpleStringSchema());
+            SinkFunction<String> milestoneStateSink = new FlinkKafkaProducer011<>(kafkaSink.getKafkaHost(),
+                    kafkaSink.getTopicMilestoneStates(), new SimpleStringSchema());
+
+            // point event stream
+            pointNotyStream
+                    .map(new PointNotificationMapper())
+                    .addSink(pointSink)
+                    .uid(String.format("points-sink-%s", oasisId));
+
+            if (milestoneNotyStream != null) {
+                milestoneNotyStream
+                        .map(new MilestoneNotificationMapper())
+                        .addSink(milestoneSink)
+                        .uid(String.format("milestone-sink-%s", oasisId));
+            }
+
+            if (milestoneStateEventDataStream != null) {
+                milestoneStateEventDataStream
+                        .map(new MilestoneStateNotificationMapper())
+                        .addSink(milestoneStateSink)
+                        .uid(String.format("milestone-state-sink-%s", oasisId));
+            }
+
+            if (badgeNotyStream != null) {
+                badgeNotyStream
+                        .map(new BadgeNotificationMapper())
+                        .addSink(badgeSink)
+                        .uid(String.format("badge-sink-%s", oasisId));
+            }
+        }
+    }
+
     public OasisExecution outputHandler(IOutputHandler outputHandler) {
         this.outputHandler = outputHandler;
+        this.kafkaSink = null;
+        return this;
+    }
+
+    public OasisExecution outputSink(OasisKafkaSink kafkaSink) {
+        this.kafkaSink = kafkaSink;
+        this.outputHandler = null;
         return this;
     }
 
@@ -305,29 +369,6 @@ public class OasisExecution {
 
     public DataStream<Event> getInputSource() {
         return inputSource;
-    }
-
-    private IOutputHandler createOrLoadHandler() {
-        if (outputHandler != null) {
-            return outputHandler;
-        }
-
-        return new IOutputHandler() {
-            @Override
-            public IPointHandler getPointsHandler() {
-                return new OasisPointsSink.DiscardingPointsSink();
-            }
-
-            @Override
-            public IBadgeHandler getBadgeHandler() {
-                return new OasisBadgesSink.DiscardingBadgeHandler();
-            }
-
-            @Override
-            public IMilestoneHandler getMilestoneHandler() {
-                return new OasisMilestoneSink.DiscardingMilestoneHandler();
-            }
-        };
     }
 
 }

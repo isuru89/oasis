@@ -5,6 +5,7 @@ import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.model.Badge;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
+import io.github.isuru.oasis.model.events.ChallengeEvent;
 import io.github.isuru.oasis.model.handlers.BadgeNotification;
 import io.github.isuru.oasis.model.handlers.PointNotification;
 
@@ -100,5 +101,17 @@ public class JdbiGameDao implements IGameDao {
         map.put("nextValInt", nextVal);
 
         dao.executeCommand("game/updateMilestoneState", map);
+    }
+
+    @Override
+    public void addChallengeWinner(Long userId, ChallengeEvent challengeEvent) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", userId);
+        map.put("teamId", null);        // @TODO team id
+        map.put("challengeId", challengeEvent.getChallengeDef().getId());
+        map.put("points", challengeEvent.getChallengeDef().getPoints());
+        map.put("wonAt", challengeEvent.getTimestamp());
+
+        dao.executeCommand("game/addChallengeWinner", map);
     }
 }

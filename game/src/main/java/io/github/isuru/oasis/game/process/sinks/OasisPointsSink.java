@@ -22,11 +22,4 @@ public class OasisPointsSink implements SinkFunction<PointNotification>, Seriali
         pointHandler.pointsScored(value);
     }
 
-    public static class DiscardingPointsSink implements IPointHandler {
-
-        @Override
-        public void pointsScored(PointNotification pointNotification) {
-
-        }
-    }
 }

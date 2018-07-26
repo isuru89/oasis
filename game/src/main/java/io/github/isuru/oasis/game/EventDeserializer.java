@@ -18,13 +18,10 @@ public class EventDeserializer implements KeyedDeserializationSchema<Event> {
 
     private static final TypeReference<JsonEvent> JSON_EVENT_TYPE_REFERENCE = new TypeReference<JsonEvent>() {};
 
-    private ObjectMapper objectMapper;
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public Event deserialize(byte[] messageKey, byte[] message, String topic, int partition, long offset) throws IOException {
-        if (objectMapper == null) {
-            objectMapper = new ObjectMapper();
-        }
         return objectMapper.readValue(message, JSON_EVENT_TYPE_REFERENCE);
     }
 

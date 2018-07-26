@@ -20,10 +20,4 @@ public class OasisMilestoneSink implements SinkFunction<MilestoneNotification> {
         milestoneHandler.milestoneReached(value);
     }
 
-    public static class DiscardingMilestoneHandler implements IMilestoneHandler {
-        @Override
-        public void milestoneReached(MilestoneNotification milestoneNotification) {
-
-        }
-    }
 }

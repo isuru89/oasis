@@ -2,6 +2,7 @@ package io.github.isuru.oasis.db;
 
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
+import io.github.isuru.oasis.model.events.ChallengeEvent;
 import io.github.isuru.oasis.model.handlers.BadgeNotification;
 import io.github.isuru.oasis.model.handlers.PointNotification;
 
@@ -18,4 +19,6 @@ public interface IGameDao {
 
     void addMilestoneCurrState(Long userId, Milestone milestone, double value, Double nextVal) throws Exception;
     void addMilestoneCurrState(Long userId, Milestone milestone, long value, Long nextVal) throws Exception;
+
+    void addChallengeWinner(Long userId, ChallengeEvent challengeEvent) throws Exception;
 }

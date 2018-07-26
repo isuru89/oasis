@@ -1,12 +1,12 @@
 package io.github.isuru.oasis.unittest.utils;
 
 import io.github.isuru.oasis.model.events.ChallengeEvent;
-import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import io.github.isuru.oasis.model.handlers.IChallengeHandler;
 
 /**
  * @author iweerarathna
  */
-public class ChallengeSink implements SinkFunction<ChallengeEvent> {
+public class ChallengeSink implements IChallengeHandler {
 
     private String name;
 
@@ -15,7 +15,7 @@ public class ChallengeSink implements SinkFunction<ChallengeEvent> {
     }
 
     @Override
-    public void invoke(ChallengeEvent value, Context context) throws Exception {
-        Memo.addChallenge(name, value);
+    public void addChallengeWinner(ChallengeEvent challengeEvent) {
+        Memo.addChallenge(name, challengeEvent);
     }
 }

@@ -7,6 +7,7 @@ import io.github.isuru.oasis.game.parser.PointParser;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.handlers.IBadgeHandler;
+import io.github.isuru.oasis.model.handlers.IChallengeHandler;
 import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import io.github.isuru.oasis.model.handlers.IPointHandler;
@@ -141,6 +142,13 @@ public class TestUtils {
                                                   IBadgeHandler badgeHandler,
                                                   IMilestoneHandler milestoneHandler) {
         return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler);
+    }
+
+    public static IOutputHandler getAssertConfigs(IPointHandler pointHandler,
+                                                  IBadgeHandler badgeHandler,
+                                                  IMilestoneHandler milestoneHandler,
+                                                  IChallengeHandler challengeHandler) {
+        return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler, challengeHandler);
     }
 
     public static List<FieldCalculator> getFields(String resourceId) throws IOException {

@@ -45,16 +45,6 @@ public class Utils {
         return BigDecimal.valueOf(number.doubleValue()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T loadInstanceOfClz(String clzName, ClassLoader classLoader) throws IOException {
-        try {
-            Class<?> aClass = classLoader.loadClass(clzName);
-            return (T) aClass.newInstance();
-        } catch (ReflectiveOperationException e) {
-            throw new IOException(e.getMessage(), e);
-        }
-    }
-
     public static Double strNum(String numStr) {
         Matcher matcher = NUMBER_PATTERN.matcher(numStr);
         if (matcher.find()) {

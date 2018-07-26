@@ -20,11 +20,4 @@ public class OasisBadgesSink implements SinkFunction<BadgeNotification> {
         badgeHandler.badgeReceived(value);
     }
 
-    public static class DiscardingBadgeHandler implements IBadgeHandler {
-
-        @Override
-        public void badgeReceived(BadgeNotification badgeNotification) {
-
-        }
-    }
 }

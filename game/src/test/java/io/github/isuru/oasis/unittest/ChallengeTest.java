@@ -27,10 +27,11 @@ class ChallengeTest {
         Oasis oasis = new Oasis(id);
         OasisChallengeExecution execution = new OasisChallengeExecution()
                 .withSource(new CsvReaderPT(id + "/input.csv"))
-                .outputHandler(new ChallengeSink(id))
+                .outputHandler(TestUtils.getAssertConfigs(null, null,
+                        null, new ChallengeSink(id)))
                 .build(oasis, challengeDef);
 
-        execution.execute();
+        execution.start();
 
         List<Tuple3<Long, Long, Double>> expected = TestUtils.parseWinners(id + "/winners.csv");
 

@@ -100,3 +100,12 @@ CREATE TABLE IF NOT EXISTS OA_TEAM_USER (
     since           BIGINT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS OA_CHALLENGE_WINNER (
+    user_id         INT,
+    team_id         INT,
+    challenge_id    INT,
+    points          FLOAT(4),
+    won_at          BIGINT,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
