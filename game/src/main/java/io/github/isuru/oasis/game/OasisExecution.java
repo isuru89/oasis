@@ -84,7 +84,7 @@ public class OasisExecution {
         if (externalEnv == null) {
             env = StreamExecutionEnvironment.getExecutionEnvironment();
             //env.enableCheckpointing(10000, CheckpointingMode.EXACTLY_ONCE);
-            env.setParallelism(1);
+            env.setParallelism(5);
             env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         } else {
             env = externalEnv;
@@ -371,4 +371,11 @@ public class OasisExecution {
         return inputSource;
     }
 
+    OasisKafkaSink getKafkaSink() {
+        return kafkaSink;
+    }
+
+    IOutputHandler getOutputHandler() {
+        return outputHandler;
+    }
 }

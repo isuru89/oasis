@@ -2,7 +2,7 @@
 .idea/
 dependency-reduced-pom.xml
 input-light.csv
-input.csv
+/input.csv
 
 data/
 /target/

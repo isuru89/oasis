@@ -14,9 +14,12 @@ public class DbOutputHandler implements IOutputHandler {
     private final IPointHandler pointHandler;
     private final IBadgeHandler badgeHandler;
     private final IMilestoneHandler milestoneHandler;
-    private IChallengeHandler challengeHandler;
+    private final IChallengeHandler challengeHandler;
+
+    private final String dbRef;
 
     public DbOutputHandler(String dbRef) {
+        this.dbRef = dbRef;
         pointHandler = new DbPointsHandler(dbRef);
         badgeHandler = new DbBadgeHandler(dbRef);
         milestoneHandler = new DbMilestoneHandler(dbRef);
@@ -41,5 +44,9 @@ public class DbOutputHandler implements IOutputHandler {
     @Override
     public IChallengeHandler getChallengeHandler() {
         return challengeHandler;
+    }
+
+    public String getDbRef() {
+        return dbRef;
     }
 }

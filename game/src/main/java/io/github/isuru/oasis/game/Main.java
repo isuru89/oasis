@@ -14,14 +14,7 @@ import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
-import io.github.isuru.oasis.model.defs.BadgeDef;
-import io.github.isuru.oasis.model.defs.ChallengeDef;
-import io.github.isuru.oasis.model.defs.DefWrapper;
-import io.github.isuru.oasis.model.defs.GameDef;
-import io.github.isuru.oasis.model.defs.KpiDef;
-import io.github.isuru.oasis.model.defs.MilestoneDef;
-import io.github.isuru.oasis.model.defs.OasisDefinition;
-import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.*;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -106,7 +99,7 @@ public class Main {
         }
     }
 
-    private static OasisChallengeExecution createOutputHandler(Properties gameProps, OasisChallengeExecution execution) {
+    static OasisChallengeExecution createOutputHandler(Properties gameProps, OasisChallengeExecution execution) {
         String jdbcInst = gameProps.getProperty(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
         String outputType = gameProps.getProperty(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
         if ("db".equals(outputType)) {
@@ -118,7 +111,7 @@ public class Main {
         }
     }
 
-    private static OasisExecution createOutputHandler(Properties gameProps, OasisExecution execution) {
+    static OasisExecution createOutputHandler(Properties gameProps, OasisExecution execution) {
         String jdbcInst = gameProps.getProperty(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
         String outputType = gameProps.getProperty(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
         if ("db".equals(outputType)) {
@@ -155,18 +148,12 @@ public class Main {
 
     private static GameDef readGameDef(int gameId, IOasisDao dao) throws Exception {
         DefWrapper wrapper = dao.getDefinitionDao().readDefinition(gameId);
-        GameDef gameDef = mapper.readValue(wrapper.getContent(), GameDef.class);
-        gameDef.setId(wrapper.getId());
-        return gameDef;
+        return Converters.toGameDef(wrapper, wrp -> toObj(wrp.getContent(), GameDef.class));
     }
 
     private static ChallengeDef readChallenge(int challengeId, IOasisDao dao) throws Exception {
         DefWrapper wrapper = dao.getDefinitionDao().readDefinition(challengeId);
-        ChallengeDef challengeDef = mapper.readValue(wrapper.getContent(), ChallengeDef.class);
-        challengeDef.setId(wrapper.getId());
-        challengeDef.setName(wrapper.getName());
-        challengeDef.setDisplayName(wrapper.getDisplayName());
-        return challengeDef;
+        return Converters.toChallengeDef(wrapper, wrp -> toObj(wrp.getContent(), ChallengeDef.class));
     }
 
     private static Properties readConfigs(String configFile) throws IOException {
@@ -186,9 +173,9 @@ public class Main {
         }
     }
 
-    private static SourceFunction<Event> createSource(Properties gameProps) throws FileNotFoundException {
+    static SourceFunction<Event> createSource(Properties gameProps) throws FileNotFoundException {
         String type = gameProps.getProperty(Constants.KEY_SOURCE_TYPE);
-        if ("file".equals(type)) {
+        if ("file".equalsIgnoreCase(type)) {
             File inputCsv = new File(gameProps.getProperty(Constants.KEY_SOURCE_FILE));
             if (!inputCsv.exists()) {
                 throw new FileNotFoundException("Input source file does not exist! ["
@@ -198,13 +185,15 @@ public class Main {
 
         } else {
             String topic = gameProps.getProperty(Constants.KEY_KAFKA_SOURCE_TOPIC);
+            String kafkaHost = gameProps.getProperty(Constants.KEY_KAFKA_HOST);
+            Preconditions.checkArgument(kafkaHost != null && !kafkaHost.trim().isEmpty());
             Preconditions.checkArgument(topic != null && !topic.trim().isEmpty());
 
             EventDeserializer deserialization = new EventDeserializer();
 
             Properties properties = new Properties();
             // add kafka host
-            properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, gameProps.getProperty(Constants.KEY_KAFKA_HOST));
+            properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaHost);
             Map<String, Object> map = filterKeys(gameProps, Constants.KEY_PREFIX_SOURCE_KAFKA);
             properties.putAll(map);
 
@@ -212,7 +201,7 @@ public class Main {
         }
     }
 
-    private static DbProperties createConfigs(Properties gameProps) throws Exception {
+    static DbProperties createConfigs(Properties gameProps) throws Exception {
         String jdbcInst = gameProps.getProperty(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
 
         File scriptsDir = new File(gameProps.getProperty(Constants.KEY_DB_SCRIPTS_DIR));
@@ -278,33 +267,19 @@ public class Main {
     }
 
     private static BadgeDef wrapperToBadge(DefWrapper wrapper) {
-        BadgeDef badgeDef = toObj(wrapper.getContent(), BadgeDef.class);
-        badgeDef.setId(wrapper.getId());
-        badgeDef.setName(wrapper.getName());
-        badgeDef.setDisplayName(wrapper.getDisplayName());
-        return badgeDef;
+        return Converters.toBadgeDef(wrapper, wrp -> toObj(wrp.getContent(), BadgeDef.class));
     }
 
     private static KpiDef wrapperToKpi(DefWrapper wrapper) {
-        KpiDef kpiDef = toObj(wrapper.getContent(), KpiDef.class);
-        kpiDef.setId(wrapper.getId());
-        return kpiDef;
+        return Converters.toKpiDef(wrapper, wrp -> toObj(wrp.getContent(), KpiDef.class));
     }
 
     private static PointDef wrapperToPoint(DefWrapper wrapper) {
-        PointDef pointDef = toObj(wrapper.getContent(), PointDef.class);
-        pointDef.setId(wrapper.getId());
-        pointDef.setName(wrapper.getName());
-        pointDef.setDisplayName(wrapper.getDisplayName());
-        return pointDef;
+        return Converters.toPointDef(wrapper, wrp -> toObj(wrp.getContent(), PointDef.class));
     }
 
     private static MilestoneDef wrapperToMilestone(DefWrapper wrapper) {
-        MilestoneDef milestoneDef = toObj(wrapper.getContent(), MilestoneDef.class);
-        milestoneDef.setId(wrapper.getId());
-        milestoneDef.setName(wrapper.getName());
-        milestoneDef.setDisplayName(wrapper.getDisplayName());
-        return milestoneDef;
+        return Converters.toMilestoneDef(wrapper, wrp -> toObj(wrp.getContent(), MilestoneDef.class));
     }
 
     private static <T> T toObj(String value, Class<T> clz) {

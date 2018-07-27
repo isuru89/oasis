@@ -84,4 +84,11 @@ public class OasisChallengeExecution {
         return this;
     }
 
+    OasisKafkaSink getOutputSink() {
+        return outputSink;
+    }
+
+    IOutputHandler getOutputHandler() {
+        return outputHandler;
+    }
 }
