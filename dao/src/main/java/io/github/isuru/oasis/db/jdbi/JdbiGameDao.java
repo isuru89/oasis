@@ -28,6 +28,7 @@ public class JdbiGameDao implements IGameDao {
         Event event = pointNotification.getEvents().get(0);
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
+        map.put("teamId", event.getTeam());
         map.put("eventType", event.getEventType());
         map.put("extId", event.getExternalId());
         map.put("ts", event.getTimestamp());
@@ -50,6 +51,7 @@ public class JdbiGameDao implements IGameDao {
 
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
+        map.put("teamId", last.getTeam());
         map.put("eventType", last.getEventType());
         map.put("extId", last.getExternalId());
         map.put("ts", last.getTimestamp());
@@ -68,6 +70,7 @@ public class JdbiGameDao implements IGameDao {
     public void addMilestone(Long userId, int level, Event event, Milestone milestone) throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
+        map.put("teamId", event.getTeam());
         map.put("eventType", event.getEventType());
         map.put("extId", event.getExternalId());
         map.put("ts", event.getTimestamp());
@@ -107,7 +110,7 @@ public class JdbiGameDao implements IGameDao {
     public void addChallengeWinner(Long userId, ChallengeEvent challengeEvent) throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
-        map.put("teamId", null);        // @TODO team id
+        map.put("teamId", challengeEvent.getTeam());        // team id
         map.put("challengeId", challengeEvent.getChallengeDef().getId());
         map.put("points", challengeEvent.getChallengeDef().getPoints());
         map.put("wonAt", challengeEvent.getTimestamp());

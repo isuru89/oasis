@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS OA_POINTS (
     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id         INT,
+    team_id         INT,
     event_type      VARCHAR(1024),
     ext_id          BIGINT,
     ts              BIGINT,
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS OA_POINTS (
 CREATE TABLE IF NOT EXISTS OA_BADGES (
     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id         INT,
+    team_id         INT,
     event_type      VARCHAR(1024),
     ext_id          BIGINT(20),
     ts              BIGINT(20),
@@ -34,6 +36,7 @@ CREATE TABLE IF NOT EXISTS OA_BADGES (
 CREATE TABLE IF NOT EXISTS OA_MILESTONES (
     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id         INT,
+    team_id         INT,
     event_type      VARCHAR(1024),
     ext_id          BIGINT,
     ts              BIGINT,

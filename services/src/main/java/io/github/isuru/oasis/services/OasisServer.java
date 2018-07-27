@@ -40,9 +40,9 @@ public class OasisServer {
     private static void putDummyData() throws Exception {
         DbProperties dbProperties = new DbProperties(OasisDbPool.DEFAULT);
         dbProperties.setQueryLocation("./scripts/db");
-        dbProperties.setUsername("isuru");
-        dbProperties.setPassword("isuru");
-        dbProperties.setUrl("jdbc:mysql://localhost/oasis");
+        dbProperties.setUsername("root");
+        dbProperties.setPassword("");
+        dbProperties.setUrl("jdbc:mariadb://localhost/oasis");
 
         IOasisDao oasisDao = OasisDbFactory.create(dbProperties);
         IOasisApiService apiService = new DefaultOasisApiService(oasisDao);

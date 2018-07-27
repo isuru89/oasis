@@ -96,8 +96,8 @@ public class PointEvent implements Event {
     }
 
     @Override
-    public Long getScope(int level) {
-        return refEvent.getScope(level);
+    public Long getTeam() {
+        return refEvent.getTeam();
     }
 
     @Override

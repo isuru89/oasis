@@ -85,7 +85,7 @@ public class BadgeEvent implements Event {
     }
 
     @Override
-    public Long getScope(int level) {
-        return causedEvent.getScope(level);
+    public Long getTeam() {
+        return causedEvent.getTeam();
     }
 }

@@ -63,7 +63,7 @@ public class ChallengeEvent implements Event {
     }
 
     @Override
-    public Long getScope(int level) {
-        return event.getScope(level);
+    public Long getTeam() {
+        return event.getTeam();
     }
 }

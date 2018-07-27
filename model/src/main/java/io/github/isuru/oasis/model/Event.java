@@ -61,12 +61,10 @@ public interface Event extends Serializable {
     Long getUserId(String fieldName);
 
     /**
-     * Returns the scope id of this event.
-     * This scope id has no meaning to it for the system, but will
-     * be used to group events based on external criteria.
+     * Returns the current team of the associated user of this event.
      *
-     * @param level scope level.
-     * @return scope id.
+     * @return team id.
      */
-    Long getScope(int level);
+    Long getTeam();
+
 }

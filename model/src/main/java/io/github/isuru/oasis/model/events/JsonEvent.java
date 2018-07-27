@@ -48,8 +48,17 @@ public class JsonEvent extends HashMap<String, Object> implements Event {
     }
 
     @Override
-    public Long getScope(int level) {
-        return getLong("scope" + level);
+    public Long getTeam() {
+        return getLongOrNull("team");
+    }
+
+    private Long getLongOrNull(String key) {
+        Object o = get(key);
+        if (o != null) {
+            return Long.parseLong(o.toString());
+        } else {
+            return null;
+        }
     }
 
     private long getLong(String key) {
