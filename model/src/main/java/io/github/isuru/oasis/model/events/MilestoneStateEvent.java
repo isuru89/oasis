@@ -38,11 +38,11 @@ public class MilestoneStateEvent implements Serializable {
         return value != Double.MIN_VALUE;
     }
 
-    public double getNextValue() {
+    public Double getNextValue() {
         return nextValue;
     }
 
-    public long getNextValueInt() {
+    public Long getNextValueInt() {
         return nextValueInt;
     }
 

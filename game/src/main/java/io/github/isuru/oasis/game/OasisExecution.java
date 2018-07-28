@@ -21,10 +21,8 @@ import io.github.isuru.oasis.game.process.sinks.OasisBadgesSink;
 import io.github.isuru.oasis.game.process.sinks.OasisMilestoneSink;
 import io.github.isuru.oasis.game.process.sinks.OasisMilestoneStateSink;
 import io.github.isuru.oasis.game.process.sinks.OasisPointsSink;
+import io.github.isuru.oasis.model.*;
 import io.github.isuru.oasis.model.Constants;
-import io.github.isuru.oasis.model.Event;
-import io.github.isuru.oasis.model.FieldCalculator;
-import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.events.BadgeEvent;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
 import io.github.isuru.oasis.model.events.MilestoneStateEvent;
@@ -40,17 +38,23 @@ import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.tuple.Tuple6;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.SplitStream;
+import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
+import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.TableEnvironment;
+import org.apache.flink.table.api.Window;
+import org.apache.flink.table.api.java.Over;
+import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.java.Tumble;
+import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
 
 import java.util.List;
@@ -84,7 +88,7 @@ public class OasisExecution {
         if (externalEnv == null) {
             env = StreamExecutionEnvironment.getExecutionEnvironment();
             //env.enableCheckpointing(10000, CheckpointingMode.EXACTLY_ONCE);
-            env.setParallelism(5);
+            env.setParallelism(1);
             env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         } else {
             env = externalEnv;

@@ -1,10 +1,10 @@
 leaderboards:
-  - id: goc-all
+  - name: goc-all
     from: points
     ruleIds: all
     order: desc
 
-  - id: top-fixer
+  - name: top-fixer
     from: points
     ruleIds:
       - fix-violations
@@ -12,7 +12,7 @@ leaderboards:
       - fixed-violations-of-others-bonus
     order: desc
 
-  - id: coding-leader
+  - name: coding-leader
     from: points
     ruleIds:
       - churn

@@ -9,6 +9,7 @@ import io.github.isuru.oasis.game.parser.FieldCalculationParser;
 import io.github.isuru.oasis.game.parser.MilestoneParser;
 import io.github.isuru.oasis.game.parser.PointParser;
 import io.github.isuru.oasis.game.persist.DbOutputHandler;
+import io.github.isuru.oasis.game.persist.NoneOutputHandler;
 import io.github.isuru.oasis.game.persist.OasisKafkaSink;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.model.Event;
@@ -30,11 +31,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -106,6 +103,8 @@ public class Main {
             return execution.outputHandler(new DbOutputHandler(jdbcInst));
         } else if ("kafka".equals(outputType)) {
             return execution.outputHandler(createKafkaSink(gameProps));
+        } else if ("none".equalsIgnoreCase(outputType)) {
+            return execution.outputHandler(new NoneOutputHandler());
         } else {
             throw new RuntimeException("Unknown output type!");
         }
@@ -118,6 +117,8 @@ public class Main {
             return execution.outputHandler(new DbOutputHandler(jdbcInst));
         } else if ("kafka".equals(outputType)) {
             return execution.outputSink(createKafkaSink(gameProps));
+        } else if ("none".equalsIgnoreCase(outputType)) {
+            return execution.outputHandler(new NoneOutputHandler());
         } else {
             throw new RuntimeException("Unknown output type!");
         }
