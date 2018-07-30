@@ -127,6 +127,16 @@ CREATE TABLE IF NOT EXISTS OA_SHOP_ITEM (
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS OA_PURCHASE (
+    item_id         INT,
+    user_id         INT,
+    cost            FLOAT(4),
+    shared_at       BIGINT,
+    via_friend      TINYINT(1) DEFAULT 0,
+    is_active       TINYINT(1) DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS OA_JOBS (
     def_id          INT,
     jar_id          VARCHAR(2048),
