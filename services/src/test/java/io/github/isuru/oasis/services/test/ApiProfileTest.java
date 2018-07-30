@@ -174,7 +174,7 @@ class ApiProfileTest extends AbstractApiTest {
         properties.setQueryLocation(file.getAbsolutePath());
 
         oasisDao = OasisDbFactory.create(properties);
-        apiService = new DefaultOasisApiService(oasisDao);
+        apiService = new DefaultOasisApiService(oasisDao, null);
     }
 
     @AfterAll

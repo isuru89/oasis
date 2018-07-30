@@ -11,4 +11,8 @@ public interface IOasisApiService {
 
     IProfileService getProfileService();
 
+    ILifecycleService getLifecycleService();
+
+    IEventsService getEventService();
+
 }

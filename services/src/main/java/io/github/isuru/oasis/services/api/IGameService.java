@@ -9,16 +9,13 @@ import java.util.Map;
 
 public interface IGameService {
 
-    void start();
-    void stop();
 
-    void submitEvent(Map<String, Object> eventData);
-    void submitEvents(List<Map<String, Object>> events);
+
 
     void awardPoints(long userId, PointAwardDto awardDto);
     void awardBadge(long userId, BadgeAwardDto awardDto);
 
-    void postAChallenge(ChallengeDef challengeDef, boolean startImmediate);
+    void postAChallenge(ChallengeDef challengeDef, boolean startImmediate) throws Exception;
 
     void buyItem(long userBy, long itemId);
     void shareItem(long userBy, long itemId, long toUser);

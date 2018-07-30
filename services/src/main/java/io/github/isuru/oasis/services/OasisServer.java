@@ -15,16 +15,19 @@ import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.defs.PointsDef;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
+import io.github.isuru.oasis.services.utils.Configs;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 public class OasisServer {
 
     public static void main(String[] args) throws Exception {
+        initConfigs();
 //        DbProperties dbProperties = new DbProperties(OasisDbPool.DEFAULT);
 //
 //        IOasisDao oasisDao = OasisDbFactory.create(dbProperties);
@@ -37,6 +40,23 @@ public class OasisServer {
 
     }
 
+    private static void initConfigs() throws IOException {
+        String oasisConfigs = System.getenv("OASIS_CONFIG_FILE");
+        if (oasisConfigs == null || oasisConfigs.isEmpty()) {
+            oasisConfigs = System.getProperty("oasis.config.file", "./conf/oasis.properties");
+        }
+
+        Configs configs = Configs.get().initWithSysProps();
+
+        String[] parts = oasisConfigs.split("[,]");
+        for (String filePath : parts) {
+            File file = new File(filePath);
+            try (FileInputStream inputStream = new FileInputStream(file)) {
+                configs = configs.init(inputStream);
+            }
+        }
+    }
+
     private static void putDummyData() throws Exception {
         DbProperties dbProperties = new DbProperties(OasisDbPool.DEFAULT);
         dbProperties.setQueryLocation("./scripts/db");
@@ -45,7 +65,7 @@ public class OasisServer {
         dbProperties.setUrl("jdbc:mariadb://localhost/oasis");
 
         IOasisDao oasisDao = OasisDbFactory.create(dbProperties);
-        IOasisApiService apiService = new DefaultOasisApiService(oasisDao);
+        IOasisApiService apiService = new DefaultOasisApiService(oasisDao, null);
 
         GameDef gameDef = new GameDef();
         gameDef.setName("oasis-test");

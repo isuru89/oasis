@@ -22,4 +22,12 @@ public class JarListInfo {
     public void setFiles(List<FlinkJar> files) {
         this.files = files;
     }
+
+    @Override
+    public String toString() {
+        return "JarListInfo{" +
+                "address='" + address + '\'' +
+                ", files=" + files +
+                '}';
+    }
 }

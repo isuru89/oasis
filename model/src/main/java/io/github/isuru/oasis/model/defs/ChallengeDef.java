@@ -14,13 +14,13 @@ public class ChallengeDef implements Serializable {
     private String displayName;
 
     private long expireAfter;
-    private long startAt;
+    private Long startAt;
     private long winnerCount;
 
     private double points;
 
     private Collection<String> forEvents;
-    private List<Serializable> conditions;
+    private List<String> conditions;
 
     public Long getId() {
         return id;
@@ -54,11 +54,11 @@ public class ChallengeDef implements Serializable {
         this.expireAfter = expireAfter;
     }
 
-    public long getStartAt() {
+    public Long getStartAt() {
         return startAt;
     }
 
-    public void setStartAt(long startAt) {
+    public void setStartAt(Long startAt) {
         this.startAt = startAt;
     }
 
@@ -86,11 +86,11 @@ public class ChallengeDef implements Serializable {
         this.forEvents = forEvents;
     }
 
-    public List<Serializable> getConditions() {
+    public List<String> getConditions() {
         return conditions;
     }
 
-    public void setConditions(List<Serializable> conditions) {
+    public void setConditions(List<String> conditions) {
         this.conditions = conditions;
     }
 }

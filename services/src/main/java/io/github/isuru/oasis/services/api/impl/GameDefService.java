@@ -3,6 +3,7 @@ package io.github.isuru.oasis.services.api.impl;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.Converters;
 import io.github.isuru.oasis.model.defs.DefWrapper;
 import io.github.isuru.oasis.model.defs.GameDef;
@@ -314,34 +315,69 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
+    public long addChallenge(ChallengeDef challengeDef) throws Exception {
+        DefWrapper wrapper = new DefWrapper();
+        wrapper.setKind(OasisDefinition.CHALLENGE.getTypeId());
+        wrapper.setName(challengeDef.getName());
+        wrapper.setDisplayName(challengeDef.getDisplayName());
+        wrapper.setContent(RUtils.toStr(challengeDef, getMapper()));
+        wrapper.setGameId(gameId);
+
+        return getDao().getDefinitionDao().addDefinition(wrapper);
+    }
+
+    @Override
+    public ChallengeDef readChallenge(long id) throws Exception {
+        return wrapperToChallenge(getDao().getDefinitionDao().readDefinition(id));
+    }
+
+    @Override
+    public List<ChallengeDef> listChallenges() throws Exception {
+        return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.CHALLENGE.getTypeId())
+                .stream()
+                .map(this::wrapperToChallenge)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean disableChallenge(long id) throws Exception {
+        return getDao().getDefinitionDao().disableDefinition(id);
+    }
+
+    @Override
     public boolean disableShopItem(long id) throws Exception {
         return getDao().executeCommand("def/item/disableItem",
                 Maps.create("itemId", id)) > 0;
     }
 
+    private ChallengeDef wrapperToChallenge(DefWrapper wrapper) {
+        return Converters.toChallengeDef(wrapper,
+                wrp -> RUtils.toObj(wrp.getContent(), ChallengeDef.class, getMapper()));
+    }
+
     private BadgeDef wrapperToBadge(DefWrapper wrapper) {
         return Converters.toBadgeDef(wrapper,
-                wrp -> RUtils.toObj(wrapper.getContent(), BadgeDef.class, getMapper()));
+                wrp -> RUtils.toObj(wrp.getContent(), BadgeDef.class, getMapper()));
     }
 
     private KpiDef wrapperToKpi(DefWrapper wrapper) {
         return Converters.toKpiDef(wrapper,
-                wrp -> RUtils.toObj(wrapper.getContent(), KpiDef.class, getMapper()));
+                wrp -> RUtils.toObj(wrp.getContent(), KpiDef.class, getMapper()));
     }
 
     private PointDef wrapperToPoint(DefWrapper wrapper) {
         return Converters.toPointDef(wrapper,
-                wrp -> RUtils.toObj(wrapper.getContent(), PointDef.class, getMapper()));
+                wrp -> RUtils.toObj(wrp.getContent(), PointDef.class, getMapper()));
     }
 
     private MilestoneDef wrapperToMilestone(DefWrapper wrapper) {
         return Converters.toMilestoneDef(wrapper,
-                wrp -> RUtils.toObj(wrapper.getContent(), MilestoneDef.class, getMapper()));
+                wrp -> RUtils.toObj(wrp.getContent(), MilestoneDef.class, getMapper()));
     }
 
     private LeaderboardDef wrapperToLeaderboard(DefWrapper wrapper) {
         return Converters.toLeaderboardDef(wrapper,
-                wrp -> RUtils.toObj(wrapper.getContent(), LeaderboardDef.class, getMapper()));
+                wrp -> RUtils.toObj(wrp.getContent(), LeaderboardDef.class, getMapper()));
     }
 
 }

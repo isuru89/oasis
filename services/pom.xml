@@ -30,6 +30,16 @@
             <version>2.3.0</version>
         </dependency>
         <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>adapter-rxjava2</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>converter-jackson</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
             <groupId>io.github.isuru</groupId>
             <artifactId>oasis-dao</artifactId>
             <version>${project.version}</version>
@@ -38,6 +48,11 @@
             <groupId>io.github.isuru</groupId>
             <artifactId>oasis-model</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
         </dependency>
     </dependencies>
 

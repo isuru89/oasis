@@ -6,6 +6,7 @@ import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.KpiDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
@@ -375,6 +376,48 @@ class ApiDefTest extends AbstractApiTest {
         Assertions.assertTrue(gameDefService.disableGame(gameId));
     }
 
+    @Test
+    void testChallenges() throws Exception {
+        IGameDefService gameDefService = apiService.getGameDefService();
+        long gameId = createGame("game-challenge-test", "Testing challenges");
+        Assertions.assertTrue(gameId > 0);
+
+        ChallengeDef def = new ChallengeDef();
+        def.setName("holiday-surprise");
+        def.setDisplayName("Holiday Surprise");
+        def.setForEvents(Collections.singletonList("ticket-resolve"));
+        def.setConditions(Collections.singletonList("true"));
+        def.setExpireAfter(System.currentTimeMillis() + 8400000);
+        def.setWinnerCount(100);
+        def.setPoints(200);
+
+        long cid = gameDefService.addChallenge(def);
+        Assertions.assertTrue(cid > 0);
+
+        List<ChallengeDef> challengeDefs = gameDefService.listChallenges();
+        Assertions.assertNotNull(challengeDefs);
+        Assertions.assertEquals(1, challengeDefs.size());
+
+        ChallengeDef challenge = gameDefService.readChallenge(cid);
+        Assertions.assertNotNull(challenge);
+        Assertions.assertEquals(cid, (long) challenge.getId());
+        Assertions.assertEquals(def.getName(), challenge.getName());
+        Assertions.assertEquals(def.getDisplayName(), challenge.getDisplayName());
+        Assertions.assertEquals(def.getPoints(), challenge.getPoints());
+        Assertions.assertEquals(def.getForEvents().size(), challenge.getForEvents().size());
+        Assertions.assertEquals(def.getConditions().size(), challenge.getConditions().size());
+        Assertions.assertEquals(def.getForEvents().iterator().next(),
+                challenge.getForEvents().iterator().next());
+        Assertions.assertEquals(def.getConditions().iterator().next(),
+                challenge.getConditions().iterator().next());
+        Assertions.assertEquals(def.getExpireAfter(), challenge.getExpireAfter());
+        Assertions.assertEquals(def.getWinnerCount(), challenge.getWinnerCount());
+        Assertions.assertNull(challenge.getStartAt());
+
+        Assertions.assertTrue(gameDefService.disableChallenge(cid));
+        Assertions.assertTrue(gameDefService.disableGame(gameId));
+    }
+
     private long createGame(String name, String displayName) throws Exception {
         GameDef def = new GameDef();
         def.setName(name);
@@ -419,7 +462,7 @@ class ApiDefTest extends AbstractApiTest {
         properties.setQueryLocation(file.getAbsolutePath());
 
         oasisDao = OasisDbFactory.create(properties);
-        apiService = new DefaultOasisApiService(oasisDao);
+        apiService = new DefaultOasisApiService(oasisDao, null);
     }
 
     @AfterAll

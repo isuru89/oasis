@@ -126,3 +126,13 @@ CREATE TABLE IF NOT EXISTS OA_SHOP_ITEM (
     expiration_at   BIGINT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS OA_JOBS (
+    def_id          INT,
+    jar_id          VARCHAR(2048),
+    job_id          VARCHAR(2048),
+    snapshot_dir    VARCHAR(2048),
+    is_active       TINYINT(1) DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

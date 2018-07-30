@@ -10,7 +10,8 @@ public enum OasisDefinition {
     POINT(5),
     BADGE(6),
     MILESTONE(7),
-    LEADERBOARD(8);
+    LEADERBOARD(8),
+    CHALLENGE(10);
 
     private final int typeId;
 

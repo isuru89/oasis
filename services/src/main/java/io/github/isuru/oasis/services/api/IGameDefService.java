@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.api;
 
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.KpiDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
@@ -52,4 +53,9 @@ public interface IGameDefService {
     List<ShopItem> listShopItems() throws Exception;
     ShopItem readShopItem(long id) throws Exception;
     boolean disableShopItem(long id) throws Exception;
+
+    long addChallenge(ChallengeDef challengeDef) throws Exception;
+    ChallengeDef readChallenge(long id) throws Exception;
+    List<ChallengeDef> listChallenges() throws Exception;
+    boolean disableChallenge(long id) throws Exception;
 }

@@ -7,7 +7,6 @@ import io.github.isuru.oasis.model.events.EventNames;
 import org.apache.flink.api.common.functions.FilterFunction;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -30,8 +29,8 @@ public class ChallengeFilter implements FilterFunction<Event> {
 
     public static boolean filter(Event event, ChallengeDef challengeDef) throws IOException {
         if (challengeDef.getForEvents().contains(event.getEventType())) {
-            List<Serializable> conditions = challengeDef.getConditions();
-            for (Serializable c : conditions) {
+            List<String> conditions = challengeDef.getConditions();
+            for (String c : conditions) {
                 if (Utils.evaluateCondition(c, event.getAllFieldValues())) {
                     return true;
                 }
