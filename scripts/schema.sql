@@ -113,3 +113,16 @@ CREATE TABLE IF NOT EXISTS OA_CHALLENGE_WINNER (
     is_active       TINYINT(1) DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS OA_SHOP_ITEM (
+    id              INT PRIMARY KEY AUTO_INCREMENT,
+    title           VARCHAR(64),
+    description     VARCHAR(2048),
+    scope           VARCHAR(32),
+    level           INT,
+    price           FLOAT(4),
+    image_ref       VARCHAR(512),
+    is_active       TINYINT(1) DEFAULT 1,
+    expiration_at   BIGINT,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

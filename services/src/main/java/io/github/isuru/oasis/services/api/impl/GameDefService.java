@@ -12,6 +12,7 @@ import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.OasisDefinition;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.services.api.IGameDefService;
+import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.RUtils;
 
 import java.util.LinkedList;
@@ -281,23 +282,41 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public void addShopItem(ShopItem item) {
+    public long addShopItem(ShopItem item) throws Exception {
+        Map<String, Object> data = Maps.create()
+                .put("title", item.getTitle())
+                .put("description", item.getDescription())
+                .put("scope", item.getScope())
+                .put("level", item.getLevel())
+                .put("price", item.getPrice())
+                .put("imageRef", item.getImageRef())
+                .put("expirationAt", item.getExpirationAt())
+                .build();
 
+        return getDao().executeInsert("def/item/addShopItem", data, "id");
     }
 
     @Override
-    public List<ShopItem> listShopItems() {
-        return null;
+    public List<ShopItem> listShopItems() throws Exception {
+        Iterable<ShopItem> items = getDao().executeQuery("def/item/listItems", null, ShopItem.class);
+        LinkedList<ShopItem> shopItems = new LinkedList<>();
+        for (ShopItem item : items) {
+            shopItems.add(item);
+        }
+        return shopItems;
     }
 
     @Override
-    public ShopItem readShopItem(long id) {
-        return null;
+    public ShopItem readShopItem(long id) throws Exception {
+        return getTheOnlyRecord("def/item/readItem",
+                Maps.create("itemId", id),
+                ShopItem.class);
     }
 
     @Override
-    public boolean disableShopItem(long id) {
-        return false;
+    public boolean disableShopItem(long id) throws Exception {
+        return getDao().executeCommand("def/item/disableItem",
+                Maps.create("itemId", id)) > 0;
     }
 
     private BadgeDef wrapperToBadge(DefWrapper wrapper) {

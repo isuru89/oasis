@@ -48,7 +48,7 @@ public interface IGameDefService {
     LeaderboardDef readLeaderboardDef(long id) throws Exception;
     boolean disableLeaderboardDef(long id) throws Exception;
 
-    void addShopItem(ShopItem item) throws Exception;
+    long addShopItem(ShopItem item) throws Exception;
     List<ShopItem> listShopItems() throws Exception;
     ShopItem readShopItem(long id) throws Exception;
     boolean disableShopItem(long id) throws Exception;

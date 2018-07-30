@@ -15,18 +15,14 @@ public class Maps {
     }
 
     public static MapBuilder create() {
-        return new MapBuilder(null);
+        return new MapBuilder();
     }
 
     public static class MapBuilder {
         private final Map<String, Object> map;
 
-        MapBuilder(Map<String, Object> map) {
-            if (map != null) {
-                this.map = map;
-            } else {
-                this.map = new HashMap<>();
-            }
+        MapBuilder() {
+            this.map = new HashMap<>();
         }
 
         public Map<String, Object> build() {

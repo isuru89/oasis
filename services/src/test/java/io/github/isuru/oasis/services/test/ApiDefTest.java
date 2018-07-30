@@ -4,6 +4,7 @@ import io.github.isuru.oasis.db.DbProperties;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.db.OasisDbPool;
+import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.BadgeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.KpiDef;
@@ -302,6 +303,77 @@ class ApiDefTest extends AbstractApiTest {
         }
     }
 
+    @Test
+    void testShopItems() throws Exception {
+        IGameDefService gameDefService = apiService.getGameDefService();
+        long gameId = createGame("game-shop-test", "Testing shop");
+        Assertions.assertTrue(gameId > 0);
+
+        long item1Id;
+        {
+            ShopItem shopItem = new ShopItem();
+            shopItem.setTitle("Tango");
+            shopItem.setDescription("Consumes a target tree to gain 7 health regeneration for 16 seconds.");
+            shopItem.setLevel(1);
+            shopItem.setScope("Consumable");
+            shopItem.setPrice(90);
+
+            long sid = gameDefService.addShopItem(shopItem);
+            item1Id = sid;
+            Assertions.assertTrue(sid > 0);
+
+            List<ShopItem> items = gameDefService.listShopItems();
+            Assertions.assertNotNull(items);
+            Assertions.assertEquals(1, items.size());
+            Assertions.assertEquals(sid, (long) items.get(0).getId());
+
+            ShopItem item = gameDefService.readShopItem(sid);
+            Assertions.assertNotNull(item);
+            Assertions.assertTrue(item.getId() > 0);
+            Assertions.assertEquals(item.getTitle(), shopItem.getTitle());
+            Assertions.assertEquals(item.getDescription(), shopItem.getDescription());
+            Assertions.assertEquals(item.getLevel(), shopItem.getLevel());
+            Assertions.assertEquals(item.getScope(), shopItem.getScope());
+            Assertions.assertEquals(item.getPrice(), shopItem.getPrice());
+            Assertions.assertNull(item.getExpirationAt());
+            Assertions.assertNull(item.getImageRef());
+        }
+
+        ShopItem magicStick = new ShopItem();
+        magicStick.setTitle("Magic Stick");
+        magicStick.setDescription("Instantly restores 15 health and mana per charge stored.");
+        magicStick.setPrice(200);
+        magicStick.setScope("Arcane");
+        magicStick.setLevel(3);
+        magicStick.setExpirationAt(System.currentTimeMillis() + 8400000);
+        magicStick.setImageRef("/images/item/magic_stick.png");
+
+        long sid = gameDefService.addShopItem(magicStick);
+        Assertions.assertTrue(sid > 0);
+
+        List<ShopItem> items = gameDefService.listShopItems();
+        Assertions.assertNotNull(items);
+        Assertions.assertEquals(2, items.size());
+
+        ShopItem item = gameDefService.readShopItem(sid);
+        Assertions.assertNotNull(item);
+        Assertions.assertTrue(item.getId() > 0);
+        Assertions.assertNotNull(item.getImageRef());
+        Assertions.assertNotNull(item.getExpirationAt());
+        Assertions.assertEquals(magicStick.getExpirationAt(), item.getExpirationAt());
+        Assertions.assertEquals(magicStick.getImageRef(), item.getImageRef());
+
+        Assertions.assertTrue(gameDefService.disableShopItem(item1Id));
+
+        items = gameDefService.listShopItems();
+        Assertions.assertNotNull(items);
+        Assertions.assertEquals(1, items.size());
+
+        // @TODO check read deleted shop item
+
+        Assertions.assertTrue(gameDefService.disableShopItem(sid));
+        Assertions.assertTrue(gameDefService.disableGame(gameId));
+    }
 
     private long createGame(String name, String displayName) throws Exception {
         GameDef def = new GameDef();
@@ -355,6 +427,7 @@ class ApiDefTest extends AbstractApiTest {
         System.out.println("Shutting down db connection.");
         try {
             oasisDao.executeRawCommand("TRUNCATE OA_DEFINITION", new HashMap<>());
+            oasisDao.executeRawCommand("TRUNCATE OA_SHOP_ITEM", new HashMap<>());
         } catch (Exception ex) {
             ex.printStackTrace();
         }

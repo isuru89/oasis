@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.api;
 
+import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.services.model.BadgeAwardDto;
 import io.github.isuru.oasis.services.model.PointAwardDto;
 
@@ -17,9 +18,10 @@ public interface IGameService {
     void awardPoints(long userId, PointAwardDto awardDto);
     void awardBadge(long userId, BadgeAwardDto awardDto);
 
-    void postAChallenge();
-    void awardBadge(long toUser, long badgeId);
+    void postAChallenge(ChallengeDef challengeDef, boolean startImmediate);
+
     void buyItem(long userBy, long itemId);
+    void shareItem(long userBy, long itemId, long toUser);
 
     void readGameTimeline(long since);
 
