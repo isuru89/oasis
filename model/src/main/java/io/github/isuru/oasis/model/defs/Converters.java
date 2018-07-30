@@ -1,7 +1,6 @@
 package io.github.isuru.oasis.model.defs;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class Converters {
 
@@ -35,6 +34,14 @@ public class Converters {
 
     public static MilestoneDef toMilestoneDef(DefWrapper wrapper, Function<DefWrapper, MilestoneDef> creator) {
         MilestoneDef def = creator.apply(wrapper);
+        def.setId(wrapper.getId());
+        def.setName(wrapper.getName());
+        def.setDisplayName(wrapper.getDisplayName());
+        return def;
+    }
+
+    public static LeaderboardDef toLeaderboardDef(DefWrapper wrapper, Function<DefWrapper, LeaderboardDef> creator) {
+        LeaderboardDef def = creator.apply(wrapper);
         def.setId(wrapper.getId());
         def.setName(wrapper.getName());
         def.setDisplayName(wrapper.getDisplayName());

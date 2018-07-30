@@ -22,7 +22,7 @@ abstract class BaseService {
         return dao;
     }
 
-    public ObjectMapper getMapper() {
+    ObjectMapper getMapper() {
         return mapper;
     }
 

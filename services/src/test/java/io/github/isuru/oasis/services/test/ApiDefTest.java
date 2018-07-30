@@ -7,6 +7,7 @@ import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.model.defs.BadgeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.KpiDef;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.defs.PointsAdditional;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -250,6 +252,51 @@ class ApiDefTest extends AbstractApiTest {
         try {
             gameDefService.readGame(Integer.MAX_VALUE - 1000);
             Assertions.fail("Non existing game read should fail!");
+        } catch (Exception ex) {
+            // ok ignored
+        }
+    }
+
+    @Test
+    void testLeaderboardTest() throws Exception {
+        IGameDefService gameDefService = apiService.getGameDefService();
+        long gameId = createGame("game-leaderboard-test", "Testing leaderboard");
+        Assertions.assertTrue(gameId > 0);
+
+        LeaderboardDef def = new LeaderboardDef();
+        def.setName("top-resolver");
+        def.setDisplayName("Top Resolvers");
+        def.setOrderBy("desc");
+        def.setRuleIds(Arrays.asList("ticket-resolved", "ticket-closed"));
+        long lid = gameDefService.addLeaderboardDef(def);
+        Assertions.assertTrue(lid > 0);
+
+        List<LeaderboardDef> leaderboardDefs = gameDefService.listLeaderboardDefs();
+        Assertions.assertNotNull(leaderboardDefs);
+        Assertions.assertEquals(1, leaderboardDefs.size());
+
+        LeaderboardDef leaderboard = gameDefService.readLeaderboardDef(lid);
+        Assertions.assertNotNull(leaderboard);
+        Assertions.assertEquals(lid, (long) leaderboard.getId());
+        Assertions.assertEquals(def.getName(), leaderboard.getName());
+        Assertions.assertEquals(def.getDisplayName(), leaderboard.getDisplayName());
+        Assertions.assertEquals(def.getOrderBy(), leaderboard.getOrderBy());
+        Assertions.assertNotNull(def.getRuleIds());
+        Assertions.assertNull(def.getExcludeRuleIds());
+        Assertions.assertEquals(def.getRuleIds().size(), leaderboard.getRuleIds().size());
+        Assertions.assertTrue(def.getRuleIds().contains(leaderboard.getRuleIds().get(0)));
+        Assertions.assertTrue(def.getRuleIds().contains(leaderboard.getRuleIds().get(1)));
+
+        Assertions.assertTrue(gameDefService.disableLeaderboardDef(lid));
+        List<LeaderboardDef> leaderboardDefList = gameDefService.listLeaderboardDefs();
+        Assertions.assertTrue(leaderboardDefList.isEmpty());
+
+        Assertions.assertTrue(gameDefService.disableGame(gameId));
+
+        // non existing leaderboard id should throw exception
+        try {
+            gameDefService.readLeaderboardDef(Integer.MAX_VALUE - 1000);
+            Assertions.fail("Non existing leaderboard read should fail!");
         } catch (Exception ex) {
             // ok ignored
         }

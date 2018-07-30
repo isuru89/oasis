@@ -1,16 +1,17 @@
 package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.db.IOasisDao;
-import io.github.isuru.oasis.model.LeaderboardDef;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.Converters;
 import io.github.isuru.oasis.model.defs.DefWrapper;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.KpiDef;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
+import io.github.isuru.oasis.model.defs.OasisDefinition;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.services.api.IGameDefService;
-import io.github.isuru.oasis.model.defs.OasisDefinition;
 import io.github.isuru.oasis.services.utils.RUtils;
 
 import java.util.LinkedList;
@@ -250,18 +251,28 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public void addLeaderboardDef(LeaderboardDef leaderboardDef) {
+    public long addLeaderboardDef(LeaderboardDef leaderboardDef) throws Exception {
+        DefWrapper wrapper = new DefWrapper();
+        wrapper.setKind(OasisDefinition.LEADERBOARD.getTypeId());
+        wrapper.setName(leaderboardDef.getName());
+        wrapper.setDisplayName(leaderboardDef.getDisplayName());
+        wrapper.setContent(RUtils.toStr(leaderboardDef, getMapper()));
+        wrapper.setGameId(gameId);
 
+        return getDao().getDefinitionDao().addDefinition(wrapper);
     }
 
     @Override
-    public List<LeaderboardDef> listLeaderboardDefs() {
-        return null;
+    public List<LeaderboardDef> listLeaderboardDefs() throws Exception {
+        return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.LEADERBOARD.getTypeId())
+                .stream()
+                .map(this::wrapperToLeaderboard)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public LeaderboardDef readLeaderboardDef() {
-        return null;
+    public LeaderboardDef readLeaderboardDef(long id) throws Exception {
+        return wrapperToLeaderboard(getDao().getDefinitionDao().readDefinition(id));
     }
 
     @Override
@@ -290,33 +301,28 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     private BadgeDef wrapperToBadge(DefWrapper wrapper) {
-        BadgeDef badgeDef = RUtils.toObj(wrapper.getContent(), BadgeDef.class, getMapper());
-        badgeDef.setId(wrapper.getId());
-        badgeDef.setName(wrapper.getName());
-        badgeDef.setDisplayName(wrapper.getDisplayName());
-        return badgeDef;
+        return Converters.toBadgeDef(wrapper,
+                wrp -> RUtils.toObj(wrapper.getContent(), BadgeDef.class, getMapper()));
     }
 
     private KpiDef wrapperToKpi(DefWrapper wrapper) {
-        KpiDef kpiDef = RUtils.toObj(wrapper.getContent(), KpiDef.class, getMapper());
-        kpiDef.setId(wrapper.getId());
-        return kpiDef;
+        return Converters.toKpiDef(wrapper,
+                wrp -> RUtils.toObj(wrapper.getContent(), KpiDef.class, getMapper()));
     }
 
     private PointDef wrapperToPoint(DefWrapper wrapper) {
-        PointDef pointDef = RUtils.toObj(wrapper.getContent(), PointDef.class, getMapper());
-        pointDef.setId(wrapper.getId());
-        pointDef.setName(wrapper.getName());
-        pointDef.setDisplayName(wrapper.getDisplayName());
-        return pointDef;
+        return Converters.toPointDef(wrapper,
+                wrp -> RUtils.toObj(wrapper.getContent(), PointDef.class, getMapper()));
     }
 
     private MilestoneDef wrapperToMilestone(DefWrapper wrapper) {
-        MilestoneDef milestoneDef = RUtils.toObj(wrapper.getContent(), MilestoneDef.class, getMapper());
-        milestoneDef.setId(wrapper.getId());
-        milestoneDef.setName(wrapper.getName());
-        milestoneDef.setDisplayName(wrapper.getDisplayName());
-        return milestoneDef;
+        return Converters.toMilestoneDef(wrapper,
+                wrp -> RUtils.toObj(wrapper.getContent(), MilestoneDef.class, getMapper()));
+    }
+
+    private LeaderboardDef wrapperToLeaderboard(DefWrapper wrapper) {
+        return Converters.toLeaderboardDef(wrapper,
+                wrp -> RUtils.toObj(wrapper.getContent(), LeaderboardDef.class, getMapper()));
     }
 
 }

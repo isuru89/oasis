@@ -6,4 +6,8 @@ public class ShopItem {
     private String title;
     private String description;
 
+    private float price;
+    private String imageRef;
+
+
 }

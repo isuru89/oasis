@@ -1,10 +1,10 @@
 package io.github.isuru.oasis.services.api;
 
-import io.github.isuru.oasis.model.LeaderboardDef;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.BadgeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.KpiDef;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 
@@ -43,9 +43,9 @@ public interface IGameDefService {
     MilestoneDef readMilestoneDef(long id) throws Exception;
     boolean disableMilestoneDef(long id) throws Exception;
 
-    void addLeaderboardDef(LeaderboardDef leaderboardDef) throws Exception;
+    long addLeaderboardDef(LeaderboardDef leaderboardDef) throws Exception;
     List<LeaderboardDef> listLeaderboardDefs() throws Exception;
-    LeaderboardDef readLeaderboardDef() throws Exception;
+    LeaderboardDef readLeaderboardDef(long id) throws Exception;
     boolean disableLeaderboardDef(long id) throws Exception;
 
     void addShopItem(ShopItem item) throws Exception;

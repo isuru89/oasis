@@ -110,5 +110,6 @@ CREATE TABLE IF NOT EXISTS OA_CHALLENGE_WINNER (
     challenge_id    INT,
     points          FLOAT(4),
     won_at          BIGINT,
+    is_active       TINYINT(1) DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

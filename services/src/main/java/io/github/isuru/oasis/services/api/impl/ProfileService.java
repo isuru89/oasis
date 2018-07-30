@@ -97,6 +97,12 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public boolean addUserToTeam(long userId, long teamId) throws Exception {
+        // if the current team is same as previous team, then don't add
+        UserTeam userTeam = findCurrentTeamOfUser(userId);
+        if (userTeam != null && userTeam.getTeamId() == teamId) {
+            return false;
+        }
+
         return getDao().executeInsert("profile/addUserToTeam",
                 Maps.create()
                         .put("userId", userId)
