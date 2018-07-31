@@ -15,4 +15,6 @@ public interface IOasisApiService {
 
     IEventsService getEventService();
 
+    IStatService getStatService();
+
 }

@@ -122,33 +122,4 @@ public class ProfileService extends BaseService implements IProfileService {
                 UserTeam.class);
     }
 
-    @Override
-    public void readUserGameStats(long userId) {
-
-    }
-
-    @Override
-    public void readUserGameTimeline(long userId) {
-
-    }
-
-    @Override
-    public void readUserBadges(long userId) {
-
-    }
-
-    @Override
-    public void readUserPoints(long userId) {
-
-    }
-
-    @Override
-    public void readUserMilestones(long userId) {
-
-    }
-
-    @Override
-    public void readUserRankings(long userId) {
-
-    }
 }

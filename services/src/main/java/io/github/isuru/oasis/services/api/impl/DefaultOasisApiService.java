@@ -7,6 +7,7 @@ import io.github.isuru.oasis.services.api.IGameService;
 import io.github.isuru.oasis.services.api.ILifecycleService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IProfileService;
+import io.github.isuru.oasis.services.api.IStatService;
 import io.github.isuru.oasis.services.backend.FlinkServices;
 
 /**
@@ -18,6 +19,7 @@ public class DefaultOasisApiService implements IOasisApiService {
     private IGameService gameService;
     private IProfileService profileService;
     private ILifecycleService lifecycleService;
+    private IStatService statService;
 
     public DefaultOasisApiService(IOasisDao oasisDao, FlinkServices flinkServices) {
         gameDefService = new GameDefService(oasisDao, this);
@@ -49,4 +51,10 @@ public class DefaultOasisApiService implements IOasisApiService {
     public IEventsService getEventService() {
         return null;
     }
+
+    @Override
+    public IStatService getStatService() {
+        return null;
+    }
+
 }

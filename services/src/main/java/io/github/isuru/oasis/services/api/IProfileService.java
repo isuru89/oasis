@@ -19,12 +19,4 @@ public interface IProfileService {
     boolean addUserToTeam(long userId, long teamId) throws Exception;
     UserTeam findCurrentTeamOfUser(long userId) throws Exception;
 
-    void readUserGameStats(long userId);
-    void readUserGameTimeline(long userId);
-    void readUserBadges(long userId);
-    void readUserPoints(long userId);
-    void readUserMilestones(long userId);
-    void readUserRankings(long userId);
-
-
 }
