@@ -3,6 +3,7 @@ package io.github.isuru.oasis.services.api.impl;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.DefWrapper;
 import io.github.isuru.oasis.model.defs.GameDef;
+import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.ILifecycleService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
@@ -26,7 +27,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
+import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
@@ -36,14 +37,12 @@ import java.util.Map;
 public class LifeCycleService extends BaseService implements ILifecycleService  {
 
     private final FlinkServices services;
-    private final IOasisApiService apiService;
 
     LifeCycleService(IOasisDao dao, IOasisApiService apiService,
                      FlinkServices flinkServices) {
-        super(dao);
+        super(dao, apiService);
 
         this.services = flinkServices;
-        this.apiService = apiService;
     }
 
     @Override
@@ -142,32 +141,35 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
 
     private void writeGameRulesFile(long defId, boolean isGame, File executionDir) throws Exception {
         File ruleFile = executionDir.toPath().resolve("rules.yml").toFile();
+        try (FileWriter writer = new FileWriter(ruleFile)) {
+            writeGameRulesFile(defId, isGame, writer);
+        }
+    }
 
-        IGameDefService gameDefService = apiService.getGameDefService();
-        Map<String, Object> content = new HashMap<>();
+    public void writeGameRulesFile(long defId, boolean isGame, Writer writer) throws Exception {
+        IGameDefService gameDefService = getApiService().getGameDefService();
+        OasisGameDef oasisGameDef = new OasisGameDef();
 
         if (isGame) {
             GameDef gameDef = gameDefService.readGame(defId);
-            content.put("game", gameDef);
+            oasisGameDef.setGame(gameDef);
 
-            content.put("kpis", gameDefService.listKpiCalculations(defId));
-            content.put("points", gameDefService.listPointDefs(defId));
-            content.put("badges", gameDefService.listBadgeDefs(defId));
-            content.put("milestones", gameDefService.listMilestoneDefs(defId));
+            oasisGameDef.setKpis(gameDefService.listKpiCalculations(defId));
+            oasisGameDef.setPoints(gameDefService.listPointDefs(defId));
+            oasisGameDef.setBadges(gameDefService.listBadgeDefs(defId));
+            oasisGameDef.setMilestones(gameDefService.listMilestoneDefs(defId));
 
         } else {
             // write challenge configs to file
             DefWrapper wrapper = getDao().getDefinitionDao().readDefinition(defId);
             Long gameId = wrapper.getGameId();
 
-            content.put("game", gameDefService.readGame(gameId));
-            content.put("challenge", gameDefService.readChallenge(defId));
+            oasisGameDef.setGame(gameDefService.readGame(gameId));
+            oasisGameDef.setChallenge(gameDefService.readChallenge(defId));
         }
 
         Yaml yaml = new Yaml();
-        try (FileWriter writer = new FileWriter(ruleFile)) {
-            yaml.dump(content, writer);
-        }
+        yaml.dump(oasisGameDef, writer);
     }
 
     private String buildGameArgs(boolean isGame, long defId, File executionFile) throws IOException {

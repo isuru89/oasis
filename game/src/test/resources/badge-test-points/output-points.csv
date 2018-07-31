@@ -18,9 +18,9 @@
 100,virus,,-3,14
 105,virus,,-3,14
 
-100,badge_bonus_points,,100,14
-101,badge_bonus_points,,10,14
-101,badge_bonus_points,,5,11
+100,__oasis_badge_bonus__,,100,14
+101,__oasis_badge_bonus__,,10,14
+101,__oasis_badge_bonus__,,5,11
 
 
 

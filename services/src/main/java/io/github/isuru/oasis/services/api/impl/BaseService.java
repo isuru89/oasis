@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.api.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.services.api.IOasisApiService;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -13,9 +14,11 @@ abstract class BaseService {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final IOasisDao dao;
+    private final IOasisApiService apiService;
 
-    BaseService(IOasisDao dao) {
+    BaseService(IOasisDao dao, IOasisApiService apiService) {
         this.dao = dao;
+        this.apiService = apiService;
     }
 
     IOasisDao getDao() {
@@ -24,6 +27,10 @@ abstract class BaseService {
 
     ObjectMapper getMapper() {
         return mapper;
+    }
+
+    IOasisApiService getApiService() {
+        return apiService;
     }
 
     <T> T getTheOnlyRecord(String queryId, Map<String, Object> data, Class<T> clz) throws Exception {

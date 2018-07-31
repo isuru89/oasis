@@ -21,9 +21,11 @@ import io.github.isuru.oasis.game.process.sinks.OasisBadgesSink;
 import io.github.isuru.oasis.game.process.sinks.OasisMilestoneSink;
 import io.github.isuru.oasis.game.process.sinks.OasisMilestoneStateSink;
 import io.github.isuru.oasis.game.process.sinks.OasisPointsSink;
-import io.github.isuru.oasis.model.*;
-import io.github.isuru.oasis.model.Constants;
+import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.FieldCalculator;
+import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.events.BadgeEvent;
+import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
 import io.github.isuru.oasis.model.events.MilestoneStateEvent;
 import io.github.isuru.oasis.model.events.PointEvent;
@@ -38,26 +40,20 @@ import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.tuple.Tuple6;
-import org.apache.flink.api.java.typeutils.RowTypeInfo;
-import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
-import org.apache.flink.streaming.api.datastream.*;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
+import org.apache.flink.streaming.api.datastream.SplitStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.Window;
-import org.apache.flink.table.api.java.Over;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
-import org.apache.flink.table.api.java.Tumble;
-import org.apache.flink.types.Row;
 import org.apache.flink.util.OutputTag;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author iweerarathna
@@ -202,25 +198,25 @@ public class OasisExecution {
         //
 
         // award points from badges...
-        if (badgeNotyStream != null) {  // @TODO create reserved point rule
-            PointRule badgePointAwardRule = new PointRule();
-            badgePointAwardRule.setId(100000);
-            badgePointAwardRule.setName(Constants.POINTS_FROM_BADGE_TAG);
-            DataStream<PointNotification> tmp = badgeNotyStream
-                    .flatMap(new PointsFromBadgeMapper(badgePointAwardRule))
-                    .uid(String.format("badge-to-points-%s", oasisId));
-            pointNotyStream = pointNotyStream.union(tmp);
+        if (badgeNotyStream != null) {  // use reserved point rule
+            Optional<PointRule> pointRule = findPointRule(EventNames.POINT_RULE_BADGE_BONUS_NAME);
+            if (pointRule.isPresent()) {
+                DataStream<PointNotification> tmp = badgeNotyStream
+                        .flatMap(new PointsFromBadgeMapper(pointRule.get()))
+                        .uid(String.format("badge-to-points-%s", oasisId));
+                pointNotyStream = pointNotyStream.union(tmp);
+            }
         }
 
         // award points from milestones...
-        if (milestoneNotyStream != null) { // @TODO create reserved point rule
-            PointRule milestonePointAwardRule = new PointRule();
-            milestonePointAwardRule.setId(100001);
-            milestonePointAwardRule.setName(Constants.POINTS_FROM_MILESTONE_TAG);
-            DataStream<PointNotification> tmp = milestoneNotyStream
-                    .flatMap(new PointsFromMilestoneMapper(milestonePointAwardRule))
-                    .uid(String.format("milestone-to-points-%s", oasisId));
-            pointNotyStream = pointNotyStream.union(tmp);
+        if (milestoneNotyStream != null) { // use reserved point rule
+            Optional<PointRule> pointRule = findPointRule(EventNames.POINT_RULE_MILESTONE_BONUS_NAME);
+            if (pointRule.isPresent()) {
+                DataStream<PointNotification> tmp = milestoneNotyStream
+                        .flatMap(new PointsFromMilestoneMapper(pointRule.get()))
+                        .uid(String.format("milestone-to-points-%s", oasisId));
+                pointNotyStream = pointNotyStream.union(tmp);
+            }
         }
 
         //
@@ -260,6 +256,13 @@ public class OasisExecution {
 
     public void start() throws Exception {
         env.execute();
+    }
+
+    private Optional<PointRule> findPointRule(String name) {
+        if (pointRules != null) {
+            return pointRules.stream().filter(p -> name.equals(p.getName())).findFirst();
+        }
+        return Optional.empty();
     }
 
     private void attachSinks(DataStream<PointNotification> pointNotyStream,
@@ -340,7 +343,7 @@ public class OasisExecution {
         return this;
     }
 
-    public OasisExecution outputSink(OasisKafkaSink kafkaSink) {
+    OasisExecution outputSink(OasisKafkaSink kafkaSink) {
         this.kafkaSink = kafkaSink;
         this.outputHandler = null;
         return this;

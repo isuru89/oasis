@@ -12,7 +12,10 @@ import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.OasisDefinition;
 import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.api.IGameDefService;
+import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.model.GameOptionsDto;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.RUtils;
 
@@ -28,12 +31,12 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     private Long gameId;
 
-    GameDefService(IOasisDao dao) {
-        super(dao);
+    GameDefService(IOasisDao dao, IOasisApiService apiService) {
+        super(dao, apiService);
     }
 
     @Override
-    public Long createGame(GameDef gameDef) throws Exception {
+    public Long createGame(GameDef gameDef, GameOptionsDto optionsDto) throws Exception {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.GAME.getTypeId());
         wrapper.setName(gameDef.getName());
@@ -49,6 +52,34 @@ public class GameDefService extends BaseService implements IGameDefService {
                 break;
             }
         }
+
+        if (optionsDto.isAllowPointCompensation()) {
+            // add compensation point event
+            PointDef compDef = new PointDef();
+            compDef.setName(EventNames.POINT_RULE_COMPENSATION_NAME);
+            compDef.setDisplayName("Rule to compensate points at any time.");
+            compDef.setAmount("amount");
+            compDef.setEvent(EventNames.EVENT_COMPENSATE_POINTS);
+            compDef.setCondition("true");
+            addPointDef(compDef);
+        }
+
+        if (optionsDto.isAwardPointsForMilestoneCompletion()) {
+            PointDef msCompleteDef = new PointDef();
+            msCompleteDef.setName(EventNames.POINT_RULE_MILESTONE_BONUS_NAME);
+            msCompleteDef.setDisplayName("Award points when certain milestones are completed.");
+            msCompleteDef.setAmount(optionsDto.getDefaultBonusPointsForMilestone());
+            addPointDef(msCompleteDef);
+        }
+
+        if (optionsDto.isAwardPointsForBadges()) {
+            PointDef bdgCompleteDef = new PointDef();
+            bdgCompleteDef.setName(EventNames.POINT_RULE_BADGE_BONUS_NAME);
+            bdgCompleteDef.setDisplayName("Award points when certain badges are completed.");
+            bdgCompleteDef.setAmount(optionsDto.getDefaultBonusPointsForBadge());
+            addPointDef(bdgCompleteDef);
+        }
+
         return gameId;
     }
 
@@ -79,6 +110,7 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public boolean disableGame(long gameId) throws Exception {
+        getDao().executeCommand("def/disableAllGameDefs", Maps.create("gameId", gameId));
         return getDao().getDefinitionDao().disableDefinition(gameId);
     }
 

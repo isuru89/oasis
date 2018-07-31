@@ -20,8 +20,8 @@ public class DefaultOasisApiService implements IOasisApiService {
     private ILifecycleService lifecycleService;
 
     public DefaultOasisApiService(IOasisDao oasisDao, FlinkServices flinkServices) {
-        gameDefService = new GameDefService(oasisDao);
-        profileService = new ProfileService(oasisDao);
+        gameDefService = new GameDefService(oasisDao, this);
+        profileService = new ProfileService(oasisDao, this);
         lifecycleService = new LifeCycleService(oasisDao, this, flinkServices);
     }
 

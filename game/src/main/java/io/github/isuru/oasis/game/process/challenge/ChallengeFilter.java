@@ -31,7 +31,7 @@ public class ChallengeFilter implements FilterFunction<Event> {
         if (challengeDef.getForEvents().contains(event.getEventType())) {
             List<String> conditions = challengeDef.getConditions();
             for (String c : conditions) {
-                if (Utils.evaluateCondition(c, event.getAllFieldValues())) {
+                if (Utils.evaluateCondition(Utils.compileExpression(c), event.getAllFieldValues())) {
                     return true;
                 }
             }

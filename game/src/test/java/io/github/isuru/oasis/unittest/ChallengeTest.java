@@ -2,7 +2,6 @@ package io.github.isuru.oasis.unittest;
 
 import io.github.isuru.oasis.game.Oasis;
 import io.github.isuru.oasis.game.OasisChallengeExecution;
-import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.events.ChallengeEvent;
 import io.github.isuru.oasis.unittest.utils.ChallengeSink;
@@ -77,7 +76,7 @@ class ChallengeTest {
         def.setStartAt(System.currentTimeMillis());
         def.setExpireAfter(10000);
         def.setForEvents(Sets.newHashSet("exam"));
-        def.setConditions(Collections.singletonList(Utils.compileExpression("marks >= 80")));
+        def.setConditions(Collections.singletonList("marks >= 80"));
 
         beginChallenge("challenge-fw", def);
     }
@@ -92,7 +91,7 @@ class ChallengeTest {
         def.setStartAt(System.currentTimeMillis());
         def.setExpireAfter(1000);
         def.setForEvents(Sets.newHashSet("exam"));
-        def.setConditions(Collections.singletonList(Utils.compileExpression("marks >= 80")));
+        def.setConditions(Collections.singletonList("marks >= 80"));
 
         beginChallenge("challenge-fw-ex", def);
     }
@@ -107,7 +106,7 @@ class ChallengeTest {
         def.setStartAt(System.currentTimeMillis());
         def.setExpireAfter(10000);
         def.setForEvents(Sets.newHashSet("exam"));
-        def.setConditions(Collections.singletonList(Utils.compileExpression("marks >= 80")));
+        def.setConditions(Collections.singletonList("marks >= 80"));
 
         beginChallenge("challenge-mw", def);
     }
@@ -122,7 +121,7 @@ class ChallengeTest {
         def.setStartAt(System.currentTimeMillis());
         def.setExpireAfter(2500);
         def.setForEvents(Sets.newHashSet("exam"));
-        def.setConditions(Collections.singletonList(Utils.compileExpression("marks >= 80")));
+        def.setConditions(Collections.singletonList("marks >= 80"));
 
         beginChallenge("challenge-mw-ex", def);
     }

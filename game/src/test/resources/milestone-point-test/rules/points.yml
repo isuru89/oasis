@@ -8,3 +8,5 @@ points:
     name: mark-50-value
     condition: "marks > 50"
     amount: "(marks - 50) * 2"
+
+  - name: __oasis_milestone_bonus__

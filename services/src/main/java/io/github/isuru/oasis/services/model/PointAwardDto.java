@@ -7,6 +7,15 @@ public class PointAwardDto {
 
     private long byUser;
     private float amount;
+    private Long associatedEventId;
+
+    public Long getAssociatedEventId() {
+        return associatedEventId;
+    }
+
+    public void setAssociatedEventId(Long associatedEventId) {
+        this.associatedEventId = associatedEventId;
+    }
 
     public long getByUser() {
         return byUser;

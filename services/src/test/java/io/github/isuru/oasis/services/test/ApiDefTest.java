@@ -16,6 +16,7 @@ import io.github.isuru.oasis.model.defs.PointsAdditional;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
+import io.github.isuru.oasis.services.model.GameOptionsDto;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -41,16 +42,21 @@ class ApiDefTest extends AbstractApiTest {
     @Test
     void testGameDefApi() throws Exception {
         IGameDefService gameDefService = apiService.getGameDefService();
+        GameOptionsDto optionsDto = new GameOptionsDto();
+        optionsDto.setAwardPointsForMilestoneCompletion(false);
+        optionsDto.setAwardPointsForBadges(false);
+        optionsDto.setAllowPointCompensation(false);
+
         GameDef gameDef = new GameDef();
         gameDef.setName("game-of-code");
         gameDef.setDisplayName("Game Of Code");
-        Long gameId = gameDefService.createGame(gameDef);
+        Long gameId = gameDefService.createGame(gameDef, optionsDto);
         Assertions.assertTrue(gameId > 0);
 
         GameDef gameDef2 = new GameDef();
         gameDef2.setName("game-of-code-2");
         gameDef2.setDisplayName("Game Of Code - v2");
-        Long gameId2 = gameDefService.createGame(gameDef2);
+        Long gameId2 = gameDefService.createGame(gameDef2, optionsDto);
         Assertions.assertTrue(gameId2 > 0);
         Assertions.assertTrue(gameId2 > gameId);
 
@@ -88,6 +94,47 @@ class ApiDefTest extends AbstractApiTest {
 
         Assertions.assertTrue(gameDefService.disableGame(gameId));
         Assertions.assertTrue(gameDefService.disableGame(gameId2));
+    }
+
+    @Test
+    void testGameDefApiWithSpecialPointRules() throws Exception {
+        IGameDefService gameDefService = apiService.getGameDefService();
+        {
+            // ALL three rules enabled...
+            GameOptionsDto optionsDto = new GameOptionsDto();
+            optionsDto.setAwardPointsForMilestoneCompletion(true);
+            optionsDto.setAwardPointsForBadges(true);
+            optionsDto.setAllowPointCompensation(true);
+            long gameId = createGame("game-3", "Game 3", optionsDto);
+
+            assertToSize(gameDefService.listPointDefs(gameId), 3);
+            Assertions.assertTrue(gameDefService.disableGame(gameId));
+            assertEmpty(gameDefService.listPointDefs(gameId));
+        }
+        {
+            // ALL three rules enabled...
+            GameOptionsDto optionsDto = new GameOptionsDto();
+            optionsDto.setAwardPointsForMilestoneCompletion(true);
+            optionsDto.setAwardPointsForBadges(false);
+            optionsDto.setAllowPointCompensation(true);
+            long gameId = createGame("game-2", "Game 2", optionsDto);
+
+            assertToSize(gameDefService.listPointDefs(gameId), 2);
+            Assertions.assertTrue(gameDefService.disableGame(gameId));
+            assertEmpty(gameDefService.listPointDefs(gameId));
+        }
+        {
+            // ALL three rules enabled...
+            GameOptionsDto optionsDto = new GameOptionsDto();
+            optionsDto.setAwardPointsForMilestoneCompletion(false);
+            optionsDto.setAwardPointsForBadges(false);
+            optionsDto.setAllowPointCompensation(true);
+            long gameId = createGame("game-1", "Game 1", optionsDto);
+
+            assertToSize(gameDefService.listPointDefs(gameId), 1);
+            Assertions.assertTrue(gameDefService.disableGame(gameId));
+            assertEmpty(gameDefService.listPointDefs(gameId));
+        }
     }
 
     @Test
@@ -419,10 +466,18 @@ class ApiDefTest extends AbstractApiTest {
     }
 
     private long createGame(String name, String displayName) throws Exception {
+        GameOptionsDto optionsDto = new GameOptionsDto();
+        optionsDto.setAllowPointCompensation(false);
+        optionsDto.setAwardPointsForBadges(false);
+        optionsDto.setAwardPointsForMilestoneCompletion(false);
+        return createGame(name, displayName, optionsDto);
+    }
+
+    private long createGame(String name, String displayName, GameOptionsDto optionsDto) throws Exception {
         GameDef def = new GameDef();
         def.setName(name);
         def.setDisplayName(displayName);
-        return apiService.getGameDefService().createGame(def);
+        return apiService.getGameDefService().createGame(def, optionsDto);
     }
 
     @BeforeEach
@@ -469,7 +524,7 @@ class ApiDefTest extends AbstractApiTest {
     static void afterAnyTest() throws Exception {
         System.out.println("Shutting down db connection.");
         try {
-            oasisDao.executeRawCommand("TRUNCATE OA_DEFINITION", new HashMap<>());
+            //oasisDao.executeRawCommand("TRUNCATE OA_DEFINITION", new HashMap<>());
             oasisDao.executeRawCommand("TRUNCATE OA_SHOP_ITEM", new HashMap<>());
         } catch (Exception ex) {
             ex.printStackTrace();

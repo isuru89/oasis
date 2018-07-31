@@ -8,13 +8,14 @@ import io.github.isuru.oasis.model.defs.KpiDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.services.model.GameOptionsDto;
 
 import java.util.List;
 import java.util.Map;
 
 public interface IGameDefService {
 
-    Long createGame(GameDef gameDef) throws Exception;
+    Long createGame(GameDef gameDef, GameOptionsDto optionsDto) throws Exception;
     GameDef readGame(long gameId) throws Exception;
     List<GameDef> listGames() throws Exception;
     boolean disableGame(long gameId) throws Exception;

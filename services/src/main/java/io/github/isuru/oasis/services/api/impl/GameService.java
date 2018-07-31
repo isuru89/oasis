@@ -3,6 +3,7 @@ package io.github.isuru.oasis.services.api.impl;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
+import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.api.IGameService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.model.BadgeAwardDto;
@@ -17,51 +18,41 @@ import java.util.Map;
  */
 public class GameService extends BaseService implements IGameService {
 
-    private final IOasisApiService apiService;
-
     GameService(IOasisDao oasisDao, IOasisApiService apiService) {
-        super(oasisDao);
-
-        this.apiService = apiService;
+        super(oasisDao, apiService);
     }
 
     @Override
     public void awardPoints(long userId, PointAwardDto awardDto) throws Exception {
-        long teamId = apiService.getProfileService().findCurrentTeamOfUser(userId).getTeamId();
+        long teamId = getApiService().getProfileService().findCurrentTeamOfUser(userId).getTeamId();
         Map<String, Object> data = Maps.create()
-                .put("userId", userId)
-                .put("teamId", teamId)
-                .put("eventType", null)
-                .put("extId", null)
+                .put("type", EventNames.EVENT_COMPENSATE_POINTS)
                 .put("ts", System.currentTimeMillis())
-                .put("pointId", 0) // @TODO create award type point
-                .put("subPointId", "MANUAL_AWARD")
-                .put("points", awardDto.getAmount())
+                .put("user", userId)
+                .put("team", teamId)
+                .put("id", awardDto.getAssociatedEventId())
+                .put("amount", awardDto.getAmount())
                 .put("tag", String.valueOf(awardDto.getByUser()))
                 .build();
 
-        getDao().executeCommand("game/addPoint", data);
+        getApiService().getEventService().submitEvent(data);
     }
 
     @Override
     public void awardBadge(long userId, BadgeAwardDto awardDto) throws Exception {
-        long teamId = apiService.getProfileService().findCurrentTeamOfUser(userId).getTeamId();
+        long teamId = getApiService().getProfileService().findCurrentTeamOfUser(userId).getTeamId();
         Map<String, Object> data = Maps.create()
-                .put("userId", userId)
-                .put("teamId", teamId)
-                .put("eventType", null)
-                .put("extId", null)
+                .put("type", EventNames.EVENT_AWARD_BADGE)
                 .put("ts", System.currentTimeMillis())
-                .put("badgeId", awardDto.getBadgeId())
-                .put("subBadgeId", awardDto.getSubBadgeId())
-                .put("startExtId", null)
-                .put("endExtId", null)
-                .put("startTime", null)
-                .put("endTime", null)
+                .put("user", userId)
+                .put("team", teamId)
+                .put("id", awardDto.getAssociatedEventId())
+                .put("badge", awardDto.getBadgeId())
+                .put("subBadge", awardDto.getSubBadgeId())
                 .put("tag", String.valueOf(awardDto.getByUser()))
                 .build();
 
-        getDao().executeCommand("game/addBadge", data);
+        getApiService().getEventService().submitEvent(data);
     }
 
     @Override
@@ -71,7 +62,7 @@ public class GameService extends BaseService implements IGameService {
 
     @Override
     public void buyItem(long userBy, long itemId) throws Exception {
-        ShopItem shopItem = apiService.getGameDefService().readShopItem(itemId);
+        ShopItem shopItem = getApiService().getGameDefService().readShopItem(itemId);
         if (shopItem != null) {
             buyItem(userBy, itemId, shopItem.getPrice());
         } else {

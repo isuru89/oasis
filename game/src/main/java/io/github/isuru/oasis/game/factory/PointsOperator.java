@@ -30,6 +30,7 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
     public PointsOperator(List<PointRule> rules) {
         if (rules != null) {
             pointRules = rules.stream()
+                    .filter(r -> r.getForEvent() != null)
                     .filter(r -> !"POINTS".equals(r.getSource()))
                     .collect(Collectors.groupingBy(PointRule::getForEvent));
             pointSelfRules = rules.stream().filter(r -> "POINTS".equals(r.getSource()))

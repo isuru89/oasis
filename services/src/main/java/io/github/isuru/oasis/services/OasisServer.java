@@ -15,6 +15,7 @@ import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.defs.PointsDef;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
+import io.github.isuru.oasis.services.model.GameOptionsDto;
 import io.github.isuru.oasis.services.utils.Configs;
 import org.yaml.snakeyaml.Yaml;
 
@@ -69,7 +70,7 @@ public class OasisServer {
 
         GameDef gameDef = new GameDef();
         gameDef.setName("oasis-test");
-        apiService.getGameDefService().createGame(gameDef);
+        apiService.getGameDefService().createGame(gameDef, new GameOptionsDto());
 
         List<KpiDef> kpiDefs = loadKpis(new File("./scripts/examples/kpis.yml"));
         for (KpiDef kpiDef : kpiDefs) {
