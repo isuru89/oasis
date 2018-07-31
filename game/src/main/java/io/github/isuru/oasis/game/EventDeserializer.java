@@ -22,7 +22,7 @@ public class EventDeserializer implements KeyedDeserializationSchema<Event> {
 
     @Override
     public Event deserialize(byte[] messageKey, byte[] message, String topic, int partition, long offset) throws IOException {
-        return objectMapper.readValue(message, JSON_EVENT_TYPE_REFERENCE);
+        return parseEvent(message);
     }
 
     @Override
@@ -33,5 +33,9 @@ public class EventDeserializer implements KeyedDeserializationSchema<Event> {
     @Override
     public TypeInformation<Event> getProducedType() {
         return TypeExtractor.getForClass(Event.class);
+    }
+
+    protected Event parseEvent(byte[] data) throws IOException {
+        return objectMapper.readValue(data, JSON_EVENT_TYPE_REFERENCE);
     }
 }

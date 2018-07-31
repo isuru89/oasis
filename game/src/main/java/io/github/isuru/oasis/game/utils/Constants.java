@@ -22,4 +22,10 @@ public final class Constants {
     public static final String KEY_JDBC_USERNAME = "jdbc.username";
     public static final String KEY_JDBC_PASSWORD = "jdbc.password";
 
+    public static final String KEY_CHECKPOINT_ENABLED = "checkpoint.enabled";
+    public static final String KEY_CHECKPOINT_INTERVAL = "checkpoint.interval";
+    public static final String KEY_CHECKPOINT_DIR = "checkpoint.dir";
+
+    public static final String KEY_FLINK_PARALLELISM = "flink.parallelism";
+
 }

@@ -34,7 +34,6 @@ CREATE TABLE IF NOT EXISTS OA_BADGES (
 );
 
 CREATE TABLE IF NOT EXISTS OA_MILESTONES (
-    id              BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id         INT,
     team_id         INT,
     event_type      VARCHAR(1024),
@@ -46,6 +45,9 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONES (
     level           INT,
     is_active       TINYINT(1) DEFAULT 1
 );
+
+ALTER TABLE OA_MILESTONES ADD PRIMARY KEY (user_id, milestone_id, level);
+
 
 CREATE TABLE IF NOT EXISTS OA_MILESTONE_STATE (
     user_id         INT,

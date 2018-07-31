@@ -20,12 +20,14 @@ public class DefaultOasisApiService implements IOasisApiService {
     private IProfileService profileService;
     private ILifecycleService lifecycleService;
     private IStatService statService;
+    private IEventsService eventsService;
 
     public DefaultOasisApiService(IOasisDao oasisDao, FlinkServices flinkServices) {
         gameDefService = new GameDefService(oasisDao, this);
         profileService = new ProfileService(oasisDao, this);
         gameService = new GameService(oasisDao, this);
         lifecycleService = new LifeCycleService(oasisDao, this, flinkServices);
+        eventsService = new EventsService(oasisDao, this);
     }
 
     @Override
@@ -50,12 +52,12 @@ public class DefaultOasisApiService implements IOasisApiService {
 
     @Override
     public IEventsService getEventService() {
-        return null;
+        return eventsService;
     }
 
     @Override
     public IStatService getStatService() {
-        return null;
+        return statService;
     }
 
 }

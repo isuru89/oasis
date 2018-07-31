@@ -16,6 +16,8 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
+import java.util.Properties;
+
 /**
  * @author iweerarathna
  */
@@ -27,9 +29,13 @@ public class OasisChallengeExecution {
 
     private StreamExecutionEnvironment env;
 
+    private Properties gameProperties;
+
     public OasisChallengeExecution build(Oasis oasis, ChallengeDef challenge) {
+        if (gameProperties == null) gameProperties = new Properties();
+
         env = StreamExecutionEnvironment.getExecutionEnvironment();
-        //env.enableCheckpointing(15000, CheckpointingMode.EXACTLY_ONCE);
+        OasisExecution.appendCheckpointStatus(env, gameProperties);
         env.setParallelism(1);
         env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
 
@@ -77,6 +83,11 @@ public class OasisChallengeExecution {
     OasisChallengeExecution outputHandler(OasisSink sink) {
         this.outputSink = sink;
         this.outputHandler = null;
+        return this;
+    }
+
+    OasisChallengeExecution havingGameProperties(Properties properties) {
+        this.gameProperties = properties;
         return this;
     }
 

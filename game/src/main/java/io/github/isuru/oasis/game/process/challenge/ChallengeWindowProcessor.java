@@ -7,11 +7,15 @@ import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author iweerarathna
  */
 public class ChallengeWindowProcessor extends KeyedProcessFunction<Byte, Event, ChallengeEvent> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ChallengeWindowProcessor.class);
 
     private ChallengeDef challengeDef;
 
@@ -44,8 +48,7 @@ public class ChallengeWindowProcessor extends KeyedProcessFunction<Byte, Event, 
         if (regState.value() == registeredStateDesc.getDefaultValue()) {
             long l = ctx.timerService().currentProcessingTime() + challengeDef.getExpireAfter();
 
-            System.out.println("Submitting in: " + l);
-            System.out.println("   at: " + l);
+            LOG.debug("Submitting challenge deadline at: {}", l);
             ctx.timerService().registerProcessingTimeTimer(l);
             deadlineState.update(l);
             regState.update(Boolean.TRUE);

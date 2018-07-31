@@ -15,3 +15,5 @@ INSERT INTO OA_MILESTONES (
     :milestoneId,
     :level
 )
+ON DUPLICATE KEY
+UPDATE ext_id = :extId

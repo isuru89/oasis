@@ -21,6 +21,7 @@ import io.github.isuru.oasis.game.process.sinks.OasisBadgesSink;
 import io.github.isuru.oasis.game.process.sinks.OasisMilestoneSink;
 import io.github.isuru.oasis.game.process.sinks.OasisMilestoneStateSink;
 import io.github.isuru.oasis.game.process.sinks.OasisPointsSink;
+import io.github.isuru.oasis.game.utils.Constants;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
@@ -39,6 +40,9 @@ import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.runtime.state.StateBackend;
+import org.apache.flink.runtime.state.filesystem.FsStateBackend;
+import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -51,13 +55,17 @@ import org.apache.flink.util.OutputTag;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 /**
  * @author iweerarathna
  */
 public class OasisExecution {
 
+
     private StreamExecutionEnvironment env;
+
+    private Properties gameProperties;
 
     private OasisSink oasisSink;
     private SourceFunction<Event> eventSource;
@@ -71,17 +79,28 @@ public class OasisExecution {
 
     private IOutputHandler outputHandler;
 
+    static void appendCheckpointStatus(StreamExecutionEnvironment env, Properties gameProperties) {
+        if (gameProperties.containsKey(Constants.KEY_CHECKPOINT_ENABLED) &&
+                Boolean.parseBoolean(gameProperties.getProperty(Constants.KEY_CHECKPOINT_ENABLED, "true"))) {
+            int interval = Integer.parseInt(gameProperties.getProperty(Constants.KEY_CHECKPOINT_INTERVAL, "20000"));
+            env.enableCheckpointing(interval, CheckpointingMode.EXACTLY_ONCE);
+            env.setStateBackend((StateBackend) new FsStateBackend(Constants.KEY_CHECKPOINT_DIR));
+        }
+    }
+
     public OasisExecution build(Oasis oasis) {
         return build(oasis, null);
     }
 
     public OasisExecution build(Oasis oasis, StreamExecutionEnvironment externalEnv) {
+        if (gameProperties == null) gameProperties = new Properties();
+
         String oasisId = oasis.getId();
 
         if (externalEnv == null) {
             env = StreamExecutionEnvironment.getExecutionEnvironment();
-            //env.enableCheckpointing(10000, CheckpointingMode.EXACTLY_ONCE);
-            env.setParallelism(1);
+            appendCheckpointStatus(env, gameProperties);
+            env.setParallelism(Integer.parseInt(gameProperties.getProperty(Constants.KEY_FLINK_PARALLELISM, "1")));
             env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         } else {
             env = externalEnv;
@@ -359,6 +378,11 @@ public class OasisExecution {
 
     public OasisExecution setBadgeRules(List<BadgeRule> badgeRules) {
         this.badgeRules = badgeRules;
+        return this;
+    }
+
+    OasisExecution havingGameProperties(Properties properties) {
+        this.gameProperties = properties;
         return this;
     }
 

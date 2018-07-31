@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.events.EventNames;
@@ -26,11 +27,11 @@ public class GameService extends BaseService implements IGameService {
     public void awardPoints(long userId, PointAwardDto awardDto) throws Exception {
         long teamId = getApiService().getProfileService().findCurrentTeamOfUser(userId).getTeamId();
         Map<String, Object> data = Maps.create()
-                .put("type", EventNames.EVENT_COMPENSATE_POINTS)
-                .put("ts", System.currentTimeMillis())
-                .put("user", userId)
-                .put("team", teamId)
-                .put("id", awardDto.getAssociatedEventId())
+                .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_COMPENSATE_POINTS)
+                .put(Constants.FIELD_TIMESTAMP, System.currentTimeMillis())
+                .put(Constants.FIELD_USER, userId)
+                .put(Constants.FIELD_TEAM, teamId)
+                .put(Constants.FIELD_ID, awardDto.getAssociatedEventId())
                 .put("amount", awardDto.getAmount())
                 .put("tag", String.valueOf(awardDto.getByUser()))
                 .build();
@@ -42,11 +43,11 @@ public class GameService extends BaseService implements IGameService {
     public void awardBadge(long userId, BadgeAwardDto awardDto) throws Exception {
         long teamId = getApiService().getProfileService().findCurrentTeamOfUser(userId).getTeamId();
         Map<String, Object> data = Maps.create()
-                .put("type", EventNames.EVENT_AWARD_BADGE)
-                .put("ts", System.currentTimeMillis())
-                .put("user", userId)
-                .put("team", teamId)
-                .put("id", awardDto.getAssociatedEventId())
+                .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_AWARD_BADGE)
+                .put(Constants.FIELD_TIMESTAMP, System.currentTimeMillis())
+                .put(Constants.FIELD_USER, userId)
+                .put(Constants.FIELD_TEAM, teamId)
+                .put(Constants.FIELD_ID, awardDto.getAssociatedEventId())
                 .put("badge", awardDto.getBadgeId())
                 .put("subBadge", awardDto.getSubBadgeId())
                 .put("tag", String.valueOf(awardDto.getByUser()))

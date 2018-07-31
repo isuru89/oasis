@@ -12,6 +12,7 @@ import io.github.isuru.oasis.game.persist.DbOutputHandler;
 import io.github.isuru.oasis.game.persist.NoneOutputHandler;
 import io.github.isuru.oasis.game.persist.OasisKafkaSink;
 import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSink;
+import io.github.isuru.oasis.game.persist.rabbit.RabbitUtils;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.game.utils.Constants;
 import io.github.isuru.oasis.game.utils.Utils;
@@ -26,6 +27,8 @@ import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+import org.apache.flink.streaming.connectors.rabbitmq.RMQSource;
+import org.apache.flink.streaming.connectors.rabbitmq.common.RMQConnectionConfig;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.yaml.snakeyaml.Yaml;
@@ -60,6 +63,7 @@ public class Main {
             List<BadgeRule> badges = BadgeParser.parse(oasisGameDef.getBadges());
 
             OasisExecution execution = new OasisExecution()
+                    .havingGameProperties(gameProperties)
                     .withSource(source)
                     .fieldTransformer(kpis)
                     .setPointRules(pointRules)
@@ -82,6 +86,7 @@ public class Main {
         SourceFunction<Event> source = createSource(gameProps);
 
         OasisChallengeExecution execution = new OasisChallengeExecution()
+                .havingGameProperties(gameProps)
                 .withSource(source);  // append kafka source
 
         execution = createOutputHandler(gameProps, execution)
@@ -158,7 +163,7 @@ public class Main {
             }
             return new CsvEventSource(inputCsv);
 
-        } else {
+        } else if ("kafka".equalsIgnoreCase(type)) {
             String topic = gameProps.getProperty(Constants.KEY_KAFKA_SOURCE_TOPIC);
             String kafkaHost = gameProps.getProperty(Constants.KEY_KAFKA_HOST);
             Preconditions.checkArgument(kafkaHost != null && !kafkaHost.trim().isEmpty());
@@ -173,6 +178,16 @@ public class Main {
             properties.putAll(map);
 
             return new FlinkKafkaConsumer011<>(topic, deserialization, properties);
+        } else if ("rabbit".equalsIgnoreCase(type)) {
+            RMQConnectionConfig rabbitConfig = RabbitUtils.createRabbitConfig(gameProps);
+            String inputQueue = gameProps.getProperty("rabbit.queue.src");
+
+            return new RMQSource<>(rabbitConfig, inputQueue,
+                    true,
+                    new EventRabbitDeserializer());
+
+        } else {
+            throw new IllegalArgumentException("Invalid event source type specified! [" + type + "]");
         }
     }
 

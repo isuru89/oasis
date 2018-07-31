@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.model.events;
 
+import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.Event;
 
 import java.util.HashMap;
@@ -24,22 +25,22 @@ public class JsonEvent extends HashMap<String, Object> implements Event {
 
     @Override
     public String getEventType() {
-        return (String) get("type");
+        return (String) get(Constants.FIELD_EVENT_TYPE);
     }
 
     @Override
     public long getTimestamp() {
-        return getLong("ts");
+        return getLong(Constants.FIELD_TIMESTAMP);
     }
 
     @Override
     public long getUser() {
-        return getLong("user");
+        return getLong(Constants.FIELD_USER);
     }
 
     @Override
     public Long getExternalId() {
-        return getLong("id");
+        return getLong(Constants.FIELD_ID);
     }
 
     @Override
@@ -49,7 +50,7 @@ public class JsonEvent extends HashMap<String, Object> implements Event {
 
     @Override
     public Long getTeam() {
-        return getLongOrNull("team");
+        return getLongOrNull(Constants.FIELD_TEAM);
     }
 
     private Long getLongOrNull(String key) {
