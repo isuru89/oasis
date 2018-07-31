@@ -8,7 +8,6 @@ import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.util.Preconditions;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,12 +17,11 @@ import java.util.List;
  */
 public class PointParser {
 
-    public static List<PointRule> parse(List<PointDef> pointDefs) throws IOException {
-        int p = 0;
+    public static List<PointRule> parse(List<PointDef> pointDefs) {
         List<PointRule> pointRules = new LinkedList<>();
         for (PointDef record : pointDefs) {
             PointRule pr = new PointRule();
-            pr.setId(record.getId() != null ? record.getId() : ++p);
+            pr.setId(record.getId());
             pr.setName(record.getName());
             pr.setForEvent(record.getEvent());
             pr.setSource(record.getSource());
@@ -72,7 +70,7 @@ public class PointParser {
         return pointRules;
     }
 
-    public static List<PointRule> parse(InputStream inputStream) throws IOException {
+    public static List<PointRule> parse(InputStream inputStream) {
         Yaml yaml = new Yaml();
         PointsDef pointsDef = yaml.loadAs(inputStream, PointsDef.class);
 

@@ -13,15 +13,15 @@ import java.util.List;
 /**
  * @author iweerarathna
  */
-public class FieldCalculationParser {
+public class KpiParser {
 
     public static List<FieldCalculator> parse(List<KpiDef> calculations) {
-        int f = 0;
+        //int f = 0;
         List<FieldCalculator> calculators = new LinkedList<>();
         for (KpiDef item: calculations) {
             FieldCalculator calculator = new FieldCalculator();
-            calculator.setId(++f);
-            calculator.setPriority(f);
+            calculator.setId(item.getId());
+            calculator.setPriority(Integer.parseInt(item.getId().toString()));
             calculator.setForEvent(item.getEvent());
             calculator.setFieldName(item.getField());
             calculator.setExpression(MVEL.compileExpression(item.getExpression()));

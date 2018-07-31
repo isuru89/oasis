@@ -18,6 +18,7 @@ import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.api.impl.LifeCycleService;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 
@@ -68,6 +70,8 @@ class ApiLifecycleTest extends AbstractApiTest {
         writer.flush();
 
         String txt = writer.getBuffer().toString();
+        FileUtils.write(new File("../scripts/examples/oasis.yml"), txt, StandardCharsets.UTF_8);
+        //System.out.println(txt);
 
         Yaml yaml = new Yaml();
         OasisGameDef oasisGameDef = yaml.loadAs(txt, OasisGameDef.class);

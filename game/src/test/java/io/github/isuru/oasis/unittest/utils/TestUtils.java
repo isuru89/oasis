@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.unittest.utils;
 
 import io.github.isuru.oasis.game.parser.BadgeParser;
-import io.github.isuru.oasis.game.parser.FieldCalculationParser;
+import io.github.isuru.oasis.game.parser.KpiParser;
 import io.github.isuru.oasis.game.parser.MilestoneParser;
 import io.github.isuru.oasis.game.parser.PointParser;
 import io.github.isuru.oasis.model.FieldCalculator;
@@ -152,7 +152,7 @@ public class TestUtils {
     }
 
     public static List<FieldCalculator> getFields(String resourceId) throws IOException {
-        return FieldCalculationParser.parse(TestUtils.loadResource(resourceId));
+        return KpiParser.parse(TestUtils.loadResource(resourceId));
     }
 
     public static List<BadgeRule> getBadgeRules(String resourceId) throws IOException {

@@ -1,11 +1,9 @@
 package io.github.isuru.oasis.game;
 
 import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.db.IOasisDao;
-import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.game.parser.BadgeParser;
-import io.github.isuru.oasis.game.parser.FieldCalculationParser;
+import io.github.isuru.oasis.game.parser.KpiParser;
 import io.github.isuru.oasis.game.parser.MilestoneParser;
 import io.github.isuru.oasis.game.parser.PointParser;
 import io.github.isuru.oasis.game.persist.DbOutputHandler;
@@ -15,52 +13,48 @@ import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
-import io.github.isuru.oasis.model.defs.*;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
+import io.github.isuru.oasis.model.defs.GameDef;
+import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 public class Main {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
     public static void main(String[] args) throws Exception {
         ParameterTool parameters = ParameterTool.fromArgs(args);
-        int challengeId = parameters.getInt("challenge", 0);
-        if (challengeId > 0) {
-            startChallenge(parameters, challengeId);
-            return;
-        }
-
-        int gameId = parameters.getInt("game", 0);
-        Preconditions.checkArgument(gameId > 0, "Game id must be specified!");
         String configs = parameters.getRequired("configs");
         Properties gameProperties = readConfigs(configs);
-        DbProperties dbProperties = createConfigs(gameProperties);
 
-        try (IOasisDao dao = OasisDbFactory.create(dbProperties)) {
-            GameDef gameDef = readGameDef(gameId, dao);
+        File ruleFile = new File(gameProperties.getProperty("game.rule.file"));
+        OasisGameDef oasisGameDef = readGameDef(ruleFile);
+
+        if (oasisGameDef.getChallenge() == null) {
+            GameDef gameDef = oasisGameDef.getGame();
             Oasis oasis = new Oasis(gameDef.getName());
 
             SourceFunction<Event> source = createSource(gameProperties);
-            List<FieldCalculator> kpis = getCalculations(dao);
-            List<PointRule> pointRules = getPointRules(dao);
-            List<Milestone> milestones = getMilestones(dao);
-            List<BadgeRule> badges = createBadges(dao);
+            List<FieldCalculator> kpis = KpiParser.parse(oasisGameDef.getKpis());
+            List<PointRule> pointRules = PointParser.parse(oasisGameDef.getPoints());
+            List<Milestone> milestones = MilestoneParser.parse(oasisGameDef.getMilestones());
+            List<BadgeRule> badges = BadgeParser.parse(oasisGameDef.getBadges());
 
             OasisExecution execution = new OasisExecution()
                     .withSource(source)
@@ -73,27 +67,24 @@ public class Main {
                     .build(oasis);
 
             execution.start();
+
+        } else {
+            startChallenge(oasisGameDef, gameProperties);
         }
     }
 
-    private static void startChallenge(ParameterTool parameters, int challengeId) throws Exception {
-        String configs = parameters.getRequired("configs");
-        Properties gameProperties = readConfigs(configs);
-        DbProperties dbProperties = createConfigs(gameProperties);
+    private static void startChallenge(OasisGameDef oasisGameDef, Properties gameProps) throws Exception {
+        ChallengeDef challengeDef = oasisGameDef.getChallenge();
+        Oasis oasis = new Oasis(String.format("challenge-%s", challengeDef.getName()));
+        SourceFunction<Event> source = createSource(gameProps);
 
-        try (IOasisDao dao = OasisDbFactory.create(dbProperties)) {
-            ChallengeDef challengeDef = readChallenge(challengeId, dao);
-            Oasis oasis = new Oasis(String.format("challenge-%s", challengeDef.getName()));
-            SourceFunction<Event> source = createSource(gameProperties);
+        OasisChallengeExecution execution = new OasisChallengeExecution()
+                .withSource(source);  // append kafka source
 
-            OasisChallengeExecution execution = new OasisChallengeExecution()
-                    .withSource(source);  // append kafka source
+        execution = createOutputHandler(gameProps, execution)
+                .build(oasis, challengeDef);
 
-            execution = createOutputHandler(gameProperties, execution)
-                    .build(oasis, challengeDef);
-
-            execution.start();
-        }
+        execution.start();
     }
 
     static OasisChallengeExecution createOutputHandler(Properties gameProps, OasisChallengeExecution execution) {
@@ -145,16 +136,6 @@ public class Main {
         }
 
         return kafkaSink;
-    }
-
-    private static GameDef readGameDef(int gameId, IOasisDao dao) throws Exception {
-        DefWrapper wrapper = dao.getDefinitionDao().readDefinition(gameId);
-        return Converters.toGameDef(wrapper, wrp -> toObj(wrp.getContent(), GameDef.class));
-    }
-
-    private static ChallengeDef readChallenge(int challengeId, IOasisDao dao) throws Exception {
-        DefWrapper wrapper = dao.getDefinitionDao().readDefinition(challengeId);
-        return Converters.toChallengeDef(wrapper, wrp -> toObj(wrp.getContent(), ChallengeDef.class));
     }
 
     private static Properties readConfigs(String configFile) throws IOException {
@@ -232,62 +213,10 @@ public class Main {
         return map;
     }
 
-    private static List<Milestone> getMilestones(IOasisDao dao) throws Exception {
-        List<DefWrapper> wrappers = dao.getDefinitionDao().listDefinitions(OasisDefinition.MILESTONE.getTypeId());
-        List<MilestoneDef> milestoneDefs = wrappers.stream()
-                .map(Main::wrapperToMilestone)
-                .collect(Collectors.toList());
-        return MilestoneParser.parse(milestoneDefs);
-    }
-
-
-    private static List<FieldCalculator> getCalculations(IOasisDao dao) throws Exception {
-        List<DefWrapper> wrappers = dao.getDefinitionDao().listDefinitions(OasisDefinition.KPI.getTypeId());
-        List<KpiDef> kpiDefs = wrappers.stream()
-                .map(Main::wrapperToKpi)
-                .collect(Collectors.toList());
-        List<FieldCalculator> fieldCalculators = FieldCalculationParser.parse(kpiDefs);
-        fieldCalculators.sort(Comparator.comparingInt(FieldCalculator::getPriority));
-        return fieldCalculators;
-    }
-
-    private static List<PointRule> getPointRules(IOasisDao dao) throws Exception {
-        List<DefWrapper> wrappers = dao.getDefinitionDao().listDefinitions(OasisDefinition.POINT.getTypeId());
-        List<PointDef> pointDefs = wrappers.stream()
-                .map(Main::wrapperToPoint)
-                .collect(Collectors.toList());
-        return PointParser.parse(pointDefs);
-    }
-
-    private static List<BadgeRule> createBadges(IOasisDao dao) throws Exception {
-        List<DefWrapper> wrappers = dao.getDefinitionDao().listDefinitions(OasisDefinition.BADGE.getTypeId());
-        List<BadgeDef> badgeDefs = wrappers.stream()
-                .map(Main::wrapperToBadge)
-                .collect(Collectors.toList());
-        return BadgeParser.parse(badgeDefs);
-    }
-
-    private static BadgeDef wrapperToBadge(DefWrapper wrapper) {
-        return Converters.toBadgeDef(wrapper, wrp -> toObj(wrp.getContent(), BadgeDef.class));
-    }
-
-    private static KpiDef wrapperToKpi(DefWrapper wrapper) {
-        return Converters.toKpiDef(wrapper, wrp -> toObj(wrp.getContent(), KpiDef.class));
-    }
-
-    private static PointDef wrapperToPoint(DefWrapper wrapper) {
-        return Converters.toPointDef(wrapper, wrp -> toObj(wrp.getContent(), PointDef.class));
-    }
-
-    private static MilestoneDef wrapperToMilestone(DefWrapper wrapper) {
-        return Converters.toMilestoneDef(wrapper, wrp -> toObj(wrp.getContent(), MilestoneDef.class));
-    }
-
-    private static <T> T toObj(String value, Class<T> clz) {
-        try {
-            return mapper.readValue(value, clz);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to deserialize given db object!");
+    private static OasisGameDef readGameDef(File file) throws IOException {
+        try (InputStream inputStream = new FileInputStream(file)) {
+            Yaml yaml = new Yaml();
+            return yaml.loadAs(inputStream, OasisGameDef.class);
         }
     }
 

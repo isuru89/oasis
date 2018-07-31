@@ -7,7 +7,6 @@ import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.MilestonesDef;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -20,11 +19,10 @@ import java.util.Map;
 public class MilestoneParser {
 
     public static List<Milestone> parse(List<MilestoneDef> milestoneDefs) {
-        int m = 0;
         List<Milestone> milestones = new LinkedList<>();
         for (MilestoneDef milestoneDef : milestoneDefs) {
             Milestone milestone = new Milestone();
-            milestone.setId(milestoneDef.getId() != null ? milestoneDef.getId() : ++m);
+            milestone.setId(milestoneDef.getId());
             milestone.setName(milestoneDef.getName());
             milestone.setDisplayName(milestoneDef.getDisplayName());
             milestone.setEvent(milestoneDef.getEvent());
@@ -74,7 +72,7 @@ public class MilestoneParser {
         return milestones;
     }
 
-    public static List<Milestone> parse(InputStream inputStream) throws IOException {
+    public static List<Milestone> parse(InputStream inputStream) {
         Yaml yaml = new Yaml();
         MilestonesDef milestonesDef = yaml.loadAs(inputStream, MilestonesDef.class);
 
