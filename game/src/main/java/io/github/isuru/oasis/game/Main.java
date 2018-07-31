@@ -1,6 +1,8 @@
 package io.github.isuru.oasis.game;
 
 import io.github.isuru.oasis.db.DbProperties;
+import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.game.parser.BadgeParser;
 import io.github.isuru.oasis.game.parser.KpiParser;
@@ -9,7 +11,10 @@ import io.github.isuru.oasis.game.parser.PointParser;
 import io.github.isuru.oasis.game.persist.DbOutputHandler;
 import io.github.isuru.oasis.game.persist.NoneOutputHandler;
 import io.github.isuru.oasis.game.persist.OasisKafkaSink;
+import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSink;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
+import io.github.isuru.oasis.game.utils.Constants;
+import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
@@ -23,7 +28,6 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -31,7 +35,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -93,49 +96,39 @@ public class Main {
         if ("db".equals(outputType)) {
             return execution.outputHandler(new DbOutputHandler(jdbcInst));
         } else if ("kafka".equals(outputType)) {
-            return execution.outputHandler(createKafkaSink(gameProps));
+            return execution.outputHandler(new OasisKafkaSink(gameProps));
         } else if ("none".equalsIgnoreCase(outputType)) {
             return execution.outputHandler(new NoneOutputHandler());
+        } else if ("rabbit".equalsIgnoreCase(outputType)) {
+            return execution.outputHandler(new OasisRabbitSink(gameProps));
         } else {
             throw new RuntimeException("Unknown output type!");
         }
     }
 
-    static OasisExecution createOutputHandler(Properties gameProps, OasisExecution execution) {
+    static OasisExecution createOutputHandler(Properties gameProps, OasisExecution execution) throws Exception {
         String jdbcInst = gameProps.getProperty(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
         String outputType = gameProps.getProperty(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
         if ("db".equals(outputType)) {
+            DbProperties dbProps = createConfigs(gameProps);
+            IOasisDao oasisDao = OasisDbFactory.create(dbProps);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    oasisDao.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }));
             return execution.outputHandler(new DbOutputHandler(jdbcInst));
         } else if ("kafka".equals(outputType)) {
-            return execution.outputSink(createKafkaSink(gameProps));
+            return execution.outputSink(new OasisKafkaSink(gameProps));
         } else if ("none".equalsIgnoreCase(outputType)) {
             return execution.outputHandler(new NoneOutputHandler());
+        } else if ("rabbit".equalsIgnoreCase(outputType)) {
+            return execution.outputSink(new OasisRabbitSink(gameProps));
         } else {
             throw new RuntimeException("Unknown output type!");
         }
-    }
-
-    private static OasisKafkaSink createKafkaSink(Properties gameProps) {
-        String kafkaHost = gameProps.getProperty(Constants.KEY_KAFKA_HOST);
-        OasisKafkaSink kafkaSink = new OasisKafkaSink();
-        kafkaSink.setKafkaHost(kafkaHost);
-
-        // @TODO set as dynamic kafka topics
-        kafkaSink.setTopicPoints("game-points");
-        kafkaSink.setTopicBadges("game-badges");
-        kafkaSink.setTopicMilestones("game-milestones");
-        kafkaSink.setTopicMilestoneStates("game-milestone-states");
-        kafkaSink.setTopicChallengeWinners("game-challenge-winners");
-
-        Map<String, Object> map = filterKeys(gameProps, Constants.KEY_PREFIX_OUTPUT_KAFKA);
-        if (!map.isEmpty()) {
-            Properties producerConfigs = new Properties();
-            producerConfigs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaHost);
-            producerConfigs.putAll(map);
-            kafkaSink.setProducerConfigs(producerConfigs);
-        }
-
-        return kafkaSink;
     }
 
     private static Properties readConfigs(String configFile) throws IOException {
@@ -176,7 +169,7 @@ public class Main {
             Properties properties = new Properties();
             // add kafka host
             properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaHost);
-            Map<String, Object> map = filterKeys(gameProps, Constants.KEY_PREFIX_SOURCE_KAFKA);
+            Map<String, Object> map = Utils.filterKeys(gameProps, Constants.KEY_PREFIX_SOURCE_KAFKA);
             properties.putAll(map);
 
             return new FlinkKafkaConsumer011<>(topic, deserialization, properties);
@@ -198,19 +191,6 @@ public class Main {
 
         dbProperties.setQueryLocation(scriptsDir.getAbsolutePath());
         return dbProperties;
-    }
-
-    private static Map<String, Object> filterKeys(Properties properties, String keyPfx) {
-        Map<String, Object> map = new HashMap<>();
-        for (Object keyObj : properties.keySet()) {
-            String key = String.valueOf(keyObj);
-            if (key.startsWith(keyPfx)) {
-                Object val = properties.get(key);
-                String tmp = key.substring(keyPfx.length());
-                map.put(tmp, val);
-            }
-        }
-        return map;
     }
 
     private static OasisGameDef readGameDef(File file) throws IOException {

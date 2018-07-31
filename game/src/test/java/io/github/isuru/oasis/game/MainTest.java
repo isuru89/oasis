@@ -4,6 +4,7 @@ import io.github.isuru.oasis.db.DbProperties;
 import io.github.isuru.oasis.game.persist.DbOutputHandler;
 import io.github.isuru.oasis.game.persist.OasisKafkaSink;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
+import io.github.isuru.oasis.game.utils.Constants;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
@@ -93,7 +94,7 @@ class MainTest {
     }
 
     @Test
-    void testOutputKafkaSink() {
+    void testOutputKafkaSink() throws Exception {
         {
             Properties properties = new Properties();
             properties.put(Constants.KEY_JDBC_INSTANCE, "testing");
@@ -104,7 +105,7 @@ class MainTest {
             OasisExecution execution = Main.createOutputHandler(properties, new OasisExecution());
             Assertions.assertNotNull(execution);
 
-            OasisKafkaSink kafkaSink = execution.getKafkaSink();
+            OasisKafkaSink kafkaSink = (OasisKafkaSink) execution.getKafkaSink();
             Assertions.assertNotNull(kafkaSink);
             Assertions.assertNull(execution.getOutputHandler());
 
@@ -114,7 +115,6 @@ class MainTest {
             Assertions.assertNotNull(kafkaSink.getTopicMilestones());
             Assertions.assertNotNull(kafkaSink.getTopicMilestoneStates());
             Assertions.assertNotNull(kafkaSink.getTopicPoints());
-            Assertions.assertNull(kafkaSink.getConsumerConfigs());
             Assertions.assertNull(kafkaSink.getProducerConfigs());
         }
 
@@ -127,7 +127,7 @@ class MainTest {
         OasisChallengeExecution execution = Main.createOutputHandler(properties, new OasisChallengeExecution());
         Assertions.assertNotNull(execution);
 
-        OasisKafkaSink kafkaSink = execution.getOutputSink();
+        OasisKafkaSink kafkaSink = (OasisKafkaSink) execution.getOutputSink();
         Assertions.assertNotNull(kafkaSink);
         Assertions.assertNull(execution.getOutputHandler());
 
@@ -137,12 +137,11 @@ class MainTest {
         Assertions.assertNotNull(kafkaSink.getTopicMilestones());
         Assertions.assertNotNull(kafkaSink.getTopicMilestoneStates());
         Assertions.assertNotNull(kafkaSink.getTopicPoints());
-        Assertions.assertNull(kafkaSink.getConsumerConfigs());
         Assertions.assertNull(kafkaSink.getProducerConfigs());
     }
 
     @Test
-    void testOutputDbCreation() {
+    void testOutputDbCreation() throws Exception {
         {
             Properties properties = new Properties();
             properties.put(Constants.KEY_JDBC_INSTANCE, "testing");

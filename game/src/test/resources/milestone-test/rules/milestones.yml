@@ -1,5 +1,6 @@
 milestones:
   - name: total-codes
+    id: 301
     event: submission
     aggregator: sum
     accumulatorType: long
@@ -12,6 +13,7 @@ milestones:
       5: 1000
 
   - name: deleter
+    id: 302
     event: submission
     aggregator: sum
     accumulator: "deletedLines"
@@ -23,6 +25,7 @@ milestones:
       5: 1000
 
   - name: engagement
+    id: 303
     event: submission
     aggregator: count
     levels:
@@ -31,6 +34,7 @@ milestones:
       3: 50
 
   - name: neutral-subs
+    id: 304
     event: submission
     aggregator: count
     condition: "introducedViolations == 0 && fixedViolations == 0"

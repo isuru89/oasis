@@ -1,12 +1,15 @@
 points:
   - event: marks
+    id: 301
     name: mark-value
     condition: "true"
     amount: "marks / 10.0"
 
   - event: marks
+    id: 302
     name: mark-50-value
     condition: "marks > 50"
     amount: "(marks - 50) * 2"
 
   - name: __oasis_milestone_bonus__
+    id: 303

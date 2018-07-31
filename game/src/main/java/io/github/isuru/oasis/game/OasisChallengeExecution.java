@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.game;
 
-import io.github.isuru.oasis.game.persist.OasisKafkaSink;
-import io.github.isuru.oasis.game.persist.kafka.ChallengeNotificationMapper;
+import io.github.isuru.oasis.game.persist.OasisSink;
+import io.github.isuru.oasis.game.persist.mappers.ChallengeNotificationMapper;
 import io.github.isuru.oasis.game.process.challenge.ChallengeContext;
 import io.github.isuru.oasis.game.process.challenge.ChallengeFilter;
 import io.github.isuru.oasis.game.process.challenge.ChallengeWindowProcessor;
@@ -10,13 +10,11 @@ import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.events.ChallengeEvent;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.functions.NullByteKeySelector;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
 
 /**
  * @author iweerarathna
@@ -24,7 +22,7 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
 public class OasisChallengeExecution {
 
     private SourceFunction<Event> eventSource;
-    private OasisKafkaSink outputSink;
+    private OasisSink outputSink;
     private IOutputHandler outputHandler;
 
     private StreamExecutionEnvironment env;
@@ -50,9 +48,7 @@ public class OasisChallengeExecution {
 
         if (outputSink != null) {
             execution.map(new ChallengeNotificationMapper())
-                    .addSink(new FlinkKafkaProducer011<>(outputSink.getKafkaHost(),
-                            outputSink.getTopicChallengeWinners(),
-                            new SimpleStringSchema()))
+                    .addSink(outputSink.createChallengeSink())
                     .setParallelism(1);
 
         } else if (outputHandler != null) {
@@ -78,13 +74,13 @@ public class OasisChallengeExecution {
         return this;
     }
 
-    OasisChallengeExecution outputHandler(OasisKafkaSink sink) {
+    OasisChallengeExecution outputHandler(OasisSink sink) {
         this.outputSink = sink;
         this.outputHandler = null;
         return this;
     }
 
-    OasisKafkaSink getOutputSink() {
+    OasisSink getOutputSink() {
         return outputSink;
     }
 

@@ -1,5 +1,6 @@
 badges:
   - name: quality-streak
+    id: 101
     from:
       pointsId: minus-nvd
       within: 7 days
@@ -15,6 +16,7 @@ badges:
           name: platinum
 
   - name: first-time-right
+    id: 102
     event: submission
     condition: "totalCode >= 50 && introducedViolations == 0 && fixedViolations == 0"
     streak: 3
@@ -29,6 +31,7 @@ badges:
         name: platinum
 
   - name: developer
+    id: 103
     from:
       milestoneId: total-codes
       level: 1
@@ -41,6 +44,7 @@ badges:
           level: 5
 
   - name: heavy-coder
+    id: 104
     event: submission
     condition: "addedLines >= 1000"
     subBadges:
@@ -50,21 +54,25 @@ badges:
         name: giga committer
 
   - name: heavy-commit-streak
+    id: 105
     from:
       pointsId: heavy-commit
       streak: 50
 
   - name: other-fixer
+    id: 106
     from:
       pointsId: fixed-violations-of-others
       streak: 3
 
   - name: welcome-badge
+    id: 107
     event: login
     condition: "true"
     maxBadges: 1
 
   - name: tech-lead
+    id: 108
     from:
       pointsId: remark-raised
       #within: 7 days

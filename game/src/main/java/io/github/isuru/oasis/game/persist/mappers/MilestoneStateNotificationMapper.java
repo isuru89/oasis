@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.game.persist.kafka;
+package io.github.isuru.oasis.game.persist.mappers;
 
 import io.github.isuru.oasis.model.events.MilestoneStateEvent;
 

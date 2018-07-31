@@ -23,7 +23,6 @@ import java.util.List;
 public class BadgeParser {
 
     public static List<BadgeRule> parse(List<BadgeDef> badgeDefs) throws IOException {
-        //long b = 0;
         List<BadgeRule> badgeRules = new LinkedList<>();
         for (BadgeDef badgeDef : badgeDefs) {
             Badge badge = new Badge(badgeDef.getId(), badgeDef.getName());
@@ -38,7 +37,6 @@ public class BadgeParser {
                     bp.setPointsId(from.getPointsId());
                     bp.setDuration(from.getWithin());
                     bp.setStreak(from.getStreak() != null ? from.getStreak() : 0);
-                    //if (badge.getId() == null) badge.setId(b);
                     bp.setBadge(badge);
 
                     if (from.getSubBadges() != null) {
@@ -57,7 +55,6 @@ public class BadgeParser {
                     bfm.setId(badgeDef.getId());
                     bfm.setMilestoneId(from.getMilestoneId());
                     bfm.setLevel(from.getLevel());
-                    //if (badge.getId() == null) badge.setId(b);
                     bfm.setBadge(badge);
 
                     if (from.getSubBadges() != null) {
@@ -75,7 +72,6 @@ public class BadgeParser {
             } else {
                 BadgeFromEvents bfe = new BadgeFromEvents();
                 bfe.setId(badgeDef.getId());
-                //if (badge.getId() == null) badge.setId(b);
                 bfe.setBadge(badge);
                 bfe.setEventType(badgeDef.getEvent());
                 bfe.setDuration(badgeDef.getWithin());

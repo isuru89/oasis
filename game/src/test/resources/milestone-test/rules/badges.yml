@@ -1,5 +1,6 @@
 badges:
   - name: heavy-coder
+    id: 101
     from:
       milestoneId: total-codes
       level: 2

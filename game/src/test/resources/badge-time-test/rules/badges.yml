@@ -1,5 +1,6 @@
 badges:
   - name: heavy-commit-streak
+    id: 101
     event: submission
     condition: "totalCode >= 50"
     within: weekly
@@ -15,12 +16,14 @@ badges:
         name: platinum
 
   - name: quality-coder
+    id: 102
     from:
       pointsId: minus-nvd
       within: monthly
       streak: 3
 
   - name: germ
+    id: 103
     from:
       pointsId: virus
       within: 3 days
@@ -41,6 +44,7 @@ badges:
 #        id: giga-committer
 
   - name: bad-commit
+    id: 104
     event: submission
     condition: "introducedViolations >= 10 && fixedViolations == 0"
     within: 5 days

@@ -16,7 +16,6 @@ import java.util.List;
 public class KpiParser {
 
     public static List<FieldCalculator> parse(List<KpiDef> calculations) {
-        //int f = 0;
         List<FieldCalculator> calculators = new LinkedList<>();
         for (KpiDef item: calculations) {
             FieldCalculator calculator = new FieldCalculator();

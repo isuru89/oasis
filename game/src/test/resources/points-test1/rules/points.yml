@@ -1,5 +1,6 @@
 points:
   - event: qa
+    id: 301
     name: defect-assigned
     condition: "status == 'ASSIGNED'"
     amount: "4 - severity"
@@ -9,6 +10,7 @@ points:
         amount: -4
 
   - event: qa
+    id: 302
     name: defect-fixed
     condition: "status == 'FIXED'"
     amount: 2
@@ -18,6 +20,7 @@ points:
         amount: 1
 
   - event: qa-test
+    id: 303
     name: test-case-written
     condition: "true"
     amount: 4

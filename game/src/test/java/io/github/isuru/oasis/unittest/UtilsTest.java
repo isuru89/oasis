@@ -5,6 +5,9 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+import java.util.Properties;
+
 class UtilsTest {
 
     private static final long ONE_MONTH = 1000 * 3600L * 24L * 30L;
@@ -12,6 +15,30 @@ class UtilsTest {
     private static final long ONE_HOUR = 1000 * 3600;
     private static final long ONE_MIN = 1000 * 60;
     private static final long ONE_SEC = 1000;
+
+    @Test
+    void propTest() {
+        {
+            Properties props = new Properties();
+            props.put("a.b.c", 1);
+            props.put("a.b.f", 2);
+            props.put("a.f", 2);
+
+            Map<String, Object> map = Utils.filterKeys(props, "a.b.");
+            Assertions.assertEquals(2, map.size());
+            Assertions.assertTrue(map.containsKey("c"));
+            Assertions.assertTrue(map.containsKey("f"));
+        }
+        {
+            Properties props = new Properties();
+            props.put("a.b.c", 1);
+            props.put("a.b.f", 2);
+            props.put("a.f", 2);
+
+            Map<String, Object> map = Utils.filterKeys(props, "x.y.");
+            Assertions.assertEquals(0, map.size());
+        }
+    }
 
     @Test
     void numTest() {

@@ -1,10 +1,12 @@
 badges:
   - name: first-submission
+    id: 100
     event: submission
     condition: "true"
     maxBadges: 1
 
   - name: heavy-commit-streak
+    id: 101
     event: submission
     condition: "totalCode >= 50"
     streak: 3
@@ -19,11 +21,13 @@ badges:
         name: platinum
 
   - name: quality-coder
+    id: 102
     from:
       pointsId: minus-nvd
       streak: 3
 
   - name: germ
+    id: 103
     from:
       pointsId: virus
       streak: 3
@@ -36,6 +40,7 @@ badges:
           name: epidemic
 
   - name: mega-committer
+    id: 104
     event: submission
     condition: "totalCode >= 500"
     subBadges:
@@ -43,5 +48,6 @@ badges:
         name: giga-committer
 
   - name: bad-commit
+    id: 105
     event: submission
     condition: "introducedViolations >= 10 && fixedViolations == 0"
