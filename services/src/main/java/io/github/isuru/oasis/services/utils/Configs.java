@@ -30,7 +30,7 @@ public final class Configs {
         return getPath(key, defPath, true, true);
     }
 
-    private File getPath(String key, String defPath, boolean validate, boolean autoCreate) throws FileNotFoundException {
+    public File getPath(String key, String defPath, boolean validate, boolean autoCreate) throws FileNotFoundException {
         String pathStr = props.getProperty(key, defPath);
         File path = new File(pathStr);
         if (validate) {

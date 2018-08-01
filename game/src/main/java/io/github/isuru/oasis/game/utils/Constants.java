@@ -5,6 +5,8 @@ package io.github.isuru.oasis.game.utils;
  */
 public final class Constants {
 
+    public static final String KEY_LOCATION = "_location";
+
     public static final String KEY_KAFKA_HOST = "kafka.host";
     public static final String KEY_OUTPUT_TYPE = "output.type";
 

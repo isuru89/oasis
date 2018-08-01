@@ -38,6 +38,7 @@ import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
 import io.github.isuru.oasis.model.rules.BadgeFromPoints;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
+import org.apache.commons.io.FileUtils;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.runtime.state.StateBackend;
@@ -53,6 +54,8 @@ import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.util.OutputTag;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -79,20 +82,26 @@ public class OasisExecution {
 
     private IOutputHandler outputHandler;
 
-    static void appendCheckpointStatus(StreamExecutionEnvironment env, Properties gameProperties) {
+    static void appendCheckpointStatus(StreamExecutionEnvironment env, Properties gameProperties) throws IOException {
         if (gameProperties.containsKey(Constants.KEY_CHECKPOINT_ENABLED) &&
                 Boolean.parseBoolean(gameProperties.getProperty(Constants.KEY_CHECKPOINT_ENABLED, "true"))) {
             int interval = Integer.parseInt(gameProperties.getProperty(Constants.KEY_CHECKPOINT_INTERVAL, "20000"));
             env.enableCheckpointing(interval, CheckpointingMode.EXACTLY_ONCE);
-            env.setStateBackend((StateBackend) new FsStateBackend(Constants.KEY_CHECKPOINT_DIR));
+
+            File configDir = new File(gameProperties.getProperty(Constants.KEY_LOCATION));
+            String relPath = gameProperties.getProperty(Constants.KEY_CHECKPOINT_DIR);
+            File chkDir = new File(configDir, relPath);
+            FileUtils.forceMkdir(chkDir);
+
+            env.setStateBackend((StateBackend) new FsStateBackend(chkDir.toURI()));
         }
     }
 
-    public OasisExecution build(Oasis oasis) {
+    public OasisExecution build(Oasis oasis) throws IOException {
         return build(oasis, null);
     }
 
-    public OasisExecution build(Oasis oasis, StreamExecutionEnvironment externalEnv) {
+    public OasisExecution build(Oasis oasis, StreamExecutionEnvironment externalEnv) throws IOException {
         if (gameProperties == null) gameProperties = new Properties();
 
         String oasisId = oasis.getId();

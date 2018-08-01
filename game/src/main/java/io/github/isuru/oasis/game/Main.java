@@ -49,7 +49,7 @@ public class Main {
         String configs = parameters.getRequired("configs");
         Properties gameProperties = readConfigs(configs);
 
-        File ruleFile = new File(gameProperties.getProperty("game.rule.file"));
+        File ruleFile = deriveGameRuleFilePath(configs, gameProperties);
         OasisGameDef oasisGameDef = readGameDef(ruleFile);
 
         if (oasisGameDef.getChallenge() == null) {
@@ -213,6 +213,22 @@ public class Main {
             Yaml yaml = new Yaml();
             return yaml.loadAs(inputStream, OasisGameDef.class);
         }
+    }
+
+    private static File deriveGameRuleFilePath(String configsPath, Properties gameProps) {
+        File configFile = new File(configsPath);
+        File configDir = configFile.getParentFile();
+        gameProps.put("_location", configDir.getAbsolutePath());
+
+        String filePath = gameProps.getProperty("game.rule.file");
+        if (filePath == null) {
+            throw new RuntimeException("Game rule file location had not specified!");
+        }
+        File ruleFile = new File(configDir, filePath);
+        if (!ruleFile.exists()) {
+            throw new RuntimeException("Game rule file does not exist! [" + ruleFile.getAbsolutePath() + "]");
+        }
+        return ruleFile;
     }
 
 }

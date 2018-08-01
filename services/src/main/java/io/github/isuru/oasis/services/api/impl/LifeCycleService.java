@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -108,12 +109,12 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
         // write game content to file
         File executionDir = getExecutionDir(defId, storageDir);
         writeGameRulesFile(defId, isGame, executionDir);
-        File executionFile = writeGameConfigFile(defId, isGame, executionDir);
+        File executionFile = writeGameConfigFile(executionDir);
 
         // start the game
         //
         FlinkJar uploadedJar = files.get(0);
-        String args = buildGameArgs(isGame, defId, executionFile);
+        String args = buildGameArgs(executionFile);
         File savepointDir = executionDir.toPath().resolve(Constants.SAVEPOINT_DIR).normalize().toFile();
         FileUtils.forceMkdir(savepointDir);
 
@@ -133,14 +134,20 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
                         .build()) > 0;
     }
 
-    private File writeGameConfigFile(long defId, boolean isGame, File executionDir) {
-        File configFile = executionDir.toPath().resolve("run.properties").toFile();
-        // @TODO write config file
+    private File writeGameConfigFile(File specificExecutionDir) throws IOException {
+        File configFile = specificExecutionDir.toPath().resolve("run.properties").toFile();
+        File templateFile = Configs.get().getPath("game.run.template.file",
+                Constants.DEF_LOCATION_RUN_TEMPLATE, true, false);
+
+        String runConfigsTxt = FileUtils.readFileToString(templateFile, StandardCharsets.UTF_8);
+
+        // write config file
+        FileUtils.write(configFile, runConfigsTxt, StandardCharsets.UTF_8, false);
         return configFile;
     }
 
-    private void writeGameRulesFile(long defId, boolean isGame, File executionDir) throws Exception {
-        File ruleFile = executionDir.toPath().resolve("rules.yml").toFile();
+    private void writeGameRulesFile(long defId, boolean isGame, File specificExecutionDir) throws Exception {
+        File ruleFile = specificExecutionDir.toPath().resolve("rules.yml").toFile();
         try (FileWriter writer = new FileWriter(ruleFile)) {
             writeGameRulesFile(defId, isGame, writer);
         }
@@ -172,15 +179,12 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
         yaml.dump(oasisGameDef, writer);
     }
 
-    private String buildGameArgs(boolean isGame, long defId, File executionFile) throws IOException {
+    private String buildGameArgs(File executionFile) throws IOException {
         if (!executionFile.isFile()) {
             throw new IOException("The input must be a file for executing game!");
         }
 
-        return String.format(Constants.RUN_ARGS_FORMAT,
-                isGame ? "game" : "challenge",
-                defId,
-                executionFile.getCanonicalPath());
+        return String.format(Constants.RUN_ARGS_FORMAT, executionFile.getCanonicalPath());
     }
 
     private List<FlinkJar> uploadGameJar(File storageDir, FlinkClient flinkClient) throws IOException {

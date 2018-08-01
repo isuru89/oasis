@@ -5,7 +5,7 @@ package io.github.isuru.oasis.services.utils;
  */
 public final class Constants {
 
-    public static final String RUN_ARGS_FORMAT = "--%s %d --configs \"%s\"";
+    public static final String RUN_ARGS_FORMAT = "--configs \"%s\"";
 
     public static final int DEF_PARALLELISM = 2;
 
@@ -15,7 +15,9 @@ public final class Constants {
     public static final String RUN_CONFIGS_SUB_DIR = "execution";
     public static final String SAVEPOINT_DIR = "sp";
 
-    public static final String GAME_JAR = "oasis.jar";
+    public static final String GAME_JAR = "game.jar";
+
+    public static final String DEF_LOCATION_RUN_TEMPLATE = "game-run-template.properties";
 
 
 }

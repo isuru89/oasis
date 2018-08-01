@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,7 @@ public class OasisTest {
     }
 
     @Test
-    void buildOasisWithoutSource() {
+    void buildOasisWithoutSource() throws IOException {
         try {
             Oasis oasis = new Oasis("test-should-fail");
             new OasisExecution()

@@ -16,6 +16,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
+import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -31,7 +32,7 @@ public class OasisChallengeExecution {
 
     private Properties gameProperties;
 
-    public OasisChallengeExecution build(Oasis oasis, ChallengeDef challenge) {
+    public OasisChallengeExecution build(Oasis oasis, ChallengeDef challenge) throws IOException {
         if (gameProperties == null) gameProperties = new Properties();
 
         env = StreamExecutionEnvironment.getExecutionEnvironment();
