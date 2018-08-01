@@ -32,6 +32,7 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
     private Double nextLevelValue = null;
 
     private ValueState<Double> accSum;
+    private ValueState<Double> accNegSum;
     private ValueState<Integer> currentLevel;
 
     public MilestoneSumDoubleProcess(List<Double> levels, FilterFunction<Event> filter,
@@ -51,6 +52,13 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
             if (currLevel < levels.size()) {
                 double margin = levels.get(currLevel);
                 double acc = asDouble(expression, value);
+
+                if (milestone.isOnlyPositive() && acc < 0) {
+                    accNegSum.update(accNegSum.value() + acc);
+                    ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), milestone, accNegSum.value()));
+                    return;
+                }
+
                 double currSum = accSum.value();
                 if (currSum < margin && margin <= currSum + acc) {
                     // level changed
@@ -107,6 +115,11 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
                 new ValueStateDescriptor<>(String.format("milestone-sd-%d-sum", milestone.getId()),
                         DoubleSerializer.INSTANCE,
                         0.0);
+        ValueStateDescriptor<Double> accNegSumDesc = new ValueStateDescriptor<>(
+                String.format("milestone-sd-%d-negsum", milestone.getId()),
+                DoubleSerializer.INSTANCE, 0.0);
+
+        accNegSum = getRuntimeContext().getState(accNegSumDesc);
         currentLevel = getRuntimeContext().getState(currLevelStateDesc);
         accSum = getRuntimeContext().getState(stateDesc);
     }

@@ -27,6 +27,7 @@ public class MilestoneParser {
             milestone.setDisplayName(milestoneDef.getDisplayName());
             milestone.setEvent(milestoneDef.getEvent());
             milestone.setFrom(milestoneDef.getFrom());
+            milestone.setOnlyPositive(milestoneDef.getOnlyPositive() != null ? milestoneDef.getOnlyPositive() : false);
             if (Utils.isNonEmpty(milestoneDef.getPointIds())) {
                 milestone.setPointIds(new HashSet<>(milestoneDef.getPointIds()));
             }

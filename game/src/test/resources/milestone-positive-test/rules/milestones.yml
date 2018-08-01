@@ -1,0 +1,14 @@
+milestones:
+  - name: markms
+    id: 301
+    event: submission
+    aggregator: sum
+    accumulatorType: long
+    onlyPositive: true
+    accumulator: "marks < 75 ? -1 : 2"
+    levels:
+      1: 1
+      2: 3
+      3: 5
+      4: 7
+      5: 10

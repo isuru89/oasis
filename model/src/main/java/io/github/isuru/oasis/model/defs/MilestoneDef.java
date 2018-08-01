@@ -18,6 +18,7 @@ public class MilestoneDef {
     private String accumulator;
     private String condition;
     private String accumulatorType;
+    private Boolean onlyPositive;
     private Map<Integer, Object> levels;
     private Map<Integer, Double> awardPoints;
 
@@ -118,5 +119,13 @@ public class MilestoneDef {
 
     public void setCondition(String condition) {
         this.condition = condition;
+    }
+
+    public Boolean getOnlyPositive() {
+        return onlyPositive;
+    }
+
+    public void setOnlyPositive(Boolean onlyPositive) {
+        this.onlyPositive = onlyPositive;
     }
 }

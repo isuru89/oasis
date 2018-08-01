@@ -17,4 +17,9 @@ class MilestoneTest extends AbstractTest {
         beginTest("milestone-test");
     }
 
+    @Test
+    void testMilestonePositive() throws Exception {
+        beginTest("milestone-positive-test");
+    }
+
 }

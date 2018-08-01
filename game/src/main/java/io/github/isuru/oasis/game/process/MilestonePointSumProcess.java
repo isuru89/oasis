@@ -28,6 +28,7 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
     private Double nextLevelValue = null;
 
     private ValueState<Double> accSum;
+    private ValueState<Double> accNegSum;
     private ValueState<Integer> currentLevel;
 
     public MilestonePointSumProcess(List<Double> levels, Milestone milestone,
@@ -49,6 +50,12 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
                     acc += value.getPointScore(pid).getValue0();
                 }
             }
+        }
+
+        if (milestone.isOnlyPositive() && acc < 0) {
+            accNegSum.update(accNegSum.value() + acc);
+            ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), milestone, accNegSum.value()));
+            return;
         }
 
         Integer currLevel = currentLevel.value();
@@ -103,13 +110,18 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
     @Override
     public void open(Configuration parameters) {
         ValueStateDescriptor<Integer> currLevelStateDesc =
-                new ValueStateDescriptor<>(String.format("milestone-sd-%d-curr-level", milestone.getId()),
+                new ValueStateDescriptor<>(String.format("milestone-psd-%d-curr-level", milestone.getId()),
                         Integer.class,
                         0);
         ValueStateDescriptor<Double> stateDesc =
-                new ValueStateDescriptor<>(String.format("milestone-sd-%d-sum", milestone.getId()),
+                new ValueStateDescriptor<>(String.format("milestone-psd-%d-sum", milestone.getId()),
                         DoubleSerializer.INSTANCE,
                         0.0);
+        ValueStateDescriptor<Double> accNegSumDesc = new ValueStateDescriptor<>(
+                String.format("milestone-psd-%d-negsum", milestone.getId()),
+                DoubleSerializer.INSTANCE, 0.0);
+
+        accNegSum = getRuntimeContext().getState(accNegSumDesc);
         currentLevel = getRuntimeContext().getState(currLevelStateDesc);
         accSum = getRuntimeContext().getState(stateDesc);
     }

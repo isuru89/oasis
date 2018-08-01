@@ -31,6 +31,7 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
     private Long nextLevelValue = null;
 
     private ValueState<Long> accSum;
+    private ValueState<Long> accNegSum;
     private ValueState<Integer> currentLevel;
 
     public MilestoneSumProcess(List<Long> levels, FilterFunction<Event> filter,
@@ -49,6 +50,13 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
             Integer currLevel = currentLevel.value();
             if (currLevel < levels.size()) {
                 long acc = Long.parseLong(Utils.executeExpression(expression, value.getAllFieldValues()).toString());
+
+                if (milestone.isOnlyPositive() && acc < 0) {
+                    accNegSum.update(accNegSum.value() + acc);
+                    ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), milestone, accNegSum.value()));
+                    return;
+                }
+
                 long margin = levels.get(currLevel);
                 long currSum = accSum.value();
                 if (currSum < margin && margin <= currSum + acc) {
@@ -105,6 +113,10 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
         ValueStateDescriptor<Long> stateDesc =
                 new ValueStateDescriptor<>(String.format("milestone-%d-sum", milestone.getId()),
                         Long.class, 0L);
+        ValueStateDescriptor<Long> accNegSumDesc = new ValueStateDescriptor<>(
+                String.format("milestone-%d-negsum", milestone.getId()), Long.class, 0L);
+
+        accNegSum = getRuntimeContext().getState(accNegSumDesc);
         currentLevel = getRuntimeContext().getState(currLevelStateDesc);
         accSum = getRuntimeContext().getState(stateDesc);
     }

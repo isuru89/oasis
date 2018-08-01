@@ -21,8 +21,17 @@ public class Milestone implements Serializable {
     private Serializable accumulatorExpr;
     private Serializable condition;
     private AggregatorType aggregator = AggregatorType.COUNT;
+    private boolean onlyPositive = false;
     private List<Level> levels;
     private transient Map<Integer, Level> levelMap = null;
+
+    public boolean isOnlyPositive() {
+        return onlyPositive;
+    }
+
+    public void setOnlyPositive(boolean onlyPositive) {
+        this.onlyPositive = onlyPositive;
+    }
 
     public String getDisplayName() {
         return displayName;
