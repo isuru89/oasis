@@ -4,12 +4,14 @@ import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IProfileService;
 import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -94,6 +96,48 @@ public class ProfileService extends BaseService implements IProfileService {
                 .build();
 
         return getDao().executeCommand("profile/editTeam", data) > 0;
+    }
+
+    @Override
+    public List<TeamProfile> listTeams(long scopeId) throws Exception {
+        return toList(getDao().executeQuery("profile/listTeamOfScope",
+                Maps.create("scopeId", scopeId),
+                TeamProfile.class));
+    }
+
+    @Override
+    public long addTeamScope(TeamScope teamScope) throws Exception {
+        Map<String, Object> data = Maps.create()
+                .put("extId", teamScope.getExtId())
+                .put("name", teamScope.getName())
+                .put("displayName", teamScope.getDisplayName())
+                .build();
+
+        return getDao().executeInsert("profile/addTeamScope", data, "scope_id");
+    }
+
+    @Override
+    public TeamScope readTeamScope(long scopeId) throws Exception {
+        return getTheOnlyRecord("profile/readTeamScope",
+                Maps.create("scopeId", scopeId),
+                TeamScope.class);
+    }
+
+    @Override
+    public List<TeamScope> listTeamScopes() throws Exception {
+        return toList(getDao().executeQuery("profile/listTeamScopes",
+                null, TeamScope.class));
+    }
+
+    @Override
+    public boolean editTeamScope(long scopeId, TeamScope latest) throws Exception {
+        TeamScope prev = readTeamScope(scopeId);
+        Map<String, Object> data = Maps.create()
+                .put("displayName", Pojos.compareWith(latest.getDisplayName(), prev.getDisplayName()))
+                .put("scopeId", scopeId)
+                .build();
+
+        return getDao().executeCommand("profile/editTeamScope", data) > 0;
     }
 
     @Override

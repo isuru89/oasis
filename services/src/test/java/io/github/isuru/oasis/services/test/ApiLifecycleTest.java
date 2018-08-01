@@ -49,19 +49,19 @@ class ApiLifecycleTest extends AbstractApiTest {
 
         List<KpiDef> kpiDefs = loadKpis(new File("../scripts/examples/kpis.yml"));
         for (KpiDef kpiDef : kpiDefs) {
-            apiService.getGameDefService().addKpiCalculation(kpiDef);
+            apiService.getGameDefService().addKpiCalculation(gameId, kpiDef);
         }
         List<PointDef> pointDefs = loadPoints(new File("../scripts/examples/points.yml"));
         for (PointDef def : pointDefs) {
-            apiService.getGameDefService().addPointDef(def);
+            apiService.getGameDefService().addPointDef(gameId, def);
         }
         List<BadgeDef> badgeDefs = loadBadges(new File("../scripts/examples/badges.yml"));
         for (BadgeDef def : badgeDefs) {
-            apiService.getGameDefService().addBadgeDef(def);
+            apiService.getGameDefService().addBadgeDef(gameId, def);
         }
         List<MilestoneDef> milestoneDefs = loadMilestones(new File("../scripts/examples/milestones.yml"));
         for (MilestoneDef def : milestoneDefs) {
-            apiService.getGameDefService().addMilestoneDef(def);
+            apiService.getGameDefService().addMilestoneDef(gameId, def);
         }
 
         LifeCycleService lifecycleService = (LifeCycleService) apiService.getLifecycleService();

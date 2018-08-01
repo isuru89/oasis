@@ -148,7 +148,7 @@ class ApiDefTest extends AbstractApiTest {
         kpiDef.setField("totalCode");
         kpiDef.setExpression("addedLines + changedLines");
         String name = kpiDef.assignName();
-        long id = gameDefService.addKpiCalculation(kpiDef);
+        long id = gameDefService.addKpiCalculation(gameId, kpiDef);
 
         KpiDef kpi = gameDefService.readKpiCalculation(id);
         Assertions.assertEquals(kpi.getEvent(), kpiDef.getEvent());
@@ -183,7 +183,7 @@ class ApiDefTest extends AbstractApiTest {
         p1.setAmount(-3);
         def.setAdditionalPoints(Collections.singletonList(p1));
 
-        long id = gameDefService.addPointDef(def);
+        long id = gameDefService.addPointDef(gameId, def);
         Assertions.assertTrue(id > 0);
 
         PointDef point = gameDefService.readPointDef(id);
@@ -231,7 +231,7 @@ class ApiDefTest extends AbstractApiTest {
         levels.put(2, 50);
         levels.put(3, 100);
         def.setLevels(levels);
-        long id = gameDefService.addMilestoneDef(def);
+        long id = gameDefService.addMilestoneDef(gameId, def);
         Assertions.assertTrue(id > 0);
 
         MilestoneDef ms = gameDefService.readMilestoneDef(id);
@@ -275,7 +275,7 @@ class ApiDefTest extends AbstractApiTest {
         def.setMaxBadges(1);
         def.setCondition("true");
         def.setEvent("login");
-        long id = gameDefService.addBadgeDef(def);
+        long id = gameDefService.addBadgeDef(gameId, def);
         Assertions.assertTrue(id > 0);
 
         BadgeDef badge = gameDefService.readBadgeDef(id);
@@ -317,10 +317,10 @@ class ApiDefTest extends AbstractApiTest {
         def.setDisplayName("Top Resolvers");
         def.setOrderBy("desc");
         def.setRuleIds(Arrays.asList("ticket-resolved", "ticket-closed"));
-        long lid = gameDefService.addLeaderboardDef(def);
+        long lid = gameDefService.addLeaderboardDef(gameId, def);
         Assertions.assertTrue(lid > 0);
 
-        List<LeaderboardDef> leaderboardDefs = gameDefService.listLeaderboardDefs();
+        List<LeaderboardDef> leaderboardDefs = gameDefService.listLeaderboardDefs(gameId);
         Assertions.assertNotNull(leaderboardDefs);
         Assertions.assertEquals(1, leaderboardDefs.size());
 
@@ -337,7 +337,7 @@ class ApiDefTest extends AbstractApiTest {
         Assertions.assertTrue(def.getRuleIds().contains(leaderboard.getRuleIds().get(1)));
 
         Assertions.assertTrue(gameDefService.disableLeaderboardDef(lid));
-        List<LeaderboardDef> leaderboardDefList = gameDefService.listLeaderboardDefs();
+        List<LeaderboardDef> leaderboardDefList = gameDefService.listLeaderboardDefs(gameId);
         Assertions.assertTrue(leaderboardDefList.isEmpty());
 
         Assertions.assertTrue(gameDefService.disableGame(gameId));
@@ -366,11 +366,11 @@ class ApiDefTest extends AbstractApiTest {
             shopItem.setScope("Consumable");
             shopItem.setPrice(90);
 
-            long sid = gameDefService.addShopItem(shopItem);
+            long sid = gameDefService.addShopItem(gameId, shopItem);
             item1Id = sid;
             Assertions.assertTrue(sid > 0);
 
-            List<ShopItem> items = gameDefService.listShopItems();
+            List<ShopItem> items = gameDefService.listShopItems(gameId);
             Assertions.assertNotNull(items);
             Assertions.assertEquals(1, items.size());
             Assertions.assertEquals(sid, (long) items.get(0).getId());
@@ -396,10 +396,10 @@ class ApiDefTest extends AbstractApiTest {
         magicStick.setExpirationAt(System.currentTimeMillis() + 8400000);
         magicStick.setImageRef("/images/item/magic_stick.png");
 
-        long sid = gameDefService.addShopItem(magicStick);
+        long sid = gameDefService.addShopItem(gameId, magicStick);
         Assertions.assertTrue(sid > 0);
 
-        List<ShopItem> items = gameDefService.listShopItems();
+        List<ShopItem> items = gameDefService.listShopItems(gameId);
         Assertions.assertNotNull(items);
         Assertions.assertEquals(2, items.size());
 
@@ -413,7 +413,7 @@ class ApiDefTest extends AbstractApiTest {
 
         Assertions.assertTrue(gameDefService.disableShopItem(item1Id));
 
-        items = gameDefService.listShopItems();
+        items = gameDefService.listShopItems(gameId);
         Assertions.assertNotNull(items);
         Assertions.assertEquals(1, items.size());
 
@@ -438,10 +438,10 @@ class ApiDefTest extends AbstractApiTest {
         def.setWinnerCount(100);
         def.setPoints(200);
 
-        long cid = gameDefService.addChallenge(def);
+        long cid = gameDefService.addChallenge(gameId, def);
         Assertions.assertTrue(cid > 0);
 
-        List<ChallengeDef> challengeDefs = gameDefService.listChallenges();
+        List<ChallengeDef> challengeDefs = gameDefService.listChallenges(gameId);
         Assertions.assertNotNull(challengeDefs);
         Assertions.assertEquals(1, challengeDefs.size());
 

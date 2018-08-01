@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
  */
 public class GameDefService extends BaseService implements IGameDefService {
 
-    private Long gameId;
-
     GameDefService(IOasisDao dao, IOasisApiService apiService) {
         super(dao, apiService);
     }
@@ -45,12 +43,17 @@ public class GameDefService extends BaseService implements IGameDefService {
 
         getDao().getDefinitionDao().addDefinition(wrapper);
 
+        long gameId = -1;
         List<DefWrapper> wrappers = getDao().getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
         for (DefWrapper wrp : wrappers) {
             if (wrp.getName().equals(gameDef.getName())) {
                 gameId = wrp.getId();
                 break;
             }
+        }
+
+        if (gameId < 0) {
+            throw new Exception("Game add failed!");
         }
 
         if (optionsDto.isAllowPointCompensation()) {
@@ -61,7 +64,7 @@ public class GameDefService extends BaseService implements IGameDefService {
             compDef.setAmount("amount");
             compDef.setEvent(EventNames.EVENT_COMPENSATE_POINTS);
             compDef.setCondition("true");
-            addPointDef(compDef);
+            addPointDef(gameId, compDef);
         }
 
         if (optionsDto.isAwardPointsForMilestoneCompletion()) {
@@ -69,7 +72,7 @@ public class GameDefService extends BaseService implements IGameDefService {
             msCompleteDef.setName(EventNames.POINT_RULE_MILESTONE_BONUS_NAME);
             msCompleteDef.setDisplayName("Award points when certain milestones are completed.");
             msCompleteDef.setAmount(optionsDto.getDefaultBonusPointsForMilestone());
-            addPointDef(msCompleteDef);
+            addPointDef(gameId, msCompleteDef);
         }
 
         if (optionsDto.isAwardPointsForBadges()) {
@@ -77,7 +80,7 @@ public class GameDefService extends BaseService implements IGameDefService {
             bdgCompleteDef.setName(EventNames.POINT_RULE_BADGE_BONUS_NAME);
             bdgCompleteDef.setDisplayName("Award points when certain badges are completed.");
             bdgCompleteDef.setAmount(optionsDto.getDefaultBonusPointsForBadge());
-            addPointDef(bdgCompleteDef);
+            addPointDef(gameId, bdgCompleteDef);
         }
 
         return gameId;
@@ -141,7 +144,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public long addKpiCalculation(KpiDef fieldCalculator) throws Exception {
+    public long addKpiCalculation(long gameId, KpiDef fieldCalculator) throws Exception {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.KPI.getTypeId());
         wrapper.setName(fieldCalculator.getName());
@@ -179,7 +182,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public long addBadgeDef(BadgeDef badge) throws Exception {
+    public long addBadgeDef(long gameId, BadgeDef badge) throws Exception {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.BADGE.getTypeId());
         wrapper.setName(badge.getName());
@@ -225,7 +228,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public long addPointDef(PointDef pointRule) throws Exception {
+    public long addPointDef(long gameId, PointDef pointRule) throws Exception {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.POINT.getTypeId());
         wrapper.setName(pointRule.getName());
@@ -247,7 +250,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public long addMilestoneDef(MilestoneDef milestone) throws Exception {
+    public long addMilestoneDef(long gameId, MilestoneDef milestone) throws Exception {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.MILESTONE.getTypeId());
         wrapper.setName(milestone.getName());
@@ -285,7 +288,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public long addLeaderboardDef(LeaderboardDef leaderboardDef) throws Exception {
+    public long addLeaderboardDef(long gameId, LeaderboardDef leaderboardDef) throws Exception {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.LEADERBOARD.getTypeId());
         wrapper.setName(leaderboardDef.getName());
@@ -297,7 +300,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public List<LeaderboardDef> listLeaderboardDefs() throws Exception {
+    public List<LeaderboardDef> listLeaderboardDefs(long gameId) throws Exception {
         return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.LEADERBOARD.getTypeId())
                 .stream()
                 .map(this::wrapperToLeaderboard)
@@ -315,7 +318,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public long addShopItem(ShopItem item) throws Exception {
+    public long addShopItem(long gameId, ShopItem item) throws Exception {
         Map<String, Object> data = Maps.create()
                 .put("title", item.getTitle())
                 .put("description", item.getDescription())
@@ -330,7 +333,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public List<ShopItem> listShopItems() throws Exception {
+    public List<ShopItem> listShopItems(long gameId) throws Exception {
         Iterable<ShopItem> items = getDao().executeQuery("def/item/listItems", null, ShopItem.class);
         LinkedList<ShopItem> shopItems = new LinkedList<>();
         for (ShopItem item : items) {
@@ -347,7 +350,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public long addChallenge(ChallengeDef challengeDef) throws Exception {
+    public long addChallenge(long gameId, ChallengeDef challengeDef) throws Exception {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.CHALLENGE.getTypeId());
         wrapper.setName(challengeDef.getName());
@@ -364,7 +367,7 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public List<ChallengeDef> listChallenges() throws Exception {
+    public List<ChallengeDef> listChallenges(long gameId) throws Exception {
         return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.CHALLENGE.getTypeId())
                 .stream()
                 .map(this::wrapperToChallenge)

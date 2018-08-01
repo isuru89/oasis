@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,20 +16,6 @@ public class Utils {
 
     private static final Pattern TIME_PATTERN = Pattern.compile("([0-9]+)\\s*([a-zA-Z]+)");
     private static final Pattern NUMBER_PATTERN = Pattern.compile("([0-9\\\\.]+)\\s*([kKmMbB]?)");
-
-    public static Map<String, Object> filterKeys(Properties properties, String keyPfx) {
-        Map<String, Object> map = new HashMap<>();
-        for (Object keyObj : properties.keySet()) {
-            String key = String.valueOf(keyObj);
-            if (key.startsWith(keyPfx)) {
-                Object val = properties.get(key);
-                String tmp = key.substring(keyPfx.length());
-                map.put(tmp, val);
-            }
-        }
-        return map;
-    }
-
 
     public static boolean isNonEmpty(Collection<?> list) {
         return list != null && !list.isEmpty();

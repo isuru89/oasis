@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.game.persist;
 
 import io.github.isuru.oasis.game.utils.Constants;
-import io.github.isuru.oasis.game.utils.Utils;
+import io.github.isuru.oasis.model.utils.OasisUtils;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011;
@@ -37,7 +37,7 @@ public class OasisKafkaSink extends OasisSink implements Serializable {
         topicMilestoneStates = gameProps.getProperty("kafka.topics.milestonestates", "game-milestone-states");
         topicChallengeWinners = gameProps.getProperty("kafka.topics.challenges", "game-challenge-winners");
 
-        Map<String, Object> map = Utils.filterKeys(gameProps, Constants.KEY_PREFIX_OUTPUT_KAFKA);
+        Map<String, Object> map = OasisUtils.filterKeys(gameProps, Constants.KEY_PREFIX_OUTPUT_KAFKA);
         if (!map.isEmpty()) {
             Properties producerConfigs = new Properties();
             producerConfigs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaHost);

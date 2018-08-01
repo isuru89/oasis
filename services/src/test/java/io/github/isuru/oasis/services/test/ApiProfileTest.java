@@ -8,6 +8,7 @@ import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IProfileService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
 import org.junit.jupiter.api.AfterAll;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * @author iweerarathna
@@ -117,6 +119,42 @@ class ApiProfileTest extends AbstractApiTest {
     }
 
     @Test
+    void testTeamScopeCrud() throws Exception {
+        IProfileService profileService = apiService.getProfileService();
+
+        TeamScope teamScope = new TeamScope();
+        teamScope.setName("sales");
+        teamScope.setDisplayName("Sales Project");
+        teamScope.setExtId(100L);
+        long tid = profileService.addTeamScope(teamScope);
+        Assertions.assertTrue(tid > 0);
+
+        List<TeamScope> teamScopes = profileService.listTeamScopes();
+        Assertions.assertEquals(1, teamScopes.size());
+
+        TeamScope profile = profileService.readTeamScope(tid);
+        Assertions.assertNotNull(profile);
+        Assertions.assertEquals(teamScope.getName(), profile.getName());
+        Assertions.assertEquals(teamScope.getDisplayName(), profile.getDisplayName());
+        Assertions.assertEquals(teamScope.getExtId(), profile.getExtId());
+        Assertions.assertEquals((int)profile.getId(), tid);
+        Assertions.assertTrue(profile.isActive());
+        Assertions.assertNotNull(profile.getCreatedAt());
+        Assertions.assertNotNull(profile.getUpdatedAt());
+
+        profile.setDisplayName("Saled Project - UK");
+        Assertions.assertTrue(profileService.editTeamScope(profile.getId(), profile));
+
+        teamScopes = profileService.listTeamScopes();
+        Assertions.assertEquals(1, teamScopes.size());
+
+        teamScope = profileService.readTeamScope(profile.getId());
+        Assertions.assertEquals(teamScope.getName(), profile.getName());
+        Assertions.assertEquals(teamScope.getDisplayName(), profile.getDisplayName());
+        Assertions.assertEquals(teamScope.getExtId(), profile.getExtId());
+    }
+
+    @Test
     void testUserTeamAssociation() throws Exception {
         IProfileService profileService = apiService.getProfileService();
 
@@ -184,6 +222,7 @@ class ApiProfileTest extends AbstractApiTest {
             oasisDao.executeRawCommand("TRUNCATE OA_USER", null);
             oasisDao.executeRawCommand("TRUNCATE OA_TEAM", null);
             oasisDao.executeRawCommand("TRUNCATE OA_TEAM_USER", null);
+            oasisDao.executeRawCommand("TRUNCATE OA_TEAM_SCOPE", null);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

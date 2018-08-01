@@ -15,7 +15,6 @@ import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSink;
 import io.github.isuru.oasis.game.persist.rabbit.RabbitUtils;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.game.utils.Constants;
-import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
@@ -24,6 +23,7 @@ import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
+import io.github.isuru.oasis.model.utils.OasisUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
@@ -174,7 +174,7 @@ public class Main {
             Properties properties = new Properties();
             // add kafka host
             properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaHost);
-            Map<String, Object> map = Utils.filterKeys(gameProps, Constants.KEY_PREFIX_SOURCE_KAFKA);
+            Map<String, Object> map = OasisUtils.filterKeys(gameProps, Constants.KEY_PREFIX_SOURCE_KAFKA);
             properties.putAll(map);
 
             return new FlinkKafkaConsumer011<>(topic, deserialization, properties);

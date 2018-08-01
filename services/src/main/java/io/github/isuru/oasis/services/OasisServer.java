@@ -4,50 +4,109 @@ import io.github.isuru.oasis.db.DbProperties;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.db.OasisDbPool;
-import io.github.isuru.oasis.model.defs.BadgeDef;
-import io.github.isuru.oasis.model.defs.BadgesDef;
-import io.github.isuru.oasis.model.defs.GameDef;
-import io.github.isuru.oasis.model.defs.KpiDef;
-import io.github.isuru.oasis.model.defs.KpisDef;
-import io.github.isuru.oasis.model.defs.MilestoneDef;
-import io.github.isuru.oasis.model.defs.MilestonesDef;
-import io.github.isuru.oasis.model.defs.PointDef;
-import io.github.isuru.oasis.model.defs.PointsDef;
-import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
-import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.api.routers.BaseRouters;
+import io.github.isuru.oasis.services.api.routers.DefinitionRouter;
+import io.github.isuru.oasis.services.api.routers.EventsRouter;
+import io.github.isuru.oasis.services.api.routers.LifecycleRouter;
+import io.github.isuru.oasis.services.api.routers.ProfileRouter;
+import io.github.isuru.oasis.services.backend.FlinkServices;
 import io.github.isuru.oasis.services.utils.Configs;
-import org.yaml.snakeyaml.Yaml;
+import io.github.isuru.oasis.services.utils.Maps;
+import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import spark.Spark;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
+import java.util.Map;
 
 public class OasisServer {
 
-    public static void main(String[] args) throws Exception {
-        initConfigs();
-//        DbProperties dbProperties = new DbProperties(OasisDbPool.DEFAULT);
-//
-//        IOasisDao oasisDao = OasisDbFactory.create(dbProperties);
-//
-//        DefaultOasisApiService apiService = new DefaultOasisApiService(oasisDao);
-//
-//        FlinkServices flinkServices = new FlinkServices();
-//        flinkServices.init();
-        putDummyData();
+    private static final Logger LOGGER = LoggerFactory.getLogger(OasisServer.class);
 
+    public static void main(String[] args) throws Exception {
+        configureLogs();
+
+        LOGGER.debug("Initializing configurations...");
+        Configs configs = initConfigs();
+
+        LOGGER.debug("Initializing database...");
+        DbProperties dbProperties = initDbProperties(configs);
+        IOasisDao oasisDao = OasisDbFactory.create(dbProperties);
+
+        LOGGER.debug("Initializing Flink services...");
+        FlinkServices flinkServices = new FlinkServices();
+        flinkServices.init(configs.getStrReq("oasis.flink.url"));
+
+        LOGGER.debug("Initializing routers...");
+        DefaultOasisApiService apiService = new DefaultOasisApiService(oasisDao, flinkServices);
+
+        // start service with routing
+        //
+        int port = configs.getInt("oasis.service.port", 5885);
+        Spark.port(port);
+
+        Spark.path("/api/v1", () -> {
+            Spark.before("/*", (request, response) -> response.type(BaseRouters.JSON_TYPE));
+
+            Spark.get("/echo",
+                    (req, res) -> Maps.create("message", "Oasis is working!"),
+                    BaseRouters.TRANSFORMER);
+
+            new EventsRouter(apiService).register();
+
+            Spark.path("/def", () -> new DefinitionRouter(apiService).register());
+            Spark.path("/control", () -> new LifecycleRouter(apiService).register());
+            Spark.path("/admin", () -> new ProfileRouter(apiService).register());
+        });
+
+        // register safe shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Spark.stop();
+            try {
+                oasisDao.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }));
+        LOGGER.debug("Server is up and running in {}", port);
     }
 
-    private static void initConfigs() throws IOException {
+    private static DbProperties initDbProperties(Configs configs) {
+        DbProperties dbProperties = new DbProperties(OasisDbPool.DEFAULT);
+
+        dbProperties.setQueryLocation(configs.getStrReq("oasis.db.scripts.path"));
+        dbProperties.setUrl(configs.getStrReq("oasis.db.url"));
+        dbProperties.setUsername(configs.getStrReq("oasis.db.username"));
+        dbProperties.setPassword(configs.getStrReq("oasis.db.password"));
+
+        Map<String, Object> map = OasisUtils.filterKeys(configs.getProps(), "oasis.db.pool.");
+        dbProperties.setOtherOptions(map);
+
+        return dbProperties;
+    }
+
+    private static void configureLogs() {
+        String logConfigs = System.getenv("OASIS_LOG_CONFIG_FILE");
+        if (logConfigs == null || logConfigs.isEmpty()) {
+            logConfigs = System.getProperty("oasis.logs.config.file",
+                    "./configs/logger.properties");
+        }
+        PropertyConfigurator.configure(logConfigs);
+    }
+
+    private static Configs initConfigs() throws IOException {
         String oasisConfigs = System.getenv("OASIS_CONFIG_FILE");
         if (oasisConfigs == null || oasisConfigs.isEmpty()) {
-            oasisConfigs = System.getProperty("oasis.config.file", "./conf/oasis.properties");
+            oasisConfigs = System.getProperty("oasis.config.file",
+                    "./configs/oasis.properties,./configs/jdbc.properties");
         }
 
-        Configs configs = Configs.get().initWithSysProps();
+        Configs configs = Configs.get();
 
         String[] parts = oasisConfigs.split("[,]");
         for (String filePath : parts) {
@@ -56,74 +115,9 @@ public class OasisServer {
                 configs = configs.init(inputStream);
             }
         }
-    }
 
-    private static void putDummyData() throws Exception {
-        DbProperties dbProperties = new DbProperties(OasisDbPool.DEFAULT);
-        dbProperties.setQueryLocation("./scripts/db");
-        dbProperties.setUsername("root");
-        dbProperties.setPassword("");
-        dbProperties.setUrl("jdbc:mariadb://localhost/oasis");
-
-        IOasisDao oasisDao = OasisDbFactory.create(dbProperties);
-        IOasisApiService apiService = new DefaultOasisApiService(oasisDao, null);
-
-        GameDef gameDef = new GameDef();
-        gameDef.setName("oasis-test");
-        apiService.getGameDefService().createGame(gameDef, new GameOptionsDto());
-
-        List<KpiDef> kpiDefs = loadKpis(new File("./scripts/examples/kpis.yml"));
-        for (KpiDef kpiDef : kpiDefs) {
-            apiService.getGameDefService().addKpiCalculation(kpiDef);
-        }
-        List<PointDef> pointDefs = loadPoints(new File("./scripts/examples/points.yml"));
-        for (PointDef def : pointDefs) {
-            apiService.getGameDefService().addPointDef(def);
-        }
-        List<BadgeDef> badgeDefs = loadBadges(new File("./scripts/examples/badges.yml"));
-        for (BadgeDef def : badgeDefs) {
-            apiService.getGameDefService().addBadgeDef(def);
-        }
-        List<MilestoneDef> milestoneDefs = loadMilestones(new File("./scripts/examples/milestones.yml"));
-        for (MilestoneDef def : milestoneDefs) {
-            apiService.getGameDefService().addMilestoneDef(def);
-        }
-    }
-
-    private static List<KpiDef> loadKpis(File file) throws Exception {
-        try (InputStream inputStream = new FileInputStream(file)) {
-            Yaml yaml = new Yaml();
-            KpisDef kpisDef = yaml.loadAs(inputStream, KpisDef.class);
-
-            return kpisDef.getCalculations();
-        }
-    }
-
-    private static List<MilestoneDef> loadMilestones(File file) throws Exception {
-        try (InputStream inputStream = new FileInputStream(file)) {
-            Yaml yaml = new Yaml();
-            MilestonesDef milestonesDef = yaml.loadAs(inputStream, MilestonesDef.class);
-
-            return milestonesDef.getMilestones();
-        }
-    }
-
-    private static List<PointDef> loadPoints(File file) throws Exception {
-        try (InputStream inputStream = new FileInputStream(file)) {
-            Yaml yaml = new Yaml();
-            PointsDef pointsDef = yaml.loadAs(inputStream, PointsDef.class);
-
-            return pointsDef.getPoints();
-        }
-    }
-
-    private static List<BadgeDef> loadBadges(File file) throws Exception {
-        try (InputStream inputStream = new FileInputStream(file)) {
-            Yaml yaml = new Yaml();
-            BadgesDef badgesDef = yaml.loadAs(inputStream, BadgesDef.class);
-
-            return badgesDef.getBadges();
-        }
+        // after files are loaded, load properties
+        return configs.initWithSysProps();
     }
 
 }

@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.unittest;
 
 import io.github.isuru.oasis.game.utils.Utils;
+import io.github.isuru.oasis.model.utils.OasisUtils;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ class UtilsTest {
             props.put("a.b.f", 2);
             props.put("a.f", 2);
 
-            Map<String, Object> map = Utils.filterKeys(props, "a.b.");
+            Map<String, Object> map = OasisUtils.filterKeys(props, "a.b.");
             Assertions.assertEquals(2, map.size());
             Assertions.assertTrue(map.containsKey("c"));
             Assertions.assertTrue(map.containsKey("f"));
@@ -35,7 +36,7 @@ class UtilsTest {
             props.put("a.b.f", 2);
             props.put("a.f", 2);
 
-            Map<String, Object> map = Utils.filterKeys(props, "x.y.");
+            Map<String, Object> map = OasisUtils.filterKeys(props, "x.y.");
             Assertions.assertEquals(0, map.size());
         }
     }

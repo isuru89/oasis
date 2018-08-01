@@ -19,6 +19,7 @@ public class JdbiDefinitionDao implements IDefinitionDao {
     private static final String DEF_DISABLE_DEFINITION = "def/disableDefinition";
     private static final String DEF_EDIT_DEFINITION = "def/editDefinition";
     private static final String DEF_LIST_DEFINITIONS = "def/listDefinitions";
+    private static final String DEF_LIST_GAME_DEFINITIONS = "def/listDefinitionsGame";
     private static final String DEF_ADD_DEFINITION = "def/addDefinition";
 
     private final IOasisDao dao;
@@ -60,7 +61,7 @@ public class JdbiDefinitionDao implements IDefinitionDao {
         data.put("type", kind);
         data.put("gameId", gameId);
 
-        Iterable<DefWrapper> defWrappers = dao.executeQuery(DEF_LIST_DEFINITIONS, data, DefWrapper.class);
+        Iterable<DefWrapper> defWrappers = dao.executeQuery(DEF_LIST_GAME_DEFINITIONS, data, DefWrapper.class);
         List<DefWrapper> wrappers = new LinkedList<>();
         for (DefWrapper wrapper : defWrappers) {
             wrappers.add(wrapper);

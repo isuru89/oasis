@@ -5,6 +5,8 @@ import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,5 +43,17 @@ abstract class BaseService {
         } else {
             return null;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    <T> List<T> toList(Iterable<T> src) {
+        if (src instanceof List) {
+            return (List)src;
+        }
+        List<T> results = new LinkedList<>();
+        for (T t : src) {
+            results.add(t);
+        }
+        return results;
     }
 }

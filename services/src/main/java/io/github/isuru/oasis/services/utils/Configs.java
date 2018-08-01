@@ -60,11 +60,15 @@ public final class Configs {
     }
 
     public String getStrReq(String key) {
-        if (props.containsKey(key)) {
+        if (!props.containsKey(key)) {
             throw new IllegalStateException("Requested configuration '" + key + "' does not exist!");
         } else {
             return props.getProperty(key);
         }
+    }
+
+    public Properties getProps() {
+        return props;
     }
 
     public static Configs get() {
