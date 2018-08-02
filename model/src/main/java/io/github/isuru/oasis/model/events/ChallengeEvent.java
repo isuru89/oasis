@@ -66,4 +66,9 @@ public class ChallengeEvent implements Event {
     public Long getTeam() {
         return event.getTeam();
     }
+
+    @Override
+    public Long getTeamScope() {
+        return event.getTeamScope();
+    }
 }

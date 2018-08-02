@@ -29,6 +29,7 @@ public class JdbiGameDao implements IGameDao {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("teamId", event.getTeam());
+        map.put("teamScopeId", event.getTeamScope());
         map.put("eventType", event.getEventType());
         map.put("extId", event.getExternalId());
         map.put("ts", event.getTimestamp());
@@ -52,6 +53,7 @@ public class JdbiGameDao implements IGameDao {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("teamId", last.getTeam());
+        map.put("teamScopeId", last.getTeamScope());
         map.put("eventType", last.getEventType());
         map.put("extId", last.getExternalId());
         map.put("ts", last.getTimestamp());
@@ -111,6 +113,7 @@ public class JdbiGameDao implements IGameDao {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("teamId", challengeEvent.getTeam());        // team id
+        map.put("teamScopeId", challengeEvent.getTeamScope());        // team scope id
         map.put("challengeId", challengeEvent.getChallengeDef().getId());
         map.put("points", challengeEvent.getChallengeDef().getPoints());
         map.put("wonAt", challengeEvent.getTimestamp());

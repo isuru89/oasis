@@ -1,6 +1,7 @@
 INSERT INTO OA_POINTS (
     user_id,
     team_id,
+    team_scope_id,
     event_type,
     ext_id,
     ts,
@@ -11,6 +12,7 @@ INSERT INTO OA_POINTS (
 ) VALUES (
     :userId,
     :teamId,
+    :teamScopeId,
     :eventType,
     :extId,
     :ts,

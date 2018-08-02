@@ -12,11 +12,14 @@ public class ChallengeNotificationMapper extends BaseNotificationMapper<Challeng
     @Override
     public String map(ChallengeEvent value) throws Exception {
         Map<String, Object> data = new HashMap<>();
+        data.put("teamId", value.getTeam());
+        data.put("teamScopeId", value.getTeamScope());
         data.put("userId", value.getUser());
         data.put("wonAt", value.getTimestamp());
         data.put("challengeId", value.getChallengeDef().getId());
         data.put("points", value.getChallengeDef().getPoints());
         data.put("eventExtId", value.getExternalId());
+        data.put("ts", value.getTimestamp());
 
         return BaseNotificationMapper.OBJECT_MAPPER.writeValueAsString(data);
     }

@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
 import spark.Filter;
@@ -58,7 +59,31 @@ public class ProfileRouter extends BaseRouters {
         })
         .get("/team/:tid", (req, res) -> {
             return getApiService().getProfileService().readTeam(asPLong(req,"tid"));
+        }).post("/team/:tid/users", (req, res) -> {
+            return getApiService().getProfileService().listUsers(
+                    asPLong(req, "tid"),
+                    asQLong(req, "start", 0),
+                    asQLong(req, "size", 50));
         });
+
+        // team scope end points
+        //
+        post("/scope/add", (req, res) -> {
+            return getApiService().getProfileService().addTeamScope(bodyAs(req, TeamScope.class));
+        })
+        .post("/scope/:tsid/edit", (req, res) -> {
+            return getApiService().getProfileService().editTeamScope(
+                    asPLong(req, "tsid"),
+                    bodyAs(req, TeamScope.class));
+        })
+        .post("/scope/list", (req, res) -> {
+            return getApiService().getProfileService().listTeamScopes();
+        }).get("/scope/:tsid", (req, res) -> {
+            return getApiService().getProfileService().readTeamScope(asPLong(req,"tsid"));
+        }).post("/scope/:tsid/teams", (req, res) -> {
+            return getApiService().getProfileService().listTeams(asPLong(req, "tsid"));
+        });
+
 
         post("/user/add-to-team/", (req, res) -> {
             UserTeam userTeam = bodyAs(req, UserTeam.class);

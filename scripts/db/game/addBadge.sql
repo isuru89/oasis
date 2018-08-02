@@ -1,6 +1,7 @@
 INSERT INTO OA_BADGES (
     user_id,
     team_id,
+    team_scope_id,
     event_type,
     ext_id,
     ts,
@@ -14,6 +15,7 @@ INSERT INTO OA_BADGES (
 ) VALUES (
     :userId,
     :teamId,
+    :teamScopeId,
     :eventType,
     :extId,
     :ts,

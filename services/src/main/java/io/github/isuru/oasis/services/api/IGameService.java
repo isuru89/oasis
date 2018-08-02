@@ -6,9 +6,6 @@ import io.github.isuru.oasis.services.model.PointAwardDto;
 
 public interface IGameService {
 
-
-
-
     void awardPoints(long userId, PointAwardDto awardDto) throws Exception;
     void awardBadge(long userId, BadgeAwardDto awardDto) throws Exception;
 

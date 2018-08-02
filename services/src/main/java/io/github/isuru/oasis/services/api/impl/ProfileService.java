@@ -68,6 +68,17 @@ public class ProfileService extends BaseService implements IProfileService {
     }
 
     @Override
+    public List<UserProfile> listUsers(long teamId, long offset, long size) throws Exception {
+        return toList(getDao().executeQuery("profile/listUsersOfTeam",
+                Maps.create()
+                        .put("teamId", teamId)
+                        .put("offset", offset)
+                        .put("limit", size).build(),
+                UserProfile.class
+        ));
+    }
+
+    @Override
     public long addTeam(TeamProfile teamProfile) throws Exception {
         Map<String, Object> data = Maps.create()
                 .put("teamScope", teamProfile.getTeamScope())

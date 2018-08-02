@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS OA_POINTS (
     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id         INT,
     team_id         INT,
+    team_scope_id   INT,
     event_type      VARCHAR(1024),
     ext_id          BIGINT,
     ts              BIGINT,
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS OA_BADGES (
     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id         INT,
     team_id         INT,
+    team_scope_id   INT,
     event_type      VARCHAR(1024),
     ext_id          BIGINT(20),
     ts              BIGINT(20),
@@ -119,6 +121,7 @@ CREATE TABLE IF NOT EXISTS OA_TEAM_USER (
 CREATE TABLE IF NOT EXISTS OA_CHALLENGE_WINNER (
     user_id         INT,
     team_id         INT,
+    team_scope_id   INT,
     challenge_id    INT,
     points          FLOAT(4),
     won_at          BIGINT,

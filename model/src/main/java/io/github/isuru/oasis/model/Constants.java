@@ -11,6 +11,7 @@ public final class Constants {
     public static final String FIELD_USER = "user";
     public static final String FIELD_ID = "id";
     public static final String FIELD_TEAM = "team";
+    public static final String FIELD_SCOPE = "scope";
     public static final String FIELD_TIMESTAMP = "ts";
     public static final String FIELD_EVENT_TYPE = "type";
 

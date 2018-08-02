@@ -101,6 +101,11 @@ public class PointEvent implements Event {
     }
 
     @Override
+    public Long getTeamScope() {
+        return refEvent.getTeamScope();
+    }
+
+    @Override
     public String toString() {
         return "PointEvent{" +
                 "receivedPoints=" + receivedPoints +

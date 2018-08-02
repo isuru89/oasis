@@ -15,6 +15,8 @@ public interface IProfileService {
     boolean editUserProfile(long userId, UserProfile profile) throws Exception;
     boolean deleteUserProfile(long userId) throws Exception;
 
+    List<UserProfile> listUsers(long teamId, long offset, long size) throws Exception;
+
     long addTeam(TeamProfile teamProfile) throws Exception;
     TeamProfile readTeam(long teamId) throws Exception;
     boolean editTeam(long teamId, TeamProfile teamProfile) throws Exception;

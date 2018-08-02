@@ -82,6 +82,11 @@ public class MilestoneEvent implements Event {
     }
 
     @Override
+    public Long getTeamScope() {
+        return causedEvent.getTeamScope();
+    }
+
+    @Override
     public String toString() {
         return getEventType() + "#" + getExternalId();
     }
