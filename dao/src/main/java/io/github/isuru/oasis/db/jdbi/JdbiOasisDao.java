@@ -5,6 +5,7 @@ import io.github.isuru.oasis.db.IDefinitionDao;
 import io.github.isuru.oasis.db.IGameDao;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.IQueryRepo;
+import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.HandleCallback;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Update;
@@ -64,7 +65,16 @@ public class JdbiOasisDao implements IOasisDao {
             }
             return (long) update.execute();
         });
+    }
 
+    public void runTx(ConsumerEx<JdbcTransactionCtx> txBody) throws Exception {
+        jdbi.inTransaction(new HandleCallback<Object, Exception>() {
+            @Override
+            public Object withHandle(Handle handle) throws Exception {
+                txBody.consume(new RuntimeJdbcTxCtx(handle));
+                return null;
+            }
+        });
     }
 
     @Override
@@ -103,5 +113,26 @@ public class JdbiOasisDao implements IOasisDao {
     public void close() throws IOException {
         queryRepo.close();
         jdbi = null;
+    }
+
+    class RuntimeJdbcTxCtx implements JdbcTransactionCtx {
+
+        private final Handle handle;
+
+        RuntimeJdbcTxCtx(Handle handle) {
+            this.handle = handle;
+        }
+
+        @Override
+        public <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws Exception {
+            String query = queryRepo.fetchQuery(queryId);
+            return handle.createQuery(query).bindMap(data).mapToBean(clz).list();
+        }
+
+        @Override
+        public long executeCommand(String queryId, Map<String, Object> data) throws Exception {
+            String query = queryRepo.fetchQuery(queryId);
+            return handle.createUpdate(query).bindMap(data).execute();
+        }
     }
 }
