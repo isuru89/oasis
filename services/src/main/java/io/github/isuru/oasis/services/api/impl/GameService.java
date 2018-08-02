@@ -12,6 +12,7 @@ import io.github.isuru.oasis.services.model.PointAwardDto;
 import io.github.isuru.oasis.services.utils.Maps;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.Map;
 
 /**
@@ -82,21 +83,24 @@ public class GameService extends BaseService implements IGameService {
 
     @Override
     public void shareItem(long userBy, long itemId, long toUser, int amount) throws Exception {
-        Map<String, Object> data = Maps.create().put("userId", userBy)
-                .put("itemId", itemId)
-                .put("currentEpoch", System.currentTimeMillis())
-                .put("amount", amount)
-                .build();
-        long l = getDao().executeCommand("def/item/shareItem", data);
-        if (l == amount) {
-            Map<String, Object> item = Maps.create().put("userId", toUser)
+        getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
+            Map<String, Object> data = Maps.create().put("userId", userBy)
                     .put("itemId", itemId)
+                    .put("currentEpoch", System.currentTimeMillis())
+                    .put("amount", amount)
                     .build();
-            getDao().executeCommand("def/item/shareToItem", item);
+            long l = ctx.executeCommand("def/item/shareItem", data);
+            if (l == amount) {
+                Map<String, Object> item = Maps.create().put("userId", toUser)
+                        .put("itemId", itemId)
+                        .build();
+                ctx.executeCommand("def/item/shareToItem", item);
 
-        } else {
-            throw new IOException("Cannot share this item! Maybe the item itself is shared to you by friend!");
-        }
+            } else {
+                throw new IOException("Cannot share this item! Maybe the item itself is shared to you by friend!");
+            }
+        });
+
     }
 
     @Override

@@ -1,5 +1,8 @@
 package io.github.isuru.oasis.db;
 
+import io.github.isuru.oasis.db.jdbi.ConsumerEx;
+import io.github.isuru.oasis.db.jdbi.JdbcTransactionCtx;
+
 import java.util.Map;
 
 /**
@@ -14,6 +17,7 @@ public interface IOasisDao extends AutoCloseable {
     long executeCommand(String queryId, Map<String, Object> data) throws Exception;
     long executeRawCommand(String queryStr, Map<String, Object> data) throws Exception;
     Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws Exception;
+    void runTx(int transactionLevel, ConsumerEx<JdbcTransactionCtx> txBody) throws Exception;
 
     IDefinitionDao getDefinitionDao();
 

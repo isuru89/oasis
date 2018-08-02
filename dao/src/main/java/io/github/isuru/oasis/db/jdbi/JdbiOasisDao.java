@@ -9,6 +9,7 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.HandleCallback;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.Update;
+import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -67,13 +68,11 @@ public class JdbiOasisDao implements IOasisDao {
         });
     }
 
-    public void runTx(ConsumerEx<JdbcTransactionCtx> txBody) throws Exception {
-        jdbi.inTransaction(new HandleCallback<Object, Exception>() {
-            @Override
-            public Object withHandle(Handle handle) throws Exception {
-                txBody.consume(new RuntimeJdbcTxCtx(handle));
-                return null;
-            }
+    @Override
+    public void runTx(int transactionLevel, ConsumerEx<JdbcTransactionCtx> txBody) throws Exception {
+        jdbi.inTransaction(TransactionIsolationLevel.valueOf(transactionLevel), handle -> {
+            txBody.consume(new RuntimeJdbcTxCtx(handle));
+            return null;
         });
     }
 
