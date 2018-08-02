@@ -22,6 +22,10 @@ public class MilestoneEvent implements Event {
         this.user = userId;
     }
 
+    public Event getCausedEvent() {
+        return causedEvent;
+    }
+
     public int getLevel() {
         return level;
     }

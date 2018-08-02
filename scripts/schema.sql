@@ -6,13 +6,13 @@ CREATE TABLE IF NOT EXISTS OA_POINTS (
     event_type      VARCHAR(1024),
     ext_id          BIGINT,
     ts              BIGINT,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     point_id        INT,
-    sub_point_id    VARCHAR(1024),
+    point_name      VARCHAR(1024),
     points          FLOAT(4),
     tag             VARCHAR(512),
-    is_active       TINYINT(1) DEFAULT 1
+    is_active       TINYINT(1) DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS OA_BADGES (
@@ -23,10 +23,10 @@ CREATE TABLE IF NOT EXISTS OA_BADGES (
     event_type      VARCHAR(1024),
     ext_id          BIGINT(20),
     ts              BIGINT(20),
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     badge_id        INT,
     sub_badge_id    VARCHAR(1024),
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     start_ext_id    BIGINT,
     end_ext_id      BIGINT,
     start_time      BIGINT,
@@ -41,10 +41,10 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONES (
     event_type      VARCHAR(1024),
     ext_id          BIGINT,
     ts              BIGINT,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     milestone_id    INT,
     level           INT,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     is_active       TINYINT(1) DEFAULT 1
 );
 

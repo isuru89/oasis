@@ -6,7 +6,7 @@ INSERT INTO OA_POINTS (
     ext_id,
     ts,
     point_id,
-    sub_point_id,
+    point_name,
     points,
     tag
 ) VALUES (
@@ -17,7 +17,7 @@ INSERT INTO OA_POINTS (
     :extId,
     :ts,
     :pointId,
-    :subPointId,
+    :pointName,
     :points,
     :tag
 )

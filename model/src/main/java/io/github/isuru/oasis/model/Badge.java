@@ -7,10 +7,13 @@ import java.io.Serializable;
  */
 public class Badge implements Serializable {
 
-    private final Badge parent;
+    private Badge parent;
     private Long id;
     private Double awardPoints;
-    private final String name;
+    private String name;
+
+    public Badge() {
+    }
 
     public Badge(Long id, String name) {
         this(id, name, null);
