@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  oa-web:
+    build: ./services
+    ports:
+      - "5885:5885"
+
+  oa-injector:
+    build: ./injector
+
+  flink:
+    image: flink:1.5
+    ports:
+      - "8083:8081"
+      - "6121:6121"
+
+  mysql8:
+    image: mysql:8
+    volumes:
+      - "./data/db:/var/lib/mysql"
+
+  redis:
+    image: redis
+

@@ -3,7 +3,6 @@ package io.github.isuru.oasis.game.persist.rabbit;
 import io.github.isuru.oasis.game.persist.OasisSink;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
-import org.apache.flink.streaming.connectors.rabbitmq.RMQSink;
 import org.apache.flink.streaming.connectors.rabbitmq.common.RMQConnectionConfig;
 
 import java.io.Serializable;
@@ -22,7 +21,11 @@ public class OasisRabbitSink extends OasisSink implements Serializable {
     private final String badgeQueue;
     private final String challengeQueue;
 
+    private final Properties gameProperties;
+
     public OasisRabbitSink(Properties gameProps) {
+        this.gameProperties = gameProps;
+
         pointQueue = gameProps.getProperty("rabbit.queue.points", "game.o.points");
         milestoneQueue = gameProps.getProperty("rabbit.queue.milestones", "game.o.milestones");
         milestoneStateQueue = gameProps.getProperty("rabbit.queue.milestonestates", "game.o.milestonestates");
@@ -34,27 +37,27 @@ public class OasisRabbitSink extends OasisSink implements Serializable {
 
     @Override
     public SinkFunction<String> createPointSink() {
-        return new RMQSink<>(config, pointQueue, new SimpleStringSchema());
+        return new RMQOasisSink<>(config, pointQueue, new SimpleStringSchema(), gameProperties);
     }
 
     @Override
     public SinkFunction<String> createMilestoneSink() {
-        return new RMQSink<>(config, milestoneQueue, new SimpleStringSchema());
+        return new RMQOasisSink<>(config, milestoneQueue, new SimpleStringSchema(), gameProperties);
     }
 
     @Override
     public SinkFunction<String> createMilestoneStateSink() {
-        return new RMQSink<>(config, milestoneStateQueue, new SimpleStringSchema());
+        return new RMQOasisSink<>(config, milestoneStateQueue, new SimpleStringSchema(), gameProperties);
     }
 
     @Override
     public SinkFunction<String> createBadgeSink() {
-        return new RMQSink<>(config, badgeQueue, new SimpleStringSchema());
+        return new RMQOasisSink<>(config, badgeQueue, new SimpleStringSchema(), gameProperties);
     }
 
     @Override
     public SinkFunction<String> createChallengeSink() {
-        return new RMQSink<>(config, challengeQueue, new SimpleStringSchema());
+        return new RMQOasisSink<>(config, challengeQueue, new SimpleStringSchema(), gameProperties);
     }
 
 }

@@ -65,7 +65,6 @@ import java.util.Properties;
  */
 public class OasisExecution {
 
-
     private StreamExecutionEnvironment env;
 
     private Properties gameProperties;

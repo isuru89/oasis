@@ -14,36 +14,29 @@ import java.util.Properties;
  */
 class RMQOasisSink<IN> extends RMQSink<IN> {
 
-    private String exchangeName;
-    private String exchangeType;
     private boolean durable;
 
     private static final Logger LOG = LoggerFactory.getLogger(RMQOasisSink.class);
 
-    public RMQOasisSink(RMQConnectionConfig rmqConnectionConfig,
-                        String queueName,
-                        SerializationSchema<IN> schema,
-                        Properties gameProps) {
+    RMQOasisSink(RMQConnectionConfig rmqConnectionConfig,
+                 String queueName,
+                 SerializationSchema<IN> schema,
+                 Properties gameProps) {
         super(rmqConnectionConfig, queueName, schema);
 
-        this.exchangeName = gameProps.getProperty("rabbit.msg.exchange");
-        this.exchangeType = gameProps.getProperty("rabbit.msg.exchange.type", "direct");
         this.durable = Boolean.parseBoolean(gameProps.getProperty("rabbit.msg.durable", "true"));
     }
 
     @Override
     protected void setupQueue() throws IOException {
-        super.channel.exchangeDeclare(this.exchangeName, this.exchangeType, this.durable, false, false, null);
         super.channel.queueDeclare(this.queueName, this.durable, false, false, null);
-
-        super.channel.queueBind(this.queueName, this.exchangeName, this.queueName);
     }
 
     @Override
     public void invoke(IN value) {
         try {
             byte[] msg = this.schema.serialize(value);
-            this.channel.basicPublish(this.exchangeName, this.queueName, null, msg);
+            this.channel.basicPublish("", this.queueName, null, msg);
         } catch (IOException var3) {
             LOG.error("Cannot send RMQ message {} at {}", new Object[]{this.queueName, var3});
         }

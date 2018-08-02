@@ -70,6 +70,15 @@
                 </configuration>
             </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
+
 
 </project>
