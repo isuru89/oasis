@@ -9,6 +9,7 @@ import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.api.routers.BaseRouters;
 import io.github.isuru.oasis.services.api.routers.DefinitionRouter;
 import io.github.isuru.oasis.services.api.routers.EventsRouter;
+import io.github.isuru.oasis.services.api.routers.GameRouters;
 import io.github.isuru.oasis.services.api.routers.LifecycleRouter;
 import io.github.isuru.oasis.services.api.routers.ProfileRouter;
 import io.github.isuru.oasis.services.backend.FlinkServices;
@@ -62,6 +63,7 @@ public class OasisServer {
             Spark.path("/def", () -> new DefinitionRouter(apiService).register());
             Spark.path("/control", () -> new LifecycleRouter(apiService).register());
             Spark.path("/admin", () -> new ProfileRouter(apiService).register());
+            Spark.path("/game", () -> new GameRouters(apiService).register());
         });
 
         // register safe shutdown hook

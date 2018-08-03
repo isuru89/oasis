@@ -11,7 +11,7 @@ FROM OA_TEAM_USER otu
 WHERE
     otu.user_id = :userId
     AND
-    otu.since < :currentEpoch
+    :currentEpoch > otu.since
 ORDER BY
     otu.since DESC
 LIMIT

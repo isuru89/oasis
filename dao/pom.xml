@@ -29,6 +29,11 @@
             <artifactId>HikariCP</artifactId>
             <version>3.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi3-stringtemplate4</artifactId>
+            <version>3.3.0</version>
+        </dependency>
         <!--<dependency>-->
             <!--<groupId>mysql</groupId>-->
             <!--<artifactId>mysql-connector-java</artifactId>-->

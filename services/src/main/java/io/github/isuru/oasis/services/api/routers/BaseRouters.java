@@ -83,8 +83,20 @@ public abstract class BaseRouters {
         return Long.parseLong(req.params(name));
     }
 
+    protected int asPInt(Request req, String name) {
+        return Integer.parseInt(req.params(name));
+    }
+
     protected long asQLong(Request req, String name, long defVal) {
         return Long.parseLong(req.queryParamOrDefault(name, String.valueOf(defVal)));
+    }
+
+    protected int asQInt(Request req, String name, int defVal) {
+        return Integer.parseInt(req.queryParamOrDefault(name, String.valueOf(defVal)));
+    }
+
+    protected boolean asQBool(Request req, String name, boolean defVal) {
+        return Boolean.parseBoolean(req.queryParamOrDefault(name, String.valueOf(defVal)));
     }
 
     protected long asPLong(Request req, String name, long defaultVal) {

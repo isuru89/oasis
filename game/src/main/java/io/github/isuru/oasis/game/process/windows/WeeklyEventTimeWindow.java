@@ -1,11 +1,10 @@
 package io.github.isuru.oasis.game.process.windows;
 
+import io.github.isuru.oasis.model.collect.Pair;
+import io.github.isuru.oasis.model.utils.TimeUtils;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
-import java.time.DayOfWeek;
-import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 /**
  * @author iweerarathna
@@ -17,9 +16,7 @@ public class WeeklyEventTimeWindow extends OasisTimeWindowAssigner {
     @Override
     protected TimeWindow findWindow(long timestamp, Object element) {
         long start = TimeWindow.getWindowStartWithOffset(timestamp, 0, DAY_ONE);
-        ZonedDateTime startT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.systemDefault())
-                .with(DayOfWeek.MONDAY);
-        return new TimeWindow(startT.toInstant().toEpochMilli(),
-                startT.plusDays(7).toInstant().toEpochMilli());
+        Pair<Long, Long> weekRange = TimeUtils.getWeekRange(start, ZoneId.systemDefault());
+        return new TimeWindow(weekRange.getValue0(), weekRange.getValue1());
     }
 }

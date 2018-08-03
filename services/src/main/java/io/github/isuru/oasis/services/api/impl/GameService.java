@@ -8,11 +8,15 @@ import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.api.IGameService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.model.BadgeAwardDto;
+import io.github.isuru.oasis.services.model.LeaderboardRecordDto;
+import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
+import io.github.isuru.oasis.services.model.LeaderboardResponseDto;
 import io.github.isuru.oasis.services.model.PointAwardDto;
 import io.github.isuru.oasis.services.utils.Maps;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -109,8 +113,31 @@ public class GameService extends BaseService implements IGameService {
     }
 
     @Override
-    public void readLeaderboardStatus(long leaderboardId) {
+    public LeaderboardResponseDto readLeaderboardStatus(LeaderboardRequestDto request) throws Exception {
+        String scriptName = String.format("leaderboard/%s",
+                request.getType().isCustom() ? "customRange" : "currentRange");
 
+        List<LeaderboardRecordDto> recordDtos = toList(getDao().executeQuery(scriptName,
+                Maps.create()
+                    .put("startRange", request.getRangeStart())
+                    .put("endRange", request.getRangeEnd())
+                    .put("timePattern", request.getType().getPattern())
+                    .put("topN", request.getTopN())
+                    .put("bottomN", request.getBottomN())
+                    .build(),
+                LeaderboardRecordDto.class,
+                Maps.create()
+                    .put("special", request.getType().isCustom())
+                    .put("teamWise", request.isTeamWise())
+                    .put("teamScopeWise", request.isTeamScopeWise())
+                    .put("topN", request.getTopN() != null && request.getTopN() > 0)
+                    .put("bottomN", request.getBottomN() != null && request.getBottomN() > 0)
+                    .build()));
+
+        LeaderboardResponseDto responseDto = new LeaderboardResponseDto();
+        responseDto.setRankings(recordDtos);
+        responseDto.setRequest(request);
+        return responseDto;
     }
 
 }

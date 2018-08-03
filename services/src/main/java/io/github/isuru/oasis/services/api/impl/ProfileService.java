@@ -170,9 +170,10 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public UserTeam findCurrentTeamOfUser(long userId) throws Exception {
+        long l = System.currentTimeMillis();
         return getTheOnlyRecord("profile/findCurrentTeamOfUser",
                 Maps.create().put("userId", userId)
-                    .put("currentEpoch", System.currentTimeMillis())
+                    .put("currentEpoch", l)
                     .build(),
                 UserTeam.class);
     }

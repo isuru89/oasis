@@ -8,7 +8,7 @@ public class UserTeam {
     private Integer userId;
     private Integer teamId;
     private Integer scopeId;
-    private Long since;
+    private Long joinedTime;
 
     public Integer getUserId() {
         return userId;
@@ -26,12 +26,12 @@ public class UserTeam {
         this.teamId = teamId;
     }
 
-    public Long getSince() {
-        return since;
+    public Long getJoinedTime() {
+        return joinedTime;
     }
 
-    public void setSince(Long since) {
-        this.since = since;
+    public void setJoinedTime(Long joinedTime) {
+        this.joinedTime = joinedTime;
     }
 
     public Integer getScopeId() {

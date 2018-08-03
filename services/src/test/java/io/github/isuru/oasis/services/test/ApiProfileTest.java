@@ -181,7 +181,7 @@ class ApiProfileTest extends AbstractApiTest {
         Assertions.assertNotNull(currentTeamOfUser);
         Assertions.assertEquals(t1id, (long) currentTeamOfUser.getTeamId());
         Assertions.assertEquals(u1id, (long) currentTeamOfUser.getUserId());
-        Assertions.assertTrue(currentTeamOfUser.getSince() < System.currentTimeMillis());
+        Assertions.assertTrue(currentTeamOfUser.getJoinedTime() < System.currentTimeMillis());
 
         // add again to the same team should return false
         Assertions.assertFalse(profileService.addUserToTeam(u1id, t1id));
@@ -192,7 +192,7 @@ class ApiProfileTest extends AbstractApiTest {
         Assertions.assertNotNull(currentTeamOfUser);
         Assertions.assertEquals(t2id, (long) currentTeamOfUser.getTeamId());
         Assertions.assertEquals(u1id, (long) currentTeamOfUser.getUserId());
-        Assertions.assertTrue(currentTeamOfUser.getSince() < System.currentTimeMillis());
+        Assertions.assertTrue(currentTeamOfUser.getJoinedTime() < System.currentTimeMillis());
 
     }
 

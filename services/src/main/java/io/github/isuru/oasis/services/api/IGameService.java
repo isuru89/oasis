@@ -2,6 +2,8 @@ package io.github.isuru.oasis.services.api;
 
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.services.model.BadgeAwardDto;
+import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
+import io.github.isuru.oasis.services.model.LeaderboardResponseDto;
 import io.github.isuru.oasis.services.model.PointAwardDto;
 
 public interface IGameService {
@@ -17,6 +19,6 @@ public interface IGameService {
 
     void readGameTimeline(long since);
 
-    void readLeaderboardStatus(long leaderboardId);
+    LeaderboardResponseDto readLeaderboardStatus(LeaderboardRequestDto request) throws Exception;
 
 }

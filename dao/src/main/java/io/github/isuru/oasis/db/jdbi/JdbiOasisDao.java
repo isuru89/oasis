@@ -8,11 +8,14 @@ import io.github.isuru.oasis.db.IQueryRepo;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.HandleCallback;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.core.statement.Update;
 import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
+import org.jdbi.v3.stringtemplate4.StringTemplateEngine;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,6 +37,27 @@ public class JdbiOasisDao implements IOasisDao {
     public void init(DbProperties properties) throws Exception {
         DataSource source = JdbcPool.createDataSource(properties);
         jdbi = Jdbi.create(source);
+        jdbi.setTemplateEngine(new StringTemplateEngine());
+    }
+
+    @Override
+    public <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data,
+                                        Class<T> clz,
+                                        Map<String, Object> templatingData) throws Exception {
+        String query = queryRepo.fetchQuery(queryId);
+        return jdbi.withHandle((HandleCallback<Iterable<T>, Exception>) handle -> {
+            Query handleQuery = handle.createQuery(query);
+            if (templatingData != null && !templatingData.isEmpty()) {
+                for (Map.Entry<String, Object> entry : templatingData.entrySet()) {
+                    if (entry.getValue() instanceof List) {
+                        handleQuery = handleQuery.defineList(entry.getKey(), entry.getValue());
+                    } else {
+                        handleQuery = handleQuery.define(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+            return handleQuery.bindMap(data).mapToBean(clz).list();
+        });
     }
 
     @Override

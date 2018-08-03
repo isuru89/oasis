@@ -4,19 +4,19 @@ FROM
     (
     SELECT
         tbl.user_id,
-        tbl.week_yw,
+        tbl.day_d,
         tbl.totalPoints,
-        (DENSE_RANK() over (PARTITION BY tbl.week_yw ORDER BY tbl.totalPoints DESC)) AS 'rank'
+        (DENSE_RANK() over (PARTITION BY tbl.day_d ORDER BY tbl.totalPoints DESC)) AS 'rank'
     FROM
         (
         SELECT
-            FROM_UNIXTIME(ts / 1000, '%x-%v') AS week_yw,
+            DATE(FROM_UNIXTIME(ts / 1000)) AS day_d,
             user_id,
             ROUND(SUM(points), 2) AS totalPoints
         FROM
             `OA_POINTS`
         GROUP BY
-            week_yw,
+            day_d,
             user_id
         ) tbl
     ) t
@@ -24,4 +24,4 @@ FROM
 WHERE
    t.user_id = 12
 ORDER BY
-    t.week_yw
+    t.day_d
