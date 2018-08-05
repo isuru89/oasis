@@ -12,9 +12,11 @@ import io.github.isuru.oasis.game.persist.DbOutputHandler;
 import io.github.isuru.oasis.game.persist.NoneOutputHandler;
 import io.github.isuru.oasis.game.persist.OasisKafkaSink;
 import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSink;
+import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSource;
 import io.github.isuru.oasis.game.persist.rabbit.RabbitUtils;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.game.utils.Constants;
+import io.github.isuru.oasis.model.ConfigKeys;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
@@ -27,7 +29,6 @@ import io.github.isuru.oasis.model.utils.OasisUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
-import org.apache.flink.streaming.connectors.rabbitmq.RMQSource;
 import org.apache.flink.streaming.connectors.rabbitmq.common.RMQConnectionConfig;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -180,9 +181,9 @@ public class Main {
             return new FlinkKafkaConsumer011<>(topic, deserialization, properties);
         } else if ("rabbit".equalsIgnoreCase(type)) {
             RMQConnectionConfig rabbitConfig = RabbitUtils.createRabbitConfig(gameProps);
-            String inputQueue = gameProps.getProperty("rabbit.queue.src");
+            String inputQueue = gameProps.getProperty(ConfigKeys.KEY_RABBIT_QUEUE_SRC);
 
-            return new RMQSource<>(rabbitConfig, inputQueue,
+            return new OasisRabbitSource(gameProps, rabbitConfig, inputQueue,
                     true,
                     new EventRabbitDeserializer());
 

@@ -5,6 +5,7 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import io.github.isuru.oasis.model.ConfigKeys;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +21,7 @@ public final class RabbitDispatcher {
     private Connection connection;
     private Channel channel;
 
-    private String queueName;
+    private String exchangeName;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -28,18 +29,24 @@ public final class RabbitDispatcher {
         Configs configs = Configs.get();
 
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(configs.getStrReq("rabbit.host"));
-        factory.setPort(Integer.parseInt(configs.getStr("rabbit.port", "5072")));
-        factory.setVirtualHost(configs.getStr("rabbit.virtualhost", "oasis"));
-        factory.setUsername(configs.getStrReq("rabbit.username"));
-        factory.setPassword(configs.getStrReq("rabbit.password"));
+        factory.setHost(configs.getStrReq(ConfigKeys.KEY_RABBIT_HOST));
+        factory.setPort(Integer.parseInt(configs.getStr(ConfigKeys.KEY_RABBIT_PORT,
+                String.valueOf(ConfigKeys.DEF_RABBIT_PORT))));
+        factory.setVirtualHost(configs.getStr(ConfigKeys.KEY_RABBIT_VIRTUAL_HOST,
+                ConfigKeys.DEF_RABBIT_VIRTUAL_HOST));
+        factory.setUsername(configs.getStrReq(ConfigKeys.KEY_RABBIT_USERNAME));
+        factory.setPassword(configs.getStrReq(ConfigKeys.KEY_RABBIT_PASSWORD));
 
         connection = factory.newConnection();
         channel = connection.createChannel();
 
-        queueName = configs.getStrReq("rabbit.queue.src");
+        exchangeName = configs.getStrReq(ConfigKeys.KEY_RABBIT_SRC_EXCHANGE_NAME);
+        String exchangeType = configs.getStr(ConfigKeys.KEY_RABBIT_SRC_EXCHANGE_TYPE,
+                ConfigKeys.DEF_RABBIT_SRC_EXCHANGE_TYPE);
+        boolean durable = configs.getBool(ConfigKeys.KEY_RABBIT_SRC_EXCHANGE_DURABLE,
+                ConfigKeys.DEF_RABBIT_SRC_EXCHANGE_DURABLE);
 
-        channel.queueDeclare(queueName, true, false, false, null);
+        channel.exchangeDeclare(exchangeName, exchangeType, durable, false, null);
 
         // register shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -61,7 +68,10 @@ public final class RabbitDispatcher {
         AMQP.BasicProperties properties = new AMQP.BasicProperties().builder()
                 .correlationId(UUID.randomUUID().toString())
                 .build();
-        channel.basicPublish("", queueName, properties, msg);
+
+        String eventType = (String) data.get("type");
+        String routingKey = "game.event." + eventType;
+        channel.basicPublish(exchangeName, routingKey, properties, msg);
     }
 
     public static RabbitDispatcher get() {

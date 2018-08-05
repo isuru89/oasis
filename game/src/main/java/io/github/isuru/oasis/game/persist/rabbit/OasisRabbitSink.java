@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.game.persist.rabbit;
 
 import io.github.isuru.oasis.game.persist.OasisSink;
+import io.github.isuru.oasis.model.ConfigKeys;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.connectors.rabbitmq.common.RMQConnectionConfig;
@@ -26,11 +27,11 @@ public class OasisRabbitSink extends OasisSink implements Serializable {
     public OasisRabbitSink(Properties gameProps) {
         this.gameProperties = gameProps;
 
-        pointQueue = gameProps.getProperty("rabbit.queue.points", "game.o.points");
-        milestoneQueue = gameProps.getProperty("rabbit.queue.milestones", "game.o.milestones");
-        milestoneStateQueue = gameProps.getProperty("rabbit.queue.milestonestates", "game.o.milestonestates");
-        badgeQueue = gameProps.getProperty("rabbit.queue.badges", "game.o.badges");
-        challengeQueue = gameProps.getProperty("rabbit.queue.challenges", "game.o.challenges");
+        pointQueue = gameProps.getProperty(ConfigKeys.KEY_RABBIT_QUEUE_OUT_POINTS, "game.o.points");
+        milestoneQueue = gameProps.getProperty(ConfigKeys.KEY_RABBIT_QUEUE_OUT_MILESTONES, "game.o.milestones");
+        milestoneStateQueue = gameProps.getProperty(ConfigKeys.KEY_RABBIT_QUEUE_OUT_MILESTONESTATES, "game.o.milestonestates");
+        badgeQueue = gameProps.getProperty(ConfigKeys.KEY_RABBIT_QUEUE_OUT_BADGES, "game.o.badges");
+        challengeQueue = gameProps.getProperty(ConfigKeys.KEY_RABBIT_QUEUE_OUT_CHALLENGES, "game.o.challenges");
 
         config = RabbitUtils.createRabbitConfig(gameProps);
     }

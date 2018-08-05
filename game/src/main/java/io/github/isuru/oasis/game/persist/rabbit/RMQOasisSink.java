@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.game.persist.rabbit;
 
+import io.github.isuru.oasis.model.ConfigKeys;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.streaming.connectors.rabbitmq.RMQSink;
 import org.apache.flink.streaming.connectors.rabbitmq.common.RMQConnectionConfig;
@@ -24,7 +25,7 @@ class RMQOasisSink<IN> extends RMQSink<IN> {
                  Properties gameProps) {
         super(rmqConnectionConfig, queueName, schema);
 
-        this.durable = Boolean.parseBoolean(gameProps.getProperty("rabbit.msg.durable", "true"));
+        this.durable = Boolean.parseBoolean(gameProps.getProperty(ConfigKeys.KEY_RABBIT_QUEUE_OUTPUT_DURABLE, "true"));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.game;
 
+import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.Event;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 
@@ -15,5 +16,8 @@ public class EventRabbitDeserializer extends EventDeserializer implements Deseri
         return parseEvent(message);
     }
 
-
+    @Override
+    public boolean isEndOfStream(Event nextElement) {
+        return Utils.isEndOfStream(nextElement);
+    }
 }

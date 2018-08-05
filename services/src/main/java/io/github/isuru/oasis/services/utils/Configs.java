@@ -59,6 +59,15 @@ public final class Configs {
         return props.getProperty(key, def);
     }
 
+    public boolean getBool(String key, boolean def) {
+        Object val = props.get(key);
+        if (val == null) {
+            return def;
+        } else {
+            return Boolean.parseBoolean(val.toString());
+        }
+    }
+
     public String getStrReq(String key) {
         if (!props.containsKey(key)) {
             throw new IllegalStateException("Requested configuration '" + key + "' does not exist!");

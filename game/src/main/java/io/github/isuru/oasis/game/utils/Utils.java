@@ -1,6 +1,8 @@
 package io.github.isuru.oasis.game.utils;
 
 
+import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.events.EventNames;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.mvel2.MVEL;
 
@@ -16,6 +18,10 @@ public class Utils {
 
     private static final Pattern TIME_PATTERN = Pattern.compile("([0-9]+)\\s*([a-zA-Z]+)");
     private static final Pattern NUMBER_PATTERN = Pattern.compile("([0-9\\\\.]+)\\s*([kKmMbB]?)");
+
+    public static boolean isEndOfStream(Event event) {
+        return EventNames.TERMINATE_GAME.equals(event.getEventType());
+    }
 
     public static boolean isNonEmpty(Collection<?> list) {
         return list != null && !list.isEmpty();

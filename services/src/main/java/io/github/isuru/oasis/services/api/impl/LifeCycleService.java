@@ -109,7 +109,7 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
         // write game content to file
         File executionDir = getExecutionDir(defId, storageDir);
         writeGameRulesFile(defId, isGame, executionDir);
-        File executionFile = writeGameConfigFile(executionDir);
+        File executionFile = writeGameConfigFile(defId, isGame, executionDir);
 
         // start the game
         //
@@ -134,12 +134,18 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
                         .build()) > 0;
     }
 
-    private File writeGameConfigFile(File specificExecutionDir) throws IOException {
+    private File writeGameConfigFile(long defId, boolean isGame, File specificExecutionDir) throws IOException {
         File configFile = specificExecutionDir.toPath().resolve("run.properties").toFile();
         File templateFile = Configs.get().getPath("game.run.template.file",
                 Constants.DEF_LOCATION_RUN_TEMPLATE, true, false);
 
         String runConfigsTxt = FileUtils.readFileToString(templateFile, StandardCharsets.UTF_8);
+
+        // replace rabbitmq source queue name correctly
+        String queueName = isGame ?
+                String.format("game.o.src.game.%d", defId) :
+                String.format("game.o.src.challenge.%d", defId);
+        runConfigsTxt = runConfigsTxt.replace("${rabbit.queue.src}", queueName);
 
         // write config file
         FileUtils.write(configFile, runConfigsTxt, StandardCharsets.UTF_8, false);
