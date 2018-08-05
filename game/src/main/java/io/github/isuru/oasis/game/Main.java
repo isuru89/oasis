@@ -16,10 +16,11 @@ import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSource;
 import io.github.isuru.oasis.game.persist.rabbit.RabbitUtils;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.game.utils.Constants;
-import io.github.isuru.oasis.model.ConfigKeys;
+import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
@@ -48,7 +49,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         ParameterTool parameters = ParameterTool.fromArgs(args);
         String configs = parameters.getRequired("configs");
-        Properties gameProperties = readConfigs(configs);
+        Configs gameProperties = readConfigs(configs).initWithSysProps();
 
         File ruleFile = deriveGameRuleFilePath(configs, gameProperties);
         OasisGameDef oasisGameDef = readGameDef(ruleFile);
@@ -81,7 +82,7 @@ public class Main {
         }
     }
 
-    private static void startChallenge(OasisGameDef oasisGameDef, Properties gameProps) throws Exception {
+    private static void startChallenge(OasisGameDef oasisGameDef, Configs gameProps) throws Exception {
         ChallengeDef challengeDef = oasisGameDef.getChallenge();
         Oasis oasis = new Oasis(String.format("challenge-%s", challengeDef.getName()));
         SourceFunction<Event> source = createSource(gameProps);
@@ -96,9 +97,9 @@ public class Main {
         execution.start();
     }
 
-    static OasisChallengeExecution createOutputHandler(Properties gameProps, OasisChallengeExecution execution) {
-        String jdbcInst = gameProps.getProperty(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
-        String outputType = gameProps.getProperty(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
+    static OasisChallengeExecution createOutputHandler(Configs gameProps, OasisChallengeExecution execution) {
+        String jdbcInst = gameProps.getStr(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
+        String outputType = gameProps.getStr(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
         if ("db".equals(outputType)) {
             return execution.outputHandler(new DbOutputHandler(jdbcInst));
         } else if ("kafka".equals(outputType)) {
@@ -112,9 +113,9 @@ public class Main {
         }
     }
 
-    static OasisExecution createOutputHandler(Properties gameProps, OasisExecution execution) throws Exception {
-        String jdbcInst = gameProps.getProperty(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
-        String outputType = gameProps.getProperty(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
+    static OasisExecution createOutputHandler(Configs gameProps, OasisExecution execution) throws Exception {
+        String jdbcInst = gameProps.getStr(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
+        String outputType = gameProps.getStr(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
         if ("db".equals(outputType)) {
             DbProperties dbProps = createConfigs(gameProps);
             IOasisDao oasisDao = OasisDbFactory.create(dbProps);
@@ -137,27 +138,23 @@ public class Main {
         }
     }
 
-    private static Properties readConfigs(String configFile) throws IOException {
+    private static Configs readConfigs(String configFile) throws IOException {
         if (configFile.startsWith("classpath:")) {
             String cp = configFile.substring("classpath:".length());
             try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(cp)) {
-                Properties properties = new Properties();
-                properties.load(inputStream);
-                return properties;
+                return Configs.create().init(inputStream);
             }
         } else {
             try (InputStream inputStream = new FileInputStream(configFile)) {
-                Properties properties = new Properties();
-                properties.load(inputStream);
-                return properties;
+                return Configs.create().init(inputStream);
             }
         }
     }
 
-    static SourceFunction<Event> createSource(Properties gameProps) throws FileNotFoundException {
-        String type = gameProps.getProperty(Constants.KEY_SOURCE_TYPE);
+    static SourceFunction<Event> createSource(Configs gameProps) throws FileNotFoundException {
+        String type = gameProps.getStrReq(Constants.KEY_SOURCE_TYPE);
         if ("file".equalsIgnoreCase(type)) {
-            File inputCsv = new File(gameProps.getProperty(Constants.KEY_SOURCE_FILE));
+            File inputCsv = new File(gameProps.getStrReq(Constants.KEY_SOURCE_FILE));
             if (!inputCsv.exists()) {
                 throw new FileNotFoundException("Input source file does not exist! ["
                         + inputCsv.getAbsolutePath() + "]");
@@ -165,8 +162,8 @@ public class Main {
             return new CsvEventSource(inputCsv);
 
         } else if ("kafka".equalsIgnoreCase(type)) {
-            String topic = gameProps.getProperty(Constants.KEY_KAFKA_SOURCE_TOPIC);
-            String kafkaHost = gameProps.getProperty(Constants.KEY_KAFKA_HOST);
+            String topic = gameProps.getStrReq(Constants.KEY_KAFKA_SOURCE_TOPIC);
+            String kafkaHost = gameProps.getStrReq(Constants.KEY_KAFKA_HOST);
             Preconditions.checkArgument(kafkaHost != null && !kafkaHost.trim().isEmpty());
             Preconditions.checkArgument(topic != null && !topic.trim().isEmpty());
 
@@ -175,13 +172,13 @@ public class Main {
             Properties properties = new Properties();
             // add kafka host
             properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaHost);
-            Map<String, Object> map = OasisUtils.filterKeys(gameProps, Constants.KEY_PREFIX_SOURCE_KAFKA);
+            Map<String, Object> map = OasisUtils.filterKeys(gameProps.getProps(), Constants.KEY_PREFIX_SOURCE_KAFKA);
             properties.putAll(map);
 
             return new FlinkKafkaConsumer011<>(topic, deserialization, properties);
         } else if ("rabbit".equalsIgnoreCase(type)) {
             RMQConnectionConfig rabbitConfig = RabbitUtils.createRabbitConfig(gameProps);
-            String inputQueue = gameProps.getProperty(ConfigKeys.KEY_RABBIT_QUEUE_SRC);
+            String inputQueue = gameProps.getStrReq(ConfigKeys.KEY_RABBIT_QUEUE_SRC);
 
             return new OasisRabbitSource(gameProps, rabbitConfig, inputQueue,
                     true,
@@ -192,18 +189,18 @@ public class Main {
         }
     }
 
-    static DbProperties createConfigs(Properties gameProps) throws Exception {
-        String jdbcInst = gameProps.getProperty(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
+    static DbProperties createConfigs(Configs gameProps) throws Exception {
+        String jdbcInst = gameProps.getStr(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
 
-        File scriptsDir = new File(gameProps.getProperty(Constants.KEY_DB_SCRIPTS_DIR));
+        File scriptsDir = new File(gameProps.getStrReq(Constants.KEY_DB_SCRIPTS_DIR));
         if (!scriptsDir.exists()) {
             throw new FileNotFoundException("DB scripts folder does not exist! [" + scriptsDir.getAbsolutePath() + "]");
         }
 
         DbProperties dbProperties = new DbProperties(jdbcInst);
-        dbProperties.setUrl(gameProps.getProperty(Constants.KEY_JDBC_URL));
-        dbProperties.setUsername(gameProps.getProperty(Constants.KEY_JDBC_USERNAME));
-        dbProperties.setPassword(gameProps.getProperty(Constants.KEY_JDBC_PASSWORD, null));
+        dbProperties.setUrl(gameProps.getStrReq(Constants.KEY_JDBC_URL));
+        dbProperties.setUsername(gameProps.getStrReq(Constants.KEY_JDBC_USERNAME));
+        dbProperties.setPassword(gameProps.getStr(Constants.KEY_JDBC_PASSWORD, null));
 
         dbProperties.setQueryLocation(scriptsDir.getAbsolutePath());
         return dbProperties;
@@ -216,12 +213,12 @@ public class Main {
         }
     }
 
-    private static File deriveGameRuleFilePath(String configsPath, Properties gameProps) {
+    private static File deriveGameRuleFilePath(String configsPath, Configs gameProps) {
         File configFile = new File(configsPath);
         File configDir = configFile.getParentFile();
-        gameProps.put("_location", configDir.getAbsolutePath());
+        gameProps.append("_location", configDir.getAbsolutePath());
 
-        String filePath = gameProps.getProperty("game.rule.file");
+        String filePath = gameProps.getStr("game.rule.file", null);
         if (filePath == null) {
             throw new RuntimeException("Game rule file location had not specified!");
         }

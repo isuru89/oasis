@@ -13,7 +13,7 @@ import io.github.isuru.oasis.services.api.routers.GameRouters;
 import io.github.isuru.oasis.services.api.routers.LifecycleRouter;
 import io.github.isuru.oasis.services.api.routers.ProfileRouter;
 import io.github.isuru.oasis.services.backend.FlinkServices;
-import io.github.isuru.oasis.services.utils.Configs;
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.utils.Maps;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;

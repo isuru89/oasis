@@ -5,7 +5,8 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import io.github.isuru.oasis.model.ConfigKeys;
+import io.github.isuru.oasis.model.configs.ConfigKeys;
+import io.github.isuru.oasis.model.configs.Configs;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

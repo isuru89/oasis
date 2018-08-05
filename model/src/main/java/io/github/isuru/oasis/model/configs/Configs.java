@@ -1,20 +1,25 @@
-package io.github.isuru.oasis.services.utils;
+package io.github.isuru.oasis.model.configs;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Properties;
 
 /**
  * @author iweerarathna
  */
-public final class Configs {
+public final class Configs implements Serializable {
 
     public static final String KEY_STORAGE_DIR = "oasis.storage.dir";
     public static final String KEY_EXEC_PARALLELISM = "oasis.exec.parallelism";
 
     private final Properties props = new Properties();
+
+    public void append(String key, String value) {
+        props.put(key, value);
+    }
 
     public Configs initWithSysProps() {
         props.putAll(System.getProperties());
@@ -76,8 +81,22 @@ public final class Configs {
         }
     }
 
+    public boolean has(String key) {
+        return props.containsKey(key);
+    }
+
     public Properties getProps() {
         return props;
+    }
+
+    public static Configs create() {
+        return new Configs();
+    }
+
+    public static Configs from(Properties properties) {
+        Configs configs = Configs.create();
+        configs.props.putAll(properties);
+        return configs;
     }
 
     public static Configs get() {

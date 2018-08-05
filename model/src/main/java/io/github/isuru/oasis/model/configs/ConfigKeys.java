@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.model;
+package io.github.isuru.oasis.model.configs;
 
 /**
  * @author iweerarathna

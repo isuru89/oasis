@@ -25,6 +25,7 @@ import io.github.isuru.oasis.game.utils.Constants;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.events.BadgeEvent;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
@@ -58,7 +59,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 
 /**
  * @author iweerarathna
@@ -67,7 +67,7 @@ public class OasisExecution {
 
     private StreamExecutionEnvironment env;
 
-    private Properties gameProperties;
+    private Configs gameProperties;
 
     private OasisSink oasisSink;
     private SourceFunction<Event> eventSource;
@@ -81,14 +81,14 @@ public class OasisExecution {
 
     private IOutputHandler outputHandler;
 
-    static void appendCheckpointStatus(StreamExecutionEnvironment env, Properties gameProperties) throws IOException {
-        if (gameProperties.containsKey(Constants.KEY_CHECKPOINT_ENABLED) &&
-                Boolean.parseBoolean(gameProperties.getProperty(Constants.KEY_CHECKPOINT_ENABLED, "true"))) {
-            int interval = Integer.parseInt(gameProperties.getProperty(Constants.KEY_CHECKPOINT_INTERVAL, "20000"));
+    static void appendCheckpointStatus(StreamExecutionEnvironment env, Configs gameProperties) throws IOException {
+        if (gameProperties.has(Constants.KEY_CHECKPOINT_ENABLED) &&
+                gameProperties.getBool(Constants.KEY_CHECKPOINT_ENABLED, true)) {
+            int interval = gameProperties.getInt(Constants.KEY_CHECKPOINT_INTERVAL, 20000);
             env.enableCheckpointing(interval, CheckpointingMode.EXACTLY_ONCE);
 
-            File configDir = new File(gameProperties.getProperty(Constants.KEY_LOCATION));
-            String relPath = gameProperties.getProperty(Constants.KEY_CHECKPOINT_DIR);
+            File configDir = new File(gameProperties.getStrReq(Constants.KEY_LOCATION));
+            String relPath = gameProperties.getStrReq(Constants.KEY_CHECKPOINT_DIR);
             File chkDir = new File(configDir, relPath);
             FileUtils.forceMkdir(chkDir);
 
@@ -101,14 +101,14 @@ public class OasisExecution {
     }
 
     public OasisExecution build(Oasis oasis, StreamExecutionEnvironment externalEnv) throws IOException {
-        if (gameProperties == null) gameProperties = new Properties();
+        if (gameProperties == null) gameProperties = Configs.create();
 
         String oasisId = oasis.getId();
 
         if (externalEnv == null) {
             env = StreamExecutionEnvironment.getExecutionEnvironment();
             appendCheckpointStatus(env, gameProperties);
-            env.setParallelism(Integer.parseInt(gameProperties.getProperty(Constants.KEY_FLINK_PARALLELISM, "1")));
+            env.setParallelism(gameProperties.getInt(Constants.KEY_FLINK_PARALLELISM, 1));
             env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         } else {
             env = externalEnv;
@@ -389,7 +389,7 @@ public class OasisExecution {
         return this;
     }
 
-    OasisExecution havingGameProperties(Properties properties) {
+    OasisExecution havingGameProperties(Configs properties) {
         this.gameProperties = properties;
         return this;
     }

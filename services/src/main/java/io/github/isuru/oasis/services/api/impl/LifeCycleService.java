@@ -15,7 +15,7 @@ import io.github.isuru.oasis.services.backend.model.JarRunResponse;
 import io.github.isuru.oasis.services.backend.model.JarUploadResponse;
 import io.github.isuru.oasis.services.backend.model.JobSaveRequest;
 import io.github.isuru.oasis.services.model.FlinkSubmittedJob;
-import io.github.isuru.oasis.services.utils.Configs;
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.utils.Constants;
 import io.github.isuru.oasis.services.utils.Maps;
 import okhttp3.MediaType;

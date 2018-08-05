@@ -7,6 +7,7 @@ import io.github.isuru.oasis.game.process.challenge.ChallengeFilter;
 import io.github.isuru.oasis.game.process.challenge.ChallengeWindowProcessor;
 import io.github.isuru.oasis.game.process.sinks.OasisChallengeSink;
 import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.events.ChallengeEvent;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
@@ -17,7 +18,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
 import java.io.IOException;
-import java.util.Properties;
 
 /**
  * @author iweerarathna
@@ -30,10 +30,10 @@ public class OasisChallengeExecution {
 
     private StreamExecutionEnvironment env;
 
-    private Properties gameProperties;
+    private Configs gameProperties;
 
     public OasisChallengeExecution build(Oasis oasis, ChallengeDef challenge) throws IOException {
-        if (gameProperties == null) gameProperties = new Properties();
+        if (gameProperties == null) gameProperties = Configs.create();
 
         env = StreamExecutionEnvironment.getExecutionEnvironment();
         OasisExecution.appendCheckpointStatus(env, gameProperties);
@@ -87,7 +87,7 @@ public class OasisChallengeExecution {
         return this;
     }
 
-    OasisChallengeExecution havingGameProperties(Properties properties) {
+    OasisChallengeExecution havingGameProperties(Configs properties) {
         this.gameProperties = properties;
         return this;
     }

@@ -6,6 +6,7 @@ import io.github.isuru.oasis.game.persist.OasisKafkaSink;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.game.utils.Constants;
 import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
@@ -26,7 +27,7 @@ class MainTest {
             properties.put(Constants.KEY_SOURCE_TYPE, "file");
             properties.put(Constants.KEY_SOURCE_FILE, "../non/existing/file");
             try {
-                Main.createSource(properties);
+                Main.createSource(Configs.from(properties));
                 Assertions.fail("File source creation should fail when source does not exist!");
             } catch (FileNotFoundException e) {
                 // ok
@@ -37,7 +38,7 @@ class MainTest {
             properties.put(Constants.KEY_SOURCE_TYPE, "file");
             properties.put(Constants.KEY_SOURCE_FILE, "../scripts/examples/input.csv");
 
-            SourceFunction<Event> source = Main.createSource(properties);
+            SourceFunction<Event> source = Main.createSource(Configs.from(properties));
             Assertions.assertTrue(source instanceof CsvEventSource);
         }
 
@@ -47,7 +48,7 @@ class MainTest {
             properties.put(Constants.KEY_KAFKA_SOURCE_TOPIC, "game-events");
             properties.put(Constants.KEY_KAFKA_HOST, "localhost:9092");
 
-            SourceFunction<Event> source = Main.createSource(properties);
+            SourceFunction<Event> source = Main.createSource(Configs.from(properties));
             Assertions.assertTrue(source instanceof FlinkKafkaConsumer011);
         }
     }
@@ -64,7 +65,7 @@ class MainTest {
         properties.put(Constants.KEY_DB_SCRIPTS_DIR, scriptsDir.getAbsolutePath());
 
         {
-            DbProperties configs = Main.createConfigs(properties);
+            DbProperties configs = Main.createConfigs(Configs.from(properties));
             Assertions.assertNotNull(configs);
             Assertions.assertEquals(configs.getDaoName(), "testing");
             Assertions.assertEquals(configs.getUsername(), "isuru");
@@ -74,18 +75,18 @@ class MainTest {
         }
         {
             properties.remove(Constants.KEY_JDBC_PASSWORD);
-            DbProperties configs = Main.createConfigs(properties);
+            DbProperties configs = Main.createConfigs(Configs.from(properties));
             Assertions.assertNull(configs.getPassword());
             properties.put(Constants.KEY_JDBC_PASSWORD, "");
 
-            configs = Main.createConfigs(properties);
+            configs = Main.createConfigs(Configs.from(properties));
             Assertions.assertNotNull(configs.getPassword());
             Assertions.assertEquals(configs.getPassword(), "");
         }
         {
             properties.put(Constants.KEY_DB_SCRIPTS_DIR, "../hello/non/existing");
             try {
-                Main.createConfigs(properties);
+                Main.createConfigs(Configs.from(properties));
                 Assertions.fail("Non existing script dir should fail!");
             } catch (FileNotFoundException ex) {
                 // ok
@@ -102,7 +103,7 @@ class MainTest {
 
             properties.put(Constants.KEY_KAFKA_HOST, "localhost:9092");
 
-            OasisExecution execution = Main.createOutputHandler(properties, new OasisExecution());
+            OasisExecution execution = Main.createOutputHandler(Configs.from(properties), new OasisExecution());
             Assertions.assertNotNull(execution);
 
             OasisKafkaSink kafkaSink = (OasisKafkaSink) execution.getKafkaSink();
@@ -124,7 +125,7 @@ class MainTest {
 
         properties.put(Constants.KEY_KAFKA_HOST, "localhost:9092");
 
-        OasisChallengeExecution execution = Main.createOutputHandler(properties, new OasisChallengeExecution());
+        OasisChallengeExecution execution = Main.createOutputHandler(Configs.from(properties), new OasisChallengeExecution());
         Assertions.assertNotNull(execution);
 
         OasisKafkaSink kafkaSink = (OasisKafkaSink) execution.getOutputSink();
@@ -147,7 +148,7 @@ class MainTest {
             properties.put(Constants.KEY_JDBC_INSTANCE, "testing");
             properties.put(Constants.KEY_OUTPUT_TYPE, "db");
 
-            OasisExecution execution = Main.createOutputHandler(properties, new OasisExecution());
+            OasisExecution execution = Main.createOutputHandler(Configs.from(properties), new OasisExecution());
             Assertions.assertNotNull(execution);
 
             IOutputHandler outputHandler = execution.getOutputHandler();
@@ -162,7 +163,7 @@ class MainTest {
         Properties properties = new Properties();
         properties.put(Constants.KEY_JDBC_INSTANCE, "testing");
         properties.put(Constants.KEY_OUTPUT_TYPE, "db");
-        OasisChallengeExecution challengeExecution = Main.createOutputHandler(properties, new OasisChallengeExecution());
+        OasisChallengeExecution challengeExecution = Main.createOutputHandler(Configs.from(properties), new OasisChallengeExecution());
         Assertions.assertNotNull(challengeExecution);
 
         IOutputHandler outputHandler = challengeExecution.getOutputHandler();
