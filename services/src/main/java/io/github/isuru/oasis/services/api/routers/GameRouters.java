@@ -51,6 +51,8 @@ public class GameRouters extends BaseRouters {
         }
 
         long userId = req.attribute("userId");
+        checkSameUser(req, userId);
+
         BadgeAwardDto badgeAwardDto = bodyAs(req, BadgeAwardDto.class);
         getApiService().getGameService().awardBadge(userId, badgeAwardDto);
         return true;
@@ -62,6 +64,8 @@ public class GameRouters extends BaseRouters {
         }
 
         long userId = req.attribute("userId");
+        checkSameUser(req, userId);
+
         PointAwardDto pointAwardDto = bodyAs(req, PointAwardDto.class);
         getApiService().getGameService().awardPoints(userId, pointAwardDto);
         return true;
@@ -73,6 +77,8 @@ public class GameRouters extends BaseRouters {
         }
 
         long userId = req.attribute("userId");
+        checkSameUser(req, userId);
+
         ValueMap body = bodyAsMap(req);
         long itemId = body.getLongReq("itemId");
         if (body.has("price")) {
@@ -90,6 +96,8 @@ public class GameRouters extends BaseRouters {
         }
 
         long userId = req.attribute("userId");
+        checkSameUser(req, userId);
+
         ValueMap body = bodyAsMap(req);
         long itemId = body.getLongReq("itemId");
         long toUser = body.getLongReq("toUser");

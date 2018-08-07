@@ -52,8 +52,8 @@ public abstract class BaseRouters {
             if (auth.startsWith("Basic ")) {
                 String token = auth.substring("Basic ".length());
                 String decode = new String(Base64.getDecoder().decode(token), "UTF-8");
-                String uname = decode.substring(0, decode.indexOf("="));
-                String pword = decode.substring(decode.indexOf("=") + 1);
+                String uname = decode.substring(0, decode.indexOf(":"));
+                String pword = decode.substring(decode.indexOf(":") + 1);
                 return Pair.of(uname, pword);
             }
         }

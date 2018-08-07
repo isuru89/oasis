@@ -7,9 +7,17 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.Hashtable;
 
 /**
  * @author iweerarathna
@@ -20,6 +28,7 @@ public final class AuthUtils {
 
     private Algorithm algorithm;
     private JWTVerifier verifier;
+    private long expiryDate;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -33,6 +42,38 @@ public final class AuthUtils {
         verifier = JWT.require(algorithm)
                 .withIssuer(OASIS_ISSUER)
                 .build();
+
+        expiryDate = LocalDate.of(2030, 12, 31)
+                .atStartOfDay()
+                .toInstant(ZoneOffset.UTC).toEpochMilli();
+    }
+
+    public void ldapAuthUser(String username, String password) throws ApiAuthException {
+        DirContext context = null;
+        Hashtable<String, String> env = new Hashtable<>();
+        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        env.put(Context.PROVIDER_URL, Configs.get().getStrReq("oasis.auth.ldap.url"));
+        env.put(Context.SECURITY_AUTHENTICATION, "simple");
+        env.put(Context.SECURITY_PRINCIPAL, username);
+        env.put(Context.SECURITY_CREDENTIALS, password);
+
+        try {
+            context = new InitialDirContext(env);
+        } catch (NamingException e) {
+            throw new ApiAuthException("User authentication failed! Username or password is incorrect!");
+        } finally {
+            try {
+                if (context != null) {
+                    context.close();
+                }
+            } catch (NamingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public long getExpiryDate() {
+        return expiryDate;
     }
 
     public String issueToken(TokenInfo tokenInfo) throws ApiAuthException {

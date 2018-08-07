@@ -25,38 +25,38 @@ class RoutingPermissionTest extends RoutingTest {
     @Test
     void testAuth() throws Exception {
         {
-            String up = "admin@oasis.com=admin1";
+            String up = "admin@oasis.com:admin1";
             String encoded = Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
             shouldForbidden(getApi().login("Basic " + encoded));
         }
         {
-            String up = "curator@oasis.com=curatorx";
+            String up = "curator@oasis.com:curatorx";
             String encoded = Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
             shouldForbidden(getApi().login("Basic " + encoded));
         }
         {
-            String up = "player@oasis.com=";
+            String up = "player@oasis.com:";
             String encoded = Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
             shouldForbidden(getApi().login("Basic " + encoded));
         }
         {
-            String up = "admin2@oasis.com=admin";
+            String up = "admin2@oasis.com:admin";
             String encoded = Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
             shouldForbidden(getApi().login("Basic " + encoded));
         }
         {
-            String up = "admin2@oasis.com=admin1";
+            String up = "admin2@oasis.com:admin1";
             String encoded = Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
             shouldForbidden(getApi().login("Basic " + encoded));
         }
         {
             // by giving user name should fail
-            String up = "admin=admin";
+            String up = "admin:admin";
             String encoded = Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
             shouldForbidden(getApi().login("Basic " + encoded));
         }
         {
-            String up = "admin@oasis.com=admin";
+            String up = "admin@oasis.com:admin";
             String encoded = Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
             Map<String, Object> map = shouldBeSuccess(getApi().login("Basic " + encoded));
             Assertions.assertNotNull(map);
@@ -68,7 +68,7 @@ class RoutingPermissionTest extends RoutingTest {
             Assertions.assertEquals(true, map.get("success"));
         }
         {
-            String up = "curator@oasis.com=curator";
+            String up = "curator@oasis.com:curator";
             String encoded = Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
             Map<String, Object> map = shouldBeSuccess(getApi().login("Basic " + encoded));
             Assertions.assertNotNull(map);
@@ -80,7 +80,7 @@ class RoutingPermissionTest extends RoutingTest {
             Assertions.assertEquals(true, map.get("success"));
         }
         {
-            String up = "player@oasis.com=player";
+            String up = "player@oasis.com:player";
             String encoded = Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
             Map<String, Object> map = shouldBeSuccess(getApi().login("Basic " + encoded));
             Assertions.assertNotNull(map);
