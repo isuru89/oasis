@@ -114,6 +114,7 @@ CREATE TABLE IF NOT EXISTS OA_TEAM_SCOPE (
 CREATE TABLE IF NOT EXISTS OA_TEAM_USER (
     team_id         INT,
     user_id         INT,
+    role_id         INT DEFAULT 8,
     since           BIGINT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

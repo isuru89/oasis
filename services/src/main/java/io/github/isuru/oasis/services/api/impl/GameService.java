@@ -29,33 +29,33 @@ public class GameService extends BaseService implements IGameService {
     }
 
     @Override
-    public void awardPoints(long userId, PointAwardDto awardDto) throws Exception {
-        long teamId = getApiService().getProfileService().findCurrentTeamOfUser(userId).getTeamId();
+    public void awardPoints(long byUser, PointAwardDto awardDto) throws Exception {
+        long teamId = getApiService().getProfileService().findCurrentTeamOfUser(awardDto.getToUser()).getTeamId();
         Map<String, Object> data = Maps.create()
                 .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_COMPENSATE_POINTS)
                 .put(Constants.FIELD_TIMESTAMP, System.currentTimeMillis())
-                .put(Constants.FIELD_USER, userId)
+                .put(Constants.FIELD_USER, awardDto.getToUser())
                 .put(Constants.FIELD_TEAM, teamId)
                 .put(Constants.FIELD_ID, awardDto.getAssociatedEventId())
                 .put("amount", awardDto.getAmount())
-                .put("tag", String.valueOf(awardDto.getByUser()))
+                .put("tag", String.valueOf(byUser))
                 .build();
 
         getApiService().getEventService().submitEvent(data);
     }
 
     @Override
-    public void awardBadge(long userId, BadgeAwardDto awardDto) throws Exception {
-        long teamId = getApiService().getProfileService().findCurrentTeamOfUser(userId).getTeamId();
+    public void awardBadge(long byUser, BadgeAwardDto awardDto) throws Exception {
+        long teamId = getApiService().getProfileService().findCurrentTeamOfUser(awardDto.getToUser()).getTeamId();
         Map<String, Object> data = Maps.create()
                 .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_AWARD_BADGE)
                 .put(Constants.FIELD_TIMESTAMP, System.currentTimeMillis())
-                .put(Constants.FIELD_USER, userId)
+                .put(Constants.FIELD_USER, awardDto.getToUser())
                 .put(Constants.FIELD_TEAM, teamId)
                 .put(Constants.FIELD_ID, awardDto.getAssociatedEventId())
                 .put("badge", awardDto.getBadgeId())
                 .put("subBadge", awardDto.getSubBadgeId())
-                .put("tag", String.valueOf(awardDto.getByUser()))
+                .put("tag", String.valueOf(byUser))
                 .build();
 
         getApiService().getEventService().submitEvent(data);

@@ -7,11 +7,5 @@ SELECT
     is_male as male,
     is_active as active
 FROM OA_USER
-WHERE
-    is_active = 1
-ORDER BY
-    user_id
-LIMIT
-    :limit
-OFFSET
-    :offset
+WHERE email = :email
+LIMIT 1

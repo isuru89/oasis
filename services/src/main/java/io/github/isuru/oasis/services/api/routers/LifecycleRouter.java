@@ -17,36 +17,29 @@ public class LifecycleRouter extends BaseRouters {
 
     @Override
     public void register() {
+        Spark.before("/game/*", (request, response) -> {
+            checkAuth(request);
+            checkAdmin(request);
+        });
+        Spark.before("/challenge/*", (request, response) -> {
+            checkAdmin(request);
+            checkCurator(request);
+        });
+
         post("/game/:gameId/start", (req, res) -> {
-            if (checkAuth(req)) {
-                return mapToStatus(getLCService().start(asPLong(req, "gameId")));
-            } else {
-                return Spark.halt(401);
-            }
+            return mapToStatus(getLCService().start(asPLong(req, "gameId")));
         });
 
         post("/game/:gameId/stop", (req, res) -> {
-            if (checkAuth(req)) {
-                return mapToStatus(getLCService().stop(asPLong(req, "gameId")));
-            } else {
-                return Spark.halt(401);
-            }
+            return mapToStatus(getLCService().stop(asPLong(req, "gameId")));
         });
 
         post("/challenge/:cid/start", (req, res) -> {
-            if (checkAuth(req)) {
-                return mapToStatus(getLCService().startChallenge(asPLong(req, "cid")));
-            } else {
-                return Spark.halt(401);
-            }
+            return mapToStatus(getLCService().startChallenge(asPLong(req, "cid")));
         });
 
         post("/challenge/:id/stop", (req, res) -> {
-            if (checkAuth(req)) {
-                return mapToStatus(getLCService().stop(asPLong(req, "id")));
-            } else {
-                return Spark.halt(401);
-            }
+            return mapToStatus(getLCService().stop(asPLong(req, "id")));
         });
     }
 

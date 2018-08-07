@@ -5,7 +5,7 @@ package io.github.isuru.oasis.services.model;
  */
 public class PointAwardDto {
 
-    private long byUser;
+    private long toUser;
     private float amount;
     private Long associatedEventId;
 
@@ -17,12 +17,12 @@ public class PointAwardDto {
         this.associatedEventId = associatedEventId;
     }
 
-    public long getByUser() {
-        return byUser;
+    public long getToUser() {
+        return toUser;
     }
 
-    public void setByUser(long byUser) {
-        this.byUser = byUser;
+    public void setToUser(long toUser) {
+        this.toUser = toUser;
     }
 
     public float getAmount() {

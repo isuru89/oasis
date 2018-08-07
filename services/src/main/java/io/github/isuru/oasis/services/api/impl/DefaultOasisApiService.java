@@ -22,7 +22,11 @@ public class DefaultOasisApiService implements IOasisApiService {
     private IStatService statService;
     private IEventsService eventsService;
 
+    private IOasisDao dao;
+
     public DefaultOasisApiService(IOasisDao oasisDao, FlinkServices flinkServices) {
+        this.dao = oasisDao;
+
         gameDefService = new GameDefService(oasisDao, this);
         profileService = new ProfileService(oasisDao, this);
         gameService = new GameService(oasisDao, this);
@@ -60,4 +64,7 @@ public class DefaultOasisApiService implements IOasisApiService {
         return statService;
     }
 
+    public IOasisDao getDao() {
+        return dao;
+    }
 }

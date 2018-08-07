@@ -1,6 +1,7 @@
 SELECT
     otu.user_id AS userId,
     otu.team_id AS teamId,
+    otu.role_id as roleId,
     oats.scope_id AS scopeId,
     otu.since AS joinedTime
 

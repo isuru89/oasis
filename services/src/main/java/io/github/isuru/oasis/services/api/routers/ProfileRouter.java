@@ -23,16 +23,18 @@ public class ProfileRouter extends BaseRouters {
         Spark.before("/*", new Filter() {
             @Override
             public void handle(Request request, Response response) throws Exception {
-                if (!checkAuth(request)) {
-                    Spark.halt(401);
-                }
+                checkAuth(request);
             }
         });
 
         post("/user/add", (req, res) -> {
+            checkAdmin(req);
             return getApiService().getProfileService().addUserProfile(bodyAs(req, UserProfile.class));
         })
         .post("/user/:uid/edit", (req, res) -> {
+            long tid = asPLong(req, "uid");
+            checkSameUser(req, tid);
+
             return getApiService().getProfileService().editUserProfile(
                     asPLong(req, "uid"),
                     bodyAs(req, UserProfile.class));
@@ -44,12 +46,14 @@ public class ProfileRouter extends BaseRouters {
             return getApiService().getProfileService().readUserProfileByExtId(asPLong(req,"uid"));
         })
         .delete("/user/:uid", (req, res) -> {
+            checkAdmin(req);
             return getApiService().getProfileService().deleteUserProfile(asPLong(req,"uid"));
         });
 
         // team end points
         //
         post("/team/add", (req, res) -> {
+            checkCurator(req);
             return getApiService().getProfileService().addTeam(bodyAs(req, TeamProfile.class));
         })
         .post("/team/:tid/edit", (req, res) -> {
@@ -59,7 +63,8 @@ public class ProfileRouter extends BaseRouters {
         })
         .get("/team/:tid", (req, res) -> {
             return getApiService().getProfileService().readTeam(asPLong(req,"tid"));
-        }).post("/team/:tid/users", (req, res) -> {
+        })
+        .post("/team/:tid/users", (req, res) -> {
             return getApiService().getProfileService().listUsers(
                     asPLong(req, "tid"),
                     asQLong(req, "start", 0),
@@ -69,6 +74,7 @@ public class ProfileRouter extends BaseRouters {
         // team scope end points
         //
         post("/scope/add", (req, res) -> {
+            checkAdmin(req);
             return getApiService().getProfileService().addTeamScope(bodyAs(req, TeamScope.class));
         })
         .post("/scope/:tsid/edit", (req, res) -> {
@@ -78,16 +84,21 @@ public class ProfileRouter extends BaseRouters {
         })
         .post("/scope/list", (req, res) -> {
             return getApiService().getProfileService().listTeamScopes();
-        }).get("/scope/:tsid", (req, res) -> {
+        })
+        .get("/scope/:tsid", (req, res) -> {
             return getApiService().getProfileService().readTeamScope(asPLong(req,"tsid"));
-        }).post("/scope/:tsid/teams", (req, res) -> {
+        })
+        .post("/scope/:tsid/teams", (req, res) -> {
             return getApiService().getProfileService().listTeams(asPLong(req, "tsid"));
         });
 
 
         post("/user/add-to-team/", (req, res) -> {
+            checkCurator(req);
+
             UserTeam userTeam = bodyAs(req, UserTeam.class);
-            return getApiService().getProfileService().addUserToTeam(userTeam.getUserId(), userTeam.getTeamId());
+            return getApiService().getProfileService().addUserToTeam(userTeam.getUserId(), userTeam.getTeamId(),
+                    userTeam.getRoleId());
         })
         .post("/user/:uid/current-team", (req, res) -> {
             return getApiService().getProfileService().findCurrentTeamOfUser(asPLong(req, "uid"));

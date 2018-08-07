@@ -7,7 +7,7 @@ public class BadgeAwardDto {
 
     private int badgeId;
     private String subBadgeId;
-    private long byUser;
+    private long toUser;
     private Long associatedEventId;
 
     public Long getAssociatedEventId() {
@@ -18,12 +18,12 @@ public class BadgeAwardDto {
         this.associatedEventId = associatedEventId;
     }
 
-    public long getByUser() {
-        return byUser;
+    public long getToUser() {
+        return toUser;
     }
 
-    public void setByUser(long byUser) {
-        this.byUser = byUser;
+    public void setToUser(long toUser) {
+        this.toUser = toUser;
     }
 
     public String getSubBadgeId() {

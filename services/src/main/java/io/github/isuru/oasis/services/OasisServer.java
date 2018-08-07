@@ -5,7 +5,9 @@ import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.model.utils.OasisUtils;
+import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
+import io.github.isuru.oasis.services.api.routers.AuthRouter;
 import io.github.isuru.oasis.services.api.routers.BaseRouters;
 import io.github.isuru.oasis.services.api.routers.DefinitionRouter;
 import io.github.isuru.oasis.services.api.routers.EventsRouter;
@@ -14,6 +16,9 @@ import io.github.isuru.oasis.services.api.routers.LifecycleRouter;
 import io.github.isuru.oasis.services.api.routers.ProfileRouter;
 import io.github.isuru.oasis.services.backend.FlinkServices;
 import io.github.isuru.oasis.model.configs.Configs;
+import io.github.isuru.oasis.services.exception.ApiAuthException;
+import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.Maps;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
@@ -29,11 +34,15 @@ public class OasisServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OasisServer.class);
 
+    public static IOasisApiService apiService;
+
     public static void main(String[] args) throws Exception {
         configureLogs();
 
         LOGGER.debug("Initializing configurations...");
         Configs configs = initConfigs();
+
+        AuthUtils.get().init();
 
         LOGGER.debug("Initializing database...");
         DbProperties dbProperties = initDbProperties(configs);
@@ -44,7 +53,7 @@ public class OasisServer {
         flinkServices.init(configs.getStrReq("oasis.flink.url"));
 
         LOGGER.debug("Initializing routers...");
-        DefaultOasisApiService apiService = new DefaultOasisApiService(oasisDao, flinkServices);
+        apiService = new DefaultOasisApiService(oasisDao, flinkServices);
 
         // start service with routing
         //
@@ -58,6 +67,8 @@ public class OasisServer {
                     (req, res) -> Maps.create("message", "Oasis is working!"),
                     BaseRouters.TRANSFORMER);
 
+            Spark.path("/auth", () -> new AuthRouter(apiService).register());
+
             new EventsRouter(apiService).register();
 
             Spark.path("/def", () -> new DefinitionRouter(apiService).register());
@@ -66,12 +77,38 @@ public class OasisServer {
             Spark.path("/game", () -> new GameRouters(apiService).register());
         });
 
+        // Exception handling
+        //
+        Spark.exception(InputValidationException.class, (ex, req, res) -> {
+            res.status(400);
+            res.body(BaseRouters.TRANSFORMER.toStr(Maps.create()
+                .put("success", false)
+                .put("error", ex.getMessage())
+                .build()));
+        });
+        Spark.exception(ApiAuthException.class, (ex, req, res) -> {
+            res.status(401);
+            res.body(BaseRouters.TRANSFORMER.toStr(Maps.create()
+                    .put("success", false)
+                    .put("error", ex.getMessage())
+                    .build()));
+        });
+        Spark.exception(Exception.class, (ex, req, res) -> {
+            res.status(500);
+            res.body(BaseRouters.TRANSFORMER.toStr(Maps.create()
+                .put("success", false)
+                .put("error", ex.getMessage())
+                .build()));
+        });
+
         // register safe shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOGGER.debug("Oasis is stopping...");
             Spark.stop();
             try {
                 oasisDao.close();
             } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
                 e.printStackTrace();
             }
         }));
@@ -96,19 +133,23 @@ public class OasisServer {
         String logConfigs = System.getenv("OASIS_LOG_CONFIG_FILE");
         if (logConfigs == null || logConfigs.isEmpty()) {
             logConfigs = System.getProperty("oasis.logs.config.file",
-                    "./configs/logger.properties");
+                    Configs.get().getStr("oasis.logs.config.file",
+                    "./configs/logger.properties"));
         }
-        PropertyConfigurator.configure(logConfigs);
+        if (new File(logConfigs).exists()) {
+            PropertyConfigurator.configure(logConfigs);
+        }
     }
 
     private static Configs initConfigs() throws IOException {
         String oasisConfigs = System.getenv("OASIS_CONFIG_FILE");
+        Configs configs = Configs.get();
+
         if (oasisConfigs == null || oasisConfigs.isEmpty()) {
             oasisConfigs = System.getProperty("oasis.config.file",
-                    "./configs/oasis.properties,./configs/jdbc.properties");
+                    configs.getStr("oasis.config.file",
+                            "./configs/oasis.properties,./configs/jdbc.properties"));
         }
-
-        Configs configs = Configs.get();
 
         String[] parts = oasisConfigs.split("[,]");
         for (String filePath : parts) {

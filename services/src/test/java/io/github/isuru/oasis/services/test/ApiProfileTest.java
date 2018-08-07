@@ -58,6 +58,13 @@ class ApiProfileTest extends AbstractApiTest {
         Assertions.assertEquals(user1.getExtId(), profile.getExtId());
         Assertions.assertTrue(profile.isActive());
 
+        UserProfile arnoldProfile = profileService.readUserProfile("arnold@westworld.com");
+        Assertions.assertNotNull(arnoldProfile);
+        Assertions.assertEquals(arnoldProfile.getName(), user1.getName());
+        Assertions.assertEquals(arnoldProfile.getAvatarId(), user1.getAvatarId());
+        Assertions.assertEquals(arnoldProfile.getEmail(), user1.getEmail());
+        Assertions.assertEquals(arnoldProfile.getId(), id);
+
         profile.setName("Bernard Lowe");
         Assertions.assertTrue(profileService.editUserProfile(profile.getId(), profile));
 
@@ -176,22 +183,37 @@ class ApiProfileTest extends AbstractApiTest {
         long t1id = profileService.addTeam(team1);
         long t2id = profileService.addTeam(team2);
 
-        Assertions.assertTrue(profileService.addUserToTeam(u1id, t1id));
+        Assertions.assertTrue(profileService.addUserToTeam(u1id, t1id, 1));
         UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(u1id);
         Assertions.assertNotNull(currentTeamOfUser);
         Assertions.assertEquals(t1id, (long) currentTeamOfUser.getTeamId());
         Assertions.assertEquals(u1id, (long) currentTeamOfUser.getUserId());
+        Assertions.assertEquals(1, (int) currentTeamOfUser.getRoleId());
         Assertions.assertTrue(currentTeamOfUser.getJoinedTime() < System.currentTimeMillis());
 
-        // add again to the same team should return false
-        Assertions.assertFalse(profileService.addUserToTeam(u1id, t1id));
+        // add again to the same team with same role should return false
+        Assertions.assertFalse(profileService.addUserToTeam(u1id, t1id, 1));
+
+        // but should be able to change the role
+        Assertions.assertTrue(profileService.addUserToTeam(u1id, t1id, 2));
+        currentTeamOfUser = profileService.findCurrentTeamOfUser(u1id);
+        Assertions.assertNotNull(currentTeamOfUser);
+        Assertions.assertEquals(t1id, (long) currentTeamOfUser.getTeamId());
+        Assertions.assertEquals(u1id, (long) currentTeamOfUser.getUserId());
+        Assertions.assertEquals(2, (int) currentTeamOfUser.getRoleId());
+
+        // one user in team1
+        List<UserProfile> userProfiles = profileService.listUsers(t1id, 0, 100);
+        Assertions.assertNotNull(userProfiles);
+        Assertions.assertEquals(1, userProfiles.size());
 
         // add to robot team
-        Assertions.assertTrue(profileService.addUserToTeam(u1id, t2id));
+        Assertions.assertTrue(profileService.addUserToTeam(u1id, t2id, 8));
         currentTeamOfUser = profileService.findCurrentTeamOfUser(u1id);
         Assertions.assertNotNull(currentTeamOfUser);
         Assertions.assertEquals(t2id, (long) currentTeamOfUser.getTeamId());
         Assertions.assertEquals(u1id, (long) currentTeamOfUser.getUserId());
+        Assertions.assertEquals(8, (int) currentTeamOfUser.getRoleId());
         Assertions.assertTrue(currentTeamOfUser.getJoinedTime() < System.currentTimeMillis());
 
     }

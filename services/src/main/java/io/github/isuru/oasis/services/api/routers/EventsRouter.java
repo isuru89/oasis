@@ -16,9 +16,7 @@ public class EventsRouter extends BaseRouters {
     @Override
     public void register() {
         post("/event", (req, res) -> {
-            if (!checkAuth(req)) {
-                return Spark.halt(401);
-            }
+            checkAuth(req);
 
             EventPushDto eventPushDto = bodyAs(req, EventPushDto.class);
             if (eventPushDto.getEvent() != null) {

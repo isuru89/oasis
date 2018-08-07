@@ -44,6 +44,13 @@ public class ProfileService extends BaseService implements IProfileService {
     }
 
     @Override
+    public UserProfile readUserProfile(String email) throws Exception {
+        return getTheOnlyRecord("profile/readUserByEmail",
+                Maps.create("email", email),
+                UserProfile.class);
+    }
+
+    @Override
     public UserProfile readUserProfileByExtId(long extUserId) throws Exception {
         return getTheOnlyRecord("profile/readUserByExtId",
                 Maps.create("extId", extUserId),
@@ -65,6 +72,15 @@ public class ProfileService extends BaseService implements IProfileService {
     @Override
     public boolean deleteUserProfile(long userId) throws Exception {
         return getDao().executeCommand("profile/disableUser", Maps.create("userId", userId)) > 0;
+    }
+
+    @Override
+    public List<UserProfile> findUser(String email, String name) throws Exception {
+        return toList(getDao().executeQuery("profile/searchUser",
+                Maps.create()
+                    .put("email", email)
+                    .put("name", name).build(),
+                UserProfile.class));
     }
 
     @Override
@@ -152,17 +168,20 @@ public class ProfileService extends BaseService implements IProfileService {
     }
 
     @Override
-    public boolean addUserToTeam(long userId, long teamId) throws Exception {
+    public boolean addUserToTeam(long userId, long teamId, int roleId) throws Exception {
         // if the current team is same as previous team, then don't add
         UserTeam userTeam = findCurrentTeamOfUser(userId);
         if (userTeam != null && userTeam.getTeamId() == teamId) {
-            return false;
+            if (roleId == userTeam.getRoleId()) {
+                return false;
+            }
         }
 
         return getDao().executeInsert("profile/addUserToTeam",
                 Maps.create()
                         .put("userId", userId)
                         .put("teamId", teamId)
+                        .put("roleId", roleId)
                         .put("since", System.currentTimeMillis())
                         .build(),
                 null) > 0;

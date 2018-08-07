@@ -7,8 +7,17 @@ public class UserTeam {
 
     private Integer userId;
     private Integer teamId;
+    private Integer roleId;
     private Integer scopeId;
     private Long joinedTime;
+
+    public Integer getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
+    }
 
     public Integer getUserId() {
         return userId;
