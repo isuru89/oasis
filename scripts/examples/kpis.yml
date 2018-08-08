@@ -1,12 +1,18 @@
 calculations:
   - event: submission
+    name: kpi-totallines
+    displayName: Calculated total lines
     field: totalCode
     expression: "addedLines + changedLines"
 
   - event: submission
+    name: kpi-nvd
+    displayName: Calculate NVD
     field: nvd
     expression: "(introducedViolations - fixedViolations) / totalCode"
 
   - event: submission
+    name: kpi-otherfix
+    displayName: Calculate other fixes
     field: otherFixed
     expression: "0"

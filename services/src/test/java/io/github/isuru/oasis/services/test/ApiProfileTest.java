@@ -171,12 +171,20 @@ class ApiProfileTest extends AbstractApiTest {
         user1.setEmail("ford@westworld.com");
         user1.setMale(true);
 
+        TeamScope testProject = new TeamScope();
+        testProject.setName("Test Project");
+        testProject.setDisplayName(testProject.getName());
+        int scopeId = (int) profileService.addTeamScope(testProject);
+
         TeamProfile team1 = new TeamProfile();
         team1.setName("leadership");
+        team1.setTeamScope(scopeId);
         TeamProfile team2 = new TeamProfile();
         team2.setName("robot");
+        team2.setTeamScope(scopeId);
         TeamProfile team3 = new TeamProfile();
-        team2.setName("qa");
+        team3.setName("qa");
+        team3.setTeamScope(scopeId);
 
         long u1id = profileService.addUserProfile(user1);
         Assertions.assertTrue(u1id > 0);
@@ -217,6 +225,7 @@ class ApiProfileTest extends AbstractApiTest {
         Assertions.assertEquals(8, (int) currentTeamOfUser.getRoleId());
         Assertions.assertTrue(currentTeamOfUser.getJoinedTime() < System.currentTimeMillis());
 
+        clearTables("OA_TEAM_SCOPE");
     }
 
     @BeforeAll

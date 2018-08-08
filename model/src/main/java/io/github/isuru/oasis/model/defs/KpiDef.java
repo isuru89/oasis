@@ -7,6 +7,7 @@ public class KpiDef {
 
     private Long id;
     private String name;
+    private String displayName;
     private String event;
     private String field;
     private String expression;
@@ -16,6 +17,14 @@ public class KpiDef {
             name = event + "::" + field;
         }
         return name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public void setName(String name) {

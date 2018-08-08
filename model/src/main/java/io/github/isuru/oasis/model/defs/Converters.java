@@ -21,6 +21,8 @@ public class Converters {
     public static KpiDef toKpiDef(DefWrapper wrapper, Function<DefWrapper, KpiDef> creator) {
         KpiDef kpiDef = creator.apply(wrapper);
         kpiDef.setId(wrapper.getId());
+        kpiDef.setName(wrapper.getName());
+        kpiDef.setDisplayName(wrapper.getDisplayName());
         return kpiDef;
     }
 

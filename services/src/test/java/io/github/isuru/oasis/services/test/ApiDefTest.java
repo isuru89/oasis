@@ -488,7 +488,7 @@ class ApiDefTest extends AbstractApiTest {
         assertEmpty(gameDefService.listBadgeDefs());
         assertEmpty(gameDefService.listKpiCalculations());
         assertEmpty(gameDefService.listMilestoneDefs());
-        assertEmpty(gameDefService.listPointDefs(0));
+        assertEmpty(gameDefService.listPointDefs(1));
     }
 
     private void assertEmpty(List<?> list) {

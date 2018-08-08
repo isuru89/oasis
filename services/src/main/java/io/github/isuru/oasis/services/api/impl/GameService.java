@@ -143,7 +143,7 @@ public class GameService extends BaseService implements IGameService {
     @Override
     public LeaderboardResponseDto readLeaderboardStatus(LeaderboardRequestDto request) throws Exception {
         Checks.validate(request.getType() != null, "Leaderboard type must not be null!");
-        Checks.validate(request.getRangeStart() >= request.getRangeEnd(),
+        Checks.validate(request.getRangeStart() < request.getRangeEnd(),
                 "Range end must be greater than its start value!");
 
         String scriptName = String.format("leaderboard/%s",

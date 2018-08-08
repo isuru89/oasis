@@ -19,6 +19,22 @@ public class ValueMap {
         return data.containsKey(key);
     }
 
+    public String getStrReq(String key) throws InputValidationException {
+        if (data.containsKey(key)) {
+            return (String) data.get(key);
+        } else {
+            throw new InputValidationException("Input request does not contain mandatory parameter '" + key + "'!");
+        }
+    }
+
+    public String getStr(String key, String def) throws InputValidationException {
+        if (data.containsKey(key)) {
+            return (String) data.get(key);
+        } else {
+            return def;
+        }
+    }
+
     public long getLongReq(String key) throws InputValidationException {
         if (data.containsKey(key)) {
             return Long.parseLong(data.get(key).toString());

@@ -32,6 +32,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna
@@ -97,7 +98,9 @@ class ApiLifecycleTest extends AbstractApiTest {
             Yaml yaml = new Yaml();
             MilestonesDef milestonesDef = yaml.loadAs(inputStream, MilestonesDef.class);
 
-            return milestonesDef.getMilestones();
+            return milestonesDef.getMilestones().stream()
+                    .peek(p -> p.setDisplayName(p.getName()))
+                    .collect(Collectors.toList());
         }
     }
 
@@ -106,7 +109,7 @@ class ApiLifecycleTest extends AbstractApiTest {
             Yaml yaml = new Yaml();
             PointsDef pointsDef = yaml.loadAs(inputStream, PointsDef.class);
 
-            return pointsDef.getPoints();
+            return pointsDef.getPoints().stream().peek(p -> p.setDisplayName(p.getName())).collect(Collectors.toList());
         }
     }
 
@@ -115,7 +118,9 @@ class ApiLifecycleTest extends AbstractApiTest {
             Yaml yaml = new Yaml();
             BadgesDef badgesDef = yaml.loadAs(inputStream, BadgesDef.class);
 
-            return badgesDef.getBadges();
+            return badgesDef.getBadges().stream()
+                    .peek(p -> p.setDisplayName(p.getName()))
+                    .collect(Collectors.toList());
         }
     }
 
