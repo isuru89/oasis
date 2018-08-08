@@ -15,7 +15,9 @@ import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.exception.OasisGameException;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.RUtils;
 
@@ -35,6 +37,9 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public Long createGame(GameDef gameDef, GameOptionsDto optionsDto) throws Exception {
+        Checks.nonNull(gameDef, "gameDef");
+        Checks.nonNull(optionsDto, "gameOptions");
+
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.GAME.getTypeId());
         wrapper.setName(gameDef.getName());
@@ -53,7 +58,7 @@ public class GameDefService extends BaseService implements IGameDefService {
         }
 
         if (gameId < 0) {
-            throw new Exception("Game add failed!");
+            throw new OasisGameException("Game could not add to the persistence storage!");
         }
 
         if (optionsDto.isAllowPointCompensation()) {
@@ -88,6 +93,8 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public GameDef readGame(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
         List<DefWrapper> wrappers = getDao().getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
         for (DefWrapper wrp : wrappers) {
             if (wrp.getId() == gameId) {
@@ -113,12 +120,17 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public boolean disableGame(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
         getDao().executeCommand("def/disableAllGameDefs", Maps.create("gameId", gameId));
         return getDao().getDefinitionDao().disableDefinition(gameId);
     }
 
     @Override
     public boolean addGameConstants(long gameId, Map<String, Object> gameConstants) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(gameConstants, "gameConstants");
+
         DefWrapper wrp = getDao().getDefinitionDao().readDefinition(gameId);
 
         GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, getMapper());
@@ -130,6 +142,9 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public boolean removeGameConstants(long gameId, List<String> gameConstants) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(gameConstants, "gameConstantNames");
+
         DefWrapper wrp = getDao().getDefinitionDao().readDefinition(gameId);
 
         GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, getMapper());
@@ -144,12 +159,17 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
-    public long addKpiCalculation(long gameId, KpiDef fieldCalculator) throws Exception {
+    public long addKpiCalculation(long gameId, KpiDef kpi) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(kpi.getName(), "kpiName");
+        Checks.nonNullOrEmpty(kpi.getField(), "field");
+        Checks.nonNullOrEmpty(kpi.getExpression(), "expression");
+
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.KPI.getTypeId());
-        wrapper.setName(fieldCalculator.getName());
+        wrapper.setName(kpi.getName());
         wrapper.setDisplayName(wrapper.getName());
-        wrapper.setContent(RUtils.toStr(fieldCalculator, getMapper()));
+        wrapper.setContent(RUtils.toStr(kpi, getMapper()));
         wrapper.setGameId(gameId);
 
         return getDao().getDefinitionDao().addDefinition(wrapper);
@@ -165,6 +185,8 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public List<KpiDef> listKpiCalculations(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
         return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.KPI.getTypeId())
                 .stream()
                 .map(this::wrapperToKpi)
@@ -173,16 +195,24 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public KpiDef readKpiCalculation(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return wrapperToKpi(getDao().getDefinitionDao().readDefinition(id));
     }
 
     @Override
     public boolean disableKpiCalculation(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return getDao().getDefinitionDao().disableDefinition(id);
     }
 
     @Override
     public long addBadgeDef(long gameId, BadgeDef badge) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(badge.getName(), "name");
+        Checks.nonNullOrEmpty(badge.getDisplayName(), "displayName");
+
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.BADGE.getTypeId());
         wrapper.setName(badge.getName());
@@ -203,6 +233,8 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public List<BadgeDef> listBadgeDefs(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
         return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.BADGE.getTypeId())
                 .stream()
                 .map(this::wrapperToBadge)
@@ -211,16 +243,22 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public BadgeDef readBadgeDef(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return wrapperToBadge(getDao().getDefinitionDao().readDefinition(id));
     }
 
     @Override
     public boolean disableBadgeDef(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return getDao().getDefinitionDao().disableDefinition(id);
     }
 
     @Override
     public List<PointDef> listPointDefs(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
         return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.POINT.getTypeId())
                 .stream()
                 .map(this::wrapperToPoint)
@@ -229,6 +267,10 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public long addPointDef(long gameId, PointDef pointRule) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(pointRule.getName(), "name");
+        Checks.nonNullOrEmpty(pointRule.getDisplayName(), "displayName");
+
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.POINT.getTypeId());
         wrapper.setName(pointRule.getName());
@@ -241,16 +283,24 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public PointDef readPointDef(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return wrapperToPoint(getDao().getDefinitionDao().readDefinition(id));
     }
 
     @Override
     public boolean disablePointDef(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return getDao().getDefinitionDao().disableDefinition(id);
     }
 
     @Override
     public long addMilestoneDef(long gameId, MilestoneDef milestone) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(milestone.getName(), "name");
+        Checks.nonNullOrEmpty(milestone.getDisplayName(), "displayName");
+
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.MILESTONE.getTypeId());
         wrapper.setName(milestone.getName());
@@ -271,6 +321,8 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public List<MilestoneDef> listMilestoneDefs(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
         return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.MILESTONE.getTypeId())
                 .stream()
                 .map(this::wrapperToMilestone)
@@ -279,16 +331,24 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public MilestoneDef readMilestoneDef(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return wrapperToMilestone(getDao().getDefinitionDao().readDefinition(id));
     }
 
     @Override
     public boolean disableMilestoneDef(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return getDao().getDefinitionDao().disableDefinition(id);
     }
 
     @Override
     public long addLeaderboardDef(long gameId, LeaderboardDef leaderboardDef) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(leaderboardDef.getName(), "name");
+        Checks.nonNullOrEmpty(leaderboardDef.getDisplayName(), "displayName");
+
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.LEADERBOARD.getTypeId());
         wrapper.setName(leaderboardDef.getName());
@@ -301,6 +361,8 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public List<LeaderboardDef> listLeaderboardDefs(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
         return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.LEADERBOARD.getTypeId())
                 .stream()
                 .map(this::wrapperToLeaderboard)
@@ -309,16 +371,24 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public LeaderboardDef readLeaderboardDef(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return wrapperToLeaderboard(getDao().getDefinitionDao().readDefinition(id));
     }
 
     @Override
     public boolean disableLeaderboardDef(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return getDao().getDefinitionDao().disableDefinition(id);
     }
 
     @Override
     public long addShopItem(long gameId, ShopItem item) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(item.getTitle(), "title");
+        Checks.nonNullOrEmpty(item.getDescription(), "description");
+
         Map<String, Object> data = Maps.create()
                 .put("title", item.getTitle())
                 .put("description", item.getDescription())
@@ -334,6 +404,8 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public List<ShopItem> listShopItems(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
         Iterable<ShopItem> items = getDao().executeQuery("def/item/listItems", null, ShopItem.class);
         LinkedList<ShopItem> shopItems = new LinkedList<>();
         for (ShopItem item : items) {
@@ -344,6 +416,8 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public ShopItem readShopItem(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return getTheOnlyRecord("def/item/readItem",
                 Maps.create("itemId", id),
                 ShopItem.class);
@@ -351,6 +425,10 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public long addChallenge(long gameId, ChallengeDef challengeDef) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(challengeDef.getName(), "name");
+        Checks.nonNullOrEmpty(challengeDef.getDisplayName(), "displayName");
+
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.CHALLENGE.getTypeId());
         wrapper.setName(challengeDef.getName());
@@ -363,11 +441,15 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public ChallengeDef readChallenge(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return wrapperToChallenge(getDao().getDefinitionDao().readDefinition(id));
     }
 
     @Override
     public List<ChallengeDef> listChallenges(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
         return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.CHALLENGE.getTypeId())
                 .stream()
                 .map(this::wrapperToChallenge)
@@ -376,11 +458,15 @@ public class GameDefService extends BaseService implements IGameDefService {
 
     @Override
     public boolean disableChallenge(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return getDao().getDefinitionDao().disableDefinition(id);
     }
 
     @Override
     public boolean disableShopItem(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         return getDao().executeCommand("def/item/disableItem",
                 Maps.create("itemId", id)) > 0;
     }

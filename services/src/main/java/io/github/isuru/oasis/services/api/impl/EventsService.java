@@ -8,6 +8,7 @@ import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.LRUCache;
 import io.github.isuru.oasis.services.utils.RabbitDispatcher;
 
@@ -30,9 +31,9 @@ public class EventsService extends BaseService implements IEventsService {
 
     @Override
     public void submitEvent(Map<String, Object> eventData) throws Exception {
-        checkTrue(eventData.containsKey(Constants.FIELD_EVENT_TYPE), "No event-type ('type') field in the event!");
-        checkTrue(eventData.containsKey(Constants.FIELD_TIMESTAMP), "No timestamp ('ts') field in the event!");
-        checkTrue(eventData.containsKey(Constants.FIELD_USER), "No user ('user') field in the event!");
+        Checks.validate(eventData.containsKey(Constants.FIELD_EVENT_TYPE), "No event-type ('type') field in the event!");
+        Checks.validate(eventData.containsKey(Constants.FIELD_TIMESTAMP), "No timestamp ('ts') field in the event!");
+        Checks.validate(eventData.containsKey(Constants.FIELD_USER), "No user ('user') field in the event!");
 
         Object user = eventData.get(Constants.FIELD_USER);
         long userId;

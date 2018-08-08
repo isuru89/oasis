@@ -7,13 +7,14 @@ public class PointAwardDto {
 
     private long toUser;
     private float amount;
-    private Long associatedEventId;
+    private String associatedEventId;
+    private Long ts;
 
-    public Long getAssociatedEventId() {
+    public String getAssociatedEventId() {
         return associatedEventId;
     }
 
-    public void setAssociatedEventId(Long associatedEventId) {
+    public void setAssociatedEventId(String associatedEventId) {
         this.associatedEventId = associatedEventId;
     }
 
@@ -31,5 +32,13 @@ public class PointAwardDto {
 
     public void setAmount(float amount) {
         this.amount = amount;
+    }
+
+    public Long getTs() {
+        return ts;
+    }
+
+    public void setTs(Long ts) {
+        this.ts = ts;
     }
 }

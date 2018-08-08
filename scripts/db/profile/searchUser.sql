@@ -7,6 +7,8 @@ SELECT
 
 FROM OA_USER
 WHERE
-    email = :email
+    email LIKE :email
+    <if(hasName)>
     OR
     user_name LIKE :name
+    <endif>

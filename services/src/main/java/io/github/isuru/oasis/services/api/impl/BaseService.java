@@ -3,7 +3,6 @@ package io.github.isuru.oasis.services.api.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.services.api.IOasisApiService;
-import io.github.isuru.oasis.services.exception.InputValidationException;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -58,9 +57,4 @@ abstract class BaseService {
         return results;
     }
 
-    void checkTrue(boolean condition, String message) throws InputValidationException {
-        if (!condition) {
-            throw new InputValidationException(message);
-        }
-    }
 }

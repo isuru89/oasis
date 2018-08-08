@@ -8,13 +8,22 @@ public class BadgeAwardDto {
     private int badgeId;
     private String subBadgeId;
     private long toUser;
-    private Long associatedEventId;
+    private String associatedEventId;
+    private Long ts;
 
-    public Long getAssociatedEventId() {
+    public Long getTs() {
+        return ts;
+    }
+
+    public void setTs(Long ts) {
+        this.ts = ts;
+    }
+
+    public String getAssociatedEventId() {
         return associatedEventId;
     }
 
-    public void setAssociatedEventId(Long associatedEventId) {
+    public void setAssociatedEventId(String associatedEventId) {
         this.associatedEventId = associatedEventId;
     }
 

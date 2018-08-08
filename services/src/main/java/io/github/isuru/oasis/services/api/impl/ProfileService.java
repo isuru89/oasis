@@ -7,10 +7,13 @@ import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
+import io.github.isuru.oasis.services.utils.UserRole;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +28,9 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public long addUserProfile(UserProfile profile) throws Exception {
+        Checks.nonNullOrEmpty(profile.getEmail(), "email");
+        Checks.nonNullOrEmpty(profile.getName(), "name");
+
         Map<String, Object> data = Maps.create()
                 .put("name", profile.getName())
                 .put("male", profile.isMale())
@@ -38,6 +44,8 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public UserProfile readUserProfile(long userId) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
         return getTheOnlyRecord("profile/readUser",
                 Maps.create("userId", userId),
                 UserProfile.class);
@@ -45,6 +53,8 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public UserProfile readUserProfile(String email) throws Exception {
+        Checks.nonNullOrEmpty(email, "email");
+
         return getTheOnlyRecord("profile/readUserByEmail",
                 Maps.create("email", email),
                 UserProfile.class);
@@ -59,6 +69,8 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public boolean editUserProfile(long userId, UserProfile latest) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
         UserProfile prev = readUserProfile(userId);
         Map<String, Object> data = new HashMap<>();
         data.put("name", Pojos.compareWith(latest.getName(), prev.getName()));
@@ -71,20 +83,40 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public boolean deleteUserProfile(long userId) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
         return getDao().executeCommand("profile/disableUser", Maps.create("userId", userId)) > 0;
     }
 
     @Override
     public List<UserProfile> findUser(String email, String name) throws Exception {
+        Checks.nonNullOrEmpty(email, "email");
+
+        if (email.length() < 4) {
+            return new LinkedList<>();
+        }
+
+        String param = email.replace("!", "!!")
+                            .replace("%", "!%")
+                            .replace("_", "!_")
+                            .replace("[", "![");
+
         return toList(getDao().executeQuery("profile/searchUser",
                 Maps.create()
-                    .put("email", email)
-                    .put("name", name).build(),
-                UserProfile.class));
+                    .put("email", "%" + param + "%")
+                    .put("name", name)
+                    .build(),
+                UserProfile.class,
+                Maps.create("hasName", name != null && name.length() > 3)
+        ));
     }
 
     @Override
     public List<UserProfile> listUsers(long teamId, long offset, long size) throws Exception {
+        Checks.greaterThanZero(teamId, "teamId");
+        Checks.nonNegative(offset, "offset");
+        Checks.nonNegative(size, "size");
+
         return toList(getDao().executeQuery("profile/listUsersOfTeam",
                 Maps.create()
                         .put("teamId", teamId)
@@ -96,6 +128,9 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public long addTeam(TeamProfile teamProfile) throws Exception {
+        Checks.nonNullOrEmpty(teamProfile.getName(), "name");
+        Checks.greaterThanZero(teamProfile.getTeamScope(), "scope");
+
         Map<String, Object> data = Maps.create()
                 .put("teamScope", teamProfile.getTeamScope())
                 .put("name", teamProfile.getName())
@@ -107,6 +142,8 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public TeamProfile readTeam(long teamId) throws Exception {
+        Checks.greaterThanZero(teamId, "teamId");
+
         return getTheOnlyRecord("profile/readTeam",
                 Maps.create("teamId", teamId),
                 TeamProfile.class);
@@ -114,6 +151,8 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public boolean editTeam(long teamId, TeamProfile latest) throws Exception {
+        Checks.greaterThanZero(teamId, "teamId");
+
         TeamProfile prev = readTeam(teamId);
         Map<String, Object> data = Maps.create()
                 .put("name", Pojos.compareWith(latest.getName(), prev.getName()))
@@ -127,6 +166,8 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public List<TeamProfile> listTeams(long scopeId) throws Exception {
+        Checks.greaterThanZero(scopeId, "scopeId");
+
         return toList(getDao().executeQuery("profile/listTeamOfScope",
                 Maps.create("scopeId", scopeId),
                 TeamProfile.class));
@@ -134,6 +175,9 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public long addTeamScope(TeamScope teamScope) throws Exception {
+        Checks.nonNullOrEmpty(teamScope.getName(), "name");
+        Checks.nonNullOrEmpty(teamScope.getDisplayName(), "displayName");
+
         Map<String, Object> data = Maps.create()
                 .put("extId", teamScope.getExtId())
                 .put("name", teamScope.getName())
@@ -145,6 +189,8 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public TeamScope readTeamScope(long scopeId) throws Exception {
+        Checks.greaterThanZero(scopeId, "scopeId");
+
         return getTheOnlyRecord("profile/readTeamScope",
                 Maps.create("scopeId", scopeId),
                 TeamScope.class);
@@ -158,6 +204,8 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public boolean editTeamScope(long scopeId, TeamScope latest) throws Exception {
+        Checks.greaterThanZero(scopeId, "scopeId");
+
         TeamScope prev = readTeamScope(scopeId);
         Map<String, Object> data = Maps.create()
                 .put("displayName", Pojos.compareWith(latest.getDisplayName(), prev.getDisplayName()))
@@ -169,6 +217,10 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public boolean addUserToTeam(long userId, long teamId, int roleId) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+        Checks.greaterThanZero(teamId, "teamId");
+        Checks.validate(roleId > 0 && roleId <= UserRole.ALL_ROLE, "roleId must be a flag of 1,2,4, or 8.");
+
         // if the current team is same as previous team, then don't add
         UserTeam userTeam = findCurrentTeamOfUser(userId);
         if (userTeam != null && userTeam.getTeamId() == teamId) {
@@ -189,6 +241,8 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public UserTeam findCurrentTeamOfUser(long userId) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
         long l = System.currentTimeMillis();
         return getTheOnlyRecord("profile/findCurrentTeamOfUser",
                 Maps.create().put("userId", userId)

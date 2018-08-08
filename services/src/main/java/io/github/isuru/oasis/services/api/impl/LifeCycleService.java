@@ -16,6 +16,7 @@ import io.github.isuru.oasis.services.backend.model.JarUploadResponse;
 import io.github.isuru.oasis.services.backend.model.JobSaveRequest;
 import io.github.isuru.oasis.services.model.FlinkSubmittedJob;
 import io.github.isuru.oasis.model.configs.Configs;
+import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Constants;
 import io.github.isuru.oasis.services.utils.Maps;
 import okhttp3.MediaType;
@@ -48,11 +49,15 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
 
     @Override
     public boolean start(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
         return startDef(gameId, true);
     }
 
     @Override
     public boolean stop(long defId) throws Exception {
+        Checks.greaterThanZero(defId, "gameId' or 'challengeId");
+
         FlinkSubmittedJob job = getTheOnlyRecord("getJobOfDef",
                 Maps.create("defId", defId),
                 FlinkSubmittedJob.class);
@@ -80,6 +85,8 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
 
     @Override
     public boolean startChallenge(long challengeId) throws Exception {
+        Checks.greaterThanZero(challengeId, "challengeId");
+
         return startDef(challengeId, false);
     }
 

@@ -15,6 +15,7 @@ import io.github.isuru.oasis.services.model.LeaderboardRecordDto;
 import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.model.LeaderboardResponseDto;
 import io.github.isuru.oasis.services.model.PointAwardDto;
+import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 
 import java.sql.Connection;
@@ -32,10 +33,14 @@ public class GameService extends BaseService implements IGameService {
 
     @Override
     public void awardPoints(long byUser, PointAwardDto awardDto) throws Exception {
+        Checks.greaterThanZero(byUser, "user");
+        Checks.greaterThanZero(awardDto.getToUser(), "toUser");
+        Checks.validate(awardDto.getAmount() != 0.0f, "Point amount should not be equal to zero!");
+
         long teamId = getApiService().getProfileService().findCurrentTeamOfUser(awardDto.getToUser()).getTeamId();
         Map<String, Object> data = Maps.create()
                 .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_COMPENSATE_POINTS)
-                .put(Constants.FIELD_TIMESTAMP, System.currentTimeMillis())
+                .put(Constants.FIELD_TIMESTAMP, awardDto.getTs() == null ? System.currentTimeMillis() : awardDto.getTs())
                 .put(Constants.FIELD_USER, awardDto.getToUser())
                 .put(Constants.FIELD_TEAM, teamId)
                 .put(Constants.FIELD_ID, awardDto.getAssociatedEventId())
@@ -48,10 +53,14 @@ public class GameService extends BaseService implements IGameService {
 
     @Override
     public void awardBadge(long byUser, BadgeAwardDto awardDto) throws Exception {
+        Checks.greaterThanZero(byUser, "user");
+        Checks.greaterThanZero(awardDto.getToUser(), "toUser");
+        Checks.greaterThanZero(awardDto.getBadgeId(), "Badge id must be a valid one!");
+
         long teamId = getApiService().getProfileService().findCurrentTeamOfUser(awardDto.getToUser()).getTeamId();
         Map<String, Object> data = Maps.create()
                 .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_AWARD_BADGE)
-                .put(Constants.FIELD_TIMESTAMP, System.currentTimeMillis())
+                .put(Constants.FIELD_TIMESTAMP, awardDto.getTs() == null ? System.currentTimeMillis() : awardDto.getTs())
                 .put(Constants.FIELD_USER, awardDto.getToUser())
                 .put(Constants.FIELD_TEAM, teamId)
                 .put(Constants.FIELD_ID, awardDto.getAssociatedEventId())
@@ -80,6 +89,9 @@ public class GameService extends BaseService implements IGameService {
 
     @Override
     public void buyItem(long userBy, long itemId, float price) throws Exception {
+        Checks.greaterThanZero(userBy, "userId");
+        Checks.greaterThanZero(itemId, "itemId");
+
         getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
             Iterable<PointStats> userPoints = ctx.executeQuery("profile/stats/getUserTotalPoints",
                     Maps.create("userId", userBy),
@@ -100,6 +112,10 @@ public class GameService extends BaseService implements IGameService {
 
     @Override
     public void shareItem(long userBy, long itemId, long toUser, int amount) throws Exception {
+        Checks.greaterThanZero(userBy, "userId");
+        Checks.greaterThanZero(itemId, "itemId");
+        Checks.greaterThanZero(toUser, "toUser");
+
         getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
             Map<String, Object> data = Maps.create().put("userId", userBy)
                     .put("itemId", itemId)
@@ -126,6 +142,10 @@ public class GameService extends BaseService implements IGameService {
 
     @Override
     public LeaderboardResponseDto readLeaderboardStatus(LeaderboardRequestDto request) throws Exception {
+        Checks.validate(request.getType() != null, "Leaderboard type must not be null!");
+        Checks.validate(request.getRangeStart() >= request.getRangeEnd(),
+                "Range end must be greater than its start value!");
+
         String scriptName = String.format("leaderboard/%s",
                 request.getType().isCustom() ? "customRange" : "currentRange");
 
