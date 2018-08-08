@@ -86,7 +86,7 @@ public class PointEvent implements Event {
     }
 
     @Override
-    public Long getExternalId() {
+    public String getExternalId() {
         return refEvent.getExternalId();
     }
 

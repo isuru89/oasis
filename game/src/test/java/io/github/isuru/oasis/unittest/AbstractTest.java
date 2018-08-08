@@ -93,7 +93,7 @@ abstract class AbstractTest {
         //
 
         if (TestUtils.isResourceExist(outputPoints)) {
-            List<Tuple5<Long, String, String, Double, Long>> expected = TestUtils.parsePointOutput(outputPoints);
+            List<Tuple5<Long, String, String, Double, String>> expected = TestUtils.parsePointOutput(outputPoints);
             List<Tuple4<Long, List<? extends Event>, PointRule, Double>> actual = Memo.getPoints(id);
             Assertions.assertNotNull(expected);
             Assertions.assertNotNull(actual);
@@ -104,7 +104,7 @@ abstract class AbstractTest {
         }
 
         if (TestUtils.isResourceExist(outputMilestones)) {
-            List<Tuple4<Long, String, Integer, Long>> expected = TestUtils.parseMilestoneOutput(outputMilestones);
+            List<Tuple4<Long, String, Integer, String>> expected = TestUtils.parseMilestoneOutput(outputMilestones);
             List<Tuple4<Long, Integer, Event, Milestone>> actual = Memo.getMilestones(id);
             Assertions.assertNotNull(expected);
             Assertions.assertNotNull(actual);
@@ -115,7 +115,7 @@ abstract class AbstractTest {
         }
 
         if (TestUtils.isResourceExist(outputBadges)) {
-            List<Tuple5<Long, String, String, Long, Long>> expected = TestUtils.parseBadgesOutput(outputBadges);
+            List<Tuple5<Long, String, String, String, String>> expected = TestUtils.parseBadgesOutput(outputBadges);
             List<Tuple4<Long, List<? extends Event>, Badge, BadgeRule>> actual = Memo.getBadges(id);
             Assertions.assertNotNull(expected);
             Assertions.assertNotNull(actual);
@@ -130,9 +130,9 @@ abstract class AbstractTest {
 
 
     private void assertMilestones(List<Tuple4<Long, Integer, Event, Milestone>> actual,
-                                  List<Tuple4<Long, String, Integer, Long>> expected) {
+                                  List<Tuple4<Long, String, Integer, String>> expected) {
         List<Tuple4<Long, Integer, Event, Milestone>> dupActual = new LinkedList<>(actual);
-        for (Tuple4<Long, String, Integer, Long> row : expected) {
+        for (Tuple4<Long, String, Integer, String> row : expected) {
 
             boolean foundFlag = false;
             Tuple4<Long, Integer, Event, Milestone> found = null;
@@ -157,9 +157,9 @@ abstract class AbstractTest {
     }
 
     private void assertBadges(List<Tuple4<Long, List<? extends Event>, Badge, BadgeRule>> actual,
-                              List<Tuple5<Long, String, String, Long, Long>> expected) {
+                              List<Tuple5<Long, String, String, String, String>> expected) {
         List<Tuple4<Long, List<? extends Event>, Badge, BadgeRule>> dupActual = new LinkedList<>(actual);
-        for (Tuple5<Long, String, String, Long, Long> row : expected) {
+        for (Tuple5<Long, String, String, String, String> row : expected) {
 
             boolean foundFlag = false;
             Tuple4<Long, List<? extends Event>, Badge, BadgeRule> found = null;
@@ -184,9 +184,9 @@ abstract class AbstractTest {
 
 
     private void assertPoints(List<Tuple4<Long, List<? extends Event>, PointRule, Double>> actual,
-                              List<Tuple5<Long, String, String, Double, Long>> expected) {
+                              List<Tuple5<Long, String, String, Double, String>> expected) {
         List<Tuple4<Long, List<? extends Event>, PointRule, Double>> dupActual = new LinkedList<>(actual);
-        for (Tuple5<Long, String, String, Double, Long> row : expected) {
+        for (Tuple5<Long, String, String, Double, String> row : expected) {
 
             boolean foundFlag = false;
             Tuple4<Long, List<? extends Event>, PointRule, Double> found = null;
@@ -232,7 +232,7 @@ abstract class AbstractTest {
         }
     }
 
-    private boolean isEventRangeSame(List<? extends Event> events, Long start, Long end) {
+    private boolean isEventRangeSame(List<? extends Event> events, String start, String end) {
         if (Utils.isNonEmpty(events)) {
             if (events.size() >= 2) {
                 Event first = events.get(0);
@@ -243,7 +243,8 @@ abstract class AbstractTest {
                 return first.getExternalId().equals(start) && first.getExternalId().equals(end);
             }
         } else {
-            return start == 0L && end == 0L;
+            return (start == null || start.isEmpty())
+                    && (end == null || end.isEmpty());
         }
     }
 

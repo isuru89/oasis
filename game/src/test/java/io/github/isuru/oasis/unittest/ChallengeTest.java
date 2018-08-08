@@ -32,7 +32,7 @@ class ChallengeTest {
 
         execution.start();
 
-        List<Tuple3<Long, Long, Double>> expected = TestUtils.parseWinners(id + "/winners.csv");
+        List<Tuple3<Long, String, Double>> expected = TestUtils.parseWinners(id + "/winners.csv");
 
         List<ChallengeEvent> challenges = Memo.getChallenges(id);
         Assertions.assertNotNull(challenges);
@@ -41,9 +41,9 @@ class ChallengeTest {
         assertWinners(expected, challenges);
     }
 
-    private void assertWinners(List<Tuple3<Long, Long, Double>> expected, List<ChallengeEvent> actual) {
+    private void assertWinners(List<Tuple3<Long, String, Double>> expected, List<ChallengeEvent> actual) {
         List<ChallengeEvent> dupActual = new LinkedList<>(actual);
-        for (Tuple3<Long, Long, Double> row : expected) {
+        for (Tuple3<Long, String, Double> row : expected) {
 
             boolean foundFlag = false;
             ChallengeEvent found = null;

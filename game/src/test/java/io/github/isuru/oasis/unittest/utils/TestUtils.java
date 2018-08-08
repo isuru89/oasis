@@ -29,10 +29,10 @@ import java.util.List;
 
 public class TestUtils {
 
-    public static List<Tuple3<Long, Long, Double>> parseWinners(String file) throws IOException {
+    public static List<Tuple3<Long, String, Double>> parseWinners(String file) throws IOException {
         try (InputStream inputStream = TestUtils.loadResource(file)) {
             LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
-            List<Tuple3<Long, Long, Double>> list = new LinkedList<>();
+            List<Tuple3<Long, String, Double>> list = new LinkedList<>();
             while (lineIterator.hasNext()) {
                 String line = lineIterator.next();
                 if (line.trim().isEmpty()) continue;
@@ -42,17 +42,17 @@ public class TestUtils {
 
                 list.add(Tuple3.of(
                         Long.parseLong(parts[0]),
-                        Long.parseLong(parts[1]),
+                        parts[1],
                         Double.parseDouble(parts[2])));
             }
             return list;
         }
     }
 
-    public static List<Tuple5<Long, String, String, Double, Long>> parsePointOutput(String file) throws IOException {
+    public static List<Tuple5<Long, String, String, Double, String>> parsePointOutput(String file) throws IOException {
         try (InputStream inputStream = TestUtils.loadResource(file)) {
             LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
-            List<Tuple5<Long, String, String, Double, Long>> list = new LinkedList<>();
+            List<Tuple5<Long, String, String, Double, String>> list = new LinkedList<>();
             while (lineIterator.hasNext()) {
                 String line = lineIterator.next();
                 if (line.trim().isEmpty()) continue;
@@ -60,12 +60,12 @@ public class TestUtils {
 
                 String[] parts = line.split("[,]");
 
-                Tuple5<Long, String, String, Double, Long> row = Tuple5.of(
+                Tuple5<Long, String, String, Double, String> row = Tuple5.of(
                         Long.parseLong(parts[0]),
                         parts[1],
                         parts[2],
                         Double.parseDouble(parts[3]),
-                        Long.parseLong(parts[4])
+                        parts[4]
                 );
                 list.add(row);
             }
@@ -73,21 +73,21 @@ public class TestUtils {
         }
     }
 
-    public static List<Tuple4<Long, String, Integer, Long>> parseMilestoneOutput(String file) throws IOException {
+    public static List<Tuple4<Long, String, Integer, String>> parseMilestoneOutput(String file) throws IOException {
         try (InputStream inputStream = TestUtils.loadResource(file)) {
             LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
-            List<Tuple4<Long, String, Integer, Long>> list = new LinkedList<>();
+            List<Tuple4<Long, String, Integer, String>> list = new LinkedList<>();
             while (lineIterator.hasNext()) {
                 String line = lineIterator.next();
                 if (line.trim().isEmpty()) continue;
                 if (line.startsWith("#")) continue;
                 String[] parts = line.split("[,]");
 
-                Tuple4<Long, String, Integer, Long> row = Tuple4.of(
+                Tuple4<Long, String, Integer, String> row = Tuple4.of(
                         Long.parseLong(parts[0]),
                         parts[1],
                         Integer.parseInt(parts[2]),
-                        Long.parseLong(parts[3])
+                        parts[3]
                 );
                 list.add(row);
             }
@@ -95,22 +95,22 @@ public class TestUtils {
         }
     }
 
-    public static List<Tuple5<Long, String, String, Long, Long>> parseBadgesOutput(String file) throws IOException {
+    public static List<Tuple5<Long, String, String, String, String>> parseBadgesOutput(String file) throws IOException {
         try (InputStream inputStream = TestUtils.loadResource(file)) {
             LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
-            List<Tuple5<Long, String, String, Long, Long>> list = new LinkedList<>();
+            List<Tuple5<Long, String, String, String, String>> list = new LinkedList<>();
             while (lineIterator.hasNext()) {
                 String line = lineIterator.next();
                 if (line.trim().isEmpty()) continue;
                 if (line.startsWith("#")) continue;
                 String[] parts = line.split("[,]");
 
-                Tuple5<Long, String, String, Long, Long> row = Tuple5.of(
+                Tuple5<Long, String, String, String, String> row = Tuple5.of(
                         Long.parseLong(parts[0]),
                         parts[1],
                         parts[2],
-                        Long.parseLong(parts[3]),
-                        Long.parseLong(parts[4])
+                        parts[3],
+                        parts[4]
                 );
                 list.add(row);
             }

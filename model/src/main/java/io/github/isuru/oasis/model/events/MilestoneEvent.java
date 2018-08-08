@@ -71,7 +71,7 @@ public class MilestoneEvent implements Event {
     }
 
     @Override
-    public Long getExternalId() {
+    public String getExternalId() {
         return causedEvent.getExternalId();
     }
 

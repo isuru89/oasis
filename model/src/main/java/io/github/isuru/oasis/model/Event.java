@@ -48,7 +48,7 @@ public interface Event extends Serializable {
      *
      * @return external reference id.
      */
-    Long getExternalId();
+    String getExternalId();
 
     /**
      * Return user id indicated by any other field. This is useful

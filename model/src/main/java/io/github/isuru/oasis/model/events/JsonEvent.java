@@ -39,8 +39,13 @@ public class JsonEvent extends HashMap<String, Object> implements Event {
     }
 
     @Override
-    public Long getExternalId() {
-        return getLong(Constants.FIELD_ID);
+    public String getExternalId() {
+        Object o = get(Constants.FIELD_ID);
+        if (o == null) {
+            return null;
+        } else {
+            return String.valueOf(o);
+        }
     }
 
     @Override

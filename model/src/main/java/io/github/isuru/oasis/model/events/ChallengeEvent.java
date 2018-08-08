@@ -53,7 +53,7 @@ public class ChallengeEvent implements Event {
     }
 
     @Override
-    public Long getExternalId() {
+    public String getExternalId() {
         return event.getExternalId();
     }
 

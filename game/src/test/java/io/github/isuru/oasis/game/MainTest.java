@@ -147,6 +147,10 @@ class MainTest {
             Properties properties = new Properties();
             properties.put(Constants.KEY_JDBC_INSTANCE, "testing");
             properties.put(Constants.KEY_OUTPUT_TYPE, "db");
+            properties.put("db.scripts.dir", "../scripts/db");
+            properties.put("jdbc.url", "jdbc:h2:./test");
+            properties.put("jdbc.username", "");
+            properties.put("jdbc.password", "");
 
             OasisExecution execution = Main.createOutputHandler(Configs.from(properties), new OasisExecution());
             Assertions.assertNotNull(execution);
