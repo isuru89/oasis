@@ -13,3 +13,7 @@ data/
 .project
 
 src/main/resources/io/github/isuru/oasis/db/.vscode/
+
+/configs/auth/private.der
+/configs/auth/public.der
+

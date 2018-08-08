@@ -30,13 +30,13 @@ public interface IOasisApi {
 
 
     @POST("control/game/:gameId/start")
-    Call<Map<String, Object>> gameStart(@Path("gameId") long gameId);
+    Call<Map<String, Object>> gameStart(@Header("Authorization") String authHeader, @Path("gameId") long gameId);
     @POST("control/game/:gameId/stop")
-    Call<Map<String, Object>> gameStop(@Path("gameId") long gameId);
+    Call<Map<String, Object>> gameStop(@Header("Authorization") String authHeader, @Path("gameId") long gameId);
     @POST("control/challenge/:cid/start")
-    Call<Map<String, Object>> challengeStart(@Path("cid") long challengeId);
+    Call<Map<String, Object>> challengeStart(@Header("Authorization") String authHeader, @Path("cid") long challengeId);
     @POST("control/challenge/:cid/stop")
-    Call<Map<String, Object>> challengeStop(@Path("cid") long challengeId);
+    Call<Map<String, Object>> challengeStop(@Header("Authorization") String authHeader, @Path("cid") long challengeId);
 
 
     @POST("admin/user/add")

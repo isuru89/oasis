@@ -4,22 +4,13 @@ import io.github.isuru.oasis.db.DbProperties;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.db.OasisDbPool;
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
-import io.github.isuru.oasis.services.api.routers.AuthRouter;
-import io.github.isuru.oasis.services.api.routers.BaseRouters;
-import io.github.isuru.oasis.services.api.routers.DefinitionRouter;
-import io.github.isuru.oasis.services.api.routers.EventsRouter;
-import io.github.isuru.oasis.services.api.routers.GameRouters;
-import io.github.isuru.oasis.services.api.routers.LifecycleRouter;
-import io.github.isuru.oasis.services.api.routers.ProfileRouter;
+import io.github.isuru.oasis.services.api.routers.Routers;
 import io.github.isuru.oasis.services.backend.FlinkServices;
-import io.github.isuru.oasis.model.configs.Configs;
-import io.github.isuru.oasis.services.exception.ApiAuthException;
-import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.AuthUtils;
-import io.github.isuru.oasis.services.utils.Maps;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,64 +46,30 @@ public class OasisServer {
         LOGGER.debug("Initializing routers...");
         apiService = new DefaultOasisApiService(oasisDao, flinkServices);
 
-        // start service with routing
-        //
         int port = configs.getInt("oasis.service.port", 5885);
         Spark.port(port);
 
-        Spark.path("/api/v1", () -> {
-            Spark.before("/*", (request, response) -> response.type(BaseRouters.JSON_TYPE));
-
-            Spark.get("/echo",
-                    (req, res) -> Maps.create("message", "Oasis is working!"),
-                    BaseRouters.TRANSFORMER);
-
-            Spark.path("/auth", () -> new AuthRouter(apiService).register());
-
-            new EventsRouter(apiService).register();
-
-            Spark.path("/def", () -> new DefinitionRouter(apiService).register());
-            Spark.path("/control", () -> new LifecycleRouter(apiService).register());
-            Spark.path("/admin", () -> new ProfileRouter(apiService).register());
-            Spark.path("/game", () -> new GameRouters(apiService).register());
-        });
-
-        // Exception handling
+        // start service with routing
         //
-        Spark.exception(InputValidationException.class, (ex, req, res) -> {
-            res.status(400);
-            res.body(BaseRouters.TRANSFORMER.toStr(Maps.create()
-                .put("success", false)
-                .put("error", ex.getMessage())
-                .build()));
-        });
-        Spark.exception(ApiAuthException.class, (ex, req, res) -> {
-            res.status(401);
-            res.body(BaseRouters.TRANSFORMER.toStr(Maps.create()
-                    .put("success", false)
-                    .put("error", ex.getMessage())
-                    .build()));
-        });
-        Spark.exception(Exception.class, (ex, req, res) -> {
-            res.status(500);
-            res.body(BaseRouters.TRANSFORMER.toStr(Maps.create()
-                .put("success", false)
-                .put("error", ex.getMessage())
-                .build()));
-        });
+        Routers routers = new Routers(apiService);
+        Spark.path("/api/v1", routers::register);
+        routers.registerExceptionHandlers();
 
         // register safe shutdown hook
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            LOGGER.debug("Oasis is stopping...");
-            Spark.stop();
-            try {
-                oasisDao.close();
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
-                e.printStackTrace();
-            }
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdownDao(oasisDao)));
         LOGGER.debug("Server is up and running in {}", port);
+    }
+
+    private static void shutdownDao(IOasisDao dao) {
+        LOGGER.info("Oasis is stopping...");
+        Spark.stop();
+        try {
+            LOGGER.info("Shutting down db connection...");
+            dao.close();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            e.printStackTrace();
+        }
     }
 
     private static DbProperties initDbProperties(Configs configs) {

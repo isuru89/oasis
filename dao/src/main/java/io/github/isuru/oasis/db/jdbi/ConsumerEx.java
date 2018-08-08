@@ -5,6 +5,6 @@ package io.github.isuru.oasis.db.jdbi;
  */
 public interface ConsumerEx<T> {
 
-    void consume(T input) throws Exception;
+    Object consume(T input) throws Exception;
 
 }

@@ -7,6 +7,9 @@ import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.api.IGameService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.api.dto.PointStats;
+import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.exception.OasisGameException;
 import io.github.isuru.oasis.services.model.BadgeAwardDto;
 import io.github.isuru.oasis.services.model.LeaderboardRecordDto;
 import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
@@ -14,7 +17,6 @@ import io.github.isuru.oasis.services.model.LeaderboardResponseDto;
 import io.github.isuru.oasis.services.model.PointAwardDto;
 import io.github.isuru.oasis.services.utils.Maps;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
@@ -72,17 +74,28 @@ public class GameService extends BaseService implements IGameService {
         if (shopItem != null) {
             buyItem(userBy, itemId, shopItem.getPrice());
         } else {
-            throw new IOException("No item is found by id " + itemId + "!");
+            throw new InputValidationException("No item is found by id " + itemId + "!");
         }
     }
 
     @Override
     public void buyItem(long userBy, long itemId, float price) throws Exception {
-        Map<String, Object> data = Maps.create().put("userId", userBy)
-                .put("itemId", itemId)
-                .put("cost", price)
-                .build();
-        getDao().executeCommand("def/item/buyItem", data);
+        getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
+            Iterable<PointStats> userPoints = ctx.executeQuery("profile/stats/getUserTotalPoints",
+                    Maps.create("userId", userBy),
+                    PointStats.class);
+            PointStats userPoint = userPoints.iterator().next();
+            if (userPoint.getTotalPoints() > price) {
+                Map<String, Object> data = Maps.create().put("userId", userBy)
+                        .put("itemId", itemId)
+                        .put("cost", price)
+                        .build();
+                ctx.executeCommand("def/item/buyItem", data);
+                return true;
+            } else {
+                throw new OasisGameException("You do not have enough money to buy this item!");
+            }
+        });
     }
 
     @Override
@@ -99,12 +112,11 @@ public class GameService extends BaseService implements IGameService {
                         .put("itemId", itemId)
                         .build();
                 ctx.executeCommand("def/item/shareToItem", item);
-
+                return true;
             } else {
-                throw new IOException("Cannot share this item! Maybe the item itself is shared to you by friend!");
+                throw new OasisGameException("Cannot share this item! Maybe the item itself is shared to you by friend!");
             }
         });
-
     }
 
     @Override

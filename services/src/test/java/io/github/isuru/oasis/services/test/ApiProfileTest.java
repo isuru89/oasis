@@ -128,6 +128,7 @@ class ApiProfileTest extends AbstractApiTest {
     @Test
     void testTeamScopeCrud() throws Exception {
         IProfileService profileService = apiService.getProfileService();
+        clearTables("OA_TEAM_SCOPE");
 
         TeamScope teamScope = new TeamScope();
         teamScope.setName("sales");
@@ -250,6 +251,12 @@ class ApiProfileTest extends AbstractApiTest {
         }
         oasisDao.close();
         apiService = null;
+    }
+
+    static void clearTables(String... tableNames) throws Exception {
+        for (String tbl : tableNames) {
+            oasisDao.executeRawCommand("TRUNCATE " + tbl, null);
+        }
     }
 
 }

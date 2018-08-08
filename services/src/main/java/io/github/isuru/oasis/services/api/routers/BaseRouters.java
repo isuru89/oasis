@@ -6,6 +6,7 @@ import io.github.isuru.oasis.services.api.ILifecycleService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.utils.UserRole;
 import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.JsonTransformer;
 import io.github.isuru.oasis.services.utils.ValueMap;
@@ -22,9 +23,9 @@ import java.util.Base64;
  */
 public abstract class BaseRouters {
 
-    public static final String JSON_TYPE = "application/json";
+    static final String JSON_TYPE = "application/json";
 
-    public static final JsonTransformer TRANSFORMER = new JsonTransformer();
+    static final JsonTransformer TRANSFORMER = new JsonTransformer();
     private static final String AUTHORIZATION = "Authorization";
 
     private final IOasisApiService apiService;
@@ -37,16 +38,16 @@ public abstract class BaseRouters {
         return apiService;
     }
 
-    protected IGameDefService getGameDefService() {
+    IGameDefService getGameDefService() {
         return apiService.getGameDefService();
     }
-    protected ILifecycleService getLCService() {
+    ILifecycleService getLCService() {
         return apiService.getLifecycleService();
     }
 
     public abstract void register();
 
-    protected Pair<String, String> getBasicAuthPair(Request request) throws ApiAuthException, UnsupportedEncodingException {
+    Pair<String, String> getBasicAuthPair(Request request) throws ApiAuthException, UnsupportedEncodingException {
         String auth = request.headers(AUTHORIZATION);
         if (auth != null) {
             if (auth.startsWith("Basic ")) {
@@ -60,7 +61,7 @@ public abstract class BaseRouters {
         throw new ApiAuthException("No Authorization header is found in the request!");
     }
 
-    protected void checkAuth(Request request) throws ApiAuthException {
+    void checkAuth(Request request) throws ApiAuthException {
         String auth = request.headers(AUTHORIZATION);
         if (auth != null) {
             if (auth.startsWith("Bearer ")) {
@@ -72,17 +73,17 @@ public abstract class BaseRouters {
         }
     }
 
-    protected void checkCurator(Request request) throws ApiAuthException {
+    void checkCurator(Request request) throws ApiAuthException {
         AuthUtils.TokenInfo tokenInfo = request.attribute("token");
         if (tokenInfo == null) {
             throw new ApiAuthException("You need to first authenticate to access this api!");
         }
-        if (!tokenInfo.isCurator()) {
+        if (!UserRole.hasRole(tokenInfo.getRole(), UserRole.CURATOR)) {
             throw new ApiAuthException("You do not have necessary permissions to access this api!");
         }
     }
 
-    protected void checkSameUser(Request req, long userId) throws ApiAuthException {
+    void checkSameUser(Request req, long userId) throws ApiAuthException {
         long authUser = req.attribute("userId");
         if (userId > 0 && userId == authUser) {
             return;
@@ -90,12 +91,12 @@ public abstract class BaseRouters {
         throw new ApiAuthException("You are not allowed to access this api!");
     }
 
-    protected void checkAdmin(Request request) throws ApiAuthException {
+    void checkAdmin(Request request) throws ApiAuthException {
         AuthUtils.TokenInfo tokenInfo = request.attribute("token");
         if (tokenInfo == null) {
             throw new ApiAuthException("You need to first authenticate to access this api!");
         }
-        if (!tokenInfo.isAdmin()) {
+        if (!UserRole.hasRole(tokenInfo.getRole(), UserRole.ADMIN)) {
             throw new ApiAuthException("You do not have necessary permissions to access this api!");
         }
     }
@@ -110,16 +111,21 @@ public abstract class BaseRouters {
         return this;
     }
 
-    protected BaseRouters post(String path, Route route) {
+    BaseRouters post(String path, Route route) {
         Spark.post(path, JSON_TYPE, route, TRANSFORMER);
         return this;
     }
 
-    protected BaseRouters delete(String path, Route route) {
+    BaseRouters delete(String path, Route route, int role) {
         Route auth = new Route() {
             @Override
             public Object handle(Request request, Response response) throws Exception {
                 checkAuth(request);
+                AuthUtils.TokenInfo token = request.attribute("token");
+                if (!UserRole.hasRole(token.getRole(), role)) {
+                    throw new ApiAuthException("You do not have necessary permissions to access this api!");
+                }
+
                 return route.handle(request, response);
             }
         };
@@ -127,23 +133,23 @@ public abstract class BaseRouters {
         return this;
     }
 
-    protected long asPLong(Request req, String name) {
+    long asPLong(Request req, String name) {
         return Long.parseLong(req.params(name));
     }
 
-    protected int asPInt(Request req, String name) {
+    int asPInt(Request req, String name) {
         return Integer.parseInt(req.params(name));
     }
 
-    protected long asQLong(Request req, String name, long defVal) {
+    long asQLong(Request req, String name, long defVal) {
         return Long.parseLong(req.queryParamOrDefault(name, String.valueOf(defVal)));
     }
 
-    protected int asQInt(Request req, String name, int defVal) {
+    int asQInt(Request req, String name, int defVal) {
         return Integer.parseInt(req.queryParamOrDefault(name, String.valueOf(defVal)));
     }
 
-    protected boolean asQBool(Request req, String name, boolean defVal) {
+    boolean asQBool(Request req, String name, boolean defVal) {
         return Boolean.parseBoolean(req.queryParamOrDefault(name, String.valueOf(defVal)));
     }
 
@@ -155,7 +161,7 @@ public abstract class BaseRouters {
         }
     }
 
-    protected <T> T bodyAs(Request req, Class<T> clz) throws InputValidationException {
+    <T> T bodyAs(Request req, Class<T> clz) throws InputValidationException {
         try {
             return TRANSFORMER.parse(req.body(), clz);
         } catch (Exception e) {
@@ -163,7 +169,7 @@ public abstract class BaseRouters {
         }
     }
 
-    protected ValueMap bodyAsMap(Request req) throws Exception {
+    ValueMap bodyAsMap(Request req) throws Exception {
         return new ValueMap(TRANSFORMER.parseAsMap(req.body()));
     }
 }

@@ -5,6 +5,7 @@ import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.utils.UserRole;
 import spark.Filter;
 import spark.Request;
 import spark.Response;
@@ -14,7 +15,7 @@ import spark.Spark;
  * @author iweerarathna
  */
 public class ProfileRouter extends BaseRouters {
-    public ProfileRouter(IOasisApiService apiService) {
+    ProfileRouter(IOasisApiService apiService) {
         super(apiService);
     }
 
@@ -45,10 +46,9 @@ public class ProfileRouter extends BaseRouters {
         .get("/user/ext/:uid", (req, res) -> {
             return getApiService().getProfileService().readUserProfileByExtId(asPLong(req,"uid"));
         })
-        .delete("/user/:uid", (req, res) -> {
-            checkAdmin(req);
-            return getApiService().getProfileService().deleteUserProfile(asPLong(req,"uid"));
-        });
+        .delete("/user/:uid", (req, res) ->
+                getApiService().getProfileService().deleteUserProfile(asPLong(req,"uid")),
+                UserRole.ADMIN);
 
         // team end points
         //

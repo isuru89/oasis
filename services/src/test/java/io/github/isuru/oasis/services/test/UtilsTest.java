@@ -1,5 +1,7 @@
 package io.github.isuru.oasis.services.test;
 
+import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
 import org.junit.jupiter.api.Assertions;
@@ -11,6 +13,25 @@ import java.util.Map;
  * @author iweerarathna
  */
 class UtilsTest {
+
+    @Test
+    void testAuth() throws Exception {
+        AuthUtils.get().init();
+
+        AuthUtils.TokenInfo tokenInfo = new AuthUtils.TokenInfo();
+        tokenInfo.setUser(123);
+        tokenInfo.setExp(System.currentTimeMillis() + 2000000);
+        String t = AuthUtils.get().issueToken(tokenInfo);
+        Assertions.assertNotNull(t);
+
+        AuthUtils.TokenInfo parsed = AuthUtils.get().verifyToken(t);
+        Assertions.assertNotNull(parsed);
+        Assertions.assertEquals(123, parsed.getUser());
+        Assertions.assertFalse(UserRole.hasRole(parsed.getRole(), UserRole.ADMIN));
+        Assertions.assertFalse(UserRole.hasRole(parsed.getRole(), UserRole.CURATOR));
+        Assertions.assertTrue(UserRole.hasRole(parsed.getRole(), UserRole.PLAYER));
+        Assertions.assertTrue(parsed.getExp() > 0);
+    }
 
     @Test
     void testMaps() {

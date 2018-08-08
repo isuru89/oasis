@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class LifecycleRouter extends BaseRouters {
 
-    public LifecycleRouter(IOasisApiService apiService) {
+    LifecycleRouter(IOasisApiService apiService) {
         super(apiService);
     }
 

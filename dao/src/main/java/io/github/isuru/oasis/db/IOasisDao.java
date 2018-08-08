@@ -19,7 +19,7 @@ public interface IOasisDao extends AutoCloseable {
     long executeCommand(String queryId, Map<String, Object> data) throws Exception;
     long executeRawCommand(String queryStr, Map<String, Object> data) throws Exception;
     Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws Exception;
-    void runTx(int transactionLevel, ConsumerEx<JdbcTransactionCtx> txBody) throws Exception;
+    Object runTx(int transactionLevel, ConsumerEx<JdbcTransactionCtx> txBody) throws Exception;
 
     IDefinitionDao getDefinitionDao();
 

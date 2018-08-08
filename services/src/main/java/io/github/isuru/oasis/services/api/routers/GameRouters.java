@@ -24,7 +24,7 @@ public class GameRouters extends BaseRouters {
     private static final String Q_TEAM = "team";
     private static final String Q_TEAM_SCOPE = "teamscope";
 
-    public GameRouters(IOasisApiService apiService) {
+    GameRouters(IOasisApiService apiService) {
         super(apiService);
     }
 

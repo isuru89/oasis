@@ -3,6 +3,7 @@ package io.github.isuru.oasis.services.utils;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -14,6 +15,13 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -38,7 +46,14 @@ public final class AuthUtils {
         mapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
 
         // @TODO init jwt configurations
-        algorithm = Algorithm.HMAC256("1234qwer$ddwqwq");
+        byte[] bytesPrivate = Files.readAllBytes(Paths.get("../configs/auth/private.der"));
+        byte[] bytesPublic = Files.readAllBytes(Paths.get("../configs/auth/public.der"));
+        PKCS8EncodedKeySpec specPrivate = new PKCS8EncodedKeySpec(bytesPrivate);
+        X509EncodedKeySpec specPublic = new X509EncodedKeySpec(bytesPublic);
+        RSAPrivateKey rsaPrivate = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(specPrivate);
+        RSAPublicKey rsaPublic = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(specPublic);
+
+        algorithm = Algorithm.RSA256(rsaPublic, rsaPrivate);
         verifier = JWT.require(algorithm)
                 .withIssuer(OASIS_ISSUER)
                 .build();
@@ -77,13 +92,17 @@ public final class AuthUtils {
     }
 
     public String issueToken(TokenInfo tokenInfo) throws ApiAuthException {
-        return JWT.create()
-                .withIssuer(OASIS_ISSUER)
-                .withExpiresAt(new Date(tokenInfo.getExp()))
-                .withClaim("user", tokenInfo.user)
-                .withClaim("admin", tokenInfo.admin)
-                .withClaim("curator", tokenInfo.curator)
-                .sign(algorithm);
+        try {
+            return JWT.create()
+                    .withIssuer(OASIS_ISSUER)
+                    .withExpiresAt(new Date(tokenInfo.getExp()))
+                    .withClaim("user", tokenInfo.user)
+                    .withClaim("role", tokenInfo.role)
+                    .sign(algorithm);
+        } catch (IllegalArgumentException | JWTCreationException e) {
+            e.printStackTrace();
+            throw new ApiAuthException("Unable to create login information for user " + tokenInfo.getUser() + "!");
+        }
     }
 
     public TokenInfo verifyToken(String token) throws ApiAuthException {
@@ -91,8 +110,8 @@ public final class AuthUtils {
             DecodedJWT jwt = verifier.verify(token);
             TokenInfo tokenInfo = new TokenInfo();
             tokenInfo.setUser(jwt.getClaim("user").asLong());
-            tokenInfo.setAdmin(jwt.getClaim("admin").asBoolean());
-            tokenInfo.setCurator(jwt.getClaim("curator").asBoolean());
+            tokenInfo.setRole(jwt.getClaim("role").asInt());
+            tokenInfo.setExp(jwt.getExpiresAt().getTime());
             return tokenInfo;
 
         } catch (JWTVerificationException e) {
@@ -108,8 +127,7 @@ public final class AuthUtils {
     public static class TokenInfo {
         private long user;
         private long exp;
-        private boolean admin = false;
-        private boolean curator = false;
+        private int role = UserRole.PLAYER;
 
         public long getExp() {
             return exp;
@@ -119,28 +137,20 @@ public final class AuthUtils {
             this.exp = exp;
         }
 
-        public boolean isCurator() {
-            return curator;
-        }
-
-        public void setCurator(boolean curator) {
-            this.curator = curator;
-        }
-
-        public boolean isAdmin() {
-            return admin;
-        }
-
-        public void setAdmin(boolean admin) {
-            this.admin = admin;
-        }
-
         public long getUser() {
             return user;
         }
 
         public void setUser(long user) {
             this.user = user;
+        }
+
+        public int getRole() {
+            return role;
+        }
+
+        public void setRole(int role) {
+            this.role = role;
         }
     }
 

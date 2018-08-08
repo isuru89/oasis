@@ -93,11 +93,9 @@ public class JdbiOasisDao implements IOasisDao {
     }
 
     @Override
-    public void runTx(int transactionLevel, ConsumerEx<JdbcTransactionCtx> txBody) throws Exception {
-        jdbi.inTransaction(TransactionIsolationLevel.valueOf(transactionLevel), handle -> {
-            txBody.consume(new RuntimeJdbcTxCtx(handle));
-            return null;
-        });
+    public Object runTx(int transactionLevel, ConsumerEx<JdbcTransactionCtx> txBody) throws Exception {
+        return jdbi.inTransaction(TransactionIsolationLevel.valueOf(transactionLevel),
+                handle -> txBody.consume(new RuntimeJdbcTxCtx(handle)));
     }
 
     @Override

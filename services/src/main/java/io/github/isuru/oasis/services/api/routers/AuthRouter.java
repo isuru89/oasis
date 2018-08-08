@@ -6,7 +6,7 @@ import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.model.enums.UserRole;
+import io.github.isuru.oasis.services.utils.UserRole;
 import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.Maps;
 import spark.Request;
@@ -24,7 +24,7 @@ public class AuthRouter extends BaseRouters {
     private static final Set<String> RESERVED_USERS = new HashSet<>(
             Arrays.asList("admin@oasis.com", "player@oasis.com", "curator@oasis.com"));
 
-    public AuthRouter(IOasisApiService apiService) {
+    AuthRouter(IOasisApiService apiService) {
         super(apiService);
     }
 
@@ -67,23 +67,23 @@ public class AuthRouter extends BaseRouters {
             }
         }
         UserTeam team = getApiService().getProfileService().findCurrentTeamOfUser(profile.getId());
-        int role = UserRole.PLAYER.getIndex();
+        int role = UserRole.PLAYER;
         if (team != null) {
             role = team.getRoleId();
         }
 
         if (RESERVED_USERS.contains(username)) {
-            if (role == UserRole.ADMIN.getIndex()) {
+            if (role == UserRole.ADMIN) {
                 // admin
                 if (!password.equals(Configs.get().getStrReq("oasis.default.admin.password"))) {
                     throw new ApiAuthException("Username or password incorrect!");
                 }
-            } else if (role == UserRole.CURATOR.getIndex()) {
+            } else if (role == UserRole.CURATOR) {
                 // curator
                 if (!password.equals(Configs.get().getStrReq("oasis.default.curator.password"))) {
                     throw new ApiAuthException("Username or password incorrect!");
                 }
-            } else if (role == UserRole.PLAYER.getIndex()) {
+            } else if (role == UserRole.PLAYER) {
                 // player
                 if (!password.equals(Configs.get().getStrReq("oasis.default.player.password"))) {
                     throw new ApiAuthException("Username or password incorrect!");
@@ -94,8 +94,7 @@ public class AuthRouter extends BaseRouters {
         }
 
         AuthUtils.TokenInfo info = new AuthUtils.TokenInfo();
-        info.setAdmin(role == UserRole.ADMIN.getIndex());
-        info.setCurator(role == UserRole.CURATOR.getIndex());
+        info.setRole(role);
         info.setUser(profile.getId());
         info.setExp(AuthUtils.get().getExpiryDate());
         String token = AuthUtils.get().issueToken(info);

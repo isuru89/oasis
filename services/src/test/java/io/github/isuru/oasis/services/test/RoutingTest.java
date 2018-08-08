@@ -10,7 +10,7 @@ import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.model.enums.UserRole;
+import io.github.isuru.oasis.services.utils.UserRole;
 import io.github.isuru.oasis.services.test.routes.IOasisApi;
 import okhttp3.Headers;
 import org.junit.jupiter.api.Assertions;
@@ -67,7 +67,9 @@ class RoutingTest extends AbstractApiTest {
 
     static void startServer() throws Exception {
         Configs configs = Configs.get();
-        configs.append("oasis.config.file", "./src/test/resources/oasis/configs/oasis.properties,./src/test/resources/oasis/configs/jdbc.properties");
+        configs.append("oasis.config.file", "./src/test/resources/oasis/configs/oasis.properties," +
+                "./src/test/resources/oasis/configs/jdbc.properties," +
+                "./src/test/resources/oasis/configs/ldap.properties");
         configs.append("oasis.logs.config.file", "./src/test/resources/oasis/configs/logger.properties");
         OasisServer.main(new String[0]);
     }
@@ -116,16 +118,16 @@ class RoutingTest extends AbstractApiTest {
         player.setName("player");
         long playerId = profileService.addUserProfile(player);
 
-        profileService.addUserToTeam(adminId, teamId, UserRole.ADMIN.getIndex());
-        profileService.addUserToTeam(curatorId, teamId, UserRole.CURATOR.getIndex());
-        profileService.addUserToTeam(playerId, teamId, UserRole.PLAYER.getIndex());
+        profileService.addUserToTeam(adminId, teamId, UserRole.ADMIN);
+        profileService.addUserToTeam(curatorId, teamId, UserRole.CURATOR);
+        profileService.addUserToTeam(playerId, teamId, UserRole.PLAYER);
 
         UserTeam profile = profileService.findCurrentTeamOfUser(adminId);
-        Assertions.assertEquals(UserRole.ADMIN.getIndex(), (int) profile.getRoleId());
+        Assertions.assertEquals(UserRole.ADMIN, (int) profile.getRoleId());
         profile = profileService.findCurrentTeamOfUser(curatorId);
-        Assertions.assertEquals(UserRole.CURATOR.getIndex(), (int) profile.getRoleId());
+        Assertions.assertEquals(UserRole.CURATOR, (int) profile.getRoleId());
         profile = profileService.findCurrentTeamOfUser(playerId);
-        Assertions.assertEquals(UserRole.PLAYER.getIndex(), (int) profile.getRoleId());
+        Assertions.assertEquals(UserRole.PLAYER, (int) profile.getRoleId());
     }
 
     protected static IOasisDao getDao() {
