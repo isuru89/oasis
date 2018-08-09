@@ -6,6 +6,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import io.github.isuru.oasis.db.DbProperties;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
+import org.apache.log4j.PropertyConfigurator;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,10 +23,12 @@ public class Main {
     private static final boolean EXCLUSIVE = false;
 
     public static void main(String[] args) throws Exception {
+        //PropertyConfigurator.configure();
         DbProperties dbProps = new DbProperties("oasis-injector");
-        dbProps.setUrl("jdbc:mysql://localhost/oasis");
-        dbProps.setUsername("isuru");
-        dbProps.setPassword("isuru");
+        dbProps.setUrl("jdbc:mariadb://localhost/oasis");
+        dbProps.setUsername("root");
+        dbProps.setPassword("");
+        dbProps.setUseTemplateEngine(false);
         dbProps.setQueryLocation(new File("./scripts/db").getAbsolutePath());
 
         IOasisDao dao = OasisDbFactory.create(dbProps);
@@ -43,9 +46,12 @@ public class Main {
         factory.setUsername("reader");
         factory.setPassword("reader");
         factory.setVirtualHost("oasis");
+        factory.setAutomaticRecoveryEnabled(true);
+        factory.useNio();
 
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
+        channel.basicQos(10);
 
         channel.basicQos(100);
 

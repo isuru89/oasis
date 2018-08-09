@@ -216,6 +216,9 @@ public class Main {
     private static File deriveGameRuleFilePath(String configsPath, Configs gameProps) {
         File configFile = new File(configsPath);
         File configDir = configFile.getParentFile();
+        if (configDir == null) {
+            throw new IllegalArgumentException("The configuration file does not exist! [" + configsPath + "]!");
+        }
         gameProps.append("_location", configDir.getAbsolutePath());
 
         String filePath = gameProps.getStr("game.rule.file", null);
