@@ -1,15 +1,31 @@
 SELECT
-    user_id as userId,
-    point_id as pointId,
-    sub_point_id as subPointId,
-    ROUND(SUM(points), 2) as totalPoints
+    oad.name as pointName,
+    oad.displayName as pointDisplayName,
+    tbl.*
 
-FROM OA_POINTS
+FROM (
+    SELECT
+        oap.user_id as userId,
+        oap.point_id as pointId,
+        ROUND(SUM(oap.points), 2) as totalPoints,
+        COUNT(*) as occurrences,
+        MIN(oap.points) as minAchieved,
+        MAX(oap.points) as maxAchieved,
+        MIN(oap.ts) as firstAchieved,
+        MAX(oap.ts) as lastAchieved
+
+    FROM OA_POINTS oap
+    WHERE
+        oap.user_id = :userId
+        AND
+        oap.is_active = 1
+
+    GROUP BY
+        oap.user_id,
+        oap.point_id
+
+    ) tbl
+    INNER JOIN OA_DEFINITION oad ON tbl.pointId = oad.id
+
 WHERE
-    user_id = :userId
-    AND
-    is_active = 1
-GROUP BY
-    user_id,
-    point_id,
-    sub_point_id
+    oad.is_active = 1

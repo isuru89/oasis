@@ -25,3 +25,5 @@ INSERT INTO OA_BADGES (
     :startTime, :endTime,
     :tag
 )
+ON DUPLICATE KEY
+UPDATE tag = :tag

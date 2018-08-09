@@ -57,4 +57,19 @@ abstract class BaseService {
         return results;
     }
 
+    int orDefault(Integer val, int def) {
+        return val == null ? def : val;
+    }
+
+    long orDefault(Long val, long def) {
+        return val == null ? def : val;
+    }
+
+    boolean isValid(Integer val) {
+        return val != null && val > 0;
+    }
+
+    boolean isValid(Long val) {
+        return val != null && val > 0;
+    }
 }

@@ -47,6 +47,8 @@ public class Main {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
+        channel.basicQos(100);
+
         channel.queueDeclare("game.o.points", DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare("game.o.milestones", DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare("game.o.milestonestates", DURABLE, EXCLUSIVE, AUTO_DEL, null);

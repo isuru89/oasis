@@ -32,6 +32,7 @@ public class DefaultOasisApiService implements IOasisApiService {
         gameService = new GameService(oasisDao, this);
         lifecycleService = new LifeCycleService(oasisDao, this, flinkServices);
         eventsService = new EventsService(oasisDao, this);
+        statService = new StatService(oasisDao, this);
     }
 
     @Override

@@ -30,7 +30,7 @@ class BadgeConsumer extends BaseConsumer<BadgeModel> {
         map.put("extId", last.getExternalId());
         map.put("ts", last.getTimestamp());
         map.put("badgeId", msg.getBadgeId());
-        map.put("subBadgeId", msg.getSubBadgeId());
+        map.put("subBadgeId", msg.getSubBadgeId() != null ? msg.getSubBadgeId() : "");
         map.put("startExtId", first.getExternalId());
         map.put("endExtId", last.getExternalId());
         map.put("startTime", first.getTimestamp());
