@@ -33,6 +33,7 @@ import java.util.Hashtable;
 public final class AuthUtils {
 
     private static final String OASIS_ISSUER = "oasis";
+    private static final String OASIS_SOURCE_ISSUER = "oasis-source";
 
     private Algorithm algorithm;
     private JWTVerifier verifier;
@@ -89,6 +90,18 @@ public final class AuthUtils {
 
     public long getExpiryDate() {
         return expiryDate;
+    }
+
+    public String issueSourceToken(EventSourceToken sourceToken) throws Exception {
+        try {
+            return JWT.create()
+                    .withIssuer(OASIS_SOURCE_ISSUER)
+                    .withClaim("name", sourceToken.getDisplayName())
+                    .sign(algorithm);
+        } catch (IllegalArgumentException | JWTCreationException e) {
+            e.printStackTrace();
+            throw new Exception("Unable to create auth token for event source " + sourceToken.getDisplayName() + "!");
+        }
     }
 
     public String issueToken(TokenInfo tokenInfo) throws ApiAuthException {

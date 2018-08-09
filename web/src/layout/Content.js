@@ -15,8 +15,8 @@ export default class Content extends Component {
   render() {
     return (
       <Wrapper>
-        {/* <ProfilePage /> */}
-        <CreatePointForm />
+        <ProfilePage />
+        {/* <CreatePointForm /> */}
       </Wrapper>
     )
   }

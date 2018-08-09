@@ -11,24 +11,10 @@ import TeamHistoryRecord from './TeamHistoryRecord';
 import RankView from './RankView';
 import RankPoint from './RankPoint';
 import MilestoneView from "./MilestoneView";
+import PointBreakdown from './PointBreakdown';
 
 const Content = styled.div`
   height: 100%;
-`
-
-const UserHeader = styled.div`
-  width: 100%;
-  height: 50px;
-  line-height: 50px;
-  background-color: #53A5D0;
-  color: #FBFCFD;
-  font-size: 1.61em;
-  letter-spacing: 1.2px;
-`
-
-const Title = styled.div`
-  padding: 0 20px;
-  font-weight: 700;
 `
 
 const UserContent = styled.div`
@@ -71,15 +57,6 @@ const UserDesignation = styled.div`
   font-weight: 400;
 `
 
-const UserProfileHeader = styled.div`
-  border-top: 1px solid #ffffff22;
-  background-color: #20465E;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-`
-
 const leaderboardData = [
   { leaderboard: 'Top Supporter', points: (Math.random() * 100000).toFixed(0), rank: 2 },
   { leaderboard: 'Top Finder', points: (Math.random() * 500).toFixed(0), rank: 15 },
@@ -90,7 +67,17 @@ const milestoneData = [
   { milestone: 'Total Resolves', level: 4, totalLevels: 10, remaining: (Math.random() * 10000).toFixed(0), nextLevel: 10000, progress: 55 },
   { milestone: 'Quick Resolves', level: 2, totalLevels: 5, remaining: (Math.random() * 10000).toFixed(0), nextLevel: 10000, progress: 32 },
   { milestone: 'Bugs Found', level: 9, totalLevels: 20, remaining: (Math.random() * 10000).toFixed(0), nextLevel: 10000, progress: 81 },
-]
+];
+
+const pointBreakData = { 
+    total: (Math.random() * 100000).toFixed(2),
+    records: [
+      { label: 'Ticket Resolves', points: (Math.random() * 50000).toFixed(2) },
+      { label: 'Violation Fixes', points: (Math.random() * 40000).toFixed(2) },
+      { label: 'Bonus', points: (Math.random() * 20000).toFixed(2) },
+      { label: 'Awards', points: (Math.random() * 10000).toFixed(2) },
+    ]
+  };
 
 
 export default class ProfilePage extends Component {
@@ -102,13 +89,13 @@ export default class ProfilePage extends Component {
             <Avatar image={profileImg} size={164} />
             <UserNameTitle>John Doe</UserNameTitle>
             <UserDesignation>Senior Engineer</UserDesignation>
+            <ImageTitleValue image={<FontAwesomeIcon icon="at" />}
+              title="john@product.com" />
 
             <ImageTitleValue image={<FontAwesomeIcon icon="football-ball" />}
               title="Team:" 
               value="QA-Testings" />
-            <ImageTitleValue image={<FontAwesomeIcon icon="at" />}
-              title="john@product.com" />
-
+            
             <RankView data={leaderboardData} />
 
           </Column1>
@@ -124,11 +111,14 @@ export default class ProfilePage extends Component {
                 </Panel>
               </Column2>
               <Column3>
-              <Panel title="TEAM HISTORY">
-                <TeamHistoryRecord team="Team-1" active={true} />
-                <TeamHistoryRecord />
-                <TeamHistoryRecord />
-              </Panel>
+                <Panel title="TEAM HISTORY">
+                  <TeamHistoryRecord team="Team-1" active={true} />
+                  <TeamHistoryRecord />
+                  <TeamHistoryRecord />
+                </Panel>
+                <Panel title="Point Breakdown">
+                  <PointBreakdown {...pointBreakData} />
+                </Panel>
               </Column3>
               
             </UserContent>

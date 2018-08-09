@@ -23,6 +23,7 @@ const Expander = styled.span`
 
 const Title = styled.span`
   flex: 1;
+  text-transform: uppercase;
 `
 
 const TitleBar = styled.div`

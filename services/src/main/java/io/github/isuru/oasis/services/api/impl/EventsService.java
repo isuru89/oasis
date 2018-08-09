@@ -6,10 +6,13 @@ import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.api.IEventsService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.utils.AuthUtils;
+import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.LRUCache;
+import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.RabbitDispatcher;
 
 import java.util.HashMap;
@@ -61,6 +64,37 @@ public class EventsService extends BaseService implements IEventsService {
         for (Map<String, Object> event : events) {
             submitEvent(event);
         }
+    }
+
+    @Override
+    public List<EventSourceToken> listAllEventSources() throws Exception {
+        return toList(getDao().executeQuery("def/events/listAllEventSources",
+                new HashMap<>(),
+                EventSourceToken.class));
+    }
+
+    @Override
+    public EventSourceToken addEventSource(EventSourceToken sourceToken) throws Exception {
+        String token = AuthUtils.get().issueSourceToken(sourceToken);
+        long id = getDao().executeInsert("def/events/addEventSource",
+                Maps.create().put("token", sourceToken.getToken())
+                    .put("displayName", sourceToken.getDisplayName())
+                    .put("authToken", token)
+                    .build(), "id");
+
+        List<EventSourceToken> eventSourceTokens = listAllEventSources();
+        for (EventSourceToken eventSourceToken : eventSourceTokens) {
+            if (eventSourceToken.getId() == id) {
+                return eventSourceToken;
+            }
+        }
+        throw new Exception("Unable to register event source!");
+    }
+
+    @Override
+    public boolean disableEventSource(int id) throws Exception {
+        return getDao().executeCommand("def/events/disableEventSource",
+                Maps.create("id", id)) > 0;
     }
 
     private long resolveUser(String email) throws Exception {

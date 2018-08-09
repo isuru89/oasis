@@ -93,7 +93,7 @@ export default class MilestoneView extends Component {
         {
           data.map(r => {
             return (
-              <MilestoneWrapper>
+              <MilestoneWrapper key={r.milestone}>
                 <MilestoneLabel>{r.milestone}</MilestoneLabel>
                 <ProgressContainer>
                   <CustomContentProgressBar percentage={r.progress}>
@@ -105,10 +105,10 @@ export default class MilestoneView extends Component {
                   r.remaining && r.remaining > 0 &&
                   <BottomLabel>
                     <div style={{ fontWeight: 'normal', fontSize: 11 }}>
-                      <span style={{ paddingRight: 2, letterSpacing: 0.4, fontSize: 16 }}>{formatInt(r.nextLevel - r.remaining)}</span>
-                      <span>/{formatInt(r.nextLevel)}</span>
+                      <span style={{ paddingRight: 2, letterSpacing: 0.4, fontSize: 16 }}>{formatInt(r.remaining)}</span>
+                      <span> until next level</span>
                     </div>
-                    {" "} for next level 
+                    {" "} 
                   </BottomLabel>
                 }
               </MilestoneWrapper>
