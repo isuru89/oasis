@@ -68,6 +68,25 @@ public class JdbiOasisDao implements IOasisDao {
     }
 
     @Override
+    public Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data,
+                                                      Map<String, Object> templatingData) throws Exception {
+        String query = queryRepo.fetchQuery(queryId);
+        return jdbi.withHandle((HandleCallback<Iterable<Map<String, Object>>, Exception>) handle -> {
+            Query handleQuery = handle.createQuery(query);
+            if (templatingData != null && !templatingData.isEmpty()) {
+                for (Map.Entry<String, Object> entry : templatingData.entrySet()) {
+                    if (entry.getValue() instanceof List) {
+                        handleQuery = handleQuery.defineList(entry.getKey(), entry.getValue());
+                    } else {
+                        handleQuery = handleQuery.define(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+            return handleQuery.bindMap(data).mapToMap().list();
+        });
+    }
+
+    @Override
     public <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws Exception {
         String query = queryRepo.fetchQuery(queryId);
         return jdbi.withHandle((HandleCallback<Iterable<T>, Exception>) handle ->
@@ -142,6 +161,12 @@ public class JdbiOasisDao implements IOasisDao {
 
         RuntimeJdbcTxCtx(Handle handle) {
             this.handle = handle;
+        }
+
+        @Override
+        public Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data) throws Exception {
+            String query = queryRepo.fetchQuery(queryId);
+            return handle.createQuery(query).bindMap(data).mapToMap().list();
         }
 
         @Override

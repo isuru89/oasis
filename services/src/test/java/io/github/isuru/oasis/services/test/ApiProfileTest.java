@@ -101,10 +101,15 @@ class ApiProfileTest extends AbstractApiTest {
     void testTeamCrud() throws Exception {
         IProfileService profileService = apiService.getProfileService();
 
+        TeamScope scope = new TeamScope();
+        scope.setName("Finance");
+        scope.setDisplayName("Department Finance");
+        long l = profileService.addTeamScope(scope);
+
         TeamProfile teamProfile = new TeamProfile();
         teamProfile.setName("QA Team");
         teamProfile.setAvatarId("image_qa.png");
-        teamProfile.setTeamScope(2000);
+        teamProfile.setTeamScope((int)l);
         long tid = profileService.addTeam(teamProfile);
         Assertions.assertTrue(tid > 0);
 
@@ -127,13 +132,17 @@ class ApiProfileTest extends AbstractApiTest {
         Assertions.assertEquals(profile.getTeamScope(), teamProfile.getTeamScope());
 
         profile.setName("QA Team Modified");
-        profile.setTeamScope(2001);
         Assertions.assertTrue(profileService.editTeam(profile.getId(), profile));
 
         teamProfile = profileService.readTeam(profile.getId());
         Assertions.assertEquals(profile.getName(), teamProfile.getName());
         Assertions.assertEquals(profile.getAvatarId(), teamProfile.getAvatarId());
         Assertions.assertEquals(profile.getTeamScope(), teamProfile.getTeamScope());
+
+        List<TeamProfile> teamProfiles = profileService.listTeams(l);
+        Assertions.assertEquals(1, teamProfiles.size());
+
+        clearTables("OA_TEAM_SCOPE");
     }
 
     @Test
@@ -273,7 +282,7 @@ class ApiProfileTest extends AbstractApiTest {
         apiService = null;
     }
 
-    static void clearTables(String... tableNames) throws Exception {
+    private static void clearTables(String... tableNames) throws Exception {
         for (String tbl : tableNames) {
             oasisDao.executeRawCommand("TRUNCATE " + tbl, null);
         }

@@ -15,6 +15,8 @@ public interface IOasisDao extends AutoCloseable {
     <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data,
                                  Class<T> clz, Map<String, Object> templatingData) throws Exception;
     Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data) throws Exception;
+    Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data,
+                                               Map<String, Object> templatingData) throws Exception;
     <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws Exception;
     long executeCommand(String queryId, Map<String, Object> data) throws Exception;
     long executeRawCommand(String queryStr, Map<String, Object> data) throws Exception;

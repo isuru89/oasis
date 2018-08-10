@@ -7,7 +7,6 @@ import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.api.IGameService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
-import io.github.isuru.oasis.services.api.dto.PointStats;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.exception.OasisGameException;
 import io.github.isuru.oasis.services.model.BadgeAwardDto;
@@ -99,14 +98,18 @@ public class GameService extends BaseService implements IGameService {
         Checks.greaterThanZero(itemId, "itemId");
 
         getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
-            Iterable<PointStats> userPoints = ctx.executeQuery("profile/stats/getUserTotalPoints",
-                    Maps.create("userId", userBy),
-                    PointStats.class);
-            PointStats userPoint = userPoints.iterator().next();
-            if (userPoint.getTotalPoints() > price) {
-                Map<String, Object> data = Maps.create().put("userId", userBy)
+            Iterable<Map<String, Object>> userPoints = ctx.executeQuery(
+                    "profile/stats/getUserAvailablePoints",
+                    Maps.create("userId", userBy));
+            Map<String, Object> balanceMap = userPoints.iterator().next();
+            float balance = ((Double) balanceMap.get("Balance")).floatValue();
+
+            if (balance > price) {
+                Map<String, Object> data = Maps.create()
+                        .put("userId", userBy)
                         .put("itemId", itemId)
                         .put("cost", price)
+                        .put("purchasedAt", System.currentTimeMillis())
                         .build();
                 ctx.executeCommand("def/item/buyItem", data);
                 return true;
@@ -134,6 +137,7 @@ public class GameService extends BaseService implements IGameService {
                         .put("itemId", itemId)
                         .build();
                 ctx.executeCommand("def/item/shareToItem", item);
+                // @TODO add an event to stream processor
                 return true;
             } else {
                 throw new OasisGameException("Cannot share this item! Maybe the item itself is shared to you by friend!");

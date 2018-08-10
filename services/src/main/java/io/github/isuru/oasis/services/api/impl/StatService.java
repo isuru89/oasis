@@ -9,9 +9,15 @@ import io.github.isuru.oasis.services.api.dto.BadgeRecordDto;
 import io.github.isuru.oasis.services.api.dto.PointBreakdownReqDto;
 import io.github.isuru.oasis.services.api.dto.PointBreakdownResDto;
 import io.github.isuru.oasis.services.api.dto.PointRecordDto;
+import io.github.isuru.oasis.services.api.dto.UserBadgeStatDto;
+import io.github.isuru.oasis.services.api.dto.UserMilestoneStatDto;
+import io.github.isuru.oasis.services.api.dto.UserStatDto;
+import io.github.isuru.oasis.services.model.PurchasedItem;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 
+import java.beans.Statement;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -83,8 +89,44 @@ public class StatService extends BaseService implements IStatService {
     }
 
     @Override
-    public void readUserGameStats(long userId) {
+    public UserStatDto readUserGameStats(long userId, long since) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
 
+        Map<String, Object> tdata = new HashMap<>();
+        tdata.put("hasSince", since > 0);
+
+        Iterable<Map<String, Object>> summaryStat = getDao().executeQuery(
+                "profile/stats/getUserStatSummary",
+                Maps.create()
+                        .put("userId", userId)
+                        .put("since", since)
+                        .build(),
+                tdata);
+
+        UserStatDto dto = new UserStatDto();
+        dto.setUserId((int)userId);
+        for (Map<String, Object> row : summaryStat) {
+            Statement stmt = new Statement(dto,
+                    "set" + row.get("type").toString(),
+                    new Object[] { firstNonNull(row.get("value_i"), row.get("value_f")) });
+            stmt.execute();
+        }
+        return dto;
+    }
+
+    @Override
+    public List<PurchasedItem> readUserPurchasedItems(long userId, long since) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
+        Map<String, Object> tdata = new HashMap<>();
+        tdata.put("hasSince", since > 0);
+
+        return toList(getDao().executeQuery("profile/stats/getPurchasedItems",
+                Maps.create()
+                    .put("userId", userId).put("since", since)
+                    .build(),
+                PurchasedItem.class,
+                tdata));
     }
 
     @Override
@@ -93,22 +135,40 @@ public class StatService extends BaseService implements IStatService {
     }
 
     @Override
-    public void readUserBadges(long userId) {
+    public List<UserBadgeStatDto> readUserBadges(long userId, long since) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
 
+        Map<String, Object> tdata = new HashMap<>();
+        tdata.put("hasSince", since > 0);
+
+        return toList(getDao().executeQuery(
+                "profile/stats/getUserBadgeStat",
+                Maps.create().put("userId", userId).put("since", since).build(),
+                UserBadgeStatDto.class,
+                tdata));
     }
 
     @Override
-    public void readUserPoints(long userId) {
+    public List<UserMilestoneStatDto> readUserMilestones(long userId) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
 
-    }
-
-    @Override
-    public void readUserMilestones(long userId) {
-
+        return toList(getDao().executeQuery(
+                "profile/stats/getUserMilestoneStat",
+                Maps.create("userId", userId),
+                UserMilestoneStatDto.class));
     }
 
     @Override
     public void readUserRankings(long userId) {
 
+    }
+
+    private Object firstNonNull(Object... vals) {
+        for (Object o : vals) {
+            if (o != null) {
+                return o;
+            }
+        }
+        return null;
     }
 }

@@ -156,6 +156,7 @@ CREATE TABLE IF NOT EXISTS OA_PURCHASE (
     item_id         INT,
     user_id         INT,
     cost            FLOAT(4),
+    purchased_at    BIGINT,
     shared_at       BIGINT,
     via_friend      TINYINT(1) DEFAULT 0,
     is_active       TINYINT(1) DEFAULT 1,

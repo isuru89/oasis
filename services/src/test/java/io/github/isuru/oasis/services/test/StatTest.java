@@ -12,6 +12,7 @@ import io.github.isuru.oasis.services.api.dto.BadgeRecordDto;
 import io.github.isuru.oasis.services.api.dto.PointBreakdownReqDto;
 import io.github.isuru.oasis.services.api.dto.PointBreakdownResDto;
 import io.github.isuru.oasis.services.api.dto.PointRecordDto;
+import io.github.isuru.oasis.services.api.dto.UserStatDto;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -29,6 +30,17 @@ class StatTest extends AbstractApiTest {
 
     private static IOasisDao oasisDao;
     private static IOasisApiService apiService;
+
+    @Test
+    void testGameSummaryStat() throws Exception {
+        IStatService statService = apiService.getStatService();
+
+        UserStatDto dto = statService.readUserGameStats(145, 0);
+        Assertions.assertEquals(145, dto.getUserId());
+        Assertions.assertTrue(dto.getTotalPoints() > 0);
+        Assertions.assertTrue(dto.getTotalBadges() > 0);
+        System.out.println(dto);
+    }
 
     @Test
     void testStat() throws Exception {

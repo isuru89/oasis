@@ -9,7 +9,7 @@ SELECT
     mcur.achievedTime as achievedTime,
     oms.updated_at as lastUpdatedTime
 
-FROM OA_MILESTONES_STATE AS oms
+FROM OA_MILESTONE_STATE AS oms
     LEFT JOIN (
         SELECT
             user_id as userId,

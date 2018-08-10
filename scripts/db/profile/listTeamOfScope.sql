@@ -7,7 +7,7 @@ SELECT
     oat.updated_at as updatedAt
 
 FROM OA_TEAM oat
-    INNER JOIN OA_TEAM_SCOPE oats ON oat.team_scope = oats.scope_id
+    LEFT JOIN OA_TEAM_SCOPE oats ON oat.team_scope = oats.scope_id
 WHERE
     oats.scope_id = :scopeId
     AND

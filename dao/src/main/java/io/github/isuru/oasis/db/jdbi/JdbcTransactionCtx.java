@@ -7,6 +7,8 @@ import java.util.Map;
  */
 public interface JdbcTransactionCtx {
 
+    Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data) throws Exception;
+
     <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws Exception;
 
     long executeCommand(String queryId, Map<String, Object> data) throws Exception;
