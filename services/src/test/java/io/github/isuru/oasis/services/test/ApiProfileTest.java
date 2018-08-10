@@ -75,6 +75,13 @@ class ApiProfileTest extends AbstractApiTest {
         profile.setMale(false);
         Assertions.assertTrue(profileService.editUserProfile(profile.getId(), profile));
 
+        List<UserProfile> searchRes = profileService.findUser("arn", null);
+        Assertions.assertEquals(0, searchRes.size());
+        searchRes = profileService.findUser("arno", null);
+        Assertions.assertEquals(1, searchRes.size());
+        searchRes = profileService.findUser("arno%", null);
+        Assertions.assertEquals(0, searchRes.size());
+
         tmpProfile = profileService.readUserProfileByExtId(10001L);
         Assertions.assertFalse(tmpProfile.isMale());
         Assertions.assertEquals(profile.getAvatarId(), tmpProfile.getAvatarId());
@@ -84,6 +91,10 @@ class ApiProfileTest extends AbstractApiTest {
 
         Assertions.assertNotNull(tmpProfile);
         Assertions.assertFalse(tmpProfile.isActive());
+
+        // after deletion there should be no users
+        searchRes = profileService.findUser("arno", null);
+        Assertions.assertEquals(0, searchRes.size());
     }
 
     @Test

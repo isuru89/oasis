@@ -26,7 +26,7 @@ public abstract class BaseRouters {
     static final String JSON_TYPE = "application/json";
 
     static final JsonTransformer TRANSFORMER = new JsonTransformer();
-    private static final String AUTHORIZATION = "Authorization";
+    static final String AUTHORIZATION = "Authorization";
 
     private final IOasisApiService apiService;
 

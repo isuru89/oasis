@@ -14,6 +14,9 @@ public final class Constants {
     public static final String FIELD_SCOPE = "scope";
     public static final String FIELD_TIMESTAMP = "ts";
     public static final String FIELD_EVENT_TYPE = "type";
+    public static final String FIELD_SOURCE = "_source";
+    public static final String FIELD_SOURCE_TOKEN = "_token";
+
 
 
 }

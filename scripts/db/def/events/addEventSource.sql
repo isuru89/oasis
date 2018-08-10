@@ -1,9 +1,9 @@
 INSERT INTO OA_EVENT_SOURCE (
     token,
     display_name,
-    auth_token
+    is_internal
 ) VALUES (
     :token,
     :displayName,
-    :authToken
+    :isInternal
 )

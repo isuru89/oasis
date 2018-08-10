@@ -16,16 +16,20 @@ import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.model.LeaderboardResponseDto;
 import io.github.isuru.oasis.services.model.PointAwardDto;
 import io.github.isuru.oasis.services.utils.Checks;
+import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.Maps;
 
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author iweerarathna
  */
 public class GameService extends BaseService implements IGameService {
+
+    private String internalToken = null;
 
     GameService(IOasisDao oasisDao, IOasisApiService apiService) {
         super(oasisDao, apiService);
@@ -48,7 +52,8 @@ public class GameService extends BaseService implements IGameService {
                 .put("tag", String.valueOf(byUser))
                 .build();
 
-        getApiService().getEventService().submitEvent(data);
+        String token = getInternalToken();
+        getApiService().getEventService().submitEvent(token, data);
     }
 
     @Override
@@ -69,7 +74,8 @@ public class GameService extends BaseService implements IGameService {
                 .put("tag", String.valueOf(byUser))
                 .build();
 
-        getApiService().getEventService().submitEvent(data);
+        String token = getInternalToken();
+        getApiService().getEventService().submitEvent(token, data);
     }
 
     @Override
@@ -172,4 +178,14 @@ public class GameService extends BaseService implements IGameService {
         return responseDto;
     }
 
+    private String getInternalToken() throws Exception {
+        synchronized (this) {
+            if (internalToken != null) {
+                return internalToken;
+            }
+            Optional<EventSourceToken> eventSourceToken = getApiService().getEventService().readInternalSourceToken();
+            eventSourceToken.ifPresent(eventSourceToken1 -> internalToken = eventSourceToken1.getToken());
+            return internalToken;
+        }
+    }
 }

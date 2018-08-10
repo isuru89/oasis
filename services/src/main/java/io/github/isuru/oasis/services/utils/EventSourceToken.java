@@ -10,7 +10,7 @@ public class EventSourceToken {
     private Integer id;
     private String token;
     private String displayName;
-    private String authToken;
+    private boolean internal;
     private boolean active;
     private Timestamp createdAt;
     private Timestamp updatedAt;
@@ -39,12 +39,12 @@ public class EventSourceToken {
         this.displayName = displayName;
     }
 
-    public String getAuthToken() {
-        return authToken;
+    public boolean isInternal() {
+        return internal;
     }
 
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
+    public void setInternal(boolean internal) {
+        this.internal = internal;
     }
 
     public boolean isActive() {

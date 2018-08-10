@@ -15,9 +15,13 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -26,6 +30,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Random;
 
 /**
  * @author iweerarathna
@@ -33,7 +38,8 @@ import java.util.Hashtable;
 public final class AuthUtils {
 
     private static final String OASIS_ISSUER = "oasis";
-    private static final String OASIS_SOURCE_ISSUER = "oasis-source";
+
+    private MessageDigest digest;
 
     private Algorithm algorithm;
     private JWTVerifier verifier;
@@ -46,7 +52,7 @@ public final class AuthUtils {
     public void init() throws Exception {
         mapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
 
-        // @TODO init jwt configurations
+        // init jwt configurations
         byte[] bytesPrivate = Files.readAllBytes(Paths.get("../configs/auth/private.der"));
         byte[] bytesPublic = Files.readAllBytes(Paths.get("../configs/auth/public.der"));
         PKCS8EncodedKeySpec specPrivate = new PKCS8EncodedKeySpec(bytesPrivate);
@@ -92,16 +98,26 @@ public final class AuthUtils {
         return expiryDate;
     }
 
-    public String issueSourceToken(EventSourceToken sourceToken) throws Exception {
-        try {
-            return JWT.create()
-                    .withIssuer(OASIS_SOURCE_ISSUER)
-                    .withClaim("name", sourceToken.getDisplayName())
-                    .sign(algorithm);
-        } catch (IllegalArgumentException | JWTCreationException e) {
-            e.printStackTrace();
-            throw new Exception("Unable to create auth token for event source " + sourceToken.getDisplayName() + "!");
+    public String issueSourceToken(EventSourceToken token) throws IOException {
+        String text = token.getDisplayName() + String.valueOf(System.currentTimeMillis())
+                + String.valueOf(new Random(System.currentTimeMillis()).nextInt(1000000));
+        if (digest == null) {
+            try {
+                digest = MessageDigest.getInstance("SHA-1");
+            } catch (NoSuchAlgorithmException e) {
+                throw new IOException("Unable to generate a token for event source!", e);
+            }
         }
+        byte[] digest = this.digest.digest(text.getBytes(StandardCharsets.UTF_8));
+        return byteArrayToHexString(digest);
+    }
+
+    private static String byteArrayToHexString(byte[] b) {
+        StringBuilder result = new StringBuilder();
+        for (byte aB : b) {
+            result.append(Integer.toString((aB & 0xff) + 0x100, 16).substring(1));
+        }
+        return result.toString();
     }
 
     public String issueToken(TokenInfo tokenInfo) throws ApiAuthException {

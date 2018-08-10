@@ -176,7 +176,7 @@ CREATE TABLE IF NOT EXISTS OA_EVENT_SOURCE (
     id              INT PRIMARY KEY AUTO_INCREMENT,
     token           VARCHAR(64),
     display_name    VARCHAR(1024),
-    auth_token      TEXT,
+    is_internal     TINYINT(1) DEFAULT 0,
     is_active       TINYINT(1) DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
