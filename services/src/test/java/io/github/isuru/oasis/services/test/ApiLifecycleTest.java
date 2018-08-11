@@ -39,9 +39,6 @@ import java.util.stream.Collectors;
  */
 class ApiLifecycleTest extends AbstractApiTest {
 
-    private static IOasisDao oasisDao;
-    private static IOasisApiService apiService;
-
     @Test
     void testRuleWrite() throws Exception {
         GameDef gameDef = new GameDef();
@@ -126,33 +123,12 @@ class ApiLifecycleTest extends AbstractApiTest {
 
     @BeforeAll
     static void beforeAnyTest() throws Exception {
-        DbProperties properties = new DbProperties(OasisDbPool.DEFAULT);
-        properties.setUrl("jdbc:mysql://localhost/oasis");
-        properties.setUsername("isuru");
-        properties.setPassword("isuru");
-        File file = new File("./scripts/db");
-        if (!file.exists()) {
-            file = new File("../scripts/db");
-            if (!file.exists()) {
-                Assertions.fail("Database scripts directory is not found!");
-            }
-        }
-        properties.setQueryLocation(file.getAbsolutePath());
-
-        oasisDao = OasisDbFactory.create(properties);
-        apiService = new DefaultOasisApiService(oasisDao, null);
+        dbStart();
     }
 
     @AfterAll
     static void afterAnyTest() throws Exception {
-        System.out.println("Shutting down db connection.");
-        try {
-            oasisDao.executeRawCommand("TRUNCATE OA_DEFINITION", new HashMap<>());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        oasisDao.close();
-        apiService = null;
+        dbClose("OA_DEFINITION");
     }
 
 }

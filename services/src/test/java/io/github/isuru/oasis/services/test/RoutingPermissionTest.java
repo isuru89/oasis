@@ -103,10 +103,12 @@ class RoutingPermissionTest extends RoutingTest {
     @AfterAll
     static void stop() {
         try {
-            getDao().executeRawCommand("TRUNCATE OA_USER", Maps.create().build());
-            getDao().executeRawCommand("TRUNCATE OA_TEAM", Maps.create().build());
-            getDao().executeRawCommand("TRUNCATE OA_SCOPE", Maps.create().build());
-            getDao().executeRawCommand("TRUNCATE OA_TEAM_USER", Maps.create().build());
+            if (getDao() != null) {
+                getDao().executeRawCommand("TRUNCATE OA_USER", Maps.create().build());
+                getDao().executeRawCommand("TRUNCATE OA_TEAM", Maps.create().build());
+                getDao().executeRawCommand("TRUNCATE OA_SCOPE", Maps.create().build());
+                getDao().executeRawCommand("TRUNCATE OA_TEAM_USER", Maps.create().build());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

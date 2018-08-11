@@ -27,10 +27,6 @@ import java.util.List;
  */
 class StatTest extends AbstractApiTest {
 
-
-    private static IOasisDao oasisDao;
-    private static IOasisApiService apiService;
-
     @Test
     void testGameSummaryStat() throws Exception {
         IStatService statService = apiService.getStatService();
@@ -92,27 +88,11 @@ class StatTest extends AbstractApiTest {
 
     @BeforeAll
     static void beforeAnyTest() throws Exception {
-        DbProperties properties = new DbProperties(OasisDbPool.DEFAULT);
-        properties.setUrl("jdbc:mysql://localhost/oasis");
-        properties.setUsername("isuru");
-        properties.setPassword("isuru");
-        File file = new File("./scripts/db");
-        if (!file.exists()) {
-            file = new File("../scripts/db");
-            if (!file.exists()) {
-                Assertions.fail("Database scripts directory is not found!");
-            }
-        }
-        properties.setQueryLocation(file.getAbsolutePath());
-
-        oasisDao = OasisDbFactory.create(properties);
-        apiService = new DefaultOasisApiService(oasisDao, null);
+        dbStart();
     }
 
     @AfterAll
     static void afterAnyTest() throws Exception {
-        System.out.println("Shutting down db connection.");
-        oasisDao.close();
-        apiService = null;
+        dbClose();
     }
 }

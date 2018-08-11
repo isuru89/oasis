@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS OA_POINTS (
     user_id         INT,
     team_id         INT,
     team_scope_id   INT,
-    event_type      VARCHAR(256),
+    event_type      VARCHAR(128),
     ext_id          VARCHAR(1024),
     ts              BIGINT,
     point_id        INT,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS OA_BADGES (
     user_id         INT,
     team_id         INT,
     team_scope_id   INT,
-    event_type      VARCHAR(256),
+    event_type      VARCHAR(128),
     ext_id          VARCHAR(1024),
     ts              BIGINT,
     badge_id        INT,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS OA_BADGES (
     end_ext_id      VARCHAR(1024),
     start_time      BIGINT,
     end_time        BIGINT,
-    tag             VARCHAR(1024),
+    tag             VARCHAR(512),
     is_active       TINYINT(1) DEFAULT 1
 );
 
@@ -40,7 +40,7 @@ ALTER TABLE OA_BADGES ADD PRIMARY KEY (user_id, event_type, ts, badge_id, sub_ba
 CREATE TABLE IF NOT EXISTS OA_MILESTONES (
     user_id         INT,
     team_id         INT,
-    event_type      VARCHAR(256),
+    event_type      VARCHAR(128),
     ext_id          VARCHAR(1024),
     ts              BIGINT,
     milestone_id    INT,
@@ -83,9 +83,9 @@ CREATE TABLE IF NOT EXISTS OA_DEFINITION (
 
 CREATE TABLE IF NOT EXISTS OA_USER (
     user_id         INT PRIMARY KEY AUTO_INCREMENT,
-    user_name       VARCHAR(1024),
+    user_name       VARCHAR(512),
     ext_id          BIGINT,
-    email           VARCHAR(512),
+    email           VARCHAR(256),
     avatar_id       VARCHAR(1024),
     is_male         TINYINT(1),
     is_active       TINYINT(1) DEFAULT 1,

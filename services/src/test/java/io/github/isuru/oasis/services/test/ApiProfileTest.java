@@ -24,9 +24,6 @@ import java.util.List;
  */
 class ApiProfileTest extends AbstractApiTest {
 
-    private static IOasisDao oasisDao;
-    private static IOasisApiService apiService;
-
     @Test
     void testUsers() throws Exception {
         IProfileService profileService = apiService.getProfileService();
@@ -250,42 +247,12 @@ class ApiProfileTest extends AbstractApiTest {
 
     @BeforeAll
     static void beforeAnyTest() throws Exception {
-        DbProperties properties = new DbProperties(OasisDbPool.DEFAULT);
-        properties.setUrl("jdbc:mysql://localhost/oasis");
-        properties.setUsername("isuru");
-        properties.setPassword("isuru");
-        File file = new File("./scripts/db");
-        if (!file.exists()) {
-            file = new File("../scripts/db");
-            if (!file.exists()) {
-                Assertions.fail("Database scripts directory is not found!");
-            }
-        }
-        properties.setQueryLocation(file.getAbsolutePath());
-
-        oasisDao = OasisDbFactory.create(properties);
-        apiService = new DefaultOasisApiService(oasisDao, null);
+        dbStart();
     }
 
     @AfterAll
     static void afterAnyTest() throws Exception {
-        System.out.println("Shutting down db connection.");
-        try {
-            oasisDao.executeRawCommand("TRUNCATE OA_USER", null);
-            oasisDao.executeRawCommand("TRUNCATE OA_TEAM", null);
-            oasisDao.executeRawCommand("TRUNCATE OA_TEAM_USER", null);
-            oasisDao.executeRawCommand("TRUNCATE OA_TEAM_SCOPE", null);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        oasisDao.close();
-        apiService = null;
-    }
-
-    private static void clearTables(String... tableNames) throws Exception {
-        for (String tbl : tableNames) {
-            oasisDao.executeRawCommand("TRUNCATE " + tbl, null);
-        }
+        dbClose("OA_USER", "OA_TEAM", "OA_TEAM_USER", "OA_TEAM_SCOPE");
     }
 
 }

@@ -11,11 +11,7 @@ import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.Maps;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,9 +24,6 @@ import java.util.Map;
  * @author iweerarathna
  */
 class EventTest extends AbstractApiTest {
-
-    private static IOasisDao oasisDao;
-    private static IOasisApiService apiService;
 
     @Test
     void testFailEventSubmission() throws Exception {
@@ -138,48 +131,20 @@ class EventTest extends AbstractApiTest {
         Assertions.assertEquals(1, allTokens.size());
     }
 
-    @BeforeEach
-    void beforeTest() throws Exception {
+    @AfterEach
+    void afterTest() throws Exception {
         // clear table
         clearTables("OA_EVENT_SOURCE");
     }
 
     @BeforeAll
     static void beforeAnyTest() throws Exception {
-        DbProperties properties = new DbProperties(OasisDbPool.DEFAULT);
-        properties.setUrl("jdbc:mysql://localhost/oasis");
-        properties.setUsername("isuru");
-        properties.setPassword("isuru");
-        File file = new File("./scripts/db");
-        if (!file.exists()) {
-            file = new File("../scripts/db");
-            if (!file.exists()) {
-                Assertions.fail("Database scripts directory is not found!");
-            }
-        }
-        properties.setQueryLocation(file.getAbsolutePath());
-
-        oasisDao = OasisDbFactory.create(properties);
-        apiService = new DefaultOasisApiService(oasisDao, null);
+        dbStart();
     }
 
     @AfterAll
     static void afterAnyTest() throws Exception {
-        System.out.println("Shutting down db connection.");
-        try {
-            oasisDao.executeRawCommand("TRUNCATE OA_EVENT_SOURCE", new HashMap<>());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        oasisDao.close();
-        apiService = null;
+        dbClose("OA_EVENT_SOURCE");
     }
-
-    static void clearTables(String... tableNames) throws Exception {
-        for (String tbl : tableNames) {
-            oasisDao.executeRawCommand("TRUNCATE " + tbl, null);
-        }
-    }
-
 
 }

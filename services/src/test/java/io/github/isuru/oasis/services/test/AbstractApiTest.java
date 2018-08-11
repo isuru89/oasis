@@ -1,12 +1,26 @@
 package io.github.isuru.oasis.services.test;
 
+import io.github.isuru.oasis.db.DbProperties;
+import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.db.OasisDbFactory;
+import io.github.isuru.oasis.db.OasisDbPool;
+import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
+import javafx.util.Pair;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+
+import java.io.File;
+import java.util.HashMap;
 
 /**
  * @author iweerarathna
  */
 public abstract class AbstractApiTest {
 
+    protected static IOasisDao oasisDao;
+    protected static IOasisApiService apiService;
 
     public void assertFail(RunnableEx runnable, Class<? extends Exception> exceptionType) {
         try {
@@ -24,6 +38,45 @@ public abstract class AbstractApiTest {
     @FunctionalInterface
     public static interface RunnableEx {
         void run() throws Exception;
+    }
+
+    protected static Pair<IOasisApiService, IOasisDao> dbStart() throws Exception {
+        DbProperties properties = new DbProperties(OasisDbPool.DEFAULT);
+        properties.setUrl("jdbc:mysql://localhost/oasis");
+        properties.setUsername("root");
+        properties.setPassword("root");
+        File file = new File("./scripts/db");
+        if (!file.exists()) {
+            file = new File("../scripts/db");
+            if (!file.exists()) {
+                Assertions.fail("Database scripts directory is not found!");
+            }
+        }
+        properties.setQueryLocation(file.getAbsolutePath());
+
+        oasisDao = OasisDbFactory.create(properties);
+        apiService = new DefaultOasisApiService(oasisDao, null);
+        return new Pair<>(apiService, oasisDao);
+    }
+
+    protected static void dbClose(String... tables) throws Exception {
+        System.out.println("Shutting down db connection.");
+        try {
+            clearTables(tables);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        oasisDao.close();
+        apiService = null;
+    }
+
+    protected static void clearTables(String... tableNames) throws Exception {
+        if (tableNames == null) {
+            return;
+        }
+        for (String tbl : tableNames) {
+            oasisDao.executeRawCommand("TRUNCATE " + tbl, null);
+        }
     }
 
 }

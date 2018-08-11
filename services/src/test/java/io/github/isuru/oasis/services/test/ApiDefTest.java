@@ -17,6 +17,7 @@ import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
+import javafx.util.Pair;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -35,9 +36,6 @@ import java.util.Map;
  * @author iweerarathna
  */
 class ApiDefTest extends AbstractApiTest {
-
-    private static IOasisDao oasisDao;
-    private static IOasisApiService apiService;
 
     @Test
     void testGameDefApi() throws Exception {
@@ -503,33 +501,12 @@ class ApiDefTest extends AbstractApiTest {
 
     @BeforeAll
     static void beforeAnyTest() throws Exception {
-        DbProperties properties = new DbProperties(OasisDbPool.DEFAULT);
-        properties.setUrl("jdbc:mysql://localhost/oasis");
-        properties.setUsername("isuru");
-        properties.setPassword("isuru");
-        File file = new File("./scripts/db");
-        if (!file.exists()) {
-            file = new File("../scripts/db");
-            if (!file.exists()) {
-                Assertions.fail("Database scripts directory is not found!");
-            }
-        }
-        properties.setQueryLocation(file.getAbsolutePath());
-
-        oasisDao = OasisDbFactory.create(properties);
-        apiService = new DefaultOasisApiService(oasisDao, null);
+        dbStart();
     }
 
     @AfterAll
     static void afterAnyTest() throws Exception {
-        System.out.println("Shutting down db connection.");
-        try {
-            //oasisDao.executeRawCommand("TRUNCATE OA_DEFINITION", new HashMap<>());
-            oasisDao.executeRawCommand("TRUNCATE OA_SHOP_ITEM", new HashMap<>());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        oasisDao.close();
-        apiService = null;
+        dbClose("OA_SHOP_ITEM");
     }
+
 }
