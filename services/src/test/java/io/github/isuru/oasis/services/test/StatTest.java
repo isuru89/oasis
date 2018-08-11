@@ -6,14 +6,9 @@ import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IStatService;
-import io.github.isuru.oasis.services.api.dto.BadgeBreakdownReqDto;
-import io.github.isuru.oasis.services.api.dto.BadgeBreakdownResDto;
-import io.github.isuru.oasis.services.api.dto.BadgeRecordDto;
-import io.github.isuru.oasis.services.api.dto.PointBreakdownReqDto;
-import io.github.isuru.oasis.services.api.dto.PointBreakdownResDto;
-import io.github.isuru.oasis.services.api.dto.PointRecordDto;
-import io.github.isuru.oasis.services.api.dto.UserStatDto;
+import io.github.isuru.oasis.services.api.dto.*;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
+import io.github.isuru.oasis.services.model.PurchasedItem;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,6 +16,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.List;
+import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna
@@ -36,6 +33,20 @@ class StatTest extends AbstractApiTest {
         Assertions.assertTrue(dto.getTotalPoints() > 0);
         Assertions.assertTrue(dto.getTotalBadges() > 0);
         System.out.println(dto);
+
+        List<UserMilestoneStatDto> msStats = statService.readUserMilestones(54);
+        Assertions.assertEquals(3, msStats.size());
+
+        List<PurchasedItem> purchasedItems = statService.readUserPurchasedItems(54, 0);
+        Assertions.assertEquals(0, purchasedItems.size());
+
+        List<UserBadgeStatDto> userBadgeStatDtos = statService.readUserBadges(1763, 0);
+        System.out.println(userBadgeStatDtos);
+        int totalBadges = userBadgeStatDtos.stream().mapToInt(UserBadgeStatDto::getBadgeCount).sum();
+        Assertions.assertEquals(183, totalBadges);
+
+        List<TeamHistoryRecordDto> teamHistoryRecordDtos = statService.readUserTeamHistoryStat(145);
+        Assertions.assertEquals(1, teamHistoryRecordDtos.size());
     }
 
     @Test

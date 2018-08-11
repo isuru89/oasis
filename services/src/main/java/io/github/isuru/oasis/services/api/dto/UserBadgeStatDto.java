@@ -7,7 +7,7 @@ public class UserBadgeStatDto {
 
     private int userId;
     private int badgeId;
-    private System subBadgeId;
+    private String subBadgeId;
     private int badgeCount;
 
     public int getUserId() {
@@ -26,11 +26,11 @@ public class UserBadgeStatDto {
         this.badgeId = badgeId;
     }
 
-    public System getSubBadgeId() {
+    public String getSubBadgeId() {
         return subBadgeId;
     }
 
-    public void setSubBadgeId(System subBadgeId) {
+    public void setSubBadgeId(String subBadgeId) {
         this.subBadgeId = subBadgeId;
     }
 
@@ -40,5 +40,15 @@ public class UserBadgeStatDto {
 
     public void setBadgeCount(int badgeCount) {
         this.badgeCount = badgeCount;
+    }
+
+    @Override
+    public String toString() {
+        return "\n{" +
+                "userId=" + userId +
+                ", badgeId=" + badgeId +
+                ", subBadgeId='" + subBadgeId + '\'' +
+                ", badgeCount=" + badgeCount +
+                '}';
     }
 }

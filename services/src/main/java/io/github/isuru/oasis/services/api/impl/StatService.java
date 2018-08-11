@@ -3,23 +3,17 @@ package io.github.isuru.oasis.services.api.impl;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IStatService;
-import io.github.isuru.oasis.services.api.dto.BadgeBreakdownReqDto;
-import io.github.isuru.oasis.services.api.dto.BadgeBreakdownResDto;
-import io.github.isuru.oasis.services.api.dto.BadgeRecordDto;
-import io.github.isuru.oasis.services.api.dto.PointBreakdownReqDto;
-import io.github.isuru.oasis.services.api.dto.PointBreakdownResDto;
-import io.github.isuru.oasis.services.api.dto.PointRecordDto;
-import io.github.isuru.oasis.services.api.dto.UserBadgeStatDto;
-import io.github.isuru.oasis.services.api.dto.UserMilestoneStatDto;
-import io.github.isuru.oasis.services.api.dto.UserStatDto;
+import io.github.isuru.oasis.services.api.dto.*;
+import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.PurchasedItem;
+import io.github.isuru.oasis.services.model.UserRankRecordDto;
+import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 
 import java.beans.Statement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna
@@ -42,7 +36,7 @@ public class StatService extends BaseService implements IStatService {
                 .put("hasRangeEnd", isValid(request.getRangeEnd()))
                 .build();
 
-        List<PointRecordDto> recordDtos = toList(getDao().executeQuery("profile/stats/getUserPointsList",
+        List<PointRecordDto> recordDtos = toList(getDao().executeQuery("stats/getUserPointsList",
                 Maps.create().put("userId", request.getUserId())
                     .put("pointId", request.getPointId())
                     .put("offset", orDefault(request.getOffset(), 0))
@@ -71,7 +65,7 @@ public class StatService extends BaseService implements IStatService {
                 .put("hasRangeEnd", isValid(request.getRangeEnd()))
                 .build();
 
-        List<BadgeRecordDto> recordDtos = toList(getDao().executeQuery("profile/stats/getUserBadgesList",
+        List<BadgeRecordDto> recordDtos = toList(getDao().executeQuery("stats/getUserBadgesList",
                 Maps.create().put("userId", request.getUserId())
                         .put("badgeId", orDefault(request.getBadgeId(), 0))
                         .put("offset", orDefault(request.getOffset(), 0))
@@ -96,7 +90,7 @@ public class StatService extends BaseService implements IStatService {
         tdata.put("hasSince", since > 0);
 
         Iterable<Map<String, Object>> summaryStat = getDao().executeQuery(
-                "profile/stats/getUserStatSummary",
+                "stats/getUserStatSummary",
                 Maps.create()
                         .put("userId", userId)
                         .put("since", since)
@@ -121,7 +115,7 @@ public class StatService extends BaseService implements IStatService {
         Map<String, Object> tdata = new HashMap<>();
         tdata.put("hasSince", since > 0);
 
-        return toList(getDao().executeQuery("profile/stats/getPurchasedItems",
+        return toList(getDao().executeQuery("stats/getPurchasedItems",
                 Maps.create()
                     .put("userId", userId).put("since", since)
                     .build(),
@@ -142,7 +136,7 @@ public class StatService extends BaseService implements IStatService {
         tdata.put("hasSince", since > 0);
 
         return toList(getDao().executeQuery(
-                "profile/stats/getUserBadgeStat",
+                "stats/getUserBadgesStat",
                 Maps.create().put("userId", userId).put("since", since).build(),
                 UserBadgeStatDto.class,
                 tdata));
@@ -153,14 +147,76 @@ public class StatService extends BaseService implements IStatService {
         Checks.greaterThanZero(userId, "userId");
 
         return toList(getDao().executeQuery(
-                "profile/stats/getUserMilestoneStat",
+                "stats/getUserMilestoneStat",
                 Maps.create("userId", userId),
                 UserMilestoneStatDto.class));
     }
 
     @Override
-    public void readUserRankings(long userId) {
+    public List<UserRankRecordDto> readUserCurrentRankings(long userId, boolean currentTeamOnly) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
 
+        UserTeam currentTeamOfUser = getApiService().getProfileService().findCurrentTeamOfUser(userId);
+
+        Map<String, Object> tdata = new HashMap<>();
+        tdata.put("teamWise", currentTeamOnly);
+
+        return toList(getDao().executeQuery("stats/getUserCurrentRankings",
+                Maps.create()
+                    .put("userId", userId)
+                    .put("teamId", currentTeamOfUser.getTeamId())
+                    .put("teamScopeId", currentTeamOfUser.getScopeId()).build(),
+                UserRankRecordDto.class,
+                tdata
+        ));
+    }
+
+    @Override
+    public List<TeamHistoryRecordDto> readUserTeamHistoryStat(long userId) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
+        List<TeamHistoryRecordDto> historyRecords = toList(getDao().executeQuery(
+                "stats/teamWiseSummaryStats",
+                    Maps.create("userId", userId),
+                    TeamHistoryRecordDto.class))
+                .stream()
+                .sorted(Comparator.comparingInt(TeamHistoryRecordDto::getTeamId))
+                .collect(Collectors.toList());
+
+        if (historyRecords.isEmpty()) {
+            return historyRecords;
+        }
+
+        List<TeamHistoryRecordDto> accumulated = new ArrayList<>();
+        Iterator<TeamHistoryRecordDto> iterator = historyRecords.iterator();
+        TeamHistoryRecordDto base = iterator.next();
+        while (iterator.hasNext()) {
+            TeamHistoryRecordDto current = iterator.next();
+            if (current.getTeamId().equals(base.getTeamId())) {
+                mergeTwoTeamRecords(base, current);
+            } else {
+                // new record
+                accumulated.add(base);
+                base = current;
+            }
+        }
+        accumulated.add(base);
+        return accumulated;
+    }
+
+    private void mergeTwoTeamRecords(TeamHistoryRecordDto base, TeamHistoryRecordDto curr) {
+        if (curr.getTotalBadges() != null && base.getTotalBadges() == null) {
+            base.setTotalBadges(curr.getTotalBadges());
+        }
+        if (curr.getTotalChallengeWins() != null && base.getTotalChallengeWins() == null) {
+            base.setTotalChallengeWins(curr.getTotalChallengeWins());
+        }
+        if (curr.getTotalPoints() != null && base.getTotalPoints() == null) {
+            base.setTotalPoints(curr.getTotalPoints());
+        }
+        if (curr.getTotalUniqueBadges() != null && base.getTotalUniqueBadges() == null) {
+            base.setTotalUniqueBadges(curr.getTotalBadges());
+        }
     }
 
     private Object firstNonNull(Object... vals) {
