@@ -4,16 +4,13 @@ import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.api.IGameService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.exception.OasisGameException;
-import io.github.isuru.oasis.services.model.BadgeAwardDto;
-import io.github.isuru.oasis.services.model.LeaderboardRecordDto;
-import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
-import io.github.isuru.oasis.services.model.LeaderboardResponseDto;
-import io.github.isuru.oasis.services.model.PointAwardDto;
+import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -155,6 +152,11 @@ public class GameService extends BaseService implements IGameService {
         Checks.validate(request.getType() != null, "Leaderboard type must not be null!");
         Checks.validate(request.getRangeStart() < request.getRangeEnd(),
                 "Range end must be greater than its start value!");
+        if (request.getForUser() != null && request.getForUser() > 0
+                && (request.getTopN() != null || request.getBottomN() != null)) {
+            throw new InputValidationException("Top or bottom listing is not supported when " +
+                    "a specific user has been specified in the request!");
+        }
 
         String scriptName = String.format("leaderboard/%s",
                 request.getType().isCustom() ? "customRange" : "currentRange");
@@ -166,6 +168,7 @@ public class GameService extends BaseService implements IGameService {
                     .put("timePattern", request.getType().getPattern())
                     .put("topN", request.getTopN())
                     .put("bottomN", request.getBottomN())
+                    .put("userId", request.getForUser())
                     .build(),
                 LeaderboardRecordDto.class,
                 Maps.create()
@@ -174,12 +177,103 @@ public class GameService extends BaseService implements IGameService {
                     .put("teamScopeWise", request.isTeamScopeWise())
                     .put("topN", request.getTopN() != null && request.getTopN() > 0)
                     .put("bottomN", request.getBottomN() != null && request.getBottomN() > 0)
+                    .put("hasUser", request.getForUser() != null && request.getForUser() > 0)
                     .build()));
 
         LeaderboardResponseDto responseDto = new LeaderboardResponseDto();
         responseDto.setRankings(recordDtos);
         responseDto.setRequest(request);
         return responseDto;
+    }
+
+    @Override
+    public List<UserRankRecordDto> readGlobalLeaderboard(LeaderboardRequestDto request) throws Exception {
+        LeaderboardDef ldef = request.getLeaderboardDef();
+        Map<String, Object> templateData = Maps.create()
+                .put("hasUser", isValid(request.getForUser()))
+                .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
+                .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
+                .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
+                .build();
+
+
+        Maps.MapBuilder dataBuilder = Maps.create()
+                .put("userId", request.getForUser())
+                .put("rangeStart", request.getRangeStart())
+                .put("rangeEnd", request.getRangeEnd());
+
+        if (ldef != null) {
+            dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
+                    .put("excludeRuleIds", ldef.getExcludeRuleIds());
+        }
+
+        return toList(getDao().executeQuery("leaderboard/globalLeaderboard",
+                dataBuilder.build(),
+                UserRankRecordDto.class,
+                templateData));
+    }
+
+    @Override
+    public List<UserRankRecordDto> readTeamLeaderboard(long teamId, LeaderboardRequestDto request) throws Exception {
+        Checks.greaterThanZero(teamId, "teamId");
+
+        LeaderboardDef ldef = request.getLeaderboardDef();
+        Map<String, Object> templateData = Maps.create()
+                .put("hasTeam", true)
+                .put("hasUser", isValid(request.getForUser()))
+                .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
+                .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
+                .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
+                .build();
+
+        TeamProfile teamProfile = getApiService().getProfileService().readTeam(teamId);
+
+        Maps.MapBuilder dataBuilder = Maps.create()
+                .put("teamId", teamId)
+                .put("userId", request.getForUser())
+                .put("teamScopeId", teamProfile.getTeamScope())
+                .put("rangeStart", request.getRangeStart())
+                .put("rangeEnd", request.getRangeEnd());
+
+        if (ldef != null) {
+            dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
+                    .put("excludeRuleIds", ldef.getExcludeRuleIds());
+        }
+
+        return toList(getDao().executeQuery("leaderboard/teamLeaderboard",
+                dataBuilder.build(),
+                UserRankRecordDto.class,
+                templateData));
+    }
+
+    @Override
+    public List<UserRankRecordDto> readTeamScopeLeaderboard(long teamScopeId, LeaderboardRequestDto request) throws Exception {
+        Checks.greaterThanZero(teamScopeId, "teamScopeId");
+
+        LeaderboardDef ldef = request.getLeaderboardDef();
+        Map<String, Object> templateData = Maps.create()
+                .put("hasTeam", false)
+                .put("hasUser", isValid(request.getForUser()))
+                .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
+                .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
+                .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
+                .build();
+
+        Maps.MapBuilder dataBuilder = Maps.create()
+                .put("teamScopeId", teamScopeId)
+                .put("userId", request.getForUser())
+                .put("rangeStart", request.getRangeStart())
+                .put("rangeEnd", request.getRangeEnd());
+
+        if (ldef != null) {
+            dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
+                    .put("excludeRuleIds", ldef.getExcludeRuleIds());
+        }
+
+        return toList(getDao().executeQuery("leaderboard/teamLeaderboard",
+                dataBuilder.build(),
+                UserRankRecordDto.class,
+                templateData));
     }
 
     private String getInternalToken() throws Exception {

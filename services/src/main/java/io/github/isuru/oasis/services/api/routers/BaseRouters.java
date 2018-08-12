@@ -141,6 +141,10 @@ public abstract class BaseRouters {
         return Integer.parseInt(req.params(name));
     }
 
+    String asQStr(Request req, String name, String defVal) {
+        return req.queryParamOrDefault(name, defVal);
+    }
+
     long asQLong(Request req, String name, long defVal) {
         return Long.parseLong(req.queryParamOrDefault(name, String.valueOf(defVal)));
     }

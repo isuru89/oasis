@@ -1,0 +1,42 @@
+<if(hasUser)>
+SELECT
+    *
+FROM
+(
+<endif>
+
+    SELECT
+        tbl.user_id AS userId,
+        tbl.totalPoints AS totalPoints,
+        (RANK() over (ORDER BY tbl.totalPoints DESC)) AS 'rankGlobal',
+        UNIX_TIMESTAMP(NOW()) * 1000 AS calculatedTime
+    FROM
+    (
+        SELECT
+            user_id,
+            ROUND(SUM(points), 2) AS totalPoints
+        FROM OA_POINTS
+        WHERE
+            is_active = 1
+            <if(hasTimeRange)>
+            AND ts >= :rangeStart
+            AND ts \< :rangeEnd
+            <endif>
+
+            <if(hasInclusions)>
+            AND point_id IN \<ruleIds>
+            <endif>
+            <if(hasExclusions)>
+            AND point_id NOT IN \<excludeRuleIds>
+            <endif>
+        GROUP BY
+            user_id
+    ) tbl
+
+<if(hasUser)>
+) rankTbl
+
+WHERE
+    rankTbl.userId = :userId
+
+<endif>

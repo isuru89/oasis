@@ -5,14 +5,7 @@ import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.model.ShopItem;
-import io.github.isuru.oasis.model.defs.BadgeDef;
-import io.github.isuru.oasis.model.defs.ChallengeDef;
-import io.github.isuru.oasis.model.defs.GameDef;
-import io.github.isuru.oasis.model.defs.KpiDef;
-import io.github.isuru.oasis.model.defs.LeaderboardDef;
-import io.github.isuru.oasis.model.defs.MilestoneDef;
-import io.github.isuru.oasis.model.defs.PointDef;
-import io.github.isuru.oasis.model.defs.PointsAdditional;
+import io.github.isuru.oasis.model.defs.*;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
@@ -310,6 +303,9 @@ class ApiDefTest extends AbstractApiTest {
         long gameId = createGame("game-leaderboard-test", "Testing leaderboard");
         Assertions.assertTrue(gameId > 0);
 
+        List<LeaderboardDef> defLbs = gameDefService.listLeaderboardDefs(gameId);
+        Assertions.assertEquals(1, defLbs.size());
+
         LeaderboardDef def = new LeaderboardDef();
         def.setName("top-resolver");
         def.setDisplayName("Top Resolvers");
@@ -320,7 +316,7 @@ class ApiDefTest extends AbstractApiTest {
 
         List<LeaderboardDef> leaderboardDefs = gameDefService.listLeaderboardDefs(gameId);
         Assertions.assertNotNull(leaderboardDefs);
-        Assertions.assertEquals(1, leaderboardDefs.size());
+        Assertions.assertEquals(2, leaderboardDefs.size());
 
         LeaderboardDef leaderboard = gameDefService.readLeaderboardDef(lid);
         Assertions.assertNotNull(leaderboard);
@@ -336,9 +332,10 @@ class ApiDefTest extends AbstractApiTest {
 
         Assertions.assertTrue(gameDefService.disableLeaderboardDef(lid));
         List<LeaderboardDef> leaderboardDefList = gameDefService.listLeaderboardDefs(gameId);
-        Assertions.assertTrue(leaderboardDefList.isEmpty());
+        Assertions.assertEquals(1, leaderboardDefList.size());
 
         Assertions.assertTrue(gameDefService.disableGame(gameId));
+        Assertions.assertTrue(gameDefService.listLeaderboardDefs(gameId).isEmpty());
 
         // non existing leaderboard id should throw exception
         try {
@@ -497,6 +494,11 @@ class ApiDefTest extends AbstractApiTest {
     private void assertToSize(List<?> list, int size) {
         Assertions.assertNotNull(list);
         Assertions.assertEquals(size, list.size());
+    }
+
+    @BeforeEach
+    void teardownTest() throws Exception {
+        clearTables("OA_DEFINITION");
     }
 
     @BeforeAll

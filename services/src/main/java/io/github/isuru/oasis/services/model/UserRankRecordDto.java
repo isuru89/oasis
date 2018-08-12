@@ -1,13 +1,43 @@
 package io.github.isuru.oasis.services.model;
 
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
+
 public class UserRankRecordDto {
+
+    private LeaderboardDef leaderboard;
 
     private Integer userId;
     private Integer teamId;
     private Integer teamScopeId;
     private Double totalPoints;
-    private Integer teamRank;
-    private Integer teamScopeRank;
+    private Integer rankGlobal;
+    private Integer rankTeam;
+    private Integer rankTeamScope;
+    private Long calculatedTime;
+
+    public Integer getRankGlobal() {
+        return rankGlobal;
+    }
+
+    public void setRankGlobal(Integer rankGlobal) {
+        this.rankGlobal = rankGlobal;
+    }
+
+    public LeaderboardDef getLeaderboard() {
+        return leaderboard;
+    }
+
+    public void setLeaderboard(LeaderboardDef leaderboard) {
+        this.leaderboard = leaderboard;
+    }
+
+    public Long getCalculatedTime() {
+        return calculatedTime;
+    }
+
+    public void setCalculatedTime(Long calculatedTime) {
+        this.calculatedTime = calculatedTime;
+    }
 
     public Integer getUserId() {
         return userId;
@@ -41,19 +71,19 @@ public class UserRankRecordDto {
         this.totalPoints = totalPoints;
     }
 
-    public Integer getTeamRank() {
-        return teamRank;
+    public Integer getRankTeam() {
+        return rankTeam;
     }
 
-    public void setTeamRank(Integer teamRank) {
-        this.teamRank = teamRank;
+    public void setRankTeam(Integer rankTeam) {
+        this.rankTeam = rankTeam;
     }
 
-    public Integer getTeamScopeRank() {
-        return teamScopeRank;
+    public Integer getRankTeamScope() {
+        return rankTeamScope;
     }
 
-    public void setTeamScopeRank(Integer teamScopeRank) {
-        this.teamScopeRank = teamScopeRank;
+    public void setRankTeamScope(Integer rankTeamScope) {
+        this.rankTeamScope = rankTeamScope;
     }
 }

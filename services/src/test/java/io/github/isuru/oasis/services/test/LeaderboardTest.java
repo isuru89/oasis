@@ -1,22 +1,16 @@
 package io.github.isuru.oasis.services.test;
 
-import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.db.IOasisDao;
-import io.github.isuru.oasis.db.OasisDbFactory;
-import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.services.api.IGameService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
-import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
+import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.LeaderboardRecordDto;
 import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.model.LeaderboardResponseDto;
-import io.github.isuru.oasis.services.model.enums.LeaderboardType;
+import io.github.isuru.oasis.model.defs.LeaderboardType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
@@ -66,6 +60,9 @@ class LeaderboardTest extends AbstractApiTest {
 
         System.out.println(res1.getRankings());
         Assertions.assertEquals(30, res1.getRankings().size());
+
+        req1.setForUser(55L);
+        assertFail(() -> gameService.readLeaderboardStatus(req1), InputValidationException.class);
     }
 
     @BeforeAll

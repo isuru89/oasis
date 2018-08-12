@@ -1,8 +1,9 @@
 package io.github.isuru.oasis.services.model;
 
 import io.github.isuru.oasis.model.collect.Pair;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.utils.TimeUtils;
-import io.github.isuru.oasis.services.model.enums.LeaderboardType;
+import io.github.isuru.oasis.model.defs.LeaderboardType;
 
 import java.time.ZoneId;
 
@@ -11,16 +12,18 @@ import java.time.ZoneId;
  */
 public class LeaderboardRequestDto {
 
+    private Long forUser;
+
     private boolean teamWise = true;
     private boolean teamScopeWise = false;
 
     private long rangeStart;
     private long rangeEnd;
 
-    private Integer leaderboardId;
+    private LeaderboardDef leaderboardDef;
     private Integer topN;
     private Integer bottomN;
-    private LeaderboardType type = LeaderboardType.CURRENT_WEEK;
+    private LeaderboardType type;
 
     public LeaderboardRequestDto(LeaderboardType type, long relativeTimeEpoch) {
         this.type = type;
@@ -44,6 +47,23 @@ public class LeaderboardRequestDto {
     public LeaderboardRequestDto(long rangeStart, long rangeEnd) {
         this.rangeStart = rangeStart;
         this.rangeEnd = rangeEnd;
+        this.type = LeaderboardType.CUSTOM;
+    }
+
+    public LeaderboardDef getLeaderboardDef() {
+        return leaderboardDef;
+    }
+
+    public void setLeaderboardDef(LeaderboardDef leaderboardDef) {
+        this.leaderboardDef = leaderboardDef;
+    }
+
+    public Long getForUser() {
+        return forUser;
+    }
+
+    public void setForUser(Long forUser) {
+        this.forUser = forUser;
     }
 
     public Integer getTopN() {
@@ -68,14 +88,6 @@ public class LeaderboardRequestDto {
 
     public void setType(LeaderboardType type) {
         this.type = type;
-    }
-
-    public Integer getLeaderboardId() {
-        return leaderboardId;
-    }
-
-    public void setLeaderboardId(Integer leaderboardId) {
-        this.leaderboardId = leaderboardId;
     }
 
     public boolean isTeamWise() {

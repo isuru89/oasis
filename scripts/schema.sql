@@ -81,6 +81,17 @@ CREATE TABLE IF NOT EXISTS OA_DEFINITION (
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS OA_RANKS (
+    leaderboard_id  INT,
+    user_id         INT,
+    points          FLOAT(4),
+    ranking         INT,
+    updated_at      BIGINT
+);
+
+ALTER TABLE OA_RANKS ADD PRIMARY KEY (leaderboard_id, user_id);
+
+
 CREATE TABLE IF NOT EXISTS OA_USER (
     user_id         INT PRIMARY KEY AUTO_INCREMENT,
     user_name       VARCHAR(512),
@@ -181,4 +192,4 @@ CREATE TABLE IF NOT EXISTS OA_EVENT_SOURCE (
     is_active       TINYINT(1) DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-)
+);

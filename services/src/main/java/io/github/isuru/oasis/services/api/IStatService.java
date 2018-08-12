@@ -1,8 +1,10 @@
 package io.github.isuru.oasis.services.api;
 
+import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.api.dto.*;
 import io.github.isuru.oasis.services.model.PurchasedItem;
 import io.github.isuru.oasis.services.model.UserRankRecordDto;
+import io.github.isuru.oasis.services.model.enums.ScopingType;
 
 import java.util.List;
 
@@ -18,7 +20,9 @@ public interface IStatService {
     List<PurchasedItem> readUserPurchasedItems(long userId, long since) throws Exception;
     List<UserBadgeStatDto> readUserBadges(long userId, long since) throws Exception;
     List<UserMilestoneStatDto> readUserMilestones(long userId) throws Exception;
-    List<UserRankRecordDto> readUserCurrentRankings(long userId, boolean currentTeamOnly) throws Exception;
+    List<UserRankRecordDto> readUserTeamRankings(long userId, boolean currentTeamOnly) throws Exception;
+    List<UserRankRecordDto> readMyLeaderboardRankings(long gameId, long userId, ScopingType scopingType,
+                                                      LeaderboardType rangeType) throws Exception;
     List<TeamHistoryRecordDto> readUserTeamHistoryStat(long userId) throws Exception;
 
     void readUserGameTimeline(long userId);

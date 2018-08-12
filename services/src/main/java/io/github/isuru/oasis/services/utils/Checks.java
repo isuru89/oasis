@@ -52,4 +52,7 @@ public final class Checks {
         }
     }
 
+    public static boolean isNullOrEmpty(Collection<?> list) {
+        return list == null || list.isEmpty();
+    }
 }

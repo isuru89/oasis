@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.model.enums;
+package io.github.isuru.oasis.model.defs;
 
 /**
  * @author iweerarathna

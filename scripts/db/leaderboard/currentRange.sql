@@ -1,4 +1,4 @@
-<if(topN||bottomN)>
+<if(topN||bottomN||hasUser)>
 SELECT
     *
 FROM (
@@ -35,8 +35,13 @@ FROM
             user_id
     ) tbl
 
-<if(topN||bottomN)>
+<if(topN||bottomN||hasUser)>
 ) t
+
+<if(hasUser)>
+WHERE
+    t.userId = :userId
+<endif>
 
 <if(bottomN)>
 ORDER BY t.rank DESC

@@ -28,7 +28,7 @@ public class Main {
         dbProps.setUrl("jdbc:mariadb://localhost/oasis");
         dbProps.setUsername("root");
         dbProps.setPassword("");
-        dbProps.setUseTemplateEngine(false);
+        //dbProps.setUseTemplateEngine(false);
         dbProps.setQueryLocation(new File("./scripts/db").getAbsolutePath());
 
         IOasisDao dao = OasisDbFactory.create(dbProps);

@@ -19,7 +19,7 @@ badges:
     - {awardPoints: null, condition: null, displayName: null, id: null, level: null,
       name: platinum, streak: 20}
     within: 7 days
-  id: 46
+  id: 30
   maxBadges: 2147483647
   name: quality-streak
   streak: null
@@ -30,7 +30,7 @@ badges:
   displayName: first-time-right
   event: submission
   from: null
-  id: 47
+  id: 31
   maxBadges: 2147483647
   name: first-time-right
   streak: 3
@@ -61,7 +61,7 @@ badges:
     - {awardPoints: null, condition: null, displayName: null, id: null, level: 5,
       name: guru, streak: null}
     within: null
-  id: 48
+  id: 32
   maxBadges: 2147483647
   name: developer
   streak: null
@@ -72,7 +72,7 @@ badges:
   displayName: heavy-coder
   event: submission
   from: null
-  id: 49
+  id: 33
   maxBadges: 2147483647
   name: heavy-coder
   streak: null
@@ -88,7 +88,7 @@ badges:
   event: null
   from: {level: null, milestoneId: null, pointsId: heavy-commit, streak: 5, subBadges: null,
     within: null}
-  id: 50
+  id: 34
   maxBadges: 2147483647
   name: heavy-commit-streak
   streak: null
@@ -100,14 +100,14 @@ badges:
   event: null
   from: {level: null, milestoneId: null, pointsId: fixed-violations-of-others, streak: 3,
     subBadges: null, within: null}
-  id: 51
+  id: 35
   maxBadges: 2147483647
   name: other-fixer
   streak: null
   subBadges: null
   within: null
 - {awardPoints: null, condition: 'true', displayName: welcome-badge, event: login,
-  from: null, id: 52, maxBadges: 1, name: welcome-badge, streak: null, subBadges: null,
+  from: null, id: 36, maxBadges: 1, name: welcome-badge, streak: null, subBadges: null,
   within: null}
 - awardPoints: null
   condition: null
@@ -130,21 +130,21 @@ badges:
     - {awardPoints: null, condition: null, displayName: null, id: null, level: null,
       name: level-5, streak: 50}
     within: null
-  id: 53
+  id: 37
   maxBadges: 2147483647
   name: tech-lead
   streak: null
   subBadges: null
   within: null
 challenge: null
-game: {constants: null, displayName: null, id: 25, name: oasis-test}
+game: {constants: null, displayName: null, id: 6, name: oasis-test}
 kpis:
 - {displayName: kpi-totallines, event: submission, expression: addedLines + changedLines,
-  field: totalCode, id: 29, name: kpi-totallines}
+  field: totalCode, id: 13, name: kpi-totallines}
 - {displayName: kpi-nvd, event: submission, expression: (introducedViolations - fixedViolations)
-    / totalCode, field: nvd, id: 30, name: kpi-nvd}
+    / totalCode, field: nvd, id: 14, name: kpi-nvd}
 - {displayName: kpi-otherfix, event: submission, expression: '0', field: otherFixed,
-  id: 31, name: kpi-otherfix}
+  id: 15, name: kpi-otherfix}
 milestones:
 - accumulator: totalCode
   accumulatorType: null
@@ -153,7 +153,7 @@ milestones:
   displayName: total-codes
   event: submission
   from: null
-  id: 54
+  id: 38
   levels: {1: 5k, 2: 10k, 3: 20k, 4: 50k, 5: 100k}
   name: total-codes
   onlyPositive: null
@@ -165,7 +165,7 @@ milestones:
   displayName: total-other-fixes
   event: submission
   from: null
-  id: 55
+  id: 39
   levels: {1: 5, 2: 10, 3: 25, 4: 50, 5: 100, 6: 200, 7: 500}
   name: total-other-fixes
   onlyPositive: null
@@ -177,7 +177,7 @@ milestones:
   displayName: total-fixes
   event: submission
   from: null
-  id: 56
+  id: 40
   levels: {1: 10, 2: 25, 3: 50, 4: 100, 5: 500, 6: 1000, 7: 5000}
   name: total-fixes
   onlyPositive: null
@@ -189,7 +189,7 @@ milestones:
   displayName: logins
   event: login
   from: null
-  id: 57
+  id: 41
   levels: {1: 10, 2: 100, 3: 1000}
   name: logins
   onlyPositive: null
@@ -197,40 +197,40 @@ milestones:
 points:
 - {additionalPoints: null, amount: amount, condition: 'true', conditionClass: null,
   displayName: Rule to compensate points at any time., event: __OASIS_COMPENSATE_POINTS__,
-  id: 26, name: __oasis_compensate_points__, source: null}
+  id: 7, name: __oasis_compensate_points__, source: null}
 - {additionalPoints: null, amount: 0.0, condition: null, conditionClass: null, displayName: Award
-    points when certain milestones are completed., event: null, id: 27, name: __oasis_milestone_bonus__,
+    points when certain milestones are completed., event: null, id: 8, name: __oasis_milestone_bonus__,
   source: null}
 - {additionalPoints: null, amount: 0.0, condition: null, conditionClass: null, displayName: Award
-    points when certain badges are completed., event: null, id: 28, name: __oasis_badge_bonus__,
+    points when certain badges are completed., event: null, id: 9, name: __oasis_badge_bonus__,
   source: null}
 - {additionalPoints: null, amount: totalCode / 100, condition: totalCode >= 50 &&
     (totalCode / 100) > 0, conditionClass: null, displayName: churn, event: submission,
-  id: 32, name: churn, source: null}
+  id: 16, name: churn, source: null}
 - {additionalPoints: null, amount: 5, condition: totalCode >= 500, conditionClass: null,
-  displayName: heavy-commit, event: submission, id: 33, name: heavy-commit, source: null}
+  displayName: heavy-commit, event: submission, id: 17, name: heavy-commit, source: null}
 - {additionalPoints: null, amount: fixedViolations, condition: fixedViolations > 0,
-  conditionClass: null, displayName: fix-violations, event: submission, id: 34, name: fix-violations,
+  conditionClass: null, displayName: fix-violations, event: submission, id: 18, name: fix-violations,
   source: null}
 - {additionalPoints: null, amount: -1 * introducedViolations, condition: introducedViolations
     > 0, conditionClass: null, displayName: introduced-violations, event: submission,
-  id: 35, name: introduced-violations, source: null}
+  id: 19, name: introduced-violations, source: null}
 - {additionalPoints: null, amount: otherFixed * 2, condition: otherFixed > 0, conditionClass: null,
-  displayName: fixed-violations-of-others, event: submission, id: 36, name: fixed-violations-of-others,
+  displayName: fixed-violations-of-others, event: submission, id: 20, name: fixed-violations-of-others,
   source: null}
 - {additionalPoints: null, amount: (otherFixed / 10) * 5, condition: (otherFixed /
     10) > 0, conditionClass: null, displayName: fixed-violations-of-others-bonus,
-  event: submission, id: 37, name: fixed-violations-of-others-bonus, source: null}
+  event: submission, id: 21, name: fixed-violations-of-others-bonus, source: null}
 - {additionalPoints: null, amount: 1, condition: nvd < 0 && introducedViolations <=
-    0, conditionClass: null, displayName: minus-nvd, event: submission, id: 38, name: minus-nvd,
+    0, conditionClass: null, displayName: minus-nvd, event: submission, id: 22, name: minus-nvd,
   source: null}
 - {additionalPoints: null, amount: 5 + ($TOTAL - 10) * 2, condition: $TOTAL >= 10,
-  conditionClass: null, displayName: submission_bonus_points, event: submission, id: 39,
+  conditionClass: null, displayName: submission_bonus_points, event: submission, id: 23,
   name: submission_bonus_points, source: POINTS}
 - {additionalPoints: null, amount: 1, condition: remarkRaised == true, conditionClass: null,
-  displayName: remark-raised, event: code-review, id: 40, name: remark-raised, source: null}
+  displayName: remark-raised, event: code-review, id: 24, name: remark-raised, source: null}
 - {additionalPoints: null, amount: 1, condition: remarkResolved == true, conditionClass: null,
-  displayName: remark-resolved, event: code-review, id: 41, name: remark-resolved,
+  displayName: remark-resolved, event: code-review, id: 25, name: remark-resolved,
   source: null}
 - additionalPoints:
   - {amount: -4, name: defect-get-assigned, toUser: assignedTo}
@@ -239,7 +239,7 @@ points:
   conditionClass: null
   displayName: defect-assigned
   event: qa
-  id: 42
+  id: 26
   name: defect-assigned
   source: null
 - additionalPoints:
@@ -249,11 +249,11 @@ points:
   conditionClass: null
   displayName: defect-assigned-blocking
   event: qa
-  id: 43
+  id: 27
   name: defect-assigned-blocking
   source: null
 - {additionalPoints: null, amount: 2, condition: status == 'FIXED', conditionClass: null,
-  displayName: defect-fixed, event: qa, id: 44, name: defect-fixed, source: null}
+  displayName: defect-fixed, event: qa, id: 28, name: defect-fixed, source: null}
 - additionalPoints:
   - {amount: -4, name: defect-not-relevant-created, toUser: createdBy}
   amount: 4
@@ -261,6 +261,6 @@ points:
   conditionClass: null
   displayName: defect-not-relevant
   event: qa
-  id: 45
+  id: 29
   name: defect-not-relevant
   source: null

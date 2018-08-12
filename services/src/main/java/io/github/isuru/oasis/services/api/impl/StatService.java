@@ -1,13 +1,14 @@
 package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
+import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IStatService;
 import io.github.isuru.oasis.services.api.dto.*;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.model.PurchasedItem;
-import io.github.isuru.oasis.services.model.UserRankRecordDto;
-import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.model.*;
+import io.github.isuru.oasis.services.model.enums.ScopingType;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 
@@ -124,11 +125,6 @@ public class StatService extends BaseService implements IStatService {
     }
 
     @Override
-    public void readUserGameTimeline(long userId) {
-
-    }
-
-    @Override
     public List<UserBadgeStatDto> readUserBadges(long userId, long since) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
@@ -153,22 +149,63 @@ public class StatService extends BaseService implements IStatService {
     }
 
     @Override
-    public List<UserRankRecordDto> readUserCurrentRankings(long userId, boolean currentTeamOnly) throws Exception {
+    public List<UserRankRecordDto> readUserTeamRankings(long userId, boolean currentTeamOnly) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
         UserTeam currentTeamOfUser = getApiService().getProfileService().findCurrentTeamOfUser(userId);
 
         Map<String, Object> tdata = new HashMap<>();
-        tdata.put("teamWise", currentTeamOnly);
+        tdata.put("teamWise", currentTeamOfUser != null && currentTeamOnly);
+        tdata.put("hasTeamScope", currentTeamOfUser != null);
 
-        return toList(getDao().executeQuery("stats/getUserCurrentRankings",
+        int tid = currentTeamOfUser == null ? 0 : currentTeamOfUser.getTeamId();
+        int sid = currentTeamOfUser == null ? 0 : currentTeamOfUser.getScopeId();
+        return toList(getDao().executeQuery("stats/getUserTeamRanking",
                 Maps.create()
                     .put("userId", userId)
-                    .put("teamId", currentTeamOfUser.getTeamId())
-                    .put("teamScopeId", currentTeamOfUser.getScopeId()).build(),
+                    .put("teamId", tid)
+                    .put("teamScopeId", sid).build(),
                 UserRankRecordDto.class,
                 tdata
         ));
+    }
+
+    @Override
+    public List<UserRankRecordDto> readMyLeaderboardRankings(long gameId, long userId, ScopingType scopingType,
+                                                             LeaderboardType rangeType) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+        Checks.nonNull(scopingType, "scopeType");
+
+        UserTeam currentTeamOfUser = getApiService().getProfileService().findCurrentTeamOfUser(userId);
+        List<LeaderboardDef> leaderboardDefs = getApiService().getGameDefService().listLeaderboardDefs(gameId);
+        List<UserRankRecordDto> rankings = new LinkedList<>();
+
+        for (LeaderboardDef def : leaderboardDefs) {
+            LeaderboardRequestDto requestDto = rangeType == LeaderboardType.CUSTOM ?
+                    new LeaderboardRequestDto(1, System.currentTimeMillis())
+                    : new LeaderboardRequestDto(rangeType, System.currentTimeMillis());
+            requestDto.setForUser(userId);
+            requestDto.setLeaderboardDef(def);
+
+            List<UserRankRecordDto> userRankRecordDtos = null;
+            if (scopingType == ScopingType.TEAM) {
+                userRankRecordDtos = getApiService().getGameService()
+                        .readTeamLeaderboard(currentTeamOfUser.getTeamId(), requestDto);
+            } else if (scopingType == ScopingType.TEAM_SCOPE) {
+                userRankRecordDtos = getApiService().getGameService()
+                        .readTeamScopeLeaderboard(currentTeamOfUser.getScopeId(), requestDto);
+            } else if (scopingType == ScopingType.GLOBAL) {
+                userRankRecordDtos = getApiService().getGameService()
+                        .readGlobalLeaderboard(requestDto);
+            }
+
+            if (userRankRecordDtos != null && !userRankRecordDtos.isEmpty()) {
+                UserRankRecordDto record = userRankRecordDtos.get(0);
+                record.setLeaderboard(def);
+                rankings.add(record);
+            }
+        }
+        return rankings;
     }
 
     @Override
@@ -202,6 +239,11 @@ public class StatService extends BaseService implements IStatService {
         }
         accumulated.add(base);
         return accumulated;
+    }
+
+    @Override
+    public void readUserGameTimeline(long userId) {
+
     }
 
     private void mergeTwoTeamRecords(TeamHistoryRecordDto base, TeamHistoryRecordDto curr) {

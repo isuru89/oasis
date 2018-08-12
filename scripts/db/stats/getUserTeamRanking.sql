@@ -20,7 +20,9 @@ FROM
         FROM OA_POINTS
         WHERE
             is_active = 1
+            <if(hasTeamScope)>
             AND team_scope_id = :teamScopeId
+            <endif>
         GROUP BY
             team_id,
             team_scope_id,

@@ -1,3 +1,9 @@
+<if(hasUser)>
+SELECT
+    *
+FROM (
+<endif>
+
 SELECT
     tbl.user_id AS userId,
     <if(teamWise)>tbl.team_id AS teamId,<endif>
@@ -25,3 +31,11 @@ FROM
             <if(teamScopeWise)>team_scope_id,<endif>
             user_id
     ) tbl
+
+<if(hasUser)>
+) t
+
+WHERE
+    t.userId = :userId
+
+<endif>

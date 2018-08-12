@@ -1,12 +1,13 @@
 package io.github.isuru.oasis.services.api.routers;
 
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.services.api.IGameService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.BadgeAwardDto;
 import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.model.PointAwardDto;
-import io.github.isuru.oasis.services.model.enums.LeaderboardType;
+import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.utils.ValueMap;
 import spark.Request;
 import spark.Response;
@@ -33,6 +34,10 @@ public class GameRouters extends BaseRouters {
         get("/leaderboard/weekly", this::leaderboardWeekly);
         get("/leaderboard/monthly", this::leaderboardMonthly);
         get("/leaderboard/daily", this::leaderboarDaily);
+
+        get("/leaderboard/:lid/team/:tid", this::leaderboardTeam);
+        get("/leaderboard/:lid/teamscope/:sid", this::leaderboardTeamScope);
+
         get("/leaderboard/:lid/weekly", this::leaderboardCustomWeekly);
         get("/leaderboard/:lid/monthly", this::leaderboardCustomMonthly);
         get("/leaderboard/:lid/daily", this::leaderboardCustomDaily);
@@ -109,28 +114,28 @@ public class GameRouters extends BaseRouters {
     private Object leaderboardCustomWeekly(Request req, Response res) throws Exception {
         IGameService gameService = getApiService().getGameService();
         LeaderboardRequestDto requestDto = generate(req, LeaderboardType.CURRENT_WEEK);
-        requestDto.setLeaderboardId(asPInt(req, "lid"));
+        requestDto.setLeaderboardDef(readLeaderboardDef(asPInt(req, "lid")));
         return gameService.readLeaderboardStatus(requestDto);
     }
 
     private Object leaderboardCustomMonthly(Request req, Response res) throws Exception {
         IGameService gameService = getApiService().getGameService();
         LeaderboardRequestDto requestDto = generate(req, LeaderboardType.CURRENT_MONTH);
-        requestDto.setLeaderboardId(asPInt(req, "lid"));
+        requestDto.setLeaderboardDef(readLeaderboardDef(asPInt(req, "lid")));
         return gameService.readLeaderboardStatus(requestDto);
     }
 
     private Object leaderboardCustomDaily(Request req, Response res) throws Exception {
         IGameService gameService = getApiService().getGameService();
         LeaderboardRequestDto requestDto = generate(req, LeaderboardType.CURRENT_DAY);
-        requestDto.setLeaderboardId(asPInt(req, "lid"));
+        requestDto.setLeaderboardDef(readLeaderboardDef(asPInt(req, "lid")));
         return gameService.readLeaderboardStatus(requestDto);
     }
 
     private Object leaderboardCustom(Request req, Response res) throws Exception {
         IGameService gameService = getApiService().getGameService();
         LeaderboardRequestDto requestDto = generate(req, LeaderboardType.CUSTOM);
-        requestDto.setLeaderboardId(asPInt(req, "lid"));
+        requestDto.setLeaderboardDef(readLeaderboardDef(asPInt(req, "lid")));
         return gameService.readLeaderboardStatus(requestDto);
     }
 
@@ -150,6 +155,42 @@ public class GameRouters extends BaseRouters {
         IGameService gameService = getApiService().getGameService();
         LeaderboardRequestDto requestDto = generate(req, LeaderboardType.CURRENT_DAY);
         return gameService.readLeaderboardStatus(requestDto);
+    }
+
+    private Object leaderboardTeam(Request req, Response res) throws Exception {
+        IGameService gameService = getApiService().getGameService();
+        String range = asQStr(req, "range", "weekly");
+        LeaderboardRequestDto requestDto = generate(req, toType(range));
+
+        long teamId = asPLong(req, "tid");
+        int leaderboardId = asPInt(req, "lid");
+        requestDto.setLeaderboardDef(readLeaderboardDef(leaderboardId));
+        return gameService.readTeamLeaderboard(teamId, requestDto);
+    }
+
+    private Object leaderboardTeamScope(Request req, Response res) throws Exception {
+        IGameService gameService = getApiService().getGameService();
+        String range = asQStr(req, "range", "weekly");
+        LeaderboardRequestDto requestDto = generate(req, toType(range));
+
+        long teamScopeId = asPLong(req, "sid");
+        int leaderboardId = asPInt(req, "lid");
+        requestDto.setLeaderboardDef(readLeaderboardDef(leaderboardId));
+        return gameService.readTeamScopeLeaderboard(teamScopeId, requestDto);
+    }
+
+    private static LeaderboardType toType(String rangeType) throws InputValidationException {
+        if (rangeType.startsWith("week")) {
+            return LeaderboardType.CURRENT_WEEK;
+        } else if (rangeType.startsWith("month")) {
+            return LeaderboardType.CURRENT_MONTH;
+        } else if (rangeType.startsWith("da")) {
+            return LeaderboardType.CURRENT_DAY;
+        } else if (rangeType.startsWith("custom")) {
+            return LeaderboardType.CUSTOM;
+        } else {
+            throw new InputValidationException("Unknown range query parameter value! [" + rangeType + "]");
+        }
     }
 
     private LeaderboardRequestDto generate(Request req, LeaderboardType type) throws InputValidationException {
@@ -184,5 +225,9 @@ public class GameRouters extends BaseRouters {
         requestDto.setTopN(asQInt(req, Q_TOP, 50));
         requestDto.setBottomN(asQInt(req, Q_BOTTOM, 50));
         return requestDto;
+    }
+
+    private LeaderboardDef readLeaderboardDef(int id) throws Exception {
+        return getApiService().getGameDefService().readLeaderboardDef(id);
     }
 }

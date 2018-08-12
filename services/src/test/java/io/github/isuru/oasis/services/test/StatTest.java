@@ -9,6 +9,7 @@ import io.github.isuru.oasis.services.api.IStatService;
 import io.github.isuru.oasis.services.api.dto.*;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.model.PurchasedItem;
+import io.github.isuru.oasis.services.model.UserRankRecordDto;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,6 +48,9 @@ class StatTest extends AbstractApiTest {
 
         List<TeamHistoryRecordDto> teamHistoryRecordDtos = statService.readUserTeamHistoryStat(145);
         Assertions.assertEquals(1, teamHistoryRecordDtos.size());
+
+        List<UserRankRecordDto> userRankRecordDtos = statService.readUserTeamRankings(55, true);
+        System.out.println(userRankRecordDtos);
     }
 
     @Test
