@@ -7,12 +7,9 @@ import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import javafx.util.Pair;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 
 import java.io.File;
-import java.util.HashMap;
 
 /**
  * @author iweerarathna
@@ -43,8 +40,8 @@ public abstract class AbstractApiTest {
     protected static Pair<IOasisApiService, IOasisDao> dbStart() throws Exception {
         DbProperties properties = new DbProperties(OasisDbPool.DEFAULT);
         properties.setUrl("jdbc:mysql://localhost/oasis");
-        properties.setUsername("root");
-        properties.setPassword("root");
+        properties.setUsername("isuru");
+        properties.setPassword("isuru");
         File file = new File("./scripts/db");
         if (!file.exists()) {
             file = new File("../scripts/db");

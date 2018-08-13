@@ -1,17 +1,79 @@
 package io.github.isuru.oasis.services;
 
-import io.github.isuru.oasis.model.defs.GameDef;
+import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
-import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.api.IProfileService;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.TeamScope;
+import io.github.isuru.oasis.services.utils.EventSourceToken;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Bootstrapping {
+
+    static void initSystem(IOasisApiService apiService, IOasisDao dao) throws Exception {
+        try {
+            IProfileService profileService = apiService.getProfileService();
+
+            // add default team scope...
+            List<TeamScope> teamScopes = profileService.listTeamScopes();
+            TeamScope defTeamScope;
+            if (teamScopes.isEmpty()) {
+                defTeamScope = addDefaultTeamScope(profileService);
+            } else {
+                Optional<TeamScope> defTeamScopeOpt = teamScopes.stream()
+                        .filter(ts -> DefaultEntities.DEFAULT_TEAM_SCOPE_NAME.equalsIgnoreCase(ts.getName()))
+                        .findFirst();
+                if (defTeamScopeOpt.isPresent()) {
+                    defTeamScope = defTeamScopeOpt.get();
+                } else {
+                    defTeamScope = addDefaultTeamScope(profileService);
+                }
+            }
+
+            // add default team...
+            List<TeamProfile> defaultTeams = profileService.listTeams(defTeamScope.getId());
+            if (defaultTeams.isEmpty()) {
+                addDefaultTeamProfile(profileService, defTeamScope);
+            } else {
+                Optional<TeamProfile> defTeam = defaultTeams.stream()
+                        .filter(t -> DefaultEntities.DEFAULT_TEAM_NAME.equalsIgnoreCase(t.getName()))
+                        .findFirst();
+                if (!defTeam.isPresent()) {
+                    addDefaultTeamProfile(profileService, defTeamScope);
+                }
+            }
+
+            // add internal event source
+            Optional<EventSourceToken> internalSourceToken = apiService.getEventService().readInternalSourceToken();
+            if (!internalSourceToken.isPresent()) {
+                EventSourceToken eventSourceToken = new EventSourceToken();
+                eventSourceToken.setDisplayName(DefaultEntities.INTERNAL_EVENT_SOURCE_NAME);
+                eventSourceToken.setInternal(true);
+                apiService.getEventService().addEventSource(eventSourceToken);
+            }
+
+        } catch (Throwable error) {
+            // revert back to previous status...
+            cleanTables(dao, "OA_EVENT_SOURCE", "OA_TEAM", "OA_TEAM_SCOPE");
+            throw error;
+        }
+    }
+
+    private static void cleanTables(IOasisDao dao, String... tableNames) throws Exception {
+        if (tableNames != null) {
+            for (String tbl : tableNames) {
+                dao.executeRawCommand("TRUNCATE " + tbl, null);
+            }
+        }
+    }
 
     public static void initGame(IOasisApiService apiService, long gameId, GameOptionsDto optionsDto) throws Exception {
         IGameDefService gameDefService = apiService.getGameDefService();
@@ -25,11 +87,23 @@ public class Bootstrapping {
         }
     }
 
+    private static void addDefaultTeamProfile(IProfileService profileService, TeamScope teamScope) throws Exception {
+        TeamProfile profile = new TeamProfile();
+        profile.setName(DefaultEntities.DEFAULT_TEAM_NAME);
+        profile.setTeamScope(teamScope.getId());
+        profileService.addTeam(profile);
+    }
+
+    private static TeamScope addDefaultTeamScope(IProfileService profileService) throws Exception {
+        TeamScope teamScope = new TeamScope();
+        teamScope.setName(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
+        teamScope.setDisplayName(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
+        long id = profileService.addTeamScope(teamScope);
+        return profileService.readTeamScope(id);
+    }
+
     private static void addDefaultLeaderboards(IGameDefService defService, long gameId, GameOptionsDto optionsDto) throws Exception {
-        LeaderboardDef dlb = new LeaderboardDef();
-        dlb.setName("Oasis_AllRules_Leaderboard");
-        dlb.setDisplayName("Oasis Leaderboard");
-        defService.addLeaderboardDef(gameId, dlb);
+        defService.addLeaderboardDef(gameId, DefaultEntities.DEFAULT_LEADERBOARD_DEF);
     }
 
     private static void addDefaultPointRules(IGameDefService gameDefService, long gameId, GameOptionsDto optionsDto) throws Exception {

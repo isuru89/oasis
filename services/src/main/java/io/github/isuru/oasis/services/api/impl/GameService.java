@@ -3,29 +3,31 @@ package io.github.isuru.oasis.services.api.impl;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.ShopItem;
-import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.events.EventNames;
+import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.api.IGameService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.exception.OasisGameException;
-import io.github.isuru.oasis.services.model.*;
+import io.github.isuru.oasis.services.model.BadgeAwardDto;
+import io.github.isuru.oasis.services.model.LeaderboardRecordDto;
+import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
+import io.github.isuru.oasis.services.model.LeaderboardResponseDto;
+import io.github.isuru.oasis.services.model.PointAwardDto;
+import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.UserRankRecordDto;
 import io.github.isuru.oasis.services.utils.Checks;
-import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.Maps;
 
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author iweerarathna
  */
 public class GameService extends BaseService implements IGameService {
-
-    private String internalToken = null;
 
     GameService(IOasisDao oasisDao, IOasisApiService apiService) {
         super(oasisDao, apiService);
@@ -72,11 +74,6 @@ public class GameService extends BaseService implements IGameService {
 
         String token = getInternalToken();
         getApiService().getEventService().submitEvent(token, data);
-    }
-
-    @Override
-    public void postAChallenge(ChallengeDef challengeDef, boolean startImmediate) throws Exception {
-        //startDef(challengeDef.getId(), false);
     }
 
     @Override
@@ -140,11 +137,6 @@ public class GameService extends BaseService implements IGameService {
                 throw new OasisGameException("Cannot share this item! Maybe the item itself is shared to you by friend!");
             }
         });
-    }
-
-    @Override
-    public void readGameTimeline(long since) {
-
     }
 
     @Override
@@ -276,14 +268,7 @@ public class GameService extends BaseService implements IGameService {
                 templateData));
     }
 
-    private String getInternalToken() throws Exception {
-        synchronized (this) {
-            if (internalToken != null) {
-                return internalToken;
-            }
-            Optional<EventSourceToken> eventSourceToken = getApiService().getEventService().readInternalSourceToken();
-            eventSourceToken.ifPresent(eventSourceToken1 -> internalToken = eventSourceToken1.getToken());
-            return internalToken;
-        }
+    private String getInternalToken() {
+        return DataCache.get().getInternalEventSourceToken().getToken();
     }
 }

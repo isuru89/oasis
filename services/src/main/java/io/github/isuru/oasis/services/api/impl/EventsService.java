@@ -3,6 +3,7 @@ package io.github.isuru.oasis.services.api.impl;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.configs.Configs;
+import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.api.IEventsService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
@@ -49,6 +50,9 @@ public class EventsService extends BaseService implements IEventsService {
         Checks.validate(eventData.containsKey(Constants.FIELD_EVENT_TYPE), "No event-type ('type') field in the event!");
         Checks.validate(eventData.containsKey(Constants.FIELD_TIMESTAMP), "No timestamp ('ts') field in the event!");
         Checks.validate(eventData.containsKey(Constants.FIELD_USER), "No user ('user') field in the event!");
+        if (DataCache.get().getGameCount() > 1 && !eventData.containsKey(Constants.FIELD_GAME_ID)) {
+            throw new InputValidationException("Unable to find associated game id for this event!");
+        }
 
         // authenticate event...
         EventSourceToken eventSourceToken = SOURCE_CACHE.get(token);
@@ -67,10 +71,24 @@ public class EventsService extends BaseService implements IEventsService {
         }
 
         Map<String, Object> event = new HashMap<>(eventData);
+        // @TODO should we scope events for game?
+        event.put(Constants.FIELD_GAME_ID, DataCache.get().getDefGameId());
+
         if (!event.containsKey(Constants.FIELD_TEAM)) {
             UserTeam userTeam = getApiService().getProfileService().findCurrentTeamOfUser(userId);
-            event.put(Constants.FIELD_TEAM, userTeam.getTeamId());
+            if (userTeam != null) {
+                event.put(Constants.FIELD_TEAM, userTeam.getTeamId());
+                event.put(Constants.FIELD_SCOPE, userTeam.getScopeId());
+            } else {
+                event.put(Constants.FIELD_TEAM, DataCache.get().getTeamDefault().getId());
+                event.put(Constants.FIELD_SCOPE, DataCache.get().getTeamScopeDefault().getId());
+            }
+        } else {
+            // @TODO validate team and user
+            event.put(Constants.FIELD_TEAM, DataCache.get().getTeamDefault().getId());
+            event.put(Constants.FIELD_SCOPE, DataCache.get().getTeamScopeDefault().getId());
         }
+
         RabbitDispatcher.get().dispatch(event);
     }
 

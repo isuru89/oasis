@@ -24,6 +24,7 @@ import java.util.Map;
 public class OasisServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OasisServer.class);
+    private static final int DEF_PORT = 5885;
 
     public static IOasisApiService apiService;
 
@@ -43,14 +44,20 @@ public class OasisServer {
         FlinkServices flinkServices = new FlinkServices();
         flinkServices.init(configs.getStrReq("oasis.flink.url"));
 
-        LOGGER.debug("Initializing routers...");
+        LOGGER.debug("Initializing services...");
         apiService = new DefaultOasisApiService(oasisDao, flinkServices);
 
-        int port = configs.getInt("oasis.service.port", 5885);
+        LOGGER.debug("Setting up database and cache...");
+        Bootstrapping.initSystem(apiService, oasisDao);
+        DataCache.get().setup(apiService);
+
+        LOGGER.debug("Initializing server...");
+        int port = configs.getInt("oasis.service.port", DEF_PORT);
         Spark.port(port);
 
         // start service with routing
         //
+        LOGGER.debug("Initializing routers...");
         Routers routers = new Routers(apiService);
         Spark.path("/api/v1", routers::register);
         routers.registerExceptionHandlers();
