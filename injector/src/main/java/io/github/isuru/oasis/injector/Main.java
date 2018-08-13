@@ -6,7 +6,6 @@ import com.rabbitmq.client.ConnectionFactory;
 import io.github.isuru.oasis.db.DbProperties;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
-import org.apache.log4j.PropertyConfigurator;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +25,8 @@ public class Main {
         //PropertyConfigurator.configure();
         DbProperties dbProps = new DbProperties("oasis-injector");
         dbProps.setUrl("jdbc:mariadb://localhost/oasis");
-        dbProps.setUsername("root");
-        dbProps.setPassword("");
+        dbProps.setUsername("isuru");
+        dbProps.setPassword("isuru");
         //dbProps.setUseTemplateEngine(false);
         dbProps.setQueryLocation(new File("./scripts/db").getAbsolutePath());
 

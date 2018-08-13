@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS OA_POINTS (
     points          FLOAT(4),
     tag             VARCHAR(512),
     is_active       TINYINT(1) DEFAULT 1,
+    game_id         INT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -31,6 +32,7 @@ CREATE TABLE IF NOT EXISTS OA_BADGES (
     start_time      BIGINT,
     end_time        BIGINT,
     tag             VARCHAR(512),
+    game_id         INT,
     is_active       TINYINT(1) DEFAULT 1
 );
 
@@ -47,7 +49,8 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONES (
     level           INT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    is_active       TINYINT(1) DEFAULT 1
+    is_active       TINYINT(1) DEFAULT 1,
+    game_id         INT
 );
 
 ALTER TABLE OA_MILESTONES ADD PRIMARY KEY (user_id, milestone_id, level);
@@ -60,6 +63,7 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONE_STATE (
     current_val_i   BIGINT,
     next_val        FLOAT(4),
     next_val_i      BIGINT,
+    game_id         INT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -80,17 +84,6 @@ CREATE TABLE IF NOT EXISTS OA_DEFINITION (
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
-CREATE TABLE IF NOT EXISTS OA_RANKS (
-    leaderboard_id  INT,
-    user_id         INT,
-    points          FLOAT(4),
-    ranking         INT,
-    updated_at      BIGINT
-);
-
-ALTER TABLE OA_RANKS ADD PRIMARY KEY (leaderboard_id, user_id);
-
 
 CREATE TABLE IF NOT EXISTS OA_USER (
     user_id         INT PRIMARY KEY AUTO_INCREMENT,
@@ -146,6 +139,7 @@ CREATE TABLE IF NOT EXISTS OA_CHALLENGE_WINNER (
     challenge_id    INT,
     points          FLOAT(4),
     won_at          BIGINT,
+    game_id         INT,
     is_active       TINYINT(1) DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -160,6 +154,7 @@ CREATE TABLE IF NOT EXISTS OA_SHOP_ITEM (
     image_ref       VARCHAR(512),
     is_active       TINYINT(1) DEFAULT 1,
     expiration_at   BIGINT,
+    game_id         INT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -171,6 +166,7 @@ CREATE TABLE IF NOT EXISTS OA_PURCHASE (
     shared_at       BIGINT,
     via_friend      TINYINT(1) DEFAULT 0,
     is_active       TINYINT(1) DEFAULT 1,
+    game_id         INT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

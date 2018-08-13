@@ -64,7 +64,7 @@ public final class RabbitDispatcher {
         }));
     }
 
-    public void dispatch(Map<String, Object> data) throws IOException {
+    public void dispatch(long gameId, Map<String, Object> data) throws IOException {
         byte[] msg = mapper.writeValueAsString(data).getBytes(StandardCharsets.UTF_8);
         AMQP.BasicProperties properties = new AMQP.BasicProperties().builder()
                 .correlationId(UUID.randomUUID().toString())

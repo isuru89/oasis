@@ -71,8 +71,7 @@ public class EventsService extends BaseService implements IEventsService {
         }
 
         Map<String, Object> event = new HashMap<>(eventData);
-        // @TODO should we scope events for game?
-        event.put(Constants.FIELD_GAME_ID, DataCache.get().getDefGameId());
+        event.remove(Constants.FIELD_GAME_ID);
 
         if (!event.containsKey(Constants.FIELD_TEAM)) {
             UserTeam userTeam = getApiService().getProfileService().findCurrentTeamOfUser(userId);
@@ -89,7 +88,7 @@ public class EventsService extends BaseService implements IEventsService {
             event.put(Constants.FIELD_SCOPE, DataCache.get().getTeamScopeDefault().getId());
         }
 
-        RabbitDispatcher.get().dispatch(event);
+        RabbitDispatcher.get().dispatch(DataCache.get().getDefGameId(), event);
     }
 
     @Override

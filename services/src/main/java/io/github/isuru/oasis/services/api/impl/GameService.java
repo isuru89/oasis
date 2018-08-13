@@ -186,13 +186,17 @@ public class GameService extends BaseService implements IGameService {
                 .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
                 .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
                 .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
+                .put("isTopN", isValid(request.getTopN()))
+                .put("isBottomN", isValid(request.getBottomN()))
                 .build();
 
 
         Maps.MapBuilder dataBuilder = Maps.create()
                 .put("userId", request.getForUser())
                 .put("rangeStart", request.getRangeStart())
-                .put("rangeEnd", request.getRangeEnd());
+                .put("rangeEnd", request.getRangeEnd())
+                .put("topN", request.getTopN())
+                .put("bottomN", request.getBottomN());
 
         if (ldef != null) {
             dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
@@ -216,6 +220,8 @@ public class GameService extends BaseService implements IGameService {
                 .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
                 .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
                 .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
+                .put("isTopN", isValid(request.getTopN()))
+                .put("isBottomN", isValid(request.getBottomN()))
                 .build();
 
         TeamProfile teamProfile = getApiService().getProfileService().readTeam(teamId);
@@ -225,7 +231,9 @@ public class GameService extends BaseService implements IGameService {
                 .put("userId", request.getForUser())
                 .put("teamScopeId", teamProfile.getTeamScope())
                 .put("rangeStart", request.getRangeStart())
-                .put("rangeEnd", request.getRangeEnd());
+                .put("rangeEnd", request.getRangeEnd())
+                .put("topN", request.getTopN())
+                .put("bottomN", request.getBottomN());
 
         if (ldef != null) {
             dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
@@ -249,13 +257,17 @@ public class GameService extends BaseService implements IGameService {
                 .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
                 .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
                 .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
+                .put("isTopN", isValid(request.getTopN()))
+                .put("isBottomN", isValid(request.getBottomN()))
                 .build();
 
         Maps.MapBuilder dataBuilder = Maps.create()
                 .put("teamScopeId", teamScopeId)
                 .put("userId", request.getForUser())
                 .put("rangeStart", request.getRangeStart())
-                .put("rangeEnd", request.getRangeEnd());
+                .put("rangeEnd", request.getRangeEnd())
+                .put("topN", request.getTopN())
+                .put("bottomN", request.getBottomN());
 
         if (ldef != null) {
             dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())

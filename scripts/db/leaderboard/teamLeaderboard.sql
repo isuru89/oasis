@@ -1,4 +1,4 @@
-<if(hasTeam||hasUser)>
+<if(hasTeam||hasUser||isTopN||isBottomN)>
 SELECT
     *
 FROM
@@ -42,7 +42,7 @@ FROM
             user_id
     ) tbl
 
-<if(hasTeam||hasUser)>
+<if(hasTeam||hasUser||isTopN||isBottomN)>
 ) rankTbl
 
 WHERE
@@ -52,6 +52,24 @@ WHERE
 <endif>
 <if(hasUser)>
     AND rankTbl.userId = :userId
+<endif>
+
+<if(isTopN)>
+    <if(hasTeam)>
+    ORDER BY rankTbl.rankTeam ASC
+    <else>
+    ORDER BY rankTbl.rankTeamScope ASC
+    <endif>
+LIMIT :topN
+<endif>
+
+<if(isBottomN)>
+    <if(hasTeam)>
+    ORDER BY rankTbl.rankTeam DESC
+    <else>
+    ORDER BY rankTbl.rankTeamScope DESC
+    <endif>
+LIMIT :bottomN
 <endif>
 
 <endif>

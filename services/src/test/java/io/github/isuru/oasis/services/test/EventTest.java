@@ -1,22 +1,18 @@
 package io.github.isuru.oasis.services.test;
 
-import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.db.IOasisDao;
-import io.github.isuru.oasis.db.OasisDbFactory;
-import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.services.api.IEventsService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
-import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.Maps;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -131,7 +127,7 @@ class EventTest extends AbstractApiTest {
         Assertions.assertEquals(1, allTokens.size());
     }
 
-    @AfterEach
+    @BeforeEach
     void afterTest() throws Exception {
         // clear table
         clearTables("OA_EVENT_SOURCE");

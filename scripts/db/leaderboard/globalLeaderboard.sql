@@ -1,4 +1,4 @@
-<if(hasUser)>
+<if(hasUser||isTopN||isBottomN)>
 SELECT
     *
 FROM
@@ -33,10 +33,22 @@ FROM
             user_id
     ) tbl
 
-<if(hasUser)>
+<if(hasUser||isTopN||isBottomN)>
 ) rankTbl
 
+<if(hasUser)>
 WHERE
     rankTbl.userId = :userId
+<endif>
+
+<if(isTopN)>
+ORDER BY rankTbl.rankGlobal ASC
+LIMIT :topN
+<endif>
+
+<if(isBottomN)>
+ORDER BY rankTbl.rankGlobal DESC
+LIMIT :bottomN
+<endif>
 
 <endif>
