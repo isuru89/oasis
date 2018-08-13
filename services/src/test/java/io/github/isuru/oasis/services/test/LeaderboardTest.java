@@ -62,7 +62,7 @@ class LeaderboardTest extends AbstractApiTest {
         Assertions.assertEquals(30, res1.size());
 
         req1.setForUser(55L);
-        assertFail(() -> gameService.readLeaderboardStatus(req1), InputValidationException.class);
+        assertFail(() -> gameService.readGlobalLeaderboard(req1), InputValidationException.class);
     }
 
     @BeforeAll

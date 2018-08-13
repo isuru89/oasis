@@ -14,9 +14,6 @@ public class LeaderboardRequestDto {
 
     private Long forUser;
 
-    private boolean teamWise = true;
-    private boolean teamScopeWise = false;
-
     private long rangeStart;
     private long rangeEnd;
 
@@ -45,8 +42,8 @@ public class LeaderboardRequestDto {
     }
 
     public LeaderboardRequestDto(long rangeStart, long rangeEnd) {
-        this.rangeStart = rangeStart;
-        this.rangeEnd = rangeEnd;
+        this.setRangeStart(rangeStart);
+        this.setRangeEnd(rangeEnd);
         this.type = LeaderboardType.CUSTOM;
     }
 
@@ -88,22 +85,6 @@ public class LeaderboardRequestDto {
 
     public void setType(LeaderboardType type) {
         this.type = type;
-    }
-
-    public boolean isTeamWise() {
-        return teamWise;
-    }
-
-    public void setTeamWise(boolean teamWise) {
-        this.teamWise = teamWise;
-    }
-
-    public boolean isTeamScopeWise() {
-        return teamScopeWise;
-    }
-
-    public void setTeamScopeWise(boolean teamScopeWise) {
-        this.teamScopeWise = teamScopeWise;
     }
 
     public long getRangeStart() {

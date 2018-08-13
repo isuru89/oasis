@@ -160,6 +160,8 @@ CREATE TABLE IF NOT EXISTS OA_SHOP_ITEM (
 
 CREATE TABLE IF NOT EXISTS OA_PURCHASE (
     item_id         INT,
+    team_id         INT,
+    team_scope_id   INT,
     user_id         INT,
     cost            FLOAT(4),
     purchased_at    BIGINT,

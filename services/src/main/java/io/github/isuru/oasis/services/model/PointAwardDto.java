@@ -9,6 +9,7 @@ public class PointAwardDto {
     private float amount;
     private String associatedEventId;
     private Long ts;
+    private Integer gameId;
 
     public String getAssociatedEventId() {
         return associatedEventId;
@@ -40,5 +41,13 @@ public class PointAwardDto {
 
     public void setTs(Long ts) {
         this.ts = ts;
+    }
+
+    public Integer getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(Integer gameId) {
+        this.gameId = gameId;
     }
 }

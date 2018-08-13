@@ -10,6 +10,7 @@ public class BadgeAwardDto {
     private long toUser;
     private String associatedEventId;
     private Long ts;
+    private Integer gameId;
 
     public Long getTs() {
         return ts;
@@ -49,5 +50,13 @@ public class BadgeAwardDto {
 
     public void setBadgeId(int badgeId) {
         this.badgeId = badgeId;
+    }
+
+    public Integer getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(Integer gameId) {
+        this.gameId = gameId;
     }
 }

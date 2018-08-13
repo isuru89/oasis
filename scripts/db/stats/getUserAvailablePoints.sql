@@ -16,6 +16,8 @@ SELECT (
         WHERE
             user_id = :userId
             AND
+            via_friend = 0
+            AND
             is_active = 1
     )
     ) as Balance
