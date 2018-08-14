@@ -12,8 +12,8 @@ import java.util.Map;
  */
 class ChallengeConsumer extends BaseConsumer<ChallengeModel> {
 
-    ChallengeConsumer(Channel channel, IOasisDao dao) {
-        super(channel, dao, ChallengeModel.class);
+    ChallengeConsumer(Channel channel, IOasisDao dao, ContextInfo contextInfo) {
+        super(channel, dao, ChallengeModel.class, contextInfo);
     }
 
     @Override
@@ -25,6 +25,7 @@ class ChallengeConsumer extends BaseConsumer<ChallengeModel> {
         map.put("challengeId", msg.getChallengeId());
         map.put("points", msg.getPoints());
         map.put("wonAt", msg.getWonAt());
+        map.put("gameId", contextInfo.getGameId());
 
         try {
             dao.executeCommand("game/addChallengeWinner", map);

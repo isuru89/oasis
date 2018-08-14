@@ -56,6 +56,7 @@ public class Main {
 
         if (oasisGameDef.getChallenge() == null) {
             GameDef gameDef = oasisGameDef.getGame();
+            System.setProperty(Constants.ENV_OASIS_GAME_ID, String.valueOf(gameDef.getId()));
             Oasis oasis = new Oasis(gameDef.getName());
 
             SourceFunction<Event> source = createSource(gameProperties);

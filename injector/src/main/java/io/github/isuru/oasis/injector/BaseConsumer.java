@@ -22,16 +22,18 @@ public abstract class BaseConsumer<T> extends DefaultConsumer {
 
     protected IOasisDao dao;
     private Class<T> clz;
+    protected ContextInfo contextInfo;
 
     /**
      * Constructs a new instance and records its association to the passed-in channel.
      *
      * @param channel the channel to which this consumer is attached
      */
-    public BaseConsumer(Channel channel, IOasisDao dao, Class<T> clz) {
+    public BaseConsumer(Channel channel, IOasisDao dao, Class<T> clz, ContextInfo context) {
         super(channel);
         this.dao = dao;
         this.clz = clz;
+        this.contextInfo = context;
     }
 
     @Override

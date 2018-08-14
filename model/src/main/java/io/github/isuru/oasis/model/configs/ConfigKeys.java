@@ -29,4 +29,10 @@ public class ConfigKeys {
     public static final String DEF_RABBIT_VIRTUAL_HOST = "oasis";
     public static final String DEF_RABBIT_SRC_EXCHANGE_TYPE = "fanout";
     public static final boolean DEF_RABBIT_SRC_EXCHANGE_DURABLE = true;
+
+    public static final String DEF_RABBIT_Q_POINTS_SINK = "game.o{gid}.points";
+    public static final String DEF_RABBIT_Q_BADGES_SINK = "game.o{gid}.badges";
+    public static final String DEF_RABBIT_Q_MILESTONES_SINK = "game.o{gid}.milestones";
+    public static final String DEF_RABBIT_Q_MILESTONESTATE_SINK = "game.o{gid}.milestonestates";
+    public static final String DEF_RABBIT_Q_CHALLENGES_SINK = "game.o{gid}.challenges";
 }

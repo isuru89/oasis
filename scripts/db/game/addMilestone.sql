@@ -5,7 +5,8 @@ INSERT INTO OA_MILESTONES (
     ext_id,
     ts,
     milestone_id,
-    level
+    level,
+    game_id
 ) VALUES (
     :userId,
     :teamId,
@@ -13,7 +14,8 @@ INSERT INTO OA_MILESTONES (
     :extId,
     :ts,
     :milestoneId,
-    :level
+    :level,
+    :gameId
 )
 ON DUPLICATE KEY
 UPDATE ext_id = :extId

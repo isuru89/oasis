@@ -13,8 +13,8 @@ import java.util.Map;
  */
 class MilestoneConsumer extends BaseConsumer<MilestoneModel> {
 
-    MilestoneConsumer(Channel channel, IOasisDao dao) {
-        super(channel, dao, MilestoneModel.class);
+    MilestoneConsumer(Channel channel, IOasisDao dao, ContextInfo contextInfo) {
+        super(channel, dao, MilestoneModel.class, contextInfo);
     }
 
     @Override
@@ -29,6 +29,7 @@ class MilestoneConsumer extends BaseConsumer<MilestoneModel> {
         map.put("ts", event.getTimestamp());
         map.put("milestoneId", msg.getMilestoneId());
         map.put("level", msg.getLevel());
+        map.put("gameId", contextInfo.getGameId());
 
         try {
             dao.executeCommand("game/addMilestone", map);

@@ -13,8 +13,8 @@ import java.util.Map;
  */
 class BadgeConsumer extends BaseConsumer<BadgeModel> {
 
-    BadgeConsumer(Channel channel, IOasisDao dao) {
-        super(channel, dao, BadgeModel.class);
+    BadgeConsumer(Channel channel, IOasisDao dao, ContextInfo contextInfo) {
+        super(channel, dao, BadgeModel.class, contextInfo);
     }
 
     @Override
@@ -35,6 +35,7 @@ class BadgeConsumer extends BaseConsumer<BadgeModel> {
         map.put("endExtId", last.getExternalId());
         map.put("startTime", first.getTimestamp());
         map.put("endTime", last.getTimestamp());
+        map.put("gameId", contextInfo.getGameId());
         map.put("tag", msg.getTag());
 
         try {

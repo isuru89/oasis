@@ -13,8 +13,8 @@ import java.util.Map;
  */
 class PointConsumer extends BaseConsumer<PointModel> {
 
-    PointConsumer(Channel channel, IOasisDao dao) {
-        super(channel, dao, PointModel.class);
+    PointConsumer(Channel channel, IOasisDao dao, ContextInfo contextInfo) {
+        super(channel, dao, PointModel.class, contextInfo);
     }
 
     @Override
@@ -30,6 +30,7 @@ class PointConsumer extends BaseConsumer<PointModel> {
         map.put("pointId", msg.getRuleId());
         map.put("pointName", msg.getRuleName());
         map.put("points", msg.getAmount());
+        map.put("gameId", contextInfo.getGameId());
         map.put("tag", msg.getTag());
 
         try {

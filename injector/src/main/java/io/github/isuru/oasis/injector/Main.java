@@ -6,6 +6,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import io.github.isuru.oasis.db.DbProperties;
 import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
+import io.github.isuru.oasis.model.configs.ConfigKeys;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,21 +51,28 @@ public class Main {
 
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
-        channel.basicQos(10);
-
         channel.basicQos(100);
 
-        channel.queueDeclare("game.o.points", DURABLE, EXCLUSIVE, AUTO_DEL, null);
-        channel.queueDeclare("game.o.milestones", DURABLE, EXCLUSIVE, AUTO_DEL, null);
-        channel.queueDeclare("game.o.milestonestates", DURABLE, EXCLUSIVE, AUTO_DEL, null);
-        channel.queueDeclare("game.o.badges", DURABLE, EXCLUSIVE, AUTO_DEL, null);
-        channel.queueDeclare("game.o.challenges", DURABLE, EXCLUSIVE, AUTO_DEL, null);
+        ContextInfo contextInfo = new ContextInfo();
+        contextInfo.setGameId(1);
 
-        channel.basicConsume("game.o.points", AUTO_ACK, new PointConsumer(channel, dao));
-        channel.basicConsume("game.o.milestones", AUTO_ACK, new MilestoneConsumer(channel, dao));
-        channel.basicConsume("game.o.milestonestates", AUTO_ACK, new MilestoneStateConsumer(channel, dao));
-        channel.basicConsume("game.o.badges", AUTO_ACK, new BadgeConsumer(channel, dao));
-        channel.basicConsume("game.o.challenges", AUTO_ACK, new ChallengeConsumer(channel, dao));
+        String pointsQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_POINTS_SINK, contextInfo.getGameId());
+        String badgesQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_BADGES_SINK, contextInfo.getGameId());
+        String msQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_MILESTONES_SINK, contextInfo.getGameId());
+        String msStateQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_MILESTONESTATE_SINK, contextInfo.getGameId());
+        String challengesQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_CHALLENGES_SINK, contextInfo.getGameId());
+
+        channel.queueDeclare(pointsQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
+        channel.queueDeclare(msQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
+        channel.queueDeclare(msStateQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
+        channel.queueDeclare(badgesQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
+        channel.queueDeclare(challengesQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
+
+        channel.basicConsume(pointsQ, AUTO_ACK, new PointConsumer(channel, dao, contextInfo));
+        channel.basicConsume(msQ, AUTO_ACK, new MilestoneConsumer(channel, dao, contextInfo));
+        channel.basicConsume(msStateQ, AUTO_ACK, new MilestoneStateConsumer(channel, dao, contextInfo));
+        channel.basicConsume(badgesQ, AUTO_ACK, new BadgeConsumer(channel, dao, contextInfo));
+        channel.basicConsume(challengesQ, AUTO_ACK, new ChallengeConsumer(channel, dao, contextInfo));
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
@@ -78,6 +86,10 @@ public class Main {
                 e.printStackTrace();
             }
         }));
+    }
+
+    private static String replaceQ(String name, long id) {
+        return name.replace("{gid}", String.valueOf(id));
     }
 
 }

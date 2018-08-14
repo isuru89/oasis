@@ -4,12 +4,14 @@ INSERT INTO OA_CHALLENGE_WINNER (
     team_scope_id,
     challenge_id,
     points,
-    won_at
+    won_at,
+    game_id
 ) VALUES (
     :userId,
     :teamId,
     :teamScopeId,
     :challengeId,
     :points,
-    :wonAt
+    :wonAt,
+    :gameId
 )

@@ -11,6 +11,7 @@ INSERT INTO OA_BADGES (
     end_ext_id,
     start_time,
     end_time,
+    game_id,
     tag
 ) VALUES (
     :userId,
@@ -23,6 +24,7 @@ INSERT INTO OA_BADGES (
     :subBadgeId,
     :startExtId, :endExtId,
     :startTime, :endTime,
+    :gameId,
     :tag
 )
 ON DUPLICATE KEY

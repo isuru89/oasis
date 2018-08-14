@@ -18,8 +18,8 @@ public class MilestoneStateConsumer extends BaseConsumer<MilestoneStateModel> {
      * @param channel the channel to which this consumer is attached
      * @param dao
      */
-    public MilestoneStateConsumer(Channel channel, IOasisDao dao) {
-        super(channel, dao, MilestoneStateModel.class);
+    public MilestoneStateConsumer(Channel channel, IOasisDao dao, ContextInfo contextInfo) {
+        super(channel, dao, MilestoneStateModel.class, contextInfo);
     }
 
     @Override
@@ -31,6 +31,7 @@ public class MilestoneStateConsumer extends BaseConsumer<MilestoneStateModel> {
         map.put("valueLong", msg.getValueInt() == Long.MIN_VALUE ? null : msg.getValueInt());
         map.put("nextVal", msg.getNextValue());
         map.put("nextValInt", msg.getNextValueInt());
+        map.put("gameId", contextInfo.getGameId());
 
         try {
             dao.executeCommand("game/updateMilestoneState", map);
