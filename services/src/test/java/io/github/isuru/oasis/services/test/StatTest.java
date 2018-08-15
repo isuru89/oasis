@@ -1,13 +1,7 @@
 package io.github.isuru.oasis.services.test;
 
-import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.db.IOasisDao;
-import io.github.isuru.oasis.db.OasisDbFactory;
-import io.github.isuru.oasis.db.OasisDbPool;
-import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IStatService;
 import io.github.isuru.oasis.services.api.dto.*;
-import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.model.PurchasedItem;
 import io.github.isuru.oasis.services.model.UserRankRecordDto;
 import org.junit.jupiter.api.AfterAll;
@@ -15,10 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.util.List;
-import java.util.function.ToIntFunction;
-import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna

@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.db;
+package io.github.isuru.oasis.model.db;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,7 +14,7 @@ public final class OasisDbPool {
 
     private OasisDbPool() {}
 
-    static IOasisDao put(String name, IOasisDao oasisDao) {
+    public static IOasisDao put(String name, IOasisDao oasisDao) {
         Holder.INSTANCE.daoPool.put(name, oasisDao);
         return oasisDao;
     }

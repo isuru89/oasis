@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.services.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.OasisServer;
 import io.github.isuru.oasis.services.api.IProfileService;

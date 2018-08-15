@@ -1,7 +1,6 @@
-package io.github.isuru.oasis.db;
+package io.github.isuru.oasis.model.db;
 
-import io.github.isuru.oasis.db.jdbi.ConsumerEx;
-import io.github.isuru.oasis.db.jdbi.JdbcTransactionCtx;
+import io.github.isuru.oasis.model.utils.ConsumerEx;
 
 import java.util.Map;
 
@@ -25,5 +24,4 @@ public interface IOasisDao extends AutoCloseable {
 
     IDefinitionDao getDefinitionDao();
 
-    IGameDao getGameDao();
 }

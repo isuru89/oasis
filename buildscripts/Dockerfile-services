@@ -1,0 +1,14 @@
+FROM openjdk:8-jre
+MAINTAINER Isuru Weerarathna <uisurumadushanka89@gmail.com>
+
+WORKDIR /usr/share/oasis
+ENTRYPOINT ["/usr/bin/java", "-classpath", "./*:libs/*", "io.github.isuru.oasis.services.OasisServer"]
+EXPOSE 5885
+
+# Add dependency library files
+ADD services/target/libs /usr/share/oasis
+
+# Add main executing jar
+ADD services/target/oasis-service.jar /usr/share/oasis/oasis-service.jar
+
+

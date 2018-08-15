@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.db;
+package io.github.isuru.oasis.model.db;
 
 import java.io.Closeable;
 

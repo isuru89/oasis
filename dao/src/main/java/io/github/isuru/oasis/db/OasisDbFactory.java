@@ -1,6 +1,10 @@
 package io.github.isuru.oasis.db;
 
 import io.github.isuru.oasis.db.jdbi.JdbiOasisDao;
+import io.github.isuru.oasis.model.db.DbProperties;
+import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.db.IQueryRepo;
+import io.github.isuru.oasis.model.db.OasisDbPool;
 
 /**
  * @author iweerarathna

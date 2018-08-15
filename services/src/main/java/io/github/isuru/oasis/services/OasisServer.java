@@ -1,11 +1,9 @@
 package io.github.isuru.oasis.services;
 
-import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
-import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.model.configs.Configs;
-import io.github.isuru.oasis.model.utils.OasisUtils;
+import io.github.isuru.oasis.model.db.DbProperties;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.api.routers.Routers;
@@ -18,8 +16,8 @@ import spark.Spark;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
 
 public class OasisServer {
 
@@ -34,7 +32,7 @@ public class OasisServer {
         LOGGER.debug("Initializing configurations...");
         Configs configs = initConfigs();
 
-        AuthUtils.get().init();
+        AuthUtils.get().init(configs);
 
         LOGGER.debug("Initializing database...");
         DbProperties dbProperties = initDbProperties(configs);
@@ -79,18 +77,8 @@ public class OasisServer {
         }
     }
 
-    private static DbProperties initDbProperties(Configs configs) {
-        DbProperties dbProperties = new DbProperties(OasisDbPool.DEFAULT);
-
-        dbProperties.setQueryLocation(configs.getStrReq("oasis.db.scripts.path"));
-        dbProperties.setUrl(configs.getStrReq("oasis.db.url"));
-        dbProperties.setUsername(configs.getStrReq("oasis.db.username"));
-        dbProperties.setPassword(configs.getStrReq("oasis.db.password"));
-
-        Map<String, Object> map = OasisUtils.filterKeys(configs.getProps(), "oasis.db.pool.");
-        dbProperties.setOtherOptions(map);
-
-        return dbProperties;
+    private static DbProperties initDbProperties(Configs configs) throws FileNotFoundException {
+        return DbProperties.fromProps(configs);
     }
 
     private static void configureLogs() {

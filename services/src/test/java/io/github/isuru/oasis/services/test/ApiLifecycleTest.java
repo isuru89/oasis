@@ -1,9 +1,5 @@
 package io.github.isuru.oasis.services.test;
 
-import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.db.IOasisDao;
-import io.github.isuru.oasis.db.OasisDbFactory;
-import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.model.defs.BadgeDef;
 import io.github.isuru.oasis.model.defs.BadgesDef;
 import io.github.isuru.oasis.model.defs.GameDef;
@@ -14,8 +10,6 @@ import io.github.isuru.oasis.model.defs.MilestonesDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.defs.PointsDef;
-import io.github.isuru.oasis.services.api.IOasisApiService;
-import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.api.impl.LifeCycleService;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
 import org.apache.commons.io.FileUtils;
@@ -30,7 +24,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 

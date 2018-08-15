@@ -1,16 +1,9 @@
 package io.github.isuru.oasis.services.test;
 
-import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.db.IOasisDao;
-import io.github.isuru.oasis.db.OasisDbFactory;
-import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.*;
 import io.github.isuru.oasis.services.api.IGameDefService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
-import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
-import javafx.util.Pair;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -18,7 +11,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;

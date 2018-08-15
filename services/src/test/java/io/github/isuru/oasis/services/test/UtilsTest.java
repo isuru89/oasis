@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.test;
 
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.Checks;
@@ -9,11 +10,13 @@ import io.github.isuru.oasis.services.utils.UserRole;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author iweerarathna
@@ -54,7 +57,14 @@ class UtilsTest extends AbstractApiTest {
 
     @Test
     void testAuth() throws Exception {
-        AuthUtils.get().init();
+        Properties properties = new Properties();
+        Configs configs;
+        try (InputStream inputStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("oasis/configs/oasis.properties")) {
+            properties.load(inputStream);
+            configs = Configs.from(properties);
+        }
+        AuthUtils.get().init(configs);
 
         AuthUtils.TokenInfo tokenInfo = new AuthUtils.TokenInfo();
         tokenInfo.setUser(123);

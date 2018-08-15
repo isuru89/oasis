@@ -3,10 +3,10 @@ package io.github.isuru.oasis.injector;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
+import io.github.isuru.oasis.model.db.DbProperties;
+import io.github.isuru.oasis.model.db.IOasisDao;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +15,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author iweerarathna
  */
-public class Main {
+public class Injector {
 
     private static final boolean DURABLE = true;
     private static final boolean AUTO_ACK = false;
@@ -24,12 +24,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         //PropertyConfigurator.configure();
-        DbProperties dbProps = new DbProperties("oasis-injector");
-        dbProps.setUrl("jdbc:mariadb://localhost/oasis");
-        dbProps.setUsername("isuru");
-        dbProps.setPassword("isuru");
-        //dbProps.setUseTemplateEngine(false);
-        dbProps.setQueryLocation(new File("./scripts/db").getAbsolutePath());
+        File dbConfigFile = new File("./configs/jdbc.properties");
+        DbProperties dbProps = DbProperties.fromFile(dbConfigFile);
 
         IOasisDao dao = OasisDbFactory.create(dbProps);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -39,6 +35,8 @@ public class Main {
                 e.printStackTrace();
             }
         }));
+
+        File rabbitFile = new File("./configs/rabbit.properties");
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");

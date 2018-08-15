@@ -1,10 +1,11 @@
 package io.github.isuru.oasis.db.jdbi;
 
-import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.db.IDefinitionDao;
-import io.github.isuru.oasis.db.IGameDao;
-import io.github.isuru.oasis.db.IOasisDao;
-import io.github.isuru.oasis.db.IQueryRepo;
+import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.db.DbProperties;
+import io.github.isuru.oasis.model.db.IDefinitionDao;
+import io.github.isuru.oasis.model.db.IQueryRepo;
+import io.github.isuru.oasis.model.db.JdbcTransactionCtx;
+import io.github.isuru.oasis.model.utils.ConsumerEx;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.HandleCallback;
 import org.jdbi.v3.core.Jdbi;
@@ -27,7 +28,6 @@ public class JdbiOasisDao implements IOasisDao {
 
     private Jdbi jdbi;
     private IDefinitionDao definitionDao;
-    private IGameDao gameDao;
 
     public JdbiOasisDao(IQueryRepo queryRepo) {
         this.queryRepo = queryRepo;
@@ -139,14 +139,6 @@ public class JdbiOasisDao implements IOasisDao {
             definitionDao = new JdbiDefinitionDao(this);
         }
         return definitionDao;
-    }
-
-    @Override
-    public IGameDao getGameDao() {
-        if (gameDao == null) {
-            gameDao = new JdbiGameDao(this);
-        }
-        return gameDao;
     }
 
     @Override

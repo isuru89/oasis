@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.db.jdbi;
 
-import io.github.isuru.oasis.db.IDefinitionDao;
-import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.db.IDefinitionDao;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.DefWrapper;
 
 import java.util.HashMap;

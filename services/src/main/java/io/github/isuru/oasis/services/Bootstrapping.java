@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.services;
 
-import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.PointDef;

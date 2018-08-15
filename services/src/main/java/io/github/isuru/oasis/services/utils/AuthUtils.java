@@ -49,12 +49,14 @@ public final class AuthUtils {
 
     private AuthUtils() {}
 
-    public void init() throws Exception {
+    public void init(Configs configs) throws Exception {
         mapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
 
         // init jwt configurations
-        byte[] bytesPrivate = Files.readAllBytes(Paths.get("../configs/auth/private.der"));
-        byte[] bytesPublic = Files.readAllBytes(Paths.get("../configs/auth/public.der"));
+        String publicKeyPath = Configs.get().getStrReq("oasis.public.key");
+        String privateKeyPath = Configs.get().getStrReq("oasis.private.key");
+        byte[] bytesPrivate = Files.readAllBytes(Paths.get(privateKeyPath));
+        byte[] bytesPublic = Files.readAllBytes(Paths.get(publicKeyPath));
         PKCS8EncodedKeySpec specPrivate = new PKCS8EncodedKeySpec(bytesPrivate);
         X509EncodedKeySpec specPublic = new X509EncodedKeySpec(bytesPublic);
         RSAPrivateKey rsaPrivate = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(specPrivate);

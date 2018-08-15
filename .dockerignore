@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mobi)
+*.java
+*.class
+*.log
+/scripts/examples
+/svp
+/web/node_modules
+/data

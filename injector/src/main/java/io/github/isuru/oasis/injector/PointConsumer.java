@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.injector;
 
 import com.rabbitmq.client.Channel;
-import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.injector.model.PointModel;
 import io.github.isuru.oasis.model.Event;
 

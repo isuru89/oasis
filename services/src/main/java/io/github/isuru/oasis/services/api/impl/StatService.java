@@ -1,12 +1,11 @@
 package io.github.isuru.oasis.services.api.impl;
 
-import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IStatService;
 import io.github.isuru.oasis.services.api.dto.*;
-import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.model.enums.ScopingType;
 import io.github.isuru.oasis.services.utils.Checks;

@@ -1,5 +1,8 @@
 package io.github.isuru.oasis.db;
 
+import io.github.isuru.oasis.model.db.DbProperties;
+import io.github.isuru.oasis.model.db.IQueryRepo;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

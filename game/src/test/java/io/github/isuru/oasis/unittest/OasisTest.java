@@ -1,6 +1,5 @@
 package io.github.isuru.oasis.unittest;
 
-import io.github.isuru.oasis.db.DbProperties;
 import io.github.isuru.oasis.game.Oasis;
 import io.github.isuru.oasis.game.OasisExecution;
 import io.github.isuru.oasis.model.Event;
@@ -47,12 +46,6 @@ public class OasisTest {
 
         Assertions.assertNotNull(oasis.getGameVariables());
         Assertions.assertEquals(oasis.getGameVariables().size(), 1);
-
-        DbProperties properties = new DbProperties("testing");
-        oasis.setDbProperties(properties);
-
-        Assertions.assertNotNull(oasis.getDbProperties());
-        Assertions.assertEquals(oasis.getDbProperties().getDaoName(), "testing");
     }
 
     @Test

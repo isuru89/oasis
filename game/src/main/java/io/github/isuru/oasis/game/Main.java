@@ -1,14 +1,9 @@
 package io.github.isuru.oasis.game;
 
-import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.db.IOasisDao;
-import io.github.isuru.oasis.db.OasisDbFactory;
-import io.github.isuru.oasis.db.OasisDbPool;
 import io.github.isuru.oasis.game.parser.BadgeParser;
 import io.github.isuru.oasis.game.parser.KpiParser;
 import io.github.isuru.oasis.game.parser.MilestoneParser;
 import io.github.isuru.oasis.game.parser.PointParser;
-import io.github.isuru.oasis.game.persist.DbOutputHandler;
 import io.github.isuru.oasis.game.persist.NoneOutputHandler;
 import io.github.isuru.oasis.game.persist.OasisKafkaSink;
 import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSink;
@@ -16,10 +11,10 @@ import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSource;
 import io.github.isuru.oasis.game.persist.rabbit.RabbitUtils;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.game.utils.Constants;
-import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
+import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
@@ -99,11 +94,8 @@ public class Main {
     }
 
     static OasisChallengeExecution createOutputHandler(Configs gameProps, OasisChallengeExecution execution) {
-        String jdbcInst = gameProps.getStr(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
         String outputType = gameProps.getStr(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
-        if ("db".equals(outputType)) {
-            return execution.outputHandler(new DbOutputHandler(jdbcInst));
-        } else if ("kafka".equals(outputType)) {
+        if ("kafka".equals(outputType)) {
             return execution.outputHandler(new OasisKafkaSink(gameProps));
         } else if ("none".equalsIgnoreCase(outputType)) {
             return execution.outputHandler(new NoneOutputHandler());
@@ -114,21 +106,9 @@ public class Main {
         }
     }
 
-    static OasisExecution createOutputHandler(Configs gameProps, OasisExecution execution) throws Exception {
-        String jdbcInst = gameProps.getStr(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
+    static OasisExecution createOutputHandler(Configs gameProps, OasisExecution execution) {
         String outputType = gameProps.getStr(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
-        if ("db".equals(outputType)) {
-            DbProperties dbProps = createConfigs(gameProps);
-            IOasisDao oasisDao = OasisDbFactory.create(dbProps);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    oasisDao.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }));
-            return execution.outputHandler(new DbOutputHandler(jdbcInst));
-        } else if ("kafka".equals(outputType)) {
+        if ("kafka".equals(outputType)) {
             return execution.outputSink(new OasisKafkaSink(gameProps));
         } else if ("none".equalsIgnoreCase(outputType)) {
             return execution.outputHandler(new NoneOutputHandler());
@@ -188,23 +168,6 @@ public class Main {
         } else {
             throw new IllegalArgumentException("Invalid event source type specified! [" + type + "]");
         }
-    }
-
-    static DbProperties createConfigs(Configs gameProps) throws Exception {
-        String jdbcInst = gameProps.getStr(Constants.KEY_JDBC_INSTANCE, OasisDbPool.DEFAULT);
-
-        File scriptsDir = new File(gameProps.getStrReq(Constants.KEY_DB_SCRIPTS_DIR));
-        if (!scriptsDir.exists()) {
-            throw new FileNotFoundException("DB scripts folder does not exist! [" + scriptsDir.getAbsolutePath() + "]");
-        }
-
-        DbProperties dbProperties = new DbProperties(jdbcInst);
-        dbProperties.setUrl(gameProps.getStrReq(Constants.KEY_JDBC_URL));
-        dbProperties.setUsername(gameProps.getStrReq(Constants.KEY_JDBC_USERNAME));
-        dbProperties.setPassword(gameProps.getStr(Constants.KEY_JDBC_PASSWORD, null));
-
-        dbProperties.setQueryLocation(scriptsDir.getAbsolutePath());
-        return dbProperties;
     }
 
     private static OasisGameDef readGameDef(File file) throws IOException {

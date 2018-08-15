@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.services;
 
-import io.github.isuru.oasis.db.DbProperties;
-import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.db.DbProperties;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
-import io.github.isuru.oasis.db.OasisDbPool;
+import io.github.isuru.oasis.model.db.OasisDbPool;
 import io.github.isuru.oasis.model.defs.BadgeDef;
 import io.github.isuru.oasis.model.defs.BadgesDef;
 import io.github.isuru.oasis.model.defs.GameDef;

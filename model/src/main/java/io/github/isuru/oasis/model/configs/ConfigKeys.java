@@ -5,6 +5,8 @@ package io.github.isuru.oasis.model.configs;
  */
 public class ConfigKeys {
 
+    public static final String KEY_JDBC_SCRIPTS_PATH = "oasis.db.scripts.path";
+
     public static final String KEY_RABBIT_HOST = "rabbit.host";
     public static final String KEY_RABBIT_PORT = "rabbit.port";
     public static final String KEY_RABBIT_VIRTUAL_HOST = "rabbit.virtualhost";

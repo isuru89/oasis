@@ -18,41 +18,36 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
             <version>${flink.version}</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table_2.11</artifactId>
             <version>${flink.version}</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-scala_2.11</artifactId>
             <version>1.5.0</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka-0.11_2.11</artifactId>
             <version>1.5.0</version>
-            <!--<scope>provided</scope>-->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-rabbitmq_2.11</artifactId>
             <version>1.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.isuru</groupId>
-            <artifactId>oasis-dao</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.isuru</groupId>

@@ -2,24 +2,69 @@ version: '3'
 
 services:
   oa-web:
-    build: ./services
+    build:
+      context: .
+      dockerfile: buildscripts/Dockerfile-services
     ports:
       - "5885:5885"
+    volumes:
+      - "./configs:/usr/share/oasis/configs"
+      - "./scripts:/usr/share/oasis/scripts"
+    depends_on:
+      - db
+#      - redis
+#      - rabbit
+    networks:
+      - frontend
+      - backend
 
-  oa-injector:
-    build: ./injector
+#  oa-injector:
+#    build:
+#      context: .
+#      dockerfile: buildscripts/Dockerfile-injector
+#    depends_on:
+#      - db
+#      - rabbit
+#    networks:
+#      - backend
 
-  flink:
-    image: flink:1.5
+#  rabbit:
+#    image: uisuru89/oasis-rabbit
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    volumes:
+#      - "./data/rabbit:/var/lib/rabbitmq/mnesia"
+#    networks:
+#      - backend
+
+#  flink:
+#    image: flink:1.5
+#    ports:
+#      - "8083:8081"
+#      - "6121:6121"
+#    networks:
+#      - backend
+
+  db:
+    image: uisuru89/oasis-db
     ports:
-      - "8083:8081"
-      - "6121:6121"
-
-  mysql8:
-    image: mysql:8
+      - "3306:3306"
     volumes:
       - "./data/db:/var/lib/mysql"
+    environment:
+      - MYSQL_DATABASE=oasis
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=oasis
+      - MYSQL_PASSWORD=oasis
+    networks:
+      - backend
 
-  redis:
-    image: redis
+#  redis:
+#    image: redis
+#    networks:
+#      - backend
 
+networks:
+  backend:
+  frontend:

@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.db;
+package io.github.isuru.oasis.model.db;
 
 import io.github.isuru.oasis.model.defs.DefWrapper;
 

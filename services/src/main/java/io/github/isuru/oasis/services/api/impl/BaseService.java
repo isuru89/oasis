@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.services.api.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 
 import java.util.Iterator;

@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.services.api.impl;
 
-import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;

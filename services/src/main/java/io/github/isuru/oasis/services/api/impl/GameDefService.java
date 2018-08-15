@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.services.api.impl;
 
-import io.github.isuru.oasis.db.IOasisDao;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.BadgeDef;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
@@ -12,7 +12,6 @@ import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.OasisDefinition;
 import io.github.isuru.oasis.model.defs.PointDef;
-import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.Bootstrapping;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;

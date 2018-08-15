@@ -2,7 +2,7 @@ package io.github.isuru.oasis.db.jdbi;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import io.github.isuru.oasis.db.DbProperties;
+import io.github.isuru.oasis.model.db.DbProperties;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -17,6 +17,7 @@ class JdbcPool {
         config.setJdbcUrl(properties.getUrl());
         config.setUsername(properties.getUsername());
         config.setPassword(properties.getPassword());
+        System.out.println(properties.getUsername() + " , " + properties.getPassword());
 
         Properties props = new Properties();
         if (properties.getOtherOptions() != null) {
@@ -28,7 +29,25 @@ class JdbcPool {
             props.put("cachePrepStmts", true);
             props.put("useServerPrepStmts", true);
         }
-        return new HikariDataSource(config);
+
+        DataSource dataSource;
+
+        int retry = 10;
+        while (retry > 0) {
+            try {
+                dataSource = new HikariDataSource(config);
+                return dataSource;
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+            retry--;
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        throw new IllegalStateException("Cannot initialize database connection!");
     }
 
 }
