@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.api.impl;
 
+import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.DefWrapper;
 import io.github.isuru.oasis.model.defs.GameDef;
@@ -92,7 +93,7 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
 
     private boolean startDef(long defId, boolean isGame) throws Exception {
         Configs configs = Configs.get();
-        File storageDir = configs.getPath(Configs.KEY_STORAGE_DIR, Constants.DEF_WORKSPACE_DIR);
+        File storageDir = configs.getPath(ConfigKeys.KEY_STORAGE_DIR, Constants.DEF_WORKSPACE_DIR);
 
         FlinkSubmittedJob job = getTheOnlyRecord("getJobOfDef",
                 Maps.create("defId", defId),
@@ -127,7 +128,7 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
 
         JarRunResponse jarRunResponse = flinkClient.runJar(uploadedJar.getId(),
                 args,
-                configs.getInt(Configs.KEY_EXEC_PARALLELISM, Constants.DEF_PARALLELISM),
+                configs.getInt(ConfigKeys.KEY_EXEC_PARALLELISM, Constants.DEF_PARALLELISM),
                 true,
                 savepointDir.getAbsolutePath()).blockingSingle();
 

@@ -12,9 +12,6 @@ import java.util.Properties;
  */
 public final class Configs implements Serializable {
 
-    public static final String KEY_STORAGE_DIR = "oasis.storage.dir";
-    public static final String KEY_EXEC_PARALLELISM = "oasis.exec.parallelism";
-
     private final Properties props = new Properties();
 
     public void append(String key, String value) {

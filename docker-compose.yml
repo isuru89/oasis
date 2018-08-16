@@ -10,6 +10,7 @@ services:
     volumes:
       - "./configs:/usr/share/oasis/configs"
       - "./scripts:/usr/share/oasis/scripts"
+      - "./data/logs/server:/usr/share/oasis/logs"
     depends_on:
       - db
 #      - redis
@@ -28,29 +29,34 @@ services:
 #    networks:
 #      - backend
 
-#  rabbit:
-#    image: uisuru89/oasis-rabbit
-#    ports:
-#      - "5672:5672"
-#      - "15672:15672"
-#    volumes:
-#      - "./data/rabbit:/var/lib/rabbitmq/mnesia"
-#    networks:
-#      - backend
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - "./buildscripts/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
+      - "./buildscripts/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json"
+      - "./data/rabbit:/var/lib/rabbitmq/mnesia"
+    networks:
+      - backend
 
-#  flink:
-#    image: flink:1.5
-#    ports:
-#      - "8083:8081"
-#      - "6121:6121"
-#    networks:
-#      - backend
+  flink:
+    image: flink:1.5
+    ports:
+      - "8083:8081"
+      - "6121:6121"
+    volumes:
+      - "./data/flink:/opt/flink/data:"
+      - "./data/logs/flink:/opt/flink/log"
+      - "./buildscripts/flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml"
+    networks:
+      - backend
 
   db:
-    image: uisuru89/oasis-db
-    ports:
-      - "3306:3306"
+    image: mysql:8
     volumes:
+      - "./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql"
       - "./data/db:/var/lib/mysql"
     environment:
       - MYSQL_DATABASE=oasis

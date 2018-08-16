@@ -6,6 +6,12 @@ package io.github.isuru.oasis.model.configs;
 public class ConfigKeys {
 
     public static final String KEY_JDBC_SCRIPTS_PATH = "oasis.db.scripts.path";
+    public static final String KEY_JDBC_URL = "oasis.db.url";
+    public static final String KEY_JDBC_USERNAME = "oasis.db.username";
+    public static final String KEY_JDBC_PASSWORD = "oasis.db.password";
+
+    public static final String KEY_STORAGE_DIR = "oasis.storage.dir";
+    public static final String KEY_EXEC_PARALLELISM = "oasis.exec.parallelism";
 
     public static final String KEY_RABBIT_HOST = "rabbit.host";
     public static final String KEY_RABBIT_PORT = "rabbit.port";

@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
  */
 class FlinkTest {
 
-    //@Test
+    @Test
     void testFlinkApi() {
         FlinkServices flinkServices = new FlinkServices();
-        flinkServices.init("http://localhost:8089");
+        flinkServices.init("http://localhost:8084");
 
         FlinkClient flinkClient = flinkServices.getFlinkClient();
         JarListInfo jarListInfo = flinkClient.getJars().blockingFirst();

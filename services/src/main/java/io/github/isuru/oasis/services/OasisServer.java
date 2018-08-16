@@ -2,8 +2,10 @@ package io.github.isuru.oasis.services;
 
 import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.model.configs.Configs;
+import io.github.isuru.oasis.model.configs.EnvKeys;
 import io.github.isuru.oasis.model.db.DbProperties;
 import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.api.routers.Routers;
@@ -40,7 +42,8 @@ public class OasisServer {
 
         LOGGER.debug("Initializing Flink services...");
         FlinkServices flinkServices = new FlinkServices();
-        flinkServices.init(configs.getStrReq("oasis.flink.url"));
+        flinkServices.init(OasisUtils.getEnvOr(EnvKeys.OASIS_FLINK_URL,
+                configs.getStrReq("oasis.flink.url")));
 
         LOGGER.debug("Initializing services...");
         apiService = new DefaultOasisApiService(oasisDao, flinkServices);

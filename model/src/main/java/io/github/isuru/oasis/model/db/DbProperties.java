@@ -2,6 +2,7 @@ package io.github.isuru.oasis.model.db;
 
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
+import io.github.isuru.oasis.model.configs.EnvKeys;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 
 import java.io.File;
@@ -83,9 +84,14 @@ public class DbProperties {
     public static DbProperties fromProps(Configs configs) throws FileNotFoundException {
         String name = configs.getStr("oasis.db.name", "default");
         DbProperties dbProps = new DbProperties(name);
-        dbProps.setUrl(configs.getStrReq("oasis.db.url"));
-        dbProps.setUsername(configs.getStrReq("oasis.db.username"));
-        dbProps.setPassword(configs.getStrReq("oasis.db.password"));
+        String oasisJdbcUrl = System.getenv(EnvKeys.OASIS_JDBC_URL);
+        if (oasisJdbcUrl != null && !oasisJdbcUrl.isEmpty()) {
+            dbProps.setUrl(oasisJdbcUrl);
+        } else {
+            dbProps.setUrl(configs.getStrReq(ConfigKeys.KEY_JDBC_URL));
+        }
+        dbProps.setUsername(configs.getStrReq(ConfigKeys.KEY_JDBC_USERNAME));
+        dbProps.setPassword(configs.getStrReq(ConfigKeys.KEY_JDBC_PASSWORD));
         File scriptsDir = new File(configs.getStrReq(ConfigKeys.KEY_JDBC_SCRIPTS_PATH));
         if (scriptsDir.exists()) {
             dbProps.setQueryLocation(scriptsDir.getAbsolutePath());

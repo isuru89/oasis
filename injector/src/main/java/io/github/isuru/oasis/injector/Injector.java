@@ -5,8 +5,10 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
+import io.github.isuru.oasis.model.configs.EnvKeys;
 import io.github.isuru.oasis.model.db.DbProperties;
 import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.utils.OasisUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +41,7 @@ public class Injector {
         File rabbitFile = new File("./configs/rabbit.properties");
 
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost(OasisUtils.getEnvOr(EnvKeys.OASIS_RABBIT_HOST, "localhost"));
         factory.setPort(5672);
         factory.setUsername("reader");
         factory.setPassword("reader");

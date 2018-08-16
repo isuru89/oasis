@@ -9,6 +9,15 @@ import java.util.Properties;
  */
 public class OasisUtils {
 
+    public static String getEnvOr(String key, String defVal) {
+        String getenv = System.getenv(key);
+        if (getenv != null && !getenv.isEmpty()) {
+            return getenv;
+        }
+        return defVal;
+    }
+
+
     public static Map<String, Object> filterKeys(Properties properties, String keyPfx) {
         Map<String, Object> map = new HashMap<>();
         for (Object keyObj : properties.keySet()) {
