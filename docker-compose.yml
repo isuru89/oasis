@@ -11,6 +11,7 @@ services:
       - "./configs:/usr/share/oasis/configs"
       - "./scripts:/usr/share/oasis/scripts"
       - "./data/logs/server:/usr/share/oasis/logs"
+      - "./game/target/game.jar:/usr/share/oasis/ws/artifacts/game.jar"
     depends_on:
       - db
 #      - redis
@@ -47,7 +48,7 @@ services:
       - "8083:8081"
       - "6121:6121"
     volumes:
-      - "./data/flink:/opt/flink/data:"
+      - "./data/flink:/opt/flink/data"
       - "./data/logs/flink:/opt/flink/log"
       - "./buildscripts/flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml"
     networks:

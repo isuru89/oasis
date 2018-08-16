@@ -19,12 +19,7 @@ public final class Constants {
     public static final String KEY_SOURCE_TYPE = "source.type";
     public static final String KEY_SOURCE_FILE = "source.file";
 
-
-    public static final String KEY_DB_SCRIPTS_DIR = "db.scripts.dir";
     public static final String KEY_JDBC_INSTANCE = "jdbc.instance";
-    public static final String KEY_JDBC_URL = "jdbc.url";
-    public static final String KEY_JDBC_USERNAME = "jdbc.username";
-    public static final String KEY_JDBC_PASSWORD = "jdbc.password";
 
     public static final String KEY_CHECKPOINT_ENABLED = "checkpoint.enabled";
     public static final String KEY_CHECKPOINT_INTERVAL = "checkpoint.interval";

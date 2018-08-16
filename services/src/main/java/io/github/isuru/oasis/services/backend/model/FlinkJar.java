@@ -6,7 +6,7 @@ public class FlinkJar {
 
     private String id;
     private String name;
-    private Integer uploaded;
+    private Long uploaded;
     private List<JarEntry> entry;
 
     public String getId() {
@@ -25,11 +25,11 @@ public class FlinkJar {
         this.name = name;
     }
 
-    public Integer getUploaded() {
+    public Long getUploaded() {
         return uploaded;
     }
 
-    public void setUploaded(Integer uploaded) {
+    public void setUploaded(Long uploaded) {
         this.uploaded = uploaded;
     }
 
@@ -39,6 +39,16 @@ public class FlinkJar {
 
     public void setEntry(List<JarEntry> entry) {
         this.entry = entry;
+    }
+
+    @Override
+    public String toString() {
+        return "FlinkJar{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", uploaded=" + uploaded +
+                ", entry=" + entry +
+                '}';
     }
 
     public static class JarEntry {
@@ -59,6 +69,14 @@ public class FlinkJar {
 
         public void setDescription(String description) {
             this.description = description;
+        }
+
+        @Override
+        public String toString() {
+            return "JarEntry{" +
+                    "name='" + name + '\'' +
+                    ", description='" + description + '\'' +
+                    '}';
         }
     }
 

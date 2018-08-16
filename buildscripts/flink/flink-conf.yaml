@@ -138,6 +138,8 @@ rest.port: 8081
 
 #jobmanager.web.submit.enable: false
 
+jobmanager.web.upload.dir: /opt/flink/data/uploads
+
 #==============================================================================
 # Advanced
 #==============================================================================

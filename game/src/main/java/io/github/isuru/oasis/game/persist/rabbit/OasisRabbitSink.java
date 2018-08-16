@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.game.persist.rabbit;
 
 import io.github.isuru.oasis.game.persist.OasisSink;
-import io.github.isuru.oasis.game.utils.Constants;
+import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -28,22 +28,18 @@ public class OasisRabbitSink extends OasisSink implements Serializable {
     public OasisRabbitSink(Configs gameProps) {
         this.gameProperties = gameProps;
 
-        pointQueue = queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_POINTS,
+        pointQueue = Utils.queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_POINTS,
                 ConfigKeys.DEF_RABBIT_Q_POINTS_SINK));
-        milestoneQueue = queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_MILESTONES,
+        milestoneQueue = Utils.queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_MILESTONES,
                 ConfigKeys.DEF_RABBIT_Q_MILESTONES_SINK));
-        milestoneStateQueue = queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_MILESTONESTATES,
+        milestoneStateQueue = Utils.queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_MILESTONESTATES,
                 ConfigKeys.DEF_RABBIT_Q_MILESTONESTATE_SINK));
-        badgeQueue = queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_BADGES,
+        badgeQueue = Utils.queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_BADGES,
                 ConfigKeys.DEF_RABBIT_Q_BADGES_SINK));
-        challengeQueue = queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_CHALLENGES,
+        challengeQueue = Utils.queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_CHALLENGES,
                 ConfigKeys.DEF_RABBIT_Q_CHALLENGES_SINK));
 
         config = RabbitUtils.createRabbitConfig(gameProps);
-    }
-
-    private String queueReplace(String name) {
-        return name.replace("{gid}", System.getProperty(Constants.ENV_OASIS_GAME_ID, ""));
     }
 
     @Override

@@ -17,7 +17,10 @@ public class OasisRabbitSource extends RMQSource<Event> {
     private Configs props;
 
     public OasisRabbitSource(Configs gameProps,
-                             RMQConnectionConfig rmqConnectionConfig, String queueName, boolean usesCorrelationId, DeserializationSchema<Event> deserializationSchema) {
+                             RMQConnectionConfig rmqConnectionConfig,
+                             String queueName,
+                             boolean usesCorrelationId,
+                             DeserializationSchema<Event> deserializationSchema) {
         super(rmqConnectionConfig, queueName, usesCorrelationId, deserializationSchema);
 
         props = gameProps;

@@ -87,12 +87,14 @@ public class OasisExecution {
             int interval = gameProperties.getInt(Constants.KEY_CHECKPOINT_INTERVAL, 20000);
             env.enableCheckpointing(interval, CheckpointingMode.EXACTLY_ONCE);
 
-            File configDir = new File(gameProperties.getStrReq(Constants.KEY_LOCATION));
-            String relPath = gameProperties.getStrReq(Constants.KEY_CHECKPOINT_DIR);
-            File chkDir = new File(configDir, relPath);
-            FileUtils.forceMkdir(chkDir);
+            if (gameProperties.has(Constants.KEY_CHECKPOINT_DIR)) {
+                File configDir = new File(gameProperties.getStrReq(Constants.KEY_LOCATION));
+                String relPath = gameProperties.getStrReq(Constants.KEY_CHECKPOINT_DIR);
+                File chkDir = new File(configDir, relPath);
+                FileUtils.forceMkdir(chkDir);
 
-            env.setStateBackend((StateBackend) new FsStateBackend(chkDir.toURI()));
+                env.setStateBackend((StateBackend) new FsStateBackend(chkDir.toURI()));
+            }
         }
     }
 

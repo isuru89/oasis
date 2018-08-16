@@ -24,4 +24,12 @@ public class JarUploadResponse {
     public boolean isSuccess() {
         return "success".equalsIgnoreCase(status);
     }
+
+    @Override
+    public String toString() {
+        return "JarUploadResponse{" +
+                "filename='" + filename + '\'' +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }

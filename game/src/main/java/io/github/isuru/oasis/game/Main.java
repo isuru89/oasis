@@ -11,6 +11,7 @@ import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSource;
 import io.github.isuru.oasis.game.persist.rabbit.RabbitUtils;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.game.utils.Constants;
+import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
@@ -159,7 +160,7 @@ public class Main {
             return new FlinkKafkaConsumer011<>(topic, deserialization, properties);
         } else if ("rabbit".equalsIgnoreCase(type)) {
             RMQConnectionConfig rabbitConfig = RabbitUtils.createRabbitConfig(gameProps);
-            String inputQueue = gameProps.getStrReq(ConfigKeys.KEY_RABBIT_QUEUE_SRC);
+            String inputQueue = Utils.queueReplace(gameProps.getStrReq(ConfigKeys.KEY_RABBIT_QUEUE_SRC));
 
             return new OasisRabbitSource(gameProps, rabbitConfig, inputQueue,
                     true,

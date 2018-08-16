@@ -10,7 +10,6 @@ import okhttp3.MultipartBody;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
-import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
@@ -22,7 +21,6 @@ public interface FlinkClient {
     @GET("/jars")
     Observable<JarListInfo> getJars();
 
-    @Headers("Content-Type: application/x-java-archive")
     @Multipart
     @POST("/jars/upload")
     Observable<JarUploadResponse> uploadJar(@Part MultipartBody.Part file);
