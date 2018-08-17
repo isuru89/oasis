@@ -24,6 +24,15 @@ public class Milestone implements Serializable {
     private boolean onlyPositive = false;
     private List<Level> levels;
     private transient Map<Integer, Level> levelMap = null;
+    private Long startingLevel = null;
+
+    public Long getStartingLevel() {
+        return startingLevel;
+    }
+
+    public void setStartingLevel(Long startingLevel) {
+        this.startingLevel = startingLevel;
+    }
 
     public boolean isOnlyPositive() {
         return onlyPositive;
