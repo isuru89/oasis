@@ -17,6 +17,13 @@ public class JobsStatusResponse {
         this.jobs = jobs;
     }
 
+    @Override
+    public String toString() {
+        return "JobsStatusResponse{" +
+                "jobs=" + jobs +
+                '}';
+    }
+
     /**
      * Job status is one of those.
      *
@@ -42,6 +49,14 @@ public class JobsStatusResponse {
 
         public void setStatus(String status) {
             this.status = status;
+        }
+
+        @Override
+        public String toString() {
+            return "JobStatus{" +
+                    "id='" + id + '\'' +
+                    ", status='" + status + '\'' +
+                    '}';
         }
     }
 

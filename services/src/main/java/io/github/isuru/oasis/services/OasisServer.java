@@ -34,6 +34,10 @@ public class OasisServer {
         LOGGER.debug("Initializing configurations...");
         Configs configs = initConfigs();
 
+        start(configs);
+    }
+
+    public static void start(Configs configs) throws Exception {
         AuthUtils.get().init(configs);
 
         LOGGER.debug("Initializing database...");
@@ -106,16 +110,19 @@ public class OasisServer {
                             "./configs/oasis.properties,./configs/jdbc.properties"));
         }
 
-        String[] parts = oasisConfigs.split("[,]");
+        loadConfigFiles(configs, oasisConfigs);
+
+        // after files are loaded, load properties
+        return configs.initWithSysProps();
+    }
+
+    public static void loadConfigFiles(Configs configs, String paths) throws IOException {
+        String[] parts = paths.split("[,]");
         for (String filePath : parts) {
             File file = new File(filePath);
             try (FileInputStream inputStream = new FileInputStream(file)) {
                 configs = configs.init(inputStream);
             }
         }
-
-        // after files are loaded, load properties
-        return configs.initWithSysProps();
     }
-
 }

@@ -5,6 +5,7 @@ import io.github.isuru.oasis.services.backend.model.JarRunResponse;
 import io.github.isuru.oasis.services.backend.model.JarUploadResponse;
 import io.github.isuru.oasis.services.backend.model.JobSaveRequest;
 import io.github.isuru.oasis.services.backend.model.JobsStatusResponse;
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import okhttp3.MultipartBody;
 import retrofit2.http.Body;
@@ -26,7 +27,7 @@ public interface FlinkClient {
     Observable<JarUploadResponse> uploadJar(@Part MultipartBody.Part file);
 
     @DELETE("/jars/{jarid}")
-    Observable<Void> deleteJar(@Path("jarid") String jarId);
+    Completable deleteJar(@Path("jarid") String jarId);
 
     @GET("/jobs")
     Observable<JobsStatusResponse> jobs();
@@ -39,6 +40,6 @@ public interface FlinkClient {
                                 @Query("savepointPath") String savepointPath);
 
     @POST("/jobs/:jobid/savepoints")
-    Observable<Void> jobSaveAndClose(@Path("jabid") String jobId,
+    Completable jobSaveAndClose(@Path("jabid") String jobId,
                                @Body JobSaveRequest saveRequest);
 }

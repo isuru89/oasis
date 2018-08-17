@@ -81,6 +81,7 @@ public class Main {
 
     private static void startChallenge(OasisGameDef oasisGameDef, Configs gameProps) throws Exception {
         ChallengeDef challengeDef = oasisGameDef.getChallenge();
+        System.setProperty(Constants.ENV_OASIS_GAME_ID, String.valueOf(challengeDef.getId()));
         Oasis oasis = new Oasis(String.format("challenge-%s", challengeDef.getName()));
         SourceFunction<Event> source = createSource(gameProps);
 

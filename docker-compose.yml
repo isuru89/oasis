@@ -12,6 +12,7 @@ services:
       - "./scripts:/usr/share/oasis/scripts"
       - "./data/logs/server:/usr/share/oasis/logs"
       - "./game/target/game.jar:/usr/share/oasis/ws/artifacts/game.jar"
+      - "./data/flink:/usr/share/oasis/ws/execution"
     depends_on:
       - db
 #      - redis
@@ -30,18 +31,6 @@ services:
 #    networks:
 #      - backend
 
-  rabbit:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - "./buildscripts/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
-      - "./buildscripts/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json"
-      - "./data/rabbit:/var/lib/rabbitmq/mnesia"
-    networks:
-      - backend
-
   flink:
     image: flink:1.5
     ports:
@@ -51,6 +40,18 @@ services:
       - "./data/flink:/opt/flink/data"
       - "./data/logs/flink:/opt/flink/log"
       - "./buildscripts/flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml"
+    networks:
+      - backend
+
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - "./buildscripts/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
+      - "./buildscripts/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json"
+      - "./data/rabbit:/var/lib/rabbitmq/mnesia"
     networks:
       - backend
 

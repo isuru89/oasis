@@ -4,6 +4,7 @@ import io.github.isuru.oasis.services.backend.FlinkClient;
 import io.github.isuru.oasis.services.backend.FlinkServices;
 import io.github.isuru.oasis.services.backend.model.JarListInfo;
 import io.github.isuru.oasis.services.backend.model.JarUploadResponse;
+import io.github.isuru.oasis.services.backend.model.JobsStatusResponse;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -41,7 +42,16 @@ class FlinkTest {
         System.out.println(jarLists);
         Assertions.assertEquals(1, jarLists.getFiles().size());
 
+        String id = jarLists.getFiles().get(0).getId();
+        flinkClient.deleteJar(id).blockingAwait();
 
+        JarListInfo tmp = flinkClient.getJars().blockingSingle();
+        System.out.println(tmp);
+        Assertions.assertEquals(0, tmp.getFiles().size());
+
+        JobsStatusResponse jobsStatusResponse = flinkClient.jobs().blockingSingle();
+        System.out.println(jobsStatusResponse);
+        Assertions.assertTrue(jobsStatusResponse.getJobs().isEmpty());
     }
 
 }

@@ -70,8 +70,11 @@ class RoutingTest extends AbstractApiTest {
         configs.append("oasis.config.file", "./src/test/resources/oasis/configs/oasis.properties," +
                 "./src/test/resources/oasis/configs/jdbc.properties," +
                 "./src/test/resources/oasis/configs/ldap.properties");
+        OasisServer.loadConfigFiles(configs, configs.getStrReq("oasis.config.file"));
+        configs.append("oasis.public.key", "../configs/auth/public.der");
+        configs.append("oasis.private.key", "../configs/auth/private.der");
         configs.append("oasis.logs.config.file", "./src/test/resources/oasis/configs/logger.properties");
-        OasisServer.main(new String[0]);
+        OasisServer.start(configs);
     }
 
     static void runBeforeApi() {

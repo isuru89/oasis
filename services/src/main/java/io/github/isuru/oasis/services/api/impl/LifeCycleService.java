@@ -76,7 +76,7 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
             // first stop flink job
             services.getFlinkClient()
                     .jobSaveAndClose(job.getJobId(), request)
-                    .blockingSingle();
+                    .blockingAwait();
 
             Map<String, Object> map = Maps.create("jobId", job.getJobId());
             return getDao().executeCommand("stopJob", map) > 0;
@@ -161,7 +161,7 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
     }
 
     private void writeGameRulesFile(long defId, boolean isGame, File specificExecutionDir) throws Exception {
-        File ruleFile = specificExecutionDir.toPath().resolve("rules.yml").toFile();
+        File ruleFile = specificExecutionDir.toPath().resolve(Constants.GAME_RULES_FILE).toFile();
         try (FileWriter writer = new FileWriter(ruleFile)) {
             writeGameRulesFile(defId, isGame, writer);
         }
@@ -224,7 +224,7 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
 
     private File getExecutionDir(long defId, File storageDir) throws IOException {
         File executionDir = storageDir.toPath()
-                .resolve(Constants.RUN_CONFIGS_SUB_DIR)
+                .resolve(Constants.ALL_EXECUTIONS_DIR)
                 .resolve(String.valueOf(defId))
                 .normalize()
                 .toFile();

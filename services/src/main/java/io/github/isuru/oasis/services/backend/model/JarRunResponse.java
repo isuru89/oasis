@@ -11,4 +11,11 @@ public class JarRunResponse {
     public void setJobid(String jobid) {
         this.jobid = jobid;
     }
+
+    @Override
+    public String toString() {
+        return "JarRunResponse{" +
+                "jobid='" + jobid + '\'' +
+                '}';
+    }
 }

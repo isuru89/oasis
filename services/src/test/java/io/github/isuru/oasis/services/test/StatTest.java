@@ -51,13 +51,13 @@ class StatTest extends AbstractApiTest {
         {
             PointBreakdownReqDto reqDto = new PointBreakdownReqDto();
             reqDto.setUserId(55);
-            reqDto.setPointId(32);
+            reqDto.setPointId(12);
             PointBreakdownResDto pointBreakdownList = statService.getPointBreakdownList(reqDto);
             Assertions.assertNotNull(pointBreakdownList);
             Assertions.assertTrue(pointBreakdownList.getCount() > 0);
             List<PointRecordDto> records = pointBreakdownList.getRecords();
             for (PointRecordDto recordDto : records) {
-                Assertions.assertEquals((int) recordDto.getPointId(), 32);
+                Assertions.assertEquals((int) recordDto.getPointId(), 12);
                 Assertions.assertEquals((int) recordDto.getUserId(), 55);
             }
             System.out.println(records.size());

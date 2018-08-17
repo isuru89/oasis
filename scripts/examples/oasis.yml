@@ -137,7 +137,7 @@ badges:
   subBadges: null
   within: null
 challenge: null
-game: {constants: null, displayName: null, id: 1, name: oasis-test}
+game: {constants: null, displayName: null, id: 4, name: oasis-test}
 kpis:
 - {displayName: kpi-totallines, event: submission, expression: addedLines + changedLines,
   field: totalCode, id: 9, name: kpi-totallines}
