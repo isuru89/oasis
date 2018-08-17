@@ -35,8 +35,8 @@ public final class RabbitDispatcher {
                 String.valueOf(ConfigKeys.DEF_RABBIT_PORT))));
         factory.setVirtualHost(configs.getStr(ConfigKeys.KEY_RABBIT_VIRTUAL_HOST,
                 ConfigKeys.DEF_RABBIT_VIRTUAL_HOST));
-        factory.setUsername(configs.getStrReq(ConfigKeys.KEY_RABBIT_USERNAME));
-        factory.setPassword(configs.getStrReq(ConfigKeys.KEY_RABBIT_PASSWORD));
+        factory.setUsername(configs.getStrReq(ConfigKeys.KEY_RABBIT_SRVW_USERNAME));
+        factory.setPassword(configs.getStrReq(ConfigKeys.KEY_RABBIT_SRVW_PASSWORD));
 
         connection = factory.newConnection();
         channel = connection.createChannel();

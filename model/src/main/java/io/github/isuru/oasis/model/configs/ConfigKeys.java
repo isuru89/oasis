@@ -16,8 +16,17 @@ public class ConfigKeys {
     public static final String KEY_RABBIT_HOST = "rabbit.host";
     public static final String KEY_RABBIT_PORT = "rabbit.port";
     public static final String KEY_RABBIT_VIRTUAL_HOST = "rabbit.virtualhost";
-    public static final String KEY_RABBIT_USERNAME = "rabbit.username";
-    public static final String KEY_RABBIT_PASSWORD = "rabbit.password";
+
+    public static final String KEY_RABBIT_SRVW_USERNAME = "rabbit.username.servicew";
+    public static final String KEY_RABBIT_SRVW_PASSWORD = "rabbit.password.servicew";
+    public static final String KEY_RABBIT_SRVR_USERNAME = "rabbit.username.servicer";
+    public static final String KEY_RABBIT_SRVR_PASSWORD = "rabbit.password.servicer";
+    public static final String KEY_RABBIT_INJ_USERNAME = "rabbit.username.injector";
+    public static final String KEY_RABBIT_INJ_PASSWORD = "rabbit.password.injector";
+    public static final String KEY_RABBIT_GSRC_USERNAME = "rabbit.username.gsource";
+    public static final String KEY_RABBIT_GSRC_PASSWORD = "rabbit.password.gsource";
+    public static final String KEY_RABBIT_GSNK_USERNAME = "rabbit.username.gsink";
+    public static final String KEY_RABBIT_GSNK_PASSWORD = "rabbit.password.gsink";
 
     public static final String KEY_RABBIT_SRC_EXCHANGE_NAME = "rabbit.src.exchange";
     public static final String KEY_RABBIT_SRC_EXCHANGE_TYPE = "rabbit.src.exchange.type";

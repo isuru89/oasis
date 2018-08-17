@@ -39,7 +39,7 @@ public class OasisRabbitSink extends OasisSink implements Serializable {
         challengeQueue = Utils.queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_CHALLENGES,
                 ConfigKeys.DEF_RABBIT_Q_CHALLENGES_SINK));
 
-        config = RabbitUtils.createRabbitConfig(gameProps);
+        config = RabbitUtils.createRabbitSinkConfig(gameProps);
     }
 
     @Override

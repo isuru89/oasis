@@ -9,6 +9,7 @@ import io.github.isuru.oasis.model.utils.ConsumerEx;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.HandleCallback;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.core.statement.Update;
 import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
@@ -16,8 +17,10 @@ import org.jdbi.v3.stringtemplate4.StringTemplateEngine;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna
@@ -130,6 +133,19 @@ public class JdbiOasisDao implements IOasisDao {
             } else {
                 return (long) update.execute();
             }
+        });
+    }
+
+    @Override
+    public List<Integer> executeBatchInsert(String queryId, List<Map<String, Object>> batchData) throws Exception {
+        String query = queryRepo.fetchQuery(queryId);
+        return jdbi.withHandle((HandleCallback<List<Integer>, Exception>) handle -> {
+            PreparedBatch insert = handle.prepareBatch(query);
+            for (Map<String, Object> record : batchData) {
+                insert = insert.bindMap(record).add();
+            }
+            return Arrays.stream(insert.execute())
+                    .boxed().collect(Collectors.toList());
         });
     }
 

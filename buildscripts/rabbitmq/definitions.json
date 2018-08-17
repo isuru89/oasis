@@ -1,6 +1,24 @@
 {
-  "rabbit_version": "3.7.4",
+  "rabbit_version": "3.7.7",
   "users": [
+    {
+      "name": "gwriter",
+      "password_hash": "bJz7eT0u6cF5xi8HOwvqY4Rxd9+kWyz3jd/ZwWyPh5YmC7KI",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    },
+    {
+      "name": "greader",
+      "password_hash": "wCduFMk0gS0tpEPmWK/cq1ExB0x7hAEnIN+rds/P6YLEEqZp",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    },
+    {
+      "name": "ewriter",
+      "password_hash": "saEYlIk3AxLS7huXQ55NTA0C85sdBmcni1s5tR5Q2xchl0N9",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    },
     {
       "name": "guest",
       "password_hash": "bQZ+J+npoxNcuyQoTu6BTkfxqCkgW+J0+yY3lTGVuY02cDWD",
@@ -12,6 +30,12 @@
       "password_hash": "deauggCSUvDqW2hs5SgNzSuL8TuO+rBzjRdPVonjR3uzRnCd",
       "hashing_algorithm": "rabbit_password_hashing_sha256",
       "tags": "administrator"
+    },
+    {
+      "name": "injector",
+      "password_hash": "4laaxdeHv0EmRT3sYq+mVhJ/sbqfBQDIp9H2i9f9s4UdzaoJ",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
     }
   ],
   "vhosts": [
@@ -21,7 +45,21 @@
   ],
   "permissions": [
     {
-      "user": "guest",
+      "user": "ewriter",
+      "vhost": "oasis",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "gwriter",
+      "vhost": "oasis",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "greader",
       "vhost": "oasis",
       "configure": ".*",
       "write": ".*",
@@ -29,6 +67,20 @@
     },
     {
       "user": "reader",
+      "vhost": "oasis",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "guest",
+      "vhost": "oasis",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "injector",
       "vhost": "oasis",
       "configure": ".*",
       "write": ".*",

@@ -95,7 +95,6 @@ export default class ProfilePage extends Component {
             <ImageTitleValue image={<FontAwesomeIcon icon="football-ball" />}
               title="Team:" 
               value="QA-Testings" />
-            
             <RankView data={leaderboardData} />
 
           </Column1>

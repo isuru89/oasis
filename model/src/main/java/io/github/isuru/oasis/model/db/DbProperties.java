@@ -6,11 +6,8 @@ import io.github.isuru.oasis.model.configs.EnvKeys;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author iweerarathna
@@ -71,14 +68,6 @@ public class DbProperties {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public static DbProperties fromFile(File file) throws IOException {
-        try (FileInputStream inputStream = new FileInputStream(file)) {
-            Properties properties = new Properties();
-            properties.load(inputStream);
-            return fromProps(Configs.from(properties));
-        }
     }
 
     public static DbProperties fromProps(Configs configs) throws FileNotFoundException {

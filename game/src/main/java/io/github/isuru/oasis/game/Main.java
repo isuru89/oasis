@@ -160,7 +160,7 @@ public class Main {
 
             return new FlinkKafkaConsumer011<>(topic, deserialization, properties);
         } else if ("rabbit".equalsIgnoreCase(type)) {
-            RMQConnectionConfig rabbitConfig = RabbitUtils.createRabbitConfig(gameProps);
+            RMQConnectionConfig rabbitConfig = RabbitUtils.createRabbitSourceConfig(gameProps);
             String inputQueue = Utils.queueReplace(gameProps.getStrReq(ConfigKeys.KEY_RABBIT_QUEUE_SRC));
 
             return new OasisRabbitSource(gameProps, rabbitConfig, inputQueue,

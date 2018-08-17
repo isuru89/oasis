@@ -11,15 +11,26 @@ import org.apache.flink.streaming.connectors.rabbitmq.common.RMQConnectionConfig
  */
 public class RabbitUtils {
 
+    public static RMQConnectionConfig createRabbitSourceConfig(Configs gameProps) {
+        return new RMQConnectionConfig.Builder()
+                .setHost(OasisUtils.getEnvOr(EnvKeys.OASIS_RABBIT_HOST,
+                        gameProps.getStr(ConfigKeys.KEY_RABBIT_HOST, "localhost")))
+                .setPort(gameProps.getInt(ConfigKeys.KEY_RABBIT_PORT, ConfigKeys.DEF_RABBIT_PORT))
+                .setVirtualHost(gameProps.getStr(ConfigKeys.KEY_RABBIT_VIRTUAL_HOST, ConfigKeys.DEF_RABBIT_VIRTUAL_HOST))
+                .setUserName(gameProps.getStrReq(ConfigKeys.KEY_RABBIT_GSRC_USERNAME))
+                .setPassword(gameProps.getStrReq(ConfigKeys.KEY_RABBIT_GSRC_PASSWORD))
+                .build();
+    }
 
-    public static RMQConnectionConfig createRabbitConfig(Configs gameProps) {
+
+    public static RMQConnectionConfig createRabbitSinkConfig(Configs gameProps) {
         return new RMQConnectionConfig.Builder()
                 .setHost(OasisUtils.getEnvOr(EnvKeys.OASIS_RABBIT_HOST,
                                 gameProps.getStr(ConfigKeys.KEY_RABBIT_HOST, "localhost")))
                 .setPort(gameProps.getInt(ConfigKeys.KEY_RABBIT_PORT, ConfigKeys.DEF_RABBIT_PORT))
                 .setVirtualHost(gameProps.getStr(ConfigKeys.KEY_RABBIT_VIRTUAL_HOST, ConfigKeys.DEF_RABBIT_VIRTUAL_HOST))
-                .setUserName(gameProps.getStrReq(ConfigKeys.KEY_RABBIT_USERNAME))
-                .setPassword(gameProps.getStrReq(ConfigKeys.KEY_RABBIT_PASSWORD))
+                .setUserName(gameProps.getStrReq(ConfigKeys.KEY_RABBIT_GSNK_USERNAME))
+                .setPassword(gameProps.getStrReq(ConfigKeys.KEY_RABBIT_GSNK_PASSWORD))
                 .build();
     }
 
