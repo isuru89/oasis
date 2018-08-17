@@ -5,7 +5,8 @@ SELECT
     email as email,
     avatar_id as avatarId,
     is_male as male,
-    is_active as active
+    is_active as active,
+    is_aggregated as aggregated
 FROM OA_USER
 WHERE email = :email
 LIMIT 1

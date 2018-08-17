@@ -9,6 +9,15 @@ public class UserProfile {
     private boolean male;
     private String avatarId;
     private boolean active;
+    private boolean aggregated;
+
+    public boolean isAggregated() {
+        return aggregated;
+    }
+
+    public void setAggregated(boolean aggregated) {
+        this.aggregated = aggregated;
+    }
 
     public Long getExtId() {
         return extId;

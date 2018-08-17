@@ -188,5 +188,18 @@ public class JdbiOasisDao implements IOasisDao {
             String query = queryRepo.fetchQuery(queryId);
             return handle.createUpdate(query).bindMap(data).execute();
         }
+
+        @Override
+        public Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws Exception {
+            String query = queryRepo.fetchQuery(queryId);
+            Update update = handle.createUpdate(query).bindMap(data);
+            if (keyColumn != null && !keyColumn.isEmpty()) {
+                return update.executeAndReturnGeneratedKeys(keyColumn)
+                        .mapTo(Long.class)
+                        .findOnly();
+            } else {
+                return (long) update.execute();
+            }
+        }
     }
 }

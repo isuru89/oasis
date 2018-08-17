@@ -13,4 +13,5 @@ public interface JdbcTransactionCtx {
 
     long executeCommand(String queryId, Map<String, Object> data) throws Exception;
 
+    Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws Exception;
 }

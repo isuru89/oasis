@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS OA_USER (
     avatar_id       VARCHAR(1024),
     is_male         TINYINT(1),
     is_active       TINYINT(1) DEFAULT 1,
+    is_aggregated   TINYINT(1) DEFAULT 0,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

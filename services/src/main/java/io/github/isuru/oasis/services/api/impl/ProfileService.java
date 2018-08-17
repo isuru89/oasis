@@ -12,6 +12,7 @@ import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
 import io.github.isuru.oasis.services.utils.UserRole;
 
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,6 +38,7 @@ public class ProfileService extends BaseService implements IProfileService {
                 .put("avatarId", profile.getAvatarId())
                 .put("extId", profile.getExtId())
                 .put("email", profile.getEmail())
+                .put("aggregated", false)
                 .build();
 
         return getDao().executeInsert("profile/addUser", data, "user_id");
@@ -131,13 +133,36 @@ public class ProfileService extends BaseService implements IProfileService {
         Checks.nonNullOrEmpty(teamProfile.getName(), "name");
         Checks.greaterThanZero(teamProfile.getTeamScope(), "scope");
 
-        Map<String, Object> data = Maps.create()
-                .put("teamScope", teamProfile.getTeamScope())
-                .put("name", teamProfile.getName())
-                .put("avatarId", teamProfile.getAvatarId())
-                .build();
+        return (Long) getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
+            Map<String, Object> data = Maps.create()
+                    .put("teamScope", teamProfile.getTeamScope())
+                    .put("name", teamProfile.getName())
+                    .put("avatarId", teamProfile.getAvatarId())
+                    .build();
 
-        return getDao().executeInsert("profile/addTeam", data, "team_id");
+            Long teamId = input.executeInsert("profile/addTeam", data, "team_id");
+
+            // add user for team scope
+            Map<String, Object> playerData = Maps.create()
+                    .put("name", teamProfile.getName())
+                    .put("male", false)
+                    .put("avatarId", null)
+                    .put("extId", null)
+                    .put("email", "")
+                    .put("aggregated", true)
+                    .build();
+            Long userId = input.executeInsert("profile/addUser", playerData, "user_id");
+
+            input.executeInsert("profile/addUserToTeam",
+                    Maps.create()
+                            .put("userId", userId)
+                            .put("teamId", teamId)
+                            .put("roleId", UserRole.PLAYER)
+                            .put("since", System.currentTimeMillis())
+                            .build(),
+                    null);
+            return teamId;
+        });
     }
 
     @Override
@@ -178,13 +203,44 @@ public class ProfileService extends BaseService implements IProfileService {
         Checks.nonNullOrEmpty(teamScope.getName(), "name");
         Checks.nonNullOrEmpty(teamScope.getDisplayName(), "displayName");
 
-        Map<String, Object> data = Maps.create()
-                .put("extId", teamScope.getExtId())
-                .put("name", teamScope.getName())
-                .put("displayName", teamScope.getDisplayName())
-                .build();
+        return (Long) getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
+            Map<String, Object> data = Maps.create()
+                    .put("extId", teamScope.getExtId())
+                    .put("name", teamScope.getName())
+                    .put("displayName", teamScope.getDisplayName())
+                    .build();
 
-        return getDao().executeInsert("profile/addTeamScope", data, "scope_id");
+            Long addedScopeId = input.executeInsert("profile/addTeamScope", data, "scope_id");
+
+            // add default team
+            Map<String, Object> teamData = Maps.create()
+                    .put("teamScope", addedScopeId)
+                    .put("name", "default")
+                    .put("avatarId", null)
+                    .build();
+            Long addedTeamId = input.executeInsert("profile/addTeam", teamData, "team_id");
+
+            // add user for team scope
+            Map<String, Object> playerData = Maps.create()
+                    .put("name", teamScope.getName())
+                    .put("male", false)
+                    .put("avatarId", null)
+                    .put("extId", null)
+                    .put("email", "")
+                    .put("aggregated", true)
+                    .build();
+            Long userId = input.executeInsert("profile/addUser", playerData, "user_id");
+
+            input.executeInsert("profile/addUserToTeam",
+                    Maps.create()
+                            .put("userId", userId)
+                            .put("teamId", addedTeamId)
+                            .put("roleId", UserRole.PLAYER)
+                            .put("since", System.currentTimeMillis())
+                            .build(),
+                    null);
+            return addedScopeId;
+        });
     }
 
     @Override
