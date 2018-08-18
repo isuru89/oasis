@@ -40,8 +40,8 @@ public abstract class AbstractApiTest {
     protected static Pair<IOasisApiService, IOasisDao> dbStart() throws Exception {
         DbProperties properties = new DbProperties(OasisDbPool.DEFAULT);
         properties.setUrl("jdbc:mysql://localhost/oasis");
-        properties.setUsername("isuru");
-        properties.setPassword("isuru");
+        properties.setUsername("root");
+        properties.setPassword("root");
         File file = new File("./scripts/db");
         if (!file.exists()) {
             file = new File("../scripts/db");

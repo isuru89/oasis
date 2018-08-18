@@ -1,12 +1,7 @@
 package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.model.ShopItem;
-import io.github.isuru.oasis.model.defs.BadgeDef;
-import io.github.isuru.oasis.model.defs.ChallengeDef;
-import io.github.isuru.oasis.model.defs.KpiDef;
-import io.github.isuru.oasis.model.defs.LeaderboardDef;
-import io.github.isuru.oasis.model.defs.MilestoneDef;
-import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.*;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.dto.AddGameDto;
 import io.github.isuru.oasis.services.utils.UserRole;
@@ -71,6 +66,11 @@ public class DefinitionRouter extends BaseRouters {
                         asPLong(req, P_GAME_ID),
                         bodyAs(req, ShopItem.class));
             });
+            post("/:gameId/state", (req, res) -> {
+                return getGameDefService().addStatePlay(
+                        asPLong(req, P_GAME_ID),
+                        bodyAs(req, StateDef.class));
+            });
 
             Spark.path("/:gameId/kpi", () -> {
                 get("/all", (req, res) -> getGameDefService().listKpiCalculations(asPLong(req, P_GAME_ID)))
@@ -119,6 +119,13 @@ public class DefinitionRouter extends BaseRouters {
                 .get("/:iid", (req, res) -> getGameDefService().readShopItem(asPLong(req, "iid")))
                 .delete("/:iid", (req, res) ->
                         getGameDefService().disableShopItem(asPLong(req, "iid")), UserRole.ADMIN);
+            });
+
+            Spark.path("/:gameId/state", () -> {
+                get("/all", (req, res) -> getGameDefService().listStatePlays(asPLong(req, P_GAME_ID)))
+                .get("/:sid", (req, res) -> getGameDefService().readStatePlay(asPLong(req, "sid")))
+                .delete("/:sid", (req, res) ->
+                        getGameDefService().disableStatePlay(asPLong(req, "sid")), UserRole.ADMIN);
             });
         });
 

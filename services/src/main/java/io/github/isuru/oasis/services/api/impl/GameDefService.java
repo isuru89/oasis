@@ -2,16 +2,7 @@ package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.ShopItem;
-import io.github.isuru.oasis.model.defs.BadgeDef;
-import io.github.isuru.oasis.model.defs.ChallengeDef;
-import io.github.isuru.oasis.model.defs.Converters;
-import io.github.isuru.oasis.model.defs.DefWrapper;
-import io.github.isuru.oasis.model.defs.GameDef;
-import io.github.isuru.oasis.model.defs.KpiDef;
-import io.github.isuru.oasis.model.defs.LeaderboardDef;
-import io.github.isuru.oasis.model.defs.MilestoneDef;
-import io.github.isuru.oasis.model.defs.OasisDefinition;
-import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.*;
 import io.github.isuru.oasis.services.Bootstrapping;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
@@ -439,6 +430,46 @@ public class GameDefService extends BaseService implements IGameDefService {
     }
 
     @Override
+    public long addStatePlay(long gameId, StateDef stateDef) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(stateDef.getName(), "name");
+        Checks.nonNullOrEmpty(stateDef.getDisplayName(), "displayName");
+
+        DefWrapper wrapper = new DefWrapper();
+        wrapper.setKind(OasisDefinition.STATE.getTypeId());
+        wrapper.setName(stateDef.getName());
+        wrapper.setDisplayName(stateDef.getDisplayName());
+        wrapper.setContent(RUtils.toStr(stateDef, getMapper()));
+        wrapper.setGameId(gameId);
+
+        return getDao().getDefinitionDao().addDefinition(wrapper);
+    }
+
+    @Override
+    public StateDef readStatePlay(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
+        return wrapperToStatePlay(getDao().getDefinitionDao().readDefinition(id));
+    }
+
+    @Override
+    public List<StateDef> listStatePlays(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
+        return getDao().getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.STATE.getTypeId())
+                .stream()
+                .map(this::wrapperToStatePlay)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean disableStatePlay(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
+        return getDao().getDefinitionDao().disableDefinition(id);
+    }
+
+    @Override
     public boolean disableShopItem(long id) throws Exception {
         Checks.greaterThanZero(id, "id");
 
@@ -449,6 +480,11 @@ public class GameDefService extends BaseService implements IGameDefService {
     private ChallengeDef wrapperToChallenge(DefWrapper wrapper) {
         return Converters.toChallengeDef(wrapper,
                 wrp -> RUtils.toObj(wrp.getContent(), ChallengeDef.class, getMapper()));
+    }
+
+    private StateDef wrapperToStatePlay(DefWrapper wrapper) {
+        return Converters.toStateDef(wrapper,
+                wrp -> RUtils.toObj(wrp.getContent(), StateDef.class, getMapper()));
     }
 
     private BadgeDef wrapperToBadge(DefWrapper wrapper) {

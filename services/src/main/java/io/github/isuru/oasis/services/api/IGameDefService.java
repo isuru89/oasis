@@ -1,13 +1,7 @@
 package io.github.isuru.oasis.services.api;
 
 import io.github.isuru.oasis.model.ShopItem;
-import io.github.isuru.oasis.model.defs.BadgeDef;
-import io.github.isuru.oasis.model.defs.ChallengeDef;
-import io.github.isuru.oasis.model.defs.GameDef;
-import io.github.isuru.oasis.model.defs.KpiDef;
-import io.github.isuru.oasis.model.defs.LeaderboardDef;
-import io.github.isuru.oasis.model.defs.MilestoneDef;
-import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.*;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
 
 import java.util.List;
@@ -59,4 +53,9 @@ public interface IGameDefService {
     ChallengeDef readChallenge(long id) throws Exception;
     List<ChallengeDef> listChallenges(long gameId) throws Exception;
     boolean disableChallenge(long id) throws Exception;
+
+    long addStatePlay(long gameId, StateDef stateDef) throws Exception;
+    StateDef readStatePlay(long id) throws Exception;
+    List<StateDef> listStatePlays(long gameId) throws Exception;
+    boolean disableStatePlay(long id) throws Exception;
 }

@@ -149,6 +149,73 @@ class ApiDefTest extends AbstractApiTest {
     }
 
     @Test
+    void testStatePlayTest() throws Exception {
+        IGameDefService gameDefService = apiService.getGameDefService();
+        long gameId = createGame("game-state-test", "Testing states");
+        Assertions.assertTrue(gameId > 0);
+
+        StateDef def = new StateDef();
+        def.setName("bug-density");
+        def.setEvent("bug");
+        def.setDisplayName("Bug Density");
+        def.setDefaultState(2);
+        def.setStateValueExpression("bd");
+        StateDef.State state1 = new StateDef.State();
+        state1.setId(1);
+        state1.setName("bad");
+        state1.setCondition("bd < 0");
+        state1.setPoints(-10.0);
+        StateDef.State state2 = new StateDef.State();
+        state2.setId(2);
+        state2.setName("neutral");
+        state2.setCondition("bd == 0");
+        state2.setPoints(0.0);
+        StateDef.State state3 = new StateDef.State();
+        state3.setId(3);
+        state3.setName("good");
+        state3.setCondition("bd > 0");
+        state3.setPoints(10.0);
+        def.setStates(Arrays.asList(state1, state2, state3));
+
+        long stId = gameDefService.addStatePlay(gameId, def);
+        Assertions.assertTrue(stId > gameId);
+        {
+            StateDef dbRec = gameDefService.readStatePlay(stId);
+            Assertions.assertNotNull(dbRec);
+            Assertions.assertEquals(stId, (long) dbRec.getId());
+            Assertions.assertEquals(def.getName(), dbRec.getName());
+            Assertions.assertEquals(def.getDisplayName(), dbRec.getDisplayName());
+            Assertions.assertEquals(def.getDefaultState(), dbRec.getDefaultState());
+            Assertions.assertEquals(def.getStateValueExpression(), dbRec.getStateValueExpression());
+            Assertions.assertEquals(def.getEvent(), dbRec.getEvent());
+            Assertions.assertNull(dbRec.getCondition());
+
+            Assertions.assertEquals(3, dbRec.getStates().size());
+            for (int i = 0; i < 3; i++) {
+                StateDef.State original = def.getStates().get(i);
+                StateDef.State read = dbRec.getStates().get(i);
+                Assertions.assertEquals(original.getId(), read.getId());
+                Assertions.assertEquals(original.getCondition(), read.getCondition());
+                Assertions.assertEquals(original.getName(), read.getName());
+                Assertions.assertEquals(original.getPoints(), read.getPoints());
+            }
+        }
+
+        {
+            List<StateDef> stateDefs = gameDefService.listStatePlays(gameId);
+            Assertions.assertEquals(1, stateDefs.size());
+            Assertions.assertEquals(stId, (long) stateDefs.get(0).getId());
+        }
+
+        {
+            Assertions.assertTrue(gameDefService.disableStatePlay(stId));
+            Assertions.assertTrue(gameDefService.listStatePlays(gameId).isEmpty());
+        }
+
+        Assertions.assertTrue(gameDefService.disableGame(gameId));
+    }
+
+    @Test
     void testPointDefTest() throws Exception {
         IGameDefService gameDefService = apiService.getGameDefService();
         long gameId = createGame("game-point-test", "Testing points");
