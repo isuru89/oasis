@@ -8,6 +8,8 @@ import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.api.java.tuple.Tuple5;
+import scala.Int;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,7 @@ public class Memo {
     private static final Map<String, List<Tuple4<Long, List<? extends Event>, PointRule, Double>>> pointsMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple4<Long, List<? extends Event>, Badge, BadgeRule>>> badgeMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple4<Long, Integer, Event, Milestone>>> milestoneMap = new ConcurrentHashMap<>();
+    private static final Map<String, List<Tuple5<Long, Integer, String, Integer, String>>> statesMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, PointRule>>> pointsErrorMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, BadgeRule>>> badgesErrorMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, Milestone>>> milestoneErrorMap = new ConcurrentHashMap<>();
@@ -89,6 +92,18 @@ public class Memo {
 
     public static List<Tuple3<Throwable, Event, Milestone>> getMilestoneErrors(String id) {
         return milestoneErrorMap.get(id);
+    }
+
+    //
+    // STATES EVENTS
+    //
+
+    public static void addState(String id, Tuple5<Long, Integer, String, Integer, String> record) {
+        statesMap.computeIfAbsent(id, s -> new ArrayList<>()).add(record);
+    }
+
+    public static List<Tuple5<Long, Integer, String, Integer, String>> getStates(String id) {
+        return statesMap.get(id);
     }
 
     //

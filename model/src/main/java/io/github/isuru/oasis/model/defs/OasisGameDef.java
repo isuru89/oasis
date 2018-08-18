@@ -9,13 +9,21 @@ import java.util.List;
 public class OasisGameDef implements Serializable {
 
     private GameDef game;
+    private ChallengeDef challenge;
 
     private List<KpiDef> kpis;
     private List<PointDef> points;
     private List<BadgeDef> badges;
     private List<MilestoneDef> milestones;
+    private List<StateDef> states;
 
-    private ChallengeDef challenge;
+    public List<StateDef> getStates() {
+        return states;
+    }
+
+    public void setStates(List<StateDef> states) {
+        this.states = states;
+    }
 
     public ChallengeDef getChallenge() {
         return challenge;

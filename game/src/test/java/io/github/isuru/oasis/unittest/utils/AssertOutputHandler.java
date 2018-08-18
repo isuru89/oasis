@@ -1,10 +1,6 @@
 package io.github.isuru.oasis.unittest.utils;
 
-import io.github.isuru.oasis.model.handlers.IBadgeHandler;
-import io.github.isuru.oasis.model.handlers.IChallengeHandler;
-import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
-import io.github.isuru.oasis.model.handlers.IOutputHandler;
-import io.github.isuru.oasis.model.handlers.IPointHandler;
+import io.github.isuru.oasis.model.handlers.*;
 
 public class AssertOutputHandler implements IOutputHandler {
 
@@ -12,19 +8,24 @@ public class AssertOutputHandler implements IOutputHandler {
     private IMilestoneHandler milestoneCollector;
     private IPointHandler pointCollector;
     private IChallengeHandler challengeCollector;
+    private IStatesHandler statesCollector;
 
-    AssertOutputHandler(IBadgeHandler badgeCollector, IMilestoneHandler milestoneCollector, IPointHandler pointCollector) {
+    AssertOutputHandler(IBadgeHandler badgeCollector, IMilestoneHandler milestoneCollector, IPointHandler pointCollector,
+                        IStatesHandler statesHandler) {
         this.badgeCollector = badgeCollector;
         this.milestoneCollector = milestoneCollector;
         this.pointCollector = pointCollector;
+        this.statesCollector = statesHandler;
     }
 
     public AssertOutputHandler(IBadgeHandler badgeCollector, IMilestoneHandler milestoneCollector,
-                               IPointHandler pointCollector, IChallengeHandler challengeCollector) {
+                               IPointHandler pointCollector, IChallengeHandler challengeCollector,
+                               IStatesHandler statesHandler) {
         this.badgeCollector = badgeCollector;
         this.milestoneCollector = milestoneCollector;
         this.pointCollector = pointCollector;
         this.challengeCollector = challengeCollector;
+        this.statesCollector = statesHandler;
     }
 
     @Override
@@ -45,5 +46,10 @@ public class AssertOutputHandler implements IOutputHandler {
     @Override
     public IChallengeHandler getChallengeHandler() {
         return challengeCollector;
+    }
+
+    @Override
+    public IStatesHandler getStatesHandler() {
+        return statesCollector;
     }
 }

@@ -1,9 +1,6 @@
 package io.github.isuru.oasis.game;
 
-import io.github.isuru.oasis.game.parser.BadgeParser;
-import io.github.isuru.oasis.game.parser.KpiParser;
-import io.github.isuru.oasis.game.parser.MilestoneParser;
-import io.github.isuru.oasis.game.parser.PointParser;
+import io.github.isuru.oasis.game.parser.*;
 import io.github.isuru.oasis.game.persist.NoneOutputHandler;
 import io.github.isuru.oasis.game.persist.OasisKafkaSink;
 import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSink;
@@ -15,6 +12,7 @@ import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
+import io.github.isuru.oasis.model.OState;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
@@ -60,6 +58,7 @@ public class Main {
             List<PointRule> pointRules = PointParser.parse(oasisGameDef.getPoints());
             List<Milestone> milestones = MilestoneParser.parse(oasisGameDef.getMilestones());
             List<BadgeRule> badges = BadgeParser.parse(oasisGameDef.getBadges());
+            List<OState> states = OStateParser.parse(oasisGameDef.getStates());
 
             OasisExecution execution = new OasisExecution()
                     .havingGameProperties(gameProperties)
@@ -67,6 +66,7 @@ public class Main {
                     .fieldTransformer(kpis)
                     .setPointRules(pointRules)
                     .setMilestones(milestones)
+                    .setStates(states)
                     .setBadgeRules(badges);
 
             execution = createOutputHandler(gameProperties, execution)

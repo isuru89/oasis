@@ -28,7 +28,7 @@ class ChallengeTest {
         OasisChallengeExecution execution = new OasisChallengeExecution()
                 .withSource(new CsvReaderPT(id + "/input.csv"))
                 .outputHandler(TestUtils.getAssertConfigs(null, null,
-                        null, new ChallengeSink(id)))
+                        null, new ChallengeSink(id), null))
                 .build(oasis, challengeDef);
 
         execution.start();

@@ -13,6 +13,8 @@ public interface IOutputHandler extends Serializable {
 
     IMilestoneHandler getMilestoneHandler();
 
+    default IStatesHandler getStatesHandler() { return null; }
+
     default IChallengeHandler getChallengeHandler() {
         return null;
     }

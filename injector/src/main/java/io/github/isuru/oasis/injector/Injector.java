@@ -89,18 +89,21 @@ public class Injector {
         String msQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_MILESTONES_SINK, contextInfo.getGameId());
         String msStateQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_MILESTONESTATE_SINK, contextInfo.getGameId());
         String challengesQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_CHALLENGES_SINK, contextInfo.getGameId());
+        String stateQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_STATES_SINK, contextInfo.getGameId());
 
         channel.queueDeclare(pointsQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(msQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(msStateQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(badgesQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(challengesQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
+        channel.queueDeclare(stateQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
 
         channel.basicConsume(pointsQ, AUTO_ACK, new PointConsumer(channel, dao, contextInfo));
         channel.basicConsume(msQ, AUTO_ACK, new MilestoneConsumer(channel, dao, contextInfo));
         channel.basicConsume(msStateQ, AUTO_ACK, new MilestoneStateConsumer(channel, dao, contextInfo));
         channel.basicConsume(badgesQ, AUTO_ACK, new BadgeConsumer(channel, dao, contextInfo));
         channel.basicConsume(challengesQ, AUTO_ACK, new ChallengeConsumer(channel, dao, contextInfo));
+        channel.basicConsume(stateQ, AUTO_ACK, new StateConsumer(channel, dao, contextInfo));
     }
 
     public static void main(String[] args) throws Exception {

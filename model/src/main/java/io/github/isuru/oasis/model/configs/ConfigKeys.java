@@ -40,6 +40,7 @@ public class ConfigKeys {
     public static final String KEY_RABBIT_QUEUE_OUT_MILESTONES = "rabbit.queue.milestones";
     public static final String KEY_RABBIT_QUEUE_OUT_MILESTONESTATES = "rabbit.queue.milestonestates";
     public static final String KEY_RABBIT_QUEUE_OUT_CHALLENGES = "rabbit.queue.challenges";
+    public static final String KEY_RABBIT_QUEUE_OUT_STATES = "rabbit.queue.states";
 
 
     public static final int DEF_RABBIT_PORT = 5672;
@@ -52,4 +53,5 @@ public class ConfigKeys {
     public static final String DEF_RABBIT_Q_MILESTONES_SINK = "game.o{gid}.milestones";
     public static final String DEF_RABBIT_Q_MILESTONESTATE_SINK = "game.o{gid}.milestonestates";
     public static final String DEF_RABBIT_Q_CHALLENGES_SINK = "game.o{gid}.challenges";
+    public static final String DEF_RABBIT_Q_STATES_SINK = "game.o{gid}.states";
 }

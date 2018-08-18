@@ -1,40 +1,20 @@
 package io.github.isuru.oasis.game;
 
-import io.github.isuru.oasis.game.factory.MilestoneNotifier;
-import io.github.isuru.oasis.game.factory.MilestoneOperator;
-import io.github.isuru.oasis.game.factory.PointsNotifier;
-import io.github.isuru.oasis.game.factory.PointsOperator;
+import io.github.isuru.oasis.game.factory.*;
 import io.github.isuru.oasis.game.factory.badges.BadgeNotifier;
 import io.github.isuru.oasis.game.factory.badges.BadgeOperator;
 import io.github.isuru.oasis.game.persist.OasisSink;
-import io.github.isuru.oasis.game.persist.mappers.BadgeNotificationMapper;
-import io.github.isuru.oasis.game.persist.mappers.MilestoneNotificationMapper;
-import io.github.isuru.oasis.game.persist.mappers.MilestoneStateNotificationMapper;
-import io.github.isuru.oasis.game.persist.mappers.PointNotificationMapper;
-import io.github.isuru.oasis.game.process.EventTimestampSelector;
-import io.github.isuru.oasis.game.process.EventUserSelector;
-import io.github.isuru.oasis.game.process.FieldInjector;
-import io.github.isuru.oasis.game.process.PointErrorSplitter;
-import io.github.isuru.oasis.game.process.PointsFromBadgeMapper;
-import io.github.isuru.oasis.game.process.PointsFromMilestoneMapper;
-import io.github.isuru.oasis.game.process.sinks.OasisBadgesSink;
-import io.github.isuru.oasis.game.process.sinks.OasisMilestoneSink;
-import io.github.isuru.oasis.game.process.sinks.OasisMilestoneStateSink;
-import io.github.isuru.oasis.game.process.sinks.OasisPointsSink;
+import io.github.isuru.oasis.game.persist.mappers.*;
+import io.github.isuru.oasis.game.process.*;
+import io.github.isuru.oasis.game.process.sinks.*;
 import io.github.isuru.oasis.game.utils.Constants;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
+import io.github.isuru.oasis.model.OState;
 import io.github.isuru.oasis.model.configs.Configs;
-import io.github.isuru.oasis.model.events.BadgeEvent;
-import io.github.isuru.oasis.model.events.EventNames;
-import io.github.isuru.oasis.model.events.MilestoneEvent;
-import io.github.isuru.oasis.model.events.MilestoneStateEvent;
-import io.github.isuru.oasis.model.events.PointEvent;
-import io.github.isuru.oasis.model.handlers.BadgeNotification;
-import io.github.isuru.oasis.model.handlers.IOutputHandler;
-import io.github.isuru.oasis.model.handlers.MilestoneNotification;
-import io.github.isuru.oasis.model.handlers.PointNotification;
+import io.github.isuru.oasis.model.events.*;
+import io.github.isuru.oasis.model.handlers.*;
 import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
 import io.github.isuru.oasis.model.rules.BadgeFromPoints;
 import io.github.isuru.oasis.model.rules.BadgeRule;
@@ -46,10 +26,7 @@ import org.apache.flink.runtime.state.StateBackend;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.SplitStream;
+import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
@@ -76,6 +53,7 @@ public class OasisExecution {
     private List<PointRule> pointRules;
     private List<Milestone> milestones;
     private List<BadgeRule> badgeRules;
+    private List<OState> statesList;
 
     private DataStream<Event> inputSource;
 
@@ -142,6 +120,17 @@ public class OasisExecution {
         DataStream<PointEvent> errorStream = pointSplitStream.select(PointErrorSplitter.NAME_ERROR);
 
         KeyedStream<PointEvent, Long> userPointStream = pointStream.keyBy(new EventUserSelector<>());
+
+        // create states stream
+        DataStream<OStateEvent> statesStream = null;
+        if (statesList != null) {
+            for (OState oState : statesList) {
+                DataStream<OStateEvent> thisStream = StatesOperator.createStateStream(oState, userStream, oasis);
+                statesStream = statesStream == null
+                        ? thisStream
+                        : statesStream.union(thisStream);
+            }
+        }
 
         // create milestone stream
         DataStream<MilestoneEvent> milestoneStream = null;
@@ -215,6 +204,11 @@ public class OasisExecution {
                     .uid(String.format("badge-notifier-%s", oasisId));
         }
 
+        DataStream<OStateNotification> statesNotyStream = null;
+        if (statesStream != null) {
+            statesNotyStream = statesStream.map(new StatesNotifier())
+                    .uid(String.format("states-notitifer-%s", oasisId));
+        }
 
 
         //
@@ -245,6 +239,14 @@ public class OasisExecution {
             }
         }
 
+        // setup points from state changes
+        if (statesNotyStream != null) {
+            DataStream<PointNotification> tmp = statesNotyStream
+                    .flatMap(new PointsFromStateMapper(pointRules))
+                    .uid(String.format("states-to-points-%s", oasisId));
+            pointNotyStream = pointNotyStream.union(tmp);
+        }
+
         //
         // ---------------------------------------------------------------------------
         // SETUP SINKS
@@ -255,6 +257,7 @@ public class OasisExecution {
                 milestoneNotyStream,
                 milestoneStateEventDataStream,
                 badgeNotyStream,
+                statesNotyStream,
                 oasisId);
 
         //
@@ -295,6 +298,7 @@ public class OasisExecution {
                              DataStream<MilestoneNotification> milestoneNotyStream,
                              DataStream<MilestoneStateEvent> milestoneStateEventDataStream,
                              DataStream<BadgeNotification> badgeNotyStream,
+                             DataStream<OStateNotification> statesNotyStream,
                              String oasisId) {
 
         if (outputHandler != null) {
@@ -321,6 +325,12 @@ public class OasisExecution {
                 badgeNotyStream
                         .addSink(new OasisBadgesSink(outputHandler.getBadgeHandler()))
                         .uid(String.format("badge-sink-%s", oasisId));
+            }
+
+            if (statesNotyStream != null) {
+                statesNotyStream
+                        .addSink(new OasisStatesSink(outputHandler.getStatesHandler()))
+                        .uid(String.format("states-sink-%s", oasisId));
             }
 
         } else if (oasisSink != null) {
@@ -350,6 +360,13 @@ public class OasisExecution {
                         .map(new BadgeNotificationMapper())
                         .addSink(oasisSink.createBadgeSink())
                         .uid(String.format("badge-sink-%s", oasisId));
+            }
+
+            if (statesNotyStream != null) {
+                statesNotyStream
+                        .map(new StatesNotificationMapper())
+                        .addSink(oasisSink.createStatesSink())
+                        .uid(String.format("states-sink-%s", oasisId));
             }
         }
     }
@@ -388,6 +405,11 @@ public class OasisExecution {
 
     public OasisExecution setBadgeRules(List<BadgeRule> badgeRules) {
         this.badgeRules = badgeRules;
+        return this;
+    }
+
+    public OasisExecution setStates(List<OState> states) {
+        this.statesList = states;
         return this;
     }
 

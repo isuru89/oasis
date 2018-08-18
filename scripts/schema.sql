@@ -70,6 +70,19 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONE_STATE (
 
 ALTER TABLE OA_MILESTONE_STATE ADD PRIMARY KEY (user_id, milestone_id);
 
+CREATE TABLE IF NOT EXISTS OA_STATES (
+    user_id         INT,
+    state_id        INT,
+    current_state   INT,
+    current_value   VARCHAR(1024),
+    ext_id          VARCHAR(1024),
+    game_id         INT,
+    changed_at      BIGINT,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+ALTER TABLE OA_STATES ADD PRIMARY KEY (user_id, state_id);
 
 CREATE TABLE IF NOT EXISTS OA_DEFINITION (
     id              INT PRIMARY KEY AUTO_INCREMENT,

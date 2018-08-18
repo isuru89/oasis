@@ -25,6 +25,7 @@ public class OasisKafkaSink extends OasisSink implements Serializable {
     private String topicBadges;
     private String topicMilestones;
     private String topicMilestoneStates;
+    private String topicStates;
 
     private String topicChallengeWinners;
 
@@ -37,6 +38,7 @@ public class OasisKafkaSink extends OasisSink implements Serializable {
         topicMilestones = gameProps.getStr("kafka.topics.milestones", "game-milestones");
         topicMilestoneStates = gameProps.getStr("kafka.topics.milestonestates", "game-milestone-states");
         topicChallengeWinners = gameProps.getStr("kafka.topics.challenges", "game-challenge-winners");
+        topicStates = gameProps.getStr("kafka.topics.states", "game-user-states");
 
         Map<String, Object> map = OasisUtils.filterKeys(gameProps.getProps(), Constants.KEY_PREFIX_OUTPUT_KAFKA);
         if (!map.isEmpty()) {
@@ -75,6 +77,10 @@ public class OasisKafkaSink extends OasisSink implements Serializable {
         return topicMilestoneStates;
     }
 
+    public String getTopicStates() {
+        return topicStates;
+    }
+
     @Override
     public SinkFunction<String> createPointSink() {
         return new FlinkKafkaProducer011<>(getKafkaHost(), getTopicPoints(), new SimpleStringSchema());
@@ -93,6 +99,11 @@ public class OasisKafkaSink extends OasisSink implements Serializable {
     @Override
     public SinkFunction<String> createBadgeSink() {
         return new FlinkKafkaProducer011<>(getKafkaHost(), getTopicBadges(), new SimpleStringSchema());
+    }
+
+    @Override
+    public SinkFunction<String> createStatesSink() {
+        return new FlinkKafkaProducer011<>(getKafkaHost(), getTopicStates(), new SimpleStringSchema());
     }
 
     @Override

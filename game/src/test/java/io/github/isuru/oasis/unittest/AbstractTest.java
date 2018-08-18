@@ -9,12 +9,7 @@ import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
-import io.github.isuru.oasis.unittest.utils.BadgeCollector;
-import io.github.isuru.oasis.unittest.utils.Memo;
-import io.github.isuru.oasis.unittest.utils.MilestoneCollector;
-import io.github.isuru.oasis.unittest.utils.PointCollector;
-import io.github.isuru.oasis.unittest.utils.ResourceFileStream;
-import io.github.isuru.oasis.unittest.utils.TestUtils;
+import io.github.isuru.oasis.unittest.utils.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;
@@ -49,7 +44,8 @@ abstract class AbstractTest {
     private Oasis beginTestExec(String id, String... inputs) throws Exception {
         IOutputHandler assertOutput = TestUtils.getAssertConfigs(new PointCollector(id),
                 new BadgeCollector(id),
-                new MilestoneCollector(id));
+                new MilestoneCollector(id),
+                new StatesCollector(id));
 
         Oasis oasis = new Oasis(id);
 
@@ -58,10 +54,12 @@ abstract class AbstractTest {
         String rulesBadges = ruleLoc + "/badges.yml";
         String rulesMilestones = ruleLoc + "/milestones.yml";
         String rulesFields = ruleLoc + "/fields.yml";
+        String rulesStates = ruleLoc + "/states.yml";
 
         String outputPoints = id + "/output-points.csv";
         String outputBadges = id + "/output-badges.csv";
         String outputMilestones = id + "/output-milestones.csv";
+        String outputStates = id + "/output-states.csv";
 
         ResourceFileStream rfs;
         OasisExecution execution = new OasisExecution();
@@ -83,6 +81,9 @@ abstract class AbstractTest {
         }
         if (TestUtils.isResourceExist(rulesMilestones)) {
             execution = execution.setMilestones(TestUtils.getMilestoneRules(rulesMilestones));
+        }
+        if (TestUtils.isResourceExist(rulesStates)) {
+            execution = execution.setStates(TestUtils.getStateRules(rulesStates));
         }
 
         execution = execution.outputHandler(assertOutput)
@@ -123,6 +124,16 @@ abstract class AbstractTest {
             Assertions.assertEquals(expected.size(), actual.size(), "Expected badges are not equal!");
 
             assertBadges(actual, expected);
+        }
+
+        if (TestUtils.isResourceExist(outputStates)) {
+            List<Tuple5<Long, Integer, String, Integer, String>> expected = TestUtils.parseStatesOutput(outputStates);
+            List<Tuple5<Long, Integer, String, Integer, String>> actual = Memo.getStates(id);
+            Assertions.assertNotNull(expected);
+            Assertions.assertNotNull(actual);
+            Assertions.assertEquals(expected.size(), actual.size(), "Expected states are not equal!");
+
+            assertStates(actual, expected);
         }
 
         return oasis;
@@ -182,6 +193,29 @@ abstract class AbstractTest {
         }
     }
 
+    private void assertStates(List<Tuple5<Long, Integer, String, Integer, String>> actual,
+                              List<Tuple5<Long, Integer, String, Integer, String>> expected) {
+        List<Tuple5<Long, Integer, String, Integer, String>> dupActual = new LinkedList<>(actual);
+        for (Tuple5<Long, Integer, String, Integer, String> row : expected) {
+
+            boolean foundFlag = false;
+            Tuple5<Long, Integer, String, Integer, String> found = null;
+            for (Tuple5<Long, Integer, String, Integer, String> given : dupActual) {
+                if (row.equals(given)) {
+                    foundFlag = true;
+                    found = given;
+                    break;
+                }
+            }
+
+            if (!foundFlag) {
+                Assertions.fail("Expected state row " + row + " is not found!");
+            } else {
+                dupActual.remove(found);
+                System.out.println("\tFound state: " + row);
+            }
+        }
+    }
 
     private void assertPoints(List<Tuple4<Long, List<? extends Event>, PointRule, Double>> actual,
                               List<Tuple5<Long, String, String, Double, String>> expected) {

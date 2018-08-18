@@ -27,7 +27,13 @@ public class NoneOutputHandler implements IOutputHandler {
         return noneHandler;
     }
 
-    public static class NoneHandler implements IMilestoneHandler, IBadgeHandler, IPointHandler, IChallengeHandler {
+    @Override
+    public IStatesHandler getStatesHandler() {
+        return noneHandler;
+    }
+
+    public static class NoneHandler implements IMilestoneHandler, IBadgeHandler,
+            IPointHandler, IChallengeHandler, IStatesHandler {
 
         @Override
         public void milestoneReached(MilestoneNotification milestoneNotification) {
@@ -46,6 +52,11 @@ public class NoneOutputHandler implements IOutputHandler {
 
         @Override
         public void pointsScored(PointNotification pointNotification) {
+
+        }
+
+        @Override
+        public void handleStateChange(OStateNotification stateNotification) {
 
         }
     }

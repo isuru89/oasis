@@ -1,16 +1,10 @@
 package io.github.isuru.oasis.unittest.utils;
 
-import io.github.isuru.oasis.game.parser.BadgeParser;
-import io.github.isuru.oasis.game.parser.KpiParser;
-import io.github.isuru.oasis.game.parser.MilestoneParser;
-import io.github.isuru.oasis.game.parser.PointParser;
+import io.github.isuru.oasis.game.parser.*;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
-import io.github.isuru.oasis.model.handlers.IBadgeHandler;
-import io.github.isuru.oasis.model.handlers.IChallengeHandler;
-import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
-import io.github.isuru.oasis.model.handlers.IOutputHandler;
-import io.github.isuru.oasis.model.handlers.IPointHandler;
+import io.github.isuru.oasis.model.OState;
+import io.github.isuru.oasis.model.handlers.*;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.commons.io.IOUtils;
@@ -118,6 +112,28 @@ public class TestUtils {
         }
     }
 
+    public static List<Tuple5<Long, Integer, String, Integer, String>> parseStatesOutput(String file) throws IOException {
+        try (InputStream inputStream = TestUtils.loadResource(file)) {
+            LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
+            List<Tuple5<Long, Integer, String, Integer, String>> list = new LinkedList<>();
+            while (lineIterator.hasNext()) {
+                String line = lineIterator.next();
+                if (line.trim().isEmpty()) continue;
+                if (line.startsWith("#")) continue;
+                String[] parts = line.split("[,]");
+
+                Tuple5<Long, Integer, String, Integer, String> row = Tuple5.of(
+                        Long.parseLong(parts[0]),
+                        Integer.parseInt(parts[1]),
+                        parts[2],
+                        Integer.parseInt(parts[3]),
+                        parts[4]
+                );
+                list.add(row);
+            }
+            return list;
+        }
+    }
 
     public static boolean isResourceExist(String resourceId) {
         try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceId)) {
@@ -140,15 +156,18 @@ public class TestUtils {
 
     public static IOutputHandler getAssertConfigs(IPointHandler pointHandler,
                                                   IBadgeHandler badgeHandler,
-                                                  IMilestoneHandler milestoneHandler) {
-        return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler);
+                                                  IMilestoneHandler milestoneHandler,
+                                                  IStatesHandler statesHandler) {
+        return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler, statesHandler);
     }
 
     public static IOutputHandler getAssertConfigs(IPointHandler pointHandler,
                                                   IBadgeHandler badgeHandler,
                                                   IMilestoneHandler milestoneHandler,
-                                                  IChallengeHandler challengeHandler) {
-        return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler, challengeHandler);
+                                                  IChallengeHandler challengeHandler,
+                                                  IStatesHandler statesHandler) {
+        return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler, challengeHandler,
+                statesHandler);
     }
 
     public static List<FieldCalculator> getFields(String resourceId) throws IOException {
@@ -165,5 +184,9 @@ public class TestUtils {
 
     public static List<Milestone> getMilestoneRules(String resourceId) throws IOException {
         return MilestoneParser.parse(TestUtils.loadResource(resourceId));
+    }
+
+    public static List<OState> getStateRules(String resourceId) throws IOException {
+        return OStateParser.parse(TestUtils.loadResource(resourceId));
     }
 }

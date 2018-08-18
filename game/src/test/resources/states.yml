@@ -1,0 +1,18 @@
+states:
+  - event: bug
+    id: 701
+    name: bug-density
+    defaultState: 2
+    states:
+      - id: 1
+        name: bad
+        condition: "bd < 0"
+        points: -10
+      - id: 2
+        name: neutral
+        condition: "bd == 0"
+        points: 0
+      - id: 3
+        name: good
+        condition: "bd > 0"
+        points: 10

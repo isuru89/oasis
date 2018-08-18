@@ -5,11 +5,7 @@ import io.github.isuru.oasis.game.OasisExecution;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
-import io.github.isuru.oasis.unittest.utils.BadgeCollector;
-import io.github.isuru.oasis.unittest.utils.MilestoneCollector;
-import io.github.isuru.oasis.unittest.utils.PointCollector;
-import io.github.isuru.oasis.unittest.utils.ResourceFileStream;
-import io.github.isuru.oasis.unittest.utils.TestUtils;
+import io.github.isuru.oasis.unittest.utils.*;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.junit.jupiter.api.AfterAll;
@@ -51,7 +47,8 @@ public class OasisTest {
     @Test
     void buildOasis() throws Exception {
         IOutputHandler assertOutputs = TestUtils.getAssertConfigs(new PointCollector("t"),
-                new BadgeCollector("t"), new MilestoneCollector("t"));
+                new BadgeCollector("t"), new MilestoneCollector("t"),
+                new StatesCollector("t"));
         Oasis oasis = new Oasis("test-1");
 
         List<FieldCalculator> fields = TestUtils.getFields("fields.yml");
