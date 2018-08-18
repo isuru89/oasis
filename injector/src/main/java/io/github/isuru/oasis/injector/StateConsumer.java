@@ -23,14 +23,12 @@ public class StateConsumer extends BaseConsumer<OStateModel> {
 
     @Override
     boolean handle(OStateModel msg) {
-        Event event = msg.getEvent();
-
         Map<String, Object> map = new HashMap<>();
         map.put("userId", msg.getUserId());
         map.put("stateId", msg.getStateId());
         map.put("currState", msg.getCurrentState());
         map.put("currValue", msg.getCurrentValue());
-        map.put("extId", event.getExternalId());
+        map.put("extId", msg.getExtId());
         map.put("ts", msg.getTs());
         map.put("gameId", contextInfo.getGameId());
 

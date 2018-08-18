@@ -11,6 +11,15 @@ public class OStateModel {
     private String currentValue;
     private Long ts;
     private JsonEvent event;
+    private String extId;
+
+    public String getExtId() {
+        return extId;
+    }
+
+    public void setExtId(String extId) {
+        this.extId = extId;
+    }
 
     public JsonEvent getEvent() {
         return event;
