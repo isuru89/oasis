@@ -36,7 +36,7 @@ public class MilestoneOperator {
             filterFunction = new FilterFunction<Event>() {
                 @Override
                 public boolean filter(Event event) throws Exception {
-                    return event.getEventType().equals(milestone.getEvent())
+                    return Utils.eventEquals(event, milestone.getEvent())
                             && (milestone.getCondition() == null
                             || Utils.evaluateCondition(milestone.getCondition(), event.getAllFieldValues()));
                 }
@@ -45,7 +45,7 @@ public class MilestoneOperator {
             filterFunction = new FilterFunction<Event>() {
                 @Override
                 public boolean filter(Event event) {
-                    return event.getEventType().equals(milestone.getEvent());
+                    return Utils.eventEquals(event, milestone.getEvent());
                 }
             };
         }

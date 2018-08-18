@@ -46,7 +46,7 @@ class ConditionBadgeHandler<E extends Event, W extends Window>
         int curr = currMaxBadges.value();
 
         E value = elements.iterator().next();
-        if (value.getEventType().equals(badgeRule.getEventType())) {
+        if (Utils.eventEquals(value, badgeRule.getEventType())) {
             Map<String, Object> vars = value.getAllFieldValues();
             if (Utils.evaluateCondition(badgeRule.getCondition(), vars)) {
                 curr++;

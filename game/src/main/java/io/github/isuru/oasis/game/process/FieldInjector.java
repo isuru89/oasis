@@ -25,7 +25,7 @@ public class FieldInjector<E extends Event> implements MapFunction<E, E> {
     public E map(E value) {
         if (Utils.isNonEmpty(fieldCalculatorList)) {
             for (FieldCalculator fc : fieldCalculatorList) {
-                if (fc.getForEvent().equals(value.getEventType())) {
+                if (Utils.eventEquals(value, fc.getForEvent())) {
                     Object evaluated = evaluate(fc, value.getAllFieldValues());
                     value.setFieldValue(fc.getFieldName(), evaluated);
                 }

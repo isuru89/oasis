@@ -62,7 +62,7 @@ public class BadgeOperator {
         FilterFunction<Event> filterFunction = new FilterFunction<Event>() {
             @Override
             public boolean filter(Event value) throws Exception {
-                return value.getEventType().equals(badgeRule.getEventType())
+                return Utils.eventEquals(value, badgeRule.getEventType())
                         && Utils.evaluateCondition(badgeRule.getCondition(), value.getAllFieldValues());
             }
         };

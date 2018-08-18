@@ -19,12 +19,16 @@ public class Utils {
     private static final Pattern TIME_PATTERN = Pattern.compile("([0-9]+)\\s*([a-zA-Z]+)");
     private static final Pattern NUMBER_PATTERN = Pattern.compile("([0-9\\\\.]+)\\s*([kKmMbB]?)");
 
+    public static boolean eventEquals(Event against, String eventType) {
+        return eventType.equals(against.getEventType());
+    }
+
     public static String queueReplace(String name) {
         return name.replace("{gid}", System.getProperty(Constants.ENV_OASIS_GAME_ID, ""));
     }
 
     public static boolean isEndOfStream(Event event) {
-        return EventNames.TERMINATE_GAME.equals(event.getEventType());
+        return Utils.eventEquals(event, EventNames.TERMINATE_GAME);
     }
 
     public static boolean isNonEmpty(Collection<?> list) {

@@ -100,7 +100,7 @@ public class PointsOperator<IN extends Event> extends RichFlatMapFunction<IN, Po
             vars.put("$TOTAL", totalPoints);
 
             for (PointRule rule : pointSelfRules) {
-                if (rule.getForEvent().equals(value.getEventType())) {
+                if (Utils.eventEquals(value, rule.getForEvent())) {
                     try {
                         executeRuleConditionAndValue(value, rule, vars)
                                 .ifPresent(p -> points.put(rule.getName(), Pair.of(p, rule)));

@@ -21,7 +21,7 @@ public class StatesOperator {
             filter = new FilterFunction<Event>() {
                 @Override
                 public boolean filter(Event value) throws Exception {
-                    return value.getEventType().equals(oState.getEvent())
+                    return Utils.eventEquals(value, oState.getEvent())
                             && Utils.evaluateCondition(oState.getCondition(), value.getAllFieldValues());
                 }
             };
@@ -29,7 +29,7 @@ public class StatesOperator {
             filter = new FilterFunction<Event>() {
                 @Override
                 public boolean filter(Event value) {
-                    return value.getEventType().equals(oState.getEvent());
+                    return Utils.eventEquals(value, oState.getEvent());
                 }
             };
         }

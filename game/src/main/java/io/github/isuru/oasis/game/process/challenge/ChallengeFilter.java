@@ -22,7 +22,7 @@ public class ChallengeFilter implements FilterFunction<Event> {
 
     @Override
     public boolean filter(Event value) {
-        return EventNames.START_CHALLENGE.equals(value.getEventType())
+        return Utils.eventEquals(value, EventNames.START_CHALLENGE)
                 || Utils.isNullOrEmpty(challengeDef.getForEvents())
                 || challengeDef.getForEvents().contains(value.getEventType());
     }
