@@ -27,6 +27,7 @@ import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.*;
+import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
@@ -64,7 +65,8 @@ public class OasisExecution {
                 gameProperties.getBool(Constants.KEY_CHECKPOINT_ENABLED, true)) {
             int interval = gameProperties.getInt(Constants.KEY_CHECKPOINT_INTERVAL, 20000);
             env.enableCheckpointing(interval, CheckpointingMode.EXACTLY_ONCE);
-
+            env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+            
             if (gameProperties.has(Constants.KEY_CHECKPOINT_DIR)) {
                 File configDir = new File(gameProperties.getStrReq(Constants.KEY_LOCATION));
                 String relPath = gameProperties.getStrReq(Constants.KEY_CHECKPOINT_DIR);

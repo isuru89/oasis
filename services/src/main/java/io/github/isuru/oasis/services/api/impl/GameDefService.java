@@ -6,8 +6,13 @@ import io.github.isuru.oasis.model.defs.*;
 import io.github.isuru.oasis.services.Bootstrapping;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.api.IProfileService;
+import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.exception.OasisGameException;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.TeamScope;
+import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.RUtils;
@@ -394,6 +399,31 @@ public class GameDefService extends BaseService implements IGameDefService {
         Checks.greaterThanZero(gameId, "gameId");
         Checks.nonNullOrEmpty(challengeDef.getName(), "name");
         Checks.nonNullOrEmpty(challengeDef.getDisplayName(), "displayName");
+
+        // map user and team ids, if specified
+        IProfileService profileService = getApiService().getProfileService();
+        if (!Checks.isNullOrEmpty(challengeDef.getForUser())) {
+            UserProfile profile = profileService.readUserProfile(challengeDef.getForUser());
+            if (profile == null) {
+                throw new InputValidationException("No user is found by email address " + challengeDef.getForUser() + "!");
+            }
+            challengeDef.setForUserId(profile.getId());
+        }
+        if (!Checks.isNullOrEmpty(challengeDef.getForTeam())) {
+            TeamProfile teamByName = profileService.findTeamByName(challengeDef.getForTeam());
+            if (teamByName == null) {
+                throw new InputValidationException("No team is found by name '" + challengeDef.getForTeam() + "'!");
+            }
+            challengeDef.setForTeamId(teamByName.getId().longValue());
+        }
+        if (!Checks.isNullOrEmpty(challengeDef.getForTeamScope())) {
+            TeamScope scope = profileService.readTeamScope(challengeDef.getForTeamScope());
+            if (scope == null) {
+                throw new InputValidationException("No team scope is found by name '"
+                        + challengeDef.getForTeamScope() + "'!");
+            }
+            challengeDef.setForTeamId(scope.getId().longValue());
+        }
 
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.CHALLENGE.getTypeId());

@@ -253,6 +253,15 @@ public class ProfileService extends BaseService implements IProfileService {
     }
 
     @Override
+    public TeamScope readTeamScope(String scopeName) throws Exception {
+        Checks.nonNullOrEmpty(scopeName, "scopeName");
+
+        return getTheOnlyRecord("profile/findScopeByName",
+                Maps.create("scopeName", scopeName),
+                TeamScope.class);
+    }
+
+    @Override
     public List<TeamScope> listTeamScopes() throws Exception {
         return toList(getDao().executeQuery("profile/listTeamScopes",
                 null, TeamScope.class));

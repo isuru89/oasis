@@ -26,6 +26,7 @@ public interface IProfileService {
 
     long addTeamScope(TeamScope teamScope) throws Exception;
     TeamScope readTeamScope(long scopeId) throws Exception;
+    TeamScope readTeamScope(String scopeName) throws Exception;
     List<TeamScope> listTeamScopes() throws Exception;
     boolean editTeamScope(long scopeId, TeamScope scope) throws Exception;
 

@@ -72,7 +72,7 @@ public class ChallengeWindowProcessor extends KeyedProcessFunction<Byte, Event, 
     @Override
     public void onTimer(long timestamp, OnTimerContext ctx, Collector<ChallengeEvent> out) throws Exception {
         ValueState<Long> deadlineState = getRuntimeContext().getState(deadlineStateDesc);
-        System.out.println("Fired");
+        LOG.info("Fired.");
         if (timestamp == deadlineState.value()) {
             closed = true;
         }

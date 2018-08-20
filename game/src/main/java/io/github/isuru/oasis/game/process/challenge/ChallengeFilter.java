@@ -22,9 +22,25 @@ public class ChallengeFilter implements FilterFunction<Event> {
 
     @Override
     public boolean filter(Event value) {
-        return Utils.eventEquals(value, EventNames.START_CHALLENGE)
+        if (Utils.eventEquals(value, EventNames.START_CHALLENGE)
                 || Utils.isNullOrEmpty(challengeDef.getForEvents())
-                || challengeDef.getForEvents().contains(value.getEventType());
+                || challengeDef.getForEvents().contains(value.getEventType())) {
+            return userFilterSuccess(challengeDef, value);
+        } else {
+            return false;
+        }
+    }
+
+    private boolean userFilterSuccess(ChallengeDef def, Event event) {
+        if (def.getForUserId() != null) {
+            return event.getUser() == def.getForUserId();
+        } else if (def.getForTeamId() != null) {
+            return def.getForTeamId().equals(event.getTeam());
+        } else if (def.getForTeamScopeId() != null) {
+            return def.getForTeamScopeId().equals(event.getTeamScope());
+        } else {
+            return true;
+        }
     }
 
     public static boolean filter(Event event, ChallengeDef challengeDef) throws IOException {

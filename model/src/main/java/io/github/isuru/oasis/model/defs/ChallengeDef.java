@@ -20,7 +20,61 @@ public class ChallengeDef implements Serializable {
     private double points;
 
     private Collection<String> forEvents;
+    private Long forTeamId;
+    private String forTeam;
+    private Long forUserId;
+    private String forUser;
+    private String forTeamScope;
+    private Long forTeamScopeId;
     private List<String> conditions;
+
+    public String getForTeamScope() {
+        return forTeamScope;
+    }
+
+    public void setForTeamScope(String forTeamScope) {
+        this.forTeamScope = forTeamScope;
+    }
+
+    public Long getForTeamScopeId() {
+        return forTeamScopeId;
+    }
+
+    public void setForTeamScopeId(Long forTeamScopeId) {
+        this.forTeamScopeId = forTeamScopeId;
+    }
+
+    public Long getForTeamId() {
+        return forTeamId;
+    }
+
+    public void setForTeamId(Long forTeamId) {
+        this.forTeamId = forTeamId;
+    }
+
+    public String getForTeam() {
+        return forTeam;
+    }
+
+    public void setForTeam(String forTeam) {
+        this.forTeam = forTeam;
+    }
+
+    public Long getForUserId() {
+        return forUserId;
+    }
+
+    public void setForUserId(Long forUserId) {
+        this.forUserId = forUserId;
+    }
+
+    public String getForUser() {
+        return forUser;
+    }
+
+    public void setForUser(String forUser) {
+        this.forUser = forUser;
+    }
 
     public Long getId() {
         return id;
