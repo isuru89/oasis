@@ -6,6 +6,7 @@ import GameCreation from '../pages/game/GameCreation';
 import CreateKpiForm from '../pages/game/CreateKpiForm';
 import { CreatePointForm } from '../pages/game/CreatePointForm';
 import { Route } from "react-router-dom";
+import ContestsPage from '../pages/contests/ContestsPage';
 
 const Wrapper = styled.div`
   width: 100%;
@@ -18,7 +19,7 @@ export default class Content extends Component {
       <Wrapper>
         <Route path="/profile" component={ProfilePage} />
         <Route path="/progress" component={ProgressPage} />
-        
+        <Route path="/contests" component={ContestsPage} />
         {/* <CreatePointForm /> */}
       </Wrapper>
     )

@@ -1,11 +1,13 @@
 package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IStatService;
 import io.github.isuru.oasis.services.api.dto.*;
+import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.model.enums.ScopingType;
 import io.github.isuru.oasis.services.utils.Checks;
@@ -238,6 +240,27 @@ public class StatService extends BaseService implements IStatService {
         }
         accumulated.add(base);
         return accumulated;
+    }
+
+    @Override
+    public ChallengeInfoDto readChallengeStats(long challengeId) throws Exception {
+        Checks.greaterThanZero(challengeId, "challengeId");
+
+        ChallengeDef def = getApiService().getGameDefService().readChallenge(challengeId);
+        if (def != null) {
+            ChallengeInfoDto challengeInfoDto = new ChallengeInfoDto();
+            List<ChallengeWinnerDto> winners = toList(getDao().executeQuery(
+                    "stats/getChallengeWinners",
+                    Maps.create("challengeId", challengeId),
+                    ChallengeWinnerDto.class));
+
+            challengeInfoDto.setWinners(winners);
+            challengeInfoDto.setChallengeDef(def);
+            return challengeInfoDto;
+
+        } else {
+            throw new InputValidationException("No challenge is found by id " + challengeId + "!");
+        }
     }
 
     @Override
