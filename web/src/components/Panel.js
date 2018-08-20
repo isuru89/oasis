@@ -30,7 +30,7 @@ const TitleBar = styled.div`
   padding: 5px;
   margin: 0 5px;
   border-radius: 5px 5px 0 0;
-  border-bottom: 1px solid #739CAE88;
+  border-bottom: 1px solid hsl(203, 50%, 80%);
   margin-bottom: 5px;
   display: flex;
   background-color: white;

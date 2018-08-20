@@ -4,21 +4,26 @@ import "typeface-roboto"
 import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
-
+import { BrowserRouter } from "react-router-dom";
 import './images'
 
 import 'react-circular-progressbar/dist/styles.css';
 
 const rootEl = document.getElementById('root');
 
-ReactDOM.render(<App />, rootEl);
+ReactDOM.render(
+<BrowserRouter>
+  <App/>
+</BrowserRouter>, rootEl);
 registerServiceWorker();
 
 if (module.hot) {
   module.hot.accept('./App', () => {
     const NextApp = require('./App').default
     ReactDOM.render(
-      <NextApp />,
+      <BrowserRouter>
+        <NextApp />
+      </BrowserRouter>,
       rootEl
     )
   })

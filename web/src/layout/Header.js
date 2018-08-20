@@ -19,6 +19,7 @@ const Logo = styled.div`
   text-align: center;
   line-height: 70px;
   font-size: 30px;
+  color: hsl(203, 49%, 26%);
 `
 
 const MyWrapper = styled.div`
@@ -27,7 +28,7 @@ const MyWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #20465E;
+  background-color: hsl(203, 49%, 26%);
   padding: 0 0 0 20px;
 `
 
@@ -40,12 +41,11 @@ const UserStats = styled.div`
 
 const AvatarPane = styled.div`
   min-width: 60px;
-  background-color: #1E2B34;
+  background-color: hsl(203, 70%, 10%);
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-
 `
 
 export default class Header extends Component {

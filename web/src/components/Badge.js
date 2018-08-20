@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import styled from 'styled-components';
+import PopOver from "antd/lib/popover";
 
 const Wrapper = styled.div`
   display: flex;
@@ -13,7 +14,20 @@ const Wrapper = styled.div`
   }
 `
 
+const BadgeCount = styled.span`
+  user-select: none;
+  position: absolute;
+  background-color: hsl(203, 43%, 16%);
+  color: hsl(203, 80%, 56%);
+  border: 1px solid hsl(203, 43%, 36%);
+  padding: 2px 4px;
+  border-radius: 50%;
+  top: 0px;
+  right: 5px;
+`
+
 const Image = styled.div`
+  position: relative;
   padding-right: 10px;
   opacity: ${props => props.acquired ? 1 : 0.1};
 `
@@ -43,22 +57,37 @@ const MetaInfo = styled.div`
   font-style: italic;
 `
 
+class BadgeDetails extends Component {
+
+  render() {
+    return (
+      <div>
+        <div>{this.props.description}</div>
+        <div style={{height: '40px'}}></div>
+        {this.props.achievedDate && <MetaInfo>You last achieved this on 9th Feb.</MetaInfo>}
+      </div>
+    )
+  }
+}
+
 export default class Badge extends Component {
   render() {
-    const { image, title, description, achievedDate, imageOnly = true, acquired = true } = this.props;
+    const { image, title, description, achievedDate, count = 5, imageOnly = true, acquired = true } = this.props;
 
     return (
       <Wrapper>
         <Image acquired={acquired} {...this.props}>
-          <img src={image} width={80} height={90} title={title} />
+          <img src={image} width={80} height={90} />
+          { acquired && count > 1 && !imageOnly &&
+            <PopOver content={<BadgeDetails {...this.props}/>} title={<Title>{title}</Title>}>
+              <BadgeCount>x{count}</BadgeCount> 
+            </PopOver>
+          }
         </Image>
         {
           !imageOnly && <Details>
             <Title>{title}</Title>
             <Description>{description}</Description>
-            {
-              achievedDate && <MetaInfo>You achieved this on 9th Feb.</MetaInfo>
-            }
           </Details>
         }
       </Wrapper>

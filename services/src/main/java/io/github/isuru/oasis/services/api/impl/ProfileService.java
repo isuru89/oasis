@@ -307,4 +307,12 @@ public class ProfileService extends BaseService implements IProfileService {
                 UserTeam.class);
     }
 
+    @Override
+    public TeamProfile findTeamByName(String name) throws Exception {
+        Checks.nonNullOrEmpty(name, "teamName");
+
+        return getTheOnlyRecord("profile/findTeamByName",
+                Maps.create("teamName", name),
+                TeamProfile.class);
+    }
 }

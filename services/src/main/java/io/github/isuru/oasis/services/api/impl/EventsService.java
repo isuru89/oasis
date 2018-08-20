@@ -8,6 +8,7 @@ import io.github.isuru.oasis.services.api.IEventsService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.utils.AuthUtils;
@@ -57,7 +58,7 @@ public class EventsService extends BaseService implements IEventsService {
         // authenticate event...
         EventSourceToken eventSourceToken = SOURCE_CACHE.get(token);
         if (eventSourceToken == null || !eventSourceToken.isActive()) {
-            throw new ApiAuthException("Unable to verify authentication of event source for token '" + token + "'!");
+            throw new ApiAuthException("Unable to verify authorization token of event source '" + token + "'!");
         }
         eventData.put(Constants.FIELD_SOURCE, eventSourceToken.getId());
 
@@ -84,8 +85,15 @@ public class EventsService extends BaseService implements IEventsService {
             }
         } else {
             // @TODO validate team and user
-            event.put(Constants.FIELD_TEAM, DataCache.get().getTeamDefault().getId());
-            event.put(Constants.FIELD_SCOPE, DataCache.get().getTeamScopeDefault().getId());
+            Object team = event.get(Constants.FIELD_TEAM);
+            if (team instanceof String) {
+                TeamProfile teamProfile = resolveTeam(String.valueOf(team));
+                event.put(Constants.FIELD_TEAM, teamProfile.getId());
+                event.put(Constants.FIELD_SCOPE, teamProfile.getTeamScope());
+            } else {
+                event.put(Constants.FIELD_TEAM, Long.parseLong(String.valueOf(team)));
+                event.put(Constants.FIELD_SCOPE, DataCache.get().getTeamScopeDefault().getId());
+            }
         }
 
         RabbitDispatcher.get().dispatch(DataCache.get().getDefGameId(), event);
@@ -179,6 +187,15 @@ public class EventsService extends BaseService implements IEventsService {
             }
             USER_CACHE.put(email, profile.getId());
             return profile.getId();
+        }
+    }
+
+    private TeamProfile resolveTeam(String team) throws Exception {
+        TeamProfile teamByName = getApiService().getProfileService().findTeamByName(team);
+        if (teamByName != null) {
+            return teamByName;
+        } else {
+            throw new InputValidationException("No team is found by name of '" + team + "'!");
         }
     }
 

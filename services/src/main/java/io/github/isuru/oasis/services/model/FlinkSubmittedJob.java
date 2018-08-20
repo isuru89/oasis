@@ -9,7 +9,15 @@ public class FlinkSubmittedJob {
     private String jobId;
     private String jarId;
     private String snapshotDir;
+    private boolean active;
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public String getSnapshotDir() {
         return snapshotDir;

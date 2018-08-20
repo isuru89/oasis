@@ -7,6 +7,7 @@ import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
 import io.github.isuru.oasis.services.utils.UserRole;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +23,13 @@ import java.util.Properties;
  * @author iweerarathna
  */
 class UtilsTest extends AbstractApiTest {
+
+    @Test
+    void givenUsingPlainJava_whenGeneratingRandomStringUnbounded_thenCorrect() {
+        String generatedString = RandomStringUtils.randomAlphanumeric(10);
+
+        System.out.println(generatedString);
+    }
 
     @Test
     void testChecks() throws InputValidationException {

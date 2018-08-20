@@ -23,12 +23,13 @@ const Delta = styled.div`
   font-size: 10px;
   letter-spacing: 1px;
   font-weight: 300;
-  color: ${props => props.plus ? '#00bb00': '#ff0000'};
+  color: ${props => props.plus ? 'hsl(100, 100%, 70%)': 'hsl(10, 100%, 70%)'};
 `
 
 const AnnotationLabel = styled.div`
   font-size: 9px;
   line-height: 2;
+  color: hsl(203, 50%, 76%);
 `
 
 export default class PointLabel extends Component {

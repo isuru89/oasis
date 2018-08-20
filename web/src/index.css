@@ -4,7 +4,7 @@ html, body {
   padding: 0;
   font-family: "Roboto", sans-serif;
   height: 100vh;
-  color: #739CAE;
+  color:hsl(240, 43%, 26%);
   box-sizing: border-box;
 }
 
@@ -13,7 +13,7 @@ html, body {
 }
 
 input {
-  color: #1E2B34;
+  color: hsl(240, 43%, 26%);
   font-size: 14px;
   line-height: 2;
   outline: none;

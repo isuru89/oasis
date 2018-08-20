@@ -6,7 +6,7 @@ const Wrapper = styled.div`
   height: 100px;
   text-align: center;
   font-size: 0.9em;
-  color: ${props => props.selected ? '#21BFE7' : '#21BFE788'};
+  color: ${props => props.selected ? 'hsl(203, 100%, 70%)' : 'hsl(203, 30%, 50%)'};
   user-select: none;
   box-sizing: border-box;
   cursor: pointer;
@@ -15,14 +15,13 @@ const Wrapper = styled.div`
   align-items: center;
   justify-content: center;
 
-  border-bottom: 1px solid #ffffff22;
-  background-color: ${props => props.selected ? '#1E2B34' : '#00000000'};
-  border-left: ${props => props.selected ? '5px solid #24D5E9' : '5px solid #ffffff00'};
-  border-right: 5px solid #ffffff00;
+  border-bottom: 1px solid hsl(203, 40%, 30%);
+  background-color: ${props => props.selected ? 'hsl(203, 70%, 10%)' : 'transparent'};
+  border-left: ${props => props.selected ? '5px solid hsl(203, 100%, 70%)' : '5px solid transparent'};
 
   &:hover {
-    background-color: #1E2B3488;
-    color: #21BFE7;
+    background-color: ${props => props.selected ? 'hsl(203, 70%, 10%)' : 'hsl(203, 50%, 20%)' };
+    color: hsl(203, 100%, 70%);
   }
 `
 

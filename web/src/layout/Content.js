@@ -5,6 +5,7 @@ import ProgressPage from '../pages/progress/ProgressPage';
 import GameCreation from '../pages/game/GameCreation';
 import CreateKpiForm from '../pages/game/CreateKpiForm';
 import { CreatePointForm } from '../pages/game/CreatePointForm';
+import { Route } from "react-router-dom";
 
 const Wrapper = styled.div`
   width: 100%;
@@ -15,7 +16,9 @@ export default class Content extends Component {
   render() {
     return (
       <Wrapper>
-        <ProfilePage />
+        <Route path="/profile" component={ProfilePage} />
+        <Route path="/progress" component={ProgressPage} />
+        
         {/* <CreatePointForm /> */}
       </Wrapper>
     )

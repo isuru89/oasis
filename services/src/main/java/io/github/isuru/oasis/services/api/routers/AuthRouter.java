@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.configs.Configs;
+import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.model.UserProfile;
@@ -45,7 +46,10 @@ public class AuthRouter extends BaseRouters {
         String password = basicAuthPair.getValue1();
 
         if (!RESERVED_USERS.contains(username)) {
-            AuthUtils.get().ldapAuthUser(username, password);
+            // @TODO remove this in production
+            if (!password.equals(DataCache.get().getAllUserTmpPassword())) {
+                AuthUtils.get().ldapAuthUser(username, password);
+            }
         }
 
         boolean fresh = false;

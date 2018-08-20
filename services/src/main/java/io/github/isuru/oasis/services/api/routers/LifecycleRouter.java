@@ -26,21 +26,17 @@ public class LifecycleRouter extends BaseRouters {
             checkCurator(request);
         });
 
-        post("/game/:gameId/start", (req, res) -> {
-            return mapToStatus(getLCService().start(asPLong(req, "gameId")));
-        });
+        post("/game/:gameId/start",
+                (req, res) -> mapToStatus(getLCService().start(asPLong(req, "gameId"))));
 
-        post("/game/:gameId/stop", (req, res) -> {
-            return mapToStatus(getLCService().stop(asPLong(req, "gameId")));
-        });
+        post("/game/:gameId/stop",
+                (req, res) -> mapToStatus(getLCService().stop(asPLong(req, "gameId"))));
 
-        post("/challenge/:cid/start", (req, res) -> {
-            return mapToStatus(getLCService().startChallenge(asPLong(req, "cid")));
-        });
+        post("/challenge/:cid/start",
+                (req, res) -> mapToStatus(getLCService().startChallenge(asPLong(req, "cid"))));
 
-        post("/challenge/:id/stop", (req, res) -> {
-            return mapToStatus(getLCService().stop(asPLong(req, "id")));
-        });
+        post("/challenge/:id/stop",
+                (req, res) -> mapToStatus(getLCService().stop(asPLong(req, "id"))));
     }
 
     private static Map<String, Object> mapToStatus(boolean status) {

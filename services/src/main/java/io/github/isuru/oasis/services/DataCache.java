@@ -8,6 +8,9 @@ import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DataCache {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DataCache.class);
+
     private IOasisApiService apiService;
+
+    private String allUserTmpPassword;
 
     private final Map<Long, OasisGameDef> cache = new ConcurrentHashMap<>();
     private long defGameId;
@@ -27,6 +34,8 @@ public class DataCache {
     private EventSourceToken internalEventSourceToken;
 
     void setup(IOasisApiService apiService) throws Exception {
+        allUserTmpPassword = RandomStringUtils.randomAlphanumeric(10);
+        LOG.info("Temporary password for all player authentication: " + allUserTmpPassword);
         this.apiService = apiService;
 
         IGameDefService gameDefService = apiService.getGameDefService();
@@ -90,6 +99,10 @@ public class DataCache {
         oasisGameDef.setBadges(gameDefService.listBadgeDefs(gameId));
         oasisGameDef.setMilestones(gameDefService.listMilestoneDefs(gameId));
         return oasisGameDef;
+    }
+
+    public String getAllUserTmpPassword() {
+        return allUserTmpPassword;
     }
 
     public long getDefGameId() {

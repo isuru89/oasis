@@ -7,21 +7,22 @@ const Wrapper = styled.div`
 `
 
 const RankCell = styled.div`
+    line-height: 1;
     font-size: 24px;
     font-weight: bold;
-    color: #21BFE7;
+    color: hsl(203, 80%, 56%);
 `
 
 const PointsCell = styled.div`
     font-size: 14px;
     color: goldenrod;
-    opacity: 0.7;
+    color: hsl(50, 43%, 50%);
 `
 
 const PtsLabel = styled.span`
     font-size: 10px;
     margin-left: 5px;
-    opacity: 0.7;
+    color: hsl(50, 43%, 30%);
 `
 
 export default class RankPoint extends Component {
@@ -32,7 +33,7 @@ export default class RankPoint extends Component {
       <Wrapper>
         <RankCell style={rankStyle}>{rank || '-'}</RankCell>
         <PointsCell style={pointStyle}>{formatInt(points, true, '')} 
-            <PtsLabel>{suffix}</PtsLabel></PointsCell>
+        <PtsLabel>{suffix}</PtsLabel></PointsCell>
       </Wrapper>
     )
   }

@@ -15,6 +15,8 @@ import PointBreakdown from './PointBreakdown';
 
 const Content = styled.div`
   height: 100%;
+  color: hsl(203, 70%, 30%);
+  background-color: hsl(203, 30%, 90%);
 `
 
 const UserContent = styled.div`
@@ -26,7 +28,8 @@ const UserContent = styled.div`
 const Column1 = styled.div`
   width: 300px;
   text-align: center;
-  background-color: #1E2B34;
+  background-color: hsl(203, 70%, 10%);
+  color: hsl(203, 50%, 60%);
   padding: 10px 5px;
 `
 
@@ -95,6 +98,7 @@ export default class ProfilePage extends Component {
             <ImageTitleValue image={<FontAwesomeIcon icon="football-ball" />}
               title="Team:" 
               value="QA-Testings" />
+            <div style={{ height: 20 }} />
             <RankView data={leaderboardData} />
 
           </Column1>
