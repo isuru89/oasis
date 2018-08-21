@@ -1,6 +1,5 @@
 package io.github.isuru.oasis.services.api.impl;
 
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IProfileService;
 import io.github.isuru.oasis.services.model.TeamProfile;
@@ -23,8 +22,8 @@ import java.util.Map;
  */
 public class ProfileService extends BaseService implements IProfileService {
 
-    ProfileService(IOasisDao dao, IOasisApiService apiService) {
-        super(dao, apiService);
+    ProfileService(IOasisApiService apiService) {
+        super(apiService);
     }
 
     @Override

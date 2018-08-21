@@ -18,8 +18,8 @@ abstract class BaseService {
     private final IOasisDao dao;
     private final IOasisApiService apiService;
 
-    BaseService(IOasisDao dao, IOasisApiService apiService) {
-        this.dao = dao;
+    BaseService(IOasisApiService apiService) {
+        this.dao = apiService.getDao();
         this.apiService = apiService;
     }
 

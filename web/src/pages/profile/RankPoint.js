@@ -11,6 +11,7 @@ const RankCell = styled.div`
     font-size: 24px;
     font-weight: bold;
     color: hsl(203, 80%, 56%);
+    font-family: 'Roboto', Tahoma, Geneva, Verdana, sans-serif;
 `
 
 const PointsCell = styled.div`

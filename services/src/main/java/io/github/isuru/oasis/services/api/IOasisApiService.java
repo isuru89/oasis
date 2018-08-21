@@ -1,9 +1,13 @@
 package io.github.isuru.oasis.services.api;
 
+import io.github.isuru.oasis.model.db.IOasisDao;
+
 /**
  * @author iweerarathna
  */
 public interface IOasisApiService {
+
+    IOasisDao getDao();
 
     IGameDefService getGameDefService();
 

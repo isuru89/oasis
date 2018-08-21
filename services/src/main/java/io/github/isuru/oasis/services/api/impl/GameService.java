@@ -1,6 +1,5 @@
 package io.github.isuru.oasis.services.api.impl;
 
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
@@ -28,8 +27,8 @@ import java.util.Map;
  */
 public class GameService extends BaseService implements IGameService {
 
-    GameService(IOasisDao oasisDao, IOasisApiService apiService) {
-        super(oasisDao, apiService);
+    GameService(IOasisApiService apiService) {
+        super(apiService);
     }
 
     @Override

@@ -11,6 +11,10 @@ import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.api.routers.Routers;
 import io.github.isuru.oasis.services.backend.FlinkServices;
 import io.github.isuru.oasis.services.utils.AuthUtils;
+import io.github.isuru.oasis.services.utils.FlinkScheduler;
+import io.github.isuru.oasis.services.utils.IGameController;
+import io.github.isuru.oasis.services.utils.OasisOptions;
+import io.github.isuru.oasis.services.utils.local.LocalScheduler;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +53,20 @@ public class OasisServer {
         flinkServices.init(OasisUtils.getEnvOr(EnvKeys.OASIS_FLINK_URL,
                 configs.getStrReq("oasis.flink.url")));
 
+        LOGGER.debug("Creating remote game controllers...");
+        IGameController gameController;
+        if (configs.isLocal()) {
+            gameController = new LocalScheduler(oasisDao);
+        } else {
+            gameController = new FlinkScheduler(configs);
+        }
+
         LOGGER.debug("Initializing services...");
-        apiService = new DefaultOasisApiService(oasisDao, flinkServices);
+        OasisOptions oasisOptions = new OasisOptions();
+        oasisOptions.setFlinkServices(flinkServices);
+        oasisOptions.setGameController(gameController);
+        oasisOptions.setConfigs(configs);
+        apiService = new DefaultOasisApiService(oasisDao, oasisOptions, configs);
 
         LOGGER.debug("Setting up database and cache...");
         Bootstrapping.initSystem(apiService, oasisDao);
@@ -63,7 +79,7 @@ public class OasisServer {
         // start service with routing
         //
         LOGGER.debug("Initializing routers...");
-        Routers routers = new Routers(apiService);
+        Routers routers = new Routers(apiService, oasisOptions);
         Spark.path("/api/v1", routers::register);
         routers.registerExceptionHandlers();
 
@@ -92,8 +108,7 @@ public class OasisServer {
         String logConfigs = System.getenv("OASIS_LOG_CONFIG_FILE");
         if (logConfigs == null || logConfigs.isEmpty()) {
             logConfigs = System.getProperty("oasis.logs.config.file",
-                    Configs.get().getStr("oasis.logs.config.file",
-                    "./configs/logger.properties"));
+                    "./configs/logger.properties");
         }
         if (new File(logConfigs).exists()) {
             PropertyConfigurator.configure(logConfigs);
@@ -102,7 +117,7 @@ public class OasisServer {
 
     private static Configs initConfigs() throws IOException {
         String oasisConfigs = System.getenv("OASIS_CONFIG_FILE");
-        Configs configs = Configs.get();
+        Configs configs = Configs.create();
 
         if (oasisConfigs == null || oasisConfigs.isEmpty()) {
             oasisConfigs = System.getProperty("oasis.config.file",

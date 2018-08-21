@@ -1,8 +1,6 @@
 package io.github.isuru.oasis.services.api.impl;
 
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.Constants;
-import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.api.IEventsService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
@@ -14,9 +12,10 @@ import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
+import io.github.isuru.oasis.services.utils.IGameController;
 import io.github.isuru.oasis.services.utils.LRUCache;
 import io.github.isuru.oasis.services.utils.Maps;
-import io.github.isuru.oasis.services.utils.RabbitDispatcher;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,10 +33,14 @@ public class EventsService extends BaseService implements IEventsService {
     private final Map<String, Long> USER_CACHE;
     private final Map<String, EventSourceToken> SOURCE_CACHE = new ConcurrentHashMap<>();
 
-    EventsService(IOasisDao dao, IOasisApiService apiService) {
-        super(dao, apiService);
+    private IGameController gameController;
 
-        USER_CACHE = new LRUCache<>(Configs.get().getInt("oasis.cache.user.size", 300));
+    EventsService(IOasisApiService apiService,
+                  OasisOptions oasisOptions) {
+        super(apiService);
+
+        gameController = oasisOptions.getGameController();
+        USER_CACHE = new LRUCache<>(oasisOptions.getConfigs().getInt("oasis.cache.user.size", 300));
         try {
             listAllEventSources();
         } catch (Exception e) {
@@ -71,6 +74,9 @@ public class EventsService extends BaseService implements IEventsService {
             userId = Long.parseLong(String.valueOf(user));
         }
 
+        Object gobj = eventData.get(Constants.FIELD_GAME_ID);
+        long gid = gobj != null ? Long.parseLong(gobj.toString()) : DataCache.get().getDefGameId();
+
         Map<String, Object> event = new HashMap<>(eventData);
         event.remove(Constants.FIELD_GAME_ID);
 
@@ -96,7 +102,7 @@ public class EventsService extends BaseService implements IEventsService {
             }
         }
 
-        RabbitDispatcher.get().dispatch(DataCache.get().getDefGameId(), event);
+        gameController.submitEvent(gid, event);
     }
 
     @Override

@@ -42,6 +42,8 @@ public class ConfigKeys {
     public static final String KEY_RABBIT_QUEUE_OUT_CHALLENGES = "rabbit.queue.challenges";
     public static final String KEY_RABBIT_QUEUE_OUT_STATES = "rabbit.queue.states";
 
+    public static final String KEY_LOCAL_REF_SOURCE = "oasis.local.source.ref";
+    public static final String KEY_LOCAL_REF_OUTPUT = "oasis.local.output.ref";
 
     public static final int DEF_RABBIT_PORT = 5672;
     public static final String DEF_RABBIT_VIRTUAL_HOST = "oasis";

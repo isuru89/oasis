@@ -1,11 +1,9 @@
 package io.github.isuru.oasis.injector;
 
 import com.rabbitmq.client.Channel;
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.injector.model.BadgeModel;
-import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.db.IOasisDao;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -18,25 +16,8 @@ class BadgeConsumer extends BaseConsumer<BadgeModel> {
     }
 
     @Override
-    boolean handle(BadgeModel msg) {
-        Event first = msg.getEvents().get(0);
-        Event last = msg.getEvents().get(msg.getEvents().size() - 1);
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("userId", msg.getUserId());
-        map.put("teamId", last.getTeam());
-        map.put("teamScopeId", last.getTeamScope());
-        map.put("eventType", msg.getEventType());
-        map.put("extId", last.getExternalId());
-        map.put("ts", last.getTimestamp());
-        map.put("badgeId", msg.getBadgeId());
-        map.put("subBadgeId", msg.getSubBadgeId() != null ? msg.getSubBadgeId() : "");
-        map.put("startExtId", first.getExternalId());
-        map.put("endExtId", last.getExternalId());
-        map.put("startTime", first.getTimestamp());
-        map.put("endTime", last.getTimestamp());
-        map.put("gameId", contextInfo.getGameId());
-        map.put("tag", msg.getTag());
+    public boolean handle(BadgeModel msg) {
+        Map<String, Object> map = ConsumerUtils.toBadgeDaoData(contextInfo.getGameId(), msg);
 
         try {
             dao.executeCommand("game/addBadge", map);

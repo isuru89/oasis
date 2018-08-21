@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services;
 
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.db.DbProperties;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
@@ -16,6 +17,7 @@ import io.github.isuru.oasis.model.defs.PointsDef;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -40,7 +42,8 @@ class DummyRunner {
         dbProperties.setUrl("jdbc:mysql://localhost/oasis");
 
         IOasisDao oasisDao = OasisDbFactory.create(dbProperties);
-        IOasisApiService apiService = new DefaultOasisApiService(oasisDao, null);
+        OasisOptions oasisOptions = new OasisOptions();
+        IOasisApiService apiService = new DefaultOasisApiService(oasisDao, oasisOptions, Configs.create());
 
         GameDef gameDef = new GameDef();
         gameDef.setName("oasis-test");

@@ -26,9 +26,7 @@ public final class RabbitDispatcher {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public void init() throws IOException, TimeoutException {
-        Configs configs = Configs.get();
-
+    void init(Configs configs) throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(configs.getStrReq(ConfigKeys.KEY_RABBIT_HOST));
         factory.setPort(Integer.parseInt(configs.getStr(ConfigKeys.KEY_RABBIT_PORT,
@@ -75,14 +73,6 @@ public final class RabbitDispatcher {
         channel.basicPublish(exchangeName, routingKey, properties, msg);
     }
 
-    public static RabbitDispatcher get() {
-        return Holder.INSTANCE;
-    }
-
-    private RabbitDispatcher() {}
-
-    private static class Holder {
-        private static final RabbitDispatcher INSTANCE = new RabbitDispatcher();
-    }
+    RabbitDispatcher() {}
 
 }

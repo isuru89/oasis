@@ -19,6 +19,13 @@ public class Utils {
     private static final Pattern TIME_PATTERN = Pattern.compile("([0-9]+)\\s*([a-zA-Z]+)");
     private static final Pattern NUMBER_PATTERN = Pattern.compile("([0-9\\\\.]+)\\s*([kKmMbB]?)");
 
+    @SuppressWarnings("unchecked")
+    public static <T> T createInst(String clz) throws ReflectiveOperationException {
+        return (T) Thread.currentThread().getContextClassLoader()
+                .loadClass(clz)
+                .newInstance();
+    }
+
     public static boolean eventEquals(Event against, String eventType) {
         return eventType.equals(against.getEventType());
     }

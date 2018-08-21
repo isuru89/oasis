@@ -66,7 +66,7 @@ class RoutingTest extends AbstractApiTest {
     }
 
     static void startServer() throws Exception {
-        Configs configs = Configs.get();
+        Configs configs = Configs.create();
         configs.append("oasis.config.file", "./src/test/resources/oasis/configs/oasis.properties," +
                 "./src/test/resources/oasis/configs/jdbc.properties," +
                 "./src/test/resources/oasis/configs/ldap.properties");

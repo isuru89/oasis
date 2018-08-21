@@ -50,5 +50,5 @@ public abstract class BaseConsumer<T> extends DefaultConsumer {
         }
     }
 
-    abstract boolean handle(T msg);
+    public abstract boolean handle(T msg);
 }

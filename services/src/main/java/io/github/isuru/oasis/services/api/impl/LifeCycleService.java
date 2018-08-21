@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.model.configs.ConfigKeys;
-import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.defs.DefWrapper;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
@@ -16,10 +16,10 @@ import io.github.isuru.oasis.services.backend.model.JarRunResponse;
 import io.github.isuru.oasis.services.backend.model.JarUploadResponse;
 import io.github.isuru.oasis.services.backend.model.JobSaveRequest;
 import io.github.isuru.oasis.services.model.FlinkSubmittedJob;
-import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Constants;
 import io.github.isuru.oasis.services.utils.Maps;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -41,11 +41,14 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
 
     private final FlinkServices services;
 
-    LifeCycleService(IOasisDao dao, IOasisApiService apiService,
-                     FlinkServices flinkServices) {
-        super(dao, apiService);
+    private Configs configs;
 
-        this.services = flinkServices;
+    LifeCycleService(IOasisApiService apiService,
+                     OasisOptions oasisOptions) {
+        super(apiService);
+
+        this.services = oasisOptions.getFlinkServices();
+        this.configs = oasisOptions.getConfigs();
     }
 
     @Override
@@ -92,7 +95,6 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
     }
 
     private boolean startDef(long defId, boolean isGame) throws Exception {
-        Configs configs = Configs.get();
         File storageDir = configs.getPath(ConfigKeys.KEY_STORAGE_DIR, Constants.DEF_WORKSPACE_DIR);
 
         FlinkSubmittedJob job = getTheOnlyRecord("getJobOfDef",
@@ -144,7 +146,7 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
 
     private File writeGameConfigFile(long defId, boolean isGame, File specificExecutionDir) throws IOException {
         File configFile = specificExecutionDir.toPath().resolve("run.properties").toFile();
-        File templateFile = Configs.get().getPath("game.run.template.file",
+        File templateFile = configs.getPath("game.run.template.file",
                 Constants.DEF_LOCATION_RUN_TEMPLATE, true, false);
 
         String runConfigsTxt = FileUtils.readFileToString(templateFile, StandardCharsets.UTF_8);

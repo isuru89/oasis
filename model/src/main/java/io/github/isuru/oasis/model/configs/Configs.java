@@ -1,5 +1,7 @@
 package io.github.isuru.oasis.model.configs;
 
+import io.github.isuru.oasis.model.utils.OasisUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,7 +16,16 @@ public final class Configs implements Serializable {
 
     private final Properties props = new Properties();
 
+    public boolean isLocal() {
+        return OasisUtils.getEnvOr("OASIS_MODE", "").trim()
+                .equalsIgnoreCase("local");
+    }
+
     public void append(String key, String value) {
+        props.put(key, value);
+    }
+
+    public void append(String key, Object value) {
         props.put(key, value);
     }
 
@@ -26,6 +37,10 @@ public final class Configs implements Serializable {
     public Configs init(InputStream inputStream) throws IOException {
         props.load(inputStream);
         return this;
+    }
+
+    public Object getObj(String key, Object defObj) {
+        return props.getOrDefault(key, defObj);
     }
 
     public File getPath(String key, String defPath) throws FileNotFoundException {
@@ -96,9 +111,9 @@ public final class Configs implements Serializable {
         return configs;
     }
 
-    public static Configs get() {
-        return Holder.INSTANCE;
-    }
+//    public static Configs get() {
+//        return Holder.INSTANCE;
+//    }
 
     private Configs() {}
 

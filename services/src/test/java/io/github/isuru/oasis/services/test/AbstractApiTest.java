@@ -1,11 +1,13 @@
 package io.github.isuru.oasis.services.test;
 
+import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.db.DbProperties;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.model.db.OasisDbPool;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 import javafx.util.Pair;
 import org.junit.jupiter.api.Assertions;
 
@@ -40,8 +42,8 @@ public abstract class AbstractApiTest {
     protected static Pair<IOasisApiService, IOasisDao> dbStart() throws Exception {
         DbProperties properties = new DbProperties(OasisDbPool.DEFAULT);
         properties.setUrl("jdbc:mysql://localhost/oasis");
-        properties.setUsername("root");
-        properties.setPassword("root");
+        properties.setUsername("isuru");
+        properties.setPassword("isuru");
         File file = new File("./scripts/db");
         if (!file.exists()) {
             file = new File("../scripts/db");
@@ -52,7 +54,10 @@ public abstract class AbstractApiTest {
         properties.setQueryLocation(file.getAbsolutePath());
 
         oasisDao = OasisDbFactory.create(properties);
-        apiService = new DefaultOasisApiService(oasisDao, null);
+        OasisOptions oasisOptions = new OasisOptions();
+        Configs configs = Configs.create();
+        oasisOptions.setConfigs(configs);
+        apiService = new DefaultOasisApiService(oasisDao, oasisOptions, configs);
         return new Pair<>(apiService, oasisDao);
     }
 

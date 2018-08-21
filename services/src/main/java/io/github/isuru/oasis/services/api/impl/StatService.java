@@ -1,20 +1,39 @@
 package io.github.isuru.oasis.services.api.impl;
 
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IStatService;
-import io.github.isuru.oasis.services.api.dto.*;
+import io.github.isuru.oasis.services.api.dto.BadgeBreakdownReqDto;
+import io.github.isuru.oasis.services.api.dto.BadgeBreakdownResDto;
+import io.github.isuru.oasis.services.api.dto.BadgeRecordDto;
+import io.github.isuru.oasis.services.api.dto.ChallengeInfoDto;
+import io.github.isuru.oasis.services.api.dto.ChallengeWinnerDto;
+import io.github.isuru.oasis.services.api.dto.PointBreakdownReqDto;
+import io.github.isuru.oasis.services.api.dto.PointBreakdownResDto;
+import io.github.isuru.oasis.services.api.dto.PointRecordDto;
+import io.github.isuru.oasis.services.api.dto.TeamHistoryRecordDto;
+import io.github.isuru.oasis.services.api.dto.UserBadgeStatDto;
+import io.github.isuru.oasis.services.api.dto.UserMilestoneStatDto;
+import io.github.isuru.oasis.services.api.dto.UserStatDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.model.*;
+import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
+import io.github.isuru.oasis.services.model.PurchasedItem;
+import io.github.isuru.oasis.services.model.UserRankRecordDto;
+import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.model.enums.ScopingType;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 
 import java.beans.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -22,8 +41,8 @@ import java.util.stream.Collectors;
  */
 public class StatService extends BaseService implements IStatService {
 
-    StatService(IOasisDao dao, IOasisApiService apiService) {
-        super(dao, apiService);
+    StatService(IOasisApiService apiService) {
+        super(apiService);
     }
 
     @Override

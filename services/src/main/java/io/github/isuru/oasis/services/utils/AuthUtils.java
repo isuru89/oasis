@@ -47,14 +47,16 @@ public final class AuthUtils {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    private Configs configs;
+
     private AuthUtils() {}
 
     public void init(Configs configs) throws Exception {
         mapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
 
         // init jwt configurations
-        String publicKeyPath = Configs.get().getStrReq("oasis.public.key");
-        String privateKeyPath = Configs.get().getStrReq("oasis.private.key");
+        String publicKeyPath = configs.getStrReq("oasis.public.key");
+        String privateKeyPath = configs.getStrReq("oasis.private.key");
         byte[] bytesPrivate = Files.readAllBytes(Paths.get(privateKeyPath));
         byte[] bytesPublic = Files.readAllBytes(Paths.get(publicKeyPath));
         PKCS8EncodedKeySpec specPrivate = new PKCS8EncodedKeySpec(bytesPrivate);
@@ -76,7 +78,7 @@ public final class AuthUtils {
         DirContext context = null;
         Hashtable<String, String> env = new Hashtable<>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(Context.PROVIDER_URL, Configs.get().getStrReq("oasis.auth.ldap.url"));
+        env.put(Context.PROVIDER_URL, configs.getStrReq("oasis.auth.ldap.url"));
         env.put(Context.SECURITY_AUTHENTICATION, "simple");
         env.put(Context.SECURITY_PRINCIPAL, username);
         env.put(Context.SECURITY_CREDENTIALS, password);

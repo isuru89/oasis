@@ -1,10 +1,9 @@
 package io.github.isuru.oasis.injector;
 
 import com.rabbitmq.client.Channel;
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.injector.model.ChallengeModel;
+import io.github.isuru.oasis.model.db.IOasisDao;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -17,15 +16,8 @@ class ChallengeConsumer extends BaseConsumer<ChallengeModel> {
     }
 
     @Override
-    boolean handle(ChallengeModel msg) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("userId", msg.getUserId());
-        map.put("teamId", msg.getTeamId());
-        map.put("teamScopeId", msg.getTeamScopeId());
-        map.put("challengeId", msg.getChallengeId());
-        map.put("points", msg.getPoints());
-        map.put("wonAt", msg.getWonAt());
-        map.put("gameId", contextInfo.getGameId());
+    public boolean handle(ChallengeModel msg) {
+        Map<String, Object> map = ConsumerUtils.toChallengeDaoData(contextInfo.getGameId(), msg);
 
         try {
             dao.executeCommand("game/addChallengeWinner", map);

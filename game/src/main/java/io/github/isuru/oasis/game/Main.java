@@ -3,6 +3,7 @@ package io.github.isuru.oasis.game;
 import io.github.isuru.oasis.game.parser.*;
 import io.github.isuru.oasis.game.persist.NoneOutputHandler;
 import io.github.isuru.oasis.game.persist.OasisKafkaSink;
+import io.github.isuru.oasis.game.persist.OasisSink;
 import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSink;
 import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSource;
 import io.github.isuru.oasis.game.persist.rabbit.RabbitUtils;
@@ -18,6 +19,7 @@ import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
+import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import io.github.isuru.oasis.model.utils.OasisUtils;
@@ -44,10 +46,12 @@ public class Main {
         ParameterTool parameters = ParameterTool.fromArgs(args);
         String configs = parameters.getRequired("configs");
         Configs gameProperties = readConfigs(configs).initWithSysProps();
-
         File ruleFile = deriveGameRuleFilePath(configs, gameProperties);
         OasisGameDef oasisGameDef = readGameDef(ruleFile);
+        startGame(gameProperties, oasisGameDef);
+    }
 
+    public static void startGame(Configs gameProperties, OasisGameDef oasisGameDef) throws Exception {
         if (oasisGameDef.getChallenge() == null) {
             GameDef gameDef = oasisGameDef.getGame();
             System.setProperty(Constants.ENV_OASIS_GAME_ID, String.valueOf(gameDef.getId()));
@@ -117,7 +121,22 @@ public class Main {
         } else if ("rabbit".equalsIgnoreCase(outputType)) {
             return execution.outputSink(new OasisRabbitSink(gameProps));
         } else {
-            throw new RuntimeException("Unknown output type!");
+            try {
+                Object inst = gameProps.getObj(ConfigKeys.KEY_LOCAL_REF_OUTPUT, null);
+                if (inst == null) {
+                    inst = Utils.createInst(outputType);
+                }
+
+                if (inst instanceof IOutputHandler) {
+                    return execution.outputHandler((IOutputHandler)inst);
+                } else if (inst instanceof OasisSink) {
+                    return execution.outputSink((OasisSink)inst);
+                } else {
+                    throw new RuntimeException("Unknown type of output!");
+                }
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException("Unknown output type!");
+            }
         }
     }
 
@@ -134,6 +153,7 @@ public class Main {
         }
     }
 
+    @SuppressWarnings("unchecked")
     static SourceFunction<Event> createSource(Configs gameProps) throws FileNotFoundException {
         String type = gameProps.getStrReq(Constants.KEY_SOURCE_TYPE);
         if ("file".equalsIgnoreCase(type)) {
@@ -168,7 +188,16 @@ public class Main {
                     new EventRabbitDeserializer());
 
         } else {
-            throw new IllegalArgumentException("Invalid event source type specified! [" + type + "]");
+            Object inst = gameProps.getObj(ConfigKeys.KEY_LOCAL_REF_SOURCE, null);
+            if (inst != null) {
+                return (SourceFunction<Event>) inst;
+            }
+
+            try {
+                return Utils.createInst(type);
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalArgumentException("Invalid event source type specified! [" + type + "]");
+            }
         }
     }
 

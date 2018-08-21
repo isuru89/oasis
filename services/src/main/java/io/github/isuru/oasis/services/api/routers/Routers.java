@@ -4,6 +4,7 @@ import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.Maps;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -15,9 +16,11 @@ import spark.Spark;
 public final class Routers {
 
     private final IOasisApiService apiService;
+    private final OasisOptions oasisOptions;
 
-    public Routers(IOasisApiService apiService) {
+    public Routers(IOasisApiService apiService, OasisOptions oasisOptions) {
         this.apiService = apiService;
+        this.oasisOptions = oasisOptions;
     }
 
     public void register() {
@@ -25,7 +28,7 @@ public final class Routers {
 
         get("/echo", this::handleEcho);
 
-        Spark.path("/auth", () -> new AuthRouter(apiService).register());
+        Spark.path("/auth", () -> new AuthRouter(apiService, oasisOptions).register());
         Spark.path("/def", () -> new DefinitionRouter(apiService).register());
         Spark.path("/control", () -> new LifecycleRouter(apiService).register());
         Spark.path("/admin", () -> new ProfileRouter(apiService).register());

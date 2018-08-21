@@ -1,8 +1,17 @@
 package io.github.isuru.oasis.services.api.impl;
 
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.ShopItem;
-import io.github.isuru.oasis.model.defs.*;
+import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
+import io.github.isuru.oasis.model.defs.Converters;
+import io.github.isuru.oasis.model.defs.DefWrapper;
+import io.github.isuru.oasis.model.defs.GameDef;
+import io.github.isuru.oasis.model.defs.KpiDef;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
+import io.github.isuru.oasis.model.defs.MilestoneDef;
+import io.github.isuru.oasis.model.defs.OasisDefinition;
+import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.StateDef;
 import io.github.isuru.oasis.services.Bootstrapping;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
@@ -27,8 +36,8 @@ import java.util.stream.Collectors;
  */
 public class GameDefService extends BaseService implements IGameDefService {
 
-    GameDefService(IOasisDao dao, IOasisApiService apiService) {
-        super(dao, apiService);
+    GameDefService(IOasisApiService apiService) {
+        super(apiService);
     }
 
     @Override

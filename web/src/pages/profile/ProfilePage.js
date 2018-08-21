@@ -61,9 +61,9 @@ const UserDesignation = styled.div`
 `
 
 const leaderboardData = [
-  { leaderboard: 'Top Supporter', points: (Math.random() * 100000).toFixed(0), rank: 2 },
-  { leaderboard: 'Top Finder', points: (Math.random() * 500).toFixed(0), rank: 15 },
-  { leaderboard: 'Top Closer', points: (Math.random() * 500).toFixed(0), rank: (Math.random() * 20).toFixed(0) },
+  { leaderboard: 'Team', points: (Math.random() * 100000).toFixed(0), rank: 2, image: 'users' },
+  { leaderboard: 'Project', points: (Math.random() * 500).toFixed(0), rank: 15, image: 'building' },
+  { leaderboard: 'Global', points: (Math.random() * 500).toFixed(0), rank: (Math.random() * 20).toFixed(0), image: 'globe' },
 ]
 
 const milestoneData = [
@@ -92,10 +92,11 @@ export default class ProfilePage extends Component {
             <Avatar image={profileImg} size={164} />
             <UserNameTitle>John Doe</UserNameTitle>
             <UserDesignation>Senior Engineer</UserDesignation>
-            <ImageTitleValue image={<FontAwesomeIcon icon="at" />}
+            <ImageTitleValue image={<FontAwesomeIcon icon="at" />} imgSize={24}
               title="john@product.com" />
 
-            <ImageTitleValue image={<FontAwesomeIcon icon="football-ball" />}
+            <ImageTitleValue image={<FontAwesomeIcon icon="users" />}
+              imgSize={24}
               title="Team:" 
               value="QA-Testings" />
             <div style={{ height: 20 }} />

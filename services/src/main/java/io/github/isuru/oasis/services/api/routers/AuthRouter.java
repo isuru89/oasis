@@ -7,6 +7,7 @@ import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.UserRole;
 import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -25,8 +26,12 @@ public class AuthRouter extends BaseRouters {
     private static final Set<String> RESERVED_USERS = new HashSet<>(
             Arrays.asList("admin@oasis.com", "player@oasis.com", "curator@oasis.com"));
 
-    AuthRouter(IOasisApiService apiService) {
+    private Configs configs;
+
+    AuthRouter(IOasisApiService apiService, OasisOptions oasisOptions) {
         super(apiService);
+
+        configs = oasisOptions.getConfigs();
     }
 
     @Override
@@ -79,17 +84,17 @@ public class AuthRouter extends BaseRouters {
         if (RESERVED_USERS.contains(username)) {
             if (role == UserRole.ADMIN) {
                 // admin
-                if (!password.equals(Configs.get().getStrReq("oasis.default.admin.password"))) {
+                if (!password.equals(configs.getStrReq("oasis.default.admin.password"))) {
                     throw new ApiAuthException("Username or password incorrect!");
                 }
             } else if (role == UserRole.CURATOR) {
                 // curator
-                if (!password.equals(Configs.get().getStrReq("oasis.default.curator.password"))) {
+                if (!password.equals(configs.getStrReq("oasis.default.curator.password"))) {
                     throw new ApiAuthException("Username or password incorrect!");
                 }
             } else if (role == UserRole.PLAYER) {
                 // player
-                if (!password.equals(Configs.get().getStrReq("oasis.default.player.password"))) {
+                if (!password.equals(configs.getStrReq("oasis.default.player.password"))) {
                     throw new ApiAuthException("Username or password incorrect!");
                 }
             } else {

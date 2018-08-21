@@ -17,6 +17,10 @@ public class MilestoneStateModel {
     private Double lossValue;
     private Long lossValueInt;
 
+    public boolean isLoss() {
+        return lossUpdate != null && lossUpdate;
+    }
+
     public Boolean getLossUpdate() {
         return lossUpdate;
     }

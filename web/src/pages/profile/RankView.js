@@ -48,14 +48,14 @@ const ValueCell = styled.td`
 
 export default class RankView extends Component {
   render() {
-    const { data = [] } = this.props;
+    const { data = [], title = 'Rankings' } = this.props;
 
     return (
       <Wrapper>
         <Table>
           <TableHeader>
             <tr>
-              <LabelCellHeader style={{ textAlign: 'left', paddingTop: 10 }}>Rankings</LabelCellHeader>
+              <LabelCellHeader style={{ textAlign: 'left', paddingTop: 10 }}>{title}</LabelCellHeader>
               <ValueCell></ValueCell>
             </tr>
           </TableHeader>
@@ -65,7 +65,7 @@ export default class RankView extends Component {
                 return (
                   <Row key={d.leaderboard}>
                     <LabelCell>
-                      <ImageContent image={<FontAwesomeIcon icon="list-ol" />}>
+                      <ImageContent image={<FontAwesomeIcon icon={d.image || 'list-ol'} />}>
                         <div>{d.leaderboard}</div>
                       </ImageContent>
                     </LabelCell>

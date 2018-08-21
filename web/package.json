@@ -10,6 +10,7 @@
     "antd": "^3.7.1",
     "react": "^16.4.1",
     "react-circular-progressbar": "^1.0.0",
+    "react-custom-scrollbars": "^4.2.1",
     "react-dom": "^16.4.1",
     "react-event-timeline": "^1.5.4",
     "react-router-dom": "^4.3.1",

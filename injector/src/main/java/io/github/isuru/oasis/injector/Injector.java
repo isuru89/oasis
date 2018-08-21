@@ -128,7 +128,7 @@ public class Injector {
             throw new RuntimeException("No configuration files found inside '" + configDirStr + "' dir!");
         }
 
-        Configs configs = Configs.get();
+        Configs configs = Configs.create();
         int count = 0;
         for (File file : files) {
             if (file.getName().endsWith(".properties")) {

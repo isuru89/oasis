@@ -100,7 +100,7 @@ class ApiProfileTest extends AbstractApiTest {
         // default team must be added
         List<TeamProfile> defTeams = profileService.listTeams(l);
         Assertions.assertEquals(1, defTeams.size());
-        Assertions.assertEquals("default", defTeams.get(0).getName());
+        Assertions.assertEquals("default_" + scope.getName(), defTeams.get(0).getName());
         List<UserProfile> defUsers = profileService.listUsers(defTeams.get(0).getId(), 0, 500);
         Assertions.assertEquals(1, defUsers.size());
         Assertions.assertEquals(scope.getName(), defUsers.get(0).getName());
@@ -198,7 +198,7 @@ class ApiProfileTest extends AbstractApiTest {
         // default team / scope user / user
         List<TeamProfile> defTeams = profileService.listTeams(scopeId);
         Assertions.assertEquals(1, defTeams.size());
-        Assertions.assertEquals("default", defTeams.get(0).getName());
+        Assertions.assertEquals("default_" + testProject.getName(), defTeams.get(0).getName());
         List<UserProfile> defUsers = profileService.listUsers(defTeams.get(0).getId(), 0, 500);
         Assertions.assertEquals(1, defUsers.size());
         Assertions.assertEquals(testProject.getName(), defUsers.get(0).getName());
