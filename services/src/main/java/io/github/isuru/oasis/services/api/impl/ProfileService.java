@@ -215,7 +215,7 @@ public class ProfileService extends BaseService implements IProfileService {
             // add default team
             Map<String, Object> teamData = Maps.create()
                     .put("teamScope", addedScopeId)
-                    .put("name", "default")
+                    .put("name", "default_" + teamScope.getName())
                     .put("avatarId", null)
                     .build();
             Long addedTeamId = input.executeInsert("profile/addTeam", teamData, "team_id");
