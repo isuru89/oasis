@@ -17,6 +17,9 @@ public class MilestoneStateNotificationMapper extends BaseNotificationMapper<Mil
         data.put("valueInt", value.getValueInt());
         data.put("nextValue", value.getNextValue());
         data.put("nextValueInt", value.getNextValueInt());
+        data.put("lossUpdate", value.isLossUpdate());
+        data.put("lossValue", value.getLossValue());
+        data.put("lossValueInt", value.getLossValueInt());
         data.put("milestoneId", value.getMilestone().getId());
 
         return BaseNotificationMapper.OBJECT_MAPPER.writeValueAsString(data);

@@ -13,6 +13,34 @@ public class MilestoneStateModel {
     private Double nextValue;
     private Long nextValueInt;
 
+    private Boolean lossUpdate;
+    private Double lossValue;
+    private Long lossValueInt;
+
+    public Boolean getLossUpdate() {
+        return lossUpdate;
+    }
+
+    public void setLossUpdate(Boolean lossUpdate) {
+        this.lossUpdate = lossUpdate;
+    }
+
+    public Double getLossValue() {
+        return lossValue;
+    }
+
+    public void setLossValue(Double lossValue) {
+        this.lossValue = lossValue;
+    }
+
+    public Long getLossValueInt() {
+        return lossValueInt;
+    }
+
+    public void setLossValueInt(Long lossValueInt) {
+        this.lossValueInt = lossValueInt;
+    }
+
     public Long getUserId() {
         return userId;
     }

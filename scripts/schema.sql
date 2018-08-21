@@ -63,6 +63,8 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONE_STATE (
     current_val_i   BIGINT,
     next_val        FLOAT(4),
     next_val_i      BIGINT,
+    loss_val        FLOAT(4),
+    loss_val_i      BIGINT,
     game_id         INT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
