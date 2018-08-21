@@ -12,6 +12,8 @@ FROM
         tbl.totalPoints AS totalPoints,
         (RANK() over (PARTITION BY tbl.team_id ORDER BY tbl.totalPoints DESC)) AS 'rankTeam',
         (RANK() over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC)) AS 'rankTeamScope',
+        (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_id ORDER BY tbl.totalPoints DESC)) AS 'nextRankVal',
+        (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC)) AS 'nextTeamScopeRankVal',
         UNIX_TIMESTAMP(NOW()) * 1000 AS calculatedTime
     FROM
     (

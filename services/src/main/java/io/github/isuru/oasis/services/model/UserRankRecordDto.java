@@ -15,6 +15,34 @@ public class UserRankRecordDto {
     private Integer rankTeamScope;
     private Long calculatedTime;
 
+    private Double nextRankVal;
+    private Double topRankVal;
+    private Double nextTeamScopeRankVal;
+
+    public Double getNextTeamScopeRankVal() {
+        return nextTeamScopeRankVal;
+    }
+
+    public void setNextTeamScopeRankVal(Double nextTeamScopeRankVal) {
+        this.nextTeamScopeRankVal = nextTeamScopeRankVal;
+    }
+
+    public Double getNextRankVal() {
+        return nextRankVal;
+    }
+
+    public void setNextRankVal(Double nextRankVal) {
+        this.nextRankVal = nextRankVal;
+    }
+
+    public Double getTopRankVal() {
+        return topRankVal;
+    }
+
+    public void setTopRankVal(Double topRankVal) {
+        this.topRankVal = topRankVal;
+    }
+
     public Integer getRankGlobal() {
         return rankGlobal;
     }

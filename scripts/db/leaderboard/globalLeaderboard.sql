@@ -9,6 +9,8 @@ FROM
         tbl.user_id AS userId,
         tbl.totalPoints AS totalPoints,
         (RANK() over (ORDER BY tbl.totalPoints DESC)) AS 'rankGlobal',
+        (LAG(tbl.totalPoints) over (ORDER BY tbl.totalPoints DESC)) AS 'nextRankVal',
+        (FIRST_VALUE(tbl.totalPoints) over (ORDER BY tbl.totalPoints DESC)) AS 'topRankVal',
         UNIX_TIMESTAMP(NOW()) * 1000 AS calculatedTime
     FROM
     (
