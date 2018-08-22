@@ -39,6 +39,12 @@ public class OStateParser {
                 throw new IOException("State 'stateValueExpression' has not been set!");
             }
 
+            if (def.getStateChangeAwards() != null) {
+                oState.setStateChangeAwards(def.getStateChangeAwards().stream()
+                        .map(OStateParser::fromDefTo)
+                        .collect(Collectors.toList()));
+            }
+
             List<OState.OAState> oaStateList = new ArrayList<>();
             boolean defStateFound = false;
             for (StateDef.State state : def.getStates()) {
@@ -64,6 +70,14 @@ public class OStateParser {
             states.add(oState);
         }
         return states;
+    }
+
+    private static OState.OAStateChangeAwards fromDefTo(StateDef.StateChangeAwards changeAwards) {
+        OState.OAStateChangeAwards awards = new OState.OAStateChangeAwards();
+        awards.setTo(changeAwards.getTo());
+        awards.setFrom(changeAwards.getFrom());
+        awards.setPoints(changeAwards.getPoints());
+        return awards;
     }
 
     public static List<OState> parse(InputStream inputStream) throws IOException {

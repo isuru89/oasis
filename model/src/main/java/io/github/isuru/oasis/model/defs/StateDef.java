@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.model.defs;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -17,6 +18,37 @@ public class StateDef {
     private String stateValueExpression;
 
     private List<State> states;
+    private List<StateChangeAwards> stateChangeAwards;
+
+    public static class StateChangeAwards implements Serializable {
+        private Integer from;
+        private Integer to;
+        private Double points;
+
+        public Integer getFrom() {
+            return from;
+        }
+
+        public void setFrom(Integer from) {
+            this.from = from;
+        }
+
+        public Integer getTo() {
+            return to;
+        }
+
+        public void setTo(Integer to) {
+            this.to = to;
+        }
+
+        public Double getPoints() {
+            return points;
+        }
+
+        public void setPoints(Double points) {
+            this.points = points;
+        }
+    }
 
     public static class State {
         private Integer id;
@@ -55,6 +87,14 @@ public class StateDef {
         public void setPoints(Double points) {
             this.points = points;
         }
+    }
+
+    public List<StateChangeAwards> getStateChangeAwards() {
+        return stateChangeAwards;
+    }
+
+    public void setStateChangeAwards(List<StateChangeAwards> stateChangeAwards) {
+        this.stateChangeAwards = stateChangeAwards;
     }
 
     public String getCondition() {

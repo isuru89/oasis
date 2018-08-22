@@ -15,9 +15,12 @@ public class StatesNotificationMapper implements MapFunction<OStateNotification,
         Map<String, Object> data = new HashMap<>();
         Event event = value.getEvent();
         data.put("userId", value.getUserId());
+        data.put("teamId", event.getTeam());
+        data.put("teamScopeId", event.getTeamScope());
         data.put("stateId", value.getStateRef().getId());
         data.put("currentState", value.getState().getId());
         data.put("currentValue", value.getCurrentValue());
+        data.put("currentPoints", value.getState().getPoints());
         data.put("event", event);
         data.put("ts", event.getTimestamp());
         data.put("extId", event.getExternalId());

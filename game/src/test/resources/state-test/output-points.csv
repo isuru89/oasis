@@ -1,9 +1,5 @@
 #userId,pointRule,subPointRuleId,points,eventId
-100,state-change-bug-density-rate,,10,1
-100,state-change-bug-density-rate,,-20,3
-101,state-change-bug-density-rate,,-10,4
-101,state-change-bug-density-rate,,20,5
-101,state-change-bug-density-rate,,-20,7
-101,state-change-bug-density-rate,,10,8
-101,state-change-bug-density-rate,,10,9
+100,state-change-bug-density-rate,,-50,3
+101,state-change-bug-density-rate,,50,5
+101,state-change-bug-density-rate,,-50,7
 

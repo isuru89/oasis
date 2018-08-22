@@ -14,7 +14,7 @@ import java.util.function.Function;
 public class PointsFromStateMapper implements FlatMapFunction<OStateNotification, PointNotification> {
 
     private List<PointRule> pointRules;
-    private transient Map<Long, Map<Integer, Double>> cache;
+    private transient Map<Long, Map<String, Double>> cache;
 
     public PointsFromStateMapper(List<PointRule> pointRules) {
         this.pointRules = pointRules != null ? pointRules : new LinkedList<>();
@@ -33,26 +33,31 @@ public class PointsFromStateMapper implements FlatMapFunction<OStateNotification
                 PointRule pointRule = firstRuleOpt.get();
 
                 // calculate point diff
-                Map<Integer, Double> pointMap = buildCacheFor(value.getStateRef());
-                double points = pointMap.get(value.getState().getId()) - pointMap.get(value.getPreviousState());
+                Map<String, Double> pointMap = buildCacheFor(value.getStateRef());
+                String changeId = value.getPreviousState() + "->" + value.getState().getId();
+                Double points = pointMap.get(changeId);
 
-                out.collect(new PointNotification(
-                        value.getUserId(),
-                        Collections.singletonList(value.getEvent()),
-                        pointRule,
-                        points
-                ));
+                if (points != null) {
+                    out.collect(new PointNotification(
+                            value.getUserId(),
+                            Collections.singletonList(value.getEvent()),
+                            pointRule,
+                            points
+                    ));
+                }
             }
         }
     }
 
-    private synchronized Map<Integer, Double> buildCacheFor(OState state) {
+    private synchronized Map<String, Double> buildCacheFor(OState state) {
         if (cache == null) {
             cache = new ConcurrentHashMap<>();
         }
         return cache.computeIfAbsent(state.getId(), id -> {
-            Map<Integer, Double> pointMap = new ConcurrentHashMap<>();
-            state.getStates().forEach(s -> pointMap.put(s.getId(), s.getPoints()));
+            Map<String, Double> pointMap = new ConcurrentHashMap<>();
+            if (state.getStateChangeAwards() != null) {
+                state.getStateChangeAwards().forEach(a -> pointMap.put(a.getFrom() + "->" + a.getTo(), a.getPoints()));
+            }
             return pointMap;
         });
     }

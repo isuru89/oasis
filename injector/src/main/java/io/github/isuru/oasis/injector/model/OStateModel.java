@@ -5,13 +5,40 @@ import io.github.isuru.oasis.model.events.JsonEvent;
 public class OStateModel {
 
     private Long userId;
+    private Long teamId;
+    private Long teamScopeId;
     private Integer stateId;
 
     private Integer currentState;
     private String currentValue;
+    private Double currentPoints;
     private Long ts;
     private JsonEvent event;
     private String extId;
+
+    public Long getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
+    }
+
+    public Long getTeamScopeId() {
+        return teamScopeId;
+    }
+
+    public void setTeamScopeId(Long teamScopeId) {
+        this.teamScopeId = teamScopeId;
+    }
+
+    public Double getCurrentPoints() {
+        return currentPoints;
+    }
+
+    public void setCurrentPoints(Double currentPoints) {
+        this.currentPoints = currentPoints;
+    }
 
     public String getExtId() {
         return extId;

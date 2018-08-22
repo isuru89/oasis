@@ -41,9 +41,12 @@ public class ConsumerUtils {
     public static Map<String, Object> toStateDaoData(long gameId, OStateModel stateModel) {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", stateModel.getUserId());
+        map.put("teamId", stateModel.getTeamId());
+        map.put("teamScopeId", stateModel.getTeamScopeId());
         map.put("stateId", stateModel.getStateId());
         map.put("currState", stateModel.getCurrentState());
         map.put("currValue", stateModel.getCurrentValue());
+        map.put("currPoints", stateModel.getCurrentPoints());
         map.put("extId", stateModel.getExtId());
         map.put("ts", stateModel.getTs());
         map.put("gameId", gameId);
