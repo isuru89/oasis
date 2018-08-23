@@ -24,6 +24,7 @@ public interface IStatService {
     List<UserRankRecordDto> readMyLeaderboardRankings(long gameId, long userId, ScopingType scopingType,
                                                       LeaderboardType rangeType) throws Exception;
     List<TeamHistoryRecordDto> readUserTeamHistoryStat(long userId) throws Exception;
+    List<UserStateStatDto> readUserStateStats(long userId, long teamId) throws Exception;
 
     ChallengeInfoDto readChallengeStats(long challengeId) throws Exception;
     void readUserGameTimeline(long userId);

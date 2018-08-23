@@ -17,6 +17,7 @@ import io.github.isuru.oasis.services.api.dto.TeamHistoryRecordDto;
 import io.github.isuru.oasis.services.api.dto.UserBadgeStatDto;
 import io.github.isuru.oasis.services.api.dto.UserMilestoneStatDto;
 import io.github.isuru.oasis.services.api.dto.UserStatDto;
+import io.github.isuru.oasis.services.api.dto.UserStateStatDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.model.PurchasedItem;
@@ -259,6 +260,17 @@ public class StatService extends BaseService implements IStatService {
         }
         accumulated.add(base);
         return accumulated;
+    }
+
+    @Override
+    public List<UserStateStatDto> readUserStateStats(long userId, long teamId) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
+        return toList(getDao().executeQuery("stats/getUserStateValues",
+                Maps.create()
+                    .put("userId", userId)
+                    .put("teamId", teamId).build(),
+                UserStateStatDto.class));
     }
 
     @Override
