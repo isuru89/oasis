@@ -65,13 +65,15 @@ public abstract class BaseRouters {
 
     void checkAuth(Request request) throws ApiAuthException {
         String auth = request.headers(AUTHORIZATION);
-        if (auth != null) {
+        if (auth != null && !auth.trim().isEmpty()) {
             if (auth.startsWith("Bearer ")) {
                 String token = auth.substring("Bearer ".length());
                 AuthUtils.TokenInfo tokenInfo = AuthUtils.get().verifyToken(token);
                 request.attribute("token", tokenInfo);
                 request.attribute("userId", tokenInfo.getUser()); // set user
             }
+        } else {
+            throw new ApiAuthException("You are not allowed to access end point " + request.contextPath());
         }
     }
 

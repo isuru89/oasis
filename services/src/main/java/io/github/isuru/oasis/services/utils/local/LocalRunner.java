@@ -6,8 +6,10 @@ import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.model.events.JsonEvent;
+import io.github.isuru.oasis.model.utils.OasisUtils;
 
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author iweerarathna
@@ -27,8 +29,15 @@ public class LocalRunner implements Runnable {
 
     @Override
     public void run() {
-        // @TODO configs
-        Configs configs = Configs.from(appConfigs.getProps());
+        // setup explicit configs
+        Properties props = appConfigs.getProps();
+        Map<String, Object> localProps = OasisUtils.filterKeys(props, "oasis.localrun.");
+
+        Configs configs = Configs.from(props);
+        for (Map.Entry<String, Object> entry : localProps.entrySet()) {
+            configs.append(entry.getKey(), entry.getValue());
+        }
+
         queueSource = new QueueSource();
         DbSink dbSink = new DbSink(dao, gameId);
 

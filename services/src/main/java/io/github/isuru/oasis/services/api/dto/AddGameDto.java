@@ -11,6 +11,14 @@ public class AddGameDto {
     private GameDef def;
     private GameOptionsDto options;
 
+    public AddGameDto() {
+    }
+
+    public AddGameDto(GameDef def, GameOptionsDto options) {
+        this.def = def;
+        this.options = options;
+    }
+
     public GameDef getDef() {
         return def;
     }

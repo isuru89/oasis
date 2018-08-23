@@ -1,45 +1,56 @@
 package io.github.isuru.oasis.services.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.configs.Configs;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.services.OasisServer;
+import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IProfileService;
-import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.utils.UserRole;
 import io.github.isuru.oasis.services.test.routes.IOasisApi;
+import io.github.isuru.oasis.services.test.routes.IOasisDefApi;
+import io.github.isuru.oasis.services.utils.UserRole;
 import okhttp3.Headers;
 import org.junit.jupiter.api.Assertions;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 
 /**
  * @author iweerarathna
  */
-class RoutingTest extends AbstractApiTest {
+public class RoutingTest extends AbstractApiTest {
 
     private static final String APP_JSON = "application/json";
     private static final String CONTENT_TYPE = "Content-Type";
 
     private static IOasisApi api;
-    private static DefaultOasisApiService apiService;
+    protected static IOasisDefApi defApi;
+
+    private static IOasisApiService apiService;
     private static IOasisDao dao;
+
+    private static String adminToken;
+    private static String curatorToken;
+    private static String playerToken;
+
 
     IOasisApi getApi() {
         return api;
     }
 
-    Map<String, Object> shouldBeSuccess(Call<Map<String, Object>> call) throws IOException {
-        Response<Map<String, Object>> execute = call.execute();
+    <T> T shouldBeSuccess(Call<T> call) throws IOException {
+        Response<T> execute = call.execute();
         Assertions.assertEquals(200, execute.code());
         Headers headers = execute.headers();
         Assertions.assertTrue(headers.names().contains(CONTENT_TYPE));
@@ -47,26 +58,60 @@ class RoutingTest extends AbstractApiTest {
         return execute.body();
     }
 
-    Map<String, Object> shouldForbidden(Call<Map<String, Object>> call) throws IOException {
-        Response<Map<String, Object>> execute = call.execute();
+    <T> T shouldForbidden(Call<T> call) throws IOException {
+        Response<T> execute = call.execute();
         Assertions.assertEquals(401, execute.code());
         return execute.body();
     }
 
-    Map<String, Object> shouldInternalError(Call<Map<String, Object>> call) throws IOException {
-        Response<Map<String, Object>> execute = call.execute();
+    <T> T shouldInternalError(Call<T> call) throws IOException {
+        Response<T> execute = call.execute();
         Assertions.assertEquals(500, execute.code());
         return execute.body();
     }
 
-    Map<String, Object> shouldBadRequest(Call<Map<String, Object>> call) throws IOException {
-        Response<Map<String, Object>> execute = call.execute();
+    <T> T shouldBadRequest(Call<T> call) throws IOException {
+        Response<T> execute = call.execute();
         Assertions.assertEquals(400, execute.code());
         return execute.body();
     }
 
+    String getAdminToken() throws IOException {
+        if (adminToken != null) {
+            return adminToken;
+        }
+        String up = "admin@oasis.com:admin";
+        String encoded = "Basic " + Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
+        Map<String, Object> login = shouldBeSuccess(getApi().login(encoded));
+        adminToken =  "Bearer " + login.get("token");
+        return adminToken;
+    }
+
+    String getNoUserToken() {
+        return "";
+    }
+
+    String getCuratorToken() throws IOException {
+        if (curatorToken != null) return curatorToken;
+        String up = "curator@oasis.com:curator";
+        String encoded = "Basic " + Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
+        Map<String, Object> login = shouldBeSuccess(getApi().login(encoded));
+        curatorToken = "Bearer " + login.get("token");
+        return curatorToken;
+    }
+
+    String getPlayerToken() throws IOException {
+        if (playerToken != null) return playerToken;
+        String up = "player@oasis.com:player";
+        String encoded = "Basic " + Base64.getEncoder().encodeToString(up.getBytes(StandardCharsets.UTF_8));
+        Map<String, Object> login = shouldBeSuccess(getApi().login(encoded));
+        playerToken = "Bearer " + login.get("token");
+        return playerToken;
+    }
+
     static void startServer() throws Exception {
         Configs configs = Configs.create();
+        System.setProperty("oasis.mode", "local");
         configs.append("oasis.config.file", "./src/test/resources/oasis/configs/oasis.properties," +
                 "./src/test/resources/oasis/configs/jdbc.properties," +
                 "./src/test/resources/oasis/configs/ldap.properties");
@@ -78,16 +123,18 @@ class RoutingTest extends AbstractApiTest {
     }
 
     static void runBeforeApi() {
-        apiService = (DefaultOasisApiService) OasisServer.apiService;
+        apiService = OasisServer.apiService;
         dao = apiService.getDao();
 
         ObjectMapper mapper = new ObjectMapper();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://localhost:5885/api/v1/")
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(JacksonConverterFactory.create(mapper))
                 .build();
         api = retrofit.create(IOasisApi.class);
+        defApi = retrofit.create(IOasisDefApi.class);
     }
 
     static void createUsers() throws Exception {
@@ -137,7 +184,7 @@ class RoutingTest extends AbstractApiTest {
         return dao;
     }
 
-    protected static DefaultOasisApiService getApiService() {
+    protected static IOasisApiService getApiService() {
         return apiService;
     }
 

@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.services;
 
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.DefaultEntities;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.events.EventNames;
@@ -11,7 +11,9 @@ import io.github.isuru.oasis.services.api.IProfileService;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
+import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
+import io.github.isuru.oasis.services.utils.UserRole;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +42,7 @@ public class Bootstrapping {
 
             // add default team...
             List<TeamProfile> defaultTeams = profileService.listTeams(defTeamScope.getId());
+            long defTeamId = -1;
             if (defaultTeams.isEmpty()) {
                 addDefaultTeamProfile(profileService, defTeamScope);
             } else {
@@ -47,7 +50,9 @@ public class Bootstrapping {
                         .filter(t -> DefaultEntities.DEFAULT_TEAM_NAME.equalsIgnoreCase(t.getName()))
                         .findFirst();
                 if (!defTeam.isPresent()) {
-                    addDefaultTeamProfile(profileService, defTeamScope);
+                    defTeamId = addDefaultTeamProfile(profileService, defTeamScope);
+                } else {
+                    defTeamId = defTeam.get().getId();
                 }
             }
 
@@ -60,9 +65,12 @@ public class Bootstrapping {
                 apiService.getEventService().addEventSource(eventSourceToken);
             }
 
+            // add users
+            addUsers(apiService, defTeamId);
+
         } catch (Throwable error) {
             // revert back to previous status...
-            cleanTables(dao, "OA_EVENT_SOURCE", "OA_TEAM", "OA_TEAM_SCOPE");
+            cleanTables(dao, "OA_EVENT_SOURCE", "OA_TEAM", "OA_TEAM_SCOPE", "OA_USER");
             throw error;
         }
     }
@@ -72,6 +80,35 @@ public class Bootstrapping {
             for (String tbl : tableNames) {
                 dao.executeRawCommand("TRUNCATE " + tbl, null);
             }
+        }
+    }
+
+    private static void addUsers(IOasisApiService apiService, long defTeamId) throws Exception {
+        List<UserProfile> userProfiles = apiService.getProfileService()
+                .listUsers(defTeamId, 0, 5000);
+
+        if (userProfiles.stream().noneMatch(u -> u.getEmail().equals("admin@oasis.com"))) {
+            UserProfile admin = new UserProfile();
+            admin.setEmail("admin@oasis.com");
+            admin.setName("Admin");
+            long adminId = apiService.getProfileService().addUserProfile(admin);
+            apiService.getProfileService().addUserToTeam(adminId, defTeamId, UserRole.ADMIN);
+        }
+
+        if (userProfiles.stream().noneMatch(u -> u.getEmail().equals("curator@oasis.com"))) {
+            UserProfile curator = new UserProfile();
+            curator.setEmail("curator@oasis.com");
+            curator.setName("Curator");
+            long curatorId = apiService.getProfileService().addUserProfile(curator);
+            apiService.getProfileService().addUserToTeam(curatorId, defTeamId, UserRole.CURATOR);
+        }
+
+        if (userProfiles.stream().noneMatch(u -> u.getEmail().equals("player@oasis.com"))) {
+            UserProfile player = new UserProfile();
+            player.setEmail("player@oasis.com");
+            player.setName("Player");
+            long playerId = apiService.getProfileService().addUserProfile(player);
+            apiService.getProfileService().addUserToTeam(playerId, defTeamId, UserRole.PLAYER);
         }
     }
 
@@ -87,11 +124,11 @@ public class Bootstrapping {
         }
     }
 
-    private static void addDefaultTeamProfile(IProfileService profileService, TeamScope teamScope) throws Exception {
+    private static long addDefaultTeamProfile(IProfileService profileService, TeamScope teamScope) throws Exception {
         TeamProfile profile = new TeamProfile();
         profile.setName(DefaultEntities.DEFAULT_TEAM_NAME);
         profile.setTeamScope(teamScope.getId());
-        profileService.addTeam(profile);
+        return profileService.addTeam(profile);
     }
 
     private static TeamScope addDefaultTeamScope(IProfileService profileService) throws Exception {

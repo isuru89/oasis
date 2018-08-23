@@ -26,7 +26,7 @@ public class DefinitionRouter extends BaseRouters {
         post("/game", (req, res) -> {
             AddGameDto addGameDto = bodyAs(req, AddGameDto.class);
             return asResAdd(gds.createGame(addGameDto.getDef(), addGameDto.getOptions()));
-        });
+        }, UserRole.ADMIN);
 
         Spark.path("/game", () -> {
             get("/all", (req, res) -> gds.listGames())
