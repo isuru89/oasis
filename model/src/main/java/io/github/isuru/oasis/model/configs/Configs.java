@@ -17,7 +17,8 @@ public final class Configs implements Serializable {
     private final Properties props = new Properties();
 
     public boolean isLocal() {
-        return OasisUtils.getEnvOr("OASIS_MODE", "").trim()
+        return OasisUtils.getEnvOr("OASIS_MODE", System.getProperty("oasis.mode", ""))
+                .trim()
                 .equalsIgnoreCase("local");
     }
 
