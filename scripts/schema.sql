@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS OA_STATES (
     current_points  FLOAT(4),
     ext_id          VARCHAR(1024),
     game_id         INT,
+    is_active       TINYINT(1) DEFAULT 1,
     changed_at      BIGINT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

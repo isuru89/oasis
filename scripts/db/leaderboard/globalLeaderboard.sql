@@ -15,24 +15,43 @@ FROM
     FROM
     (
         SELECT
-            user_id,
-            ROUND(SUM(points), 2) AS totalPoints
-        FROM OA_POINTS
-        WHERE
-            is_active = 1
-            <if(hasTimeRange)>
-            AND ts >= :rangeStart
-            AND ts \< :rangeEnd
-            <endif>
+          user_id,
+          ROUND(SUM(totalPoints), 2) AS totalPoints
+        FROM (
+            SELECT
+                user_id,
+                ROUND(SUM(points), 2) AS totalPoints
+            FROM OA_POINTS
+            WHERE
+                is_active = 1
+                <if(hasTimeRange)>
+                AND ts >= :rangeStart
+                AND ts \< :rangeEnd
+                <endif>
 
-            <if(hasInclusions)>
-            AND point_id IN \<ruleIds>
-            <endif>
-            <if(hasExclusions)>
-            AND point_id NOT IN \<excludeRuleIds>
-            <endif>
-        GROUP BY
-            user_id
+                <if(hasInclusions)>
+                AND point_id IN \<ruleIds>
+                <endif>
+                <if(hasExclusions)>
+                AND point_id NOT IN \<excludeRuleIds>
+                <endif>
+            GROUP BY
+                user_id
+        UNION ALL
+            SELECT
+                user_id,
+                ROUND(SUM(current_points), 2) AS totalPoints
+            FROM OA_STATES
+            WHERE
+                is_active = 1
+                <if(hasTimeRange)>
+                AND changed_at >= :rangeStart
+                AND changed_at \< :rangeEnd
+                <endif>
+            GROUP BY
+                user_id
+        ) AS groupedPoints
+        GROUP BY groupedPoints.user_id
     ) tbl
 
 <if(hasUser||isTopN||isBottomN)>
