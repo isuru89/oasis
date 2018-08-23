@@ -6,6 +6,7 @@ import io.github.isuru.oasis.services.api.ILifecycleService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.UserRole;
 import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.JsonTransformer;
@@ -17,6 +18,7 @@ import spark.Spark;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
+import java.util.Map;
 
 /**
  * @author iweerarathna
@@ -116,6 +118,23 @@ public abstract class BaseRouters {
         return this;
     }
 
+    BaseRouters post(String path, Route route, int role) {
+        Route auth = new Route() {
+            @Override
+            public Object handle(Request request, Response response) throws Exception {
+                checkAuth(request);
+                AuthUtils.TokenInfo token = request.attribute("token");
+                if (!UserRole.hasRole(token.getRole(), role)) {
+                    throw new ApiAuthException("You do not have necessary permissions to access this api!");
+                }
+
+                return route.handle(request, response);
+            }
+        };
+        Spark.post(path, JSON_TYPE, auth, TRANSFORMER);
+        return this;
+    }
+
     BaseRouters delete(String path, Route route, int role) {
         Route auth = new Route() {
             @Override
@@ -179,5 +198,15 @@ public abstract class BaseRouters {
 
     ValueMap bodyAsMap(Request req) throws Exception {
         return new ValueMap(TRANSFORMER.parseAsMap(req.body()));
+    }
+
+    Map<String, Object> asResAdd(long id) {
+        return Maps.create()
+                .put("success", true)
+                .put("id", id).build();
+    }
+
+    Map<String, Object> asResBool(boolean edited) {
+        return Maps.create("success", edited);
     }
 }

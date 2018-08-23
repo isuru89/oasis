@@ -109,7 +109,7 @@ public class AuthRouter extends BaseRouters {
         String token = AuthUtils.get().issueToken(info);
         return Maps.create()
                 .put("token", token)
-                .put("isNew", fresh)
+                .put("firstTime", fresh)
                 .put("profile", profile)
                 .build();
     }

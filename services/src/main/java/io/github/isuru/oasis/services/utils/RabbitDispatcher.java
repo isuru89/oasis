@@ -17,7 +17,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author iweerarathna
  */
-public final class RabbitDispatcher {
+final class RabbitDispatcher {
 
     private Connection connection;
     private Channel channel;
@@ -62,14 +62,14 @@ public final class RabbitDispatcher {
         }));
     }
 
-    public void dispatch(long gameId, Map<String, Object> data) throws IOException {
+    void dispatch(long gameId, Map<String, Object> data) throws IOException {
         byte[] msg = mapper.writeValueAsString(data).getBytes(StandardCharsets.UTF_8);
         AMQP.BasicProperties properties = new AMQP.BasicProperties().builder()
                 .correlationId(UUID.randomUUID().toString())
                 .build();
 
         String eventType = (String) data.get("type");
-        String routingKey = "game.event." + eventType;
+        String routingKey = String.format("game.%d.event.%s", gameId, eventType);
         channel.basicPublish(exchangeName, routingKey, properties, msg);
     }
 
