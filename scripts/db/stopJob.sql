@@ -1,4 +1,4 @@
-UPDATE OA_JOBS
+UPDATE OA_JOB
 SET
     is_active = 0
 WHERE

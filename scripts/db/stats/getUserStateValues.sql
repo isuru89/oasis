@@ -11,7 +11,7 @@ SELECT
     oas.ext_id AS extId,
     oas.changed_at AS lastChangedAt
 
-FROM OA_STATES oas
+FROM OA_STATE oas
     INNER JOIN OA_DEFINITION oad ON oas.state_id = oad.id
 
 WHERE

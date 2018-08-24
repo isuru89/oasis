@@ -1,4 +1,4 @@
-INSERT INTO OA_BADGES (
+INSERT INTO OA_BADGE (
     user_id,
     team_id,
     team_scope_id,

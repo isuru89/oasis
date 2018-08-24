@@ -1,4 +1,4 @@
-INSERT INTO OA_MILESTONES (
+INSERT INTO OA_MILESTONE (
     user_id,
     team_id,
     event_type,

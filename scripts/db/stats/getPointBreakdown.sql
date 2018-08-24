@@ -14,7 +14,7 @@ FROM (
         MIN(oap.ts) as firstAchieved,
         MAX(oap.ts) as lastAchieved
 
-    FROM OA_POINTS oap
+    FROM OA_POINT oap
     WHERE
         oap.user_id = :userId
         AND

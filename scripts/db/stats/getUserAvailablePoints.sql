@@ -1,6 +1,6 @@
 SELECT (
     (SELECT COALESCE(ROUND(SUM(points), 2), 0)
-        FROM OA_POINTS
+        FROM OA_POINT
         WHERE
             user_id = :userId
             AND
@@ -10,7 +10,7 @@ SELECT (
     +
 
     (SELECT COALESCE(ROUND(SUM(current_points), 2), 0)
-        FROM OA_STATES
+        FROM OA_STATE
         WHERE
             user_id = :userId
             AND

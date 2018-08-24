@@ -26,7 +26,7 @@ FROM
                 team_scope_id,
                 team_id,
                 ROUND(SUM(points), 2) AS totalPoints
-            FROM OA_POINTS
+            FROM OA_POINT
             WHERE
                 is_active = 1
                 AND
@@ -52,7 +52,7 @@ FROM
                 team_scope_id,
                 team_id,
                 ROUND(SUM(current_points), 2) AS totalPoints
-            FROM OA_STATES
+            FROM OA_STATE
             WHERE
                 is_active = 1
                 AND

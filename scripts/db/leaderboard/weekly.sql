@@ -14,7 +14,7 @@ FROM
             user_id,
             ROUND(SUM(points), 2) AS totalPoints
         FROM
-            `OA_POINTS`
+            OA_POINT
         GROUP BY
             week_yw,
             user_id

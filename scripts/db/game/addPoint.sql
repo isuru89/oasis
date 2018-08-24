@@ -1,4 +1,4 @@
-INSERT INTO OA_POINTS (
+INSERT INTO OA_POINT (
     user_id,
     team_id,
     team_scope_id,

@@ -12,7 +12,7 @@ SELECT
     oap.points as points,
     oap.tag as tag
 
-FROM OA_POINTS oap
+FROM OA_POINT oap
     LEFT JOIN OA_TEAM oat ON oap.team_id = oat.team_id
     LEFT JOIN OA_TEAM_SCOPE oats ON oats.scope_id = oat.team_scope
 

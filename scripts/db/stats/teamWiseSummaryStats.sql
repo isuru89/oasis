@@ -14,7 +14,7 @@ FROM
         oap.user_id as userId,
         oap.team_id as teamId,
         ROUND(SUM(oap.points), 2) as totalPoints
-    FROM OA_POINTS oap
+    FROM OA_POINT oap
     WHERE
         oap.user_id = :userId
         AND
@@ -45,7 +45,7 @@ FROM
         oab.team_id as teamId,
         COUNT(*) as totalBadges,
         COUNT(DISTINCT oab.badge_id) as totalUniqueBadges
-    FROM OA_BADGES oab
+    FROM OA_BADGE oab
     WHERE
         oab.user_id = :userId
         AND

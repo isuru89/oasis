@@ -17,7 +17,7 @@ FROM
             team_scope_id,
             team_id,
             ROUND(SUM(points), 2) AS totalPoints
-        FROM OA_POINTS
+        FROM OA_POINT
         WHERE
             is_active = 1
             <if(hasTeamScope)>

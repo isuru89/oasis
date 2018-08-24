@@ -15,7 +15,7 @@ SELECT
     oab.start_time AS timeStart,
     oab.end_time AS timeEnd
 
-FROM OA_BADGES oab
+FROM OA_BADGE oab
     LEFT JOIN OA_TEAM oat ON oab.team_id = oat.team_id
     LEFT JOIN OA_TEAM_SCOPE oats ON oats.scope_id = oat.team_scope
 

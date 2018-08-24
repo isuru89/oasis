@@ -16,7 +16,7 @@ FROM OA_MILESTONE_STATE AS oms
             milestone_id as milestoneId,
             MAX(level) as currLevel,
             MAX(ts) as achievedTime
-        FROM OA_MILESTONES
+        FROM OA_MILESTONE
         WHERE
             user_id = :userId AND is_active = 1
         GROUP BY

@@ -19,7 +19,7 @@ FROM
             <if(teamScopeWise)>team_scope_id,<endif>
             ROUND(SUM(points), 2) AS totalPoints
         FROM
-            OA_POINTS
+            OA_POINT
         WHERE
             ts >= :startRange
             AND

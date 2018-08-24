@@ -3,7 +3,7 @@ SELECT
     'TotalPoints' AS type,
     COALESCE(ROUND(SUM(points), 2), 0) as value_f,
     NULL as value_i
-FROM OA_POINTS
+FROM OA_POINT
 WHERE user_id = :userId AND is_active = 1
 
 UNION ALL
@@ -13,7 +13,7 @@ SELECT
     'TotalBadges' AS type,
     NULL as value_f,
     COUNT(*) AS value_i
-FROM OA_BADGES
+FROM OA_BADGE
 WHERE user_id = :userId AND is_active = 1
 
 UNION ALL
@@ -55,7 +55,7 @@ SELECT
     'DeltaPoints' AS type,
     COALESCE(ROUND(SUM(points), 2), 0) as value_f,
     NULL as value_i
-FROM OA_POINTS
+FROM OA_POINT
 WHERE user_id = :userId AND ts >= :since AND is_active = 1
 
 UNION ALL
@@ -65,7 +65,7 @@ SELECT
     'DeltaBadges' AS type,
     NULL as value_f,
     COUNT(*) AS value_i
-FROM OA_BADGES
+FROM OA_BADGE
 WHERE user_id = :userId AND ts >= :since AND is_active = 1
 
 UNION ALL

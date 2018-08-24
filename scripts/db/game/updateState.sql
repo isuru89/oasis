@@ -1,4 +1,4 @@
-INSERT INTO OA_STATES (
+INSERT INTO OA_STATE (
     user_id,
     team_id,
     team_scope_id,

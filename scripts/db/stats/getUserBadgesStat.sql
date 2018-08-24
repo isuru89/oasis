@@ -3,7 +3,7 @@ SELECT
     badge_id as badgeId,
     sub_badge_id as subBadgeId,
     COUNT(*) as badgeCount
-FROM OA_BADGES
+FROM OA_BADGE
 WHERE
     user_id = :userId AND is_active = 1
 GROUP BY

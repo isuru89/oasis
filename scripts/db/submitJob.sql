@@ -1,4 +1,4 @@
-INSERT INTO OA_JOBS (
+INSERT INTO OA_JOB (
     def_id,
     jar_id,
     job_id,

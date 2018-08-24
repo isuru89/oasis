@@ -16,7 +16,7 @@ FROM
             team_id,
             ROUND(SUM(points), 2) AS totalPoints
         FROM
-            `OA_POINTS`
+            OA_POINT
         GROUP BY
             month_ym,
             user_id,

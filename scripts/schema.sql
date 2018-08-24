@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS OA_POINTS (
+CREATE TABLE IF NOT EXISTS OA_POINT (
     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id         INT,
     team_id         INT,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS OA_POINTS (
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS OA_BADGES (
+CREATE TABLE IF NOT EXISTS OA_BADGE (
     user_id         INT,
     team_id         INT,
     team_scope_id   INT,
@@ -36,10 +36,10 @@ CREATE TABLE IF NOT EXISTS OA_BADGES (
     is_active       TINYINT(1) DEFAULT 1
 );
 
-ALTER TABLE OA_BADGES ADD PRIMARY KEY (user_id, event_type, ts, badge_id, sub_badge_id);
+ALTER TABLE OA_BADGE ADD PRIMARY KEY (user_id, event_type, ts, badge_id, sub_badge_id);
 
 
-CREATE TABLE IF NOT EXISTS OA_MILESTONES (
+CREATE TABLE IF NOT EXISTS OA_MILESTONE (
     user_id         INT,
     team_id         INT,
     event_type      VARCHAR(128),
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONES (
     game_id         INT
 );
 
-ALTER TABLE OA_MILESTONES ADD PRIMARY KEY (user_id, milestone_id, level);
+ALTER TABLE OA_MILESTONE ADD PRIMARY KEY (user_id, milestone_id, level);
 
 
 CREATE TABLE IF NOT EXISTS OA_MILESTONE_STATE (
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONE_STATE (
 
 ALTER TABLE OA_MILESTONE_STATE ADD PRIMARY KEY (user_id, milestone_id);
 
-CREATE TABLE IF NOT EXISTS OA_STATES (
+CREATE TABLE IF NOT EXISTS OA_STATE (
     user_id         INT,
     team_id         INT,
     team_scope_id   INT,
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS OA_STATES (
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-ALTER TABLE OA_STATES ADD PRIMARY KEY (user_id, team_id, state_id);
+ALTER TABLE OA_STATE ADD PRIMARY KEY (user_id, team_id, state_id);
 
 CREATE TABLE IF NOT EXISTS OA_DEFINITION (
     id              INT PRIMARY KEY AUTO_INCREMENT,
@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS OA_PURCHASE (
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS OA_JOBS (
+CREATE TABLE IF NOT EXISTS OA_JOB (
     def_id          INT,
     jar_id          VARCHAR(2048),
     job_id          VARCHAR(2048),
