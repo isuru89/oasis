@@ -1,12 +1,10 @@
 package io.github.isuru.oasis.game;
 
-import io.github.isuru.oasis.game.persist.OasisKafkaSink;
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
 import io.github.isuru.oasis.game.utils.Constants;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.configs.Configs;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -37,16 +35,6 @@ class MainTest {
 
             SourceFunction<Event> source = Main.createSource(Configs.from(properties));
             Assertions.assertTrue(source instanceof CsvEventSource);
-        }
-
-        {
-            Properties properties = new Properties();
-            properties.put(Constants.KEY_SOURCE_TYPE, "kafka");
-            properties.put(Constants.KEY_KAFKA_SOURCE_TOPIC, "game-events");
-            properties.put(Constants.KEY_KAFKA_HOST, "localhost:9092");
-
-            SourceFunction<Event> source = Main.createSource(Configs.from(properties));
-            Assertions.assertTrue(source instanceof FlinkKafkaConsumer011);
         }
     }
 
@@ -89,53 +77,6 @@ class MainTest {
 //                // ok
 //            }
 //        }
-    }
-
-    @Test
-    void testOutputKafkaSink() throws Exception {
-        {
-            Properties properties = new Properties();
-            properties.put(Constants.KEY_JDBC_INSTANCE, "testing");
-            properties.put(Constants.KEY_OUTPUT_TYPE, "kafka");
-
-            properties.put(Constants.KEY_KAFKA_HOST, "localhost:9092");
-
-            OasisExecution execution = Main.createOutputHandler(Configs.from(properties), new OasisExecution());
-            Assertions.assertNotNull(execution);
-
-            OasisKafkaSink kafkaSink = (OasisKafkaSink) execution.getKafkaSink();
-            Assertions.assertNotNull(kafkaSink);
-            Assertions.assertNull(execution.getOutputHandler());
-
-            Assertions.assertNotNull(kafkaSink.getKafkaHost());
-            Assertions.assertNotNull(kafkaSink.getTopicBadges());
-            Assertions.assertNotNull(kafkaSink.getTopicChallengeWinners());
-            Assertions.assertNotNull(kafkaSink.getTopicMilestones());
-            Assertions.assertNotNull(kafkaSink.getTopicMilestoneStates());
-            Assertions.assertNotNull(kafkaSink.getTopicPoints());
-            Assertions.assertNull(kafkaSink.getProducerConfigs());
-        }
-
-        Properties properties = new Properties();
-        properties.put(Constants.KEY_JDBC_INSTANCE, "testing");
-        properties.put(Constants.KEY_OUTPUT_TYPE, "kafka");
-
-        properties.put(Constants.KEY_KAFKA_HOST, "localhost:9092");
-
-        OasisChallengeExecution execution = Main.createOutputHandler(Configs.from(properties), new OasisChallengeExecution());
-        Assertions.assertNotNull(execution);
-
-        OasisKafkaSink kafkaSink = (OasisKafkaSink) execution.getOutputSink();
-        Assertions.assertNotNull(kafkaSink);
-        Assertions.assertNull(execution.getOutputHandler());
-
-        Assertions.assertNotNull(kafkaSink.getKafkaHost());
-        Assertions.assertNotNull(kafkaSink.getTopicBadges());
-        Assertions.assertNotNull(kafkaSink.getTopicChallengeWinners());
-        Assertions.assertNotNull(kafkaSink.getTopicMilestones());
-        Assertions.assertNotNull(kafkaSink.getTopicMilestoneStates());
-        Assertions.assertNotNull(kafkaSink.getTopicPoints());
-        Assertions.assertNull(kafkaSink.getProducerConfigs());
     }
 
     @Test

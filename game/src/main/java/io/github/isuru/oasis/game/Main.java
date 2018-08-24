@@ -1,8 +1,11 @@
 package io.github.isuru.oasis.game;
 
-import io.github.isuru.oasis.game.parser.*;
+import io.github.isuru.oasis.game.parser.BadgeParser;
+import io.github.isuru.oasis.game.parser.KpiParser;
+import io.github.isuru.oasis.game.parser.MilestoneParser;
+import io.github.isuru.oasis.game.parser.OStateParser;
+import io.github.isuru.oasis.game.parser.PointParser;
 import io.github.isuru.oasis.game.persist.NoneOutputHandler;
-import io.github.isuru.oasis.game.persist.OasisKafkaSink;
 import io.github.isuru.oasis.game.persist.OasisSink;
 import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSink;
 import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSource;
@@ -22,13 +25,9 @@ import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
-import io.github.isuru.oasis.model.utils.OasisUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.streaming.connectors.rabbitmq.common.RMQConnectionConfig;
-import org.apache.flink.util.Preconditions;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -37,8 +36,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 public class Main {
 
@@ -106,9 +103,7 @@ public class Main {
 
     static OasisChallengeExecution createOutputHandler(Configs gameProps, OasisChallengeExecution execution) {
         String outputType = gameProps.getStr(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
-        if ("kafka".equals(outputType)) {
-            return execution.outputHandler(new OasisKafkaSink(gameProps));
-        } else if ("none".equalsIgnoreCase(outputType)) {
+        if ("none".equalsIgnoreCase(outputType)) {
             return execution.outputHandler(new NoneOutputHandler());
         } else if ("rabbit".equalsIgnoreCase(outputType)) {
             return execution.outputHandler(new OasisRabbitSink(gameProps));
@@ -120,9 +115,7 @@ public class Main {
     static OasisExecution createOutputHandler(Configs gameProps, OasisExecution execution) {
         if (gameProps.has(Constants.KEY_OUTPUT_TYPE)) {
             String outputType = gameProps.getStr(Constants.KEY_OUTPUT_TYPE, "rabbit").trim();
-            if ("kafka".equals(outputType)) {
-                return execution.outputSink(new OasisKafkaSink(gameProps));
-            } else if ("none".equalsIgnoreCase(outputType)) {
+            if ("none".equalsIgnoreCase(outputType)) {
                 return execution.outputHandler(new NoneOutputHandler());
             } else if ("rabbit".equalsIgnoreCase(outputType)) {
                 return execution.outputSink(new OasisRabbitSink(gameProps));
@@ -170,21 +163,21 @@ public class Main {
                 }
                 return new CsvEventSource(inputCsv);
 
-            } else if ("kafka".equalsIgnoreCase(type)) {
-                String topic = gameProps.getStrReq(Constants.KEY_KAFKA_SOURCE_TOPIC);
-                String kafkaHost = gameProps.getStrReq(Constants.KEY_KAFKA_HOST);
-                Preconditions.checkArgument(kafkaHost != null && !kafkaHost.trim().isEmpty());
-                Preconditions.checkArgument(topic != null && !topic.trim().isEmpty());
-
-                EventDeserializer deserialization = new EventDeserializer();
-
-                Properties properties = new Properties();
-                // add kafka host
-                properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaHost);
-                Map<String, Object> map = OasisUtils.filterKeys(gameProps.getProps(), Constants.KEY_PREFIX_SOURCE_KAFKA);
-                properties.putAll(map);
-
-                return new FlinkKafkaConsumer011<>(topic, deserialization, properties);
+//            } else if ("kafka".equalsIgnoreCase(type)) {
+//                String topic = gameProps.getStrReq(Constants.KEY_KAFKA_SOURCE_TOPIC);
+//                String kafkaHost = gameProps.getStrReq(Constants.KEY_KAFKA_HOST);
+//                Preconditions.checkArgument(kafkaHost != null && !kafkaHost.trim().isEmpty());
+//                Preconditions.checkArgument(topic != null && !topic.trim().isEmpty());
+//
+//                EventDeserializer deserialization = new EventDeserializer();
+//
+//                Properties properties = new Properties();
+//                // add kafka host
+//                properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaHost);
+//                Map<String, Object> map = OasisUtils.filterKeys(gameProps.getProps(), Constants.KEY_PREFIX_SOURCE_KAFKA);
+//                properties.putAll(map);
+//
+//                return new FlinkKafkaConsumer011<>(topic, deserialization, properties);
             } else if ("rabbit".equalsIgnoreCase(type)) {
                 RMQConnectionConfig rabbitConfig = RabbitUtils.createRabbitSourceConfig(gameProps);
                 String inputQueue = Utils.queueReplace(gameProps.getStrReq(ConfigKeys.KEY_RABBIT_QUEUE_SRC));
