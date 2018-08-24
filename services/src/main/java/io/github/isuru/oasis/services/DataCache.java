@@ -81,7 +81,7 @@ public class DataCache {
                         "Run the bootstrap and make default team and team scope."));
     }
 
-    private OasisGameDef loadGameDefs(long gameId) throws Exception {
+    public OasisGameDef loadGameDefs(long gameId) throws Exception {
         return loadGameDefs(gameId, null);
     }
 

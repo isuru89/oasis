@@ -73,7 +73,7 @@ public abstract class BaseRouters {
                 request.attribute("userId", tokenInfo.getUser()); // set user
             }
         } else {
-            throw new ApiAuthException("You are not allowed to access end point " + request.contextPath());
+            throw new ApiAuthException("You are not allowed to access end point " + request.pathInfo());
         }
     }
 

@@ -13,19 +13,22 @@ public class QueueSource implements SourceFunction<Event> {
 
     private static final long DEF_TIMEOUT = 10000L;
 
-    private final LinkedBlockingQueue<Event> events = new LinkedBlockingQueue<>();
+    private final long queueId;
     private boolean isRunning = true;
 
-    void append(Event event) throws InterruptedException {
-        events.put(event);
+    public QueueSource(long qId) {
+        this.queueId = qId;
     }
 
     @Override
     public void run(SourceContext<Event> ctx) throws Exception {
+        LinkedBlockingQueue<Event> queue = Sources.get().poll(queueId);
         while (isRunning) {
-            Event poll = events.poll(DEF_TIMEOUT, TimeUnit.MILLISECONDS);
+            Event poll = queue.poll(DEF_TIMEOUT, TimeUnit.MILLISECONDS);
             if (poll != null) {
+                System.out.println("Event found!");
                 if (poll instanceof LocalEndEvent) {
+                    System.out.println("Terminating game!");
                     break;
                 }
                 ctx.collect(poll);

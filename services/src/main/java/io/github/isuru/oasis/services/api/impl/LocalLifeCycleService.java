@@ -27,20 +27,20 @@ public class LocalLifeCycleService extends BaseService implements ILifecycleServ
         Checks.greaterThanZero(gameId, "gameId");
 
         gameController.startGame(gameId, configs);
-        return false;
+        return true;
     }
 
     @Override
     public boolean stop(long defId) throws Exception {
         Checks.greaterThanZero(defId, "defId");
         gameController.stopGame(defId);
-        return false;
+        return true;
     }
 
     @Override
     public boolean startChallenge(long challengeId) throws Exception {
         Checks.greaterThanZero(challengeId, "challengeId");
         gameController.startChallenge(challengeId, configs);
-        return false;
+        return true;
     }
 }

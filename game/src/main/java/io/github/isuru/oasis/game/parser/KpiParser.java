@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.game.parser;
 
+import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.defs.KpiDef;
 import io.github.isuru.oasis.model.defs.KpisDef;
-import org.mvel2.MVEL;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
@@ -23,7 +23,7 @@ public class KpiParser {
             calculator.setPriority(Integer.parseInt(item.getId().toString()));
             calculator.setForEvent(item.getEvent());
             calculator.setFieldName(item.getField());
-            calculator.setExpression(MVEL.compileExpression(item.getExpression()));
+            calculator.setExpression(Utils.compileExpression(item.getExpression()));
 
             calculators.add(calculator);
         }

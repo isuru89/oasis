@@ -1,10 +1,7 @@
 package io.github.isuru.oasis.game.parser;
 
 import io.github.isuru.oasis.game.utils.Utils;
-import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.OState;
-import io.github.isuru.oasis.model.defs.MilestoneDef;
-import io.github.isuru.oasis.model.defs.MilestonesDef;
 import io.github.isuru.oasis.model.defs.StateDef;
 import io.github.isuru.oasis.model.defs.StatesDef;
 import org.yaml.snakeyaml.Yaml;
@@ -20,6 +17,9 @@ import java.util.stream.Collectors;
 public class OStateParser {
 
     public static List<OState> parse(List<StateDef> stateDefs) throws IOException {
+        if (stateDefs == null) {
+            return new LinkedList<>();
+        }
         // convert def to state
         List<OState> states = new LinkedList<>();
         for (StateDef def : stateDefs) {

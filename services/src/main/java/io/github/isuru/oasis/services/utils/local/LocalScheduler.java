@@ -31,15 +31,17 @@ public class LocalScheduler implements IGameController {
     }
 
     @Override
-    public void startGame(long gameId, Configs appConfigs) throws Exception {
-        LocalRunner runner = new LocalRunner(appConfigs, dao, gameId);
+    public void startGame(long gameId, Configs appConfigs) {
+        Sources.get().create(gameId);
+
+        LocalRunner runner = new LocalRunner(appConfigs, pool, dao, gameId);
         runners.put(gameId, runner);
         pool.submit(runner);
     }
 
     @Override
-    public void startChallenge(long challengeId, Configs appConfigs) throws Exception {
-        LocalRunner runner = new LocalRunner(appConfigs, dao, challengeId);
+    public void startChallenge(long challengeId, Configs appConfigs) {
+        LocalRunner runner = new LocalRunner(appConfigs, pool, dao, challengeId);
         runners.put(challengeId, runner);
         pool.submit(runner);
     }

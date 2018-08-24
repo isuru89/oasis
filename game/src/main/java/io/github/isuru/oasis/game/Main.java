@@ -52,34 +52,39 @@ public class Main {
     }
 
     public static void startGame(Configs gameProperties, OasisGameDef oasisGameDef) throws Exception {
-        if (oasisGameDef.getChallenge() == null) {
-            GameDef gameDef = oasisGameDef.getGame();
-            System.setProperty(Constants.ENV_OASIS_GAME_ID, String.valueOf(gameDef.getId()));
-            Oasis oasis = new Oasis(gameDef.getName());
+        try {
+            if (oasisGameDef.getChallenge() == null) {
+                GameDef gameDef = oasisGameDef.getGame();
+                System.setProperty(Constants.ENV_OASIS_GAME_ID, String.valueOf(gameDef.getId()));
+                Oasis oasis = new Oasis(gameDef.getName());
 
-            SourceFunction<Event> source = createSource(gameProperties);
-            List<FieldCalculator> kpis = KpiParser.parse(oasisGameDef.getKpis());
-            List<PointRule> pointRules = PointParser.parse(oasisGameDef.getPoints());
-            List<Milestone> milestones = MilestoneParser.parse(oasisGameDef.getMilestones());
-            List<BadgeRule> badges = BadgeParser.parse(oasisGameDef.getBadges());
-            List<OState> states = OStateParser.parse(oasisGameDef.getStates());
+                SourceFunction<Event> source = createSource(gameProperties);
+                List<FieldCalculator> kpis = KpiParser.parse(oasisGameDef.getKpis());
+                List<PointRule> pointRules = PointParser.parse(oasisGameDef.getPoints());
+                List<Milestone> milestones = MilestoneParser.parse(oasisGameDef.getMilestones());
+                List<BadgeRule> badges = BadgeParser.parse(oasisGameDef.getBadges());
+                List<OState> states = OStateParser.parse(oasisGameDef.getStates());
 
-            OasisExecution execution = new OasisExecution()
-                    .havingGameProperties(gameProperties)
-                    .withSource(source)
-                    .fieldTransformer(kpis)
-                    .setPointRules(pointRules)
-                    .setMilestones(milestones)
-                    .setStates(states)
-                    .setBadgeRules(badges);
+                OasisExecution execution = new OasisExecution()
+                        .havingGameProperties(gameProperties)
+                        .withSource(source)
+                        .fieldTransformer(kpis)
+                        .setPointRules(pointRules)
+                        .setMilestones(milestones)
+                        .setStates(states)
+                        .setBadgeRules(badges);
 
-            execution = createOutputHandler(gameProperties, execution)
-                    .build(oasis);
+                execution = createOutputHandler(gameProperties, execution)
+                        .build(oasis);
 
-            execution.start();
+                execution.start();
 
-        } else {
-            startChallenge(oasisGameDef, gameProperties);
+            } else {
+                startChallenge(oasisGameDef, gameProperties);
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 
@@ -113,29 +118,29 @@ public class Main {
     }
 
     static OasisExecution createOutputHandler(Configs gameProps, OasisExecution execution) {
-        String outputType = gameProps.getStr(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
-        if ("kafka".equals(outputType)) {
-            return execution.outputSink(new OasisKafkaSink(gameProps));
-        } else if ("none".equalsIgnoreCase(outputType)) {
-            return execution.outputHandler(new NoneOutputHandler());
-        } else if ("rabbit".equalsIgnoreCase(outputType)) {
-            return execution.outputSink(new OasisRabbitSink(gameProps));
+        if (gameProps.has(Constants.KEY_OUTPUT_TYPE)) {
+            String outputType = gameProps.getStr(Constants.KEY_OUTPUT_TYPE, "rabbit").trim();
+            if ("kafka".equals(outputType)) {
+                return execution.outputSink(new OasisKafkaSink(gameProps));
+            } else if ("none".equalsIgnoreCase(outputType)) {
+                return execution.outputHandler(new NoneOutputHandler());
+            } else if ("rabbit".equalsIgnoreCase(outputType)) {
+                return execution.outputSink(new OasisRabbitSink(gameProps));
+            } else {
+                throw new IllegalStateException("Unknown output type!");
+            }
         } else {
-            try {
-                Object inst = gameProps.getObj(ConfigKeys.KEY_LOCAL_REF_OUTPUT, null);
-                if (inst == null) {
-                    inst = Utils.createInst(outputType);
-                }
+            Object inst = gameProps.getObj(ConfigKeys.KEY_LOCAL_REF_OUTPUT, null);
+            if (inst == null) {
+                throw new IllegalStateException("Unknown output type!");
+            }
 
-                if (inst instanceof IOutputHandler) {
-                    return execution.outputHandler((IOutputHandler)inst);
-                } else if (inst instanceof OasisSink) {
-                    return execution.outputSink((OasisSink)inst);
-                } else {
-                    throw new RuntimeException("Unknown type of output!");
-                }
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException("Unknown output type!");
+            if (inst instanceof IOutputHandler) {
+                return execution.outputHandler((IOutputHandler) inst);
+            } else if (inst instanceof OasisSink) {
+                return execution.outputSink((OasisSink) inst);
+            } else {
+                throw new RuntimeException("Unknown type of output!");
             }
         }
     }
@@ -155,48 +160,49 @@ public class Main {
 
     @SuppressWarnings("unchecked")
     static SourceFunction<Event> createSource(Configs gameProps) throws FileNotFoundException {
-        String type = gameProps.getStrReq(Constants.KEY_SOURCE_TYPE);
-        if ("file".equalsIgnoreCase(type)) {
-            File inputCsv = new File(gameProps.getStrReq(Constants.KEY_SOURCE_FILE));
-            if (!inputCsv.exists()) {
-                throw new FileNotFoundException("Input source file does not exist! ["
-                        + inputCsv.getAbsolutePath() + "]");
+        if (gameProps.has(Constants.KEY_SOURCE_TYPE)) {
+            String type = gameProps.getStrReq(Constants.KEY_SOURCE_TYPE);
+            if ("file".equalsIgnoreCase(type)) {
+                File inputCsv = new File(gameProps.getStrReq(Constants.KEY_SOURCE_FILE));
+                if (!inputCsv.exists()) {
+                    throw new FileNotFoundException("Input source file does not exist! ["
+                            + inputCsv.getAbsolutePath() + "]");
+                }
+                return new CsvEventSource(inputCsv);
+
+            } else if ("kafka".equalsIgnoreCase(type)) {
+                String topic = gameProps.getStrReq(Constants.KEY_KAFKA_SOURCE_TOPIC);
+                String kafkaHost = gameProps.getStrReq(Constants.KEY_KAFKA_HOST);
+                Preconditions.checkArgument(kafkaHost != null && !kafkaHost.trim().isEmpty());
+                Preconditions.checkArgument(topic != null && !topic.trim().isEmpty());
+
+                EventDeserializer deserialization = new EventDeserializer();
+
+                Properties properties = new Properties();
+                // add kafka host
+                properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaHost);
+                Map<String, Object> map = OasisUtils.filterKeys(gameProps.getProps(), Constants.KEY_PREFIX_SOURCE_KAFKA);
+                properties.putAll(map);
+
+                return new FlinkKafkaConsumer011<>(topic, deserialization, properties);
+            } else if ("rabbit".equalsIgnoreCase(type)) {
+                RMQConnectionConfig rabbitConfig = RabbitUtils.createRabbitSourceConfig(gameProps);
+                String inputQueue = Utils.queueReplace(gameProps.getStrReq(ConfigKeys.KEY_RABBIT_QUEUE_SRC));
+
+                return new OasisRabbitSource(gameProps, rabbitConfig, inputQueue,
+                        true,
+                        new EventRabbitDeserializer());
+            } else {
+                throw new IllegalStateException(
+                        String.format("No source type '%s' is found for game!", type));
             }
-            return new CsvEventSource(inputCsv);
-
-        } else if ("kafka".equalsIgnoreCase(type)) {
-            String topic = gameProps.getStrReq(Constants.KEY_KAFKA_SOURCE_TOPIC);
-            String kafkaHost = gameProps.getStrReq(Constants.KEY_KAFKA_HOST);
-            Preconditions.checkArgument(kafkaHost != null && !kafkaHost.trim().isEmpty());
-            Preconditions.checkArgument(topic != null && !topic.trim().isEmpty());
-
-            EventDeserializer deserialization = new EventDeserializer();
-
-            Properties properties = new Properties();
-            // add kafka host
-            properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaHost);
-            Map<String, Object> map = OasisUtils.filterKeys(gameProps.getProps(), Constants.KEY_PREFIX_SOURCE_KAFKA);
-            properties.putAll(map);
-
-            return new FlinkKafkaConsumer011<>(topic, deserialization, properties);
-        } else if ("rabbit".equalsIgnoreCase(type)) {
-            RMQConnectionConfig rabbitConfig = RabbitUtils.createRabbitSourceConfig(gameProps);
-            String inputQueue = Utils.queueReplace(gameProps.getStrReq(ConfigKeys.KEY_RABBIT_QUEUE_SRC));
-
-            return new OasisRabbitSource(gameProps, rabbitConfig, inputQueue,
-                    true,
-                    new EventRabbitDeserializer());
 
         } else {
             Object inst = gameProps.getObj(ConfigKeys.KEY_LOCAL_REF_SOURCE, null);
             if (inst != null) {
                 return (SourceFunction<Event>) inst;
-            }
-
-            try {
-                return Utils.createInst(type);
-            } catch (ReflectiveOperationException e) {
-                throw new IllegalArgumentException("Invalid event source type specified! [" + type + "]");
+            } else {
+                throw new IllegalStateException("No source type is found for game!");
             }
         }
     }

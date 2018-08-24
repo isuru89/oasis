@@ -1,11 +1,15 @@
 package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.model.Constants;
+import io.github.isuru.oasis.services.api.IEventsService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.dto.EventPushDto;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.utils.EventSourceToken;
+import io.github.isuru.oasis.services.utils.UserRole;
 import spark.Request;
+import spark.Spark;
 
 import java.util.Map;
 
@@ -20,7 +24,9 @@ public class EventsRouter extends BaseRouters {
 
     @Override
     public void register() {
-        post("/event", (req, res) -> {
+        IEventsService es = getApiService().getEventService();
+
+        post("/submit", (req, res) -> {
             String token = extractToken(req);
 
             EventPushDto eventPushDto = bodyAs(req, EventPushDto.class);
@@ -31,15 +37,24 @@ public class EventsRouter extends BaseRouters {
             if (eventPushDto.getEvent() != null) {
                 Map<String, Object> event = eventPushDto.getEvent();
                 event.put(Constants.FIELD_GAME_ID, gid);
-                getApiService().getEventService().submitEvent(token, eventPushDto.getEvent());
+                es.submitEvent(token, eventPushDto.getEvent());
             } else if (eventPushDto.getEvents() != null) {
                 eventPushDto.getEvents().forEach(et -> et.put(Constants.FIELD_GAME_ID, gid));
-                getApiService().getEventService().submitEvents(token, eventPushDto.getEvents());
+                es.submitEvents(token, eventPushDto.getEvents());
             } else {
                 throw new InputValidationException("No events have been defined in this call!");
             }
-            return null;
+            return asResBool(true);
         });
+
+        Spark.path("/source", () -> {
+            post("/add", (req, res) -> es.addEventSource(bodyAs(req, EventSourceToken.class)),
+                    UserRole.ADMIN);
+            post("/list", (req, res) -> es.listAllEventSources(), UserRole.ADMIN)
+            .delete("/:srcId",
+                    (req, res) -> es.disableEventSource(asPInt(req, "srcId")), UserRole.ADMIN);
+        });
+
     }
 
     private String extractToken(Request request) throws ApiAuthException {

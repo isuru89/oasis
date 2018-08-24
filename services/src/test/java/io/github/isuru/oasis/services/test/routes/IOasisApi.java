@@ -29,50 +29,50 @@ public interface IOasisApi {
     Call<Map<String, Object>> logout(@Header("Authorization") String authHeader);
 
 
-    @POST("control/game/:gameId/start")
+    @POST("control/game/{gameId}/start")
     Call<Map<String, Object>> gameStart(@Header("Authorization") String authHeader, @Path("gameId") long gameId);
-    @POST("control/game/:gameId/stop")
+    @POST("control/game/{gameId}/stop")
     Call<Map<String, Object>> gameStop(@Header("Authorization") String authHeader, @Path("gameId") long gameId);
-    @POST("control/challenge/:cid/start")
+    @POST("control/challenge/{cid}/start")
     Call<Map<String, Object>> challengeStart(@Header("Authorization") String authHeader, @Path("cid") long challengeId);
-    @POST("control/challenge/:cid/stop")
+    @POST("control/challenge/{cid}/stop")
     Call<Map<String, Object>> challengeStop(@Header("Authorization") String authHeader, @Path("cid") long challengeId);
 
 
     @POST("admin/user/add")
     Call<Map<String, Object>> userAdd(@Body UserProfile userProfile);
-    @POST("admin/user/:uid/edit")
+    @POST("admin/user/{uid}/edit")
     Call<Map<String, Object>> userEdit(@Path("uid") long userId, @Body UserProfile userProfile);
-    @GET("admin/user/:uid")
+    @GET("admin/user/{uid}")
     Call<Map<String, Object>> userGet(@Path("uid") long userId);
-    @GET("admin/user/ext/:uid")
+    @GET("admin/user/ext/{uid}")
     Call<Map<String, Object>> userGetByExt(@Path("uid") long userId);
-    @DELETE("admin/user/:uid")
+    @DELETE("admin/user/{uid}")
     Call<Map<String, Object>> userDelete(@Path("uid") long userId);
 
     @POST("admin/team/add")
     Call<Map<String, Object>> teamAdd(@Body TeamProfile teamProfile);
-    @POST("admin/team/:tid/edit")
+    @POST("admin/team/{tid}/edit")
     Call<Map<String, Object>> teamEdit(@Path("tid") long teamId, @Body TeamProfile teamProfile);
-    @GET("admin/team/:tid")
+    @GET("admin/team/{tid}")
     Call<Map<String, Object>> teamGet(@Path("tid") long teamId);
-    @POST("admin/team/:tid/users")
+    @POST("admin/team/{tid}/users")
     Call<Map<String, Object>> teamGetUsers(@Path("tid") long teamId);
 
     @POST("admin/scope/add")
     Call<Map<String, Object>> teamScopeAdd(@Body TeamScope scope);
-    @POST("admin/scope/:tsid/edit")
+    @POST("admin/scope/{tsid}/edit")
     Call<Map<String, Object>> teamScopeEdit(@Path("tsid") long scopeId, @Body TeamScope scope);
     @POST("admin/scope/list")
     Call<Map<String, Object>> teamScopeList();
-    @GET("admin/scope/:tsid")
+    @GET("admin/scope/{tsid}")
     Call<Map<String, Object>> teamScopeGet(@Path("tsid") long scopeId);
-    @POST("admin/scope/:tsid/teams")
+    @POST("admin/scope/{tsid}/teams")
     Call<Map<String, Object>> teamScopeGetTeams(@Path("tsid") long scopeId);
 
     @POST("admin/user/add-to-team")
     Call<Map<String, Object>> userAddToTeam(@Body UserTeam userTeam);
-    @POST("admin/user/:uid/current-team")
+    @POST("admin/user/{uid}/current-team")
     Call<Map<String, Object>> userFindCurrentTeam(@Path("uid") long teamId);
 
 }
