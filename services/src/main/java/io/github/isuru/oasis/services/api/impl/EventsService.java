@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.model.Constants;
+import io.github.isuru.oasis.model.utils.ICacheProxy;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.api.IEventsService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
@@ -30,7 +31,7 @@ public class EventsService extends BaseService implements IEventsService {
 
     private static final Object SOURCE_LOCK = new Object();
 
-    private final Map<String, Long> USER_CACHE;
+    private final ICacheProxy cacheProxy;
     private final Map<String, EventSourceToken> SOURCE_CACHE = new ConcurrentHashMap<>();
 
     private IGameController gameController;
@@ -39,8 +40,9 @@ public class EventsService extends BaseService implements IEventsService {
                   OasisOptions oasisOptions) {
         super(apiService);
 
+        cacheProxy = oasisOptions.getCacheProxy();
         gameController = oasisOptions.getGameController();
-        USER_CACHE = new LRUCache<>(oasisOptions.getConfigs().getInt("oasis.cache.user.size", 300));
+        //USER_CACHE = new LRUCache<>(oasisOptions.getConfigs().getInt("oasis.cache.user.size", 300));
         try {
             listAllEventSources();
         } catch (Exception e) {
@@ -188,14 +190,15 @@ public class EventsService extends BaseService implements IEventsService {
     }
 
     private long resolveUser(String email) throws Exception {
-        if (USER_CACHE.containsKey(email)) {
-            return USER_CACHE.get(email);
+        Optional<String> uidOpt = cacheProxy.get("user.email." + email);
+        if (uidOpt.isPresent()) {
+            return Long.parseLong(uidOpt.get());
         } else {
             UserProfile profile = getApiService().getProfileService().readUserProfile(email);
             if (profile == null) {
                 throw new InputValidationException("There is no user by having email '" + email + "'!");
             }
-            USER_CACHE.put(email, profile.getId());
+            cacheProxy.update("user.email." + email, String.valueOf(profile.getId()));
             return profile.getId();
         }
     }
