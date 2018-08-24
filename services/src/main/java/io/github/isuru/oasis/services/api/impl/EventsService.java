@@ -127,6 +127,8 @@ public class EventsService extends BaseService implements IEventsService {
 
     @Override
     public EventSourceToken addEventSource(EventSourceToken sourceToken) throws Exception {
+        Checks.nonNullOrEmpty(sourceToken.getDisplayName(), "displayName");
+
         if (sourceToken.isInternal()) {
             // check for existing internal sources
             Optional<EventSourceToken> eventSourceToken = readInternalSourceToken();
@@ -154,6 +156,8 @@ public class EventsService extends BaseService implements IEventsService {
 
     @Override
     public boolean disableEventSource(int id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
         boolean success = getDao().executeCommand("def/events/disableEventSource",
                 Maps.create("id", id)) > 0;
 

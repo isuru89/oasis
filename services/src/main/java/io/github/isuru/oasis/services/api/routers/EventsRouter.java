@@ -9,6 +9,7 @@ import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.UserRole;
 import spark.Request;
+import spark.Response;
 import spark.Spark;
 
 import java.util.Map;
@@ -24,44 +25,65 @@ public class EventsRouter extends BaseRouters {
 
     @Override
     public void register() {
-        IEventsService es = getApiService().getEventService();
-
-        post("/submit", (req, res) -> {
-            String token = extractToken(req);
-
-            EventPushDto eventPushDto = bodyAs(req, EventPushDto.class);
-            Long gid = eventPushDto.getMeta() == null || !eventPushDto.getMeta().containsKey("gameId")
-                    ? null
-                    : Long.parseLong(eventPushDto.getMeta().get("gameId").toString());
-
-            if (eventPushDto.getEvent() != null) {
-                Map<String, Object> event = eventPushDto.getEvent();
-                event.put(Constants.FIELD_GAME_ID, gid);
-                es.submitEvent(token, eventPushDto.getEvent());
-            } else if (eventPushDto.getEvents() != null) {
-                eventPushDto.getEvents().forEach(et -> et.put(Constants.FIELD_GAME_ID, gid));
-                es.submitEvents(token, eventPushDto.getEvents());
-            } else {
-                throw new InputValidationException("No events have been defined in this call!");
-            }
-            return asResBool(true);
-        });
+        post("/submit", this::submitEvent);
 
         Spark.path("/source", () -> {
-            post("/add", (req, res) -> es.addEventSource(bodyAs(req, EventSourceToken.class)),
-                    UserRole.ADMIN);
-            post("/list", (req, res) -> es.listAllEventSources(), UserRole.ADMIN)
-            .delete("/:srcId",
-                    (req, res) -> es.disableEventSource(asPInt(req, "srcId")), UserRole.ADMIN);
+            post("/add", this::addEventSource, UserRole.ADMIN);
+            post("/list", this::listEventSources, UserRole.ADMIN);
+            delete("/:sourceId", this::disableEventSource, UserRole.ADMIN);
         });
 
+    }
+
+    private Object submitEvent(Request req, Response res) throws Exception {
+        IEventsService es = getApiService().getEventService();
+        String token = extractToken(req);
+
+        EventPushDto eventPushDto = bodyAs(req, EventPushDto.class);
+        Long gid = eventPushDto.getMeta() == null || !eventPushDto.getMeta().containsKey("gameId")
+                ? null
+                : Long.parseLong(eventPushDto.getMeta().get("gameId").toString());
+
+        if (eventPushDto.getEvent() != null) {
+            Map<String, Object> event = eventPushDto.getEvent();
+            event.put(Constants.FIELD_GAME_ID, gid);
+            es.submitEvent(token, eventPushDto.getEvent());
+        } else if (eventPushDto.getEvents() != null) {
+            eventPushDto.getEvents().forEach(et -> et.put(Constants.FIELD_GAME_ID, gid));
+            es.submitEvents(token, eventPushDto.getEvents());
+        } else {
+            throw new InputValidationException("No events have been defined in this call!");
+        }
+        return asResBool(true);
+    }
+
+    private Object disableEventSource(Request req, Response res) throws Exception {
+        return getApiService().getEventService().disableEventSource(asPInt(req, "sourceId"));
+    }
+
+    private Object listEventSources(Request req, Response res) throws Exception {
+        return getApiService().getEventService().listAllEventSources();
+    }
+
+    private Object addEventSource(Request req, Response res) throws Exception {
+        EventSourceToken token = bodyAs(req, EventSourceToken.class);
+        IEventsService eventService = getApiService().getEventService();
+
+        // duplicate events source names are ignored.
+        if (eventService.listAllEventSources().stream()
+                .anyMatch(e -> e.getDisplayName().equalsIgnoreCase(token.getDisplayName()))) {
+            throw new InputValidationException(
+                    "There is already an event token exist with name '" + token.getDisplayName() + "'!");
+        }
+
+        return eventService.addEventSource(token);
     }
 
     private String extractToken(Request request) throws ApiAuthException {
         String auth = request.headers(AUTHORIZATION);
         if (auth != null) {
-            if (auth.startsWith("Bearer ")) {
-                return auth.substring("Bearer ".length());
+            if (auth.startsWith(BEARER)) {
+                return auth.substring(BEARER.length());
             }
         }
         throw new ApiAuthException("The token is not found with the event.");

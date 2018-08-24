@@ -21,3 +21,5 @@ src/main/resources/io/github/isuru/oasis/db/.vscode/
 
 logs.log
 
+node_modules/
+

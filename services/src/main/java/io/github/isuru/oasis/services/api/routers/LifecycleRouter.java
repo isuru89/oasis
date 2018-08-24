@@ -2,6 +2,8 @@ package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.utils.Maps;
+import spark.Request;
+import spark.Response;
 import spark.Spark;
 
 import java.util.Map;
@@ -10,6 +12,9 @@ import java.util.Map;
  * @author iweerarathna
  */
 public class LifecycleRouter extends BaseRouters {
+
+    private static final String GAME_ID = "gameId";
+    private static final String CHALLENGE_ID = "challengeId";
 
     LifecycleRouter(IOasisApiService apiService) {
         super(apiService);
@@ -26,17 +31,26 @@ public class LifecycleRouter extends BaseRouters {
             checkCurator(request);
         });
 
-        post("/game/:gameId/start",
-                (req, res) -> mapToStatus(getLCService().start(asPLong(req, "gameId"))));
+        post("/game/:gameId/start", this::startGame);
+        post("/game/:gameId/stop", this::stopGame);
+        post("/challenge/:challengeId/start", this::startChallenge);
+        post("/challenge/:challengeId/stop", this::stopChallenge);
+    }
 
-        post("/game/:gameId/stop",
-                (req, res) -> mapToStatus(getLCService().stop(asPLong(req, "gameId"))));
+    private Object startGame(Request req, Response res) throws Exception {
+        return mapToStatus(getLCService().start(asPLong(req, GAME_ID)));
+    }
 
-        post("/challenge/:cid/start",
-                (req, res) -> mapToStatus(getLCService().startChallenge(asPLong(req, "cid"))));
+    private Object startChallenge(Request req, Response res) throws Exception {
+        return mapToStatus(getLCService().startChallenge(asPLong(req, CHALLENGE_ID)));
+    }
 
-        post("/challenge/:id/stop",
-                (req, res) -> mapToStatus(getLCService().stop(asPLong(req, "id"))));
+    private Object stopGame(Request req, Response res) throws Exception {
+        return mapToStatus(getLCService().stop(asPLong(req, GAME_ID)));
+    }
+
+    private Object stopChallenge(Request req, Response res) throws Exception {
+        return mapToStatus(getLCService().stop(asPLong(req, CHALLENGE_ID)));
     }
 
     private static Map<String, Object> mapToStatus(boolean status) {

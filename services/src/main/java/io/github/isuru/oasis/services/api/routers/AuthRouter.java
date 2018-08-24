@@ -36,8 +36,8 @@ public class AuthRouter extends BaseRouters {
 
     @Override
     public void register() {
-        post("/login", this::login)
-        .post("/logout", this::logout);
+        post("/login", this::login);
+        post("/logout", this::logout);
     }
 
     private Object logout(Request req, Response res) throws Exception {

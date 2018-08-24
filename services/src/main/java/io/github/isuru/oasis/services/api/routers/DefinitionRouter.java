@@ -14,6 +14,14 @@ import spark.Spark;
 public class DefinitionRouter extends BaseRouters {
 
     private static final String P_GAME_ID = "gameId";
+    private static final String POINT_ID = "pointId";
+    private static final String BADGE_ID = "badgeId";
+    private static final String MILESTONE_ID = "milestoneId";
+    private static final String ITEM_ID = "itemId";
+    private static final String STATE_ID = "stateId";
+    private static final String CHALLENGE_ID = "challengeId";
+    private static final String KPI_ID = "kpiId";
+    private static final String BOARD_ID = "boardId";
 
     DefinitionRouter(IOasisApiService apiService) {
         super(apiService);
@@ -45,58 +53,58 @@ public class DefinitionRouter extends BaseRouters {
 
             Spark.path("/:gameId/kpi", () -> {
                 get("/all", (req, res) -> gds.listKpiCalculations(asPLong(req, P_GAME_ID)))
-                .get("/:kpiId", (req, res) -> gds.readKpiCalculation(asPLong(req, "kpiId")))
+                .get("/:kpiId", (req, res) -> gds.readKpiCalculation(asPLong(req, KPI_ID)))
                 .delete("/:kpiId", (req, res) ->
-                        asResBool(gds.disableKpiCalculation(asPLong(req, "kpiId"))), UserRole.ADMIN);
+                        asResBool(gds.disableKpiCalculation(asPLong(req, KPI_ID))), UserRole.ADMIN);
             });
 
             Spark.path("/:gameId/point", () -> {
                 get("/all", (req, res) -> gds.listPointDefs(asPLong(req, P_GAME_ID)))
-                .get("/:pointId", (req, res) -> gds.readPointDef(asPLong(req, "pointId")))
+                .get("/:pointId", (req, res) -> gds.readPointDef(asPLong(req, POINT_ID)))
                 .delete("/:pointId", (req, res) ->
-                        asResBool(gds.disablePointDef(asPLong(req, "pointId"))), UserRole.ADMIN);
+                        asResBool(gds.disablePointDef(asPLong(req, POINT_ID))), UserRole.ADMIN);
             });
 
             Spark.path("/:gameId/badge", () -> {
                 get("/all", (req, res) -> gds.listBadgeDefs(asPLong(req, P_GAME_ID)))
-                .get("/:badgeId", (req, res) -> gds.readBadgeDef(asPLong(req, "badgeId")))
+                .get("/:badgeId", (req, res) -> gds.readBadgeDef(asPLong(req, BADGE_ID)))
                 .delete("/:badgeId", (req, res) ->
-                        asResBool(gds.disableBadgeDef(asPLong(req, "badgeId"))), UserRole.ADMIN);
+                        asResBool(gds.disableBadgeDef(asPLong(req, BADGE_ID))), UserRole.ADMIN);
             });
 
             Spark.path("/:gameId/milestone", () -> {
                 get("/all", (req, res) -> gds.listMilestoneDefs(asPLong(req, P_GAME_ID)))
-                .get("/:mid", (req, res) -> gds.readMilestoneDef(asPLong(req, "mid")))
-                .delete("/:mid", (req, res) ->
-                        asResBool(gds.disableMilestoneDef(asPLong(req, "mid"))), UserRole.ADMIN);
+                .get("/:milestoneId", (req, res) -> gds.readMilestoneDef(asPLong(req, MILESTONE_ID)))
+                .delete("/:milestoneId", (req, res) ->
+                        asResBool(gds.disableMilestoneDef(asPLong(req, MILESTONE_ID))), UserRole.ADMIN);
             });
 
             Spark.path("/:gameId/leaderboard", () -> {
                 get("/all", (req, res) -> gds.listLeaderboardDefs(asPLong(req, P_GAME_ID)))
-                .get("/:lid", (req, res) -> gds.readLeaderboardDef(asPLong(req, "lid")))
-                .delete("/:lid", (req, res) ->
-                        asResBool(gds.disableLeaderboardDef(asPLong(req, "lid"))), UserRole.ADMIN);
+                .get("/:boardId", (req, res) -> gds.readLeaderboardDef(asPLong(req, BOARD_ID)))
+                .delete("/:boardId", (req, res) ->
+                        asResBool(gds.disableLeaderboardDef(asPLong(req, BOARD_ID))), UserRole.ADMIN);
             });
 
             Spark.path("/:gameId/challenge", () -> {
                 get("/all", (req, res) -> gds.listChallenges(asPLong(req, P_GAME_ID)))
-                .get("/:cid", (req, res) -> gds.readChallenge(asPLong(req, "cid")))
-                .delete("/:cid", (req, res) ->
-                        asResBool(gds.disableChallenge(asPLong(req, "cid"))), UserRole.ADMIN);
+                .get("/:challengeId", (req, res) -> gds.readChallenge(asPLong(req, CHALLENGE_ID)))
+                .delete("/:challengeId", (req, res) ->
+                        asResBool(gds.disableChallenge(asPLong(req, CHALLENGE_ID))), UserRole.ADMIN);
             });
 
             Spark.path("/:gameId/item", () -> {
                 get("/all", (req, res) -> gds.listShopItems(asPLong(req, P_GAME_ID)))
-                .get("/:iid", (req, res) -> gds.readShopItem(asPLong(req, "iid")))
-                .delete("/:iid", (req, res) ->
-                        asResBool(gds.disableShopItem(asPLong(req, "iid"))), UserRole.ADMIN);
+                .get("/:itemId", (req, res) -> gds.readShopItem(asPLong(req, ITEM_ID)))
+                .delete("/:itemId", (req, res) ->
+                        asResBool(gds.disableShopItem(asPLong(req, ITEM_ID))), UserRole.ADMIN);
             });
 
             Spark.path("/:gameId/state", () -> {
                 get("/all", (req, res) -> gds.listStatePlays(asPLong(req, P_GAME_ID)))
-                .get("/:sid", (req, res) -> gds.readStatePlay(asPLong(req, "sid")))
-                .delete("/:sid", (req, res) ->
-                        asResBool(gds.disableStatePlay(asPLong(req, "sid"))), UserRole.ADMIN);
+                .get("/:stateId", (req, res) -> gds.readStatePlay(asPLong(req, STATE_ID)))
+                .delete("/:stateId", (req, res) ->
+                        asResBool(gds.disableStatePlay(asPLong(req, STATE_ID))), UserRole.ADMIN);
             });
         });
 

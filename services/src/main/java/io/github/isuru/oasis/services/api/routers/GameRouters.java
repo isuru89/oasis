@@ -23,6 +23,11 @@ public class GameRouters extends BaseRouters {
     private static final String Q_START = "start";
     private static final String Q_END = "end";
     private static final String Q_USER = "user";
+    private static final String USER_ID = "userId";
+    private static final String ITEM_ID = "itemId";
+    private static final String TEAM_ID = "teamId";
+    private static final String SCOPE_ID = "scopeId";
+    private static final String LB_ID = "lid";
 
     GameRouters(IOasisApiService apiService) {
         super(apiService);
@@ -31,8 +36,8 @@ public class GameRouters extends BaseRouters {
     @Override
     public void register() {
         get("/leaderboard/:lid/global", this::leaderboardGlobal);
-        get("/leaderboard/:lid/team/:tid", this::leaderboardTeam);
-        get("/leaderboard/:lid/teamscope/:sid", this::leaderboardTeamScope);
+        get("/leaderboard/:lid/team/:teamId", this::leaderboardTeam);
+        get("/leaderboard/:lid/teamscope/:scopeId", this::leaderboardTeamScope);
 
         post("/shop/buy", this::shopBuyItem);
         post("/shop/share", this::shopShareItem);
@@ -42,11 +47,11 @@ public class GameRouters extends BaseRouters {
     }
 
     private Object awardBadge(Request req, Response res) throws Exception {
-        if (!req.attributes().contains("userId")) {
+        if (!req.attributes().contains(USER_ID)) {
             throw new InputValidationException("You need to authenticate to award badge!");
         }
 
-        long userId = req.attribute("userId");
+        long userId = req.attribute(USER_ID);
         checkSameUser(req, userId);
 
         BadgeAwardDto badgeAwardDto = bodyAs(req, BadgeAwardDto.class);
@@ -55,11 +60,11 @@ public class GameRouters extends BaseRouters {
     }
 
     private Object awardPoints(Request req, Response res) throws Exception {
-        if (!req.attributes().contains("userId")) {
+        if (!req.attributes().contains(USER_ID)) {
             throw new InputValidationException("You need to authenticate to award points!");
         }
 
-        long userId = req.attribute("userId");
+        long userId = req.attribute(USER_ID);
         checkSameUser(req, userId);
 
         PointAwardDto pointAwardDto = bodyAs(req, PointAwardDto.class);
@@ -68,15 +73,15 @@ public class GameRouters extends BaseRouters {
     }
 
     private Object shopBuyItem(Request req, Response res) throws Exception {
-        if (!req.attributes().contains("userId")) {
+        if (!req.attributes().contains(USER_ID)) {
             throw new InputValidationException("You need to authenticate to buy an item!");
         }
 
-        long userId = req.attribute("userId");
+        long userId = req.attribute(USER_ID);
         checkSameUser(req, userId);
 
         ValueMap body = bodyAsMap(req);
-        long itemId = body.getLongReq("itemId");
+        long itemId = body.getLongReq(ITEM_ID);
         if (body.has("price")) {
             float price = body.getFloatReq("price");
             getApiService().getGameService().buyItem(userId, itemId, price);
@@ -87,15 +92,15 @@ public class GameRouters extends BaseRouters {
     }
 
     private Object shopShareItem(Request req, Response res) throws Exception {
-        if (!req.attributes().contains("userId")) {
+        if (!req.attributes().contains(USER_ID)) {
             throw new InputValidationException("You need to authenticate to share an item!");
         }
 
-        long userId = req.attribute("userId");
+        long userId = req.attribute(USER_ID);
         checkSameUser(req, userId);
 
         ValueMap body = bodyAsMap(req);
-        long itemId = body.getLongReq("itemId");
+        long itemId = body.getLongReq(ITEM_ID);
         long toUser = body.getLongReq("toUser");
         getApiService().getGameService().shareItem(userId, itemId, toUser,
                 body.getInt("amount", 1));
@@ -107,7 +112,7 @@ public class GameRouters extends BaseRouters {
         String range = asQStr(req, "range", "weekly");
         LeaderboardRequestDto requestDto = generate(req, toType(range));
 
-        int leaderboardId = asPInt(req, "lid");
+        int leaderboardId = asPInt(req, LB_ID);
         requestDto.setLeaderboardDef(readLeaderboardDef(leaderboardId));
         return gameService.readGlobalLeaderboard(requestDto);
     }
@@ -117,8 +122,8 @@ public class GameRouters extends BaseRouters {
         String range = asQStr(req, "range", "weekly");
         LeaderboardRequestDto requestDto = generate(req, toType(range));
 
-        long teamId = asPLong(req, "tid");
-        int leaderboardId = asPInt(req, "lid");
+        long teamId = asPLong(req, TEAM_ID);
+        int leaderboardId = asPInt(req, LB_ID);
         requestDto.setLeaderboardDef(readLeaderboardDef(leaderboardId));
         return gameService.readTeamLeaderboard(teamId, requestDto);
     }
@@ -128,8 +133,8 @@ public class GameRouters extends BaseRouters {
         String range = asQStr(req, "range", "weekly");
         LeaderboardRequestDto requestDto = generate(req, toType(range));
 
-        long teamScopeId = asPLong(req, "sid");
-        int leaderboardId = asPInt(req, "lid");
+        long teamScopeId = asPLong(req, SCOPE_ID);
+        int leaderboardId = asPInt(req, LB_ID);
         requestDto.setLeaderboardDef(readLeaderboardDef(leaderboardId));
         return gameService.readTeamScopeLeaderboard(teamScopeId, requestDto);
     }

@@ -29,6 +29,8 @@ public abstract class BaseRouters {
 
     static final JsonTransformer TRANSFORMER = new JsonTransformer();
     static final String AUTHORIZATION = "Authorization";
+    static final String BEARER = "Bearer ";
+    static final String BASIC = "Basic ";
 
     private final IOasisApiService apiService;
 
@@ -52,8 +54,8 @@ public abstract class BaseRouters {
     Pair<String, String> getBasicAuthPair(Request request) throws ApiAuthException, UnsupportedEncodingException {
         String auth = request.headers(AUTHORIZATION);
         if (auth != null) {
-            if (auth.startsWith("Basic ")) {
-                String token = auth.substring("Basic ".length());
+            if (auth.startsWith(BASIC)) {
+                String token = auth.substring(BASIC.length());
                 String decode = new String(Base64.getDecoder().decode(token), "UTF-8");
                 String uname = decode.substring(0, decode.indexOf(":"));
                 String pword = decode.substring(decode.indexOf(":") + 1);
@@ -66,8 +68,8 @@ public abstract class BaseRouters {
     void checkAuth(Request request) throws ApiAuthException {
         String auth = request.headers(AUTHORIZATION);
         if (auth != null && !auth.trim().isEmpty()) {
-            if (auth.startsWith("Bearer ")) {
-                String token = auth.substring("Bearer ".length());
+            if (auth.startsWith(BEARER)) {
+                String token = auth.substring(BEARER.length());
                 AuthUtils.TokenInfo tokenInfo = AuthUtils.get().verifyToken(token);
                 request.attribute("token", tokenInfo);
                 request.attribute("userId", tokenInfo.getUser()); // set user
