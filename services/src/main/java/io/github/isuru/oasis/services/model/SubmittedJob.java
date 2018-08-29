@@ -3,13 +3,22 @@ package io.github.isuru.oasis.services.model;
 /**
  * @author iweerarathna
  */
-public class FlinkSubmittedJob {
+public class SubmittedJob {
 
     private Integer defId;
     private String jobId;
     private String jarId;
     private String snapshotDir;
     private boolean active;
+    private long toBeFinishedAt;
+
+    public Long getToBeFinishedAt() {
+        return toBeFinishedAt;
+    }
+
+    public void setToBeFinishedAt(Long toBeFinishedAt) {
+        this.toBeFinishedAt = toBeFinishedAt;
+    }
 
     public boolean isActive() {
         return active;

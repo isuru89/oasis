@@ -23,6 +23,7 @@ public class Converters {
         def.setId(wrapper.getId());
         def.setName(wrapper.getName());
         def.setDisplayName(wrapper.getDisplayName());
+        def.setGameId(wrapper.getGameId());
         return def;
     }
 

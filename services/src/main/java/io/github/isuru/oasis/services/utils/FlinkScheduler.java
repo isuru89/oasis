@@ -1,6 +1,8 @@
 package io.github.isuru.oasis.services.utils;
 
 import io.github.isuru.oasis.model.configs.Configs;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
+import io.github.isuru.oasis.model.defs.GameDef;
 
 import java.io.IOException;
 import java.util.Map;
@@ -33,7 +35,7 @@ public class FlinkScheduler implements IGameController {
     }
 
     @Override
-    public void startChallenge(long challengeId, Configs appConfigs) throws Exception {
+    public void startChallenge(ChallengeDef challengeDef, Configs appConfigs) throws Exception {
 
     }
 
@@ -41,4 +43,15 @@ public class FlinkScheduler implements IGameController {
     public void stopGame(long gameId) {
 
     }
+
+    @Override
+    public void resumeChallenge(ChallengeDef challengeDef, Configs appConfigs) throws Exception {
+
+    }
+
+    @Override
+    public void resumeGame(GameDef gameDef, Configs appConfigs) throws Exception {
+
+    }
+
 }

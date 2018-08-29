@@ -1,7 +1,10 @@
 package io.github.isuru.oasis.services.utils.local;
 
+import io.github.isuru.oasis.game.persist.OasisSink;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
+import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.IGameController;
 
@@ -16,7 +19,9 @@ import java.util.concurrent.Executors;
 public class LocalScheduler implements IGameController {
 
     private final ExecutorService pool = Executors.newCachedThreadPool();
+    private final ExecutorService challengePool = Executors.newCachedThreadPool();
     private final Map<Long, LocalRunner> runners = new ConcurrentHashMap<>();
+    private final LocalChallengeProcessor challengeProcessor;
 
     private final IOasisDao dao;
 
@@ -25,6 +30,7 @@ public class LocalScheduler implements IGameController {
         LocalRunner runner = runners.get(gameId);
         if (runner != null) {
             runner.submitEvent(event);
+            challengeProcessor.submitEvent(event);
         } else {
             throw new InputValidationException("No game is running by id " + gameId + "!");
         }
@@ -40,24 +46,57 @@ public class LocalScheduler implements IGameController {
     }
 
     @Override
-    public void startChallenge(long challengeId, Configs appConfigs) {
-        LocalRunner runner = new LocalRunner(appConfigs, pool, dao, challengeId);
-        runners.put(challengeId, runner);
-        pool.submit(runner);
+    public void startChallenge(ChallengeDef challengeDef, Configs appConfigs) throws Exception {
+        long id = challengeDef.getId();
+        Long gameId = challengeDef.getGameId();
+        if (gameId == null) {
+            throw new InputValidationException("The challenge '" + id + "' must be running under a game!");
+        }
+
+        LocalRunner gameRun = runners.get(gameId);
+        if (gameRun == null) {
+            throw new InputValidationException("Associated game of this challenge is not currently running!");
+        }
+        OasisSink oasisSink = gameRun.getOasisSink();
+        challengeProcessor.submitChallenge(challengeDef, oasisSink);
     }
 
     @Override
-    public void stopGame(long gameId) throws Exception {
-        LocalRunner runner = runners.get(gameId);
+    public void stopGame(long defId) throws Exception {
+        LocalRunner runner = runners.get(defId);
         if (runner != null) {
             runner.stop();
+            stopAllChallengesOfGame(defId);
+            runners.remove(defId);
         } else {
-            throw new InputValidationException("Stop failed! No game is running by id " + gameId + "!");
+            if (challengeProcessor.containChallenge(defId)) {
+                challengeProcessor.stopChallenge(defId);
+            } else {
+                throw new InputValidationException("Stop failed! No game or challenge is running by id " + defId + "!");
+            }
         }
+    }
+
+    @Override
+    public void resumeChallenge(ChallengeDef challengeDef, Configs appConfigs) throws Exception {
+
+    }
+
+    @Override
+    public void resumeGame(GameDef gameDef, Configs appConfigs) throws Exception {
+
+    }
+
+    private void stopAllChallengesOfGame(long gameId) throws Exception {
+        challengeProcessor.stopChallengesOfGame(gameId);
     }
 
     public LocalScheduler(IOasisDao dao) {
         this.dao = dao;
+        this.challengeProcessor = new LocalChallengeProcessor(dao);
+
+        // submit challenge processor...
+        challengePool.submit(challengeProcessor);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             for (Map.Entry<Long, LocalRunner> entry : runners.entrySet()) {
@@ -68,6 +107,8 @@ public class LocalScheduler implements IGameController {
                 }
             }
         }));
+
+        Runtime.getRuntime().addShutdownHook(new Thread(challengeProcessor::setStop));
     }
 
 }

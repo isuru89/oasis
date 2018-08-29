@@ -28,6 +28,16 @@ public class ChallengeDef implements Serializable {
     private Long forTeamScopeId;
     private List<String> conditions;
 
+    private Long gameId;
+
+    public Long getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(Long gameId) {
+        this.gameId = gameId;
+    }
+
     public String getForTeamScope() {
         return forTeamScope;
     }

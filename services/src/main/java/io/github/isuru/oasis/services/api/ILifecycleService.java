@@ -11,4 +11,7 @@ public interface ILifecycleService {
 
     boolean startChallenge(long challengeId) throws Exception;
 
+    boolean resumeGame(long gameId) throws Exception;
+
+    boolean resumeChallenge(long challengeId) throws Exception;
 }

@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.services.utils.local;
 
 import io.github.isuru.oasis.game.Main;
+import io.github.isuru.oasis.game.persist.OasisSink;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.db.IOasisDao;
@@ -25,12 +26,14 @@ public class LocalRunner implements Runnable {
     private IOasisDao dao;
     private LocalSinks localSinks;
     private ExecutorService pool;
+    private DbSink oasisSink;
 
     LocalRunner(Configs appConfigs, ExecutorService pool, IOasisDao dao, long gameId) {
         this.appConfigs = appConfigs;
         this.gameId = gameId;
         this.dao = dao;
         this.pool = pool;
+        this.oasisSink = new DbSink(gameId);
     }
 
     @Override
@@ -45,11 +48,10 @@ public class LocalRunner implements Runnable {
         }
 
         QueueSource queueSource = new QueueSource(gameId);
-        DbSink dbSink = new DbSink(gameId);
-        localSinks = LocalSinks.applySinks(pool, dbSink, dao, gameId);
+        localSinks = LocalSinks.applySinks(pool, oasisSink, dao, gameId);
 
         configs.append(ConfigKeys.KEY_LOCAL_REF_SOURCE, queueSource);
-        configs.append(ConfigKeys.KEY_LOCAL_REF_OUTPUT, dbSink);
+        configs.append(ConfigKeys.KEY_LOCAL_REF_OUTPUT, oasisSink);
 
         try {
             OasisGameDef gameDef = DataCache.get().loadGameDefs(gameId);
@@ -75,5 +77,9 @@ public class LocalRunner implements Runnable {
 
     public long getGameId() {
         return gameId;
+    }
+
+    public OasisSink getOasisSink() {
+        return oasisSink;
     }
 }

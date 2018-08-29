@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services;
 
 import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.events.EventNames;
@@ -9,12 +10,15 @@ import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IProfileService;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.model.SubmittedJob;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
+import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.UserRole;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,10 +72,38 @@ public class Bootstrapping {
             // add users
             addUsers(apiService, defTeamId);
 
+            // resume
+            resumeGameAndChallenges(apiService, dao);
+
         } catch (Throwable error) {
             // revert back to previous status...
             cleanTables(dao, "OA_EVENT_SOURCE", "OA_TEAM", "OA_TEAM_SCOPE", "OA_USER");
             throw error;
+        }
+    }
+
+    private static void resumeGameAndChallenges(IOasisApiService apiService, IOasisDao dao) throws Exception {
+        List<GameDef> gameDefs = apiService.getGameDefService().listGames();
+        if (gameDefs == null || gameDefs.isEmpty()) {
+            // no active game exist. do nothing
+            return;
+        }
+
+        // resume game first...
+        List<Integer> resumedGameIds = new LinkedList<>();
+        for (GameDef gameDef : gameDefs) {
+            apiService.getLifecycleService().resumeGame(gameDef.getId());
+            resumedGameIds.add(gameDef.getId().intValue());
+        }
+
+        // resume previously running challenges...
+        Iterable<SubmittedJob> runningJobs = dao.executeQuery("jobs/getHadRunningJobs",
+                Maps.create("currentTime", System.currentTimeMillis()),
+                SubmittedJob.class);
+        for (SubmittedJob job : runningJobs) {
+            if (!resumedGameIds.contains(job.getDefId())) {
+                apiService.getLifecycleService().resumeChallenge(job.getDefId());
+            }
         }
     }
 

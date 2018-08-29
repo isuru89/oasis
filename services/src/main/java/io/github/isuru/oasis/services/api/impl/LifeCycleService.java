@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.DefWrapper;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
@@ -15,7 +16,8 @@ import io.github.isuru.oasis.services.backend.model.JarListInfo;
 import io.github.isuru.oasis.services.backend.model.JarRunResponse;
 import io.github.isuru.oasis.services.backend.model.JarUploadResponse;
 import io.github.isuru.oasis.services.backend.model.JobSaveRequest;
-import io.github.isuru.oasis.services.model.FlinkSubmittedJob;
+import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.model.SubmittedJob;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Constants;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -62,9 +64,9 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
     public boolean stop(long defId) throws Exception {
         Checks.greaterThanZero(defId, "gameId' or 'challengeId");
 
-        FlinkSubmittedJob job = getTheOnlyRecord("getJobOfDef",
+        SubmittedJob job = getTheOnlyRecord("getJobOfDef",
                 Maps.create("defId", defId),
-                FlinkSubmittedJob.class);
+                SubmittedJob.class);
 
         if (job != null) {
             File savepointDir = new File(job.getSnapshotDir());
@@ -94,12 +96,22 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
         return startDef(challengeId, false);
     }
 
+    @Override
+    public boolean resumeGame(long gameId) throws Exception {
+        return false;
+    }
+
+    @Override
+    public boolean resumeChallenge(long challengeId) throws Exception {
+        return false;
+    }
+
     private boolean startDef(long defId, boolean isGame) throws Exception {
         File storageDir = configs.getPath(ConfigKeys.KEY_STORAGE_DIR, Constants.DEF_WORKSPACE_DIR);
 
-        FlinkSubmittedJob job = getTheOnlyRecord("getJobOfDef",
+        SubmittedJob job = getTheOnlyRecord("getJobOfDef",
                 Maps.create("defId", defId),
-                FlinkSubmittedJob.class);
+                SubmittedJob.class);
         if (job != null) {
             throw new IOException("A " + (isGame ? "game" : "challenge") + " is already running!");
         }
@@ -134,13 +146,28 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
                 true,
                 savepointDir.getAbsolutePath()).blockingSingle();
 
-        String jobid = jarRunResponse.getJobid();
+        String jobId = jarRunResponse.getJobid();
+        return insertJobRecord(defId, jobId, uploadedJar.getId(), savepointDir, isGame);
+    }
+
+    private boolean insertJobRecord(long defId, String jobId, String jarId, File savepointDir,
+                                    boolean isGame) throws Exception {
+        long finishAt = 0L;
+        if (!isGame) {
+            ChallengeDef challengeDef = getApiService().getGameDefService().readChallenge(defId);
+            if (challengeDef == null) {
+                throw new InputValidationException("There is no challenge definition id exist by id " + defId + "!");
+            }
+            finishAt = challengeDef.getExpireAfter();
+        }
+
         return getDao().executeCommand("submitJob",
                 Maps.create()
-                        .put("jobId", jobid)
-                        .put("jarId", uploadedJar.getId())
+                        .put("jobId", jobId)
+                        .put("jarId", jarId)
                         .put("defId", defId)
                         .put("snapshotDir", savepointDir.getAbsolutePath())
+                        .put("toBeFinishedAt", finishAt)
                         .build()) > 0;
     }
 

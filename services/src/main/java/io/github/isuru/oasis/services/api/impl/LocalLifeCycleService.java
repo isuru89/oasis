@@ -1,8 +1,10 @@
 package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.model.configs.Configs;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.services.api.ILifecycleService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.IGameController;
 import io.github.isuru.oasis.services.utils.OasisOptions;
@@ -40,7 +42,12 @@ public class LocalLifeCycleService extends BaseService implements ILifecycleServ
     @Override
     public boolean startChallenge(long challengeId) throws Exception {
         Checks.greaterThanZero(challengeId, "challengeId");
-        gameController.startChallenge(challengeId, configs);
+
+        ChallengeDef challengeDef = getApiService().getGameDefService().readChallenge(challengeId);
+        if (challengeDef == null) {
+            throw new InputValidationException("No challenge is found by id " + challengeId + "!");
+        }
+        gameController.startChallenge(challengeDef, configs);
         return true;
     }
 }
