@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import styled from 'styled-components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import TimeAgo from 'react-timeago'
-import Leaderboard from '../../components/Leaderboard';
+import Leaderboard from '../../components/leaderboard/Leaderboard';
+import LeaderboardContainer from '../../components/leaderboard/LeaderboardContainer';
 
 const Wrapper = styled.div`
   display: flex;
@@ -120,26 +121,18 @@ const c1 = [
   {name: 'Bug #42 Fixer', completed: true, endTime: new Date(2018, 2, 22), wonBy: null},
 ]
 
-const rks = [
-  { name: 'Cersi Lannister', points: (Math.random() * 100000).toFixed(0) },
-  { name: 'Jon Snow', points: (Math.random() * 100000).toFixed(0) },
-  { name: 'Arya Stark', points: (Math.random() * 100000).toFixed(0) },
-  { name: 'Denarys Targerian', points: (Math.random() * 100000).toFixed(0) },
-  { name: 'Sansa Stark', points: (Math.random() * 100000).toFixed(0) },
-  
-]
 
 export default class ContestsPage extends Component {
   render() {
-    rks.sort((a,b) => b.points - a.points);
+    
     return (
       <Wrapper>
         <Column1>
           <ContestList title="On Going" contests={c1.filter(c => !c.completed)} />
           <ContestList title="Completed" contests={c1.filter(c => c.completed)} />
         </Column1>
-        <div>
-          <Leaderboard records={rks} />
+        <div style={{ width: '100%'}}>
+          <LeaderboardContainer />
         </div>
       </Wrapper>
     )

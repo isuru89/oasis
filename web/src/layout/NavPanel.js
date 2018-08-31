@@ -27,7 +27,7 @@ export default class NavPanel extends Component {
     return (
       <Wrapper>
         {
-          BUTTONS.map(b => <OLink to={b.id}>
+          BUTTONS.map(b => <OLink to={`/${b.id}`}>
             <NavButton key={b.id} 
               id={b.id}
               label={b.id} 
