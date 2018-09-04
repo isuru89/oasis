@@ -194,6 +194,7 @@ public class StatService extends BaseService implements IStatService {
     @Override
     public List<UserRankRecordDto> readMyLeaderboardRankings(long gameId, long userId, ScopingType scopingType,
                                                              LeaderboardType rangeType) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
         Checks.greaterThanZero(userId, "userId");
         Checks.nonNull(scopingType, "scopeType");
 

@@ -25,4 +25,20 @@ public enum LeaderboardType {
     public String getPattern() {
         return pattern;
     }
+
+    public static LeaderboardType from(String text) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+        if (text.startsWith("week")) {
+            return LeaderboardType.CURRENT_WEEK;
+        } else if (text.startsWith("da")) {
+            return LeaderboardType.CURRENT_DAY;
+        } else if (text.startsWith("mo")) {
+            return LeaderboardType.CURRENT_MONTH;
+        } else if (text.startsWith("custom")) {
+            return LeaderboardType.CUSTOM;
+        }
+        return null;
+    }
 }

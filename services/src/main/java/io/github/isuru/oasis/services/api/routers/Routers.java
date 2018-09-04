@@ -30,6 +30,7 @@ public final class Routers {
 
         Spark.path("/event", () -> new EventsRouter(apiService).register());
         Spark.path("/auth", () -> new AuthRouter(apiService, oasisOptions).register());
+        Spark.path("/stats", () -> new StatsRouter(apiService).register());
         Spark.path("/def", () -> new DefinitionRouter(apiService).register());
         Spark.path("/control", () -> new LifecycleRouter(apiService).register());
         Spark.path("/admin", () -> new ProfileRouter(apiService).register());
