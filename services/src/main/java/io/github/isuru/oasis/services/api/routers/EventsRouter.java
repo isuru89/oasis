@@ -12,6 +12,7 @@ import spark.Request;
 import spark.Response;
 import spark.Spark;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -40,16 +41,19 @@ public class EventsRouter extends BaseRouters {
         String token = extractToken(req);
 
         EventPushDto eventPushDto = bodyAs(req, EventPushDto.class);
-        Long gid = eventPushDto.getMeta() == null || !eventPushDto.getMeta().containsKey("gameId")
-                ? null
-                : Long.parseLong(eventPushDto.getMeta().get("gameId").toString());
+        Map<String, Object> meta = eventPushDto.getMeta() == null ? new HashMap<>() : eventPushDto.getMeta();
+        Long gid = meta.containsKey("gameId") ? null : Long.parseLong(meta.get("gameId").toString());
 
         if (eventPushDto.getEvent() != null) {
             Map<String, Object> event = eventPushDto.getEvent();
             event.put(Constants.FIELD_GAME_ID, gid);
-            es.submitEvent(token, eventPushDto.getEvent());
+            event.putAll(meta);
+            es.submitEvent(token, event);
         } else if (eventPushDto.getEvents() != null) {
-            eventPushDto.getEvents().forEach(et -> et.put(Constants.FIELD_GAME_ID, gid));
+            eventPushDto.getEvents().forEach(et -> {
+                et.put(Constants.FIELD_GAME_ID, gid);
+                et.putAll(meta);
+            });
             es.submitEvents(token, eventPushDto.getEvents());
         } else {
             throw new InputValidationException("No events have been defined in this call!");

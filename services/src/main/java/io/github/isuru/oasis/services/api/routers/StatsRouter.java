@@ -41,7 +41,7 @@ public class StatsRouter extends BaseRouters {
 
     private Object readChallengeStats(Request req, Response res) throws Exception {
         long challengeId = asPLong(req, "challengeId");
-        return getApiService().getStatService().read(userId, since);
+        return getApiService().getStatService().readChallengeStats(challengeId);
     }
 
 

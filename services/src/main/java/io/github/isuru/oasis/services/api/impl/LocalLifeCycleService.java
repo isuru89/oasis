@@ -50,4 +50,14 @@ public class LocalLifeCycleService extends BaseService implements ILifecycleServ
         gameController.startChallenge(challengeDef, configs);
         return true;
     }
+
+    @Override
+    public boolean resumeGame(long gameId) throws Exception {
+        return false;
+    }
+
+    @Override
+    public boolean resumeChallenge(long challengeId) throws Exception {
+        return false;
+    }
 }
