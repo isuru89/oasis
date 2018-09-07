@@ -33,7 +33,6 @@ public class EventsRouter extends BaseRouters {
             post("/list", this::listEventSources, UserRole.ADMIN);
             delete("/:sourceId", this::disableEventSource, UserRole.ADMIN);
         });
-
     }
 
     private Object submitEvent(Request req, Response res) throws Exception {

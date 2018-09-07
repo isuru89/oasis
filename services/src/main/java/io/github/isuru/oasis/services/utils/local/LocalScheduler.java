@@ -79,12 +79,12 @@ public class LocalScheduler implements IGameController {
 
     @Override
     public void resumeChallenge(ChallengeDef challengeDef, Configs appConfigs) throws Exception {
-
+        startChallenge(challengeDef, appConfigs);
     }
 
     @Override
     public void resumeGame(GameDef gameDef, Configs appConfigs) throws Exception {
-
+        startGame(gameDef.getId(), appConfigs);
     }
 
     private void stopAllChallengesOfGame(long gameId) throws Exception {
