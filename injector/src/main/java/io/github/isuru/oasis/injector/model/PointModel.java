@@ -20,6 +20,15 @@ public class PointModel {
     private Integer ruleId;
     private String ruleName;
     private Long ts;
+    private Integer sourceId;
+
+    public Integer getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Integer sourceId) {
+        this.sourceId = sourceId;
+    }
 
     public String getRuleName() {
         return ruleName;

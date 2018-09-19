@@ -93,4 +93,9 @@ public class BadgeEvent implements Event {
     public Long getTeamScope() {
         return causedEvent.getTeamScope();
     }
+
+    @Override
+    public Integer getSource() {
+        return causedEvent.getSource();
+    }
 }

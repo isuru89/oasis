@@ -14,6 +14,15 @@ public class ChallengeModel {
     private Double points;
     private Long eventExtId;
     private Long ts;
+    private Integer sourceId;
+
+    public Integer getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Integer sourceId) {
+        this.sourceId = sourceId;
+    }
 
     public Long getUserId() {
         return userId;

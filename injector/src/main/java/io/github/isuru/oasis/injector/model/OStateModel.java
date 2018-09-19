@@ -15,6 +15,15 @@ public class OStateModel {
     private Long ts;
     private JsonEvent event;
     private String extId;
+    private Integer sourceId;
+
+    public Integer getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Integer sourceId) {
+        this.sourceId = sourceId;
+    }
 
     public Long getTeamId() {
         return teamId;

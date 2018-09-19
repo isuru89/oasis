@@ -25,6 +25,7 @@ public class MilestoneNotificationMapper extends BaseNotificationMapper<Mileston
         data.put("level", value.getLevel());
         data.put("milestoneId", value.getMilestone().getId());
         data.put("ts", event.getTimestamp());
+        data.put("sourceId", event.getSource());
 
         return BaseNotificationMapper.OBJECT_MAPPER.writeValueAsString(data);
     }

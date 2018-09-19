@@ -8,6 +8,7 @@ INSERT INTO OA_STATE (
     current_points,
     ext_id,
     game_id,
+    source_id,
     changed_at
 ) VALUES (
     :userId,
@@ -19,6 +20,7 @@ INSERT INTO OA_STATE (
     :currPoints,
     :extId,
     :gameId,
+    :sourceId,
     :changedAt
 )
 ON DUPLICATE KEY

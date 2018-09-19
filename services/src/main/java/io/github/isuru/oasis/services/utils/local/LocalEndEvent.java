@@ -57,4 +57,9 @@ public class LocalEndEvent implements Event {
     public Long getTeamScope() {
         return null;
     }
+
+    @Override
+    public Integer getSource() {
+        return null;
+    }
 }

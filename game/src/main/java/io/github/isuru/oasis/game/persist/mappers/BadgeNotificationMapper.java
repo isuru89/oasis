@@ -27,6 +27,7 @@ public class BadgeNotificationMapper extends BaseNotificationMapper<BadgeNotific
         data.put("teamScopeId", event.getTeamScope());
         data.put("userId", value.getUserId());
         data.put("eventType", event.getEventType());
+        data.put("sourceId", event.getSource());
 
         if (event instanceof BadgeEvent) {
             data.put("events", ((BadgeEvent) event).getEvents().stream()

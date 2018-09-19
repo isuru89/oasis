@@ -74,4 +74,11 @@ public interface Event extends Serializable {
      * @return the scope id of the current team.
      */
     Long getTeamScope();
+
+    /**
+     * Return source id generated this event.
+     *
+     * @return source id
+     */
+    Integer getSource();
 }

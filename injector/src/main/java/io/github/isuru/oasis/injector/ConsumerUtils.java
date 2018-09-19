@@ -50,6 +50,7 @@ public class ConsumerUtils {
         map.put("extId", stateModel.getExtId());
         map.put("ts", stateModel.getTs());
         map.put("gameId", gameId);
+        map.put("sourceId", stateModel.getSourceId());
         return map;
     }
 
@@ -77,6 +78,7 @@ public class ConsumerUtils {
         map.put("points", challengeModel.getPoints());
         map.put("wonAt", challengeModel.getWonAt());
         map.put("gameId", gameId);
+        map.put("sourceId", challengeModel.getSourceId());
         return map;
     }
 
@@ -93,6 +95,7 @@ public class ConsumerUtils {
         map.put("pointName", pointModel.getRuleName());
         map.put("points", pointModel.getAmount());
         map.put("gameId", gameId);
+        map.put("sourceId", pointModel.getSourceId());
         map.put("tag", pointModel.getTag());
         return map;
     }
@@ -115,6 +118,7 @@ public class ConsumerUtils {
         map.put("startTime", first.getTimestamp());
         map.put("endTime", last.getTimestamp());
         map.put("gameId", gameId);
+        map.put("sourceId", last.getSource());
         map.put("tag", badgeModel.getTag());
         return map;
     }

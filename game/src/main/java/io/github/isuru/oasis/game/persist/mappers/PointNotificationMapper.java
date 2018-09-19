@@ -29,6 +29,7 @@ public class PointNotificationMapper implements MapFunction<PointNotification, S
         data.put("ruleId", value.getRule().getId());
         data.put("ruleName", value.getRule().getName());
         data.put("ts", event.getTimestamp());
+        data.put("sourceId", event.getSource());
 
         return BaseNotificationMapper.OBJECT_MAPPER.writeValueAsString(data);
     }

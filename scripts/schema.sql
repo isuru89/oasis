@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS OA_POINT (
     tag             VARCHAR(512),
     is_active       TINYINT(1) DEFAULT 1,
     game_id         INT,
+    source_id       INT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS OA_BADGE (
     end_time        BIGINT,
     tag             VARCHAR(512),
     game_id         INT,
+    source_id       INT,
     is_active       TINYINT(1) DEFAULT 1
 );
 
@@ -82,6 +84,7 @@ CREATE TABLE IF NOT EXISTS OA_STATE (
     current_points  FLOAT(4),
     ext_id          VARCHAR(1024),
     game_id         INT,
+    source_id       INT,
     is_active       TINYINT(1) DEFAULT 1,
     changed_at      BIGINT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -156,6 +159,7 @@ CREATE TABLE IF NOT EXISTS OA_CHALLENGE_WINNER (
     points          FLOAT(4),
     won_at          BIGINT,
     game_id         INT,
+    source_id       INT,
     is_active       TINYINT(1) DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

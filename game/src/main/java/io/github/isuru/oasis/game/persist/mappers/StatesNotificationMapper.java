@@ -24,6 +24,7 @@ public class StatesNotificationMapper implements MapFunction<OStateNotification,
         data.put("event", event);
         data.put("ts", event.getTimestamp());
         data.put("extId", event.getExternalId());
+        data.put("sourceId", event.getSource());
 
         return BaseNotificationMapper.OBJECT_MAPPER.writeValueAsString(data);
     }

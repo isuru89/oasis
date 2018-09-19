@@ -106,6 +106,11 @@ public class PointEvent implements Event {
     }
 
     @Override
+    public Integer getSource() {
+        return refEvent.getSource();
+    }
+
+    @Override
     public String toString() {
         return "PointEvent{" +
                 "receivedPoints=" + receivedPoints +

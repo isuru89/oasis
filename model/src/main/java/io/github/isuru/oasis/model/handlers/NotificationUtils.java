@@ -20,6 +20,7 @@ public class NotificationUtils {
         data.put("points", value.getChallengeDef().getPoints());
         data.put("eventExtId", value.getExternalId());
         data.put("ts", value.getTimestamp());
+        data.put("sourceId", value.getSource());
         return data;
     }
 

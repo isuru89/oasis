@@ -17,6 +17,4 @@ public final class Constants {
     public static final String FIELD_SOURCE = "_source";
     public static final String FIELD_GAME_ID = "_game";
 
-
-
 }

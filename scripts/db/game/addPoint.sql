@@ -9,6 +9,7 @@ INSERT INTO OA_POINT (
     point_name,
     points,
     game_id,
+    source_id,
     tag
 ) VALUES (
     :userId,
@@ -21,5 +22,6 @@ INSERT INTO OA_POINT (
     :pointName,
     :points,
     :gameId,
+    :sourceId,
     :tag
 )

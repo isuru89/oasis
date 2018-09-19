@@ -12,6 +12,7 @@ INSERT INTO OA_BADGE (
     start_time,
     end_time,
     game_id,
+    source_id,
     tag
 ) VALUES (
     :userId,
@@ -25,6 +26,7 @@ INSERT INTO OA_BADGE (
     :startExtId, :endExtId,
     :startTime, :endTime,
     :gameId,
+    :sourceId,
     :tag
 )
 ON DUPLICATE KEY
