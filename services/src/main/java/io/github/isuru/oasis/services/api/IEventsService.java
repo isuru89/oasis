@@ -19,5 +19,5 @@ public interface IEventsService {
     EventSourceToken addEventSource(EventSourceToken sourceToken) throws Exception;
     boolean disableEventSource(int id) throws Exception;
     Optional<EventSourceToken> readInternalSourceToken() throws Exception;
-
+    Optional<EventSourceToken> makeDownloadSourceKey(int id) throws Exception;
 }

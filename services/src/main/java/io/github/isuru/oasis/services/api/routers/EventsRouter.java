@@ -4,16 +4,24 @@ import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.services.api.IEventsService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.dto.EventPushDto;
+import io.github.isuru.oasis.services.api.dto.EventSourceDto;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.UserRole;
+import org.apache.commons.io.IOUtils;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
 
+import java.io.File;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna
@@ -31,6 +39,7 @@ public class EventsRouter extends BaseRouters {
         Spark.path("/source", () -> {
             post("/add", this::addEventSource, UserRole.ADMIN);
             post("/list", this::listEventSources, UserRole.ADMIN);
+            post("/:sourceId/downloadkey", this::downloadKey, UserRole.ADMIN);
             delete("/:sourceId", this::disableEventSource, UserRole.ADMIN);
         });
     }
@@ -60,12 +69,39 @@ public class EventsRouter extends BaseRouters {
         return asResBool(true);
     }
 
+    private Object downloadKey(Request req, Response res) throws Exception {
+        Integer sourceId = asPInt(req, "sourceId");
+        Checks.greaterThanZero(sourceId, "sourceId");
+
+        Optional<EventSourceToken> optionalToken = getApiService().getEventService().makeDownloadSourceKey(sourceId);
+        if (optionalToken.isPresent()) {
+            EventSourceToken eventSourceToken = optionalToken.get();
+            String sourceName = String.format("key-%s", eventSourceToken.getSourceName());
+
+            res.header("Content-Disposition", String.format("attachment; filename=key-%s.key", sourceName));
+            res.header("Access-Control-Expose-Headers", "Content-Disposition");
+
+            res.raw().setContentType("application/octet-stream");
+            OutputStream outputStream = res.raw().getOutputStream();
+            IOUtils.copy(eventSourceToken.getSecretKey().getBinaryStream(), outputStream);
+            outputStream.flush();
+            res.status(200);
+            return res;
+        } else {
+            throw new InputValidationException("You are not allowed to download key twice! " +
+                    "Contact admin if you lost the key.");
+        }
+    }
+
     private Object disableEventSource(Request req, Response res) throws Exception {
         return getApiService().getEventService().disableEventSource(asPInt(req, "sourceId"));
     }
 
     private Object listEventSources(Request req, Response res) throws Exception {
-        return getApiService().getEventService().listAllEventSources();
+        return getApiService().getEventService().listAllEventSources()
+                .stream()
+                .map(EventSourceDto::from)
+                .collect(Collectors.toList());
     }
 
     private Object addEventSource(Request req, Response res) throws Exception {

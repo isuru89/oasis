@@ -8,9 +8,13 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
@@ -19,9 +23,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -29,6 +31,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.Hashtable;
 import java.util.Random;
 
@@ -38,6 +41,8 @@ import java.util.Random;
 public final class AuthUtils {
 
     private static final String OASIS_ISSUER = "oasis";
+    private static final String HMAC_ALGORITHM = "HmacSHA1";
+    private static final int RSA_KEY_SIZE = 2048;
 
     private MessageDigest digest;
 
@@ -50,6 +55,29 @@ public final class AuthUtils {
     private Configs configs;
 
     private AuthUtils() {}
+
+    private static String toHexString(byte[] data) {
+        Formatter result = new Formatter();
+        for (byte b : data) {
+            result.format("%02x", b);
+        }
+        return result.toString();
+    }
+
+    public static String generateHMAC(String data, PrivateKey key) throws NoSuchAlgorithmException, InvalidKeyException {
+        SecretKeySpec signingKey = new SecretKeySpec(key.getEncoded(), HMAC_ALGORITHM);
+        Mac mac = Mac.getInstance(HMAC_ALGORITHM);
+        mac.init(signingKey);
+        return toHexString(mac.doFinal(data.getBytes()));
+    }
+
+    public static Pair<PrivateKey, PublicKey> generateRSAKey(EventSourceToken sourceToken) throws NoSuchAlgorithmException {
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+        SecureRandom secureRandom = new SecureRandom(sourceToken.getSourceName().getBytes());
+        keyGen.initialize(RSA_KEY_SIZE, secureRandom);
+        KeyPair keyPair = keyGen.generateKeyPair();
+        return Pair.of(keyPair.getPrivate(), keyPair.getPublic());
+    }
 
     public void init(Configs configs) throws Exception {
         mapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
@@ -102,9 +130,10 @@ public final class AuthUtils {
         return expiryDate;
     }
 
-    public String issueSourceToken(EventSourceToken token) throws IOException {
+    public Pair<String, Integer> issueSourceToken(EventSourceToken token) throws IOException {
+        int nonce = RUtils.generateNonce();
         String text = token.getDisplayName() + String.valueOf(System.currentTimeMillis())
-                + String.valueOf(new Random(System.currentTimeMillis()).nextInt(1000000));
+                + String.valueOf(nonce);
         if (digest == null) {
             try {
                 digest = MessageDigest.getInstance("SHA-1");
@@ -113,7 +142,7 @@ public final class AuthUtils {
             }
         }
         byte[] digest = this.digest.digest(text.getBytes(StandardCharsets.UTF_8));
-        return byteArrayToHexString(digest);
+        return Pair.of(byteArrayToHexString(digest), nonce);
     }
 
     private static String byteArrayToHexString(byte[] b) {

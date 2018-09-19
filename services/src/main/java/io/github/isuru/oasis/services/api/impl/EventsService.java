@@ -1,6 +1,8 @@
 package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.model.Constants;
+import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.utils.ICacheProxy;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.api.IEventsService;
@@ -18,10 +20,11 @@ import io.github.isuru.oasis.services.utils.LRUCache;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.sql.Blob;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -139,9 +142,14 @@ public class EventsService extends BaseService implements IEventsService {
             }
         }
 
-        String token = AuthUtils.get().issueSourceToken(sourceToken);
+        Pair<String, Integer> tokenNoncePair = AuthUtils.get().issueSourceToken(sourceToken);
+        Pair<PrivateKey, PublicKey> key = AuthUtils.generateRSAKey(sourceToken);
         long id = getDao().executeInsert("def/events/addEventSource",
-                Maps.create().put("token", token)
+                Maps.create().put("token", tokenNoncePair.getValue0())
+                    .put("nonce", tokenNoncePair.getValue1())
+                    .put("sourceName", EventSourceToken.INTERNAL_NAME)
+                    .put("keySecret", key.getValue0().getEncoded())
+                    .put("keyPublic", key.getValue1().getEncoded())
                     .put("displayName", sourceToken.getDisplayName())
                     .put("isInternal", sourceToken.isInternal())
                     .build(),
@@ -187,6 +195,22 @@ public class EventsService extends BaseService implements IEventsService {
                 .filter(EventSourceToken::isActive)
                 .filter(EventSourceToken::isInternal)
                 .findFirst();
+    }
+
+    @Override
+    public Optional<EventSourceToken> makeDownloadSourceKey(int id) throws Exception {
+        boolean canDownload = getDao().executeCommand("def/events/updateAsDownloaded",
+                Maps.create("id", id)) > 0;
+        if (canDownload) {
+            List<EventSourceToken> tokens = new LinkedList<>(SOURCE_CACHE.values());
+            for (EventSourceToken token : tokens) {
+                if (token.getId().equals(id)) {
+                    token.setDownloaded(true);
+                    return Optional.of(token);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     private long resolveUser(String email) throws Exception {

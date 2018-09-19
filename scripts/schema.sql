@@ -200,7 +200,12 @@ CREATE TABLE IF NOT EXISTS OA_JOB (
 
 CREATE TABLE IF NOT EXISTS OA_EVENT_SOURCE (
     id              INT PRIMARY KEY AUTO_INCREMENT,
+    source_name     VARCHAR(128),
+    nonce           INT,
     token           VARCHAR(64),
+    key_secret      BLOB,
+    key_public      BLOB,
+    is_downloaded   TINYINT(1) DEFAULT 1,
     display_name    VARCHAR(1024),
     is_internal     TINYINT(1) DEFAULT 0,
     is_active       TINYINT(1) DEFAULT 1,
