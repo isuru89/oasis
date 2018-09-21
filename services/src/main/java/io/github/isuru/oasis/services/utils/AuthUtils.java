@@ -12,6 +12,7 @@ import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
+import sun.security.rsa.RSAPrivateCrtKeyImpl;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -62,6 +64,17 @@ public final class AuthUtils {
             result.format("%02x", b);
         }
         return result.toString();
+    }
+
+    public static void verifyIntegrity(EventSourceToken token, String hash, String body) throws ApiAuthException {
+        try {
+            String hmac = generateHMAC(body, token.getSecretPrivateKey());
+            if (!hmac.equals(hash)) {
+                throw new ApiAuthException("Unable to verify integrity of the event!");
+            }
+        } catch (NoSuchAlgorithmException | IOException | InvalidKeyException e) {
+            throw new ApiAuthException("Unable to verify integrity of the event!", e);
+        }
     }
 
     public static String generateHMAC(String data, PrivateKey key) throws NoSuchAlgorithmException, InvalidKeyException {

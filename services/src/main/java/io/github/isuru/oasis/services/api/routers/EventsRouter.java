@@ -7,10 +7,12 @@ import io.github.isuru.oasis.services.api.dto.EventPushDto;
 import io.github.isuru.oasis.services.api.dto.EventSourceDto;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.UserRole;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
@@ -21,6 +23,7 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -47,6 +50,17 @@ public class EventsRouter extends BaseRouters {
     private Object submitEvent(Request req, Response res) throws Exception {
         IEventsService es = getApiService().getEventService();
         String token = extractToken(req);
+
+        // verify event submission
+        String body = req.body();
+        String[] ids = token.split("[:]");
+        if (ids.length != 2) {
+            throw new ApiAuthException("Invalid format of event authorization header!");
+        }
+        Optional<EventSourceToken> appIdOpt = es.readSourceByToken(ids[0]);
+        EventSourceToken sourceToken = appIdOpt.orElseThrow((Supplier<Exception>)
+                () -> new ApiAuthException("Event source token is not recognized by the Oasis!"));
+        AuthUtils.verifyIntegrity(sourceToken, ids[1], body);
 
         EventPushDto eventPushDto = bodyAs(req, EventPushDto.class);
         Map<String, Object> meta = eventPushDto.getMeta() == null ? new HashMap<>() : eventPushDto.getMeta();

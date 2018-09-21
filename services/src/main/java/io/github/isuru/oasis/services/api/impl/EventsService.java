@@ -12,13 +12,7 @@ import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.utils.AuthUtils;
-import io.github.isuru.oasis.services.utils.Checks;
-import io.github.isuru.oasis.services.utils.EventSourceToken;
-import io.github.isuru.oasis.services.utils.IGameController;
-import io.github.isuru.oasis.services.utils.LRUCache;
-import io.github.isuru.oasis.services.utils.Maps;
-import io.github.isuru.oasis.services.utils.OasisOptions;
+import io.github.isuru.oasis.services.utils.*;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -32,10 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class EventsService extends BaseService implements IEventsService {
 
-    private static final Object SOURCE_LOCK = new Object();
-
     private final ICacheProxy cacheProxy;
-    private final Map<String, EventSourceToken> SOURCE_CACHE = new ConcurrentHashMap<>();
+    private final EventSources sources = new EventSources();
 
     private IGameController gameController;
 
@@ -64,11 +56,11 @@ public class EventsService extends BaseService implements IEventsService {
         }
 
         // authenticate event...
-        EventSourceToken eventSourceToken = SOURCE_CACHE.get(token);
-        if (eventSourceToken == null || !eventSourceToken.isActive()) {
+        Optional<EventSourceToken> eventSourceToken = sources.getSourceByToken(token);
+        if (!eventSourceToken.isPresent() || !eventSourceToken.get().isActive()) {
             throw new ApiAuthException("Unable to verify authorization token of event source '" + token + "'!");
         }
-        eventData.put(Constants.FIELD_SOURCE, eventSourceToken.getId());
+        eventData.put(Constants.FIELD_SOURCE, eventSourceToken.get().getId());
 
         Object user = eventData.get(Constants.FIELD_USER);
         long userId;
@@ -172,19 +164,7 @@ public class EventsService extends BaseService implements IEventsService {
                 Maps.create("id", id)) > 0;
 
         if (success) {
-            synchronized (SOURCE_LOCK) {
-                String token = null;
-                for (Map.Entry<String, EventSourceToken> entry : SOURCE_CACHE.entrySet()) {
-                    if (entry.getValue().getId() == id) {
-                        token = entry.getKey();
-                        break;
-                    }
-                }
-
-                if (token != null) {
-                    SOURCE_CACHE.remove(token);
-                }
-            }
+            listAllEventSources();
         }
         return success;
     }
@@ -202,15 +182,14 @@ public class EventsService extends BaseService implements IEventsService {
         boolean canDownload = getDao().executeCommand("def/events/updateAsDownloaded",
                 Maps.create("id", id)) > 0;
         if (canDownload) {
-            List<EventSourceToken> tokens = new LinkedList<>(SOURCE_CACHE.values());
-            for (EventSourceToken token : tokens) {
-                if (token.getId().equals(id)) {
-                    token.setDownloaded(true);
-                    return Optional.of(token);
-                }
-            }
+            listAllEventSources();
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<EventSourceToken> readSourceByToken(String token) {
+        return sources.getSourceByToken(token);
     }
 
     private long resolveUser(String email) throws Exception {
@@ -237,14 +216,6 @@ public class EventsService extends BaseService implements IEventsService {
     }
 
     private void refreshSourceTokens(List<EventSourceToken> tokens) {
-        synchronized (SOURCE_LOCK) {
-            SOURCE_CACHE.clear();
-
-            if (tokens != null && !tokens.isEmpty()) {
-                for (EventSourceToken token : tokens) {
-                    SOURCE_CACHE.put(token.getToken(), token);
-                }
-            }
-        }
+        sources.setSources(tokens);
     }
 }

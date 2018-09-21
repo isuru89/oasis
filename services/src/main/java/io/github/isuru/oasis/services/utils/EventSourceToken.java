@@ -1,6 +1,14 @@
 package io.github.isuru.oasis.services.utils;
 
+import org.apache.commons.io.IOUtils;
+import sun.security.rsa.RSAPrivateCrtKeyImpl;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.PrivateKey;
 import java.sql.Blob;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 
 /**
@@ -13,14 +21,30 @@ public class EventSourceToken {
     private Integer id;
     private String sourceName;
     private String token;
-    private Blob secretKey;
-    private Blob publicKey;
+    private volatile Blob secretKey;
+    private volatile Blob publicKey;
     private String displayName;
     private boolean downloaded;
     private boolean internal;
     private boolean active;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+
+    private volatile PrivateKey secretPrivateKey;
+
+    public synchronized PrivateKey getSecretPrivateKey() throws IOException {
+        if (secretPrivateKey != null) {
+            return secretPrivateKey;
+        }
+
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            IOUtils.copy(getSecretKey().getBinaryStream(), outputStream);
+            secretPrivateKey = RSAPrivateCrtKeyImpl.newKey(outputStream.toByteArray());
+            return secretPrivateKey;
+        } catch (SQLException | InvalidKeyException e) {
+            throw new IOException(e.getMessage(), e);
+        }
+    }
 
     public Blob getPublicKey() {
         return publicKey;

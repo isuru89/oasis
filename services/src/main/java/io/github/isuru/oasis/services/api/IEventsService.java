@@ -20,4 +20,5 @@ public interface IEventsService {
     boolean disableEventSource(int id) throws Exception;
     Optional<EventSourceToken> readInternalSourceToken() throws Exception;
     Optional<EventSourceToken> makeDownloadSourceKey(int id) throws Exception;
+    Optional<EventSourceToken> readSourceByToken(String token) throws Exception;
 }
