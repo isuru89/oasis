@@ -5,6 +5,7 @@ import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.configs.EnvKeys;
 import io.github.isuru.oasis.model.db.DbProperties;
 import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.utils.AbstractCacheFactory;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
@@ -14,6 +15,7 @@ import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.FlinkScheduler;
 import io.github.isuru.oasis.services.utils.IGameController;
 import io.github.isuru.oasis.services.utils.OasisOptions;
+import io.github.isuru.oasis.services.utils.cache.OasisCacheFactory;
 import io.github.isuru.oasis.services.utils.local.LocalScheduler;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
@@ -66,6 +68,8 @@ public class OasisServer {
         oasisOptions.setFlinkServices(flinkServices);
         oasisOptions.setGameController(gameController);
         oasisOptions.setConfigs(configs);
+        OasisCacheFactory factory = new OasisCacheFactory();
+        oasisOptions.setCacheProxy(factory.create(new AbstractCacheFactory.CacheOptions(), configs));
         apiService = new DefaultOasisApiService(oasisDao, oasisOptions, configs);
 
         LOGGER.debug("Setting up database and cache...");

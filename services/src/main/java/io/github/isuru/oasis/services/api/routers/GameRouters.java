@@ -8,6 +8,7 @@ import io.github.isuru.oasis.services.model.BadgeAwardDto;
 import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.model.PointAwardDto;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.ValueMap;
 import spark.Request;
 import spark.Response;
@@ -29,8 +30,8 @@ public class GameRouters extends BaseRouters {
     private static final String SCOPE_ID = "scopeId";
     private static final String LB_ID = "lid";
 
-    GameRouters(IOasisApiService apiService) {
-        super(apiService);
+    GameRouters(IOasisApiService apiService, OasisOptions oasisOptions) {
+        super(apiService, oasisOptions);
     }
 
     @Override

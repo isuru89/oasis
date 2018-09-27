@@ -7,16 +7,14 @@ import io.github.isuru.oasis.services.api.dto.EventPushDto;
 import io.github.isuru.oasis.services.api.dto.EventSourceDto;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.utils.AuthUtils;
-import io.github.isuru.oasis.services.utils.Checks;
-import io.github.isuru.oasis.services.utils.EventSourceToken;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.utils.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -31,8 +29,8 @@ import java.util.stream.Collectors;
  */
 public class EventsRouter extends BaseRouters {
 
-    EventsRouter(IOasisApiService apiService) {
-        super(apiService);
+    EventsRouter(IOasisApiService apiService, OasisOptions oasisOptions) {
+        super(apiService, oasisOptions);
     }
 
     @Override
@@ -97,7 +95,9 @@ public class EventsRouter extends BaseRouters {
 
             res.raw().setContentType("application/octet-stream");
             OutputStream outputStream = res.raw().getOutputStream();
-            IOUtils.copy(eventSourceToken.getSecretKey().getBinaryStream(), outputStream);
+            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(eventSourceToken.getSecretKey())) {
+                IOUtils.copy(inputStream, outputStream);
+            }
             outputStream.flush();
             res.status(200);
             return res;

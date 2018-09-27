@@ -65,6 +65,7 @@ public class Bootstrapping {
             Optional<EventSourceToken> internalSourceToken = apiService.getEventService().readInternalSourceToken();
             if (!internalSourceToken.isPresent()) {
                 EventSourceToken eventSourceToken = new EventSourceToken();
+                eventSourceToken.setSourceName(DefaultEntities.INTERNAL_EVENT_SOURCE_NAME);
                 eventSourceToken.setDisplayName(DefaultEntities.INTERNAL_EVENT_SOURCE_NAME);
                 eventSourceToken.setInternal(true);
                 apiService.getEventService().addEventSource(eventSourceToken);

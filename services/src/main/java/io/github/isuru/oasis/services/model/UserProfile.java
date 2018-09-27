@@ -10,6 +10,15 @@ public class UserProfile {
     private String avatarId;
     private boolean active;
     private boolean aggregated;
+    private Long lastLogoutAt;
+
+    public Long getLastLogoutAt() {
+        return lastLogoutAt;
+    }
+
+    public void setLastLogoutAt(Long lastLogoutAt) {
+        this.lastLogoutAt = lastLogoutAt;
+    }
 
     public boolean isAggregated() {
         return aggregated;

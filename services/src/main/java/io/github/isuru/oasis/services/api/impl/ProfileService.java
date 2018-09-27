@@ -225,7 +225,7 @@ public class ProfileService extends BaseService implements IProfileService {
                     .put("male", false)
                     .put("avatarId", null)
                     .put("extId", null)
-                    .put("email", "")
+                    .put("email", "default@"+teamScope.getName() + ".oasis.com")
                     .put("aggregated", true)
                     .build();
             Long userId = input.executeInsert("profile/addUser", playerData, "user_id");
@@ -322,5 +322,15 @@ public class ProfileService extends BaseService implements IProfileService {
         return getTheOnlyRecord("profile/findTeamByName",
                 Maps.create("teamName", name),
                 TeamProfile.class);
+    }
+
+    @Override
+    public boolean logoutUser(long userId, long ts) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
+        return getDao().executeCommand("profile/logoutUser",
+                Maps.create()
+                    .put("userId", userId)
+                    .put("logoutAt", ts).build()) > 0;
     }
 }

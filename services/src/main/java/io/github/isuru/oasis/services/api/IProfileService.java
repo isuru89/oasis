@@ -33,4 +33,6 @@ public interface IProfileService {
     boolean addUserToTeam(long userId, long teamId, int roleId) throws Exception;
     UserTeam findCurrentTeamOfUser(long userId) throws Exception;
     TeamProfile findTeamByName(String name) throws Exception;
+
+    boolean logoutUser(long userId, long ts) throws Exception;
 }

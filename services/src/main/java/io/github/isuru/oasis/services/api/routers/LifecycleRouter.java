@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.utils.Maps;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
@@ -16,8 +17,8 @@ public class LifecycleRouter extends BaseRouters {
     private static final String GAME_ID = "gameId";
     private static final String CHALLENGE_ID = "challengeId";
 
-    LifecycleRouter(IOasisApiService apiService) {
-        super(apiService);
+    LifecycleRouter(IOasisApiService apiService, OasisOptions oasisOptions) {
+        super(apiService, oasisOptions);
     }
 
     @Override

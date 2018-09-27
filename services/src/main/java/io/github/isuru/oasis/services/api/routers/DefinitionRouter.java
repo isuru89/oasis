@@ -5,6 +5,7 @@ import io.github.isuru.oasis.model.defs.*;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.dto.AddGameDto;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.UserRole;
 import spark.Spark;
 
@@ -23,8 +24,8 @@ public class DefinitionRouter extends BaseRouters {
     private static final String KPI_ID = "kpiId";
     private static final String BOARD_ID = "boardId";
 
-    DefinitionRouter(IOasisApiService apiService) {
-        super(apiService);
+    DefinitionRouter(IOasisApiService apiService, OasisOptions oasisOptions) {
+        super(apiService, oasisOptions);
     }
 
     @Override

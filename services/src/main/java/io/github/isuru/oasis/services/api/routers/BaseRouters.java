@@ -6,11 +6,8 @@ import io.github.isuru.oasis.services.api.ILifecycleService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.utils.Maps;
-import io.github.isuru.oasis.services.utils.UserRole;
-import io.github.isuru.oasis.services.utils.AuthUtils;
-import io.github.isuru.oasis.services.utils.JsonTransformer;
-import io.github.isuru.oasis.services.utils.ValueMap;
+import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.utils.*;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -19,6 +16,8 @@ import spark.Spark;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * @author iweerarathna
@@ -33,9 +32,11 @@ public abstract class BaseRouters {
     static final String BASIC = "Basic ";
 
     private final IOasisApiService apiService;
+    private final OasisOptions options;
 
-    BaseRouters(IOasisApiService apiService) {
+    BaseRouters(IOasisApiService apiService, OasisOptions options) {
         this.apiService = apiService;
+        this.options = options;
     }
 
     public IOasisApiService getApiService() {
@@ -71,11 +72,36 @@ public abstract class BaseRouters {
             if (auth.startsWith(BEARER)) {
                 String token = auth.substring(BEARER.length());
                 AuthUtils.TokenInfo tokenInfo = AuthUtils.get().verifyToken(token);
+                checkForLogoutToken(tokenInfo);
                 request.attribute("token", tokenInfo);
                 request.attribute("userId", tokenInfo.getUser()); // set user
             }
         } else {
             throw new ApiAuthException("You are not allowed to access end point " + request.pathInfo());
+        }
+    }
+
+    private void checkForLogoutToken(AuthUtils.TokenInfo tokenInfo) throws ApiAuthException {
+        long userId = tokenInfo.getUser();
+        String key = String.format("user.logout.%d", userId);
+        Optional<String> logoutOpt = options.getCacheProxy().get(key);
+        long lastLogoutTime = -1;
+        if (logoutOpt.isPresent()) {
+            lastLogoutTime = Long.parseLong(logoutOpt.get());
+        } else {
+            try {
+                UserProfile userProfile = apiService.getProfileService().readUserProfile(tokenInfo.getUser());
+                if (userProfile != null && userProfile.getLastLogoutAt() != null) {
+                    options.getCacheProxy().update(key, String.valueOf(userProfile.getLastLogoutAt()));
+                    lastLogoutTime = userProfile.getLastLogoutAt();
+                }
+            } catch (Exception ex) {
+                throw new ApiAuthException("Cannot verify user in oasis, because no user record found!", ex);
+            }
+        }
+
+        if (lastLogoutTime > 0 && lastLogoutTime >= tokenInfo.getIssuedAt() * 1000L) {
+            throw new ApiAuthException("Provided authentication token is invalid and expired!");
         }
     }
 

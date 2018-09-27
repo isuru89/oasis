@@ -8,6 +8,7 @@ import io.github.isuru.oasis.services.api.dto.PointBreakdownReqDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.model.enums.ScopingType;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 import spark.Request;
 import spark.Response;
 
@@ -18,8 +19,8 @@ import java.util.List;
  */
 public class StatsRouter extends BaseRouters {
 
-    StatsRouter(IOasisApiService apiService) {
-        super(apiService);
+    StatsRouter(IOasisApiService apiService, OasisOptions oasisOptions) {
+        super(apiService, oasisOptions);
     }
 
     @Override

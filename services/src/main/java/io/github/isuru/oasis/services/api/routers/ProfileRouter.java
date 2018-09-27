@@ -6,6 +6,7 @@ import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.UserRole;
 import spark.Request;
 import spark.Response;
@@ -20,8 +21,8 @@ public class ProfileRouter extends BaseRouters {
     private static final String TEAM_ID = "teamId";
     private static final String SCOPE_ID = "scopeId";
 
-    ProfileRouter(IOasisApiService apiService) {
-        super(apiService);
+    ProfileRouter(IOasisApiService apiService, OasisOptions oasisOptions) {
+        super(apiService, oasisOptions);
     }
 
     @Override

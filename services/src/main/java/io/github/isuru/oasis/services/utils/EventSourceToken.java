@@ -21,8 +21,8 @@ public class EventSourceToken {
     private Integer id;
     private String sourceName;
     private String token;
-    private volatile Blob secretKey;
-    private volatile Blob publicKey;
+    private byte[] secretKey;
+    private byte[] publicKey;
     private String displayName;
     private boolean downloaded;
     private boolean internal;
@@ -38,20 +38,19 @@ public class EventSourceToken {
         }
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            IOUtils.copy(getSecretKey().getBinaryStream(), outputStream);
-            secretPrivateKey = RSAPrivateCrtKeyImpl.newKey(outputStream.toByteArray());
+            secretPrivateKey = RSAPrivateCrtKeyImpl.newKey(secretKey);
             return secretPrivateKey;
-        } catch (SQLException | InvalidKeyException e) {
+        } catch (InvalidKeyException e) {
             throw new IOException(e.getMessage(), e);
         }
     }
 
-    public Blob getPublicKey() {
-        return publicKey;
+    public byte[] getSecretKey() {
+        return secretKey;
     }
 
-    public void setPublicKey(Blob publicKey) {
-        this.publicKey = publicKey;
+    public void setSecretKey(byte[] secretKey) {
+        this.secretKey = secretKey;
     }
 
     public void setDownloaded(boolean downloaded) {
@@ -70,12 +69,12 @@ public class EventSourceToken {
         this.sourceName = sourceName;
     }
 
-    public Blob getSecretKey() {
-        return secretKey;
+    public byte[] getPublicKey() {
+        return publicKey;
     }
 
-    public void setSecretKey(Blob secretKey) {
-        this.secretKey = secretKey;
+    public void setPublicKey(byte[] publicKey) {
+        this.publicKey = publicKey;
     }
 
     public Integer getId() {

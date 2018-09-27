@@ -16,6 +16,7 @@ import spark.Response;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -29,7 +30,7 @@ public class AuthRouter extends BaseRouters {
     private Configs configs;
 
     AuthRouter(IOasisApiService apiService, OasisOptions oasisOptions) {
-        super(apiService);
+        super(apiService, oasisOptions);
 
         configs = oasisOptions.getConfigs();
     }
@@ -42,7 +43,11 @@ public class AuthRouter extends BaseRouters {
 
     private Object logout(Request req, Response res) throws Exception {
         checkAuth(req);
-        return Maps.create("success", true);
+
+        AuthUtils.TokenInfo tokenInfo = req.attribute("token");
+        boolean status = getApiService().getProfileService()
+                .logoutUser(tokenInfo.getUser(), System.currentTimeMillis());
+        return Maps.create("success", status);
     }
 
     private Object login(Request req, Response res) throws Exception {

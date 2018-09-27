@@ -20,6 +20,8 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -93,11 +95,15 @@ public final class AuthUtils {
     }
 
     public void init(Configs configs) throws Exception {
+        this.configs = configs;
         mapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
 
         // init jwt configurations
         String publicKeyPath = configs.getStrReq("oasis.public.key");
         String privateKeyPath = configs.getStrReq("oasis.private.key");
+        if (!new File(privateKeyPath).exists() || !new File(publicKeyPath).exists()) {
+            throw new FileNotFoundException("Required authenticate keys not found in the deployment!");
+        }
         byte[] bytesPrivate = Files.readAllBytes(Paths.get(privateKeyPath));
         byte[] bytesPublic = Files.readAllBytes(Paths.get(publicKeyPath));
         PKCS8EncodedKeySpec specPrivate = new PKCS8EncodedKeySpec(bytesPrivate);
@@ -171,6 +177,7 @@ public final class AuthUtils {
             return JWT.create()
                     .withIssuer(OASIS_ISSUER)
                     .withExpiresAt(new Date(tokenInfo.getExp()))
+                    .withIssuedAt(new Date(System.currentTimeMillis()))
                     .withClaim("user", tokenInfo.user)
                     .withClaim("role", tokenInfo.role)
                     .sign(algorithm);
@@ -186,6 +193,7 @@ public final class AuthUtils {
             TokenInfo tokenInfo = new TokenInfo();
             tokenInfo.setUser(jwt.getClaim("user").asLong());
             tokenInfo.setRole(jwt.getClaim("role").asInt());
+            tokenInfo.setIssuedAt(jwt.getIssuedAt().getTime());
             tokenInfo.setExp(jwt.getExpiresAt().getTime());
             return tokenInfo;
 
@@ -202,7 +210,16 @@ public final class AuthUtils {
     public static class TokenInfo {
         private long user;
         private long exp;
+        private long issuedAt;
         private int role = UserRole.PLAYER;
+
+        public long getIssuedAt() {
+            return issuedAt;
+        }
+
+        public void setIssuedAt(long issuedAt) {
+            this.issuedAt = issuedAt;
+        }
 
         public long getExp() {
             return exp;

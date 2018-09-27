@@ -28,13 +28,13 @@ public final class Routers {
 
         get("/echo", this::handleEcho);
 
-        Spark.path("/event", () -> new EventsRouter(apiService).register());
+        Spark.path("/event", () -> new EventsRouter(apiService, oasisOptions).register());
         Spark.path("/auth", () -> new AuthRouter(apiService, oasisOptions).register());
-        Spark.path("/stats", () -> new StatsRouter(apiService).register());
-        Spark.path("/def", () -> new DefinitionRouter(apiService).register());
-        Spark.path("/control", () -> new LifecycleRouter(apiService).register());
-        Spark.path("/admin", () -> new ProfileRouter(apiService).register());
-        Spark.path("/game", () -> new GameRouters(apiService).register());
+        Spark.path("/stats", () -> new StatsRouter(apiService, oasisOptions).register());
+        Spark.path("/def", () -> new DefinitionRouter(apiService, oasisOptions).register());
+        Spark.path("/control", () -> new LifecycleRouter(apiService, oasisOptions).register());
+        Spark.path("/admin", () -> new ProfileRouter(apiService, oasisOptions).register());
+        Spark.path("/game", () -> new GameRouters(apiService, oasisOptions).register());
     }
 
     public void registerExceptionHandlers() {
