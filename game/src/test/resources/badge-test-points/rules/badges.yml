@@ -25,13 +25,13 @@ badges:
   - name: quality-coder
     id: 102
     from:
-      pointsId: minus-nvd
+      pointsRef: minus-nvd
       streak: 3
 
   - name: germ
     id: 103
     from:
-      pointsId: virus
+      pointsRef: virus
       streak: 3
       subBadges:
         - streak: 5

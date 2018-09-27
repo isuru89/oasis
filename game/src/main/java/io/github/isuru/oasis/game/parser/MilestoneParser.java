@@ -28,8 +28,8 @@ public class MilestoneParser {
             milestone.setEvent(milestoneDef.getEvent());
             milestone.setFrom(milestoneDef.getFrom());
             milestone.setOnlyPositive(milestoneDef.getOnlyPositive() != null ? milestoneDef.getOnlyPositive() : false);
-            if (Utils.isNonEmpty(milestoneDef.getPointIds())) {
-                milestone.setPointIds(new HashSet<>(milestoneDef.getPointIds()));
+            if (Utils.isNonEmpty(milestoneDef.getPointRefs())) {
+                milestone.setPointIds(new HashSet<>(milestoneDef.getPointRefs()));
             }
 
             String type = milestoneDef.getAggregator() != null

@@ -16,7 +16,7 @@ milestones:
   - name: total-50-score
     id: 402
     from: points
-    pointIds:
+    pointRefs:
       - mark-50-value
     aggregator: sum
     levels:

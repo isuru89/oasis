@@ -2,7 +2,7 @@ badges:
   - name: quality-streak
     id: 101
     from:
-      pointsId: minus-nvd
+      pointsRef: minus-nvd
       within: 7 days
       streak: 3
       subBadges:
@@ -33,7 +33,7 @@ badges:
   - name: developer
     id: 103
     from:
-      milestoneId: total-codes
+      milestoneRef: total-codes
       level: 1
       subBadges:
         - name: intermediate
@@ -56,13 +56,13 @@ badges:
   - name: heavy-commit-streak
     id: 105
     from:
-      pointsId: heavy-commit
+      pointsRef: heavy-commit
       streak: 50
 
   - name: other-fixer
     id: 106
     from:
-      pointsId: fixed-violations-of-others
+      pointsRef: fixed-violations-of-others
       streak: 3
 
   - name: welcome-badge
@@ -74,7 +74,7 @@ badges:
   - name: tech-lead
     id: 108
     from:
-      pointsId: remark-raised
+      pointsRef: remark-raised
       #within: 7 days
       streak: 5
       subBadges:

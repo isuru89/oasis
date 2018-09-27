@@ -30,11 +30,11 @@ public class BadgeParser {
 
             BadgeSourceDef from = badgeDef.getFrom();
             if (from != null) {
-                if (from.getPointsId() != null) {
+                if (from.getPointsRef() != null) {
                     BadgeFromPoints bp = new BadgeFromPoints();
                     bp.setId(badgeDef.getId());
                     bp.setMaxBadges(badgeDef.getMaxBadges());
-                    bp.setPointsId(from.getPointsId());
+                    bp.setPointsId(from.getPointsRef());
                     bp.setDuration(from.getWithin());
                     bp.setStreak(from.getStreak() != null ? from.getStreak() : 0);
                     bp.setBadge(badge);
@@ -50,10 +50,10 @@ public class BadgeParser {
                     }
                     badgeRules.add(bp);
 
-                } else if (from.getMilestoneId() != null) {
+                } else if (from.getMilestoneRef() != null) {
                     BadgeFromMilestone bfm = new BadgeFromMilestone();
                     bfm.setId(badgeDef.getId());
-                    bfm.setMilestoneId(from.getMilestoneId());
+                    bfm.setMilestoneId(from.getMilestoneRef());
                     bfm.setLevel(from.getLevel());
                     bfm.setBadge(badge);
 

@@ -18,14 +18,14 @@ badges:
   - name: quality-coder
     id: 102
     from:
-      pointsId: minus-nvd
+      pointsRef: minus-nvd
       within: monthly
       streak: 3
 
   - name: germ
     id: 103
     from:
-      pointsId: virus
+      pointsRef: virus
       within: 3 days
       streak: 3
       subBadges:

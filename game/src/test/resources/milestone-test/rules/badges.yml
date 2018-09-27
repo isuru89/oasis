@@ -2,7 +2,7 @@ badges:
   - name: heavy-coder
     id: 101
     from:
-      milestoneId: total-codes
+      milestoneRef: total-codes
       level: 2
       subBadges:
         - name: ultra

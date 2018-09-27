@@ -12,7 +12,7 @@ public class MilestoneDef {
     private String name;
     private String displayName;
     private String from;
-    private List<String> pointIds;
+    private List<String> pointRefs;
     private String event;
     private String aggregator;
     private String accumulator;
@@ -41,12 +41,12 @@ public class MilestoneDef {
         this.from = from;
     }
 
-    public List<String> getPointIds() {
-        return pointIds;
+    public List<String> getPointRefs() {
+        return pointRefs;
     }
 
-    public void setPointIds(List<String> pointIds) {
-        this.pointIds = pointIds;
+    public void setPointRefs(List<String> pointRefs) {
+        this.pointRefs = pointRefs;
     }
 
     public String getAccumulatorType() {

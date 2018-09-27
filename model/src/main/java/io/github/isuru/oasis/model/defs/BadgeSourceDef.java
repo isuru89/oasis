@@ -7,9 +7,9 @@ import java.util.List;
  */
 public class BadgeSourceDef {
 
-    private String milestoneId;
+    private String milestoneRef;
     private Integer level;
-    private String pointsId;
+    private String pointsRef;
     private Integer streak;
     private String within;
     private List<BadgeDef.SubBadgeDef> subBadges;
@@ -22,12 +22,12 @@ public class BadgeSourceDef {
         this.level = level;
     }
 
-    public String getMilestoneId() {
-        return milestoneId;
+    public String getMilestoneRef() {
+        return milestoneRef;
     }
 
-    public void setMilestoneId(String milestoneId) {
-        this.milestoneId = milestoneId;
+    public void setMilestoneRef(String milestoneRef) {
+        this.milestoneRef = milestoneRef;
     }
 
     public String getWithin() {
@@ -38,12 +38,12 @@ public class BadgeSourceDef {
         this.within = within;
     }
 
-    public String getPointsId() {
-        return pointsId;
+    public String getPointsRef() {
+        return pointsRef;
     }
 
-    public void setPointsId(String pointsId) {
-        this.pointsId = pointsId;
+    public void setPointsRef(String pointsRef) {
+        this.pointsRef = pointsRef;
     }
 
     public Integer getStreak() {
