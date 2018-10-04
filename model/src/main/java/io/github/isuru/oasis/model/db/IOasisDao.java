@@ -19,9 +19,11 @@ public interface IOasisDao extends AutoCloseable {
                                                Map<String, Object> templatingData) throws Exception;
     <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws Exception;
     long executeCommand(String queryId, Map<String, Object> data) throws Exception;
+    long executeCommand(String queryId, Map<String, Object> data, Map<String, Object> templatingData) throws Exception;
     long executeRawCommand(String queryStr, Map<String, Object> data) throws Exception;
     List<Integer> executeBatchInsert(String queryId, List<Map<String, Object>> batchData) throws Exception;
     Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws Exception;
+    Long executeInsert(String queryId, Map<String, Object> data, Map<String, Object> templatingData, String keyColumn) throws Exception;
     Object runTx(int transactionLevel, ConsumerEx<JdbcTransactionCtx> txBody) throws Exception;
 
     IDefinitionDao getDefinitionDao();

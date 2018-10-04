@@ -12,6 +12,34 @@ public class UserProfile {
     private boolean aggregated;
     private Long lastLogoutAt;
 
+    private Integer heroId;
+    private int heroUpdateTimes;
+    private Long heroLastUpdatedAt;
+
+    public Integer getHeroId() {
+        return heroId;
+    }
+
+    public void setHeroId(Integer heroId) {
+        this.heroId = heroId;
+    }
+
+    public int getHeroUpdateTimes() {
+        return heroUpdateTimes;
+    }
+
+    public void setHeroUpdateTimes(int heroUpdateTimes) {
+        this.heroUpdateTimes = heroUpdateTimes;
+    }
+
+    public Long getHeroLastUpdatedAt() {
+        return heroLastUpdatedAt;
+    }
+
+    public void setHeroLastUpdatedAt(Long heroLastUpdatedAt) {
+        this.heroLastUpdatedAt = heroLastUpdatedAt;
+    }
+
     public Long getLastLogoutAt() {
         return lastLogoutAt;
     }

@@ -46,6 +46,7 @@ public interface IGameDefService {
 
     long addShopItem(long gameId, ShopItem item) throws Exception;
     List<ShopItem> listShopItems(long gameId) throws Exception;
+    List<ShopItem> listShopItems(long gameId, int heroId) throws Exception;
     ShopItem readShopItem(long id) throws Exception;
     boolean disableShopItem(long id) throws Exception;
 

@@ -5,6 +5,7 @@ INSERT INTO OA_SHOP_ITEM (
     level,
     price,
     image_ref,
+    for_hero,
     <if(hasMaxItems)>
     max_available,
     <endif>
@@ -16,6 +17,7 @@ INSERT INTO OA_SHOP_ITEM (
     :level,
     :price,
     :imageRef,
+    :forHero,
     <if(hasMaxItems)>
     :maxAvailable,
     <endif>

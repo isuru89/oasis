@@ -9,12 +9,7 @@ import io.github.isuru.oasis.services.api.IGameService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.exception.OasisGameException;
-import io.github.isuru.oasis.services.model.BadgeAwardDto;
-import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
-import io.github.isuru.oasis.services.model.PointAwardDto;
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.UserRankRecordDto;
-import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 
@@ -117,6 +112,15 @@ public class GameService extends BaseService implements IGameService {
         Checks.greaterThanZero(userBy, "userId");
         Checks.greaterThanZero(itemId, "itemId");
 
+        // can buy?
+        UserProfile userProfile = getApiService().getProfileService().readUserProfile(userBy);
+        if (toList(getDao().executeQuery("def/item/itemHeroBuyable",
+                Maps.create()
+                    .put("itemId", itemId)
+                    .put("userHero", userProfile.getHeroId()).build())).isEmpty()) {
+            throw new InputValidationException("User cannot purchase this item as it is not available for your hero!");
+        }
+
         getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
             Iterable<Map<String, Object>> userPoints = ctx.executeQuery(
                     "stats/getUserAvailablePoints",
@@ -159,6 +163,11 @@ public class GameService extends BaseService implements IGameService {
         Checks.greaterThanZero(userBy, "userId");
         Checks.greaterThanZero(itemId, "itemId");
         Checks.greaterThanZero(toUser, "toUser");
+
+        if (toList(getDao().executeQuery("def/item/itemHeroSharable",
+                Maps.create().put("fromUserId", userBy).put("toUserId", toUser).build())).isEmpty()) {
+            throw new InputValidationException("The user you are going to share the item is not following the same hero as you!");
+        }
 
         getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
             long currTs = System.currentTimeMillis();

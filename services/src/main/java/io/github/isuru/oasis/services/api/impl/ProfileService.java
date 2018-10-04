@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IProfileService;
+import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
@@ -332,5 +333,30 @@ public class ProfileService extends BaseService implements IProfileService {
                 Maps.create()
                     .put("userId", userId)
                     .put("logoutAt", ts).build()) > 0;
+    }
+
+    @Override
+    public boolean changeUserHero(long userId, long newHeroId) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
+        List<Map<String, Object>> heros = toList(getDao().executeQuery("profile/hero/listHeros", new HashMap<>()));
+        if (heros.stream().noneMatch(map -> (long) map.get("heroId") == newHeroId)) {
+            throw new InputValidationException("No hero is found by hero id " + newHeroId + "!");
+        }
+
+        Map<String, Object> data = Maps.create()
+                .put("userId", userId)
+                .put("heroId", newHeroId)
+                .put("heroUpdatedAt", System.currentTimeMillis())
+                .put("updateLimit", 2)      // @TODO load from deployment configs
+                .build();
+
+        boolean success = getDao().executeCommand("profile/updateHero", data) > 0;
+        if (success) {
+            // disable all purchases
+            getDao().executeCommand("def/item/disablePurchasesOfUser",
+                    Maps.create("userId", userId));
+        }
+        return success;
     }
 }

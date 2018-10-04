@@ -117,10 +117,20 @@ CREATE TABLE IF NOT EXISTS OA_USER (
     is_active       TINYINT(1) DEFAULT 1,
     is_aggregated   TINYINT(1) DEFAULT 0,
     last_logout_at  BIGINT,
+    hero_id         INT,
+    hero_updated    INT DEFAULT 0,
+    hero_last_updated_at BIGINT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 ALTER TABLE OA_USER ADD UNIQUE (email);
+
+CREATE TABLE IF NOT EXISTS OA_USER_HERO (
+    hero_id         INT PRIMARY KEY,
+    display_name    VARCHAR(64),
+    description     VARCHAR(1024),
+    is_active       TINYINT(1) DEFAULT 1
+)
 
 CREATE TABLE IF NOT EXISTS OA_TEAM (
     team_id         INT PRIMARY KEY AUTO_INCREMENT,
@@ -169,6 +179,7 @@ CREATE TABLE IF NOT EXISTS OA_SHOP_ITEM (
     description     VARCHAR(2048),
     scope           VARCHAR(32),
     level           INT,
+    for_hero        INT,
     price           FLOAT(4),
     image_ref       VARCHAR(512),
     max_available   INT DEFAULT -1,

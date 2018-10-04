@@ -379,6 +379,7 @@ public class GameDefService extends BaseService implements IGameDefService {
                 .put("level", item.getLevel())
                 .put("price", item.getPrice())
                 .put("imageRef", item.getImageRef())
+                .put("forHero", item.getForHero())
                 .put("maxAvailable", item.getMaxAvailableItems())
                 .put("expirationAt", item.getExpirationAt())
                 .build();
@@ -396,6 +397,16 @@ public class GameDefService extends BaseService implements IGameDefService {
             shopItems.add(item);
         }
         return shopItems;
+    }
+
+    @Override
+    public List<ShopItem> listShopItems(long gameId, int heroId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
+        Map<String, Object> data = Maps.create()
+                .put("gameId", gameId)
+                .put("userHero", heroId).build();
+        return toList(getDao().executeQuery("def/item/listItems", data, ShopItem.class));
     }
 
     @Override

@@ -6,6 +6,8 @@ public class ShopItem {
     private String title;
     private String description;
 
+    private int forHero;
+
     private float price;
     private String imageRef;
 
@@ -13,6 +15,14 @@ public class ShopItem {
     private Integer level;
     private Long expirationAt;
     private Integer maxAvailableItems;
+
+    public int getForHero() {
+        return forHero;
+    }
+
+    public void setForHero(int forHero) {
+        this.forHero = forHero;
+    }
 
     public Integer getMaxAvailableItems() {
         return maxAvailableItems;

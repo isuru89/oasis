@@ -6,6 +6,8 @@ import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.utils.AuthUtils;
+import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.UserRole;
 import spark.Request;
@@ -55,11 +57,23 @@ public class ProfileRouter extends BaseRouters {
         .post("/scope/:scopeId/teams", (req, res) -> ps.listTeams(asPLong(req, SCOPE_ID)));
 
         post("/user/add-to-team", this::addUserToTeam, UserRole.CURATOR)
-        .post("/user/:userId/current-team", this::findUserTeam);
+        .post("/user/:userId/current-team", this::findUserTeam)
+        .post("/user/:userId/change-hero/:heroId", this::changeUserHero);
     }
 
     private IProfileService getProfileService() {
         return getApiService().getProfileService();
+    }
+
+    private Object changeUserHero(Request req, Response res) throws Exception {
+        checkAuth(req);
+
+        long userId = asPLong(req, "userId");
+        checkSameUser(req, userId);
+
+        int heroId = asPInt(req, "heroId");
+
+        return Maps.create("success", getProfileService().changeUserHero(userId, heroId));
     }
 
     private Object deleteUser(Request req, Response res) throws Exception {
