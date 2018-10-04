@@ -369,6 +369,9 @@ public class GameDefService extends BaseService implements IGameDefService {
         Checks.nonNullOrEmpty(item.getTitle(), "title");
         Checks.nonNullOrEmpty(item.getDescription(), "description");
 
+        Map<String, Object> templateData = Maps.create("hasMaxItems",
+                item.getMaxAvailableItems() != null && item.getMaxAvailableItems() > 0);
+
         Map<String, Object> data = Maps.create()
                 .put("title", item.getTitle())
                 .put("description", item.getDescription())
@@ -376,12 +379,11 @@ public class GameDefService extends BaseService implements IGameDefService {
                 .put("level", item.getLevel())
                 .put("price", item.getPrice())
                 .put("imageRef", item.getImageRef())
-                .put("hasMaxItems", item.getMaxAvailableItems() != null && item.getMaxAvailableItems() > 0)
                 .put("maxAvailable", item.getMaxAvailableItems())
                 .put("expirationAt", item.getExpirationAt())
                 .build();
 
-        return getDao().executeInsert("def/item/addShopItem", data, "id");
+        return getDao().executeInsert("def/item/addShopItem", data, templateData, "id");
     }
 
     @Override
