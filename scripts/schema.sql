@@ -171,6 +171,7 @@ CREATE TABLE IF NOT EXISTS OA_SHOP_ITEM (
     level           INT,
     price           FLOAT(4),
     image_ref       VARCHAR(512),
+    max_available   INT DEFAULT -1,
     is_active       TINYINT(1) DEFAULT 1,
     expiration_at   BIGINT,
     game_id         INT,

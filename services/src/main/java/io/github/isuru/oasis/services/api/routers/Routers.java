@@ -5,6 +5,8 @@ import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.OasisOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -14,6 +16,8 @@ import spark.Spark;
  * @author iweerarathna
  */
 public final class Routers {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Routers.class);
 
     private final IOasisApiService apiService;
     private final OasisOptions oasisOptions;
@@ -40,6 +44,7 @@ public final class Routers {
     public void registerExceptionHandlers() {
         Spark.exception(InputValidationException.class, (ex, req, res) -> {
             res.status(400);
+            LOG.error("Error occurred in {}", req.contextPath(), ex);
             res.body(BaseRouters.TRANSFORMER.toStr(Maps.create()
                     .put("success", false)
                     .put("error", ex.getMessage())
@@ -47,6 +52,7 @@ public final class Routers {
         });
         Spark.exception(ApiAuthException.class, (ex, req, res) -> {
             res.status(401);
+            LOG.error("Error occurred in {}", req.contextPath(), ex);
             res.body(BaseRouters.TRANSFORMER.toStr(Maps.create()
                     .put("success", false)
                     .put("error", ex.getMessage())
@@ -54,6 +60,7 @@ public final class Routers {
         });
         Spark.exception(Exception.class, (ex, req, res) -> {
             res.status(500);
+            LOG.error("Error occurred in {}", req.contextPath(), ex);
             res.body(BaseRouters.TRANSFORMER.toStr(Maps.create()
                     .put("success", false)
                     .put("error", ex.getMessage())

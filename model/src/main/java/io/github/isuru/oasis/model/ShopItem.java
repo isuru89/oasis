@@ -12,6 +12,15 @@ public class ShopItem {
     private String scope;
     private Integer level;
     private Long expirationAt;
+    private Integer maxAvailableItems;
+
+    public Integer getMaxAvailableItems() {
+        return maxAvailableItems;
+    }
+
+    public void setMaxAvailableItems(Integer maxAvailableItems) {
+        this.maxAvailableItems = maxAvailableItems;
+    }
 
     public Long getExpirationAt() {
         return expirationAt;

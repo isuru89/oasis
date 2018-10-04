@@ -376,6 +376,8 @@ public class GameDefService extends BaseService implements IGameDefService {
                 .put("level", item.getLevel())
                 .put("price", item.getPrice())
                 .put("imageRef", item.getImageRef())
+                .put("hasMaxItems", item.getMaxAvailableItems() != null && item.getMaxAvailableItems() > 0)
+                .put("maxAvailable", item.getMaxAvailableItems())
                 .put("expirationAt", item.getExpirationAt())
                 .build();
 

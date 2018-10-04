@@ -12,6 +12,15 @@ public interface IGameService {
     void awardPoints(long byUser, PointAwardDto awardDto) throws Exception;
     void awardBadge(long byUser, BadgeAwardDto awardDto) throws Exception;
 
+    /**
+     * Allocate an item before purchasing. Decreases <code>max_availability</code>
+     * by one when this method returns true.
+     *
+     * @param itemId item id to be purchased.
+     * @return true if an item is available. false, otherwise.
+     * @throws Exception item allocation exception.
+     */
+    boolean allocateBuyingItem(long itemId) throws Exception;
     void buyItem(long userBy, long itemId, float price) throws Exception;
     void buyItem(long userBy, long itemId) throws Exception;
     void shareItem(long userBy, long itemId, long toUser, int amount) throws Exception;

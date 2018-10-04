@@ -6,6 +6,7 @@ SELECT
     image_ref as imageRef,
     scope as scope,
     level as level,
+    max_available AS maxAvailableItems,
     expiration_at as expirationAt
 
 FROM OA_SHOP_ITEM

@@ -103,6 +103,16 @@ public class GameService extends BaseService implements IGameService {
     }
 
     @Override
+    public boolean allocateBuyingItem(long itemId) throws Exception {
+        Checks.greaterThanZero(itemId, "itemId");
+
+        return getDao().executeCommand("def/item/updateItemAvail",
+                Maps.create().put("itemId", itemId)
+                    .put("ts", System.currentTimeMillis())
+                    .build()) > 0;
+    }
+
+    @Override
     public void buyItem(long userBy, long itemId, float price) throws Exception {
         Checks.greaterThanZero(userBy, "userId");
         Checks.greaterThanZero(itemId, "itemId");

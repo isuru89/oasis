@@ -5,6 +5,9 @@ INSERT INTO OA_SHOP_ITEM (
     level,
     price,
     image_ref,
+    <if(hasMaxItems)>
+    max_available,
+    <endif>
     expiration_at
 ) VALUES (
     :title,
@@ -13,5 +16,8 @@ INSERT INTO OA_SHOP_ITEM (
     :level,
     :price,
     :imageRef,
+    <if(hasMaxItems)>
+    :maxAvailable,
+    <endif>
     :expirationAt
 )
