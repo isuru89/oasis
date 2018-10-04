@@ -514,8 +514,13 @@ public class GameDefService extends BaseService implements IGameDefService {
     public boolean disableShopItem(long id) throws Exception {
         Checks.greaterThanZero(id, "id");
 
-        return getDao().executeCommand("def/item/disableItem",
+        boolean success = getDao().executeCommand("def/item/disableItem",
                 Maps.create("itemId", id)) > 0;
+        if (success) {
+            getDao().executeCommand("def/item/disablePurchasesOfItem",
+                    Maps.create("itemId", id));
+        }
+        return success;
     }
 
     private ChallengeDef wrapperToChallenge(DefWrapper wrapper) {
