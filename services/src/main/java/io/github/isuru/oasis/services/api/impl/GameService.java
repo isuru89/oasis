@@ -114,10 +114,10 @@ public class GameService extends BaseService implements IGameService {
 
         // can buy?
         UserProfile userProfile = getApiService().getProfileService().readUserProfile(userBy);
-        if (toList(getDao().executeQuery("def/item/itemHeroBuyable",
-                Maps.create()
-                    .put("itemId", itemId)
-                    .put("userHero", userProfile.getHeroId()).build())).isEmpty()) {
+        List<Map<String, Object>> buyableList = toList(getDao().executeQuery("def/item/itemHeroBuyable",
+                Maps.create().put("itemId", itemId)
+                        .put("userHero", userProfile.getHeroId()).build()));
+        if (buyableList.isEmpty()) {
             throw new InputValidationException("User cannot purchase this item as it is not available for your hero!");
         }
 
@@ -144,6 +144,7 @@ public class GameService extends BaseService implements IGameService {
 
                 Map<String, Object> data = Maps.create()
                         .put("userId", userBy)
+                        .put("forHero", userProfile.getHeroId())
                         .put("itemId", itemId)
                         .put("cost", price)
                         .put("teamId", teamId)
@@ -164,10 +165,12 @@ public class GameService extends BaseService implements IGameService {
         Checks.greaterThanZero(itemId, "itemId");
         Checks.greaterThanZero(toUser, "toUser");
 
-        if (toList(getDao().executeQuery("def/item/itemHeroSharable",
-                Maps.create().put("fromUserId", userBy).put("toUserId", toUser).build())).isEmpty()) {
+        List<Map<String, Object>> userHeros = toList(getDao().executeQuery("def/item/itemHeroSharable",
+                Maps.create().put("fromUserId", userBy).put("toUserId", toUser).build()));
+        if (userHeros.isEmpty()) {
             throw new InputValidationException("The user you are going to share the item is not following the same hero as you!");
         }
+        final int toUserHero = Integer.parseInt(String.valueOf(userHeros.get(0).get("user2Hero")));
 
         getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
             long currTs = System.currentTimeMillis();
@@ -190,8 +193,11 @@ public class GameService extends BaseService implements IGameService {
                 long teamId = currTeam != null ? currTeam.getTeamId() : DataCache.get().getTeamDefault().getId();
                 long scopeId = currTeam != null ? currTeam.getScopeId() : DataCache.get().getTeamScopeDefault().getId();
 
-                Map<String, Object> item = Maps.create().put("userId", toUser)
-                        .put("teamId", teamId).put("teamScopeId", scopeId)
+                Map<String, Object> item = Maps.create()
+                        .put("userId", toUser)
+                        .put("forHero", toUserHero)
+                        .put("teamId", teamId)
+                        .put("teamScopeId", scopeId)
                         .put("itemId", itemId)
                         .build();
                 ctx.executeCommand("def/item/shareToItem", item);

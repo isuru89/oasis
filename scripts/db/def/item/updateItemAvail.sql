@@ -4,7 +4,7 @@ SET
 WHERE
     id = :itemId
     AND
-    (max_available > 0 OR max_available = -1)
+    (limited_amount = 0 OR max_available > 0)
     AND
     expiration_at > :ts
 LIMIT

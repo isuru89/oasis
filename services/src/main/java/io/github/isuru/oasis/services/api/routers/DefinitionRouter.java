@@ -39,6 +39,7 @@ public class DefinitionRouter extends BaseRouters {
 
         Spark.path("/game", () -> {
             get("/all", (req, res) -> gds.listGames())
+            .get("/heros", (req, res) -> gds.listHeros())
             .get("/:gameId", (req, res) -> gds.readGame(asPLong(req, P_GAME_ID)))
             .delete("/:gameId",
                     (req, res) -> asResBool(gds.disableGame(asPLong(req, P_GAME_ID))), UserRole.ADMIN);
@@ -96,6 +97,7 @@ public class DefinitionRouter extends BaseRouters {
 
             Spark.path("/:gameId/item", () -> {
                 get("/all", (req, res) -> gds.listShopItems(asPLong(req, P_GAME_ID)))
+                .get("/all/:heroId", (req, res) -> gds.listShopItems(asPLong(req, P_GAME_ID), asPInt(req, "heroId")))
                 .get("/:itemId", (req, res) -> gds.readShopItem(asPLong(req, ITEM_ID)))
                 .delete("/:itemId", (req, res) ->
                         asResBool(gds.disableShopItem(asPLong(req, ITEM_ID))), UserRole.ADMIN);

@@ -3,6 +3,7 @@ INSERT INTO OA_PURCHASE (
     team_id,
     team_scope_id,
     user_id,
+    for_hero,
     cost,
     purchased_at
 ) VALUES (
@@ -10,6 +11,7 @@ INSERT INTO OA_PURCHASE (
     :teamId,
     :teamScopeId,
     :userId,
+    :forHero,
     :cost,
     :purchasedAt
 )

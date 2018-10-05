@@ -8,6 +8,7 @@ INSERT INTO OA_SHOP_ITEM (
     for_hero,
     <if(hasMaxItems)>
     max_available,
+    limited_amount,
     <endif>
     expiration_at
 ) VALUES (
@@ -20,6 +21,7 @@ INSERT INTO OA_SHOP_ITEM (
     :forHero,
     <if(hasMaxItems)>
     :maxAvailable,
+    :1,
     <endif>
     :expirationAt
 )

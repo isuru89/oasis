@@ -8,6 +8,7 @@ SELECT
     level as level,
     for_hero AS forHero,
     max_available AS maxAvailableItems,
+    limited_amount AS limitedAmount,
     expiration_at as expirationAt
 
 FROM OA_SHOP_ITEM

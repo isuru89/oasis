@@ -15,6 +15,15 @@ public class ShopItem {
     private Integer level;
     private Long expirationAt;
     private Integer maxAvailableItems;
+    private boolean limitedAmount;
+
+    public boolean isLimitedAmount() {
+        return limitedAmount;
+    }
+
+    public void setLimitedAmount(boolean limitedAmount) {
+        this.limitedAmount = limitedAmount;
+    }
 
     public int getForHero() {
         return forHero;

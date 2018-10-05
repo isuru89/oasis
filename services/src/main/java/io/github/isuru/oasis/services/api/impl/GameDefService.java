@@ -16,6 +16,7 @@ import io.github.isuru.oasis.services.Bootstrapping;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IProfileService;
+import io.github.isuru.oasis.services.api.dto.HeroDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.exception.OasisGameException;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
@@ -26,6 +27,7 @@ import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.RUtils;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -534,6 +536,11 @@ public class GameDefService extends BaseService implements IGameDefService {
                     Maps.create("itemId", id));
         }
         return success;
+    }
+
+    @Override
+    public List<HeroDto> listHeros() throws Exception {
+        return toList(getDao().executeQuery("profile/hero/listHeros", new HashMap<>(), HeroDto.class));
     }
 
     private ChallengeDef wrapperToChallenge(DefWrapper wrapper) {

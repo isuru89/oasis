@@ -36,5 +36,5 @@ public interface IProfileService {
 
     boolean logoutUser(long userId, long ts) throws Exception;
 
-    boolean changeUserHero(long userId, long newHeroId) throws Exception;
+    boolean changeUserHero(long userId, int newHeroId) throws Exception;
 }

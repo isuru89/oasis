@@ -1,4 +1,8 @@
-SELECT *
+SELECT
+    u1.userId AS user1Id,
+    u1.heroId AS user1Hero,
+    u2.userId AS user2Id,
+    u2.heroId AS user2Hero
 FROM
     (SELECT
         oau1.user_id AS userId,

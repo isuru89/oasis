@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.api.impl;
 
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IProfileService;
+import io.github.isuru.oasis.services.api.dto.HeroDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
@@ -336,11 +337,11 @@ public class ProfileService extends BaseService implements IProfileService {
     }
 
     @Override
-    public boolean changeUserHero(long userId, long newHeroId) throws Exception {
+    public boolean changeUserHero(long userId, int newHeroId) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
-        List<Map<String, Object>> heros = toList(getDao().executeQuery("profile/hero/listHeros", new HashMap<>()));
-        if (heros.stream().noneMatch(map -> (long) map.get("heroId") == newHeroId)) {
+        List<HeroDto> heros = getApiService().getGameDefService().listHeros();
+        if (heros.stream().noneMatch(hero -> hero.getHeroId() == newHeroId)) {
             throw new InputValidationException("No hero is found by hero id " + newHeroId + "!");
         }
 
@@ -351,12 +352,17 @@ public class ProfileService extends BaseService implements IProfileService {
                 .put("updateLimit", 2)      // @TODO load from deployment configs
                 .build();
 
-        boolean success = getDao().executeCommand("profile/updateHero", data) > 0;
-        if (success) {
-            // disable all purchases
-            getDao().executeCommand("def/item/disablePurchasesOfUser",
-                    Maps.create("userId", userId));
-        }
-        return success;
+        return (Boolean) getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
+            boolean success = ctx.executeCommand("profile/updateHero", data) > 0;
+            if (success) {
+                Map<String, Object> userMap = Maps.create("userId", userId);
+
+                // re-available limited edition items
+                ctx.executeCommand("def/item/reavailablePurchasesOfUser", userMap);
+                // disable all purchases
+                ctx.executeCommand("def/item/disablePurchasesOfUser", userMap);
+            }
+            return success;
+        });
     }
 }
