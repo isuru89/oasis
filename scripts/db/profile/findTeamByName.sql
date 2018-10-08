@@ -2,7 +2,7 @@ SELECT
     team_id as id,
     team_scope as teamScope,
     name as name,
-    avatar_id as avatarId,
+    avatar_ref as avatarId,
     is_active as active,
     created_at as createdAt,
     updated_at as updatedAt

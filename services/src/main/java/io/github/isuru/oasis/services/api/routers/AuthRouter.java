@@ -62,7 +62,7 @@ public class AuthRouter extends BaseRouters {
             }
         }
 
-        boolean fresh = false;
+        boolean activated;
         // if ldap auth success
         UserProfile profile = getApiService().getProfileService().readUserProfile(username);
         if (profile == null) {
@@ -75,10 +75,12 @@ public class AuthRouter extends BaseRouters {
                 userNew.setActive(true);
                 long idNew = getApiService().getProfileService().addUserProfile(userNew);
                 profile = getApiService().getProfileService().readUserProfile(idNew);
-                fresh = true;
+                activated = false;
             } else {
                 throw new ApiAuthException("Authentication failure! Username or password incorrect!");
             }
+        } else {
+            activated = profile.isActivated();
         }
         UserTeam team = getApiService().getProfileService().findCurrentTeamOfUser(profile.getId());
         int role = UserRole.PLAYER;
@@ -114,7 +116,7 @@ public class AuthRouter extends BaseRouters {
         String token = AuthUtils.get().issueToken(info);
         return Maps.create()
                 .put("token", token)
-                .put("firstTime", fresh)
+                .put("activated", activated)
                 .put("profile", profile)
                 .build();
     }

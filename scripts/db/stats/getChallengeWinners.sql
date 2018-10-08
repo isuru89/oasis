@@ -2,7 +2,7 @@ SELECT
     oacw.user_id AS userId,
     oau.user_name AS userName,
     oau.email AS userEmail,
-    oau.avatar_id AS userAvatar,
+    oau.avatar_ref AS userAvatar,
     oacw.team_id AS teamId,
     oat.name AS teamName,
     oacw.team_scope_id AS teamScopeId,

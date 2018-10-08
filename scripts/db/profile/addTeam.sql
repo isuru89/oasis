@@ -1,7 +1,7 @@
 INSERT INTO OA_TEAM (
     team_scope,
     name,
-    avatar_id
+    avatar_ref
 ) VALUES (
     :teamScope,
     :name,

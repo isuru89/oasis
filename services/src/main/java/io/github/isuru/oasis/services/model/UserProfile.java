@@ -5,16 +5,26 @@ public class UserProfile {
     private long id;
     private Long extId;
     private String name;
+    private String nickName;
     private String email;
     private boolean male;
     private String avatarId;
     private boolean active;
-    private boolean aggregated;
+    private boolean autoUser;
+    private boolean activated;
     private Long lastLogoutAt;
 
     private Integer heroId;
     private int heroUpdateTimes;
     private Long heroLastUpdatedAt;
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
 
     public Integer getHeroId() {
         return heroId;
@@ -48,12 +58,20 @@ public class UserProfile {
         this.lastLogoutAt = lastLogoutAt;
     }
 
-    public boolean isAggregated() {
-        return aggregated;
+    public boolean isActivated() {
+        return activated;
     }
 
-    public void setAggregated(boolean aggregated) {
-        this.aggregated = aggregated;
+    public void setActivated(boolean activated) {
+        this.activated = activated;
+    }
+
+    public boolean isAutoUser() {
+        return autoUser;
+    }
+
+    public void setAutoUser(boolean autoUser) {
+        this.autoUser = autoUser;
     }
 
     public Long getExtId() {

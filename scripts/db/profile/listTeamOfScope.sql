@@ -2,7 +2,7 @@ SELECT
     oat.team_id as id,
     oat.team_scope as teamScope,
     oat.name as name,
-    oat.avatar_id as avatarId,
+    oat.avatar_ref as avatarId,
     oat.created_at as createdAt,
     oat.updated_at as updatedAt
 

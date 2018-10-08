@@ -11,7 +11,7 @@ SELECT
     oau.ext_id as extId,
     oau.user_name as name,
     oau.email as email,
-    oau.avatar_id as avatarId,
+    oau.avatar_ref as avatarId,
     oau.is_male as male,
     oau.is_active as active
 FROM currentTeams oact

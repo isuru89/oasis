@@ -1,6 +1,7 @@
 SELECT
     ext_id AS id,
     user_name AS name,
+    nickname AS nickName,
     is_male AS isMale,
     created_at AS createdAt,
     updated_at AS updatedAt

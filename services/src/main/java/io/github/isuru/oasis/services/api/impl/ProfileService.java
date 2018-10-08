@@ -39,7 +39,7 @@ public class ProfileService extends BaseService implements IProfileService {
                 .put("avatarId", profile.getAvatarId())
                 .put("extId", profile.getExtId())
                 .put("email", profile.getEmail())
-                .put("aggregated", false)
+                .put("isAutoUser", false)
                 .build();
 
         return getDao().executeInsert("profile/addUser", data, "user_id");
@@ -150,7 +150,7 @@ public class ProfileService extends BaseService implements IProfileService {
                     .put("avatarId", null)
                     .put("extId", null)
                     .put("email", "")
-                    .put("aggregated", true)
+                    .put("isAutoUser", true)
                     .build();
             Long userId = input.executeInsert("profile/addUser", playerData, "user_id");
 
@@ -228,7 +228,7 @@ public class ProfileService extends BaseService implements IProfileService {
                     .put("avatarId", null)
                     .put("extId", null)
                     .put("email", "default@"+teamScope.getName() + ".oasis.com")
-                    .put("aggregated", true)
+                    .put("isAutoUser", true)
                     .build();
             Long userId = input.executeInsert("profile/addUser", playerData, "user_id");
 
