@@ -5,11 +5,38 @@ package io.github.isuru.oasis.services.model;
  */
 public class UserTeam {
 
+    private Integer id;
     private Integer userId;
     private Integer teamId;
     private Integer roleId;
     private Integer scopeId;
     private Long joinedTime;
+    private Long deallocatedTime;
+    private boolean approved;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
+    }
+
+    public Long getDeallocatedTime() {
+        return deallocatedTime;
+    }
+
+    public void setDeallocatedTime(Long deallocatedTime) {
+        this.deallocatedTime = deallocatedTime;
+    }
 
     public Integer getRoleId() {
         return roleId;

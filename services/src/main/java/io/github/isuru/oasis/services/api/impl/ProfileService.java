@@ -14,10 +14,7 @@ import io.github.isuru.oasis.services.utils.Pojos;
 import io.github.isuru.oasis.services.utils.UserRole;
 
 import java.sql.Connection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author iweerarathna
@@ -283,38 +280,76 @@ public class ProfileService extends BaseService implements IProfileService {
 
     @Override
     public boolean addUserToTeam(long userId, long teamId, int roleId) throws Exception {
+        return addUserToTeam(userId, teamId, roleId, false);
+    }
+
+    @Override
+    public boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval) throws Exception {
         Checks.greaterThanZero(userId, "userId");
         Checks.greaterThanZero(teamId, "teamId");
         Checks.validate(roleId > 0 && roleId <= UserRole.ALL_ROLE, "roleId must be a flag of 1,2,4, or 8.");
 
-        // if the current team is same as previous team, then don't add
-        UserTeam userTeam = findCurrentTeamOfUser(userId);
+        UserTeam userTeam = findCurrentTeamOfUser(userId, false);
         if (userTeam != null && userTeam.getTeamId() == teamId) {
+            // if the current team is same as previous team, then don't add
             if (roleId == userTeam.getRoleId()) {
                 return false;
             }
         }
 
-        return getDao().executeInsert("profile/addUserToTeam",
-                Maps.create()
-                        .put("userId", userId)
-                        .put("teamId", teamId)
-                        .put("roleId", roleId)
-                        .put("since", System.currentTimeMillis())
-                        .build(),
-                null) > 0;
+        // if the previous team is not yet approved, then disable it
+        if (userTeam != null && !userTeam.isApproved()) {
+            getDao().executeCommand("profile/rejectUserInTeam",
+                    Maps.create("id", userTeam.getId()));
+        }
+
+        return (Boolean) getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
+            long currentTimeMillis = System.currentTimeMillis();
+
+            if (userTeam != null) {
+                ctx.executeCommand("profile/deallocateFromTeam",
+                        Maps.create()
+                                .put("id", userTeam.getId())
+                                .put("endTime", currentTimeMillis)
+                                .build());
+            }
+
+            return ctx.executeCommand("profile/addUserToTeam",
+                    Maps.create()
+                            .put("userId", userId)
+                            .put("teamId", teamId)
+                            .put("roleId", roleId)
+                            .put("since", currentTimeMillis)
+                            .put("isApproved", !pendingApproval)
+                            .put("approvedAt", pendingApproval ? null : currentTimeMillis)
+                            .build()) > 0;
+        });
     }
 
     @Override
     public UserTeam findCurrentTeamOfUser(long userId) throws Exception {
+        return findCurrentTeamOfUser(userId, true);
+    }
+
+    @Override
+    public UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
         long l = System.currentTimeMillis();
-        return getTheOnlyRecord("profile/findCurrentTeamOfUser",
+        // @TODO handle when no record is found
+        Iterable<UserTeam> userTeams = getDao().executeQuery("profile/findCurrentTeamOfUser",
                 Maps.create().put("userId", userId)
-                    .put("currentEpoch", l)
-                    .build(),
-                UserTeam.class);
+                        .put("currentEpoch", l)
+                        .build(),
+                UserTeam.class,
+                Maps.create("checkApproved", returnApprovedOnly));
+        if (userTeams != null) {
+            Iterator<UserTeam> iterator = userTeams.iterator();
+            if (iterator.hasNext()) {
+                return iterator.next();
+            }
+        }
+        return null;
     }
 
     @Override

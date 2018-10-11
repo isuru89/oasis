@@ -1,9 +1,12 @@
 SELECT
+    otu.id AS id,
     otu.user_id AS userId,
     otu.team_id AS teamId,
     otu.role_id as roleId,
     oats.scope_id AS scopeId,
-    otu.since AS joinedTime
+    otu.since AS joinedTime,
+    otu.until AS deallocatedTime,
+    otu.is_approved AS approved
 
 FROM OA_TEAM_USER otu
     LEFT JOIN OA_TEAM ot ON otu.team_id = ot.team_id
@@ -11,9 +14,17 @@ FROM OA_TEAM_USER otu
 
 WHERE
     otu.user_id = :userId
+    <if(checkApproved)>
+    AND
+    otu.is_approved = 1
+    <endif>
     AND
     :currentEpoch > otu.since
-ORDER BY
-    otu.since DESC
+    AND
+    (
+    otu.until IS NULL
+    OR
+    otu.until >= :currentEpoch
+    )
 LIMIT
     1

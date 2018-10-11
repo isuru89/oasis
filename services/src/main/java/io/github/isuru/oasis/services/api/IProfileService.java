@@ -31,7 +31,9 @@ public interface IProfileService {
     boolean editTeamScope(long scopeId, TeamScope scope) throws Exception;
 
     boolean addUserToTeam(long userId, long teamId, int roleId) throws Exception;
+    boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval) throws Exception;
     UserTeam findCurrentTeamOfUser(long userId) throws Exception;
+    UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly) throws Exception;
     TeamProfile findTeamByName(String name) throws Exception;
 
     boolean logoutUser(long userId, long ts) throws Exception;
