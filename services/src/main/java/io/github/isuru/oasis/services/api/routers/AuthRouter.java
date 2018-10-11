@@ -62,26 +62,13 @@ public class AuthRouter extends BaseRouters {
             }
         }
 
-        boolean activated;
         // if ldap auth success
         UserProfile profile = getApiService().getProfileService().readUserProfile(username);
         if (profile == null) {
-            // non-admin user first time login...
-            if (!RESERVED_USERS.contains(username)) {
-                // add to database
-                UserProfile userNew = new UserProfile();
-                userNew.setName(captureNameFromEmail(username));
-                userNew.setEmail(username);
-                userNew.setActive(true);
-                long idNew = getApiService().getProfileService().addUserProfile(userNew);
-                profile = getApiService().getProfileService().readUserProfile(idNew);
-                activated = false;
-            } else {
-                throw new ApiAuthException("Authentication failure! Username or password incorrect!");
-            }
-        } else {
-            activated = profile.isActivated();
+            // no profiles associated with user.
+            throw new ApiAuthException("Authentication failure! Username or password incorrect!");
         }
+        boolean activated = profile.isActivated();
         UserTeam team = getApiService().getProfileService().findCurrentTeamOfUser(profile.getId());
         int role = UserRole.PLAYER;
         if (team != null) {

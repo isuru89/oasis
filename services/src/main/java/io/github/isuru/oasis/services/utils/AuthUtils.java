@@ -211,7 +211,16 @@ public final class AuthUtils {
         private long user;
         private long exp;
         private long issuedAt;
+        private long teamId;
         private int role = UserRole.PLAYER;
+
+        public long getTeamId() {
+            return teamId;
+        }
+
+        public void setTeamId(long teamId) {
+            this.teamId = teamId;
+        }
 
         public long getIssuedAt() {
             return issuedAt;
