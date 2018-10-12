@@ -10,6 +10,7 @@ public class BadgeDef {
     private Long id;
     private String name;
     private String displayName;
+    private boolean manual = false;
     private BadgeSourceDef from;
     private String event;
     private String condition;
@@ -18,6 +19,14 @@ public class BadgeDef {
     private Double awardPoints;
     private int maxBadges = Integer.MAX_VALUE;
     private List<SubBadgeDef> subBadges;
+
+    public boolean isManual() {
+        return manual;
+    }
+
+    public void setManual(boolean manual) {
+        this.manual = manual;
+    }
 
     public Double getAwardPoints() {
         return awardPoints;

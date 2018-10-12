@@ -25,6 +25,10 @@ public class BadgeParser {
     public static List<BadgeRule> parse(List<BadgeDef> badgeDefs) throws IOException {
         List<BadgeRule> badgeRules = new LinkedList<>();
         for (BadgeDef badgeDef : badgeDefs) {
+            if (badgeDef.isManual()) {
+                continue;
+            }
+
             Badge badge = new Badge(badgeDef.getId(), badgeDef.getName());
             badge.setAwardPoints(badgeDef.getAwardPoints());
 
