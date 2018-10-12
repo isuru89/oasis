@@ -1,9 +1,6 @@
 package io.github.isuru.oasis.services.api;
 
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.TeamScope;
-import io.github.isuru.oasis.services.model.UserProfile;
-import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.model.*;
 
 import java.util.List;
 
@@ -35,6 +32,12 @@ public interface IProfileService {
     UserTeam findCurrentTeamOfUser(long userId) throws Exception;
     UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly) throws Exception;
     TeamProfile findTeamByName(String name) throws Exception;
+
+    long requestForRole(long byUser, int teamScopeId, int roleId, long startTime) throws Exception;
+    boolean rejectRequestedRole(int requestId, long rejectedBy) throws Exception;
+    boolean removeCurrentRole(long userId, int teamScopeId, long endTime, long removedBy) throws Exception;
+    boolean approveRole(int requestId, long approvedTime, long approvedBy) throws Exception;
+    List<UserTeamScope> listCurrentUserRoles(long userId) throws Exception;
 
     boolean logoutUser(long userId, long ts) throws Exception;
 

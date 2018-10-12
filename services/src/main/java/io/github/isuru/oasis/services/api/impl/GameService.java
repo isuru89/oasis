@@ -7,11 +7,14 @@ import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.api.IGameService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.api.IProfileService;
+import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.exception.OasisGameException;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
+import io.github.isuru.oasis.services.utils.UserRole;
 
 import java.sql.Connection;
 import java.util.List;
@@ -31,11 +34,23 @@ public class GameService extends BaseService implements IGameService {
         Checks.greaterThanZero(byUser, "user");
         Checks.greaterThanZero(awardDto.getToUser(), "toUser");
         Checks.validate(awardDto.getAmount() != 0.0f, "Point amount should not be equal to zero!");
+        Checks.validate(awardDto.getToUser() != byUser, "You cannot award points to yourself!");
 
-        UserTeam currentTeamOfUser = getApiService().getProfileService().findCurrentTeamOfUser(awardDto.getToUser());
+        IProfileService ps = getApiService().getProfileService();
+
+        UserTeam currentTeamOfUser = ps.findCurrentTeamOfUser(awardDto.getToUser());
         long teamId = currentTeamOfUser != null ? currentTeamOfUser.getTeamId() : DataCache.get().getTeamDefault().getId();
         long scopeId = currentTeamOfUser != null ? currentTeamOfUser.getScopeId() : DataCache.get().getTeamScopeDefault().getId();
         long gameId = awardDto.getGameId() != null ? awardDto.getGameId() : DataCache.get().getDefGameId();
+
+        // only curators and admins can award points to the same user as
+        if (DataCache.get().getAdminUserId() != byUser
+                && ps.listCurrentUserRoles(byUser).stream().noneMatch(uts -> uts.isApproved()
+                                    && scopeId == uts.getTeamScopeId()
+                                    && uts.getUserRole() == UserRole.CURATOR)) {
+            throw new ApiAuthException("You cannot award points to user " + awardDto.getToUser()
+                    + ", because you do not have required permissions or user is not belong to same team scope as you!");
+        }
 
         Map<String, Object> data = Maps.create()
                 .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_COMPENSATE_POINTS)
@@ -58,11 +73,23 @@ public class GameService extends BaseService implements IGameService {
         Checks.greaterThanZero(byUser, "user");
         Checks.greaterThanZero(awardDto.getToUser(), "toUser");
         Checks.greaterThanZero(awardDto.getBadgeId(), "Badge id must be a valid one!");
+        Checks.validate(byUser != awardDto.getToUser(), "You cannot award badges to yourself!");
 
-        UserTeam currentTeamOfUser = getApiService().getProfileService().findCurrentTeamOfUser(awardDto.getToUser());
+        IProfileService ps = getApiService().getProfileService();
+
+        UserTeam currentTeamOfUser = ps.findCurrentTeamOfUser(awardDto.getToUser());
         long teamId = currentTeamOfUser != null ? currentTeamOfUser.getTeamId() : DataCache.get().getTeamDefault().getId();
         long scopeId = currentTeamOfUser != null ? currentTeamOfUser.getScopeId() : DataCache.get().getTeamScopeDefault().getId();
         long gameId = awardDto.getGameId() != null ? awardDto.getGameId() : DataCache.get().getDefGameId();
+
+        // only curators and admins can award points to the same user as
+        if (DataCache.get().getAdminUserId() != byUser
+                && ps.listCurrentUserRoles(byUser).stream().noneMatch(uts -> uts.isApproved()
+                && scopeId == uts.getTeamScopeId()
+                && uts.getUserRole() == UserRole.CURATOR)) {
+            throw new ApiAuthException("You cannot award badges to user " + awardDto.getToUser()
+                    + ", because you do not have required permissions or user is not belong to same team scope as you!");
+        }
 
         Map<String, Object> data = Maps.create()
                 .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_AWARD_BADGE)

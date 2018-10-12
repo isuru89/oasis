@@ -8,6 +8,7 @@ import io.github.isuru.oasis.services.model.BadgeAwardDto;
 import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.model.PointAwardDto;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
+import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.ValueMap;
 import org.slf4j.Logger;

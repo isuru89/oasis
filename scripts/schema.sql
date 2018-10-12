@@ -166,6 +166,18 @@ CREATE TABLE IF NOT EXISTS OA_TEAM_USER (
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS OA_TEAM_SCOPE_USER (
+    id              INT PRIMARY KEY AUTO_INCREMENT,
+    team_scope_id   INT,
+    user_id         INT,
+    role_id         INT DEFAULT 2,
+    since           BIGINT,
+    until           BIGINT,
+    is_approved     TINYINT(1) DEFAULT 1,
+    approved_at     BIGINT,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS OA_CHALLENGE_WINNER (
     user_id         INT,
     team_id         INT,

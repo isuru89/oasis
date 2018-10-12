@@ -7,6 +7,7 @@ import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
+import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
@@ -26,6 +27,8 @@ public class DataCache {
     private IOasisApiService apiService;
 
     private String allUserTmpPassword;
+
+    private long adminUserId;
 
     private final Map<Long, OasisGameDef> cache = new ConcurrentHashMap<>();
     private long defGameId;
@@ -75,10 +78,20 @@ public class DataCache {
                     "Run the bootstrap and make default team and team scope.");
         }
 
+        UserProfile userProfile = apiService.getProfileService().readUserProfile("admin@oasis.com");
+        if (userProfile == null) {
+            throw new IllegalStateException("No admin user is found on the system!");
+        }
+        adminUserId = userProfile.getId();
+
         internalEventSourceToken = apiService.getEventService().readInternalSourceToken()
                 .orElseThrow(() -> new IllegalStateException(
                         "Internal event source token is not found in database!" +
                         "Run the bootstrap and make default team and team scope."));
+    }
+
+    public long getAdminUserId() {
+        return adminUserId;
     }
 
     public OasisGameDef loadGameDefs(long gameId) throws Exception {

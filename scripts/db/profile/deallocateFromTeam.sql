@@ -5,3 +5,5 @@ WHERE
     id = :id
     AND
     is_approved = 1
+    AND
+    until IS NULL

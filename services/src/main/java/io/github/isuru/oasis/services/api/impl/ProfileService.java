@@ -4,10 +4,7 @@ import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IProfileService;
 import io.github.isuru.oasis.services.api.dto.HeroDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.TeamScope;
-import io.github.isuru.oasis.services.model.UserProfile;
-import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
@@ -399,5 +396,100 @@ public class ProfileService extends BaseService implements IProfileService {
             }
             return success;
         });
+    }
+
+    @Override
+    public long requestForRole(long byUser, int teamScopeId, int roleId, long startTime) throws Exception {
+        Checks.greaterThanZero(byUser, "byUser");
+        Checks.greaterThanZero(teamScopeId, "teamScopeId");
+        Checks.greaterThanZero(roleId, "roleId");
+        Checks.greaterThanZero(startTime, "startTime");
+
+        return getDao().executeInsert("profile/flow/requestRole",
+                Maps.create()
+                    .put("teamScopeId", teamScopeId)
+                    .put("userId", byUser)
+                    .put("roleId", roleId)
+                    .put("startTime", startTime)
+                    .build(),
+                "id");
+    }
+
+    @Override
+    public boolean rejectRequestedRole(int requestId, long rejectedBy) throws Exception {
+        Checks.greaterThanZero(requestId, "requestId");
+        Checks.greaterThanZero(rejectedBy, "rejectedBy");
+
+        UserTeamScope userTeamScope = getTheOnlyRecord("profile/flow/readRoleRequest",
+                Maps.create("id", requestId),
+                UserTeamScope.class);
+
+        if (userTeamScope == null) {
+            throw new InputValidationException("Given request id is not found in the system!");
+        }
+        if (userTeamScope.isApproved() || isValid(userTeamScope.getModifiedBy())) {
+            throw new InputValidationException("Given request id is already has been approved or rejected!");
+        }
+
+        // @TODO check rejectedBy user has permissions
+
+        return getDao().executeCommand("profile/flow/rejectRole",
+                Maps.create()
+                    .put("id", requestId)
+                    .put("modifiedBy", rejectedBy).build()) > 0;
+    }
+
+    @Override
+    public boolean removeCurrentRole(long userId, int teamScopeId, long endTime, long removedBy) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+        Checks.greaterThanZero(teamScopeId, "teamScopeId");
+        Checks.greaterThanZero(endTime, "endTime");
+        Checks.greaterThanZero(removedBy, "removedBy");
+
+        // @TODO check removed by user has the permissions
+
+        return getDao().executeCommand("profile/flow/removeRole",
+                Maps.create()
+                    .put("userId", userId)
+                    .put("teamScopeId", teamScopeId)
+                    .put("endTime", endTime)
+                    .put("modifiedBy", removedBy)
+                    .build()) > 0;
+    }
+
+    @Override
+    public boolean approveRole(int requestId, long approvedTime, long approvedBy) throws Exception {
+        Checks.greaterThanZero(requestId, "requestId");
+        Checks.greaterThanZero(approvedBy, "approvedBy");
+        Checks.greaterThanZero(approvedTime, "approvedTime");
+
+        UserTeamScope userTeamScope = getTheOnlyRecord("profile/flow/readRoleRequest",
+                Maps.create("id", requestId),
+                UserTeamScope.class);
+
+        if (userTeamScope == null) {
+            throw new InputValidationException("Given request id is not found in the system!");
+        }
+        if (userTeamScope.isApproved() || isValid(userTeamScope.getModifiedBy())) {
+            throw new InputValidationException("Given request id is already has been approved or rejected!");
+        }
+
+        // @TODO check removed by user has the permissions
+
+        return getDao().executeCommand("profile/flow/approveRole",
+                Maps.create()
+                        .put("id", requestId)
+                        .put("approvedAt", approvedTime)
+                        .put("modifiedBy", approvedBy)
+                        .build()) > 0;
+    }
+
+    @Override
+    public List<UserTeamScope> listCurrentUserRoles(long userId) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
+        return toList(getDao().executeQuery("profile/flow/listCurrentUserRoles",
+                Maps.create("userId", userId),
+                UserTeamScope.class));
     }
 }
