@@ -6,6 +6,10 @@ package io.github.isuru.oasis.model;
 public enum AggregatorType {
 
     SUM,
-    COUNT
+    COUNT,
+
+    AVG,
+    MIN,
+    MAX
 
 }

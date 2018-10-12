@@ -13,4 +13,7 @@ public class OasisTimeWindow {
         return new MonthlyEventTimeWindow();
     }
 
+    public static OasisTimeWindowAssigner DAILY() {
+        return new DailyEventTimeWindow();
+    }
 }
