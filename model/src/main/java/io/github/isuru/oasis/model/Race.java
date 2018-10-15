@@ -1,8 +1,7 @@
 package io.github.isuru.oasis.model;
 
-import io.github.isuru.oasis.model.utils.GroupingScope;
-
 import java.io.Serializable;
+import java.util.List;
 
 public class Race implements Serializable {
 
@@ -10,34 +9,13 @@ public class Race implements Serializable {
     private String name;
     private String displayName;
 
-    private String event;
-    private Serializable condition;
+    private List<String> ruleIds;
     private AggregatorType aggregatorType;
-    private Serializable accumulator;
 
-    private Double initialValue = 0.0;
     private String timewindow = "weekly";
-
-    private GroupingScope groupingScope = GroupingScope.TEAM_SCOPE;
 
     private Integer top;
     private Integer bottom;
-
-    public Double getInitialValue() {
-        return initialValue;
-    }
-
-    public void setInitialValue(Double initialValue) {
-        this.initialValue = initialValue;
-    }
-
-    public String getTimewindow() {
-        return timewindow;
-    }
-
-    public void setTimewindow(String timewindow) {
-        this.timewindow = timewindow;
-    }
 
     public Long getId() {
         return id;
@@ -63,20 +41,12 @@ public class Race implements Serializable {
         this.displayName = displayName;
     }
 
-    public String getEvent() {
-        return event;
+    public List<String> getRuleIds() {
+        return ruleIds;
     }
 
-    public void setEvent(String event) {
-        this.event = event;
-    }
-
-    public Serializable getCondition() {
-        return condition;
-    }
-
-    public void setCondition(Serializable condition) {
-        this.condition = condition;
+    public void setRuleIds(List<String> ruleIds) {
+        this.ruleIds = ruleIds;
     }
 
     public AggregatorType getAggregatorType() {
@@ -87,20 +57,12 @@ public class Race implements Serializable {
         this.aggregatorType = aggregatorType;
     }
 
-    public Serializable getAccumulator() {
-        return accumulator;
+    public String getTimewindow() {
+        return timewindow;
     }
 
-    public void setAccumulator(Serializable accumulator) {
-        this.accumulator = accumulator;
-    }
-
-    public GroupingScope getGroupingScope() {
-        return groupingScope;
-    }
-
-    public void setGroupingScope(GroupingScope groupingScope) {
-        this.groupingScope = groupingScope;
+    public void setTimewindow(String timewindow) {
+        this.timewindow = timewindow;
     }
 
     public Integer getTop() {
