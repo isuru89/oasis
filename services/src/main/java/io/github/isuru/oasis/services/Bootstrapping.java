@@ -9,14 +9,9 @@ import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.api.IGameDefService;
 import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.api.IProfileService;
-import io.github.isuru.oasis.services.model.GameOptionsDto;
-import io.github.isuru.oasis.services.model.SubmittedJob;
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.TeamScope;
-import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.Maps;
-import io.github.isuru.oasis.services.utils.RUtils;
 import io.github.isuru.oasis.services.utils.UserRole;
 
 import java.util.LinkedList;
@@ -203,6 +198,17 @@ public class Bootstrapping {
             bdgCompleteDef.setDisplayName("Award points when certain badges are completed.");
             bdgCompleteDef.setAmount(optionsDto.getDefaultBonusPointsForBadge());
             gameDefService.addPointDef(gameId, bdgCompleteDef);
+        }
+
+        {
+            // add race point award rule...
+            PointDef raceAwardDef = new PointDef();
+            raceAwardDef.setName(EventNames.POINT_RULE_RACE_POINTS);
+            raceAwardDef.setDisplayName("Rule to calculate points awarded from races.");
+            raceAwardDef.setAmount("amount");
+            raceAwardDef.setEvent(EventNames.EVENT_AWARD_BADGE);
+            raceAwardDef.setCondition("true");
+            gameDefService.addPointDef(gameId, raceAwardDef);
         }
     }
 

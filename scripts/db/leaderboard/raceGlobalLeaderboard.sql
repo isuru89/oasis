@@ -28,9 +28,6 @@ FROM
             <if(hasInclusions)>
             AND point_id IN \<ruleIds>
             <endif>
-            <if(hasExclusions)>
-            AND point_id NOT IN \<excludeRuleIds>
-            <endif>
         GROUP BY
             user_id
     ) tbl

@@ -11,6 +11,8 @@ public final class EventNames {
     public static final String EVENT_AWARD_BADGE = "__OASIS_MANUAL_BADGE__";
     public static final String EVENT_SHOP_ITEM_SHARE = "__OASIS_ITEM_SHARE__";
 
+    public static final String EVENT_RACE_AWARD = "__OASIS_RACE_AWARD__";
+
     public static final String START_CHALLENGE = "__OASIS_CHALLENGE_START__";
     public static final String CHALLENGE_TIMEOUT = "__OASIS_CHALLENGE_TIMEOUT__";
     public static final String CHALLENGE_COMPLETED = "__OASIS_CHALLENGE_COMPLETED__";
@@ -20,5 +22,6 @@ public final class EventNames {
     public static final String POINT_RULE_MILESTONE_BONUS_NAME = "__oasis_milestone_bonus__";
     public static final String POINT_RULE_BADGE_BONUS_NAME = "__oasis_badge_bonus__";
 
+    public static final String POINT_RULE_RACE_POINTS = "__oasis_race_award__";
 
 }

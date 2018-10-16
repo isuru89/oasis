@@ -35,9 +35,6 @@ FROM
             <if(hasInclusions)>
             AND point_id IN \<ruleIds>
             <endif>
-            <if(hasExclusions)>
-            AND point_id NOT IN \<excludeRuleIds>
-            <endif>
         GROUP BY
             team_id,
             team_scope_id,

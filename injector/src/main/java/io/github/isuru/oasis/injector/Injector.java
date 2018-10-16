@@ -4,12 +4,15 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import io.github.isuru.oasis.db.OasisDbFactory;
+import io.github.isuru.oasis.injector.scheduler.DailyScheduler;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.configs.EnvKeys;
 import io.github.isuru.oasis.model.db.DbProperties;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.utils.OasisUtils;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +35,7 @@ public class Injector {
     private IOasisDao dao;
 
     private void run() throws Exception {
+        System.out.println(System.currentTimeMillis());
         //PropertyConfigurator.configure();
         Configs configs = initConfigs();
         DbProperties dbProps = DbProperties.fromProps(configs);
@@ -62,6 +66,9 @@ public class Injector {
 
         int[] gameIds = {1}; // @TODO change game id
 
+        // start scheduler
+        startScheduler(configs, dao, gameIds);
+
         for (int gId : gameIds) {
             subscribeForGame(gId);
         }
@@ -78,6 +85,58 @@ public class Injector {
                 e.printStackTrace();
             }
         }));
+    }
+
+    private static void startScheduler(Configs configs, IOasisDao dao, int[] gameIds) throws SchedulerException {
+        Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                scheduler.shutdown(true);
+            } catch (SchedulerException e) {
+                e.printStackTrace();
+            }
+        }));
+
+        for (int i = 0; i < gameIds.length; i++) {
+
+            // add daily job
+            JobDataMap dataMap = new JobDataMap();
+            dataMap.put("configs", configs);
+            dataMap.put("dao", dao);
+            dataMap.put("gameId", gameIds[i]);
+
+            JobDetail jobDaily = JobBuilder.newJob(DailyScheduler.class)
+                    .withIdentity("dailyScheduler", "OasisInjector")
+                    .setJobData(dataMap)
+                    .build();
+            JobDetail jobWeekly = JobBuilder.newJob(DailyScheduler.class)
+                    .withIdentity("weeklyScheduler", "OasisInjector")
+                    .setJobData(dataMap)
+                    .build();
+            JobDetail jobMonthly = JobBuilder.newJob(DailyScheduler.class)
+                    .withIdentity("monthlyScheduler", "OasisInjector")
+                    .setJobData(dataMap)
+                    .build();
+
+            CronTrigger triggerDaily = TriggerBuilder.newTrigger()
+                    .withIdentity("triggerDailyCron", "OasisInjector")
+                    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?"))
+                    .build();
+            CronTrigger triggerWeekly = TriggerBuilder.newTrigger()
+                    .withIdentity("triggerWeeklyCron", "OasisInjector")
+                    .withSchedule(CronScheduleBuilder.cronSchedule("1 0 0 * * MON"))
+                    .build();
+            CronTrigger triggerMonthly = TriggerBuilder.newTrigger()
+                    .withIdentity("triggerMonthlyCron", "OasisInjector")
+                    .withSchedule(CronScheduleBuilder.cronSchedule("1 0 0 1 * ?"))
+                    .build();
+
+            scheduler.scheduleJob(jobDaily, triggerDaily);
+            scheduler.scheduleJob(jobWeekly, triggerWeekly);
+            scheduler.scheduleJob(jobMonthly, triggerMonthly);
+        }
+
+        scheduler.start();
     }
 
     private void subscribeForGame(int gameId) throws Exception {

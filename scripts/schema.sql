@@ -90,8 +90,23 @@ CREATE TABLE IF NOT EXISTS OA_STATE (
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 ALTER TABLE OA_STATE ADD PRIMARY KEY (user_id, team_id, state_id);
+
+CREATE TABLE IF NOT EXISTS OA_RACE (
+    user_id         INT,
+    team_id         INT,
+    team_scope_id   INT,
+    race_id         INT,
+    race_start_at   BIGINT,
+    race_end_at     BIGINT,
+    rank_pos        INT,
+    points          FLOAT(4),
+    awarded_at      BIGINT,
+    game_id         INT,
+    is_active       TINYINT(1) DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE OA_RACE ADD PRIMARY KEY (user_id, team_id, race_id, race_start_at, race_end_at);
 
 CREATE TABLE IF NOT EXISTS OA_DEFINITION (
     id              INT PRIMARY KEY AUTO_INCREMENT,

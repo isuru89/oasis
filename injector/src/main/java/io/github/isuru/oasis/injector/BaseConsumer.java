@@ -18,7 +18,7 @@ public abstract class BaseConsumer<T> extends DefaultConsumer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseConsumer.class);
 
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    public static final ObjectMapper MAPPER = new ObjectMapper();
 
     protected IOasisDao dao;
     private Class<T> clz;
