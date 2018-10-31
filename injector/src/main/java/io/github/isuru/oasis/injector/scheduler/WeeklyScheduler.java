@@ -34,6 +34,7 @@ public class WeeklyScheduler extends BaseScheduler implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
+        long awardedAt = System.currentTimeMillis();
         IOasisDao dao = (IOasisDao) context.getMergedJobDataMap().get("dao");
         int gameId = (int) context.getMergedJobDataMap().get("gameId");
 
@@ -42,6 +43,7 @@ public class WeeklyScheduler extends BaseScheduler implements Job {
             for (RaceDef raceDef : raceDefList) {
                 Map<String, Object> templateData = new HashMap<>();
                 templateData.put("hasUser", false);
+                templateData.put("hasTeam", false);
                 templateData.put("hasTimeRange", true);
                 templateData.put("hasInclusions", raceDef.getRuleIds() != null && !raceDef.getRuleIds().isEmpty());
                 templateData.put("isTopN", raceDef.getTop() != null && raceDef.getTop() > 0);
@@ -65,6 +67,35 @@ public class WeeklyScheduler extends BaseScheduler implements Job {
                 }
 
                 Iterable<Map<String, Object>> maps = dao.executeQuery(qFile, data, templateData);
+
+                // insert winners to database
+                for (Map<String, Object> row : maps) {
+                    Map<String, Object> winnerRecord = new HashMap<>();
+
+                    winnerRecord.put("userId", row.get("userId"));
+                    winnerRecord.put("raceId", raceDef.getId());
+                    winnerRecord.put("raceStartAt", timeRange.getValue0());
+                    winnerRecord.put("raceEndAt", timeRange.getValue1());
+                    winnerRecord.put("points", row.get("totalPoints"));
+                    winnerRecord.put("awardedAt", awardedAt);
+                    winnerRecord.put("gameId", gameId);
+
+                    if ("teamScope".equalsIgnoreCase(raceDef.getFromScope())) {
+                        winnerRecord.put("teamId", row.get("teamId"));
+                        winnerRecord.put("teamScopeId", row.get("teamScopeId"));
+                        winnerRecord.put("rankPos", row.get("rankTeamScope"));
+
+                    } else if ("team".equalsIgnoreCase(raceDef.getFromScope())) {
+                        winnerRecord.put("teamId", row.get("teamId"));
+                        winnerRecord.put("teamScopeId", row.get("teamScopeId"));
+                        winnerRecord.put("rankPos", row.get("rankTeam"));
+
+                    } else {
+                        winnerRecord.put("rankPos", row.get("rankGlobal"));
+                    }
+
+                    dao.executeInsert("game/addRaceAward", winnerRecord, null);
+                }
             }
 
         } catch (Exception e) {
