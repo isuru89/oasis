@@ -1,4 +1,4 @@
-<if(hasTeam||hasUser||isTopN||isBottomN)>
+<if(hasTeam||hasUser||isTopN||isBottomN||hasFinalTops)>
 SELECT
     *
 FROM
@@ -51,6 +51,13 @@ WHERE
 <endif>
 <if(hasUser)>
     AND rankTbl.userId = :userId
+<endif>
+<if(hasFinalTops)>
+    <if(hasTeam)>
+    AND rankTbl.rankTeam \<= :topThreshold
+    <else>
+    AND rankTbl.rankTeamScope \<= :topThreshold
+    <endif>
 <endif>
 
 <if(isTopN)>

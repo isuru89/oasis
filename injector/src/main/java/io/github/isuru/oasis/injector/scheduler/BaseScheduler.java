@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.ZoneId;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 abstract class BaseScheduler {
 
@@ -32,6 +31,37 @@ abstract class BaseScheduler {
             }
         }
         return raceDefList;
+    }
+
+    boolean validateTeamAndScope(RaceDef raceDef, IOasisDao dao) throws Exception {
+        Integer maxN = Math.max(raceDef.getTop() == null ? 0 : raceDef.getTop(),
+                raceDef.getBottom() == null ? 0 : raceDef.getBottom());
+
+        if ("teamScope".equalsIgnoreCase(raceDef.getFromScope())) {
+            return true;
+        } else if ("team".equalsIgnoreCase(raceDef.getFromScope())) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("teamId", 0);
+            map.put("offset", 0);
+            map.put("limit", maxN);
+            Iterable<Map<String, Object>> usersIt = dao.executeQuery("profile/listUsersOfTeam", map);
+            Iterator<Map<String, Object>> it = usersIt.iterator();
+            int size = 0;
+            while (it.hasNext()) {
+                size++;
+                it.next();
+            }
+            if (size < maxN) {
+                // not enough members in team
+                // @TODO handle one team member vs. many team members
+                return false;
+            } else {
+                return true;
+            }
+
+        } else {
+            return true;
+        }
     }
 
     protected abstract Pair<Long, Long> deriveTimeRange(long ms, ZoneId zoneId);

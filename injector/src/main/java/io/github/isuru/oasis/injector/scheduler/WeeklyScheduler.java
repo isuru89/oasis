@@ -13,9 +13,7 @@ import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class WeeklyScheduler extends BaseScheduler implements Job {
 
@@ -39,6 +37,9 @@ public class WeeklyScheduler extends BaseScheduler implements Job {
         int gameId = (int) context.getMergedJobDataMap().get("gameId");
 
         try {
+            Map<Long, Long> teamCountMap = loadTeamStatus(dao);
+            Map<Long, Long> teamScopeCountMap = loadTeamScopeStatus(dao);
+
             List<RaceDef> raceDefList = readRaces(gameId, dao, "weekly");
             for (RaceDef raceDef : raceDefList) {
                 Map<String, Object> templateData = new HashMap<>();
@@ -46,8 +47,9 @@ public class WeeklyScheduler extends BaseScheduler implements Job {
                 templateData.put("hasTeam", false);
                 templateData.put("hasTimeRange", true);
                 templateData.put("hasInclusions", raceDef.getRuleIds() != null && !raceDef.getRuleIds().isEmpty());
-                templateData.put("isTopN", raceDef.getTop() != null && raceDef.getTop() > 0);
-                templateData.put("isBottomN", raceDef.getBottom() != null && raceDef.getBottom() > 0);
+                templateData.put("isTopN", false);
+                templateData.put("isBottomN", false);
+                templateData.put("hasFinalTops", true);
 
                 long currMs = System.currentTimeMillis();
                 Pair<Long, Long> timeRange = deriveTimeRange(currMs, ZoneId.systemDefault());
@@ -59,6 +61,7 @@ public class WeeklyScheduler extends BaseScheduler implements Job {
                 data.put("bottomN", raceDef.getBottom());
                 data.put("ruleIds", raceDef.getRuleIds());
                 data.put("aggType", raceDef.getAggregatorType());
+                data.put("topThreshold", raceDef.getTop());
 
                 String qFile = "leaderboard/raceGlobalLeaderboard";
                 if ("teamScope".equalsIgnoreCase(raceDef.getFromScope())
@@ -81,14 +84,35 @@ public class WeeklyScheduler extends BaseScheduler implements Job {
                     winnerRecord.put("gameId", gameId);
 
                     if ("teamScope".equalsIgnoreCase(raceDef.getFromScope())) {
+                        long teamScopeId = Long.parseLong(row.get("teamScopeId").toString());
+                        int rankScopeTeam = Integer.parseInt(row.get("rankTeamScope").toString());
+
+                        long playerCount = teamScopeCountMap.get(teamScopeId);
+                        if (playerCount == 1) {
+                            continue;
+                        } else if (playerCount < raceDef.getTop() && rankScopeTeam != 1) {
+                            continue;
+                        }
+
                         winnerRecord.put("teamId", row.get("teamId"));
-                        winnerRecord.put("teamScopeId", row.get("teamScopeId"));
-                        winnerRecord.put("rankPos", row.get("rankTeamScope"));
+                        winnerRecord.put("teamScopeId", teamScopeId);
+                        winnerRecord.put("rankPos", rankScopeTeam);
 
                     } else if ("team".equalsIgnoreCase(raceDef.getFromScope())) {
-                        winnerRecord.put("teamId", row.get("teamId"));
+                        long teamId = Long.parseLong(row.get("teamId").toString());
+                        int rankTeam = Integer.parseInt(row.get("rankTeam").toString());
+
+                        long playerCount = teamCountMap.get(teamId);
+                        if (playerCount == 1) { // no awards. skip.
+                            continue;
+                        } else if (playerCount < raceDef.getTop() && rankTeam != 1) {
+                            // only the top will be awarded points
+                            continue;
+                        }
+
+                        winnerRecord.put("teamId", teamId);
                         winnerRecord.put("teamScopeId", row.get("teamScopeId"));
-                        winnerRecord.put("rankPos", row.get("rankTeam"));
+                        winnerRecord.put("rankPos", rankTeam);
 
                     } else {
                         winnerRecord.put("rankPos", row.get("rankGlobal"));
@@ -100,6 +124,39 @@ public class WeeklyScheduler extends BaseScheduler implements Job {
 
         } catch (Exception e) {
             LOG.error("Error while reading race definitions from database!", e);
+        }
+    }
+
+    private Map<Long, Long> loadTeamScopeStatus(IOasisDao dao) throws Exception {
+        List<TeamStatusStat> teamList = toList(dao.executeQuery("profile/listUserCountOfTeamScope",
+                new HashMap<>(), TeamStatusStat.class));
+        Map<Long, Long> teamScopeCounts = new HashMap<>();
+        for (TeamStatusStat statusStat : teamList) {
+            teamScopeCounts.put(statusStat.getId(), statusStat.getTotalUsers());
+        }
+        return teamScopeCounts;
+    }
+
+    private Map<Long, Long> loadTeamStatus(IOasisDao dao) throws Exception {
+        List<TeamStatusStat> teamList = toList(dao.executeQuery("profile/listUserCountOfTeams",
+                new HashMap<>(), TeamStatusStat.class));
+        Map<Long, Long> teamCounts = new HashMap<>();
+        for (TeamStatusStat statusStat : teamList) {
+            teamCounts.put(statusStat.getId(), statusStat.getTotalUsers());
+        }
+        return teamCounts;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> List<T> toList(Iterable<T> iterable) {
+        if (iterable instanceof List) {
+            return (List)iterable;
+        } else {
+            List<T> list = new LinkedList<>();
+            for (T item : iterable) {
+                list.add(item);
+            }
+            return list;
         }
     }
 }
