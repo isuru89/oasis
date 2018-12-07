@@ -133,6 +133,8 @@ public class BadgeOperator {
             return inputStream.window(OasisTimeWindow.WEEKLY());
         } else if ("monthly".equalsIgnoreCase(rule.getDuration())) {
             return inputStream.window(OasisTimeWindow.MONTHLY());
+        } else if ("daily".equalsIgnoreCase(rule.getDuration())) {
+            return inputStream.window(OasisTimeWindow.DAILY());
         } else {
             Time duration = Utils.fromStr(rule.getDuration());
             return inputStream.timeWindow(duration, Time.of(1, duration.getUnit()));
@@ -144,6 +146,8 @@ public class BadgeOperator {
             return inputStream.window(OasisTimeWindow.WEEKLY());
         } else if ("monthly".equalsIgnoreCase(rule.getDuration())) {
             return inputStream.window(OasisTimeWindow.MONTHLY());
+        } else if ("daily".equalsIgnoreCase(rule.getDuration())) {
+            return inputStream.window(OasisTimeWindow.DAILY());
         } else {
             Time duration = Utils.fromStr(rule.getDuration());
             return inputStream.timeWindow(duration, Time.of(1, duration.getUnit()));
