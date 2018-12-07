@@ -5,6 +5,8 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.injector.scheduler.DailyScheduler;
+import io.github.isuru.oasis.injector.scheduler.MonthlyScheduler;
+import io.github.isuru.oasis.injector.scheduler.WeeklyScheduler;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.configs.EnvKeys;
@@ -13,6 +15,8 @@ import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +28,8 @@ import java.util.concurrent.TimeoutException;
  * @author iweerarathna
  */
 public class Injector {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Injector.class);
 
     private static final boolean DURABLE = true;
     private static final boolean AUTO_ACK = false;
@@ -45,6 +51,7 @@ public class Injector {
             try {
                 dao.close();
             } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
                 e.printStackTrace();
             }
         }));
@@ -77,11 +84,13 @@ public class Injector {
             try {
                 channel.close();
             } catch (IOException | TimeoutException e) {
+                LOG.error(e.getMessage(), e);
                 e.printStackTrace();
             }
             try {
                 connection.close();
             } catch (IOException e) {
+                LOG.error(e.getMessage(), e);
                 e.printStackTrace();
             }
         }));
@@ -93,6 +102,7 @@ public class Injector {
             try {
                 scheduler.shutdown(true);
             } catch (SchedulerException e) {
+                LOG.error(e.getMessage(), e);
                 e.printStackTrace();
             }
         }));
@@ -109,11 +119,11 @@ public class Injector {
                     .withIdentity("dailyScheduler", "OasisInjector")
                     .setJobData(dataMap)
                     .build();
-            JobDetail jobWeekly = JobBuilder.newJob(DailyScheduler.class)
+            JobDetail jobWeekly = JobBuilder.newJob(WeeklyScheduler.class)
                     .withIdentity("weeklyScheduler", "OasisInjector")
                     .setJobData(dataMap)
                     .build();
-            JobDetail jobMonthly = JobBuilder.newJob(DailyScheduler.class)
+            JobDetail jobMonthly = JobBuilder.newJob(MonthlyScheduler.class)
                     .withIdentity("monthlyScheduler", "OasisInjector")
                     .setJobData(dataMap)
                     .build();
