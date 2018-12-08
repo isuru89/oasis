@@ -10,15 +10,33 @@ public class BadgeDef {
     private Long id;
     private String name;
     private String displayName;
+    private String description;
     private boolean manual = false;
     private BadgeSourceDef from;
     private String event;
     private String condition;
     private Integer streak;
+    private Boolean continuous = Boolean.FALSE;
     private String within;
     private Double awardPoints;
     private int maxBadges = Integer.MAX_VALUE;
     private List<SubBadgeDef> subBadges;
+
+    public Boolean getContinuous() {
+        return continuous;
+    }
+
+    public void setContinuous(Boolean continuous) {
+        this.continuous = continuous;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public boolean isManual() {
         return manual;
@@ -121,9 +139,18 @@ public class BadgeDef {
         private String id;
         private String name;
         private String displayName;
+        private String description;
         private String condition;
         private Double awardPoints;
         private Integer level;
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
 
         public Double getAwardPoints() {
             return awardPoints;

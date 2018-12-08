@@ -17,6 +17,7 @@ public class BadgeEvent implements Event {
     private BadgeRule rule;
     private List<? extends Event> events;
     private Event causedEvent;
+    private String tag;
 
     public BadgeEvent(Long userId, Badge badge, BadgeRule rule, List<? extends Event> events, Event causedEvent) {
         this.badge = badge;
@@ -24,6 +25,14 @@ public class BadgeEvent implements Event {
         this.causedEvent = causedEvent;
         this.events = events;
         this.user = userId;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public List<? extends Event> getEvents() {

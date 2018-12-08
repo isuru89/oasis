@@ -15,6 +15,7 @@ public class BadgeFromEvents extends BadgeRule {
     private String eventType;
     private Serializable condition;
     private int streak;
+    private boolean continuous;
     private String duration;
     private List<? extends Badge> subBadges;
 
@@ -48,6 +49,14 @@ public class BadgeFromEvents extends BadgeRule {
         } else {
             return null;
         }
+    }
+
+    public boolean isContinuous() {
+        return continuous;
+    }
+
+    public void setContinuous(boolean continuous) {
+        this.continuous = continuous;
     }
 
     public String getEventType() {

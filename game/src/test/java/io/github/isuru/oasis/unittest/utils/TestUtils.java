@@ -18,10 +18,32 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.List;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 public class TestUtils {
+
+    public static void main(String[] args) {
+        Instant start = LocalDateTime.of(2018, 12, 1, 0, 1)
+                .atZone(ZoneId.systemDefault()).toInstant();
+        Instant end = LocalDateTime.of(2018, 12, 3, 23, 59)
+                .atZone(ZoneId.systemDefault()).toInstant();
+        int diff = (int) (end.toEpochMilli() - start.toEpochMilli());
+        Random r = new Random(123);
+        List<Integer> nums = new ArrayList<>();
+        for (int i = 0; i < 33; i++) {
+            nums.add(r.nextInt(diff));
+        }
+        Collections.sort(nums);
+
+        long sm = start.toEpochMilli();
+        for (int i = 0; i < nums.size(); i++) {
+            System.out.println(sm + nums.get(i));
+        }
+    }
+
 
     public static List<Tuple3<Long, String, Double>> parseWinners(String file) throws IOException {
         try (InputStream inputStream = TestUtils.loadResource(file)) {

@@ -26,6 +26,14 @@ public class Utils {
                 .newInstance();
     }
 
+    public static <T> T firstNonNull(T v1, T v2) {
+        if (v1 != null) {
+            return v1;
+        } else {
+            return v2;
+        }
+    }
+
     public static boolean eventEquals(Event against, String eventType) {
         return eventType.equals(against.getEventType());
     }

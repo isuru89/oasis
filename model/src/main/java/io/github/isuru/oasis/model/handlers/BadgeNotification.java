@@ -15,11 +15,13 @@ public class BadgeNotification implements Serializable {
     private Badge badge;
     private String tag;
 
-    public BadgeNotification(long userId, List<? extends Event> events, BadgeRule rule, Badge badge) {
+    public BadgeNotification(long userId, List<? extends Event> events, BadgeRule rule, Badge badge,
+                             String tag) {
         this.events = events;
         this.rule = rule;
         this.badge = badge;
         this.userId = userId;
+        this.tag = tag;
     }
 
     public long getUserId() {
@@ -28,10 +30,6 @@ public class BadgeNotification implements Serializable {
 
     public String getTag() {
         return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
     }
 
     public List<? extends Event> getEvents() {

@@ -10,12 +10,22 @@ public class PointDef {
     private Long id;
     private String name;
     private String displayName;
+    private String description;
+
     private String event;
     private String source;
     private String condition;
     private String conditionClass;
     private Object amount;
     private List<PointsAdditional> additionalPoints;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getSource() {
         return source;

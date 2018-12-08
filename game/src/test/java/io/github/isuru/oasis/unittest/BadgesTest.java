@@ -22,4 +22,8 @@ class BadgesTest extends AbstractTest {
         beginTest("badge-test-points");
     }
 
+    @Test
+    void testAggBadges() throws Exception {
+        beginTest("badge-agg-points");
+    }
 }

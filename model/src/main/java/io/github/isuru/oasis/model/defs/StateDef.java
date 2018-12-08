@@ -11,6 +11,7 @@ public class StateDef {
     private Long id;
     private String name;
     private String displayName;
+    private String description;
 
     private String event;
     private String condition;
@@ -87,6 +88,14 @@ public class StateDef {
         public void setPoints(Double points) {
             this.points = points;
         }
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public List<StateChangeAwards> getStateChangeAwards() {

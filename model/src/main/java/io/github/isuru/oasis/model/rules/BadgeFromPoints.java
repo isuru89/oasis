@@ -17,6 +17,25 @@ public class BadgeFromPoints extends BadgeRule {
     private String duration;
     private List<? extends Badge> subBadges;
 
+    private String aggregator;
+    private String condition;
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
+
+    public String getAggregator() {
+        return aggregator;
+    }
+
+    public void setAggregator(String aggregator) {
+        this.aggregator = aggregator;
+    }
+
     public boolean hasSubStreakBadges() {
         return subBadges != null && !subBadges.isEmpty() && streak > 0;
     }

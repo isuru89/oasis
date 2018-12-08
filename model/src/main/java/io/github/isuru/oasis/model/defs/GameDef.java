@@ -10,8 +10,17 @@ public class GameDef {
     private Long id;
     private String name;
     private String displayName;
+    private String description;
 
     private Map<String, Object> constants;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Long getId() {
         return id;

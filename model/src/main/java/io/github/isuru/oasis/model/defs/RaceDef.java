@@ -7,6 +7,7 @@ public class RaceDef {
     private Long id;
     private String name;
     private String displayName;
+    private String description;
 
     private String fromScope;
     private List<String> ruleIds;
@@ -16,6 +17,14 @@ public class RaceDef {
 
     private Integer top;
     private Integer bottom;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Long getId() {
         return id;

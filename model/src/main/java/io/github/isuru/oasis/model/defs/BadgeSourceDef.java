@@ -12,7 +12,25 @@ public class BadgeSourceDef {
     private String pointsRef;
     private Integer streak;
     private String within;
+    private String aggregator;
+    private String condition;
     private List<BadgeDef.SubBadgeDef> subBadges;
+
+    public String getAggregator() {
+        return aggregator;
+    }
+
+    public void setAggregator(String aggregator) {
+        this.aggregator = aggregator;
+    }
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
 
     public Integer getLevel() {
         return level;

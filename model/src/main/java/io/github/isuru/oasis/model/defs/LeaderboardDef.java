@@ -7,10 +7,19 @@ public class LeaderboardDef {
     private Long id;
     private String name;
     private String displayName;
+    private String description;
 
     private List<String> ruleIds;
     private List<String> excludeRuleIds;
     private String orderBy;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Long getId() {
         return id;

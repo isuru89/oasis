@@ -14,7 +14,8 @@ public class BadgeNotifier implements MapFunction<BadgeEvent, BadgeNotification>
         return new BadgeNotification(event.getUser(),
                 event.getEvents(),
                 event.getRule(),
-                event.getBadge());
+                event.getBadge(),
+                event.getTag());
     }
 
 }

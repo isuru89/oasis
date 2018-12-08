@@ -11,6 +11,8 @@ public class MilestoneDef {
     private Long id;
     private String name;
     private String displayName;
+    private String description;
+
     private String from;
     private List<String> pointRefs;
     private String event;
@@ -27,6 +29,14 @@ public class MilestoneDef {
             return awardPoints.get(level);
         }
         return null;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setAwardPoints(Map<Integer, Double> awardPoints) {

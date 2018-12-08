@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.game.parser;
 
+import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.Badge;
 import io.github.isuru.oasis.model.rules.BadgeFromEvents;
 import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
@@ -42,13 +43,20 @@ public class BadgeParser {
                     bp.setDuration(from.getWithin());
                     bp.setStreak(from.getStreak() != null ? from.getStreak() : 0);
                     bp.setBadge(badge);
+                    bp.setAggregator(from.getAggregator());
+                    bp.setCondition(from.getCondition());
 
                     if (from.getSubBadges() != null) {
-                        List<BadgeFromPoints.StreakSubBadge> subBadges = new LinkedList<>();
+                        List<Badge> subBadges = new LinkedList<>();
                         for (BadgeDef.SubBadgeDef sbd : from.getSubBadges()) {
-                            BadgeFromPoints.StreakSubBadge streakSubBadge = new BadgeFromPoints.StreakSubBadge(sbd.getName(), badge, sbd.getStreak());
-                            streakSubBadge.setAwardPoints(sbd.getAwardPoints());
-                            subBadges.add(streakSubBadge);
+                            if (sbd.getCondition() != null) {
+                                subBadges.add(new BadgeFromEvents.ConditionalSubBadge(sbd.getName(), badge,
+                                                Utils.compileExpression(sbd.getCondition())));
+                            } else {
+                                BadgeFromPoints.StreakSubBadge streakSubBadge = new BadgeFromPoints.StreakSubBadge(sbd.getName(), badge, sbd.getStreak());
+                                streakSubBadge.setAwardPoints(sbd.getAwardPoints());
+                                subBadges.add(streakSubBadge);
+                            }
                         }
                         bp.setSubBadges(subBadges);
                     }
@@ -80,6 +88,9 @@ public class BadgeParser {
                 bfe.setEventType(badgeDef.getEvent());
                 bfe.setDuration(badgeDef.getWithin());
                 bfe.setMaxBadges(badgeDef.getMaxBadges());
+                if (badgeDef.getContinuous() != null) {
+                    bfe.setContinuous(badgeDef.getContinuous());
+                }
                 if (badgeDef.getCondition() != null) {
                     bfe.setCondition(MVEL.compileExpression(badgeDef.getCondition()));
                 }
