@@ -110,6 +110,9 @@ public class BadgeParser {
                             BadgeFromEvents.ConditionalSubBadge conditionalSubBadge = new BadgeFromEvents.ConditionalSubBadge(sbd.getName(), badge, serializable);
                             conditionalSubBadge.setAwardPoints(sbd.getAwardPoints());
                             subBadges.add(conditionalSubBadge);
+                        } else if (bfe.isContinuous() && sbd.getWithin() != null) {
+                            BadgeFromEvents.ContinuousSubBadge csb = new BadgeFromEvents.ContinuousSubBadge(sbd.getName(), badge, sbd.getWithin());
+                            subBadges.add(csb);
                         } else {
                             throw new IOException("Unknown sub badge type!");
                         }

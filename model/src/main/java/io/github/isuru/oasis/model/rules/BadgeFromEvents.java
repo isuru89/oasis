@@ -111,4 +111,17 @@ public class BadgeFromEvents extends BadgeRule {
             return condition;
         }
     }
+
+    public static class ContinuousSubBadge extends Badge implements Serializable {
+        private String within;
+
+        public ContinuousSubBadge(String name, Badge parent, String within) {
+            super(null, name, parent);
+            this.within = within;
+        }
+
+        public String getWithin() {
+            return within;
+        }
+    }
 }

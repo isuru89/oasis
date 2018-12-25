@@ -26,4 +26,9 @@ class BadgesTest extends AbstractTest {
     void testAggBadges() throws Exception {
         beginTest("badge-agg-points");
     }
+
+    @Test
+    void testBadgeHisto() throws Exception {
+        beginTest("badge-histogram");
+    }
 }

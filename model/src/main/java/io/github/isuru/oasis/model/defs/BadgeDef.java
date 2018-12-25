@@ -143,6 +143,15 @@ public class BadgeDef {
         private String condition;
         private Double awardPoints;
         private Integer level;
+        private String within;
+
+        public String getWithin() {
+            return within;
+        }
+
+        public void setWithin(String within) {
+            this.within = within;
+        }
 
         public String getDescription() {
             return description;

@@ -177,6 +177,7 @@ public class OasisExecution {
                         userPointStream,
                         userStream,
                         userMilestoneStream,
+                        inputSource,
                         badgeRule
                 ).uid(String.format("badge-processor-%s-%s", oasisId, badgeRule.getBadge().getName()));
 

@@ -25,7 +25,7 @@ badges:
     event: "so-login"
     condition: "user_id > 0"
     within: "30 days"
-    continous: true
+    continuous: true
 
     subBadges:
       - name: fanatic

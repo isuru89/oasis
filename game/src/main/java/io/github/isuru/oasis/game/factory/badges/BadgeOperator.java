@@ -1,5 +1,7 @@
 package io.github.isuru.oasis.game.factory.badges;
 
+import io.github.isuru.oasis.game.process.CountProcessor;
+import io.github.isuru.oasis.game.process.EventUserSelector;
 import io.github.isuru.oasis.game.process.triggers.ConditionalTrigger;
 import io.github.isuru.oasis.game.process.triggers.StreakLevelTrigger;
 import io.github.isuru.oasis.game.process.triggers.StreakTrigger;
@@ -14,20 +16,27 @@ import io.github.isuru.oasis.model.events.PointEvent;
 import io.github.isuru.oasis.model.rules.*;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.windowing.assigners.GlobalWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.triggers.ContinuousEventTimeTrigger;
 import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.api.windowing.windows.Window;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * @author iweerarathna
@@ -37,11 +46,12 @@ public class BadgeOperator {
     public static SingleOutputStreamOperator<BadgeEvent> createBadgeFromPoints(KeyedStream<PointEvent, Long> pointStreamByUser,
                                                                KeyedStream<Event, Long> userStream,
                                                                KeyedStream<MilestoneEvent, Long> milestoneStream,
+                                                               DataStream<Event> rawStream,
                                                                BadgeRule badgeRule) {
         if (badgeRule instanceof BadgeFromPoints) {
             return createBadgeFromPoints(pointStreamByUser, (BadgeFromPoints) badgeRule);
         } else if (badgeRule instanceof BadgeFromEvents) {
-            return createBadgeFromEvents(userStream, (BadgeFromEvents) badgeRule);
+            return createBadgeFromEvents(userStream, rawStream, (BadgeFromEvents) badgeRule);
         }  else if (badgeRule instanceof BadgeFromMilestone) {
             if (milestoneStream == null) {
                 throw new RuntimeException("You have NOT defined any milestones to create badges from milestone events!");
@@ -63,6 +73,7 @@ public class BadgeOperator {
     }
 
     private static SingleOutputStreamOperator<BadgeEvent> createBadgeFromEvents(KeyedStream<Event, Long> userStream,
+                                                                                DataStream<Event> rawStream,
                                                                                 BadgeFromEvents badgeRule) {
 
         FilterFunction<Event> filterFunction = new FilterFunction<Event>() {
@@ -75,36 +86,47 @@ public class BadgeOperator {
 
         WindowedStream<Event, Long, ? extends Window> window;
 
-        if (badgeRule.hasSubStreakBadges()) {
-            if (badgeRule.getDuration() != null) {
-                window = timeWindowedStream(badgeRule.getDuration(), userStream)
-                        .trigger(new StreakLevelTrigger<>(badgeRule.getStreakBreakPoints(), filterFunction, true));
-            } else {
-                window = userStream.window(GlobalWindows.create())
-                        .trigger(new StreakLevelTrigger<>(badgeRule.getStreakBreakPoints(), filterFunction));
-            }
+        if (badgeRule.isContinuous()) {
+            KeyedStream<Event, Long> keyedUserStream = rawStream.filter(filterFunction).keyBy(new EventUserSelector<>());
+
+            // @TODO histogram like counting support for weeks and months
+            return  timeHistogramStream(badgeRule.getDuration(), keyedUserStream)
+                    .trigger(ContinuousEventTimeTrigger.of(Time.days(1)))
+                    .process(new CountProcessor<>(badgeRule, new TimeConverterFunction()));
+
 
         } else {
-            if (badgeRule.getCondition() == null) {
-                if (badgeRule.getDuration() == null) {
-                    window = userStream.window(GlobalWindows.create())
-                            .trigger(new StreakTrigger<>(badgeRule.getStreak(), filterFunction));
-                } else {
+            if (badgeRule.hasSubStreakBadges()) {
+                if (badgeRule.getDuration() != null) {
                     window = timeWindowedStream(badgeRule.getDuration(), userStream)
-                            .trigger(new StreakTrigger<>(badgeRule.getStreak(), filterFunction, true));
-                }
-            } else {
-                if (badgeRule.getDuration() == null) {
-                    return userStream.countWindow(1)
-                            .process(new ConditionBadgeHandler<>(badgeRule));
+                            .trigger(new StreakLevelTrigger<>(badgeRule.getStreakBreakPoints(), filterFunction, true));
                 } else {
-                    return timeWindowedStream(badgeRule.getDuration(), userStream)
-                            .process(new ConditionBadgeHandler<>(badgeRule));
+                    window = userStream.window(GlobalWindows.create())
+                            .trigger(new StreakLevelTrigger<>(badgeRule.getStreakBreakPoints(), filterFunction));
+                }
+
+            } else {
+                if (badgeRule.getCondition() == null) {
+                    if (badgeRule.getDuration() == null) {
+                        window = userStream.window(GlobalWindows.create())
+                                .trigger(new StreakTrigger<>(badgeRule.getStreak(), filterFunction));
+                    } else {
+                        window = timeWindowedStream(badgeRule.getDuration(), userStream)
+                                .trigger(new StreakTrigger<>(badgeRule.getStreak(), filterFunction, true));
+                    }
+                } else {
+                    if (badgeRule.getDuration() == null) {
+                        return userStream.countWindow(1)
+                                .process(new ConditionBadgeHandler<>(badgeRule));
+                    } else {
+                        return timeWindowedStream(badgeRule.getDuration(), userStream)
+                                .process(new ConditionBadgeHandler<>(badgeRule));
+                    }
                 }
             }
-        }
 
-        return window.process(new StreakBadgeHandlerEvents<>(badgeRule));
+            return window.process(new StreakBadgeHandlerEvents<>(badgeRule));
+        }
     }
 
     private static SingleOutputStreamOperator<BadgeEvent> createBadgeFromPoints(KeyedStream<PointEvent, Long> pointStreamByUser,
@@ -141,6 +163,19 @@ public class BadgeOperator {
 
         } else {
             throw new RuntimeException("Unknown badge from points definition received!");
+        }
+    }
+
+    private static WindowedStream<Event, Long, TimeWindow> timeHistogramStream(String durationStr, KeyedStream<Event, Long> inputStream) {
+        if ("weekly".equalsIgnoreCase(durationStr)) {
+            return inputStream.window(OasisTimeWindow.WEEKLY());
+        } else if ("monthly".equalsIgnoreCase(durationStr)) {
+            return inputStream.window(OasisTimeWindow.MONTHLY());
+        } else if ("daily".equalsIgnoreCase(durationStr)) {
+            return inputStream.window(OasisTimeWindow.DAILY());
+        } else {
+            Time duration = Time.of(1, TimeUnit.DAYS);
+            return inputStream.timeWindow(duration, Time.of(1, duration.getUnit()));
         }
     }
 
@@ -257,7 +292,15 @@ public class BadgeOperator {
         }
     }
 
-    private static class BadgeAggregator {
+    private static class TimeConverterFunction implements Function<Long, String>, Serializable {
+
+        @Override
+        public String apply(Long aLong) {
+            return Instant.ofEpochMilli(aLong).atZone(ZoneId.of("UTC")).toLocalDate().toString();
+        }
+    }
+
+    private static class BadgeAggregator implements Serializable {
         private Long userId;
         private Double value = 0.0;
         private Event lastRefEvent;
