@@ -1,10 +1,7 @@
 package io.github.isuru.oasis.game.factory;
 
 import io.github.isuru.oasis.game.Oasis;
-import io.github.isuru.oasis.game.process.MilestoneCountProcess;
-import io.github.isuru.oasis.game.process.MilestonePointSumProcess;
-import io.github.isuru.oasis.game.process.MilestoneSumDoubleProcess;
-import io.github.isuru.oasis.game.process.MilestoneSumProcess;
+import io.github.isuru.oasis.game.process.*;
 import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.AggregatorType;
 import io.github.isuru.oasis.model.Event;
@@ -26,8 +23,8 @@ import java.util.stream.Collectors;
  */
 public class MilestoneOperator {
 
-    public static MilestoneOpResponse createPipeline(KeyedStream<Event, Long> userStream,
-                                                            KeyedStream<PointEvent, Long> userPointStream,
+    public static MilestoneOpResponse createPipeline(KeyedStream<PointEvent, Long> userPointStream,
+                                                            DataStream<Event> eventDataStream,
                                                             Milestone milestone,
                                                             OutputTag<MilestoneStateEvent> stateOutputTag,
                                                             Oasis oasis) {
@@ -56,8 +53,9 @@ public class MilestoneOperator {
             List<Long> levels = milestone.getLevels().stream()
                     .map(l -> l.getNumber().longValue())
                     .collect(Collectors.toList());
-            stream = userStream.process(new MilestoneCountProcess(levels, filterFunction, milestone,
-                    stateOutputTag));
+            stream = eventDataStream.filter(filterFunction)
+                        .keyBy(new EventUserSelector<>())
+                        .process(new MilestoneCountProcess(levels, milestone, stateOutputTag));
 
         } else {
             if (milestone.isRealValues() || milestone.getFrom() != null) {
@@ -70,16 +68,19 @@ public class MilestoneOperator {
                             stateOutputTag));
                     usedPointStream = true;
                 } else {
-                    stream = userStream.process(new MilestoneSumDoubleProcess(levels,
-                            filterFunction, milestone.getAccumulatorExpr(), milestone,
-                            stateOutputTag));
+                    stream = eventDataStream.filter(filterFunction)
+                            .keyBy(new EventUserSelector<>())
+                            .process(new MilestoneSumDoubleProcess(levels, milestone.getAccumulatorExpr(),
+                                    milestone, stateOutputTag));
                 }
             } else {
                 List<Long> levels = milestone.getLevels().stream()
                         .map(l -> l.getNumber().longValue())
                         .collect(Collectors.toList());
-                stream = userStream.process(new MilestoneSumProcess(levels, filterFunction,
-                        milestone.getAccumulatorExpr(), milestone, stateOutputTag));
+                stream = eventDataStream.filter(filterFunction)
+                            .keyBy(new EventUserSelector<>())
+                            .process(new MilestoneSumProcess(levels,
+                                milestone.getAccumulatorExpr(), milestone, stateOutputTag));
             }
         }
 

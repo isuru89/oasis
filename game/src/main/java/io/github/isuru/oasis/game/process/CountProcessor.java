@@ -58,12 +58,7 @@ public class CountProcessor<E extends Event, W extends Window> extends ProcessWi
 
     @Override
     public void process(Long userId, Context context, Iterable<E> elements, Collector<BadgeEvent> out) throws Exception {
-        if (Objects.equals(currentStreak.value(), currStreakDesc.getDefaultValue())) {
-            currentStreak.update(0L);
-        }
-        if (Objects.equals(maxAchieved.value(), maxAchDesc.getDefaultValue())) {
-            maxAchieved.update(0L);
-        }
+        initDefaultState();
 
         String timeKey = timeConverter.apply(context.window().maxTimestamp());
 
@@ -117,6 +112,15 @@ public class CountProcessor<E extends Event, W extends Window> extends ProcessWi
 
         } else {
             HistogramCounter.clearLessThan(timeKey, countMap);
+        }
+    }
+
+    private void initDefaultState() throws IOException {
+        if (Objects.equals(currentStreak.value(), currStreakDesc.getDefaultValue())) {
+            currentStreak.update(0L);
+        }
+        if (Objects.equals(maxAchieved.value(), maxAchDesc.getDefaultValue())) {
+            maxAchieved.update(0L);
         }
     }
 

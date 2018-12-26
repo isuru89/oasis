@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.game.factory;
 
 import io.github.isuru.oasis.game.Oasis;
+import io.github.isuru.oasis.game.process.EventUserSelector;
 import io.github.isuru.oasis.game.process.StatesProcess;
 import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.Event;
@@ -8,13 +9,11 @@ import io.github.isuru.oasis.model.OState;
 import io.github.isuru.oasis.model.events.OStateEvent;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 
 public class StatesOperator {
 
     public static DataStream<OStateEvent> createStateStream(OState oState,
-                                                            KeyedStream<Event, Long> keyedUserStream,
+                                                            DataStream<Event> eventDataStream,
                                                             Oasis oasis) {
         FilterFunction<Event> filter;
         if (oState.getCondition() != null) {
@@ -34,7 +33,8 @@ public class StatesOperator {
             };
         }
 
-        return keyedUserStream
+        return eventDataStream.filter(filter)
+                .keyBy(new EventUserSelector<>())
                 .process(new StatesProcess(oState, filter))
                 .uid(String.format("%s-states-processor-%d", oasis.getId(), oState.getId()));
     }

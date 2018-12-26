@@ -13,12 +13,18 @@ import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author iweerarathna
  */
 public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEvent, MilestoneEvent> {
+
+    private final ValueStateDescriptor<Integer> currLevelStateDesc;
+    private final ValueStateDescriptor<Double> stateDesc;
+    private final ValueStateDescriptor<Double> accNegSumDesc;
 
     private List<Double> levels;
     private Milestone milestone;
@@ -36,6 +42,16 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
         this.levels = levels;
         this.milestone = milestone;
         this.outputTag = outputTag;
+
+        currLevelStateDesc =
+                new ValueStateDescriptor<>(String.format("milestone-psd-%d-curr-level", milestone.getId()),
+                        Integer.class);
+        stateDesc =
+                new ValueStateDescriptor<>(String.format("milestone-psd-%d-sum", milestone.getId()),
+                        DoubleSerializer.INSTANCE);
+        accNegSumDesc = new ValueStateDescriptor<>(
+                String.format("milestone-psd-%d-negsum", milestone.getId()),
+                DoubleSerializer.INSTANCE);
     }
 
     @Override
@@ -51,6 +67,8 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
                 }
             }
         }
+
+        initDefaultState();
 
         if (milestone.isOnlyPositive() && acc < 0) {
             accNegSum.update(accNegSum.value() + acc);
@@ -107,20 +125,20 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
         }
     }
 
+    private void initDefaultState() throws IOException {
+        if (Objects.equals(accNegSum.value(), accNegSumDesc.getDefaultValue())) {
+            accNegSum.update(0.0);
+        }
+        if (Objects.equals(currentLevel.value(), currLevelStateDesc.getDefaultValue())) {
+            currentLevel.update(0);
+        }
+        if (Objects.equals(accSum.value(), stateDesc.getDefaultValue())) {
+            accSum.update(0.0);
+        }
+    }
+
     @Override
     public void open(Configuration parameters) {
-        ValueStateDescriptor<Integer> currLevelStateDesc =
-                new ValueStateDescriptor<>(String.format("milestone-psd-%d-curr-level", milestone.getId()),
-                        Integer.class,
-                        0);
-        ValueStateDescriptor<Double> stateDesc =
-                new ValueStateDescriptor<>(String.format("milestone-psd-%d-sum", milestone.getId()),
-                        DoubleSerializer.INSTANCE,
-                        0.0);
-        ValueStateDescriptor<Double> accNegSumDesc = new ValueStateDescriptor<>(
-                String.format("milestone-psd-%d-negsum", milestone.getId()),
-                DoubleSerializer.INSTANCE, 0.0);
-
         accNegSum = getRuntimeContext().getState(accNegSumDesc);
         currentLevel = getRuntimeContext().getState(currLevelStateDesc);
         accSum = getRuntimeContext().getState(stateDesc);

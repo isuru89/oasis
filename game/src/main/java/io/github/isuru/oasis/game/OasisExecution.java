@@ -127,7 +127,7 @@ public class OasisExecution {
         DataStream<OStateEvent> statesStream = null;
         if (statesList != null) {
             for (OState oState : statesList) {
-                DataStream<OStateEvent> thisStream = StatesOperator.createStateStream(oState, userStream, oasis);
+                DataStream<OStateEvent> thisStream = StatesOperator.createStateStream(oState, inputSource, oasis);
                 statesStream = statesStream == null
                         ? thisStream
                         : statesStream.union(thisStream);
@@ -143,8 +143,8 @@ public class OasisExecution {
                     TypeInformation.of(MilestoneStateEvent.class));
             for (Milestone milestone : milestones) {
                 MilestoneOperator.MilestoneOpResponse opResponse = MilestoneOperator.createPipeline(
-                        userStream,
                         userPointStream,
+                        inputSource,
                         milestone, stateTag, oasis);
 
                 DataStream<MilestoneEvent> milestoneEventStream = opResponse.getMilestoneEventStream();
