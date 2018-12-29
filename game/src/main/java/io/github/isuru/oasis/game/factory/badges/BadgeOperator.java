@@ -72,22 +72,39 @@ public class BadgeOperator {
                 .process(new MilestoneBadgeHandler<>(badgeRule));
     }
 
-    private static SingleOutputStreamOperator<BadgeEvent> createBadgeFromEvents(KeyedStream<Event, Long> userStream,
+    private static SingleOutputStreamOperator<BadgeEvent> createBadgeFromEvents(KeyedStream<Event, Long> userStream2,
                                                                                 DataStream<Event> rawStream,
                                                                                 BadgeFromEvents badgeRule) {
 
-        FilterFunction<Event> filterFunction = new FilterFunction<Event>() {
+        FilterFunction<Event> eventFilterFunction = new FilterFunction<Event>() {
             @Override
             public boolean filter(Event value) throws Exception {
-                return Utils.eventEquals(value, badgeRule.getEventType())
-                        && Utils.evaluateCondition(badgeRule.getCondition(), value.getAllFieldValues());
+                return Utils.eventEquals(value, badgeRule.getEventType());
+            }
+        };
+        FilterFunction<Event> condFilterFunction = new FilterFunction<Event>() {
+            @Override
+            public boolean filter(Event value) throws Exception {
+                return badgeRule.getCondition() == null
+                        || Utils.evaluateCondition(badgeRule.getCondition(), value.getAllFieldValues());
             }
         };
 
         WindowedStream<Event, Long, ? extends Window> window;
 
         if (badgeRule.isContinuous()) {
-            KeyedStream<Event, Long> keyedUserStream = rawStream.filter(filterFunction).keyBy(new EventUserSelector<>());
+            //
+            // Badge rules like: Event happens for N continuous days
+            //
+            FilterFunction<Event> combinedFilter = new FilterFunction<Event>() {
+                @Override
+                public boolean filter(Event value) throws Exception {
+                    return Utils.eventEquals(value, badgeRule.getEventType())
+                            && Utils.evaluateCondition(badgeRule.getCondition(), value.getAllFieldValues());
+                }
+            };
+
+            KeyedStream<Event, Long> keyedUserStream = rawStream.filter(combinedFilter).keyBy(new EventUserSelector<>());
 
             // @TODO histogram like counting support for weeks and months
             return  timeHistogramStream(badgeRule.getDuration(), keyedUserStream)
@@ -96,30 +113,34 @@ public class BadgeOperator {
 
 
         } else {
+            KeyedStream<Event, Long> keyedUserStream = rawStream.filter(eventFilterFunction)
+                    .keyBy(new EventUserSelector<>());
+
             if (badgeRule.hasSubStreakBadges()) {
                 if (badgeRule.getDuration() != null) {
-                    window = timeWindowedStream(badgeRule.getDuration(), userStream)
-                            .trigger(new StreakLevelTrigger<>(badgeRule.getStreakBreakPoints(), filterFunction, true));
+                    window = timeWindowedStream(badgeRule.getDuration(), keyedUserStream)
+                            .trigger(new StreakLevelTrigger<>(badgeRule.getStreakBreakPoints(),
+                                    condFilterFunction, true));
                 } else {
-                    window = userStream.window(GlobalWindows.create())
-                            .trigger(new StreakLevelTrigger<>(badgeRule.getStreakBreakPoints(), filterFunction));
+                    window = keyedUserStream.window(GlobalWindows.create())
+                            .trigger(new StreakLevelTrigger<>(badgeRule.getStreakBreakPoints(), condFilterFunction));
                 }
 
             } else {
                 if (badgeRule.getCondition() == null) {
                     if (badgeRule.getDuration() == null) {
-                        window = userStream.window(GlobalWindows.create())
-                                .trigger(new StreakTrigger<>(badgeRule.getStreak(), filterFunction));
+                        window = keyedUserStream.window(GlobalWindows.create())
+                                .trigger(new StreakTrigger<>(badgeRule.getStreak(), condFilterFunction));
                     } else {
-                        window = timeWindowedStream(badgeRule.getDuration(), userStream)
-                                .trigger(new StreakTrigger<>(badgeRule.getStreak(), filterFunction, true));
+                        window = timeWindowedStream(badgeRule.getDuration(), keyedUserStream)
+                                .trigger(new StreakTrigger<>(badgeRule.getStreak(), condFilterFunction, true));
                     }
                 } else {
                     if (badgeRule.getDuration() == null) {
-                        return userStream.countWindow(1)
+                        return keyedUserStream.countWindow(1)
                                 .process(new ConditionBadgeHandler<>(badgeRule));
                     } else {
-                        return timeWindowedStream(badgeRule.getDuration(), userStream)
+                        return timeWindowedStream(badgeRule.getDuration(), keyedUserStream)
                                 .process(new ConditionBadgeHandler<>(badgeRule));
                     }
                 }
