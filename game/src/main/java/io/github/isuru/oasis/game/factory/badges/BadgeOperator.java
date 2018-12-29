@@ -7,14 +7,14 @@ import io.github.isuru.oasis.game.process.triggers.StreakLevelTrigger;
 import io.github.isuru.oasis.game.process.triggers.StreakTrigger;
 import io.github.isuru.oasis.game.process.windows.OasisTimeWindow;
 import io.github.isuru.oasis.game.utils.Utils;
-import io.github.isuru.oasis.model.Badge;
 import io.github.isuru.oasis.model.Event;
-import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.events.BadgeEvent;
 import io.github.isuru.oasis.model.events.MilestoneEvent;
 import io.github.isuru.oasis.model.events.PointEvent;
-import io.github.isuru.oasis.model.rules.*;
-import org.apache.flink.api.common.functions.AggregateFunction;
+import io.github.isuru.oasis.model.rules.BadgeFromEvents;
+import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
+import io.github.isuru.oasis.model.rules.BadgeFromPoints;
+import io.github.isuru.oasis.model.rules.BadgeRule;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
@@ -27,16 +27,7 @@ import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.api.windowing.windows.Window;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 /**
  * @author iweerarathna
@@ -78,7 +69,7 @@ public class BadgeOperator {
 
         FilterFunction<Event> eventFilterFunction = new FilterFunction<Event>() {
             @Override
-            public boolean filter(Event value) throws Exception {
+            public boolean filter(Event value) {
                 return Utils.eventEquals(value, badgeRule.getEventType());
             }
         };
@@ -224,108 +215,6 @@ public class BadgeOperator {
             Time duration = Utils.fromStr(rule.getDuration());
             return inputStream.timeWindow(duration, Time.of(1, duration.getUnit()));
         }
-    }
-
-    private static class SumAggregator implements AggregateFunction<PointEvent, BadgeAggregator, BadgeEvent> {
-
-        private FilterFunction<PointEvent> filterFunction;
-        private BadgeFromPoints badgeRule;
-
-        public SumAggregator(FilterFunction<PointEvent> filterFunction, BadgeFromPoints rule) {
-            this.filterFunction = filterFunction;
-            this.badgeRule = rule;
-        }
-
-        @Override
-        public BadgeAggregator createAccumulator() {
-            return new BadgeAggregator();
-        }
-
-        @Override
-        public BadgeAggregator add(PointEvent value, BadgeAggregator accumulator) {
-            if (accumulator.userId == null) {
-                accumulator.userId = value.getUser();
-            }
-            try {
-                if (filterFunction == null || filterFunction.filter(value)) {
-                    Pair<Double, PointRule> pointScore = value.getPointScore(badgeRule.getPointsId());
-                    if (pointScore != null) {
-                        accumulator.firstRefEvent = Utils.firstNonNull(accumulator.firstRefEvent, value.getRefEvent());
-                        accumulator.value += pointScore.getValue0();
-                        accumulator.lastRefEvent = value.getRefEvent();
-                    }
-                }
-            } catch (Exception e) {
-                return accumulator;
-            }
-            return accumulator;
-        }
-
-        @Override
-        public BadgeEvent getResult(BadgeAggregator accumulator) {
-            Map<String, Object> vars = new HashMap<>();
-            vars.put(badgeRule.getAggregator(), accumulator.value);
-            vars.put("value", accumulator.value);
-            try {
-                if (Utils.evaluateCondition(
-                        Utils.compileExpression(badgeRule.getCondition()), vars)) {
-                    //System.out.println(accumulator.userId + " = " + accumulator.value);
-                    BadgeEvent badgeEvent = new BadgeEvent(accumulator.userId,
-                            badgeRule.getBadge(), badgeRule,
-                            Arrays.asList(accumulator.firstRefEvent, accumulator.lastRefEvent),
-                            accumulator.lastRefEvent);
-                    badgeEvent.setTag(String.valueOf(accumulator.value));
-                    return badgeEvent;
-                } else {
-                    List<? extends Badge> subBadges = badgeRule.getSubBadges();
-                    if (subBadges != null) {
-                        for (Badge badge : subBadges) {
-                            if (badge instanceof BadgeFromEvents.ConditionalSubBadge
-                                    && Utils.evaluateCondition(((BadgeFromEvents.ConditionalSubBadge) badge).getCondition(), vars)) {
-                                System.out.println(accumulator.userId + " = " + accumulator.value);
-                                BadgeEvent badgeEvent = new BadgeEvent(accumulator.userId,
-                                        badge, badgeRule,
-                                        Arrays.asList(accumulator.firstRefEvent, accumulator.lastRefEvent),
-                                        accumulator.lastRefEvent);
-                                badgeEvent.setTag(String.valueOf(accumulator.value));
-                                return badgeEvent;
-                            }
-                        }
-                    }
-                    return new BadgeEvent(-1L, null, null, null, null);
-                }
-            } catch (IOException e) {
-                // @TODO handle error
-                return new BadgeEvent(-1L, null, null, null, null);
-            }
-        }
-
-        @Override
-        public BadgeAggregator merge(BadgeAggregator a, BadgeAggregator b) {
-            BadgeAggregator aggregator = new BadgeAggregator();
-            aggregator.userId = a.userId;
-            aggregator.value = a.value + b.value;
-            aggregator.lastRefEvent =
-                    a.lastRefEvent.getTimestamp() > b.lastRefEvent.getTimestamp() ? a.lastRefEvent : b.lastRefEvent;
-            aggregator.firstRefEvent =
-                    a.firstRefEvent.getTimestamp() > b.firstRefEvent.getTimestamp() ? b.firstRefEvent : a.firstRefEvent;
-            return aggregator;
-        }
-    }
-
-    private static class TimeConverterFunction implements Function<Long, String>, Serializable {
-
-        @Override
-        public String apply(Long aLong) {
-            return Instant.ofEpochMilli(aLong).atZone(ZoneId.of("UTC")).toLocalDate().toString();
-        }
-    }
-
-    private static class BadgeAggregator implements Serializable {
-        private Long userId;
-        private Double value = 0.0;
-        private Event lastRefEvent;
-        private Event firstRefEvent;
     }
 
 }
