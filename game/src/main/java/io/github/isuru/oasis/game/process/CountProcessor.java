@@ -17,7 +17,6 @@ import org.apache.flink.streaming.api.windowing.windows.Window;
 import org.apache.flink.util.Collector;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
 
@@ -62,11 +61,6 @@ public class CountProcessor<E extends Event, W extends Window> extends ProcessWi
 
         String timeKey = timeConverter.apply(context.window().maxTimestamp());
 
-        System.out.println("--------------------------------------------------------------------");
-        System.out.println(context.window().maxTimestamp());
-        System.out.println(timeKey);
-        System.out.println(userId);
-        System.out.println(Instant.ofEpochMilli(context.window().maxTimestamp()));
         Iterator<E> it = elements.iterator();
         int count = 0;
         Event lastE = null;
@@ -93,8 +87,6 @@ public class CountProcessor<E extends Event, W extends Window> extends ProcessWi
                     }
                 }
 
-                System.out.println("---- " + cStreak);
-
                 if (currentStreak.value() < cStreak
                         && (badge.getMaxBadges() != 1 || cStreak > maxAchieved.value())) {
                     // creating a badge
@@ -104,7 +96,6 @@ public class CountProcessor<E extends Event, W extends Window> extends ProcessWi
                             Collections.singletonList(lastE),
                             lastE);
                     out.collect(badgeEvent);
-                    System.out.println("A badge is creating...");
                     currentStreak.update(cStreak);
                     maxAchieved.update(Math.max(maxAchieved.value(), cStreak));
                 }

@@ -2,7 +2,7 @@ badges:
   - id: 351
     name: enthusiast
     displayName: Enthusiast
-    description: Visit the site each day for N consecutive days
+    description: Visit the site each day for 3 consecutive days
 
     event: "so-login"
     condition: "user > 0"
@@ -12,5 +12,5 @@ badges:
     subBadges:
     - name: fanatic
       displayName: Fanatic
-      description: Visit the site each day for 100 consecutive days
+      description: Visit the site each day for 5 consecutive days
       within: "5 days"
