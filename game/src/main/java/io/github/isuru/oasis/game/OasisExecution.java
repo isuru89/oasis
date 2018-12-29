@@ -175,11 +175,10 @@ public class OasisExecution {
 
                 DataStream<BadgeEvent> badgeFromPoints = BadgeOperator.createBadgeFromPoints(
                         userPointStream,
-                        userStream,
                         userMilestoneStream,
                         inputSource,
                         badgeRule
-                ).uid(String.format("badge-processor-%s-%s", oasisId, badgeRule.getBadge().getName()));
+                ).uid(String.format("oasis-%s-badge-processor-%s", oasisId, badgeRule.getBadge().getName()));
 
                 bStream = bStream == null ? badgeFromPoints : bStream.union(badgeFromPoints);
             }

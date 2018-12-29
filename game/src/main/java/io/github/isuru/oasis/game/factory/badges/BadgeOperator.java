@@ -35,14 +35,13 @@ import java.util.concurrent.TimeUnit;
 public class BadgeOperator {
 
     public static SingleOutputStreamOperator<BadgeEvent> createBadgeFromPoints(KeyedStream<PointEvent, Long> pointStreamByUser,
-                                                               KeyedStream<Event, Long> userStream,
                                                                KeyedStream<MilestoneEvent, Long> milestoneStream,
                                                                DataStream<Event> rawStream,
                                                                BadgeRule badgeRule) {
         if (badgeRule instanceof BadgeFromPoints) {
             return createBadgeFromPoints(pointStreamByUser, (BadgeFromPoints) badgeRule);
         } else if (badgeRule instanceof BadgeFromEvents) {
-            return createBadgeFromEvents(userStream, rawStream, (BadgeFromEvents) badgeRule);
+            return createBadgeFromEvents(rawStream, (BadgeFromEvents) badgeRule);
         }  else if (badgeRule instanceof BadgeFromMilestone) {
             if (milestoneStream == null) {
                 throw new RuntimeException("You have NOT defined any milestones to create badges from milestone events!");
@@ -63,8 +62,7 @@ public class BadgeOperator {
                 .process(new MilestoneBadgeHandler<>(badgeRule));
     }
 
-    private static SingleOutputStreamOperator<BadgeEvent> createBadgeFromEvents(KeyedStream<Event, Long> userStream2,
-                                                                                DataStream<Event> rawStream,
+    private static SingleOutputStreamOperator<BadgeEvent> createBadgeFromEvents(DataStream<Event> rawStream,
                                                                                 BadgeFromEvents badgeRule) {
 
         FilterFunction<Event> eventFilterFunction = new FilterFunction<Event>() {

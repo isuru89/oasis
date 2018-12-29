@@ -85,7 +85,7 @@ public class MilestoneOperator {
         }
 
         DataStream<MilestoneEvent> milestoneStream = stream
-                .uid(oasis.getId() + "-milestone-processor-" + milestone.getId());
+                .uid(String.format("oasis-%s-milestone-processor-%d", oasis.getId(), milestone.getId()));
         DataStream<MilestoneStateEvent> stateStream = ((SingleOutputStreamOperator<MilestoneEvent>) milestoneStream).getSideOutput(stateOutputTag);
         return new MilestoneOpResponse(milestoneStream, stateStream)
                 .setPointStreamUsed(usedPointStream);
