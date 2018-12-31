@@ -26,6 +26,10 @@ public class Milestone implements Serializable {
     private transient Map<Integer, Level> levelMap = null;
     private Long startingLevel = null;
 
+    public boolean isFromPoints() {
+        return from != null && from.equalsIgnoreCase("points");
+    }
+
     public Long getStartingLevel() {
         return startingLevel;
     }

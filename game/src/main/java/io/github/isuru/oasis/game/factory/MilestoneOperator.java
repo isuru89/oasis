@@ -62,10 +62,8 @@ public class MilestoneOperator {
                 List<Double> levels = milestone.getLevels().stream()
                         .map(l -> l.getNumber().doubleValue())
                         .collect(Collectors.toList());
-                if (milestone.getFrom() != null && milestone.getFrom().equals("points")) {
-                    stream = userPointStream.process(new MilestonePointSumProcess(levels,
-                            milestone,
-                            stateOutputTag));
+                if (milestone.isFromPoints()) {
+                    stream = userPointStream.process(new MilestonePointSumProcess(levels, milestone, stateOutputTag));
                     usedPointStream = true;
                 } else {
                     stream = eventDataStream.filter(filterFunction)
@@ -84,9 +82,9 @@ public class MilestoneOperator {
             }
         }
 
-        DataStream<MilestoneEvent> milestoneStream = stream
+        SingleOutputStreamOperator<MilestoneEvent> milestoneStream = stream
                 .uid(String.format("oasis-%s-milestone-processor-%d", oasis.getId(), milestone.getId()));
-        DataStream<MilestoneStateEvent> stateStream = ((SingleOutputStreamOperator<MilestoneEvent>) milestoneStream).getSideOutput(stateOutputTag);
+        DataStream<MilestoneStateEvent> stateStream = milestoneStream.getSideOutput(stateOutputTag);
         return new MilestoneOpResponse(milestoneStream, stateStream)
                 .setPointStreamUsed(usedPointStream);
     }

@@ -7,13 +7,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * @author iweerarathna
  */
 public class HistogramCounter {
 
-    public static int processContinuous(String key, MapState<String, Integer> mapState) throws Exception {
+    public static int processContinuous(String key, MapState<String, Integer> mapState,
+                                        Predicate<LocalDate> isHoliday) throws Exception {
         LocalDate currDate = LocalDate.parse(key);
         Iterator<String> iterator = mapState.keys().iterator();
         Set<LocalDate> dates = new HashSet<>();
@@ -29,6 +31,9 @@ public class HistogramCounter {
             }
             p++;
             currDate = currDate.minusDays(1);
+            while (isHoliday.test(currDate)) {
+                currDate = currDate.minusDays(1);
+            }
         }
     }
 

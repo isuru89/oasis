@@ -123,6 +123,30 @@ class UtilsTest {
         time = Utils.fromStr(" 2 ds  ");
         Assertions.assertEquals(time.getSize(), 2);
         Assertions.assertEquals(time.toMilliseconds(), ONE_DAY * 2);
+
+        time = Utils.fromStr("1businessdays");
+        Assertions.assertEquals(time.getSize(), 1);
+        Assertions.assertEquals(time.toMilliseconds(), ONE_DAY);
+
+        time = Utils.fromStr("1 business days");
+        Assertions.assertEquals(time.getSize(), 1);
+        Assertions.assertEquals(time.toMilliseconds(), ONE_DAY);
+
+        time = Utils.fromStr("1 bdays");
+        Assertions.assertEquals(time.getSize(), 1);
+        Assertions.assertEquals(time.toMilliseconds(), ONE_DAY);
+
+        time = Utils.fromStr("1b");
+        Assertions.assertEquals(time.getSize(), 1);
+        Assertions.assertEquals(time.toMilliseconds(), ONE_DAY);
+
+        Assertions.assertTrue(Utils.isDurationBusinessDaysOnly("1businessdays"));
+        Assertions.assertTrue(Utils.isDurationBusinessDaysOnly("3 business days"));
+        Assertions.assertTrue(Utils.isDurationBusinessDaysOnly("1 businessdays"));
+        Assertions.assertTrue(Utils.isDurationBusinessDaysOnly("1 bdays"));
+        Assertions.assertTrue(Utils.isDurationBusinessDaysOnly("1 businessday"));
+        Assertions.assertFalse(Utils.isDurationBusinessDaysOnly("1 day"));
+        Assertions.assertFalse(Utils.isDurationBusinessDaysOnly("7 days"));
     }
 
     @Test

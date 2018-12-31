@@ -19,13 +19,6 @@ public class Utils {
     private static final Pattern TIME_PATTERN = Pattern.compile("([0-9]+)\\s*([a-zA-Z]+)");
     private static final Pattern NUMBER_PATTERN = Pattern.compile("([0-9\\\\.]+)\\s*([kKmMbB]?)");
 
-    @SuppressWarnings("unchecked")
-    public static <T> T createInst(String clz) throws ReflectiveOperationException {
-        return (T) Thread.currentThread().getContextClassLoader()
-                .loadClass(clz)
-                .newInstance();
-    }
-
     public static <T> T firstNonNull(T v1, T v2) {
         if (v1 != null) {
             return v1;
@@ -97,7 +90,7 @@ public class Utils {
         if (matcher.find()) {
             int val = Integer.parseInt(matcher.group(1));
             String unit = matcher.group(2).toLowerCase();
-            if (unit.startsWith("d")) {
+            if (unit.startsWith("d") || unit.startsWith("b")) {
                 return Time.days(val);
             } else if (unit.startsWith("s")) {
                 return Time.seconds(val);
@@ -112,4 +105,12 @@ public class Utils {
         throw new IllegalArgumentException("Given duration string found to be invalid format! [" + durationStr + "]");
     }
 
+    public static boolean isDurationBusinessDaysOnly(String durationStr) {
+        Matcher matcher = TIME_PATTERN.matcher(durationStr);
+        if (matcher.find()) {
+            String unit = matcher.group(2).toLowerCase();
+            return unit.startsWith("b");
+        }
+        return false;
+    }
 }

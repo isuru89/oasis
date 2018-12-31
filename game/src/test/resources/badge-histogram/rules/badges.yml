@@ -14,3 +14,19 @@ badges:
       displayName: Fanatic
       description: Visit the site each day for 5 consecutive days
       within: "5 days"
+
+  - id: 352
+    name: enthusiast-bd
+    displayName: Business Day Enthusiast
+    description: Visit the site each day for 3 consecutive business days
+
+    event: "so-login-bd"
+    condition: "user > 0"
+    within: "3 business days"
+    continuous: true
+
+    subBadges:
+      - name: fanatic-bd
+        displayName: Business Day Fanatic
+        description: Visit the site each day for 5 consecutive business days
+        within: "5 business days"

@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.game.process;
+package io.github.isuru.oasis.game.factory.badges;
 
 import io.github.isuru.oasis.game.utils.HistogramCounter;
 import io.github.isuru.oasis.game.utils.Utils;
@@ -17,10 +17,13 @@ import org.apache.flink.streaming.api.windowing.windows.Window;
 import org.apache.flink.util.Collector;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-public class CountProcessor<E extends Event, W extends Window> extends ProcessWindowFunction<E, BadgeEvent, Long, W> {
+class CountProcessor<E extends Event, W extends Window> extends ProcessWindowFunction<E, BadgeEvent, Long, W> {
 
     private final ValueStateDescriptor<Long> currStreakDesc;
     private final ValueStateDescriptor<Long> maxAchDesc;
@@ -33,7 +36,7 @@ public class CountProcessor<E extends Event, W extends Window> extends ProcessWi
     private List<Long> streaks = new LinkedList<>();
     private Function<Long, String> timeConverter;
 
-    public CountProcessor(BadgeFromEvents badgeRule, Function<Long, String> timeConverter) {
+    CountProcessor(BadgeFromEvents badgeRule, Function<Long, String> timeConverter) {
         this.badge = badgeRule;
         this.timeConverter = timeConverter;
         currStreakDesc = new ValueStateDescriptor<>(
@@ -59,6 +62,8 @@ public class CountProcessor<E extends Event, W extends Window> extends ProcessWi
     public void process(Long userId, Context context, Iterable<E> elements, Collector<BadgeEvent> out) throws Exception {
         initDefaultState();
 
+        Predicate<LocalDate> holidayPredicate = Utils.isDurationBusinessDaysOnly(badge.getDuration())
+                ? DefaultHolidayPredictor.INSTANCE : AllDaysPredictor.INSTANCE;
         String timeKey = timeConverter.apply(context.window().maxTimestamp());
 
         Iterator<E> it = elements.iterator();
@@ -69,10 +74,20 @@ public class CountProcessor<E extends Event, W extends Window> extends ProcessWi
             count++;
         }
 
-        // @TODO handle holidays
         if (count > 0) {
             countMap.put(timeKey, count);
-            int streakLength = HistogramCounter.processContinuous(timeKey, countMap);
+
+            // if current date is a holiday and should count only for business days,
+            // then we ignore the today count.
+            if (Utils.isDurationBusinessDaysOnly(badge.getDuration())) {
+                LocalDate currDate = LocalDate.parse(timeKey);
+                if (holidayPredicate.test(currDate)) {
+                    return;
+                }
+            }
+
+            int streakLength = HistogramCounter.processContinuous(timeKey, countMap, holidayPredicate);
+
             if (streakLength < 2) {
                 countMap.clear();
                 countMap.put(timeKey, count);
@@ -120,12 +135,42 @@ public class CountProcessor<E extends Event, W extends Window> extends ProcessWi
     }
 
     @Override
-    public void open(Configuration parameters) throws Exception {
+    public void open(Configuration parameters) {
         MapStateDescriptor<String, Integer> countMapDesc = new MapStateDescriptor<>(
                 String.format("badge-%d-histogram", badge.getBadge().getId()), String.class, Integer.class);
 
         countMap = getRuntimeContext().getMapState(countMapDesc);
         currentStreak = getRuntimeContext().getState(currStreakDesc);
         maxAchieved = getRuntimeContext().getState(maxAchDesc);
+    }
+
+
+    /**
+     * Returns as holiday true if the given date is a Saturday or Sunday.
+     */
+    private static class DefaultHolidayPredictor implements Predicate<LocalDate> {
+
+        private static final DefaultHolidayPredictor INSTANCE = new DefaultHolidayPredictor();
+
+        private DefaultHolidayPredictor() {}
+
+        @Override
+        public boolean test(LocalDate localDate) {
+            return localDate.getDayOfWeek() == DayOfWeek.SATURDAY || localDate.getDayOfWeek() == DayOfWeek.SUNDAY;
+        }
+    }
+
+    /**
+     * No holiday predictor. Every day will be counted.
+     */
+    private static class AllDaysPredictor implements Predicate<LocalDate> {
+        private static final AllDaysPredictor INSTANCE = new AllDaysPredictor();
+
+        private AllDaysPredictor() {}
+
+        @Override
+        public boolean test(LocalDate localDate) {
+            return false;
+        }
     }
 }

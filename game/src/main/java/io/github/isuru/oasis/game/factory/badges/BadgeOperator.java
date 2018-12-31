@@ -1,6 +1,5 @@
 package io.github.isuru.oasis.game.factory.badges;
 
-import io.github.isuru.oasis.game.process.CountProcessor;
 import io.github.isuru.oasis.game.process.EventUserSelector;
 import io.github.isuru.oasis.game.process.triggers.ConditionalTrigger;
 import io.github.isuru.oasis.game.process.triggers.StreakLevelTrigger;
