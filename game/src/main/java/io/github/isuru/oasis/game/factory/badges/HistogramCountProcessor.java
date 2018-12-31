@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class CountProcessor<E extends Event, W extends Window> extends ProcessWindowFunction<E, BadgeEvent, Long, W> {
+class HistogramCountProcessor<E extends Event, W extends Window> extends ProcessWindowFunction<E, BadgeEvent, Long, W> {
 
     private final ValueStateDescriptor<Long> currStreakDesc;
     private final ValueStateDescriptor<Long> maxAchDesc;
@@ -36,7 +36,7 @@ class CountProcessor<E extends Event, W extends Window> extends ProcessWindowFun
     private List<Long> streaks = new LinkedList<>();
     private Function<Long, String> timeConverter;
 
-    CountProcessor(BadgeFromEvents badgeRule, Function<Long, String> timeConverter) {
+    HistogramCountProcessor(BadgeFromEvents badgeRule, Function<Long, String> timeConverter) {
         this.badge = badgeRule;
         this.timeConverter = timeConverter;
         currStreakDesc = new ValueStateDescriptor<>(
@@ -62,8 +62,7 @@ class CountProcessor<E extends Event, W extends Window> extends ProcessWindowFun
     public void process(Long userId, Context context, Iterable<E> elements, Collector<BadgeEvent> out) throws Exception {
         initDefaultState();
 
-        Predicate<LocalDate> holidayPredicate = Utils.isDurationBusinessDaysOnly(badge.getDuration())
-                ? DefaultHolidayPredictor.INSTANCE : AllDaysPredictor.INSTANCE;
+        Predicate<LocalDate> holidayPredicate = createHolidayPredictor();
         String timeKey = timeConverter.apply(context.window().maxTimestamp());
 
         Iterator<E> it = elements.iterator();
@@ -121,7 +120,7 @@ class CountProcessor<E extends Event, W extends Window> extends ProcessWindowFun
         }
     }
 
-    private void initDefaultState() throws IOException {
+    void initDefaultState() throws IOException {
         if (Objects.equals(currentStreak.value(), currStreakDesc.getDefaultValue())) {
             currentStreak.update(0L);
         }
@@ -130,7 +129,12 @@ class CountProcessor<E extends Event, W extends Window> extends ProcessWindowFun
         }
     }
 
-    private void clearCurrentStreak() throws IOException {
+    Predicate<LocalDate> createHolidayPredictor() {
+        return Utils.isDurationBusinessDaysOnly(badge.getDuration())
+                ? DefaultHolidayPredictor.INSTANCE : AllDaysPredictor.INSTANCE;
+    }
+
+    void clearCurrentStreak() throws IOException {
         currentStreak.update(0L);
     }
 
@@ -144,6 +148,33 @@ class CountProcessor<E extends Event, W extends Window> extends ProcessWindowFun
         maxAchieved = getRuntimeContext().getState(maxAchDesc);
     }
 
+    Function<Long, String> getTimeConverter() {
+        return timeConverter;
+    }
+
+    BadgeFromEvents getBadge() {
+        return badge;
+    }
+
+    MapState<String, Integer> getCountMap() {
+        return countMap;
+    }
+
+    ValueState<Long> getCurrentStreak() {
+        return currentStreak;
+    }
+
+    ValueState<Long> getMaxAchieved() {
+        return maxAchieved;
+    }
+
+    Map<Long, Badge> getStreakBadges() {
+        return streakBadges;
+    }
+
+    List<Long> getStreaks() {
+        return streaks;
+    }
 
     /**
      * Returns as holiday true if the given date is a Saturday or Sunday.

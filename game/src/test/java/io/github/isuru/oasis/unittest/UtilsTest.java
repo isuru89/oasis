@@ -18,6 +18,19 @@ class UtilsTest {
     private static final long ONE_SEC = 1000;
 
     @Test
+    void testNullEmpty() {
+        Assertions.assertTrue(Utils.isNullOrEmpty(""));
+        Assertions.assertTrue(Utils.isNullOrEmpty(" "));
+        Assertions.assertTrue(Utils.isNullOrEmpty("     "));
+        Assertions.assertTrue(Utils.isNullOrEmpty("    " +
+                " "));
+
+        Assertions.assertFalse(Utils.isNullOrEmpty("a"));
+        Assertions.assertFalse(Utils.isNullOrEmpty("$a > 100"));
+        Assertions.assertFalse(Utils.isNullOrEmpty("isuru"));
+    }
+
+    @Test
     void propTest() {
         {
             Properties props = new Properties();

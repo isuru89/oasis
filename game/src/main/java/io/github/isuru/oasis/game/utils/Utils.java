@@ -47,6 +47,10 @@ public class Utils {
         return list == null || list.isEmpty();
     }
 
+    public static boolean isNullOrEmpty(String text) {
+        return text == null || text.trim().isEmpty();
+    }
+
     public static Serializable compileExpression(String expr) {
         return MVEL.compileExpression(expr);
     }
@@ -112,5 +116,25 @@ public class Utils {
             return unit.startsWith("b");
         }
         return false;
+    }
+
+    public static Event getLatestEvent(Event e1, Event e2) {
+        if (e1 == null) {
+            if (e2 == null) {
+                return null;
+            } else {
+                return e2;
+            }
+        } else {
+            if (e2 == null) {
+                return e1;
+            } else {
+                if (e1.getTimestamp() > e1.getTimestamp()) {
+                    return e1;
+                } else {
+                    return e2;
+                }
+            }
+        }
     }
 }

@@ -17,10 +17,28 @@ public class BadgeDef {
     private String condition;
     private Integer streak;
     private Boolean continuous = Boolean.FALSE;
+    private String continuousAggregator;
+    private String continuousCondition;
     private String within;
     private Double awardPoints;
     private int maxBadges = Integer.MAX_VALUE;
     private List<SubBadgeDef> subBadges;
+
+    public String getContinuousAggregator() {
+        return continuousAggregator;
+    }
+
+    public void setContinuousAggregator(String continuousAggregator) {
+        this.continuousAggregator = continuousAggregator;
+    }
+
+    public String getContinuousCondition() {
+        return continuousCondition;
+    }
+
+    public void setContinuousCondition(String continuousCondition) {
+        this.continuousCondition = continuousCondition;
+    }
 
     public Boolean getContinuous() {
         return continuous;

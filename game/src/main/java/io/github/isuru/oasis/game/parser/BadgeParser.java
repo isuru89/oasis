@@ -91,6 +91,12 @@ public class BadgeParser {
                 if (badgeDef.getContinuous() != null) {
                     bfe.setContinuous(badgeDef.getContinuous());
                 }
+                if (!Utils.isNullOrEmpty(badgeDef.getContinuousAggregator())) {
+                    bfe.setContinuousAggregator(MVEL.compileExpression(badgeDef.getContinuousAggregator()));
+                }
+                if (!Utils.isNullOrEmpty(badgeDef.getContinuousCondition())) {
+                    bfe.setContinuousCondition(MVEL.compileExpression(badgeDef.getContinuousCondition()));
+                }
                 if (badgeDef.getCondition() != null) {
                     bfe.setCondition(MVEL.compileExpression(badgeDef.getCondition()));
                 }

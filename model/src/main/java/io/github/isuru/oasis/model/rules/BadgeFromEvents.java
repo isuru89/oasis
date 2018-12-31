@@ -16,6 +16,8 @@ public class BadgeFromEvents extends BadgeRule {
     private Serializable condition;
     private int streak;
     private boolean continuous;
+    private Serializable continuousAggregator;
+    private Serializable continuousCondition;
     private String duration;
     private List<? extends Badge> subBadges;
 
@@ -49,6 +51,22 @@ public class BadgeFromEvents extends BadgeRule {
         } else {
             return null;
         }
+    }
+
+    public Serializable getContinuousAggregator() {
+        return continuousAggregator;
+    }
+
+    public void setContinuousAggregator(Serializable continuousAggregator) {
+        this.continuousAggregator = continuousAggregator;
+    }
+
+    public Serializable getContinuousCondition() {
+        return continuousCondition;
+    }
+
+    public void setContinuousCondition(Serializable continuousCondition) {
+        this.continuousCondition = continuousCondition;
     }
 
     public boolean isContinuous() {

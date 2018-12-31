@@ -61,8 +61,8 @@ public class BadgeOperator {
                 .process(new MilestoneBadgeHandler<>(badgeRule));
     }
 
-    private static SingleOutputStreamOperator<BadgeEvent> createBadgeFromEvents(DataStream<Event> rawStream,
-                                                                                BadgeFromEvents badgeRule) {
+    private static SingleOutputStreamOperator createBadgeFromEvents(DataStream<Event> rawStream,
+                                                                    BadgeFromEvents badgeRule) {
 
         FilterFunction<Event> eventFilterFunction = new FilterFunction<Event>() {
             @Override
@@ -95,10 +95,15 @@ public class BadgeOperator {
             KeyedStream<Event, Long> keyedUserStream = rawStream.filter(combinedFilter).keyBy(new EventUserSelector<>());
 
             // @TODO histogram like counting support for weeks and months
-            return  timeHistogramStream(badgeRule.getDuration(), keyedUserStream)
-                    .trigger(ContinuousEventTimeTrigger.of(Time.days(1)))
-                    .process(new CountProcessor<>(badgeRule, new TimeConverterFunction()));
+            WindowedStream<Event, Long, TimeWindow> tmpWindowed = timeHistogramStream(badgeRule.getDuration(), keyedUserStream)
+                    .trigger(ContinuousEventTimeTrigger.of(Time.days(1)));
 
+            // @TODO handle multiple badges award
+            if (badgeRule.getContinuousAggregator() != null) {
+                return tmpWindowed.process(new HistogramSumProcessor<>(badgeRule, new TimeConverterFunction()));
+            } else {
+                return tmpWindowed.process(new HistogramCountProcessor<>(badgeRule, new TimeConverterFunction()));
+            }
 
         } else {
             KeyedStream<Event, Long> keyedUserStream = rawStream.filter(eventFilterFunction)
