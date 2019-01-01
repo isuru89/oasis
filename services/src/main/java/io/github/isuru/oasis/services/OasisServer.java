@@ -20,13 +20,15 @@ import io.github.isuru.oasis.services.utils.local.LocalScheduler;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.Spark;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+@SpringBootApplication
 public class OasisServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OasisServer.class);
@@ -35,12 +37,13 @@ public class OasisServer {
     public static IOasisApiService apiService;
 
     public static void main(String[] args) throws Exception {
-        configureLogs();
-
-        LOGGER.debug("Initializing configurations...");
-        Configs configs = initConfigs();
-
-        start(configs);
+        SpringApplication.run(OasisServer.class, args);
+//        configureLogs();
+//
+//        LOGGER.debug("Initializing configurations...");
+//        Configs configs = initConfigs();
+//
+//        start(configs);
     }
 
     public static void start(Configs configs) throws Exception {
@@ -78,13 +81,13 @@ public class OasisServer {
 
         LOGGER.debug("Initializing server...");
         int port = configs.getInt("oasis.service.port", DEF_PORT);
-        Spark.port(port);
+        ///Spark.port(port);
 
         // start service with routing
         //
         LOGGER.debug("Initializing routers...");
         Routers routers = new Routers(apiService, oasisOptions);
-        Spark.path("/api/v1", routers::register);
+        ///Spark.path("/api/v1", routers::register);
         routers.registerExceptionHandlers();
 
         // register safe shutdown hook
@@ -94,7 +97,7 @@ public class OasisServer {
 
     private static void shutdownDao(IOasisDao dao) {
         LOGGER.info("Oasis is stopping...");
-        Spark.stop();
+        ///Spark.stop();
         try {
             LOGGER.info("Shutting down db connection...");
             dao.close();

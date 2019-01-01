@@ -7,16 +7,15 @@ import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.utils.OasisOptions;
-import io.github.isuru.oasis.services.utils.UserRole;
 import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.Maps;
+import io.github.isuru.oasis.services.utils.OasisOptions;
+import io.github.isuru.oasis.services.utils.UserRole;
 import spark.Request;
 import spark.Response;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 /**

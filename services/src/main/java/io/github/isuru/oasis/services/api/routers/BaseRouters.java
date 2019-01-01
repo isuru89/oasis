@@ -17,7 +17,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  * @author iweerarathna
@@ -50,7 +49,7 @@ public abstract class BaseRouters {
         return apiService.getLifecycleService();
     }
 
-    public abstract void register();
+    public void register() {}
 
     Pair<String, String> getBasicAuthPair(Request request) throws ApiAuthException, UnsupportedEncodingException {
         String auth = request.headers(AUTHORIZATION);
