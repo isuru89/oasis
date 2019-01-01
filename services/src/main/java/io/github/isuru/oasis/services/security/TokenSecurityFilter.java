@@ -15,7 +15,7 @@ import java.io.IOException;
 public class TokenSecurityFilter implements Filter {
 
     private static final String BEARER = "Bearer";
-    private static final String AUTHORIZATION = "Authorization";
+    public static final String AUTHORIZATION = "Authorization";
 
     @Override
     public void doFilter(ServletRequest request,
