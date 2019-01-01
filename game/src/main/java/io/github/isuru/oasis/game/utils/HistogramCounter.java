@@ -3,10 +3,8 @@ package io.github.isuru.oasis.game.utils;
 import org.apache.flink.api.common.state.MapState;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -17,12 +15,6 @@ public class HistogramCounter {
     public static int processContinuous(String key, MapState<String, Integer> mapState,
                                         Predicate<LocalDate> isHoliday) throws Exception {
         LocalDate currDate = LocalDate.parse(key);
-        Iterator<String> iterator = mapState.keys().iterator();
-        Set<LocalDate> dates = new HashSet<>();
-        while (iterator.hasNext()) {
-            dates.add(LocalDate.parse(iterator.next()));
-        }
-
         int p = 0;
         while (true) {
             Integer count = mapState.get(currDate.toString());

@@ -76,8 +76,8 @@ public class HistogramSumProcessor<E extends Event, W extends Window> extends Hi
                     }
                 }
 
-                if (getCurrentStreak().value() < cStreak
-                        && (badgeRule.getMaxBadges() != 1 || cStreak > getMaxAchieved().value())) {
+                Long maxGained = getMaxAchieved().value();
+                if (getMinStreak() <= streakLength && getCurrentStreak().value() < cStreak) {
                     // creating a badge
                     BadgeEvent badgeEvent = new BadgeEvent(userId,
                             getStreakBadges().get(cStreak),
@@ -85,8 +85,14 @@ public class HistogramSumProcessor<E extends Event, W extends Window> extends Hi
                             Collections.singletonList(lastE),
                             lastE);
                     out.collect(badgeEvent);
-                    getCurrentStreak().update(cStreak);
-                    getMaxAchieved().update(Math.max(getMaxAchieved().value(), cStreak));
+                    getMaxAchieved().update(Math.max(maxGained, cStreak));
+
+                    if (badgeRule.getMaxBadges() != 1 && getMaxStreak() <= cStreak) {
+                        clearCurrentStreak();
+                        HistogramCounter.clearLessThan(timeKey, countMap);
+                    } else {
+                        getCurrentStreak().update(cStreak);
+                    }
                 }
             }
 

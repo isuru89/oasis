@@ -1,13 +1,19 @@
 package io.github.isuru.oasis.unittest;
 
+import io.github.isuru.oasis.game.utils.HistogramCounter;
 import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.utils.OasisUtils;
+import io.github.isuru.oasis.unittest.utils.TestMapState;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Predicate;
 
 class UtilsTest {
 
@@ -18,11 +24,116 @@ class UtilsTest {
     private static final long ONE_SEC = 1000;
 
     @Test
+    void testHistogramCounterCts() throws Exception {
+        Predicate<LocalDate> noHoliday = localDate -> false;
+        Predicate<LocalDate> weekdaysOnly = localDate -> localDate.getDayOfWeek() == DayOfWeek.SUNDAY
+                || localDate.getDayOfWeek() == DayOfWeek.SATURDAY;
+
+        Map<String, Integer> data = new HashMap<>();
+        data.put("2018-12-20", 1);
+        data.put("2018-12-21", 1);
+        data.put("2018-12-22", 1);
+        data.put("2018-12-23", 1);
+        data.put("2018-12-24", 1);
+        data.put("2018-12-25", 1);
+        data.put("2018-12-26", 1);
+        data.put("2018-12-27", 1);
+        data.put("2018-12-28", 1);
+        data.put("2018-12-29", 1);
+        data.put("2018-12-30", 1);
+        data.put("2018-12-31", 1);
+
+        TestMapState<String, Integer> histogram = new TestMapState<>();
+        histogram.putAll(data);
+
+        Assertions.assertEquals(1, HistogramCounter.processContinuous("2018-12-20", histogram, noHoliday));
+        Assertions.assertEquals(3, HistogramCounter.processContinuous("2018-12-22", histogram, noHoliday));
+        Assertions.assertEquals(3, HistogramCounter.processContinuous("2018-12-22", histogram, weekdaysOnly));
+        Assertions.assertEquals(3, HistogramCounter.processContinuous("2018-12-23", histogram, weekdaysOnly));
+        Assertions.assertEquals(3, HistogramCounter.processContinuous("2018-12-24", histogram, weekdaysOnly));
+        Assertions.assertEquals(4, HistogramCounter.processContinuous("2018-12-25", histogram, weekdaysOnly));
+        Assertions.assertEquals(6, HistogramCounter.processContinuous("2018-12-25", histogram, noHoliday));
+        Assertions.assertEquals(12, HistogramCounter.processContinuous("2018-12-31", histogram, noHoliday));
+        Assertions.assertEquals(8, HistogramCounter.processContinuous("2018-12-31", histogram, weekdaysOnly));
+
+        // non existing dates
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2019-01-01", histogram, weekdaysOnly));
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2019-01-01", histogram, noHoliday));
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2018-12-01", histogram, weekdaysOnly));
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2018-12-01", histogram, noHoliday));
+
+        // clearings
+        HistogramCounter.clearLessThan("2018-12-01", histogram);
+        Assertions.assertEquals(12, histogram.size());
+
+        HistogramCounter.clearLessThan("2018-12-22", histogram);
+        Assertions.assertEquals(9, histogram.size());
+
+        HistogramCounter.clearLessThan("2018-12-28", histogram);
+        Assertions.assertEquals(3, histogram.size());
+
+        HistogramCounter.clearLessThan("2019-01-22", histogram);
+        Assertions.assertEquals(0, histogram.size());
+    }
+
+    @Test
+    void testHistogramCounterMiss() throws Exception {
+        Predicate<LocalDate> noHoliday = localDate -> false;
+        Predicate<LocalDate> weekdaysOnly = localDate -> localDate.getDayOfWeek() == DayOfWeek.SUNDAY
+                || localDate.getDayOfWeek() == DayOfWeek.SATURDAY;
+
+        Map<String, Integer> data = new HashMap<>();
+        data.put("2018-12-20", 1);
+        data.put("2018-12-21", 1);
+        data.put("2018-12-23", 1);
+        data.put("2018-12-24", 1);
+        data.put("2018-12-27", 1);
+        data.put("2018-12-28", 1);
+        data.put("2018-12-29", 1);
+        data.put("2018-12-30", 1);
+        data.put("2018-12-31", 1);
+
+        TestMapState<String, Integer> histogram = new TestMapState<>();
+        histogram.putAll(data);
+
+        Assertions.assertEquals(1, HistogramCounter.processContinuous("2018-12-20", histogram, noHoliday));
+        Assertions.assertEquals(1, HistogramCounter.processContinuous("2018-12-20", histogram, weekdaysOnly));
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2018-12-22", histogram, noHoliday));
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2018-12-22", histogram, weekdaysOnly));
+        Assertions.assertEquals(3, HistogramCounter.processContinuous("2018-12-23", histogram, weekdaysOnly));
+        Assertions.assertEquals(3, HistogramCounter.processContinuous("2018-12-24", histogram, weekdaysOnly));
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2018-12-25", histogram, weekdaysOnly));
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2018-12-25", histogram, noHoliday));
+        Assertions.assertEquals(5, HistogramCounter.processContinuous("2018-12-31", histogram, noHoliday));
+        Assertions.assertEquals(3, HistogramCounter.processContinuous("2018-12-31", histogram, weekdaysOnly));
+
+        // non existing dates
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2019-01-01", histogram, weekdaysOnly));
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2019-01-01", histogram, noHoliday));
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2018-12-01", histogram, weekdaysOnly));
+        Assertions.assertEquals(0, HistogramCounter.processContinuous("2018-12-01", histogram, noHoliday));
+
+        // clearings
+        HistogramCounter.clearLessThan("2018-12-01", histogram);
+        Assertions.assertEquals(9, histogram.size());
+
+        HistogramCounter.clearLessThan("2018-12-22", histogram);
+        Assertions.assertEquals(7, histogram.size());
+
+        HistogramCounter.clearLessThan("2018-12-28", histogram);
+        Assertions.assertEquals(3, histogram.size());
+
+        HistogramCounter.clearLessThan("2019-01-22", histogram);
+        Assertions.assertEquals(0, histogram.size());
+    }
+
+
+    @Test
     void testNullEmpty() {
         Assertions.assertTrue(Utils.isNullOrEmpty(""));
         Assertions.assertTrue(Utils.isNullOrEmpty(" "));
         Assertions.assertTrue(Utils.isNullOrEmpty("     "));
-        Assertions.assertTrue(Utils.isNullOrEmpty("    " +
+        Assertions.assertTrue(Utils.isNullOrEmpty("    \n" +
                 " "));
 
         Assertions.assertFalse(Utils.isNullOrEmpty("a"));

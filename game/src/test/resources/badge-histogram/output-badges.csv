@@ -5,6 +5,7 @@
 102,enthusiast,,7,7
 103,enthusiast,,3,3
 103,enthusiast,fanatic,5,5
+103,enthusiast,,8,8
 104,enthusiast,,3,3
 104,enthusiast,fanatic,5,5
 104,enthusiast,,9,9
@@ -14,6 +15,8 @@
 
 104,energetic-s,,3,3
 104,energetic-s,electric-s,5,5
+104,energetic-s,,8,8
+
 105,energetic-s,,5,5
 
 106,energetic-sbd,,6,6
@@ -21,3 +24,10 @@
 
 107,energetic-sbd,,6,6
 107,energetic-sbd,electric-sbd,8,8
+
+108,energetic-s,,3,3
+108,energetic-s,electric-s,5,5
+108,energetic-s,,9,9
+
+109,enthusiast-mx,,3,3
+109,enthusiast-mx,fanatic-mx,5,5

@@ -35,6 +35,8 @@ class HistogramCountProcessor<E extends Event, W extends Window> extends Process
     private Map<Long, Badge> streakBadges = new HashMap<>();
     private List<Long> streaks = new LinkedList<>();
     private Function<Long, String> timeConverter;
+    private long maxStreak = 0L;
+    private long minStreak = Long.MAX_VALUE;
 
     HistogramCountProcessor(BadgeFromEvents badgeRule, Function<Long, String> timeConverter) {
         this.badge = badgeRule;
@@ -51,11 +53,14 @@ class HistogramCountProcessor<E extends Event, W extends Window> extends Process
             for (Badge subBadge : badgeRule.getSubBadges()) {
                 if (subBadge instanceof BadgeFromEvents.ContinuousSubBadge) {
                     long sz = Utils.fromStr(((BadgeFromEvents.ContinuousSubBadge) subBadge).getWithin()).getSize();
+                    maxStreak = Math.max(maxStreak, sz);
                     streaks.add(sz);
                     streakBadges.put(sz, subBadge);
                 }
             }
         }
+        Collections.sort(streaks);
+        minStreak = streaks.get(0);
     }
 
     @Override
@@ -87,10 +92,14 @@ class HistogramCountProcessor<E extends Event, W extends Window> extends Process
 
             int streakLength = HistogramCounter.processContinuous(timeKey, countMap, holidayPredicate);
 
-            if (streakLength < 2) {
-                countMap.clear();
+            if (streakLength <= 1) {
+                HistogramCounter.clearLessThan(timeKey, countMap);
                 countMap.put(timeKey, count);
                 clearCurrentStreak();
+
+
+                // @TODO check continuous from maximum date if map has more than 1 entry
+
             } else {
                 long cStreak = 0;
                 for (long t : streaks) {
@@ -101,8 +110,8 @@ class HistogramCountProcessor<E extends Event, W extends Window> extends Process
                     }
                 }
 
-                if (currentStreak.value() < cStreak
-                        && (badge.getMaxBadges() != 1 || cStreak > maxAchieved.value())) {
+                Long maxGained = maxAchieved.value();
+                if (minStreak <= streakLength && currentStreak.value() < cStreak) {
                     // creating a badge
                     BadgeEvent badgeEvent = new BadgeEvent(userId,
                             streakBadges.get(cStreak),
@@ -110,8 +119,14 @@ class HistogramCountProcessor<E extends Event, W extends Window> extends Process
                             Collections.singletonList(lastE),
                             lastE);
                     out.collect(badgeEvent);
-                    currentStreak.update(cStreak);
-                    maxAchieved.update(Math.max(maxAchieved.value(), cStreak));
+                    maxAchieved.update(Math.max(maxGained, cStreak));
+
+                    if (badge.getMaxBadges() != 1 && maxStreak <= cStreak) {
+                        clearCurrentStreak();
+                        HistogramCounter.clearLessThan(timeKey, countMap);
+                    } else {
+                        currentStreak.update(cStreak);
+                    }
                 }
             }
 
@@ -174,6 +189,14 @@ class HistogramCountProcessor<E extends Event, W extends Window> extends Process
 
     List<Long> getStreaks() {
         return streaks;
+    }
+
+    long getMaxStreak() {
+        return maxStreak;
+    }
+
+    long getMinStreak() {
+        return minStreak;
     }
 
     /**

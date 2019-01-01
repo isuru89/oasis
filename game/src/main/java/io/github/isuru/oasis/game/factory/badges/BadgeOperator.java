@@ -98,7 +98,6 @@ public class BadgeOperator {
             WindowedStream<Event, Long, TimeWindow> tmpWindowed = timeHistogramStream(badgeRule.getDuration(), keyedUserStream)
                     .trigger(ContinuousEventTimeTrigger.of(Time.days(1)));
 
-            // @TODO handle multiple badges award
             if (badgeRule.getContinuousAggregator() != null) {
                 return tmpWindowed.process(new HistogramSumProcessor<>(badgeRule, new TimeConverterFunction()));
             } else {
