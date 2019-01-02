@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.db.jdbi;
 
+import com.zaxxer.hikari.HikariDataSource;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.db.DbProperties;
 import io.github.isuru.oasis.model.db.IDefinitionDao;
@@ -14,6 +15,8 @@ import org.jdbi.v3.core.statement.Query;
 import org.jdbi.v3.core.statement.Update;
 import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
 import org.jdbi.v3.stringtemplate4.StringTemplateEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -27,10 +30,13 @@ import java.util.stream.Collectors;
  */
 public class JdbiOasisDao implements IOasisDao {
 
+    private static final Logger LOG = LoggerFactory.getLogger(JdbiOasisDao.class);
+
     private final IQueryRepo queryRepo;
 
     private Jdbi jdbi;
     private IDefinitionDao definitionDao;
+    private DataSource source;
 
     public JdbiOasisDao(IQueryRepo queryRepo) {
         this.queryRepo = queryRepo;
@@ -38,7 +44,7 @@ public class JdbiOasisDao implements IOasisDao {
 
     @Override
     public void init(DbProperties properties) throws Exception {
-        DataSource source = JdbcPool.createDataSource(properties);
+        source = JdbcPool.createDataSource(properties);
         jdbi = Jdbi.create(source);
         jdbi.setTemplateEngine(new StringTemplateEngine());
     }
@@ -202,6 +208,10 @@ public class JdbiOasisDao implements IOasisDao {
 
     @Override
     public void close() throws IOException {
+        if (source instanceof HikariDataSource) {
+            LOG.info("Closing down database pool...");
+            ((HikariDataSource) source).close();
+        }
         queryRepo.close();
         jdbi = null;
     }

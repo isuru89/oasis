@@ -71,6 +71,11 @@ class BadgeDetails extends Component {
 }
 
 export default class Badge extends Component {
+
+  state = {
+    title: 'Isuru'
+  }
+
   render() {
     const { image, title, description, achievedDate, count = 5, imageOnly = true, acquired = true } = this.props;
 

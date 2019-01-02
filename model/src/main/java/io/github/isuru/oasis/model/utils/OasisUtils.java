@@ -17,6 +17,9 @@ public class OasisUtils {
         return defVal;
     }
 
+    public static String getEnvOr(String envKey, String jvmPropKey, String defValue) {
+        return getEnvOr(envKey, System.getProperty(jvmPropKey, defValue));
+    }
 
     public static Map<String, Object> filterKeys(Properties properties, String keyPfx) {
         Map<String, Object> map = new HashMap<>();

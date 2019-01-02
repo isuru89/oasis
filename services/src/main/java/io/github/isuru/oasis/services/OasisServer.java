@@ -12,7 +12,6 @@ import io.github.isuru.oasis.services.api.impl.DefaultOasisApiService;
 import io.github.isuru.oasis.services.api.routers.Routers;
 import io.github.isuru.oasis.services.backend.FlinkServices;
 import io.github.isuru.oasis.services.utils.AuthUtils;
-import io.github.isuru.oasis.services.utils.FlinkScheduler;
 import io.github.isuru.oasis.services.utils.IGameController;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.cache.OasisCacheFactory;
@@ -63,7 +62,7 @@ public class OasisServer {
         if (configs.isLocal()) {
             gameController = new LocalScheduler(oasisDao);
         } else {
-            gameController = new FlinkScheduler(configs);
+            gameController = new LocalScheduler(oasisDao);
         }
 
         LOGGER.debug("Initializing services...");

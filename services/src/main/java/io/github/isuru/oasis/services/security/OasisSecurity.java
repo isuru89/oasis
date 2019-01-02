@@ -1,5 +1,7 @@
 package io.github.isuru.oasis.services.security;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,5 +18,16 @@ public class OasisSecurity extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
                 .csrf().disable();
+    }
+
+    @Bean
+    public FilterRegistrationBean<TokenSecurityFilter> filterAuthToken() {
+        FilterRegistrationBean<TokenSecurityFilter> bean = new FilterRegistrationBean<>();
+        TokenSecurityFilter filter = new TokenSecurityFilter();
+
+        bean.setFilter(filter);
+        bean.addUrlPatterns("/admin/*");
+
+        return bean;
     }
 }
