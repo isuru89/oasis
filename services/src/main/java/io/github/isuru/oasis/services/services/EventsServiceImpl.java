@@ -70,7 +70,7 @@ public class EventsServiceImpl implements IEventsService {
         // authenticate event...
         Optional<EventSourceToken> eventSourceToken = sources.getSourceByToken(token);
         if (!eventSourceToken.isPresent() || !eventSourceToken.get().isActive()) {
-            throw new ApiAuthException("Unable to verify authorization token of event source '" + token + "'!");
+            throw new ApiAuthException("Unauthorized event source identified by token '" + token + "'!");
         }
         eventData.put(Constants.FIELD_SOURCE, eventSourceToken.get().getId());
 
@@ -127,7 +127,8 @@ public class EventsServiceImpl implements IEventsService {
 
     @Override
     public List<EventSourceToken> listAllEventSources() throws Exception {
-        List<EventSourceToken> eventSourceTokens = ServiceUtils.toList(dao.executeQuery("def/events/listAllEventSources",
+        List<EventSourceToken> eventSourceTokens = ServiceUtils.toList(dao.executeQuery(
+                Q.EVENTS.LIST_ALL_EVENT_SOURCES,
                 null,
                 EventSourceToken.class));
         refreshSourceTokens(eventSourceTokens);
@@ -142,14 +143,15 @@ public class EventsServiceImpl implements IEventsService {
             // check for existing internal sources
             Optional<EventSourceToken> eventSourceToken = readInternalSourceToken();
             if (eventSourceToken.isPresent()) {
-                throw new InputValidationException("Source token cannot be marked as internal!");
+                throw new InputValidationException("Only one internal token can exist in the game!");
             }
         }
 
         Pair<String, Integer> tokenNoncePair = AuthUtils.get().issueSourceToken(sourceToken);
         Pair<PrivateKey, PublicKey> key = AuthUtils.generateRSAKey(sourceToken);
-        long id = dao.executeInsert("def/events/addEventSource",
-                Maps.create().put("token", tokenNoncePair.getValue0())
+        long id = dao.executeInsert(Q.EVENTS.ADD_EVENT_SOURCE,
+                Maps.create()
+                    .put("token", tokenNoncePair.getValue0())
                     .put("nonce", tokenNoncePair.getValue1())
                     .put("sourceName", EventSourceToken.INTERNAL_NAME)
                     .put("keySecret", key.getValue0().getEncoded())
@@ -172,7 +174,7 @@ public class EventsServiceImpl implements IEventsService {
     public boolean disableEventSource(int id) throws Exception {
         Checks.greaterThanZero(id, "id");
 
-        boolean success = dao.executeCommand("def/events/disableEventSource",
+        boolean success = dao.executeCommand(Q.EVENTS.DISABLE_EVENT_SOURCE,
                 Maps.create("id", id)) > 0;
 
         if (success) {
@@ -191,7 +193,7 @@ public class EventsServiceImpl implements IEventsService {
 
     @Override
     public Optional<EventSourceToken> makeDownloadSourceKey(int id) throws Exception {
-        boolean canDownload = dao.executeCommand("def/events/updateAsDownloaded",
+        boolean canDownload = dao.executeCommand(Q.EVENTS.UPDATE_AS_DOWNLOADED,
                 Maps.create("id", id)) > 0;
         if (canDownload) {
             listAllEventSources();
@@ -205,7 +207,8 @@ public class EventsServiceImpl implements IEventsService {
     }
 
     private long resolveUser(String email) throws Exception {
-        Optional<String> uidOpt = cacheProxy.get("user.email." + email);
+        String key = "user.email." + email;
+        Optional<String> uidOpt = cacheProxy.get(key);
         if (uidOpt.isPresent()) {
             return Long.parseLong(uidOpt.get());
         } else {
@@ -213,7 +216,7 @@ public class EventsServiceImpl implements IEventsService {
             if (profile == null) {
                 throw new InputValidationException("There is no user by having email '" + email + "'!");
             }
-            cacheProxy.update("user.email." + email, String.valueOf(profile.getId()));
+            cacheProxy.update(key, String.valueOf(profile.getId()));
             return profile.getId();
         }
     }

@@ -333,14 +333,16 @@ public class ProfileServiceImpl implements IProfileService {
 
     @Override
     public UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly) throws Exception {
+        return findCurrentTeamOfUser(userId, returnApprovedOnly, System.currentTimeMillis());
+    }
+
+    @Override
+    public UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly, long atTime) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
-        long l = System.currentTimeMillis();
         // @TODO handle when no record is found
         Iterable<UserTeam> userTeams = dao.executeQuery(Q.PROFILE.FIND_CURRENT_TEAM_OF_USER,
-                Maps.create().put("userId", userId)
-                        .put("currentEpoch", l)
-                        .build(),
+                Maps.create("userId", userId, "currentEpoch", atTime),
                 UserTeam.class,
                 Maps.create("checkApproved", returnApprovedOnly));
         if (userTeams != null) {
@@ -366,9 +368,7 @@ public class ProfileServiceImpl implements IProfileService {
         Checks.greaterThanZero(userId, "userId");
 
         return dao.executeCommand(Q.PROFILE.LOGOUT_USER,
-                Maps.create()
-                    .put("userId", userId)
-                    .put("logoutAt", ts).build()) > 0;
+                Maps.create("userId", userId, "logoutAt", ts)) > 0;
     }
 
     @Override

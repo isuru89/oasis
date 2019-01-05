@@ -2,6 +2,16 @@ package io.github.isuru.oasis.services.services;
 
 final class Q {
 
+    static class EVENTS {
+        private static final String PATH = "events/";
+
+        static final String ADD_EVENT_SOURCE = PATH + "addEventSource";
+        static final String DISABLE_EVENT_SOURCE = PATH + "disableEventSource";
+        static final String LIST_ALL_EVENT_SOURCES = PATH + "listAllEventSources";
+        static final String UPDATE_AS_DOWNLOADED = PATH + "updateAsDownloaded";
+
+    }
+
     static class METAPHOR {
         private static final String PATH = "metaphor/";
 

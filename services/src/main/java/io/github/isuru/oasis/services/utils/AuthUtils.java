@@ -8,11 +8,9 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
-import sun.security.rsa.RSAPrivateCrtKeyImpl;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -27,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
-import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -37,7 +34,6 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.Hashtable;
-import java.util.Random;
 
 /**
  * @author iweerarathna
@@ -149,10 +145,9 @@ public final class AuthUtils {
         return expiryDate;
     }
 
-    public Pair<String, Integer> issueSourceToken(EventSourceToken token) throws IOException {
+    public synchronized Pair<String, Integer> issueSourceToken(EventSourceToken token) throws IOException {
         int nonce = RUtils.generateNonce();
-        String text = token.getDisplayName() + String.valueOf(System.currentTimeMillis())
-                + String.valueOf(nonce);
+        String text = String.format("%s-%d-%d", token.getDisplayName(), System.currentTimeMillis(), nonce);
         if (digest == null) {
             try {
                 digest = MessageDigest.getInstance("SHA-1");
