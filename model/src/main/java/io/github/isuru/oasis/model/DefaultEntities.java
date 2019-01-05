@@ -14,6 +14,10 @@ public class DefaultEntities {
 
     public static final String INTERNAL_EVENT_SOURCE_NAME = "oasis_internal";
 
+    public static final String DEF_ADMIN_USER = "admin@oasis.com";
+    public static final String DEF_CURATOR_USER = "curator@oasis.com";
+    public static final String DEF_PLAYER_USER = "player@oasis.com";
+
     static {
         DEFAULT_LEADERBOARD_DEF = new LeaderboardDef();
         DEFAULT_LEADERBOARD_DEF.setName("Oasis_Leaderboard");

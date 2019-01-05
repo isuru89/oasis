@@ -6,11 +6,13 @@ import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.events.EventNames;
+import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.services.*;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.UserRole;
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,7 @@ public class Bootstrapping {
         initSystem(dao);
 
         // setup data cache
+        LOG.info("  - Initializing cache from db...");
         DataCache.get().setup(gameDefService, profileService, eventsService);
 
         LOG.info("-------------------------------------------------------");
@@ -60,49 +63,16 @@ public class Bootstrapping {
     private void initSystem(IOasisDao dao) throws Exception {
         try {
             // add default team scope...
-            List<TeamScope> teamScopes = profileService.listTeamScopes();
-            TeamScope defTeamScope;
-            if (teamScopes.isEmpty()) {
-                defTeamScope = addDefaultTeamScope(profileService);
-            } else {
-                Optional<TeamScope> defTeamScopeOpt = teamScopes.stream()
-                        .filter(ts -> DefaultEntities.DEFAULT_TEAM_SCOPE_NAME.equalsIgnoreCase(ts.getName()))
-                        .findFirst();
-                if (defTeamScopeOpt.isPresent()) {
-                    defTeamScope = defTeamScopeOpt.get();
-                } else {
-                    defTeamScope = addDefaultTeamScope(profileService);
-                }
-            }
+            TeamScope defTeamScope = addDefaultTeamScope();
 
             // add default team...
-            List<TeamProfile> defaultTeams = profileService.listTeams(defTeamScope.getId());
-            long defTeamId = -1;
-            if (defaultTeams.isEmpty()) {
-                addDefaultTeamProfile(profileService, defTeamScope);
-            } else {
-                Optional<TeamProfile> defTeam = defaultTeams.stream()
-                        .filter(t -> DefaultEntities.DEFAULT_TEAM_NAME.equalsIgnoreCase(t.getName()))
-                        .findFirst();
-                if (!defTeam.isPresent()) {
-                    defTeamId = addDefaultTeamProfile(profileService, defTeamScope);
-                } else {
-                    defTeamId = defTeam.get().getId();
-                }
-            }
+            TeamProfile defaultTeam = addDefaultTeam(defTeamScope);
 
             // add internal event source
-            Optional<EventSourceToken> internalSourceToken = eventsService.readInternalSourceToken();
-            if (!internalSourceToken.isPresent()) {
-                EventSourceToken eventSourceToken = new EventSourceToken();
-                eventSourceToken.setSourceName(DefaultEntities.INTERNAL_EVENT_SOURCE_NAME);
-                eventSourceToken.setDisplayName(DefaultEntities.INTERNAL_EVENT_SOURCE_NAME);
-                eventSourceToken.setInternal(true);
-                eventsService.addEventSource(eventSourceToken);
-            }
+            createInternalToken();
 
             // add users
-            addUsers(defTeamId);
+            addUsers(defaultTeam.getId());
 
             // resume
             resumeGameAndChallenges();
@@ -114,16 +84,68 @@ public class Bootstrapping {
         }
     }
 
+    private TeamScope addDefaultTeamScope() throws Exception {
+        TeamScope defaultTeamScope = profileService.readTeamScope(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
+        if (defaultTeamScope == null) {
+            LOG.info("  - Default team scope does not exist. Creating...");
+            TeamScope teamScope = new TeamScope();
+            teamScope.setName(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
+            teamScope.setDisplayName(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
+            long id = profileService.addTeamScope(teamScope);
+            return profileService.readTeamScope(id);
+        } else {
+            LOG.info("  - Default team scope exists.");
+            return defaultTeamScope;
+        }
+    }
+
+    private TeamProfile addDefaultTeam(TeamScope defTeamScope) throws Exception {
+        List<TeamProfile> defaultTeams = profileService.listTeams(defTeamScope.getId());
+        if (defaultTeams.isEmpty()) {
+            return addDefaultTeamProfile(profileService, defTeamScope);
+        } else {
+            Optional<TeamProfile> defTeam = defaultTeams.stream()
+                    .filter(t -> DefaultEntities.DEFAULT_TEAM_NAME.equalsIgnoreCase(t.getName()))
+                    .findFirst();
+            if (!defTeam.isPresent()) {
+                return addDefaultTeamProfile(profileService, defTeamScope);
+            } else {
+                LOG.info("  - Default team exists.");
+                return defTeam.get();
+            }
+        }
+    }
+
+    private void createInternalToken() throws Exception {
+        Optional<EventSourceToken> internalSourceToken = eventsService.readInternalSourceToken();
+        if (!internalSourceToken.isPresent()) {
+            LOG.info("  - Internal event source token does not exist. Creating...");
+            EventSourceToken eventSourceToken = new EventSourceToken();
+            eventSourceToken.setSourceName(DefaultEntities.INTERNAL_EVENT_SOURCE_NAME);
+            eventSourceToken.setDisplayName(DefaultEntities.INTERNAL_EVENT_SOURCE_NAME);
+            eventSourceToken.setInternal(true);
+            eventsService.addEventSource(eventSourceToken);
+        }
+    }
+
     private void resumeGameAndChallenges() throws Exception {
+        if (BooleanUtils.toBoolean(OasisUtils.getEnvOr(
+                "OASIS_MANUAL_GAME_START", "oasis.manual.game.start", "no"))) {
+            LOG.info("  - Detected manual game start env variable. No games will be automatically started!");
+            return;
+        }
+
         List<GameDef> gameDefs = gameDefService.listGames();
         if (gameDefs == null || gameDefs.isEmpty()) {
             // no active game exist. do nothing
+            LOG.info("  - No active game exists. Nothing will be started.");
             return;
         }
 
         // resume game first...
         List<Integer> resumedGameIds = new LinkedList<>();
         for (GameDef gameDef : gameDefs) {
+            LOG.info("  - Resuming game: {}", gameDef.getName());
             lifecycleService.resumeGame(gameDef.getId());
             resumedGameIds.add(gameDef.getId().intValue());
         }
@@ -134,6 +156,7 @@ public class Bootstrapping {
                 SubmittedJob.class);
         for (SubmittedJob job : runningJobs) {
             if (!resumedGameIds.contains(job.getDefId())) {
+                LOG.info("  - Resuming challenge: {}", job.getDefId());
                 lifecycleService.resumeChallenge(job.getDefId());
             }
         }
@@ -148,31 +171,40 @@ public class Bootstrapping {
     }
 
     private void addUsers(long defTeamId) throws Exception {
-        UserProfile adminUser = profileService.readUserProfile("admin@oasis.com");
+        UserProfile adminUser = profileService.readUserProfile(DefaultEntities.DEF_ADMIN_USER);
         if (adminUser == null) {
+            LOG.info("  - Admin user does not exist. Creating...");
             UserProfile admin = new UserProfile();
-            admin.setEmail("admin@oasis.com");
+            admin.setEmail(DefaultEntities.DEF_ADMIN_USER);
             admin.setName("Admin");
             long adminId = profileService.addUserProfile(admin);
             profileService.addUserToTeam(adminId, defTeamId, UserRole.ADMIN);
+        } else {
+            LOG.info("  - Admin user exists.");
         }
 
-        UserProfile curatorUser = profileService.readUserProfile("curator@oasis.com");
+        UserProfile curatorUser = profileService.readUserProfile(DefaultEntities.DEF_CURATOR_USER);
         if (curatorUser == null) {
+            LOG.info("  - Curator user does not exist. Creating...");
             UserProfile curator = new UserProfile();
-            curator.setEmail("curator@oasis.com");
+            curator.setEmail(DefaultEntities.DEF_CURATOR_USER);
             curator.setName("Curator");
             long curatorId = profileService.addUserProfile(curator);
             profileService.addUserToTeam(curatorId, defTeamId, UserRole.CURATOR);
+        } else {
+            LOG.info("  - Curator user exists.");
         }
 
-        UserProfile playerUser = profileService.readUserProfile("player@oasis.com");
+        UserProfile playerUser = profileService.readUserProfile(DefaultEntities.DEF_PLAYER_USER);
         if (playerUser == null) {
+            LOG.info("  - Player user does not exist. Creating...");
             UserProfile player = new UserProfile();
-            player.setEmail("player@oasis.com");
+            player.setEmail(DefaultEntities.DEF_PLAYER_USER);
             player.setName("Player");
             long playerId = profileService.addUserProfile(player);
             profileService.addUserToTeam(playerId, defTeamId, UserRole.PLAYER);
+        } else {
+            LOG.info("  - Player user exists.");
         }
     }
 
@@ -186,19 +218,14 @@ public class Bootstrapping {
         }
     }
 
-    private static long addDefaultTeamProfile(IProfileService profileService, TeamScope teamScope) throws Exception {
+    private static TeamProfile addDefaultTeamProfile(IProfileService profileService, TeamScope teamScope) throws Exception {
+        LOG.info("  - Default team does not exist. Creating...");
+
         TeamProfile profile = new TeamProfile();
         profile.setName(DefaultEntities.DEFAULT_TEAM_NAME);
         profile.setTeamScope(teamScope.getId());
-        return profileService.addTeam(profile);
-    }
-
-    private static TeamScope addDefaultTeamScope(IProfileService profileService) throws Exception {
-        TeamScope teamScope = new TeamScope();
-        teamScope.setName(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
-        teamScope.setDisplayName(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
-        long id = profileService.addTeamScope(teamScope);
-        return profileService.readTeamScope(id);
+        long id = profileService.addTeam(profile);
+        return profileService.readTeam(id);
     }
 
     private static void addDefaultLeaderboards(IGameDefService defService, long gameId) throws Exception {

@@ -42,7 +42,7 @@ public class DataCache {
         this.gameDefService = gameDefService;
 
         allUserTmpPassword = RandomStringUtils.randomAlphanumeric(10);
-        LOG.info("Temporary password for all player authentication: " + allUserTmpPassword);
+        LOG.info(" *** Temporary password for all player authentication: " + allUserTmpPassword);
 
         List<GameDef> gameDefs = gameDefService.listGames();
         for (GameDef gameDef : gameDefs) {
@@ -54,13 +54,7 @@ public class DataCache {
         }
 
 
-        List<TeamScope> teamScopes = profileService.listTeamScopes();
-        for (TeamScope scope : teamScopes) {
-            if (scope.getName().equalsIgnoreCase(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME)) {
-                teamScopeDefault = scope;
-                break;
-            }
-        }
+        teamScopeDefault = profileService.readTeamScope(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
 
         if (teamScopeDefault == null) {
             throw new IllegalStateException("Default team scope is not found in database! " +
@@ -80,7 +74,7 @@ public class DataCache {
                     "Run the bootstrap and make default team and team scope.");
         }
 
-        UserProfile userProfile = profileService.readUserProfile("admin@oasis.com");
+        UserProfile userProfile = profileService.readUserProfile(DefaultEntities.DEF_ADMIN_USER);
         if (userProfile == null) {
             throw new IllegalStateException("No admin user is found on the system!");
         }
