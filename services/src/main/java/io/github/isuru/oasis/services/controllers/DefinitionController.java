@@ -1,6 +1,5 @@
 package io.github.isuru.oasis.services.controllers;
 
-import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.*;
 import io.github.isuru.oasis.services.api.dto.AddGameDto;
 import io.github.isuru.oasis.services.api.dto.HeroDto;
@@ -22,12 +21,6 @@ public class DefinitionController {
     @GetMapping("/def/game/all")
     @ResponseBody
     public List<GameDef> listAllGames() {
-        return null;
-    }
-
-    @GetMapping("/def/game/heros")
-    @ResponseBody
-    public List<HeroDto> listAllHeros() {
         return null;
     }
 
@@ -94,9 +87,4 @@ public class DefinitionController {
         return new DefinitionAddResponse("state", 0);
     }
 
-    @PostMapping("/def/game/{id}/item")
-    @ResponseBody
-    public DefinitionAddResponse addItem(@RequestBody ShopItem shopItem) {
-        return new DefinitionAddResponse("shopItem", 0);
-    }
 }

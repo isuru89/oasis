@@ -104,9 +104,4 @@ public class AdminController {
 
     }
 
-    @PostMapping("/admin/user/{id}/change-hero/{heroId}")
-    @ResponseBody
-    public void changeUserHero(@PathVariable("id") long userId, @PathVariable("heroId") int heroId) {
-
-    }
 }
