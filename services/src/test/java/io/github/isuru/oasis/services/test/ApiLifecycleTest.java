@@ -10,8 +10,8 @@ import io.github.isuru.oasis.model.defs.MilestonesDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.defs.PointsDef;
-import io.github.isuru.oasis.services.api.impl.LifeCycleService;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.services.LifeCycleServiceImpl;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -55,7 +55,7 @@ class ApiLifecycleTest extends AbstractApiTest {
             apiService.getGameDefService().addMilestoneDef(gameId, def);
         }
 
-        LifeCycleService lifecycleService = (LifeCycleService) apiService.getLifecycleService();
+        LifeCycleServiceImpl lifecycleService = (LifeCycleServiceImpl) apiService.getLifecycleService();
         StringWriter writer = new StringWriter();
         lifecycleService.writeGameRulesFile(gameId, true, writer);
         writer.flush();

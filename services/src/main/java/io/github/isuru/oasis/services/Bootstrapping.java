@@ -6,9 +6,9 @@ import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.events.EventNames;
-import io.github.isuru.oasis.services.api.IGameDefService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
-import io.github.isuru.oasis.services.api.IProfileService;
+import io.github.isuru.oasis.services.services.IGameDefService;
+import io.github.isuru.oasis.services.services.IOasisApiService;
+import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -141,9 +141,7 @@ public class Bootstrapping {
         }
     }
 
-    public static void initGame(IOasisApiService apiService, long gameId, GameOptionsDto optionsDto) throws Exception {
-        IGameDefService gameDefService = apiService.getGameDefService();
-
+    public static void initGame(IGameDefService gameDefService, long gameId, GameOptionsDto optionsDto) throws Exception {
         addDefaultPointRules(gameDefService, gameId, optionsDto);
 
         // add default leaderboard definitions...

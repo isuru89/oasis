@@ -1,14 +1,14 @@
-package io.github.isuru.oasis.services.api.impl;
+package io.github.isuru.oasis.services.services;
 
-import io.github.isuru.oasis.services.api.IOasisApiService;
-import io.github.isuru.oasis.services.api.IProfileService;
-import io.github.isuru.oasis.services.api.dto.HeroDto;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
 import io.github.isuru.oasis.services.utils.UserRole;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.util.*;
@@ -16,11 +16,14 @@ import java.util.*;
 /**
  * @author iweerarathna
  */
-public class ProfileService extends BaseService implements IProfileService {
+@Service("profileService")
+public class ProfileServiceImpl implements IProfileService {
 
-    ProfileService(IOasisApiService apiService) {
-        super(apiService);
-    }
+    @Autowired
+    private IOasisDao dao;
+
+    @Autowired
+    private IGameDefService gameDefService;
 
     @Override
     public long addUserProfile(UserProfile profile) throws Exception {
@@ -36,14 +39,14 @@ public class ProfileService extends BaseService implements IProfileService {
                 .put("isAutoUser", false)
                 .build();
 
-        return getDao().executeInsert("profile/addUser", data, "user_id");
+        return dao.executeInsert(Q.PROFILE.ADD_USER, data, "user_id");
     }
 
     @Override
     public UserProfile readUserProfile(long userId) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
-        return getTheOnlyRecord("profile/readUser",
+        return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.READ_USER,
                 Maps.create("userId", userId),
                 UserProfile.class);
     }
@@ -52,14 +55,14 @@ public class ProfileService extends BaseService implements IProfileService {
     public UserProfile readUserProfile(String email) throws Exception {
         Checks.nonNullOrEmpty(email, "email");
 
-        return getTheOnlyRecord("profile/readUserByEmail",
+        return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.READ_USER_BY_EMAIL,
                 Maps.create("email", email),
                 UserProfile.class);
     }
 
     @Override
     public UserProfile readUserProfileByExtId(long extUserId) throws Exception {
-        return getTheOnlyRecord("profile/readUserByExtId",
+        return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.READ_USER_BY_EXTID,
                 Maps.create("extId", extUserId),
                 UserProfile.class);
     }
@@ -75,14 +78,14 @@ public class ProfileService extends BaseService implements IProfileService {
         data.put("isMale", latest.isMale());
         data.put("userId", userId);
 
-        return getDao().executeCommand("profile/editUser", data) > 0;
+        return dao.executeCommand(Q.PROFILE.EDIT_USER, data) > 0;
     }
 
     @Override
     public boolean deleteUserProfile(long userId) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
-        return getDao().executeCommand("profile/disableUser", Maps.create("userId", userId)) > 0;
+        return dao.executeCommand(Q.PROFILE.DISABLE_USER, Maps.create("userId", userId)) > 0;
     }
 
     @Override
@@ -98,7 +101,7 @@ public class ProfileService extends BaseService implements IProfileService {
                             .replace("_", "!_")
                             .replace("[", "![");
 
-        return toList(getDao().executeQuery("profile/searchUser",
+        return ServiceUtils.toList(dao.executeQuery(Q.PROFILE.SEARCH_USER,
                 Maps.create()
                     .put("email", "%" + param + "%")
                     .put("name", name)
@@ -114,7 +117,7 @@ public class ProfileService extends BaseService implements IProfileService {
         Checks.nonNegative(offset, "offset");
         Checks.nonNegative(size, "size");
 
-        return toList(getDao().executeQuery("profile/listUsersOfTeam",
+        return ServiceUtils.toList(dao.executeQuery(Q.PROFILE.LIST_USERS_OF_TEAM,
                 Maps.create()
                         .put("teamId", teamId)
                         .put("offset", offset)
@@ -128,14 +131,14 @@ public class ProfileService extends BaseService implements IProfileService {
         Checks.nonNullOrEmpty(teamProfile.getName(), "name");
         Checks.greaterThanZero(teamProfile.getTeamScope(), "scope");
 
-        return (Long) getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
+        return (Long) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
             Map<String, Object> data = Maps.create()
                     .put("teamScope", teamProfile.getTeamScope())
                     .put("name", teamProfile.getName())
                     .put("avatarId", teamProfile.getAvatarId())
                     .build();
 
-            Long teamId = input.executeInsert("profile/addTeam", data, "team_id");
+            Long teamId = input.executeInsert(Q.PROFILE.ADD_TEAM, data, "team_id");
 
             // add user for team scope
             Map<String, Object> playerData = Maps.create()
@@ -146,9 +149,9 @@ public class ProfileService extends BaseService implements IProfileService {
                     .put("email", "")
                     .put("isAutoUser", true)
                     .build();
-            Long userId = input.executeInsert("profile/addUser", playerData, "user_id");
+            Long userId = input.executeInsert(Q.PROFILE.ADD_USER, playerData, "user_id");
 
-            input.executeInsert("profile/addUserToTeam",
+            input.executeInsert(Q.PROFILE.ADD_USER_TO_TEAM,
                     Maps.create()
                             .put("userId", userId)
                             .put("teamId", teamId)
@@ -164,7 +167,7 @@ public class ProfileService extends BaseService implements IProfileService {
     public TeamProfile readTeam(long teamId) throws Exception {
         Checks.greaterThanZero(teamId, "teamId");
 
-        return getTheOnlyRecord("profile/readTeam",
+        return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.READ_TEAM,
                 Maps.create("teamId", teamId),
                 TeamProfile.class);
     }
@@ -181,14 +184,14 @@ public class ProfileService extends BaseService implements IProfileService {
                 .put("teamId", teamId)
                 .build();
 
-        return getDao().executeCommand("profile/editTeam", data) > 0;
+        return dao.executeCommand(Q.PROFILE.EDIT_TEAM, data) > 0;
     }
 
     @Override
     public List<TeamProfile> listTeams(long scopeId) throws Exception {
         Checks.greaterThanZero(scopeId, "scopeId");
 
-        return toList(getDao().executeQuery("profile/listTeamOfScope",
+        return ServiceUtils.toList(dao.executeQuery(Q.PROFILE.LIST_TEAMS_OF_SCOPE,
                 Maps.create("scopeId", scopeId),
                 TeamProfile.class));
     }
@@ -198,14 +201,14 @@ public class ProfileService extends BaseService implements IProfileService {
         Checks.nonNullOrEmpty(teamScope.getName(), "name");
         Checks.nonNullOrEmpty(teamScope.getDisplayName(), "displayName");
 
-        return (Long) getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
+        return (Long) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
             Map<String, Object> data = Maps.create()
                     .put("extId", teamScope.getExtId())
                     .put("name", teamScope.getName())
                     .put("displayName", teamScope.getDisplayName())
                     .build();
 
-            Long addedScopeId = input.executeInsert("profile/addTeamScope", data, "scope_id");
+            Long addedScopeId = input.executeInsert(Q.PROFILE.ADD_TEAMSCOPE, data, "scope_id");
 
             // add default team
             Map<String, Object> teamData = Maps.create()
@@ -213,7 +216,7 @@ public class ProfileService extends BaseService implements IProfileService {
                     .put("name", "default_" + teamScope.getName())
                     .put("avatarId", null)
                     .build();
-            Long addedTeamId = input.executeInsert("profile/addTeam", teamData, "team_id");
+            Long addedTeamId = input.executeInsert(Q.PROFILE.ADD_TEAM, teamData, "team_id");
 
             // add user for team scope
             Map<String, Object> playerData = Maps.create()
@@ -224,7 +227,7 @@ public class ProfileService extends BaseService implements IProfileService {
                     .put("email", "default@"+teamScope.getName() + ".oasis.com")
                     .put("isAutoUser", true)
                     .build();
-            Long userId = input.executeInsert("profile/addUser", playerData, "user_id");
+            Long userId = input.executeInsert(Q.PROFILE.ADD_USER, playerData, "user_id");
 
             input.executeInsert("profile/addUserToTeam",
                     Maps.create()
@@ -242,7 +245,7 @@ public class ProfileService extends BaseService implements IProfileService {
     public TeamScope readTeamScope(long scopeId) throws Exception {
         Checks.greaterThanZero(scopeId, "scopeId");
 
-        return getTheOnlyRecord("profile/readTeamScope",
+        return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.READ_TEAMSCOPE,
                 Maps.create("scopeId", scopeId),
                 TeamScope.class);
     }
@@ -251,14 +254,14 @@ public class ProfileService extends BaseService implements IProfileService {
     public TeamScope readTeamScope(String scopeName) throws Exception {
         Checks.nonNullOrEmpty(scopeName, "scopeName");
 
-        return getTheOnlyRecord("profile/findScopeByName",
+        return ServiceUtils.getTheOnlyRecord(dao,Q.PROFILE.FIND_SCOPE_BY_NAME,
                 Maps.create("scopeName", scopeName),
                 TeamScope.class);
     }
 
     @Override
     public List<TeamScope> listTeamScopes() throws Exception {
-        return toList(getDao().executeQuery("profile/listTeamScopes",
+        return ServiceUtils.toList(dao.executeQuery(Q.PROFILE.LIST_TEAM_SCOPES,
                 null, TeamScope.class));
     }
 
@@ -272,7 +275,7 @@ public class ProfileService extends BaseService implements IProfileService {
                 .put("scopeId", scopeId)
                 .build();
 
-        return getDao().executeCommand("profile/editTeamScope", data) > 0;
+        return dao.executeCommand(Q.PROFILE.EDIT_TEAMSCOPE, data) > 0;
     }
 
     @Override
@@ -296,22 +299,22 @@ public class ProfileService extends BaseService implements IProfileService {
 
         // if the previous team is not yet approved, then disable it
         if (userTeam != null && !userTeam.isApproved()) {
-            getDao().executeCommand("profile/rejectUserInTeam",
+            dao.executeCommand(Q.PROFILE.REJECT_USER_IN_TEAM,
                     Maps.create("id", userTeam.getId()));
         }
 
-        return (Boolean) getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
+        return (Boolean) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
             long currentTimeMillis = System.currentTimeMillis();
 
             if (userTeam != null) {
-                ctx.executeCommand("profile/deallocateFromTeam",
+                ctx.executeCommand(Q.PROFILE.DEALLOCATE_FROM_TEAM,
                         Maps.create()
                                 .put("id", userTeam.getId())
                                 .put("endTime", currentTimeMillis)
                                 .build());
             }
 
-            return ctx.executeCommand("profile/addUserToTeam",
+            return ctx.executeCommand(Q.PROFILE.ADD_USER_TO_TEAM,
                     Maps.create()
                             .put("userId", userId)
                             .put("teamId", teamId)
@@ -334,7 +337,7 @@ public class ProfileService extends BaseService implements IProfileService {
 
         long l = System.currentTimeMillis();
         // @TODO handle when no record is found
-        Iterable<UserTeam> userTeams = getDao().executeQuery("profile/findCurrentTeamOfUser",
+        Iterable<UserTeam> userTeams = dao.executeQuery(Q.PROFILE.FIND_CURRENT_TEAM_OF_USER,
                 Maps.create().put("userId", userId)
                         .put("currentEpoch", l)
                         .build(),
@@ -353,7 +356,7 @@ public class ProfileService extends BaseService implements IProfileService {
     public TeamProfile findTeamByName(String name) throws Exception {
         Checks.nonNullOrEmpty(name, "teamName");
 
-        return getTheOnlyRecord("profile/findTeamByName",
+        return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.FIND_TEAM_BY_NAME,
                 Maps.create("teamName", name),
                 TeamProfile.class);
     }
@@ -362,40 +365,10 @@ public class ProfileService extends BaseService implements IProfileService {
     public boolean logoutUser(long userId, long ts) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
-        return getDao().executeCommand("profile/logoutUser",
+        return dao.executeCommand(Q.PROFILE.LOGOUT_USER,
                 Maps.create()
                     .put("userId", userId)
                     .put("logoutAt", ts).build()) > 0;
-    }
-
-    @Override
-    public boolean changeUserHero(long userId, int newHeroId) throws Exception {
-        Checks.greaterThanZero(userId, "userId");
-
-        List<HeroDto> heros = getApiService().getGameDefService().listHeros();
-        if (heros.stream().noneMatch(hero -> hero.getHeroId() == newHeroId)) {
-            throw new InputValidationException("No hero is found by hero id " + newHeroId + "!");
-        }
-
-        Map<String, Object> data = Maps.create()
-                .put("userId", userId)
-                .put("heroId", newHeroId)
-                .put("heroUpdatedAt", System.currentTimeMillis())
-                .put("updateLimit", 2)      // @TODO load from deployment configs
-                .build();
-
-        return (Boolean) getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
-            boolean success = ctx.executeCommand("profile/updateHero", data) > 0;
-            if (success) {
-                Map<String, Object> userMap = Maps.create("userId", userId);
-
-                // re-available limited edition items
-                ctx.executeCommand("def/item/reavailablePurchasesOfUser", userMap);
-                // disable all purchases
-                ctx.executeCommand("def/item/disablePurchasesOfUser", userMap);
-            }
-            return success;
-        });
     }
 
     @Override
@@ -405,7 +378,7 @@ public class ProfileService extends BaseService implements IProfileService {
         Checks.greaterThanZero(roleId, "roleId");
         Checks.greaterThanZero(startTime, "startTime");
 
-        return getDao().executeInsert("profile/flow/requestRole",
+        return dao.executeInsert("profile/flow/requestRole",
                 Maps.create()
                     .put("teamScopeId", teamScopeId)
                     .put("userId", byUser)
@@ -420,20 +393,20 @@ public class ProfileService extends BaseService implements IProfileService {
         Checks.greaterThanZero(requestId, "requestId");
         Checks.greaterThanZero(rejectedBy, "rejectedBy");
 
-        UserTeamScope userTeamScope = getTheOnlyRecord("profile/flow/readRoleRequest",
+        UserTeamScope userTeamScope = ServiceUtils.getTheOnlyRecord(dao, "profile/flow/readRoleRequest",
                 Maps.create("id", requestId),
                 UserTeamScope.class);
 
         if (userTeamScope == null) {
             throw new InputValidationException("Given request id is not found in the system!");
         }
-        if (userTeamScope.isApproved() || isValid(userTeamScope.getModifiedBy())) {
+        if (userTeamScope.isApproved() || ServiceUtils.isValid(userTeamScope.getModifiedBy())) {
             throw new InputValidationException("Given request id is already has been approved or rejected!");
         }
 
         // @TODO check rejectedBy user has permissions
 
-        return getDao().executeCommand("profile/flow/rejectRole",
+        return dao.executeCommand("profile/flow/rejectRole",
                 Maps.create()
                     .put("id", requestId)
                     .put("modifiedBy", rejectedBy).build()) > 0;
@@ -448,7 +421,7 @@ public class ProfileService extends BaseService implements IProfileService {
 
         // @TODO check removed by user has the permissions
 
-        return getDao().executeCommand("profile/flow/removeRole",
+        return dao.executeCommand("profile/flow/removeRole",
                 Maps.create()
                     .put("userId", userId)
                     .put("teamScopeId", teamScopeId)
@@ -463,20 +436,20 @@ public class ProfileService extends BaseService implements IProfileService {
         Checks.greaterThanZero(approvedBy, "approvedBy");
         Checks.greaterThanZero(approvedTime, "approvedTime");
 
-        UserTeamScope userTeamScope = getTheOnlyRecord("profile/flow/readRoleRequest",
+        UserTeamScope userTeamScope = ServiceUtils.getTheOnlyRecord(dao, "profile/flow/readRoleRequest",
                 Maps.create("id", requestId),
                 UserTeamScope.class);
 
         if (userTeamScope == null) {
             throw new InputValidationException("Given request id is not found in the system!");
         }
-        if (userTeamScope.isApproved() || isValid(userTeamScope.getModifiedBy())) {
+        if (userTeamScope.isApproved() || ServiceUtils.isValid(userTeamScope.getModifiedBy())) {
             throw new InputValidationException("Given request id is already has been approved or rejected!");
         }
 
         // @TODO check removed by user has the permissions
 
-        return getDao().executeCommand("profile/flow/approveRole",
+        return dao.executeCommand("profile/flow/approveRole",
                 Maps.create()
                         .put("id", requestId)
                         .put("approvedAt", approvedTime)
@@ -488,7 +461,7 @@ public class ProfileService extends BaseService implements IProfileService {
     public List<UserTeamScope> listCurrentUserRoles(long userId) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
-        return toList(getDao().executeQuery("profile/flow/listCurrentUserRoles",
+        return ServiceUtils.toList(dao.executeQuery("profile/flow/listCurrentUserRoles",
                 Maps.create("userId", userId),
                 UserTeamScope.class));
     }

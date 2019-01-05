@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.api;
+package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.services.model.*;
 
@@ -41,5 +41,4 @@ public interface IProfileService {
 
     boolean logoutUser(long userId, long ts) throws Exception;
 
-    boolean changeUserHero(long userId, int newHeroId) throws Exception;
 }

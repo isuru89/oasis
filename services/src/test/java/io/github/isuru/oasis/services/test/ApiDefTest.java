@@ -2,8 +2,9 @@ package io.github.isuru.oasis.services.test;
 
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.*;
-import io.github.isuru.oasis.services.api.IGameDefService;
+import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.services.IMetaphorService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -408,6 +409,7 @@ class ApiDefTest extends AbstractApiTest {
     @Test
     void testShopItems() throws Exception {
         IGameDefService gameDefService = apiService.getGameDefService();
+        IMetaphorService metaphorService = apiService.getMetaphorService();
         long gameId = createGame("game-shop-test", "Testing shop");
         Assertions.assertTrue(gameId > 0);
 
@@ -420,16 +422,16 @@ class ApiDefTest extends AbstractApiTest {
             shopItem.setScope("Consumable");
             shopItem.setPrice(90);
 
-            long sid = gameDefService.addShopItem(gameId, shopItem);
+            long sid = metaphorService.addShopItem(gameId, shopItem);
             item1Id = sid;
             Assertions.assertTrue(sid > 0);
 
-            List<ShopItem> items = gameDefService.listShopItems(gameId);
+            List<ShopItem> items = metaphorService.listShopItems(gameId);
             Assertions.assertNotNull(items);
             Assertions.assertEquals(1, items.size());
             Assertions.assertEquals(sid, (long) items.get(0).getId());
 
-            ShopItem item = gameDefService.readShopItem(sid);
+            ShopItem item = metaphorService.readShopItem(sid);
             Assertions.assertNotNull(item);
             Assertions.assertTrue(item.getId() > 0);
             Assertions.assertEquals(item.getTitle(), shopItem.getTitle());
@@ -450,14 +452,14 @@ class ApiDefTest extends AbstractApiTest {
         magicStick.setExpirationAt(System.currentTimeMillis() + 8400000);
         magicStick.setImageRef("/images/item/magic_stick.png");
 
-        long sid = gameDefService.addShopItem(gameId, magicStick);
+        long sid = metaphorService.addShopItem(gameId, magicStick);
         Assertions.assertTrue(sid > 0);
 
-        List<ShopItem> items = gameDefService.listShopItems(gameId);
+        List<ShopItem> items = metaphorService.listShopItems(gameId);
         Assertions.assertNotNull(items);
         Assertions.assertEquals(2, items.size());
 
-        ShopItem item = gameDefService.readShopItem(sid);
+        ShopItem item = metaphorService.readShopItem(sid);
         Assertions.assertNotNull(item);
         Assertions.assertTrue(item.getId() > 0);
         Assertions.assertNotNull(item.getImageRef());
@@ -465,15 +467,15 @@ class ApiDefTest extends AbstractApiTest {
         Assertions.assertEquals(magicStick.getExpirationAt(), item.getExpirationAt());
         Assertions.assertEquals(magicStick.getImageRef(), item.getImageRef());
 
-        Assertions.assertTrue(gameDefService.disableShopItem(item1Id));
+        Assertions.assertTrue(metaphorService.disableShopItem(item1Id));
 
-        items = gameDefService.listShopItems(gameId);
+        items = metaphorService.listShopItems(gameId);
         Assertions.assertNotNull(items);
         Assertions.assertEquals(1, items.size());
 
         // @TODO check read deleted shop item
 
-        Assertions.assertTrue(gameDefService.disableShopItem(sid));
+        Assertions.assertTrue(metaphorService.disableShopItem(sid));
         Assertions.assertTrue(gameDefService.disableGame(gameId));
     }
 

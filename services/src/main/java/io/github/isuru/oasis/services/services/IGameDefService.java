@@ -1,8 +1,6 @@
-package io.github.isuru.oasis.services.api;
+package io.github.isuru.oasis.services.services;
 
-import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.*;
-import io.github.isuru.oasis.services.api.dto.HeroDto;
 import io.github.isuru.oasis.services.model.GameOptionsDto;
 
 import java.util.List;
@@ -55,11 +53,4 @@ public interface IGameDefService {
     List<StateDef> listStatePlays(long gameId) throws Exception;
     boolean disableStatePlay(long id) throws Exception;
 
-    long addShopItem(long gameId, ShopItem item) throws Exception;
-    List<ShopItem> listShopItems(long gameId) throws Exception;
-    List<ShopItem> listShopItems(long gameId, int heroId) throws Exception;
-    ShopItem readShopItem(long id) throws Exception;
-    boolean disableShopItem(long id) throws Exception;
-
-    List<HeroDto> listHeros() throws Exception;
 }

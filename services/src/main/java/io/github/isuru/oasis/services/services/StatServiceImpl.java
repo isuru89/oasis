@@ -1,10 +1,9 @@
-package io.github.isuru.oasis.services.api.impl;
+package io.github.isuru.oasis.services.services;
 
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
-import io.github.isuru.oasis.services.api.IOasisApiService;
-import io.github.isuru.oasis.services.api.IStatService;
 import io.github.isuru.oasis.services.api.dto.BadgeBreakdownReqDto;
 import io.github.isuru.oasis.services.api.dto.BadgeBreakdownResDto;
 import io.github.isuru.oasis.services.api.dto.BadgeRecordDto;
@@ -26,6 +25,8 @@ import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.model.enums.ScopingType;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.beans.Statement;
 import java.util.ArrayList;
@@ -40,11 +41,20 @@ import java.util.stream.Collectors;
 /**
  * @author iweerarathna
  */
-public class StatService extends BaseService implements IStatService {
+@Service("statService")
+public class StatServiceImpl implements IStatService {
 
-    StatService(IOasisApiService apiService) {
-        super(apiService);
-    }
+    @Autowired
+    private IOasisDao dao;
+
+    @Autowired
+    private IProfileService profileService;
+
+    @Autowired
+    private IGameDefService gameDefService;
+
+    @Autowired
+    private IGameService gameService;
 
     @Override
     public PointBreakdownResDto getPointBreakdownList(PointBreakdownReqDto request) throws Exception {
@@ -52,19 +62,19 @@ public class StatService extends BaseService implements IStatService {
         Checks.greaterThanZero(request.getPointId(), "pointId");
 
         Map<String, Object> conditions = Maps.create()
-                .put("hasOffset", isValid(request.getOffset()))
-                .put("hasSize", isValid(request.getSize()))
-                .put("hasRangeStart", isValid(request.getRangeStart()))
-                .put("hasRangeEnd", isValid(request.getRangeEnd()))
+                .put("hasOffset", ServiceUtils.isValid(request.getOffset()))
+                .put("hasSize", ServiceUtils.isValid(request.getSize()))
+                .put("hasRangeStart", ServiceUtils.isValid(request.getRangeStart()))
+                .put("hasRangeEnd", ServiceUtils.isValid(request.getRangeEnd()))
                 .build();
 
-        List<PointRecordDto> recordDtos = toList(getDao().executeQuery("stats/getUserPointsList",
+        List<PointRecordDto> recordDtos = ServiceUtils.toList(dao.executeQuery(Q.STATS.GET_USER_POINTS_LIST,
                 Maps.create().put("userId", request.getUserId())
                     .put("pointId", request.getPointId())
-                    .put("offset", orDefault(request.getOffset(), 0))
-                    .put("size", orDefault(request.getSize(), 100))
-                    .put("rangeStart", orDefault(request.getRangeStart(), 0L))
-                    .put("rangeEnd", orDefault(request.getRangeEnd(), 0L))
+                    .put("offset", ServiceUtils.orDefault(request.getOffset(), 0))
+                    .put("size", ServiceUtils.orDefault(request.getSize(), 100))
+                    .put("rangeStart", ServiceUtils.orDefault(request.getRangeStart(), 0L))
+                    .put("rangeEnd", ServiceUtils.orDefault(request.getRangeEnd(), 0L))
                     .build(),
                 PointRecordDto.class,
                 conditions));
@@ -80,20 +90,20 @@ public class StatService extends BaseService implements IStatService {
         Checks.greaterThanZero(request.getUserId(), "userId");
 
         Map<String, Object> conditions = Maps.create()
-                .put("hasBadgeId", isValid(request.getBadgeId()))
-                .put("hasOffset", isValid(request.getOffset()))
-                .put("hasSize", isValid(request.getSize()))
-                .put("hasRangeStart", isValid(request.getRangeStart()))
-                .put("hasRangeEnd", isValid(request.getRangeEnd()))
+                .put("hasBadgeId", ServiceUtils.isValid(request.getBadgeId()))
+                .put("hasOffset", ServiceUtils.isValid(request.getOffset()))
+                .put("hasSize", ServiceUtils.isValid(request.getSize()))
+                .put("hasRangeStart", ServiceUtils.isValid(request.getRangeStart()))
+                .put("hasRangeEnd", ServiceUtils.isValid(request.getRangeEnd()))
                 .build();
 
-        List<BadgeRecordDto> recordDtos = toList(getDao().executeQuery("stats/getUserBadgesList",
+        List<BadgeRecordDto> recordDtos = ServiceUtils.toList(dao.executeQuery(Q.STATS.GET_USER_BADGES_LIST,
                 Maps.create().put("userId", request.getUserId())
-                        .put("badgeId", orDefault(request.getBadgeId(), 0))
-                        .put("offset", orDefault(request.getOffset(), 0))
-                        .put("size", orDefault(request.getSize(), 100))
-                        .put("rangeStart", orDefault(request.getRangeStart(), 0L))
-                        .put("rangeEnd", orDefault(request.getRangeEnd(), 0L))
+                        .put("badgeId", ServiceUtils.orDefault(request.getBadgeId(), 0))
+                        .put("offset", ServiceUtils.orDefault(request.getOffset(), 0))
+                        .put("size", ServiceUtils.orDefault(request.getSize(), 100))
+                        .put("rangeStart", ServiceUtils.orDefault(request.getRangeStart(), 0L))
+                        .put("rangeEnd", ServiceUtils.orDefault(request.getRangeEnd(), 0L))
                         .build(),
                 BadgeRecordDto.class,
                 conditions));
@@ -111,8 +121,8 @@ public class StatService extends BaseService implements IStatService {
         Map<String, Object> tdata = new HashMap<>();
         tdata.put("hasSince", since > 0);
 
-        Iterable<Map<String, Object>> summaryStat = getDao().executeQuery(
-                "stats/getUserStatSummary",
+        Iterable<Map<String, Object>> summaryStat = dao.executeQuery(
+                Q.STATS.GET_USER_STAT_SUMMARY,
                 Maps.create()
                         .put("userId", userId)
                         .put("since", since)
@@ -137,7 +147,7 @@ public class StatService extends BaseService implements IStatService {
         Map<String, Object> tdata = new HashMap<>();
         tdata.put("hasSince", since > 0);
 
-        return toList(getDao().executeQuery("stats/getPurchasedItems",
+        return ServiceUtils.toList(dao.executeQuery(Q.STATS.GET_PURCHASED_ITEMS,
                 Maps.create()
                     .put("userId", userId).put("since", since)
                     .build(),
@@ -152,8 +162,8 @@ public class StatService extends BaseService implements IStatService {
         Map<String, Object> tdata = new HashMap<>();
         tdata.put("hasSince", since > 0);
 
-        return toList(getDao().executeQuery(
-                "stats/getUserBadgesStat",
+        return ServiceUtils.toList(dao.executeQuery(
+                Q.STATS.GET_USER_BADGE_STAT,
                 Maps.create().put("userId", userId).put("since", since).build(),
                 UserBadgeStatDto.class,
                 tdata));
@@ -163,8 +173,8 @@ public class StatService extends BaseService implements IStatService {
     public List<UserMilestoneStatDto> readUserMilestones(long userId) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
-        return toList(getDao().executeQuery(
-                "stats/getUserMilestoneStat",
+        return ServiceUtils.toList(dao.executeQuery(
+                Q.STATS.GET_USER_MILESTONE_STAT,
                 Maps.create("userId", userId),
                 UserMilestoneStatDto.class));
     }
@@ -173,7 +183,7 @@ public class StatService extends BaseService implements IStatService {
     public List<UserRankRecordDto> readUserTeamRankings(long userId, boolean currentTeamOnly) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
-        UserTeam currentTeamOfUser = getApiService().getProfileService().findCurrentTeamOfUser(userId);
+        UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(userId);
 
         Map<String, Object> tdata = new HashMap<>();
         tdata.put("teamWise", currentTeamOfUser != null && currentTeamOnly);
@@ -181,7 +191,7 @@ public class StatService extends BaseService implements IStatService {
 
         int tid = currentTeamOfUser == null ? 0 : currentTeamOfUser.getTeamId();
         int sid = currentTeamOfUser == null ? 0 : currentTeamOfUser.getScopeId();
-        return toList(getDao().executeQuery("stats/getUserTeamRanking",
+        return ServiceUtils.toList(dao.executeQuery(Q.STATS.GET_USER_TEAM_RANKING,
                 Maps.create()
                     .put("userId", userId)
                     .put("teamId", tid)
@@ -198,8 +208,8 @@ public class StatService extends BaseService implements IStatService {
         Checks.greaterThanZero(userId, "userId");
         Checks.nonNull(scopingType, "scopeType");
 
-        UserTeam currentTeamOfUser = getApiService().getProfileService().findCurrentTeamOfUser(userId);
-        List<LeaderboardDef> leaderboardDefs = getApiService().getGameDefService().listLeaderboardDefs(gameId);
+        UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(userId);
+        List<LeaderboardDef> leaderboardDefs = gameDefService.listLeaderboardDefs(gameId);
         List<UserRankRecordDto> rankings = new LinkedList<>();
 
         for (LeaderboardDef def : leaderboardDefs) {
@@ -211,14 +221,13 @@ public class StatService extends BaseService implements IStatService {
 
             List<UserRankRecordDto> userRankRecordDtos = null;
             if (scopingType == ScopingType.TEAM) {
-                userRankRecordDtos = getApiService().getGameService()
+                userRankRecordDtos = gameService
                         .readTeamLeaderboard(currentTeamOfUser.getTeamId(), requestDto);
             } else if (scopingType == ScopingType.TEAM_SCOPE) {
-                userRankRecordDtos = getApiService().getGameService()
+                userRankRecordDtos = gameService
                         .readTeamScopeLeaderboard(currentTeamOfUser.getScopeId(), requestDto);
             } else if (scopingType == ScopingType.GLOBAL) {
-                userRankRecordDtos = getApiService().getGameService()
-                        .readGlobalLeaderboard(requestDto);
+                userRankRecordDtos = gameService.readGlobalLeaderboard(requestDto);
             }
 
             if (userRankRecordDtos != null && !userRankRecordDtos.isEmpty()) {
@@ -234,8 +243,8 @@ public class StatService extends BaseService implements IStatService {
     public List<TeamHistoryRecordDto> readUserTeamHistoryStat(long userId) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
-        List<TeamHistoryRecordDto> historyRecords = toList(getDao().executeQuery(
-                "stats/teamWiseSummaryStats",
+        List<TeamHistoryRecordDto> historyRecords = ServiceUtils.toList(dao.executeQuery(
+                Q.STATS.TEAM_WISE_SUMMARY_STATS,
                     Maps.create("userId", userId),
                     TeamHistoryRecordDto.class))
                 .stream()
@@ -267,7 +276,7 @@ public class StatService extends BaseService implements IStatService {
     public List<UserStateStatDto> readUserStateStats(long userId, long teamId) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
-        return toList(getDao().executeQuery("stats/getUserStateValues",
+        return ServiceUtils.toList(dao.executeQuery(Q.STATS.GET_USER_STATE_VALUES,
                 Maps.create()
                     .put("userId", userId)
                     .put("teamId", teamId).build(),
@@ -278,11 +287,11 @@ public class StatService extends BaseService implements IStatService {
     public ChallengeInfoDto readChallengeStats(long challengeId) throws Exception {
         Checks.greaterThanZero(challengeId, "challengeId");
 
-        ChallengeDef def = getApiService().getGameDefService().readChallenge(challengeId);
+        ChallengeDef def = gameDefService.readChallenge(challengeId);
         if (def != null) {
             ChallengeInfoDto challengeInfoDto = new ChallengeInfoDto();
-            List<ChallengeWinnerDto> winners = toList(getDao().executeQuery(
-                    "stats/getChallengeWinners",
+            List<ChallengeWinnerDto> winners = ServiceUtils.toList(dao.executeQuery(
+                    Q.STATS.GET_CHALLENGE_WINNERS,
                     Maps.create("challengeId", challengeId),
                     ChallengeWinnerDto.class));
 

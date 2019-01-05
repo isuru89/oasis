@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.configs;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -20,6 +21,16 @@ public class OasisConfigurations {
     private String privateKeyPath;
 
     private String flinkURL;
+    @Value("${flinkParallelism:1}")
+    private int flinkParallelism = 1;
+
+    public int getFlinkParallelism() {
+        return flinkParallelism;
+    }
+
+    public void setFlinkParallelism(int flinkParallelism) {
+        this.flinkParallelism = flinkParallelism;
+    }
 
     public void setDefaultAdminPassword(String defaultAdminPassword) {
         this.defaultAdminPassword = defaultAdminPassword;

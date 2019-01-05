@@ -1,31 +1,25 @@
-package io.github.isuru.oasis.services.api.impl;
+package io.github.isuru.oasis.services.services;
 
-import io.github.isuru.oasis.model.configs.ConfigKeys;
-import io.github.isuru.oasis.model.configs.Configs;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.DefWrapper;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
-import io.github.isuru.oasis.services.api.IGameDefService;
-import io.github.isuru.oasis.services.api.ILifecycleService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.backend.FlinkClient;
 import io.github.isuru.oasis.services.backend.FlinkServices;
-import io.github.isuru.oasis.services.backend.model.FlinkJar;
-import io.github.isuru.oasis.services.backend.model.JarListInfo;
-import io.github.isuru.oasis.services.backend.model.JarRunResponse;
-import io.github.isuru.oasis.services.backend.model.JarUploadResponse;
-import io.github.isuru.oasis.services.backend.model.JobSaveRequest;
+import io.github.isuru.oasis.services.backend.model.*;
+import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.SubmittedJob;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Constants;
 import io.github.isuru.oasis.services.utils.Maps;
-import io.github.isuru.oasis.services.utils.OasisOptions;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -39,19 +33,21 @@ import java.util.Map;
 /**
  * @author iweerarathna
  */
-public class LifeCycleService extends BaseService implements ILifecycleService  {
+@Service("lifecycleService")
+public class LifeCycleServiceImpl implements ILifecycleService  {
 
-    private final FlinkServices services;
+    @Autowired
+    private IOasisDao dao;
 
-    private Configs configs;
+    @Autowired
+    private FlinkServices services;
 
-    LifeCycleService(IOasisApiService apiService,
-                     OasisOptions oasisOptions) {
-        super(apiService);
+    @Autowired
+    private IGameDefService gameDefService;
 
-        this.services = oasisOptions.getFlinkServices();
-        this.configs = oasisOptions.getConfigs();
-    }
+    @Autowired
+    private OasisConfigurations oasisConfigurations;
+
 
     @Override
     public boolean start(long gameId) throws Exception {
@@ -64,7 +60,7 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
     public boolean stop(long defId) throws Exception {
         Checks.greaterThanZero(defId, "gameId' or 'challengeId");
 
-        SubmittedJob job = getTheOnlyRecord("getJobOfDef",
+        SubmittedJob job = ServiceUtils.getTheOnlyRecord(dao, "getJobOfDef",
                 Maps.create("defId", defId),
                 SubmittedJob.class);
 
@@ -84,7 +80,7 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
                     .blockingAwait();
 
             Map<String, Object> map = Maps.create("jobId", job.getJobId());
-            return getDao().executeCommand("stopJob", map) > 0;
+            return dao.executeCommand("stopJob", map) > 0;
         }
         return false;
     }
@@ -107,9 +103,10 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
     }
 
     private boolean startDef(long defId, boolean isGame) throws Exception {
-        File storageDir = configs.getPath(ConfigKeys.KEY_STORAGE_DIR, Constants.DEF_WORKSPACE_DIR);
+        //File storageDir = configs.getPath(ConfigKeys.KEY_STORAGE_DIR, Constants.DEF_WORKSPACE_DIR);
+        File storageDir = new File(oasisConfigurations.getStorageDir());
 
-        SubmittedJob job = getTheOnlyRecord("getJobOfDef",
+        SubmittedJob job = ServiceUtils.getTheOnlyRecord(dao, "getJobOfDef",
                 Maps.create("defId", defId),
                 SubmittedJob.class);
         if (job != null) {
@@ -142,7 +139,7 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
 
         JarRunResponse jarRunResponse = flinkClient.runJar(uploadedJar.getId(),
                 args,
-                configs.getInt(ConfigKeys.KEY_EXEC_PARALLELISM, Constants.DEF_PARALLELISM),
+                oasisConfigurations.getFlinkParallelism(),
                 true,
                 savepointDir.getAbsolutePath()).blockingSingle();
 
@@ -154,14 +151,14 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
                                     boolean isGame) throws Exception {
         long finishAt = 0L;
         if (!isGame) {
-            ChallengeDef challengeDef = getApiService().getGameDefService().readChallenge(defId);
+            ChallengeDef challengeDef = gameDefService.readChallenge(defId);
             if (challengeDef == null) {
                 throw new InputValidationException("There is no challenge definition id exist by id " + defId + "!");
             }
             finishAt = challengeDef.getExpireAfter();
         }
 
-        return getDao().executeCommand("submitJob",
+        return dao.executeCommand("submitJob",
                 Maps.create()
                         .put("jobId", jobId)
                         .put("jarId", jarId)
@@ -173,8 +170,9 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
 
     private File writeGameConfigFile(long defId, boolean isGame, File specificExecutionDir) throws IOException {
         File configFile = specificExecutionDir.toPath().resolve("run.properties").toFile();
-        File templateFile = configs.getPath("game.run.template.file",
-                Constants.DEF_LOCATION_RUN_TEMPLATE, true, false);
+        File templateFile = new File(oasisConfigurations.getGameRunTemplateLocation());
+
+        //configs.getPath("game.run.template.file", Constants.DEF_LOCATION_RUN_TEMPLATE, true, false);
 
         String runConfigsTxt = FileUtils.readFileToString(templateFile, StandardCharsets.UTF_8);
 
@@ -197,7 +195,6 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
     }
 
     public void writeGameRulesFile(long defId, boolean isGame, Writer writer) throws Exception {
-        IGameDefService gameDefService = getApiService().getGameDefService();
         OasisGameDef oasisGameDef = new OasisGameDef();
 
         if (isGame) {
@@ -211,7 +208,7 @@ public class LifeCycleService extends BaseService implements ILifecycleService  
 
         } else {
             // write challenge configs to file
-            DefWrapper wrapper = getDao().getDefinitionDao().readDefinition(defId);
+            DefWrapper wrapper = dao.getDefinitionDao().readDefinition(defId);
             Long gameId = wrapper.getGameId();
 
             oasisGameDef.setGame(gameDefService.readGame(gameId));

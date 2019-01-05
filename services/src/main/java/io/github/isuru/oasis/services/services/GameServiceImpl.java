@@ -1,33 +1,36 @@
-package io.github.isuru.oasis.services.api.impl;
+package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.model.Constants;
-import io.github.isuru.oasis.model.ShopItem;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.DataCache;
-import io.github.isuru.oasis.services.api.IGameService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
-import io.github.isuru.oasis.services.api.IProfileService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.exception.OasisGameException;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.UserRole;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author iweerarathna
  */
-public class GameService extends BaseService implements IGameService {
+@Service("gameService")
+public class GameServiceImpl implements IGameService {
 
-    GameService(IOasisApiService apiService) {
-        super(apiService);
-    }
+    @Autowired
+    private IProfileService profileService;
+
+    @Autowired
+    private IEventsService eventsService;
+
+    @Autowired
+    private IOasisDao dao;
 
     @Override
     public void awardPoints(long byUser, PointAwardDto awardDto) throws Exception {
@@ -36,16 +39,14 @@ public class GameService extends BaseService implements IGameService {
         Checks.validate(awardDto.getAmount() != 0.0f, "Point amount should not be equal to zero!");
         Checks.validate(awardDto.getToUser() != byUser, "You cannot award points to yourself!");
 
-        IProfileService ps = getApiService().getProfileService();
-
-        UserTeam currentTeamOfUser = ps.findCurrentTeamOfUser(awardDto.getToUser());
+        UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(awardDto.getToUser());
         long teamId = currentTeamOfUser != null ? currentTeamOfUser.getTeamId() : DataCache.get().getTeamDefault().getId();
         long scopeId = currentTeamOfUser != null ? currentTeamOfUser.getScopeId() : DataCache.get().getTeamScopeDefault().getId();
         long gameId = awardDto.getGameId() != null ? awardDto.getGameId() : DataCache.get().getDefGameId();
 
         // only curators and admins can award points to the same user as
         if (DataCache.get().getAdminUserId() != byUser
-                && ps.listCurrentUserRoles(byUser).stream().noneMatch(uts -> uts.isApproved()
+                && profileService.listCurrentUserRoles(byUser).stream().noneMatch(uts -> uts.isApproved()
                                     && scopeId == uts.getTeamScopeId()
                                     && uts.getUserRole() == UserRole.CURATOR)) {
             throw new ApiAuthException("You cannot award points to user " + awardDto.getToUser()
@@ -65,7 +66,7 @@ public class GameService extends BaseService implements IGameService {
                 .build();
 
         String token = getInternalToken();
-        getApiService().getEventService().submitEvent(token, data);
+        eventsService.submitEvent(token, data);
     }
 
     @Override
@@ -75,16 +76,14 @@ public class GameService extends BaseService implements IGameService {
         Checks.greaterThanZero(awardDto.getBadgeId(), "Badge id must be a valid one!");
         Checks.validate(byUser != awardDto.getToUser(), "You cannot award badges to yourself!");
 
-        IProfileService ps = getApiService().getProfileService();
-
-        UserTeam currentTeamOfUser = ps.findCurrentTeamOfUser(awardDto.getToUser());
+        UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(awardDto.getToUser());
         long teamId = currentTeamOfUser != null ? currentTeamOfUser.getTeamId() : DataCache.get().getTeamDefault().getId();
         long scopeId = currentTeamOfUser != null ? currentTeamOfUser.getScopeId() : DataCache.get().getTeamScopeDefault().getId();
         long gameId = awardDto.getGameId() != null ? awardDto.getGameId() : DataCache.get().getDefGameId();
 
         // only curators and admins can award points to the same user as
         if (DataCache.get().getAdminUserId() != byUser
-                && ps.listCurrentUserRoles(byUser).stream().noneMatch(uts -> uts.isApproved()
+                && profileService.listCurrentUserRoles(byUser).stream().noneMatch(uts -> uts.isApproved()
                 && scopeId == uts.getTeamScopeId()
                 && uts.getUserRole() == UserRole.CURATOR)) {
             throw new ApiAuthException("You cannot award badges to user " + awardDto.getToUser()
@@ -105,152 +104,7 @@ public class GameService extends BaseService implements IGameService {
                 .build();
 
         String token = getInternalToken();
-        getApiService().getEventService().submitEvent(token, data);
-    }
-
-    @Override
-    public void buyItem(long userBy, long itemId) throws Exception {
-        ShopItem shopItem = getApiService().getGameDefService().readShopItem(itemId);
-        if (shopItem != null) {
-            if (shopItem.getExpirationAt() != null && shopItem.getExpirationAt() < System.currentTimeMillis()) {
-                // if item is expired, then disable it.
-                getApiService().getGameDefService().disableShopItem(itemId);
-                throw new InputValidationException("Item '" + itemId + "' is already expired!");
-            }
-
-            buyItem(userBy, itemId, shopItem.getPrice());
-        } else {
-            throw new InputValidationException("No item is found by id " + itemId + "!");
-        }
-    }
-
-    @Override
-    public boolean allocateBuyingItem(long itemId) throws Exception {
-        Checks.greaterThanZero(itemId, "itemId");
-
-        return getDao().executeCommand("def/item/updateItemAvail",
-                Maps.create().put("itemId", itemId)
-                    .put("ts", System.currentTimeMillis())
-                    .build()) > 0;
-    }
-
-    @Override
-    public void buyItem(long userBy, long itemId, float price) throws Exception {
-        Checks.greaterThanZero(userBy, "userId");
-        Checks.greaterThanZero(itemId, "itemId");
-
-        // can buy?
-        UserProfile userProfile = getApiService().getProfileService().readUserProfile(userBy);
-        List<Map<String, Object>> buyableList = toList(getDao().executeQuery("def/item/itemHeroBuyable",
-                Maps.create().put("itemId", itemId)
-                        .put("userHero", userProfile.getHeroId()).build()));
-        if (buyableList.isEmpty()) {
-            throw new InputValidationException("User cannot purchase this item as it is not available for your hero!");
-        }
-
-        getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
-            Iterable<Map<String, Object>> userPoints = ctx.executeQuery(
-                    "stats/getUserAvailablePoints",
-                    Maps.create("userId", userBy));
-            Map<String, Object> balanceMap = userPoints.iterator().next();
-            float balance = ((Double) balanceMap.get("Balance")).floatValue();
-
-            if (balance > price) {
-                Iterable<UserTeam> userTeams = ctx.executeQuery("profile/findCurrentTeamOfUser",
-                        Maps.create()
-                                .put("userId", userBy)
-                                .put("currentEpoch", System.currentTimeMillis()).build(),
-                        UserTeam.class);
-                UserTeam currTeam = null;
-                if (userTeams.iterator().hasNext()) {
-                    currTeam = userTeams.iterator().next();
-                }
-
-                long teamId = currTeam != null ? currTeam.getTeamId() : DataCache.get().getTeamDefault().getId();
-                long scopeId = currTeam != null ? currTeam.getScopeId() : DataCache.get().getTeamScopeDefault().getId();
-
-                Map<String, Object> data = Maps.create()
-                        .put("userId", userBy)
-                        .put("forHero", userProfile.getHeroId())
-                        .put("itemId", itemId)
-                        .put("cost", price)
-                        .put("teamId", teamId)
-                        .put("scopeId", scopeId)
-                        .put("purchasedAt", System.currentTimeMillis())
-                        .build();
-                ctx.executeCommand("def/item/buyItem", data);
-                return true;
-            } else {
-                throw new OasisGameException("You do not have enough money to buy this item!");
-            }
-        });
-    }
-
-    @Override
-    public void shareItem(long userBy, long itemId, long toUser, int amount) throws Exception {
-        Checks.greaterThanZero(userBy, "userId");
-        Checks.greaterThanZero(itemId, "itemId");
-        Checks.greaterThanZero(toUser, "toUser");
-
-        List<Map<String, Object>> userHeros = toList(getDao().executeQuery("def/item/itemHeroSharable",
-                Maps.create().put("fromUserId", userBy).put("toUserId", toUser).build()));
-        if (userHeros.isEmpty()) {
-            throw new InputValidationException("The user you are going to share the item is not following the same hero as you!");
-        }
-        final int toUserHero = Integer.parseInt(String.valueOf(userHeros.get(0).get("user2Hero")));
-
-        getDao().runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
-            long currTs = System.currentTimeMillis();
-            Map<String, Object> data = Maps.create().put("userId", userBy)
-                    .put("itemId", itemId)
-                    .put("currentEpoch", currTs)
-                    .put("amount", amount)
-                    .build();
-            long l = ctx.executeCommand("def/item/shareItem", data);
-            if (l == amount) {
-                Iterable<UserTeam> userTeams = ctx.executeQuery("profile/findCurrentTeamOfUser",
-                        Maps.create().put("userId", toUser)
-                                .put("currentEpoch", currTs).build(),
-                        UserTeam.class);
-                UserTeam currTeam = null;
-                if (userTeams.iterator().hasNext()) {
-                    currTeam = userTeams.iterator().next();
-                }
-
-                long teamId = currTeam != null ? currTeam.getTeamId() : DataCache.get().getTeamDefault().getId();
-                long scopeId = currTeam != null ? currTeam.getScopeId() : DataCache.get().getTeamScopeDefault().getId();
-
-                Map<String, Object> item = Maps.create()
-                        .put("userId", toUser)
-                        .put("forHero", toUserHero)
-                        .put("teamId", teamId)
-                        .put("teamScopeId", scopeId)
-                        .put("itemId", itemId)
-                        .build();
-                ctx.executeCommand("def/item/shareToItem", item);
-
-                // add an event to stream processor
-                getApiService().getEventService().submitEvent(
-                        DataCache.get().getInternalEventSourceToken().getToken(),
-                        Maps.create()
-                        .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_SHOP_ITEM_SHARE)
-                        .put(Constants.FIELD_TIMESTAMP, currTs)
-                        .put(Constants.FIELD_USER, userBy)
-                        .put(Constants.FIELD_TEAM, teamId)
-                        .put(Constants.FIELD_SCOPE, scopeId)
-                        .put(Constants.FIELD_GAME_ID, DataCache.get().getDefGameId())
-                        .put(Constants.FIELD_ID, null)
-                        .put("toUser", toUser)
-                        .put("itemId", itemId)
-                        .put("itemAmount", amount)
-                        .build());
-
-
-                return true;
-            } else {
-                throw new OasisGameException("Cannot share this item! Maybe the item itself is shared to you by friend!");
-            }
-        });
+        eventsService.submitEvent(token, data);
     }
 
     @Override
@@ -259,12 +113,12 @@ public class GameService extends BaseService implements IGameService {
 
         LeaderboardDef ldef = request.getLeaderboardDef();
         Map<String, Object> templateData = Maps.create()
-                .put("hasUser", isValid(request.getForUser()))
+                .put("hasUser", ServiceUtils.isValid(request.getForUser()))
                 .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
                 .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
                 .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
-                .put("isTopN", isValid(request.getTopN()))
-                .put("isBottomN", isValid(request.getBottomN()))
+                .put("isTopN", ServiceUtils.isValid(request.getTopN()))
+                .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
                 .build();
 
 
@@ -280,7 +134,8 @@ public class GameService extends BaseService implements IGameService {
                     .put("excludeRuleIds", ldef.getExcludeRuleIds());
         }
 
-        return toList(getDao().executeQuery("leaderboard/globalLeaderboard",
+        return ServiceUtils.toList(dao.executeQuery(
+                Q.LEADERBOARD.GLOBAL_LEADERBOARD,
                 dataBuilder.build(),
                 UserRankRecordDto.class,
                 templateData));
@@ -294,15 +149,15 @@ public class GameService extends BaseService implements IGameService {
         LeaderboardDef ldef = request.getLeaderboardDef();
         Map<String, Object> templateData = Maps.create()
                 .put("hasTeam", true)
-                .put("hasUser", isValid(request.getForUser()))
+                .put("hasUser", ServiceUtils.isValid(request.getForUser()))
                 .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
                 .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
                 .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
-                .put("isTopN", isValid(request.getTopN()))
-                .put("isBottomN", isValid(request.getBottomN()))
+                .put("isTopN", ServiceUtils.isValid(request.getTopN()))
+                .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
                 .build();
 
-        TeamProfile teamProfile = getApiService().getProfileService().readTeam(teamId);
+        TeamProfile teamProfile = profileService.readTeam(teamId);
 
         Maps.MapBuilder dataBuilder = Maps.create()
                 .put("teamId", teamId)
@@ -318,7 +173,8 @@ public class GameService extends BaseService implements IGameService {
                     .put("excludeRuleIds", ldef.getExcludeRuleIds());
         }
 
-        return toList(getDao().executeQuery("leaderboard/teamLeaderboard",
+        return ServiceUtils.toList(dao.executeQuery(
+                Q.LEADERBOARD.TEAM_LEADERBOARD,
                 dataBuilder.build(),
                 UserRankRecordDto.class,
                 templateData));
@@ -332,12 +188,12 @@ public class GameService extends BaseService implements IGameService {
         LeaderboardDef ldef = request.getLeaderboardDef();
         Map<String, Object> templateData = Maps.create()
                 .put("hasTeam", false)
-                .put("hasUser", isValid(request.getForUser()))
+                .put("hasUser", ServiceUtils.isValid(request.getForUser()))
                 .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
                 .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
                 .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
-                .put("isTopN", isValid(request.getTopN()))
-                .put("isBottomN", isValid(request.getBottomN()))
+                .put("isTopN", ServiceUtils.isValid(request.getTopN()))
+                .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
                 .build();
 
         Maps.MapBuilder dataBuilder = Maps.create()
@@ -353,7 +209,8 @@ public class GameService extends BaseService implements IGameService {
                     .put("excludeRuleIds", ldef.getExcludeRuleIds());
         }
 
-        return toList(getDao().executeQuery("leaderboard/teamLeaderboard",
+        return ServiceUtils.toList(dao.executeQuery(
+                Q.LEADERBOARD.TEAM_LEADERBOARD,
                 dataBuilder.build(),
                 UserRankRecordDto.class,
                 templateData));
@@ -365,7 +222,7 @@ public class GameService extends BaseService implements IGameService {
 
     private void checkLeaderboardRequest(LeaderboardRequestDto dto) throws InputValidationException {
         Checks.validate(dto.getRangeStart() <= dto.getRangeEnd(), "Time range end must be greater than or equal to start time!");
-        if (isValid(dto.getForUser()) && (isValid(dto.getTopN()) || isValid(dto.getBottomN()))) {
+        if (ServiceUtils.isValid(dto.getForUser()) && (ServiceUtils.isValid(dto.getTopN()) || ServiceUtils.isValid(dto.getBottomN()))) {
             throw new InputValidationException("Top or bottom listing is not supported when " +
                     "a specific user has been specified in the request!");
         }

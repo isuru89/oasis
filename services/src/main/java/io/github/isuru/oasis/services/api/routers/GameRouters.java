@@ -1,18 +1,15 @@
 package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
-import io.github.isuru.oasis.services.api.IGameService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.services.IGameService;
+import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.BadgeAwardDto;
 import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.model.PointAwardDto;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
-import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.ValueMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import spark.Request;
 import spark.Response;
 
@@ -88,12 +85,12 @@ public class GameRouters extends BaseRouters {
         long itemId = body.getLongReq(ITEM_ID);
 
         // check item availability
-        if (getApiService().getGameService().allocateBuyingItem(itemId)) {
+        if (getApiService().getMetaphorService().allocateBuyingItem(itemId)) {
             if (body.has("price")) {
                 float price = body.getFloatReq("price");
-                getApiService().getGameService().buyItem(userId, itemId, price);
+                getApiService().getMetaphorService().buyItem(userId, itemId, price);
             } else {
-                getApiService().getGameService().buyItem(userId, itemId);
+                getApiService().getMetaphorService().buyItem(userId, itemId);
             }
         } else {
             throw new InputValidationException("Item is sold out!");
@@ -112,7 +109,7 @@ public class GameRouters extends BaseRouters {
         ValueMap body = bodyAsMap(req);
         long itemId = body.getLongReq(ITEM_ID);
         long toUser = body.getLongReq("toUser");
-        getApiService().getGameService().shareItem(userId, itemId, toUser,
+        getApiService().getMetaphorService().shareItem(userId, itemId, toUser,
                 body.getInt("amount", 1));
         return null;
     }

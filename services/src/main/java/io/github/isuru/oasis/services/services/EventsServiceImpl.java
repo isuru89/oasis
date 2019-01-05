@@ -1,44 +1,56 @@
-package io.github.isuru.oasis.services.api.impl;
+package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.model.Constants;
-import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.collect.Pair;
+import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.utils.ICacheProxy;
 import io.github.isuru.oasis.services.DataCache;
-import io.github.isuru.oasis.services.api.IEventsService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.utils.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.interfaces.RSAPrivateKey;
-import java.sql.Blob;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author iweerarathna
  */
-public class EventsService extends BaseService implements IEventsService {
+@Service("eventService")
+public class EventsServiceImpl implements IEventsService {
 
-    private final ICacheProxy cacheProxy;
-    private final EventSources sources = new EventSources();
+    private static final Logger LOG = LoggerFactory.getLogger(EventsServiceImpl.class);
 
+    @Autowired
+    private ICacheProxy cacheProxy;
+
+    @Autowired
     private IGameController gameController;
 
-    EventsService(IOasisApiService apiService,
-                  OasisOptions oasisOptions) {
-        super(apiService);
+    @Autowired
+    private IOasisDao dao;
 
-        cacheProxy = oasisOptions.getCacheProxy();
-        gameController = oasisOptions.getGameController();
-        //USER_CACHE = new LRUCache<>(oasisOptions.getConfigs().getInt("oasis.cache.user.size", 300));
+    @Autowired
+    private IProfileService profileService;
+
+
+    private final EventSources sources = new EventSources();
+
+    @PostConstruct
+    public void init() {
         try {
+            LOG.debug("Fetching all event sources from database...");
             listAllEventSources();
         } catch (Exception e) {
             throw new IllegalStateException("Cannot load event sources from database!", e);
@@ -78,7 +90,7 @@ public class EventsService extends BaseService implements IEventsService {
         event.remove(Constants.FIELD_GAME_ID);
 
         if (!event.containsKey(Constants.FIELD_TEAM)) {
-            UserTeam userTeam = getApiService().getProfileService().findCurrentTeamOfUser(userId);
+            UserTeam userTeam = profileService.findCurrentTeamOfUser(userId);
             if (userTeam != null) {
                 event.put(Constants.FIELD_TEAM, userTeam.getTeamId());
                 event.put(Constants.FIELD_SCOPE, userTeam.getScopeId());
@@ -115,7 +127,7 @@ public class EventsService extends BaseService implements IEventsService {
 
     @Override
     public List<EventSourceToken> listAllEventSources() throws Exception {
-        List<EventSourceToken> eventSourceTokens = toList(getDao().executeQuery("def/events/listAllEventSources",
+        List<EventSourceToken> eventSourceTokens = ServiceUtils.toList(dao.executeQuery("def/events/listAllEventSources",
                 null,
                 EventSourceToken.class));
         refreshSourceTokens(eventSourceTokens);
@@ -136,7 +148,7 @@ public class EventsService extends BaseService implements IEventsService {
 
         Pair<String, Integer> tokenNoncePair = AuthUtils.get().issueSourceToken(sourceToken);
         Pair<PrivateKey, PublicKey> key = AuthUtils.generateRSAKey(sourceToken);
-        long id = getDao().executeInsert("def/events/addEventSource",
+        long id = dao.executeInsert("def/events/addEventSource",
                 Maps.create().put("token", tokenNoncePair.getValue0())
                     .put("nonce", tokenNoncePair.getValue1())
                     .put("sourceName", EventSourceToken.INTERNAL_NAME)
@@ -160,7 +172,7 @@ public class EventsService extends BaseService implements IEventsService {
     public boolean disableEventSource(int id) throws Exception {
         Checks.greaterThanZero(id, "id");
 
-        boolean success = getDao().executeCommand("def/events/disableEventSource",
+        boolean success = dao.executeCommand("def/events/disableEventSource",
                 Maps.create("id", id)) > 0;
 
         if (success) {
@@ -179,7 +191,7 @@ public class EventsService extends BaseService implements IEventsService {
 
     @Override
     public Optional<EventSourceToken> makeDownloadSourceKey(int id) throws Exception {
-        boolean canDownload = getDao().executeCommand("def/events/updateAsDownloaded",
+        boolean canDownload = dao.executeCommand("def/events/updateAsDownloaded",
                 Maps.create("id", id)) > 0;
         if (canDownload) {
             listAllEventSources();
@@ -197,7 +209,7 @@ public class EventsService extends BaseService implements IEventsService {
         if (uidOpt.isPresent()) {
             return Long.parseLong(uidOpt.get());
         } else {
-            UserProfile profile = getApiService().getProfileService().readUserProfile(email);
+            UserProfile profile = profileService.readUserProfile(email);
             if (profile == null) {
                 throw new InputValidationException("There is no user by having email '" + email + "'!");
             }
@@ -207,7 +219,7 @@ public class EventsService extends BaseService implements IEventsService {
     }
 
     private TeamProfile resolveTeam(String team) throws Exception {
-        TeamProfile teamByName = getApiService().getProfileService().findTeamByName(team);
+        TeamProfile teamByName = profileService.findTeamByName(team);
         if (teamByName != null) {
             return teamByName;
         } else {

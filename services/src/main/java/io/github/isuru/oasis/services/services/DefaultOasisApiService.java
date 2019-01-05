@@ -1,14 +1,7 @@
-package io.github.isuru.oasis.services.api.impl;
+package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.db.IOasisDao;
-import io.github.isuru.oasis.services.api.IEventsService;
-import io.github.isuru.oasis.services.api.IGameDefService;
-import io.github.isuru.oasis.services.api.IGameService;
-import io.github.isuru.oasis.services.api.ILifecycleService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
-import io.github.isuru.oasis.services.api.IProfileService;
-import io.github.isuru.oasis.services.api.IStatService;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 
 /**
@@ -27,17 +20,17 @@ public class DefaultOasisApiService implements IOasisApiService {
 
     public DefaultOasisApiService(IOasisDao oasisDao, OasisOptions oasisOptions, Configs configs) {
         this.dao = oasisDao;
-
-        gameDefService = new GameDefService(this);
-        profileService = new ProfileService(this);
-        gameService = new GameService(this);
-        if (configs.isLocal()) {
-            lifecycleService = new LocalLifeCycleService(this, oasisOptions);
-        } else {
-            lifecycleService = new LifeCycleService(this, oasisOptions);
-        }
-        eventsService = new EventsService(this, oasisOptions);
-        statService = new StatService(this);
+//
+//        gameDefService = new GameDefService(this);
+//        profileService = new ProfileService(this);
+//        gameService = new GameService(this);
+//        if (configs.isLocal()) {
+//            lifecycleService = new LocalLifeCycleService(this, oasisOptions);
+//        } else {
+//            lifecycleService = new LifeCycleService(this, oasisOptions);
+//        }
+//        eventsService = new EventsService();
+//        statService = new StatService(this);
     }
 
     @Override
@@ -68,6 +61,11 @@ public class DefaultOasisApiService implements IOasisApiService {
     @Override
     public IStatService getStatService() {
         return statService;
+    }
+
+    @Override
+    public IMetaphorService getMetaphorService() {
+        return null;
     }
 
     @Override

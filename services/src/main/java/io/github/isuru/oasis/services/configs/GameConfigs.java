@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.configs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.model.IEventDispatcher;
@@ -23,6 +24,9 @@ public class GameConfigs {
     @Autowired
     private IEventDispatcher eventDispatcher;
 
+    @Autowired
+    private OasisConfigurations oasisConfigurations;
+
     @Bean
     public IGameController createGameController() {
         LOG.info("Creating remote game controllers...");
@@ -38,6 +42,11 @@ public class GameConfigs {
             gameController = new FlinkScheduler(eventDispatcher);
         }
         return gameController;
+    }
+
+    @Bean
+    public ObjectMapper getControllerSerializer() {
+        return new ObjectMapper();
     }
 
 }

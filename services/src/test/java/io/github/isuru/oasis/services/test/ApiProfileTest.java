@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.services.test;
 
-import io.github.isuru.oasis.services.api.IProfileService;
+import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;

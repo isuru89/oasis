@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.model.collect.Pair;
-import io.github.isuru.oasis.services.api.IGameDefService;
-import io.github.isuru.oasis.services.api.ILifecycleService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.services.IGameDefService;
+import io.github.isuru.oasis.services.services.ILifecycleService;
+import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.UserProfile;

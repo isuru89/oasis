@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.services.test;
 
-import io.github.isuru.oasis.services.api.IEventsService;
+import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.EventSourceToken;

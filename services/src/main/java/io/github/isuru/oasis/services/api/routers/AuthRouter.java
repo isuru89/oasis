@@ -3,7 +3,7 @@ package io.github.isuru.oasis.services.api.routers;
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.DataCache;
-import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;

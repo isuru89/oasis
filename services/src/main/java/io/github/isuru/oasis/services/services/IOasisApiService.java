@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.api;
+package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.model.db.IOasisDao;
 
@@ -21,4 +21,5 @@ public interface IOasisApiService {
 
     IStatService getStatService();
 
+    IMetaphorService getMetaphorService();
 }

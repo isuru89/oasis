@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.services.test;
 
 import io.github.isuru.oasis.model.defs.LeaderboardType;
-import io.github.isuru.oasis.services.api.IGameService;
+import io.github.isuru.oasis.services.services.IGameService;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.model.UserRankRecordDto;

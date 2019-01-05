@@ -1,28 +1,24 @@
-package io.github.isuru.oasis.services.api.impl;
+package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
-import io.github.isuru.oasis.services.api.ILifecycleService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.IGameController;
-import io.github.isuru.oasis.services.utils.OasisOptions;
 
 /**
  * @author iweerarathna
  */
-public class LocalLifeCycleService extends BaseService implements ILifecycleService {
+public class LocalLifeCycleServiceImpl implements ILifecycleService {
 
     private IGameController gameController;
+    private IGameDefService gameDefService;
     private Configs configs;
 
-    LocalLifeCycleService(IOasisApiService apiService, OasisOptions oasisOptions) {
-        super(apiService);
-
-        gameController = oasisOptions.getGameController();
-        configs = oasisOptions.getConfigs();
+    public LocalLifeCycleServiceImpl(IGameController gameController, IGameDefService gameDefService) {
+        this.gameController = gameController;
+        this.gameDefService = gameDefService;
     }
 
     @Override
@@ -44,7 +40,7 @@ public class LocalLifeCycleService extends BaseService implements ILifecycleServ
     public boolean startChallenge(long challengeId) throws Exception {
         Checks.greaterThanZero(challengeId, "challengeId");
 
-        ChallengeDef challengeDef = getApiService().getGameDefService().readChallenge(challengeId);
+        ChallengeDef challengeDef = gameDefService.readChallenge(challengeId);
         if (challengeDef == null) {
             throw new InputValidationException("No challenge is found by id " + challengeId + "!");
         }
@@ -56,7 +52,7 @@ public class LocalLifeCycleService extends BaseService implements ILifecycleServ
     public boolean resumeGame(long gameId) throws Exception {
         Checks.greaterThanZero(gameId, "gameId");
 
-        GameDef gameDef = getApiService().getGameDefService().readGame(gameId);
+        GameDef gameDef = gameDefService.readGame(gameId);
         if (gameDef == null) {
             throw new InputValidationException("No game is found by id " + gameId + "!");
         }
@@ -68,7 +64,7 @@ public class LocalLifeCycleService extends BaseService implements ILifecycleServ
     public boolean resumeChallenge(long challengeId) throws Exception {
         Checks.greaterThanZero(challengeId, "challengeId");
 
-        ChallengeDef challengeDef = getApiService().getGameDefService().readChallenge(challengeId);
+        ChallengeDef challengeDef = gameDefService.readChallenge(challengeId);
         if (challengeDef == null) {
             throw new InputValidationException("No challenge is found by id " + challengeId + "!");
         }

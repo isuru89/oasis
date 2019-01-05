@@ -2,8 +2,9 @@ package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.*;
-import io.github.isuru.oasis.services.api.IGameDefService;
-import io.github.isuru.oasis.services.api.IOasisApiService;
+import io.github.isuru.oasis.services.services.IGameDefService;
+import io.github.isuru.oasis.services.services.IMetaphorService;
+import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.api.dto.AddGameDto;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.UserRole;
@@ -31,6 +32,7 @@ public class DefinitionRouter extends BaseRouters {
     @Override
     public void register() {
         IGameDefService gds = getApiService().getGameDefService();
+        IMetaphorService metaphorService = getApiService().getMetaphorService();
 
         post("/game", (req, res) -> {
             AddGameDto addGameDto = bodyAs(req, AddGameDto.class);
@@ -39,7 +41,7 @@ public class DefinitionRouter extends BaseRouters {
 
         Spark.path("/game", () -> {
             get("/all", (req, res) -> gds.listGames())
-            .get("/heros", (req, res) -> gds.listHeros())
+            .get("/heros", (req, res) -> metaphorService.listHeros())
             .get("/:gameId", (req, res) -> gds.readGame(asPLong(req, P_GAME_ID)))
             .delete("/:gameId",
                     (req, res) -> asResBool(gds.disableGame(asPLong(req, P_GAME_ID))), UserRole.ADMIN);
@@ -50,7 +52,7 @@ public class DefinitionRouter extends BaseRouters {
             post("/:gameId/milestone", (req, res) -> asResAdd(gds.addMilestoneDef(asPLong(req, P_GAME_ID), bodyAs(req, MilestoneDef.class))), UserRole.ADMIN);
             post("/:gameId/leaderboard", (req, res) -> asResAdd(gds.addLeaderboardDef(asPLong(req, P_GAME_ID), bodyAs(req, LeaderboardDef.class))), UserRole.CURATOR);
             post("/:gameId/challenge", (req, res) -> asResAdd(gds.addChallenge(asPLong(req, P_GAME_ID), bodyAs(req, ChallengeDef.class))), UserRole.ADMIN);
-            post("/:gameId/item", (req, res) -> asResAdd(gds.addShopItem(asPLong(req, P_GAME_ID), bodyAs(req, ShopItem.class))), UserRole.ADMIN);
+            post("/:gameId/item", (req, res) -> asResAdd(metaphorService.addShopItem(asPLong(req, P_GAME_ID), bodyAs(req, ShopItem.class))), UserRole.ADMIN);
             post("/:gameId/state", (req, res) -> asResAdd(gds.addStatePlay(asPLong(req, P_GAME_ID), bodyAs(req, StateDef.class))), UserRole.ADMIN);
 
             Spark.path("/:gameId/kpi", () -> {
@@ -96,11 +98,11 @@ public class DefinitionRouter extends BaseRouters {
             });
 
             Spark.path("/:gameId/item", () -> {
-                get("/all", (req, res) -> gds.listShopItems(asPLong(req, P_GAME_ID)))
-                .get("/all/:heroId", (req, res) -> gds.listShopItems(asPLong(req, P_GAME_ID), asPInt(req, "heroId")))
-                .get("/:itemId", (req, res) -> gds.readShopItem(asPLong(req, ITEM_ID)))
+                get("/all", (req, res) -> metaphorService.listShopItems(asPLong(req, P_GAME_ID)))
+                .get("/all/:heroId", (req, res) -> metaphorService.listShopItems(asPLong(req, P_GAME_ID), asPInt(req, "heroId")))
+                .get("/:itemId", (req, res) -> metaphorService.readShopItem(asPLong(req, ITEM_ID)))
                 .delete("/:itemId", (req, res) ->
-                        asResBool(gds.disableShopItem(asPLong(req, ITEM_ID))), UserRole.ADMIN);
+                        asResBool(metaphorService.disableShopItem(asPLong(req, ITEM_ID))), UserRole.ADMIN);
             });
 
             Spark.path("/:gameId/state", () -> {

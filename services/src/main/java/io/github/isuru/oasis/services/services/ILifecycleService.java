@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.api;
+package io.github.isuru.oasis.services.services;
 
 /**
  * @author iweerarathna
