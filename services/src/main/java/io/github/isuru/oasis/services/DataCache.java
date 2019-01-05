@@ -3,11 +3,12 @@ package io.github.isuru.oasis.services;
 import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
-import io.github.isuru.oasis.services.services.IGameDefService;
-import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.services.IEventsService;
+import io.github.isuru.oasis.services.services.IGameDefService;
+import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class DataCache {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataCache.class);
 
-    private IOasisApiService apiService;
+    private IGameDefService gameDefService;
 
     private String allUserTmpPassword;
 
@@ -36,12 +37,13 @@ public class DataCache {
     private TeamScope teamScopeDefault;
     private EventSourceToken internalEventSourceToken;
 
-    void setup(IOasisApiService apiService) throws Exception {
+    void setup(IGameDefService gameDefService, IProfileService profileService,
+               IEventsService eventsService) throws Exception {
+        this.gameDefService = gameDefService;
+
         allUserTmpPassword = RandomStringUtils.randomAlphanumeric(10);
         LOG.info("Temporary password for all player authentication: " + allUserTmpPassword);
-        this.apiService = apiService;
 
-        IGameDefService gameDefService = apiService.getGameDefService();
         List<GameDef> gameDefs = gameDefService.listGames();
         for (GameDef gameDef : gameDefs) {
             Long id = gameDef.getId();
@@ -52,7 +54,7 @@ public class DataCache {
         }
 
 
-        List<TeamScope> teamScopes = apiService.getProfileService().listTeamScopes();
+        List<TeamScope> teamScopes = profileService.listTeamScopes();
         for (TeamScope scope : teamScopes) {
             if (scope.getName().equalsIgnoreCase(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME)) {
                 teamScopeDefault = scope;
@@ -65,7 +67,7 @@ public class DataCache {
                     "Run the bootstrap and make default team and team scope.");
         }
 
-        List<TeamProfile> teamProfiles = apiService.getProfileService().listTeams(teamScopeDefault.getId());
+        List<TeamProfile> teamProfiles = profileService.listTeams(teamScopeDefault.getId());
         for (TeamProfile profile : teamProfiles) {
             if (profile.getName().equalsIgnoreCase(DefaultEntities.DEFAULT_TEAM_NAME)) {
                 teamDefault = profile;
@@ -78,13 +80,13 @@ public class DataCache {
                     "Run the bootstrap and make default team and team scope.");
         }
 
-        UserProfile userProfile = apiService.getProfileService().readUserProfile("admin@oasis.com");
+        UserProfile userProfile = profileService.readUserProfile("admin@oasis.com");
         if (userProfile == null) {
             throw new IllegalStateException("No admin user is found on the system!");
         }
         adminUserId = userProfile.getId();
 
-        internalEventSourceToken = apiService.getEventService().readInternalSourceToken()
+        internalEventSourceToken = eventsService.readInternalSourceToken()
                 .orElseThrow(() -> new IllegalStateException(
                         "Internal event source token is not found in database!" +
                         "Run the bootstrap and make default team and team scope."));
@@ -99,7 +101,6 @@ public class DataCache {
     }
 
     private OasisGameDef loadGameDefs(long gameId, GameDef def) throws Exception {
-        IGameDefService gameDefService = apiService.getGameDefService();
         GameDef gameDef = def;
         if (gameDef == null) {
             gameDef = gameDefService.readGame(gameId);

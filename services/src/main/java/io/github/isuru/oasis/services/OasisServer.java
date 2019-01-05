@@ -75,8 +75,8 @@ public class OasisServer {
         apiService = new DefaultOasisApiService(oasisDao, oasisOptions, configs);
 
         LOGGER.debug("Setting up database and cache...");
-        Bootstrapping.initSystem(apiService, oasisDao);
-        DataCache.get().setup(apiService);
+        //Bootstrapping.initSystem(apiService, oasisDao);
+        //DataCache.get().setup();
 
         LOGGER.debug("Initializing server...");
         int port = configs.getInt("oasis.service.port", DEF_PORT);

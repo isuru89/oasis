@@ -6,24 +6,59 @@ import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.events.EventNames;
-import io.github.isuru.oasis.services.services.IGameDefService;
-import io.github.isuru.oasis.services.services.IOasisApiService;
-import io.github.isuru.oasis.services.services.IProfileService;
+import io.github.isuru.oasis.services.services.*;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.UserRole;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+@Component
 public class Bootstrapping {
 
-    static void initSystem(IOasisApiService apiService, IOasisDao dao) throws Exception {
-        try {
-            IProfileService profileService = apiService.getProfileService();
+    private static final Logger LOG = LoggerFactory.getLogger(Bootstrapping.class);
 
+    @Autowired
+    private IProfileService profileService;
+
+    @Autowired
+    private IEventsService eventsService;
+
+    @Autowired
+    private IGameDefService gameDefService;
+
+    @Autowired
+    private ILifecycleService lifecycleService;
+
+    @Autowired
+    private IOasisDao dao;
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void initialize() throws Exception {
+        LOG.info("-------------------------------------------------------");
+        LOG.info("OASIS - STARTUP / Initialized");
+        LOG.info("-------------------------------------------------------");
+        initSystem(dao);
+
+        // setup data cache
+        DataCache.get().setup(gameDefService, profileService, eventsService);
+
+        LOG.info("-------------------------------------------------------");
+        LOG.info("OASIS - STARTUP / Completed.");
+        LOG.info("-------------------------------------------------------");
+    }
+
+    private void initSystem(IOasisDao dao) throws Exception {
+        try {
             // add default team scope...
             List<TeamScope> teamScopes = profileService.listTeamScopes();
             TeamScope defTeamScope;
@@ -57,20 +92,20 @@ public class Bootstrapping {
             }
 
             // add internal event source
-            Optional<EventSourceToken> internalSourceToken = apiService.getEventService().readInternalSourceToken();
+            Optional<EventSourceToken> internalSourceToken = eventsService.readInternalSourceToken();
             if (!internalSourceToken.isPresent()) {
                 EventSourceToken eventSourceToken = new EventSourceToken();
                 eventSourceToken.setSourceName(DefaultEntities.INTERNAL_EVENT_SOURCE_NAME);
                 eventSourceToken.setDisplayName(DefaultEntities.INTERNAL_EVENT_SOURCE_NAME);
                 eventSourceToken.setInternal(true);
-                apiService.getEventService().addEventSource(eventSourceToken);
+                eventsService.addEventSource(eventSourceToken);
             }
 
             // add users
-            addUsers(apiService, defTeamId);
+            addUsers(defTeamId);
 
             // resume
-            resumeGameAndChallenges(apiService, dao);
+            resumeGameAndChallenges();
 
         } catch (Throwable error) {
             // revert back to previous status...
@@ -79,8 +114,8 @@ public class Bootstrapping {
         }
     }
 
-    private static void resumeGameAndChallenges(IOasisApiService apiService, IOasisDao dao) throws Exception {
-        List<GameDef> gameDefs = apiService.getGameDefService().listGames();
+    private void resumeGameAndChallenges() throws Exception {
+        List<GameDef> gameDefs = gameDefService.listGames();
         if (gameDefs == null || gameDefs.isEmpty()) {
             // no active game exist. do nothing
             return;
@@ -89,7 +124,7 @@ public class Bootstrapping {
         // resume game first...
         List<Integer> resumedGameIds = new LinkedList<>();
         for (GameDef gameDef : gameDefs) {
-            apiService.getLifecycleService().resumeGame(gameDef.getId());
+            lifecycleService.resumeGame(gameDef.getId());
             resumedGameIds.add(gameDef.getId().intValue());
         }
 
@@ -99,7 +134,7 @@ public class Bootstrapping {
                 SubmittedJob.class);
         for (SubmittedJob job : runningJobs) {
             if (!resumedGameIds.contains(job.getDefId())) {
-                apiService.getLifecycleService().resumeChallenge(job.getDefId());
+                lifecycleService.resumeChallenge(job.getDefId());
             }
         }
     }
@@ -112,32 +147,32 @@ public class Bootstrapping {
         }
     }
 
-    private static void addUsers(IOasisApiService apiService, long defTeamId) throws Exception {
-        List<UserProfile> userProfiles = apiService.getProfileService()
-                .listUsers(defTeamId, 0, 5000);
-
-        if (userProfiles.stream().noneMatch(u -> u.getEmail().equals("admin@oasis.com"))) {
+    private void addUsers(long defTeamId) throws Exception {
+        UserProfile adminUser = profileService.readUserProfile("admin@oasis.com");
+        if (adminUser == null) {
             UserProfile admin = new UserProfile();
             admin.setEmail("admin@oasis.com");
             admin.setName("Admin");
-            long adminId = apiService.getProfileService().addUserProfile(admin);
-            apiService.getProfileService().addUserToTeam(adminId, defTeamId, UserRole.ADMIN);
+            long adminId = profileService.addUserProfile(admin);
+            profileService.addUserToTeam(adminId, defTeamId, UserRole.ADMIN);
         }
 
-        if (userProfiles.stream().noneMatch(u -> u.getEmail().equals("curator@oasis.com"))) {
+        UserProfile curatorUser = profileService.readUserProfile("curator@oasis.com");
+        if (curatorUser == null) {
             UserProfile curator = new UserProfile();
             curator.setEmail("curator@oasis.com");
             curator.setName("Curator");
-            long curatorId = apiService.getProfileService().addUserProfile(curator);
-            apiService.getProfileService().addUserToTeam(curatorId, defTeamId, UserRole.CURATOR);
+            long curatorId = profileService.addUserProfile(curator);
+            profileService.addUserToTeam(curatorId, defTeamId, UserRole.CURATOR);
         }
 
-        if (userProfiles.stream().noneMatch(u -> u.getEmail().equals("player@oasis.com"))) {
+        UserProfile playerUser = profileService.readUserProfile("player@oasis.com");
+        if (playerUser == null) {
             UserProfile player = new UserProfile();
             player.setEmail("player@oasis.com");
             player.setName("Player");
-            long playerId = apiService.getProfileService().addUserProfile(player);
-            apiService.getProfileService().addUserToTeam(playerId, defTeamId, UserRole.PLAYER);
+            long playerId = profileService.addUserProfile(player);
+            profileService.addUserToTeam(playerId, defTeamId, UserRole.PLAYER);
         }
     }
 
@@ -147,7 +182,7 @@ public class Bootstrapping {
         // add default leaderboard definitions...
         List<LeaderboardDef> leaderboardDefs = gameDefService.listLeaderboardDefs(gameId);
         if (leaderboardDefs.isEmpty()) { // no leaderboard defs yet...
-            addDefaultLeaderboards(gameDefService, gameId, optionsDto);
+            addDefaultLeaderboards(gameDefService, gameId);
         }
     }
 
@@ -166,7 +201,7 @@ public class Bootstrapping {
         return profileService.readTeamScope(id);
     }
 
-    private static void addDefaultLeaderboards(IGameDefService defService, long gameId, GameOptionsDto optionsDto) throws Exception {
+    private static void addDefaultLeaderboards(IGameDefService defService, long gameId) throws Exception {
         defService.addLeaderboardDef(gameId, DefaultEntities.DEFAULT_LEADERBOARD_DEF);
     }
 

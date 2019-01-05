@@ -202,6 +202,8 @@ public class ProfileServiceImpl implements IProfileService {
         Checks.nonNullOrEmpty(teamScope.getDisplayName(), "displayName");
 
         return (Long) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
+            long currTime = System.currentTimeMillis();
+
             Map<String, Object> data = Maps.create()
                     .put("extId", teamScope.getExtId())
                     .put("name", teamScope.getName())
@@ -229,12 +231,14 @@ public class ProfileServiceImpl implements IProfileService {
                     .build();
             Long userId = input.executeInsert(Q.PROFILE.ADD_USER, playerData, "user_id");
 
-            input.executeInsert("profile/addUserToTeam",
+            input.executeInsert(Q.PROFILE.ADD_USER_TO_TEAM,
                     Maps.create()
                             .put("userId", userId)
                             .put("teamId", addedTeamId)
                             .put("roleId", UserRole.PLAYER)
-                            .put("since", System.currentTimeMillis())
+                            .put("since", currTime)
+                            .put("isApproved", teamScope.isDefault())
+                            .put("approvedAt", currTime)
                             .build(),
                     null);
             return addedScopeId;
