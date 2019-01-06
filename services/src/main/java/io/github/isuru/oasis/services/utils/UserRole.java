@@ -5,6 +5,10 @@ package io.github.isuru.oasis.services.utils;
  */
 public final class UserRole {
 
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
+    public static final String ROLE_CURATOR = "ROLE_ADMIN";
+    public static final String ROLE_PLAYER = "ROLE_ADMIN";
+
     public static final int ADMIN = 1;
     public static final int CURATOR = 2;
     //public static final int TEAM_LEADER = 4;

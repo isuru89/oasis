@@ -9,6 +9,7 @@ final class Q {
         static final String DISABLE_EVENT_SOURCE = PATH + "disableEventSource";
         static final String LIST_ALL_EVENT_SOURCES = PATH + "listAllEventSources";
         static final String UPDATE_AS_DOWNLOADED = PATH + "updateAsDownloaded";
+        static final String READ_EVENT_SOURCE = PATH + "readEventSource";
 
     }
 

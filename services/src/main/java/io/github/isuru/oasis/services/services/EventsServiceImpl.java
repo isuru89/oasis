@@ -196,7 +196,8 @@ public class EventsServiceImpl implements IEventsService {
         boolean canDownload = dao.executeCommand(Q.EVENTS.UPDATE_AS_DOWNLOADED,
                 Maps.create("id", id)) > 0;
         if (canDownload) {
-            listAllEventSources();
+            return Optional.ofNullable(ServiceUtils.getTheOnlyRecord(dao, Q.EVENTS.READ_EVENT_SOURCE,
+                    Maps.create("id", id), EventSourceToken.class));
         }
         return Optional.empty();
     }

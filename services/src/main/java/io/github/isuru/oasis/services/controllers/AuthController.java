@@ -14,7 +14,7 @@ import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,6 +30,7 @@ import java.util.Base64;
 import java.util.Map;
 
 @Controller
+@SuppressWarnings("unused")
 @RequestMapping("/auth")
 public class AuthController {
 
@@ -45,7 +46,7 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
-    @Secured("ROLE_ADMIN")
+    @PreAuthorize("isFullyAuthenticated()")
     @PostMapping("/logout")
     @ResponseBody
     public Map<String, Object> logout(@CurrentUser UserPrincipal user) throws Exception {

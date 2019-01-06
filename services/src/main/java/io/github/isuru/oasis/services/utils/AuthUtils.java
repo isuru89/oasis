@@ -62,7 +62,7 @@ public final class AuthUtils {
         try {
             String hmac = generateHMAC(body, token.getSecretPrivateKey());
             if (!hmac.equals(hash)) {
-                throw new ApiAuthException("Unable to verify integrity of the event!");
+                throw new IOException("Integrity of the event has been compromised!");
             }
         } catch (NoSuchAlgorithmException | IOException | InvalidKeyException e) {
             throw new ApiAuthException("Unable to verify integrity of the event!", e);
