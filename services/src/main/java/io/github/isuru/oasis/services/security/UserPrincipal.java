@@ -27,6 +27,7 @@ public class UserPrincipal implements UserDetails {
     private String password;
 
     private int role;
+    private boolean active;
 
     private Collection<? extends GrantedAuthority> authorities;
 
@@ -36,6 +37,7 @@ public class UserPrincipal implements UserDetails {
                          String email,
                          String password,
                          int role,
+                         boolean isActive,
                          Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.name = name;
@@ -44,6 +46,7 @@ public class UserPrincipal implements UserDetails {
         this.password = password;
         this.authorities = authorities;
         this.role = role;
+        this.active = isActive;
     }
 
     public static UserPrincipal create(UserProfile user, UserTeam userTeam) {
@@ -51,12 +54,12 @@ public class UserPrincipal implements UserDetails {
         List<GrantedAuthority> authorities = new LinkedList<>();
 
         if (UserRole.hasRole(roleId, UserRole.ADMIN)) {
-            authorities.add(new SimpleGrantedAuthority("ADMIN"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
         if (UserRole.hasRole(roleId, UserRole.CURATOR)) {
-            authorities.add(new SimpleGrantedAuthority("CURATOR"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_CURATOR"));
         }
-        authorities.add(new SimpleGrantedAuthority("PLAYER"));
+        authorities.add(new SimpleGrantedAuthority("ROLE_PLAYER"));
 
         return new UserPrincipal(
                 user.getId(),
@@ -65,6 +68,7 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(),
                 user.getPassword(),
                 roleId,
+                user.isActive(),
                 authorities
         );
     }
@@ -117,7 +121,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return active;
     }
 
     @Override
