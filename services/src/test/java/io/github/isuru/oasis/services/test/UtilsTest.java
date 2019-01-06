@@ -2,22 +2,14 @@ package io.github.isuru.oasis.services.test;
 
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.utils.AuthUtils;
-import io.github.isuru.oasis.services.utils.Checks;
-import io.github.isuru.oasis.services.utils.Maps;
-import io.github.isuru.oasis.services.utils.Pojos;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.model.TokenInfo;
+import io.github.isuru.oasis.services.utils.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * @author iweerarathna
@@ -74,13 +66,13 @@ class UtilsTest extends AbstractApiTest {
         }
         AuthUtils.get().init(configs);
 
-        AuthUtils.TokenInfo tokenInfo = new AuthUtils.TokenInfo();
+        TokenInfo tokenInfo = new TokenInfo();
         tokenInfo.setUser(123);
         tokenInfo.setExp(System.currentTimeMillis() + 2000000);
         String t = AuthUtils.get().issueToken(tokenInfo);
         Assertions.assertNotNull(t);
 
-        AuthUtils.TokenInfo parsed = AuthUtils.get().verifyToken(t);
+        TokenInfo parsed = AuthUtils.get().verifyToken(t);
         Assertions.assertNotNull(parsed);
         Assertions.assertEquals(123, parsed.getUser());
         Assertions.assertFalse(UserRole.hasRole(parsed.getRole(), UserRole.ADMIN));

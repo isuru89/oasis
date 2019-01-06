@@ -3,6 +3,7 @@ package io.github.isuru.oasis.services.api.routers;
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.DataCache;
+import io.github.isuru.oasis.services.model.TokenInfo;
 import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.model.UserProfile;
@@ -43,7 +44,7 @@ public class AuthRouter extends BaseRouters {
     private Object logout(Request req, Response res) throws Exception {
         checkAuth(req);
 
-        AuthUtils.TokenInfo tokenInfo = req.attribute("token");
+        TokenInfo tokenInfo = req.attribute("token");
         boolean status = getApiService().getProfileService()
                 .logoutUser(tokenInfo.getUser(), System.currentTimeMillis());
         return Maps.create("success", status);
@@ -95,7 +96,7 @@ public class AuthRouter extends BaseRouters {
             }
         }
 
-        AuthUtils.TokenInfo info = new AuthUtils.TokenInfo();
+        TokenInfo info = new TokenInfo();
         info.setRole(role);
         info.setUser(profile.getId());
         info.setExp(AuthUtils.get().getExpiryDate());

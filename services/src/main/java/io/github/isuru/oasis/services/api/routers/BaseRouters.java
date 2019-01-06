@@ -1,12 +1,13 @@
 package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.model.collect.Pair;
+import io.github.isuru.oasis.services.exception.ApiAuthException;
+import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.model.TokenInfo;
+import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.ILifecycleService;
 import io.github.isuru.oasis.services.services.IOasisApiService;
-import io.github.isuru.oasis.services.exception.ApiAuthException;
-import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.utils.*;
 import spark.Request;
 import spark.Response;
@@ -70,7 +71,7 @@ public abstract class BaseRouters {
         if (auth != null && !auth.trim().isEmpty()) {
             if (auth.startsWith(BEARER)) {
                 String token = auth.substring(BEARER.length());
-                AuthUtils.TokenInfo tokenInfo = AuthUtils.get().verifyToken(token);
+                TokenInfo tokenInfo = AuthUtils.get().verifyToken(token);
                 checkForLogoutToken(tokenInfo);
                 request.attribute("token", tokenInfo);
                 request.attribute("userId", tokenInfo.getUser()); // set user
@@ -80,7 +81,7 @@ public abstract class BaseRouters {
         }
     }
 
-    private void checkForLogoutToken(AuthUtils.TokenInfo tokenInfo) throws ApiAuthException {
+    private void checkForLogoutToken(TokenInfo tokenInfo) throws ApiAuthException {
         long userId = tokenInfo.getUser();
         String key = String.format("user.logout.%d", userId);
         Optional<String> logoutOpt = options.getCacheProxy().get(key);
@@ -105,7 +106,7 @@ public abstract class BaseRouters {
     }
 
     void checkCurator(Request request) throws ApiAuthException {
-        AuthUtils.TokenInfo tokenInfo = request.attribute("token");
+        TokenInfo tokenInfo = request.attribute("token");
         if (tokenInfo == null) {
             throw new ApiAuthException("You need to first authenticate to access this api!");
         }
@@ -123,7 +124,7 @@ public abstract class BaseRouters {
     }
 
     void checkAdmin(Request request) throws ApiAuthException {
-        AuthUtils.TokenInfo tokenInfo = request.attribute("token");
+        TokenInfo tokenInfo = request.attribute("token");
         if (tokenInfo == null) {
             throw new ApiAuthException("You need to first authenticate to access this api!");
         }
@@ -152,7 +153,7 @@ public abstract class BaseRouters {
             @Override
             public Object handle(Request request, Response response) throws Exception {
                 checkAuth(request);
-                AuthUtils.TokenInfo token = request.attribute("token");
+                TokenInfo token = request.attribute("token");
                 if (!UserRole.hasRole(token.getRole(), role)) {
                     throw new ApiAuthException("You do not have necessary permissions to access this api!");
                 }
@@ -169,7 +170,7 @@ public abstract class BaseRouters {
             @Override
             public Object handle(Request request, Response response) throws Exception {
                 checkAuth(request);
-                AuthUtils.TokenInfo token = request.attribute("token");
+                TokenInfo token = request.attribute("token");
                 if (!UserRole.hasRole(token.getRole(), role)) {
                     throw new ApiAuthException("You do not have necessary permissions to access this api!");
                 }

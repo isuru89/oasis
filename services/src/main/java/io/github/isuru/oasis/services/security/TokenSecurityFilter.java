@@ -7,7 +7,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
-import io.github.isuru.oasis.services.utils.AuthUtils;
+import io.github.isuru.oasis.services.model.TokenInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.WebApplicationContext;
@@ -97,7 +97,7 @@ public class TokenSecurityFilter implements Filter {
 
                 try {
                     DecodedJWT jwt = verifier.verify(token);
-                    AuthUtils.TokenInfo tokenInfo = new AuthUtils.TokenInfo();
+                    TokenInfo tokenInfo = new TokenInfo();
                     tokenInfo.setUser(jwt.getClaim("user").asLong());
                     tokenInfo.setRole(jwt.getClaim("role").asInt());
                     tokenInfo.setIssuedAt(jwt.getIssuedAt().getTime());
@@ -110,7 +110,7 @@ public class TokenSecurityFilter implements Filter {
                 } catch (JWTVerificationException e) {
                     HttpServletResponse res = (HttpServletResponse) response;
                     res.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                            "You are not allowed to access end point! Provided token is invalid!");
+                            "Authentication failure! Provided token is invalid!");
                 }
             }
 

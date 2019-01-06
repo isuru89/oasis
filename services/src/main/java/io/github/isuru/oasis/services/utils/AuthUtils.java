@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
+import io.github.isuru.oasis.services.model.TokenInfo;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -173,8 +174,8 @@ public final class AuthUtils {
                     .withIssuer(OASIS_ISSUER)
                     .withExpiresAt(new Date(tokenInfo.getExp()))
                     .withIssuedAt(new Date(System.currentTimeMillis()))
-                    .withClaim("user", tokenInfo.user)
-                    .withClaim("role", tokenInfo.role)
+                    .withClaim("user", tokenInfo.getUser())
+                    .withClaim("role", tokenInfo.getRole())
                     .sign(algorithm);
         } catch (IllegalArgumentException | JWTCreationException e) {
             e.printStackTrace();
@@ -200,54 +201,6 @@ public final class AuthUtils {
 
     public static AuthUtils get() {
         return Holder.INSTANCE;
-    }
-
-    public static class TokenInfo {
-        private long user;
-        private long exp;
-        private long issuedAt;
-        private long teamId;
-        private int role = UserRole.PLAYER;
-
-        public long getTeamId() {
-            return teamId;
-        }
-
-        public void setTeamId(long teamId) {
-            this.teamId = teamId;
-        }
-
-        public long getIssuedAt() {
-            return issuedAt;
-        }
-
-        public void setIssuedAt(long issuedAt) {
-            this.issuedAt = issuedAt;
-        }
-
-        public long getExp() {
-            return exp;
-        }
-
-        public void setExp(long exp) {
-            this.exp = exp;
-        }
-
-        public long getUser() {
-            return user;
-        }
-
-        public void setUser(long user) {
-            this.user = user;
-        }
-
-        public int getRole() {
-            return role;
-        }
-
-        public void setRole(int role) {
-            this.role = role;
-        }
     }
 
     private static class Holder {
