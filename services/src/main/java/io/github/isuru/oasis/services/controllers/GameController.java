@@ -8,13 +8,17 @@ import io.github.isuru.oasis.services.model.PointAwardDto;
 import io.github.isuru.oasis.services.model.UserRankRecordDto;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IGameService;
+import io.github.isuru.oasis.services.utils.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 @Controller
+@RequestMapping("/game")
 public class GameController {
 
     @Autowired
@@ -24,7 +28,7 @@ public class GameController {
     private IGameDefService gameDefService;
 
 
-    @GetMapping("/game/leaderboard/{id}/global")
+    @GetMapping("/leaderboard/{id}/global")
     @ResponseBody
     public List<UserRankRecordDto> readGlobalLeaderboard(@PathVariable("id") int leaderboardId,
                                                          @RequestParam(value = "range", defaultValue = "weekly") String range,
@@ -40,7 +44,7 @@ public class GameController {
         return gameService.readGlobalLeaderboard(dto);
     }
 
-    @GetMapping("/game/leaderboard/{id}/team/{teamId}")
+    @GetMapping("/leaderboard/{id}/team/{teamId}")
     @ResponseBody
     public List<UserRankRecordDto> readTeamLeaderboard(@PathVariable("id") int leaderboardId,
                                                        @PathVariable("teamId") int teamId,
@@ -57,7 +61,7 @@ public class GameController {
         return gameService.readTeamLeaderboard(teamId, dto);
     }
 
-    @GetMapping("/game/leaderboard/{id}/teamscope/{scopeId}")
+    @GetMapping("/leaderboard/{id}/teamscope/{scopeId}")
     @ResponseBody
     public List<UserRankRecordDto> readTeamScopeLeaderboard(@PathVariable("id") int leaderboardId,
                                                             @PathVariable("scopeId") int scopeId,
@@ -74,14 +78,16 @@ public class GameController {
         return gameService.readTeamScopeLeaderboard(scopeId, dto);
     }
 
-    @PostMapping("/game/award/badge")
+    @Secured({ UserRole.ROLE_ADMIN, UserRole.ROLE_CURATOR })
+    @PostMapping("/award/badge")
     @ResponseBody
     public void awardBadge(@RequestBody BadgeAwardDto awardDto,
                            @RequestAttribute("userId") long userId) throws Exception {
         gameService.awardBadge(userId, awardDto);
     }
 
-    @PostMapping("/game/award/points")
+    @Secured({ UserRole.ROLE_ADMIN, UserRole.ROLE_CURATOR })
+    @PostMapping("/award/points")
     @ResponseBody
     public void awardPoints(@RequestBody PointAwardDto awardDto,
                             @RequestAttribute("userId") long userId) throws Exception {

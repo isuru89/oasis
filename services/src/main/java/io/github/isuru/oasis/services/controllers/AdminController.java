@@ -3,102 +3,104 @@ package io.github.isuru.oasis.services.controllers;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+@SuppressWarnings("unused")
 @Controller
+@RequestMapping("/admin")
 public class AdminController {
 
-    @PostMapping("/admin/user/add")
+    @PostMapping("/user/add")
     @ResponseBody
     public void addUser() {
 
     }
 
-    @PostMapping("/admin/user/{id}/edit")
+    @PostMapping("/user/{id}/edit")
     @ResponseBody
     public void editUser(@PathVariable("id") long userId) {
 
     }
 
-    @GetMapping("/admin/user/{id}")
+    @GetMapping("/user/{id}")
     @ResponseBody
     public void readUser(@PathVariable("id") long userId) {
 
     }
 
-    @GetMapping("/admin/user/ext/{id}")
+    @GetMapping("/user/ext/{id}")
     @ResponseBody
     public void readUserByExternalId(@PathVariable("id") String externalId) {
 
     }
 
-    @DeleteMapping("/admin/user/{id}")
+    @DeleteMapping("/user/{id}")
     @ResponseBody
     public void deleteUser(@PathVariable("id") long userId) {
 
     }
 
-    @PostMapping("/admin/team/add")
+    @PostMapping("/team/add")
     @ResponseBody
     public void addTeam() {
 
     }
 
-    @PostMapping("/admin/team/{id}/edit")
+    @PostMapping("/team/{id}/edit")
     @ResponseBody
     public void editTeam(@PathVariable("id") int teamId) {
 
     }
 
-    @GetMapping("/admin/team/{id}")
+    @GetMapping("/team/{id}")
     @ResponseBody
     public void readTeam(@PathVariable("id") int teamId) {
 
     }
 
-    @PostMapping("/admin/team/{id}/users")
+    @PostMapping("/team/{id}/users")
     @ResponseBody
     public void getUsersOfTeam(@PathVariable("id") int teamId) {
 
     }
 
 
-    @PostMapping("/admin/scope/add")
+    @PostMapping("/scope/add")
     @ResponseBody
     public void addTeamScope() {
 
     }
 
-    @PostMapping("/admin/scope/{id}/edit")
+    @PostMapping("/scope/{id}/edit")
     @ResponseBody
     public void editTeamScope(@PathVariable("id") int scopeId) {
 
     }
 
-    @GetMapping("/admin/scope/list")
+    @GetMapping("/scope/list")
     @ResponseBody
     public void readAllTeamScopes() {
 
     }
 
-    @GetMapping("/admin/scope/{id}")
+    @GetMapping("/scope/{id}")
     @ResponseBody
     public void readTeamScope(@PathVariable("id") int scopeId) {
 
     }
 
-    @PostMapping("/admin/scope/{id}/teams")
+    @PostMapping("/scope/{id}/teams")
     @ResponseBody
     public void readTeamsInTeamScope(@PathVariable("id") int scopeId) {
 
     }
 
 
-    @PostMapping("/admin/user/add-to-team")
+    @PostMapping("/user/add-to-team")
     @ResponseBody
     public void addUserToTeam() {
 
     }
 
-    @PostMapping("/admin/user/{id}/current-team")
+    @PostMapping("/user/{id}/current-team")
     @ResponseBody
     public void findTeamOfUser(@PathVariable("id") long userId) {
 
