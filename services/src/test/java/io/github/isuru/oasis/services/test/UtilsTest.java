@@ -68,7 +68,6 @@ class UtilsTest extends AbstractApiTest {
 
         TokenInfo tokenInfo = new TokenInfo();
         tokenInfo.setUser(123);
-        tokenInfo.setExp(System.currentTimeMillis() + 2000000);
         String t = AuthUtils.get().issueToken(tokenInfo);
         Assertions.assertNotNull(t);
 
@@ -78,7 +77,7 @@ class UtilsTest extends AbstractApiTest {
         Assertions.assertFalse(UserRole.hasRole(parsed.getRole(), UserRole.ADMIN));
         Assertions.assertFalse(UserRole.hasRole(parsed.getRole(), UserRole.CURATOR));
         Assertions.assertTrue(UserRole.hasRole(parsed.getRole(), UserRole.PLAYER));
-        Assertions.assertTrue(parsed.getExp() > 0);
+        //Assertions.assertTrue(parsed.getExp() > 0);
     }
 
     @Test

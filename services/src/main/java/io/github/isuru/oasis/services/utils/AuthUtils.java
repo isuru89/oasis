@@ -1,11 +1,5 @@
 package io.github.isuru.oasis.services.utils;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.model.collect.Pair;
@@ -32,7 +26,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.Formatter;
 import java.util.Hashtable;
 
@@ -47,8 +40,8 @@ public final class AuthUtils {
 
     private MessageDigest digest;
 
-    private Algorithm algorithm;
-    private JWTVerifier verifier;
+    //private Algorithm algorithm;
+    //private JWTVerifier verifier;
     private long expiryDate;
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -108,10 +101,10 @@ public final class AuthUtils {
         RSAPrivateKey rsaPrivate = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(specPrivate);
         RSAPublicKey rsaPublic = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(specPublic);
 
-        algorithm = Algorithm.RSA256(rsaPublic, rsaPrivate);
-        verifier = JWT.require(algorithm)
-                .withIssuer(OASIS_ISSUER)
-                .build();
+        //algorithm = Algorithm.RSA256(rsaPublic, rsaPrivate);
+        //verifier = JWT.require(algorithm)
+        //        .withIssuer(OASIS_ISSUER)
+        //        .build();
 
         expiryDate = LocalDate.of(2030, 12, 31)
                 .atStartOfDay()
@@ -169,34 +162,36 @@ public final class AuthUtils {
     }
 
     public String issueToken(TokenInfo tokenInfo) throws ApiAuthException {
-        try {
-            return JWT.create()
-                    .withIssuer(OASIS_ISSUER)
-                    .withExpiresAt(new Date(tokenInfo.getExp()))
-                    .withIssuedAt(new Date(System.currentTimeMillis()))
-                    .withClaim("user", tokenInfo.getUser())
-                    .withClaim("role", tokenInfo.getRole())
-                    .sign(algorithm);
-        } catch (IllegalArgumentException | JWTCreationException e) {
-            e.printStackTrace();
-            throw new ApiAuthException("Unable to create login information for user " + tokenInfo.getUser() + "!");
-        }
+//        try {
+//            return JWT.create()
+//                    .withIssuer(OASIS_ISSUER)
+//                    .withExpiresAt(new Date(tokenInfo.getExp()))
+//                    .withIssuedAt(new Date(System.currentTimeMillis()))
+//                    .withClaim("user", tokenInfo.getUser())
+//                    .withClaim("role", tokenInfo.getRole())
+//                    .sign(algorithm);
+//        } catch (IllegalArgumentException | JWTCreationException e) {
+//            e.printStackTrace();
+//            throw new ApiAuthException("Unable to create login information for user " + tokenInfo.getUser() + "!");
+//        }
+        return null;
     }
 
     public TokenInfo verifyToken(String token) throws ApiAuthException {
-        try {
-            DecodedJWT jwt = verifier.verify(token);
-            TokenInfo tokenInfo = new TokenInfo();
-            tokenInfo.setUser(jwt.getClaim("user").asLong());
-            tokenInfo.setRole(jwt.getClaim("role").asInt());
-            tokenInfo.setIssuedAt(jwt.getIssuedAt().getTime());
-            tokenInfo.setExp(jwt.getExpiresAt().getTime());
-            return tokenInfo;
-
-        } catch (JWTVerificationException e) {
-            throw new ApiAuthException("Provided token is invalid! It is either modified or expired! ["
-                    + e.getClass().getSimpleName() + "]");
-        }
+//        try {
+//            DecodedJWT jwt = verifier.verify(token);
+//            TokenInfo tokenInfo = new TokenInfo();
+//            tokenInfo.setUser(jwt.getClaim("user").asLong());
+//            tokenInfo.setRole(jwt.getClaim("role").asInt());
+//            tokenInfo.setIssuedAt(jwt.getIssuedAt().getTime());
+//            tokenInfo.setExp(jwt.getExpiresAt().getTime());
+//            return tokenInfo;
+//
+//        } catch (JWTVerificationException e) {
+//            throw new ApiAuthException("Provided token is invalid! It is either modified or expired! ["
+//                    + e.getClass().getSimpleName() + "]");
+//        }
+        return null;
     }
 
     public static AuthUtils get() {

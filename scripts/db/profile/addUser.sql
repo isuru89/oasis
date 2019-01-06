@@ -4,6 +4,9 @@ INSERT INTO OA_USER (
     email,
     avatar_ref,
     is_auto_user,
+    <if(isActivated)>
+    is_activated,
+    <endif>
     is_male
 ) VALUES (
     :extId,
@@ -11,5 +14,8 @@ INSERT INTO OA_USER (
     :email,
     :avatarId,
     :isAutoUser,
+    <if(isActivated)>
+    :activated,
+    <endif>
     :male
 )

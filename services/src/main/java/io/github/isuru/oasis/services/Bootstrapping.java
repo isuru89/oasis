@@ -177,6 +177,7 @@ public class Bootstrapping {
             UserProfile admin = new UserProfile();
             admin.setEmail(DefaultEntities.DEF_ADMIN_USER);
             admin.setName("Admin");
+            admin.setActivated(true);
             long adminId = profileService.addUserProfile(admin);
             profileService.addUserToTeam(adminId, defTeamId, UserRole.ADMIN);
         } else {
@@ -189,6 +190,7 @@ public class Bootstrapping {
             UserProfile curator = new UserProfile();
             curator.setEmail(DefaultEntities.DEF_CURATOR_USER);
             curator.setName("Curator");
+            curator.setActivated(true);
             long curatorId = profileService.addUserProfile(curator);
             profileService.addUserToTeam(curatorId, defTeamId, UserRole.CURATOR);
         } else {
@@ -201,6 +203,7 @@ public class Bootstrapping {
             UserProfile player = new UserProfile();
             player.setEmail(DefaultEntities.DEF_PLAYER_USER);
             player.setName("Player");
+            player.setActivated(true);
             long playerId = profileService.addUserProfile(player);
             profileService.addUserToTeam(playerId, defTeamId, UserRole.PLAYER);
         } else {

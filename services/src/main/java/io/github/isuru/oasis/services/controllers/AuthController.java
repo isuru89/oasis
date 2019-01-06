@@ -6,18 +6,21 @@ import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.dto.AuthResponse;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
-import io.github.isuru.oasis.services.model.TokenInfo;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.security.TokenSecurityFilter;
+import io.github.isuru.oasis.services.security.CurrentUser;
+import io.github.isuru.oasis.services.security.JwtTokenProvider;
+import io.github.isuru.oasis.services.security.UserPrincipal;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -35,16 +38,22 @@ public class AuthController {
     @Autowired
     private OasisConfigurations oasisConfigurations;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+
     @PostMapping("/auth/logout")
     @ResponseBody
-    public Map<String, Object> logout(@RequestAttribute("token") TokenInfo token) throws Exception {
-        boolean success = profileService.logoutUser(token.getUser(), System.currentTimeMillis());
+    public Map<String, Object> logout(@CurrentUser UserPrincipal user) throws Exception {
+        boolean success = profileService.logoutUser(user.getId(), System.currentTimeMillis());
         return Maps.create("success", success);
     }
 
     @PostMapping("/auth/login")
     @ResponseBody
-    public AuthResponse login(@RequestHeader(TokenSecurityFilter.AUTHORIZATION) String authHeader,
+    public AuthResponse login(@RequestHeader("Authorization") String authHeader,
                               HttpServletResponse response) throws Exception {
         Pair<String, String> basicAuthPair = getBasicAuthPair(authHeader);
         if (basicAuthPair == null) {
@@ -76,18 +85,21 @@ public class AuthController {
 
         checkReservedUserAuth(username, password, role);
 
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        username,
+                        password
+                )
+        );
+
+        String jwt = tokenProvider.generateToken(authentication);
+
         // authentication successful. Let's create the token
         //
-        TokenInfo tokenInfo = new TokenInfo();
-        tokenInfo.setRole(role);
-        tokenInfo.setUser(profile.getId());
-        tokenInfo.setExp(AuthUtils.get().getExpiryDate());
-        String token = AuthUtils.get().issueToken(tokenInfo);
-
         AuthResponse authResponse = new AuthResponse();
         authResponse.setSuccess(true);
         authResponse.setActivated(profile.isActivated());
-        authResponse.setToken(token);
+        authResponse.setToken(jwt);
         authResponse.setUserProfile(profile);
         return authResponse;
     }
@@ -122,8 +134,8 @@ public class AuthController {
 
     private Pair<String, String> getBasicAuthPair(String authHeader) {
         if (authHeader != null) {
-            if (authHeader.startsWith(TokenSecurityFilter.BASIC)) {
-                String token = authHeader.substring(TokenSecurityFilter.BASIC.length());
+            if (authHeader.startsWith("Basic")) {
+                String token = authHeader.substring("Basic".length()).trim();
                 String decode = new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
                 String uname = decode.substring(0, decode.indexOf(":"));
                 String pword = decode.substring(decode.indexOf(":") + 1);

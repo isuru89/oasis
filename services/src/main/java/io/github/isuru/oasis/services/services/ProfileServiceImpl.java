@@ -30,6 +30,8 @@ public class ProfileServiceImpl implements IProfileService {
         Checks.nonNullOrEmpty(profile.getEmail(), "email");
         Checks.nonNullOrEmpty(profile.getName(), "name");
 
+        Map<String, Object> templating = Maps.create("isActivated", profile.isActivated());
+
         Map<String, Object> data = Maps.create()
                 .put("name", profile.getName())
                 .put("male", profile.isMale())
@@ -37,9 +39,10 @@ public class ProfileServiceImpl implements IProfileService {
                 .put("extId", profile.getExtId())
                 .put("email", profile.getEmail())
                 .put("isAutoUser", false)
+                .put("activated", profile.isActivated())
                 .build();
 
-        return dao.executeInsert(Q.PROFILE.ADD_USER, data, "user_id");
+        return dao.executeInsert(Q.PROFILE.ADD_USER, data, templating, "user_id");
     }
 
     @Override

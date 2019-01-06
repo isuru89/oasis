@@ -20,9 +20,29 @@ public class OasisConfigurations {
     private String publicKeyPath;
     private String privateKeyPath;
 
+    private String authJwtSecret;
+    @Value("${authJwtExpirationTime:604800000}")
+    private long authJwtExpirationTime;
+
     private String flinkURL;
     @Value("${flinkParallelism:1}")
     private int flinkParallelism = 1;
+
+    public String getAuthJwtSecret() {
+        return authJwtSecret;
+    }
+
+    public void setAuthJwtSecret(String authJwtSecret) {
+        this.authJwtSecret = authJwtSecret;
+    }
+
+    public long getAuthJwtExpirationTime() {
+        return authJwtExpirationTime;
+    }
+
+    public void setAuthJwtExpirationTime(long authJwtExpirationTime) {
+        this.authJwtExpirationTime = authJwtExpirationTime;
+    }
 
     public int getFlinkParallelism() {
         return flinkParallelism;

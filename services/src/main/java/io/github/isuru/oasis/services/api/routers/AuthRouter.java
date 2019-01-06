@@ -99,7 +99,6 @@ public class AuthRouter extends BaseRouters {
         TokenInfo info = new TokenInfo();
         info.setRole(role);
         info.setUser(profile.getId());
-        info.setExp(AuthUtils.get().getExpiryDate());
         String token = AuthUtils.get().issueToken(info);
         return Maps.create()
                 .put("token", token)

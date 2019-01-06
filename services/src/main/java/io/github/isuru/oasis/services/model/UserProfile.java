@@ -1,5 +1,7 @@
 package io.github.isuru.oasis.services.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class UserProfile {
 
     private long id;
@@ -13,10 +15,20 @@ public class UserProfile {
     private boolean autoUser;
     private boolean activated;
     private Long lastLogoutAt;
+    @JsonIgnore
+    private String password;
 
     private Integer heroId;
     private int heroUpdateTimes;
     private Long heroLastUpdatedAt;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public String getNickName() {
         return nickName;
