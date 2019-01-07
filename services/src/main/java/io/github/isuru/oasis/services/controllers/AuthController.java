@@ -46,6 +46,9 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @Autowired
+    private DataCache dataCache;
+
     @PreAuthorize("isFullyAuthenticated()")
     @PostMapping("/logout")
     @ResponseBody
@@ -69,7 +72,7 @@ public class AuthController {
 
         if (!DefaultEntities.RESERVED_USERS.contains(username)) {
             // @TODO remove this in production
-            if (!password.equals(DataCache.get().getAllUserTmpPassword())) {
+            if (!password.equals(dataCache.getAllUserTmpPassword())) {
                 AuthUtils.get().ldapAuthUser(username, password);
             }
         }

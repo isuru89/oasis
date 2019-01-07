@@ -10,8 +10,10 @@ import io.github.isuru.oasis.services.utils.cache.InMemoryCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 import java.io.IOException;
 
@@ -27,6 +29,7 @@ public class ExternalServiceConfigs {
     private RabbitConfigurations rabbitConfigurations;
 
     @Bean
+    @Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
     public FlinkServices createFlinkService() {
         LOG.info("Initializing Flink services...");
         FlinkServices flinkServices = new FlinkServices();
@@ -37,6 +40,7 @@ public class ExternalServiceConfigs {
     }
 
     @Bean
+    @Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
     public IEventDispatcher createEventDispatcher() throws IOException {
         LOG.info("Initializing rabbit event dispatcher...");
         RabbitDispatcher rabbitDispatcher = new RabbitDispatcher();
@@ -46,6 +50,7 @@ public class ExternalServiceConfigs {
 
 
     @Bean
+    @Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
     public ICacheProxy createCacheProxy() {
 //        OasisCacheFactory factory = new OasisCacheFactory();
 //        return factory.create();

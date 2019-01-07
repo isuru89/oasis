@@ -5,6 +5,7 @@ import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
+import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.utils.IGameController;
 
@@ -24,6 +25,7 @@ public class LocalScheduler implements IGameController {
     private final LocalChallengeProcessor challengeProcessor;
 
     private final IOasisDao dao;
+    private DataCache dataCache;
 
     @Override
     public void submitEvent(long gameId, Map<String, Object> event) throws Exception {
@@ -40,7 +42,7 @@ public class LocalScheduler implements IGameController {
     public void startGame(long gameId, Configs appConfigs) {
         Sources.get().create(gameId);
 
-        LocalRunner runner = new LocalRunner(appConfigs, pool, dao, gameId);
+        LocalRunner runner = new LocalRunner(appConfigs, pool, dao, gameId, dataCache);
         runners.put(gameId, runner);
         pool.submit(runner);
     }

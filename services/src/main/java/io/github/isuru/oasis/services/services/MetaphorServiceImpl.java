@@ -33,6 +33,8 @@ public class MetaphorServiceImpl implements IMetaphorService {
     @Autowired
     private IEventsService eventsService;
 
+    @Autowired
+    private DataCache dataCache;
 
     @Override
     public void buyItem(long userBy, long itemId) throws Exception {
@@ -98,8 +100,8 @@ public class MetaphorServiceImpl implements IMetaphorService {
                     currTeam = userTeams.iterator().next();
                 }
 
-                long teamId = currTeam != null ? currTeam.getTeamId() : DataCache.get().getTeamDefault().getId();
-                long scopeId = currTeam != null ? currTeam.getScopeId() : DataCache.get().getTeamScopeDefault().getId();
+                long teamId = currTeam != null ? currTeam.getTeamId() : dataCache.getTeamDefault().getId();
+                long scopeId = currTeam != null ? currTeam.getScopeId() : dataCache.getTeamScopeDefault().getId();
 
                 Map<String, Object> data = Maps.create()
                         .put("userId", userBy)
@@ -150,8 +152,8 @@ public class MetaphorServiceImpl implements IMetaphorService {
                     currTeam = userTeams.iterator().next();
                 }
 
-                long teamId = currTeam != null ? currTeam.getTeamId() : DataCache.get().getTeamDefault().getId();
-                long scopeId = currTeam != null ? currTeam.getScopeId() : DataCache.get().getTeamScopeDefault().getId();
+                long teamId = currTeam != null ? currTeam.getTeamId() : dataCache.getTeamDefault().getId();
+                long scopeId = currTeam != null ? currTeam.getScopeId() : dataCache.getTeamScopeDefault().getId();
 
                 Map<String, Object> item = Maps.create()
                         .put("userId", toUser)
@@ -164,14 +166,14 @@ public class MetaphorServiceImpl implements IMetaphorService {
 
                 // add an event to stream processor
                 eventsService.submitEvent(
-                        DataCache.get().getInternalEventSourceToken().getToken(),
+                        dataCache.getInternalEventSourceToken().getToken(),
                         Maps.create()
                                 .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_SHOP_ITEM_SHARE)
                                 .put(Constants.FIELD_TIMESTAMP, currTs)
                                 .put(Constants.FIELD_USER, userBy)
                                 .put(Constants.FIELD_TEAM, teamId)
                                 .put(Constants.FIELD_SCOPE, scopeId)
-                                .put(Constants.FIELD_GAME_ID, DataCache.get().getDefGameId())
+                                .put(Constants.FIELD_GAME_ID, dataCache.getDefGameId())
                                 .put(Constants.FIELD_ID, null)
                                 .put("toUser", toUser)
                                 .put("itemId", itemId)

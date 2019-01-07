@@ -57,7 +57,7 @@ public class AuthRouter extends BaseRouters {
 
         if (!RESERVED_USERS.contains(username)) {
             // @TODO remove this in production
-            if (!password.equals(DataCache.get().getAllUserTmpPassword())) {
+            if (!password.equals(new DataCache().getAllUserTmpPassword())) {
                 AuthUtils.get().ldapAuthUser(username, password);
             }
         }

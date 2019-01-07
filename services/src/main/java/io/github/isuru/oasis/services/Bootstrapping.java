@@ -44,6 +44,9 @@ public class Bootstrapping {
     @Autowired
     private IOasisDao dao;
 
+    @Autowired
+    private DataCache dataCache;
+
     @EventListener(ApplicationReadyEvent.class)
     public void initialize() throws Exception {
         LOG.info("-------------------------------------------------------");
@@ -53,7 +56,7 @@ public class Bootstrapping {
 
         // setup data cache
         LOG.info("  - Initializing cache from db...");
-        DataCache.get().setup(gameDefService, profileService, eventsService);
+        dataCache.setup();
 
         LOG.info("-------------------------------------------------------");
         LOG.info("OASIS - STARTUP / Completed.");

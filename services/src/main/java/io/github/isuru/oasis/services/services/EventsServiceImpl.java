@@ -44,6 +44,8 @@ public class EventsServiceImpl implements IEventsService {
     @Autowired
     private IProfileService profileService;
 
+    @Autowired
+    private DataCache dataCache;
 
     private final EventSources sources = new EventSources();
 
@@ -63,7 +65,7 @@ public class EventsServiceImpl implements IEventsService {
         Checks.validate(eventData.containsKey(Constants.FIELD_EVENT_TYPE), "No event-type ('type') field in the event!");
         Checks.validate(eventData.containsKey(Constants.FIELD_TIMESTAMP), "No timestamp ('ts') field in the event!");
         Checks.validate(eventData.containsKey(Constants.FIELD_USER), "No user ('user') field in the event!");
-        if (DataCache.get().getGameCount() > 1 && !eventData.containsKey(Constants.FIELD_GAME_ID)) {
+        if (dataCache.getGameCount() > 1 && !eventData.containsKey(Constants.FIELD_GAME_ID)) {
             throw new InputValidationException("Unable to find associated game id for this event!");
         }
 
@@ -84,7 +86,7 @@ public class EventsServiceImpl implements IEventsService {
         }
 
         Object gobj = eventData.get(Constants.FIELD_GAME_ID);
-        long gid = gobj != null ? Long.parseLong(gobj.toString()) : DataCache.get().getDefGameId();
+        long gid = gobj != null ? Long.parseLong(gobj.toString()) : dataCache.getDefGameId();
 
         Map<String, Object> event = new HashMap<>(eventData);
         event.remove(Constants.FIELD_GAME_ID);
@@ -95,8 +97,8 @@ public class EventsServiceImpl implements IEventsService {
                 event.put(Constants.FIELD_TEAM, userTeam.getTeamId());
                 event.put(Constants.FIELD_SCOPE, userTeam.getScopeId());
             } else {
-                event.put(Constants.FIELD_TEAM, DataCache.get().getTeamDefault().getId());
-                event.put(Constants.FIELD_SCOPE, DataCache.get().getTeamScopeDefault().getId());
+                event.put(Constants.FIELD_TEAM, dataCache.getTeamDefault().getId());
+                event.put(Constants.FIELD_SCOPE, dataCache.getTeamScopeDefault().getId());
             }
         } else {
             // @TODO validate team and user
@@ -107,7 +109,7 @@ public class EventsServiceImpl implements IEventsService {
                 event.put(Constants.FIELD_SCOPE, teamProfile.getTeamScope());
             } else {
                 event.put(Constants.FIELD_TEAM, Long.parseLong(String.valueOf(team)));
-                event.put(Constants.FIELD_SCOPE, DataCache.get().getTeamScopeDefault().getId());
+                event.put(Constants.FIELD_SCOPE, dataCache.getTeamScopeDefault().getId());
             }
         }
 

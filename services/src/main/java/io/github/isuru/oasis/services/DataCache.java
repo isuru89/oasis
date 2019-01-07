@@ -13,6 +13,10 @@ import io.github.isuru.oasis.services.utils.EventSourceToken;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -21,11 +25,20 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author iweerarathna
  */
+@Component
+@Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class DataCache {
 
     private static final Logger LOG = LoggerFactory.getLogger(DataCache.class);
 
+    @Autowired
     private IGameDefService gameDefService;
+
+    @Autowired
+    private IProfileService profileService;
+
+    @Autowired
+    private IEventsService eventsService;
 
     private String allUserTmpPassword;
 
@@ -37,10 +50,7 @@ public class DataCache {
     private TeamScope teamScopeDefault;
     private EventSourceToken internalEventSourceToken;
 
-    void setup(IGameDefService gameDefService, IProfileService profileService,
-               IEventsService eventsService) throws Exception {
-        this.gameDefService = gameDefService;
-
+    void setup() throws Exception {
         allUserTmpPassword = RandomStringUtils.randomAlphanumeric(10);
         LOG.info(" *** Temporary password for all player authentication: " + allUserTmpPassword);
 
@@ -131,16 +141,6 @@ public class DataCache {
 
     public int getGameCount() {
         return cache.size();
-    }
-
-    public static DataCache get() {
-        return Holder.INSTANCE;
-    }
-
-    private DataCache() {}
-
-    private static class Holder {
-        private static final DataCache INSTANCE = new DataCache();
     }
 
 }

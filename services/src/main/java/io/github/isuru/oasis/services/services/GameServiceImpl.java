@@ -32,6 +32,9 @@ public class GameServiceImpl implements IGameService {
     @Autowired
     private IOasisDao dao;
 
+    @Autowired
+    private DataCache dataCache;
+
     @Override
     public void awardPoints(long byUser, PointAwardDto awardDto) throws Exception {
         Checks.greaterThanZero(byUser, "user");
@@ -40,12 +43,12 @@ public class GameServiceImpl implements IGameService {
         Checks.validate(awardDto.getToUser() != byUser, "You cannot award points to yourself!");
 
         UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(awardDto.getToUser());
-        long teamId = currentTeamOfUser != null ? currentTeamOfUser.getTeamId() : DataCache.get().getTeamDefault().getId();
-        long scopeId = currentTeamOfUser != null ? currentTeamOfUser.getScopeId() : DataCache.get().getTeamScopeDefault().getId();
-        long gameId = awardDto.getGameId() != null ? awardDto.getGameId() : DataCache.get().getDefGameId();
+        long teamId = currentTeamOfUser != null ? currentTeamOfUser.getTeamId() : dataCache.getTeamDefault().getId();
+        long scopeId = currentTeamOfUser != null ? currentTeamOfUser.getScopeId() : dataCache.getTeamScopeDefault().getId();
+        long gameId = awardDto.getGameId() != null ? awardDto.getGameId() : dataCache.getDefGameId();
 
         // only curators and admins can award points to the same user as
-        if (DataCache.get().getAdminUserId() != byUser
+        if (dataCache.getAdminUserId() != byUser
                 && profileService.listCurrentUserRoles(byUser).stream().noneMatch(uts -> uts.isApproved()
                                     && scopeId == uts.getTeamScopeId()
                                     && uts.getUserRole() == UserRole.CURATOR)) {
@@ -77,12 +80,12 @@ public class GameServiceImpl implements IGameService {
         Checks.validate(byUser != awardDto.getToUser(), "You cannot award badges to yourself!");
 
         UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(awardDto.getToUser());
-        long teamId = currentTeamOfUser != null ? currentTeamOfUser.getTeamId() : DataCache.get().getTeamDefault().getId();
-        long scopeId = currentTeamOfUser != null ? currentTeamOfUser.getScopeId() : DataCache.get().getTeamScopeDefault().getId();
-        long gameId = awardDto.getGameId() != null ? awardDto.getGameId() : DataCache.get().getDefGameId();
+        long teamId = currentTeamOfUser != null ? currentTeamOfUser.getTeamId() : dataCache.getTeamDefault().getId();
+        long scopeId = currentTeamOfUser != null ? currentTeamOfUser.getScopeId() : dataCache.getTeamScopeDefault().getId();
+        long gameId = awardDto.getGameId() != null ? awardDto.getGameId() : dataCache.getDefGameId();
 
         // only curators and admins can award points to the same user as
-        if (DataCache.get().getAdminUserId() != byUser
+        if (dataCache.getAdminUserId() != byUser
                 && profileService.listCurrentUserRoles(byUser).stream().noneMatch(uts -> uts.isApproved()
                 && scopeId == uts.getTeamScopeId()
                 && uts.getUserRole() == UserRole.CURATOR)) {
@@ -217,7 +220,7 @@ public class GameServiceImpl implements IGameService {
     }
 
     private String getInternalToken() {
-        return DataCache.get().getInternalEventSourceToken().getToken();
+        return dataCache.getInternalEventSourceToken().getToken();
     }
 
     private void checkLeaderboardRequest(LeaderboardRequestDto dto) throws InputValidationException {

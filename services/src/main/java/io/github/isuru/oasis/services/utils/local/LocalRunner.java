@@ -27,13 +27,16 @@ public class LocalRunner implements Runnable {
     private LocalSinks localSinks;
     private ExecutorService pool;
     private DbSink oasisSink;
+    private DataCache dataCache;
 
-    LocalRunner(Configs appConfigs, ExecutorService pool, IOasisDao dao, long gameId) {
+    LocalRunner(Configs appConfigs, ExecutorService pool, IOasisDao dao, long gameId,
+                DataCache dataCache) {
         this.appConfigs = appConfigs;
         this.gameId = gameId;
         this.dao = dao;
         this.pool = pool;
         this.oasisSink = new DbSink(gameId);
+        this.dataCache = dataCache;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class LocalRunner implements Runnable {
         configs.append(ConfigKeys.KEY_LOCAL_REF_OUTPUT, oasisSink);
 
         try {
-            OasisGameDef gameDef = DataCache.get().loadGameDefs(gameId);
+            OasisGameDef gameDef = dataCache.loadGameDefs(gameId);
             Main.startGame(configs, gameDef);
         } catch (Throwable e) {
             e.printStackTrace();
