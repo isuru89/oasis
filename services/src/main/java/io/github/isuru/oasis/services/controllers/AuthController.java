@@ -9,10 +9,12 @@ import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.security.CurrentUser;
 import io.github.isuru.oasis.services.security.JwtTokenProvider;
+import io.github.isuru.oasis.services.security.OasisAuthenticator;
 import io.github.isuru.oasis.services.security.UserPrincipal;
 import io.github.isuru.oasis.services.services.IProfileService;
-import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,6 +36,8 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AuthController.class);
+
     @Autowired
     private IProfileService profileService;
 
@@ -49,7 +53,10 @@ public class AuthController {
     @Autowired
     private DataCache dataCache;
 
-    @PreAuthorize("isFullyAuthenticated()")
+    @Autowired
+    private OasisAuthenticator authenticator;
+
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/logout")
     @ResponseBody
     public Map<String, Object> logout(@CurrentUser UserPrincipal user) throws Exception {
@@ -73,7 +80,11 @@ public class AuthController {
         if (!DefaultEntities.RESERVED_USERS.contains(username)) {
             // @TODO remove this in production
             if (!password.equals(dataCache.getAllUserTmpPassword())) {
-                AuthUtils.get().ldapAuthUser(username, password);
+                if (!authenticator.authenticate(username, password)) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication failed for user " + username + "!");
+                    return null;
+                }
+//                AuthUtils.get().ldapAuthUser(username, password);
             }
         }
 
@@ -81,7 +92,8 @@ public class AuthController {
         UserProfile profile = profileService.readUserProfile(username);
         if (profile == null) {
             // no profiles associated with user.
-            throw new ApiAuthException("Authentication failure! Username or password incorrect!");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User is not found or registered in the Oasis!");
+            return null;
         }
 
         checkReservedUserAuth(username, password);
