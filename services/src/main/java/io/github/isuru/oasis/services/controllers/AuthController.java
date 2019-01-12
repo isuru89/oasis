@@ -21,10 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
@@ -57,7 +54,7 @@ public class AuthController {
     private OasisAuthenticator authenticator;
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/logout")
+    @PostMapping("/logout/{uid}")
     @ResponseBody
     public Map<String, Object> logout(@CurrentUser UserPrincipal user) throws Exception {
         boolean success = profileService.logoutUser(user.getId(), System.currentTimeMillis());

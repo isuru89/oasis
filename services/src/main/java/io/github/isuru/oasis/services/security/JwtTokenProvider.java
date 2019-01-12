@@ -18,8 +18,12 @@ public class JwtTokenProvider {
 
     private static final String OASIS_ISSUER = "oasis";
 
+    private final OasisConfigurations oasisConfigurations;
+
     @Autowired
-    private OasisConfigurations oasisConfigurations;
+    public JwtTokenProvider(OasisConfigurations oasisConfigurations) {
+        this.oasisConfigurations = oasisConfigurations;
+    }
 
     public String generateToken(Authentication authentication) {
 
