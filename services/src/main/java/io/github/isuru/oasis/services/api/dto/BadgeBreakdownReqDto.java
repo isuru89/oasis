@@ -8,7 +8,7 @@ public class BadgeBreakdownReqDto {
     private Integer offset;
     private Integer size;
 
-    private int userId;
+    private long userId;
     private Integer badgeId;
 
     private Long rangeStart;
@@ -30,11 +30,11 @@ public class BadgeBreakdownReqDto {
         this.size = size;
     }
 
-    public int getUserId() {
+    public long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 

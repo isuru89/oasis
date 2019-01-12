@@ -116,7 +116,7 @@ public class StatsRouter extends BaseRouters {
             throw new InputValidationException("Parameter 'userId' is mandatory and must be a valid one!");
         }
         reqDto.setPointId(asQInt(req, "pointId", -1));
-        if (reqDto.getUserId() < 0) {
+        if (reqDto.getPointId() < 0) {
             throw new InputValidationException("Parameter 'pointId' is mandatory and must be a valid one!");
         }
         reqDto.setOffset(asQInt(req, "offset", 0));
@@ -133,7 +133,7 @@ public class StatsRouter extends BaseRouters {
             throw new InputValidationException("Parameter 'userId' is mandatory and must be a valid one!");
         }
         reqDto.setBadgeId(asQInt(req, "badgeId", -1));
-        if (reqDto.getUserId() < 0) {
+        if (reqDto.getBadgeId() < 0) {
             throw new InputValidationException("Parameter 'badgeId' is mandatory and must be a valid one!");
         }
         reqDto.setOffset(asQInt(req, "offset", 0));

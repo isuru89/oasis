@@ -8,7 +8,7 @@ public class PointBreakdownReqDto {
     private Integer offset;
     private Integer size;
 
-    private int userId;
+    private long userId;
     private int pointId;
 
     private Long rangeStart;
@@ -30,11 +30,11 @@ public class PointBreakdownReqDto {
         this.size = size;
     }
 
-    public int getUserId() {
+    public long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 
