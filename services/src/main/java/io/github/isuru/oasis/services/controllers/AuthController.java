@@ -81,7 +81,6 @@ public class AuthController {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication failed for user " + username + "!");
                     return null;
                 }
-//                AuthUtils.get().ldapAuthUser(username, password);
             }
         }
 
