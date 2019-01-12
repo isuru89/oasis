@@ -43,23 +43,18 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    TokenInfo getTokenFromJWT(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(oasisConfigurations.getAuthJwtSecret())
-                .parseClaimsJws(token)
-                .getBody();
-
-        TokenInfo tokenInfo = new TokenInfo();
-        tokenInfo.setIssuedAt(claims.getIssuedAt().getTime());
-        tokenInfo.setUser(Long.parseLong(claims.getSubject()));
-        tokenInfo.setRole(claims.get("role", Integer.class));
-        return tokenInfo;
-    }
-
-    boolean validateToken(String authToken) {
+    public TokenInfo validateToken(String authToken) {
         try {
-            Jwts.parser().setSigningKey(oasisConfigurations.getAuthJwtSecret()).parseClaimsJws(authToken);
-            return true;
+            Claims claims = Jwts.parser()
+                    .setSigningKey(oasisConfigurations.getAuthJwtSecret())
+                    .parseClaimsJws(authToken)
+                    .getBody();
+
+            TokenInfo tokenInfo = new TokenInfo();
+            tokenInfo.setIssuedAt(claims.getIssuedAt().getTime());
+            tokenInfo.setUser(Long.parseLong(claims.getSubject()));
+            tokenInfo.setRole(claims.get("role", Integer.class));
+            return tokenInfo;
         } catch (SignatureException ex) {
             LOG.error("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
@@ -71,7 +66,7 @@ public class JwtTokenProvider {
         } catch (IllegalArgumentException ex) {
             LOG.error("JWT claims string is empty.");
         }
-        return false;
+        return null;
     }
 
 }

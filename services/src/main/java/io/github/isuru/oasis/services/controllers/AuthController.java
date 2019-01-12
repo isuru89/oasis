@@ -5,28 +5,32 @@ import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.dto.AuthResponse;
-import io.github.isuru.oasis.services.exception.ApiAuthException;
+import io.github.isuru.oasis.services.dto.StatusResponse;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.security.CurrentUser;
 import io.github.isuru.oasis.services.security.JwtTokenProvider;
 import io.github.isuru.oasis.services.security.OasisAuthenticator;
 import io.github.isuru.oasis.services.security.UserPrincipal;
 import io.github.isuru.oasis.services.services.IProfileService;
-import io.github.isuru.oasis.services.utils.Maps;
+import io.github.isuru.oasis.services.utils.Checks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Map;
 
 @Controller
 @SuppressWarnings("unused")
@@ -54,11 +58,11 @@ public class AuthController {
     private OasisAuthenticator authenticator;
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/logout/{uid}")
+    @PostMapping("/logout")
     @ResponseBody
-    public Map<String, Object> logout(@CurrentUser UserPrincipal user) throws Exception {
+    public StatusResponse logout(@CurrentUser UserPrincipal user) throws Exception {
         boolean success = profileService.logoutUser(user.getId(), System.currentTimeMillis());
-        return Maps.create("success", success);
+        return new StatusResponse(success);
     }
 
     @PostMapping("/login")
@@ -113,7 +117,7 @@ public class AuthController {
         return authResponse;
     }
 
-    private void checkReservedUserAuth(String username, String password) throws ApiAuthException {
+    private void checkReservedUserAuth(String username, String password) {
         if (DefaultEntities.RESERVED_USERS.contains(username)) {
             boolean success = false;
             if (DefaultEntities.DEF_ADMIN_USER.equals(username)) {
@@ -126,29 +130,34 @@ public class AuthController {
                 if (password.equals(oasisConfigurations.getDefaultCuratorPassword())) {
                     success = true;
                 }
-            } else if (DefaultEntities.DEF_PLAYER_USER.equals(username)) {
+            } else {
                 // player
                 if (password.equals(oasisConfigurations.getDefaultPlayerPassword())) {
                     success = true;
                 }
-            } else {
-                throw new ApiAuthException("User '" + username + "' does not have an associate role in Oasis!");
             }
 
             if (!success) {
-                throw new ApiAuthException("Username or password incorrect!");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Username or password incorrect!");
             }
         }
     }
 
     private Pair<String, String> getBasicAuthPair(String authHeader) {
-        if (authHeader != null) {
+        if (!Checks.isNullOrEmpty(authHeader)) {
             if (authHeader.startsWith("Basic")) {
-                String token = authHeader.substring("Basic".length()).trim();
-                String decode = new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
-                String uname = decode.substring(0, decode.indexOf(":"));
-                String pword = decode.substring(decode.indexOf(":") + 1);
-                return Pair.of(uname, pword);
+                try {
+                    String token = authHeader.substring("Basic".length()).trim();
+                    String decode = new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
+                    if (decode.contains(":")) {
+                        String uname = decode.substring(0, decode.indexOf(":"));
+                        String pword = decode.substring(decode.indexOf(":") + 1);
+                        return Pair.of(uname, pword);
+                    }
+                } catch (IllegalArgumentException e) {
+                    LOG.error("Authorization header is incorrect! " + authHeader);
+                    return null;
+                }
             }
         }
         return null;
