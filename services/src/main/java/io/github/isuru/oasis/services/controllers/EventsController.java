@@ -4,19 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.services.api.dto.EventPushDto;
-import io.github.isuru.oasis.services.exception.ApiAuthException;
-import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.dto.StatusResponse;
 import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.utils.BodyRequestWrapper;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
 import io.github.isuru.oasis.services.utils.HmacUtils;
-import io.github.isuru.oasis.services.utils.Maps;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,16 +38,15 @@ public class EventsController {
 
     @PostMapping("/submit")
     @ResponseBody
-    public Map<String, Object> submitEvent(HttpServletRequest request,
-                                           HttpServletResponse response) throws Exception {
+    public StatusResponse submitEvent(HttpServletRequest request,
+                                      HttpServletResponse response) throws Exception {
 
         // verify event submission
         // header format: <algo> <token>:<nonce>:<digest>
         Pair<String, Triple<String, String, String>> authHeader = HmacUtils.getAuthHeader(request);
         if (authHeader == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
                     "Event source authentication failed! No authorization header or header is invalid!");
-            return Maps.create("success", false);
         }
 
 
@@ -58,7 +57,7 @@ public class EventsController {
 
         Optional<EventSourceToken> appIdOpt = eventsService.readSourceByToken(token);
         EventSourceToken sourceToken = appIdOpt.orElseThrow((Supplier<Exception>)
-                () -> new ApiAuthException("Event source token is not recognized by the Oasis!"));
+                () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Event source token is not recognized by the Oasis!"));
 
         BodyRequestWrapper requestWrapper = new BodyRequestWrapper(request);
         byte[] payload = requestWrapper.getPayload();
@@ -80,10 +79,10 @@ public class EventsController {
             });
             eventsService.submitEvents(token, eventData.getEvents());
         } else {
-            throw new InputValidationException("No events have been defined in this call!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No events have been defined in this call!");
         }
 
-        return Maps.create("success", true);
+        return new StatusResponse(true);
     }
 
 }

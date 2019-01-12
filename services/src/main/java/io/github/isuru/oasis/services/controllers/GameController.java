@@ -1,7 +1,6 @@
 package io.github.isuru.oasis.services.controllers;
 
 import io.github.isuru.oasis.model.defs.LeaderboardType;
-import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.BadgeAwardDto;
 import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.model.PointAwardDto;
@@ -10,9 +9,11 @@ import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IGameService;
 import io.github.isuru.oasis.services.utils.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -99,16 +100,16 @@ public class GameController {
     private LeaderboardRequestDto generate(LeaderboardType type,
                                            int top, int bottom, long when,
                                            long start, long end,
-                                           long userId) throws InputValidationException {
+                                           long userId) {
         if (top > 0 && bottom > 0) {
-            throw new InputValidationException("Leaderboard request cannot have " +
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Leaderboard request cannot have " +
                     "both 'top' and 'bottom' parameters!");
         }
 
         LeaderboardRequestDto requestDto = null;
         if (when > 0) {
             if (type == null) {
-                throw new InputValidationException("Leaderboard type must be defined 'when' is specified!");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Leaderboard type must be defined 'when' is specified!");
             }
             requestDto = new LeaderboardRequestDto(type, when);
 
@@ -121,7 +122,7 @@ public class GameController {
         }
 
         if (requestDto == null) {
-            throw new InputValidationException("Custom leaderboards must specify time range!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Custom leaderboards must specify time range!");
         }
 
         requestDto.setForUser(userId > 0 ? userId : null);
@@ -130,7 +131,7 @@ public class GameController {
         return requestDto;
     }
 
-    private static LeaderboardType toType(String rangeType) throws InputValidationException {
+    private static LeaderboardType toType(String rangeType) {
         if (rangeType.startsWith("week")) {
             return LeaderboardType.CURRENT_WEEK;
         } else if (rangeType.startsWith("month")) {
@@ -140,7 +141,7 @@ public class GameController {
         } else if (rangeType.startsWith("custom")) {
             return LeaderboardType.CUSTOM;
         } else {
-            throw new InputValidationException("Unknown range query parameter value! [" + rangeType + "]");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown range query parameter value! [" + rangeType + "]");
         }
     }
 }

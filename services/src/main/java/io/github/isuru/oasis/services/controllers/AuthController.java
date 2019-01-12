@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -67,12 +66,10 @@ public class AuthController {
 
     @PostMapping("/login")
     @ResponseBody
-    public AuthResponse login(@RequestHeader("Authorization") String authHeader,
-                              HttpServletResponse response) throws Exception {
+    public AuthResponse login(@RequestHeader("Authorization") String authHeader) throws Exception {
         Pair<String, String> basicAuthPair = getBasicAuthPair(authHeader);
         if (basicAuthPair == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "No valid authorization header found!");
-            return null;
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No valid authorization header found!");
         }
 
         String username = basicAuthPair.getValue0();
@@ -82,8 +79,7 @@ public class AuthController {
             // @TODO remove this in production
             if (!password.equals(dataCache.getAllUserTmpPassword())) {
                 if (!authenticator.authenticate(username, password)) {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication failed for user " + username + "!");
-                    return null;
+                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication failed for user " + username + "!");
                 }
             }
         }
@@ -92,8 +88,7 @@ public class AuthController {
         UserProfile profile = profileService.readUserProfile(username);
         if (profile == null) {
             // no profiles associated with user.
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User is not found or registered in the Oasis!");
-            return null;
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not found or registered in the Oasis!");
         }
 
         checkReservedUserAuth(username, password);

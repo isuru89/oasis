@@ -31,14 +31,14 @@ public class UserPrincipal implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrincipal(Long id,
-                         String name,
-                         String username,
-                         String email,
-                         String password,
-                         int role,
-                         boolean isActive,
-                         Collection<? extends GrantedAuthority> authorities) {
+    UserPrincipal(Long id,
+                  String name,
+                  String username,
+                  String email,
+                  String password,
+                  int role,
+                  boolean isActive,
+                  Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.name = name;
         this.username = username;
@@ -134,7 +134,6 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(id);
     }
 }

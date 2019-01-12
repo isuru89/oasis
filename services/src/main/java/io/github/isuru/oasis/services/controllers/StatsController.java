@@ -3,7 +3,6 @@ package io.github.isuru.oasis.services.controllers;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.api.dto.*;
-import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.UserRankRecordDto;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.model.enums.ScopingType;
@@ -11,11 +10,13 @@ import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.services.IStatService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class StatsController {
     public List<UserStateStatDto> getUserStatesStats(@PathVariable("userId") long userId) throws Exception {
         UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(userId);
         if (currentTeamOfUser == null) {
-            throw new InputValidationException("Current team of user '" + userId + "' cannot be found!");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current team of user '" + userId + "' cannot be found!");
         }
         long teamId = currentTeamOfUser.getTeamId();
         return statService.readUserStateStats(userId, teamId);
@@ -124,7 +125,7 @@ public class StatsController {
         if (gId <= 0) {
             List<GameDef> gameDefs = gameDefService.listGames();
             if (gameDefs == null || gameDefs.isEmpty()) {
-                throw new IllegalStateException("There are no games defined in Oasis yet!");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There are no games defined in Oasis yet!");
             }
             gId = gameDefs.get(0).getId();
         }

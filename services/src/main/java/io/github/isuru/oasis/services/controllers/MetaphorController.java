@@ -5,15 +5,17 @@ import io.github.isuru.oasis.services.api.dto.HeroDto;
 import io.github.isuru.oasis.services.dto.DefinitionAddResponse;
 import io.github.isuru.oasis.services.dto.ItemBuyReq;
 import io.github.isuru.oasis.services.dto.ItemShareReq;
-import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.dto.StatusResponse;
 import io.github.isuru.oasis.services.security.CurrentUser;
 import io.github.isuru.oasis.services.security.UserPrincipal;
 import io.github.isuru.oasis.services.services.IMetaphorService;
 import io.github.isuru.oasis.services.utils.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -27,9 +29,8 @@ public class MetaphorController {
 
     @PostMapping("/user/{id}/change-hero/{heroId}")
     @ResponseBody
-    public void changeUserHero(@PathVariable("id") long userId, @PathVariable("heroId") int heroId) throws Exception {
-        metaphorService.changeUserHero(userId, heroId);
-        // @TODO response
+    public StatusResponse changeUserHero(@PathVariable("id") long userId, @PathVariable("heroId") int heroId) throws Exception {
+        return new StatusResponse(metaphorService.changeUserHero(userId, heroId));
     }
 
 
@@ -49,7 +50,7 @@ public class MetaphorController {
                 metaphorService.buyItem(userId, itemId);
             }
         } else {
-            throw new InputValidationException("Item has sold out!");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Item has sold out!");
         }
     }
 

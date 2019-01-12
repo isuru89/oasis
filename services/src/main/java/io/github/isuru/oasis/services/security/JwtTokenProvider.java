@@ -55,14 +55,8 @@ public class JwtTokenProvider {
             tokenInfo.setUser(Long.parseLong(claims.getSubject()));
             tokenInfo.setRole(claims.get("role", Integer.class));
             return tokenInfo;
-        } catch (SignatureException ex) {
-            LOG.error("Invalid JWT signature");
-        } catch (MalformedJwtException ex) {
-            LOG.error("Invalid JWT token");
-        } catch (ExpiredJwtException ex) {
-            LOG.error("Expired JWT token");
-        } catch (UnsupportedJwtException ex) {
-            LOG.error("Unsupported JWT token");
+        } catch (JwtException ex) {
+            LOG.error("Invalid JWT signature! [Reason: " + ex.getMessage() + "]");
         } catch (IllegalArgumentException ex) {
             LOG.error("JWT claims string is empty.");
         }

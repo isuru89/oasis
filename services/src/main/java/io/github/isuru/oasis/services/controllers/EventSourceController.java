@@ -2,7 +2,6 @@ package io.github.isuru.oasis.services.controllers;
 
 import io.github.isuru.oasis.services.api.dto.EventSourceDto;
 import io.github.isuru.oasis.services.dto.DeleteResponse;
-import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.EventSourceToken;
@@ -11,10 +10,12 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
@@ -40,7 +41,7 @@ public class EventSourceController {
         // duplicate events source names are ignored.
         if (eventsService.listAllEventSources().stream()
                 .anyMatch(e -> e.getDisplayName().equalsIgnoreCase(eventSourceToken.getDisplayName()))) {
-            throw new InputValidationException(
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "There is already an event token exist with name '" + eventSourceToken.getDisplayName() + "'!");
         }
 
@@ -78,12 +79,12 @@ public class EventSourceController {
                     response.flushBuffer();
                 }
             } else {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "The key has been already downloaded! Cannot download again.");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The key has been already downloaded! Cannot download again.");
             }
 
         } catch (IOException ex) {
             LOG.info("Error writing buffer to output stream. Event source id was '{}'", sourceId, ex);
-            throw new RuntimeException("IOError writing file to output buffer!");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "IOError writing file to output buffer!");
         }
     }
 

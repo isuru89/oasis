@@ -3,6 +3,7 @@ package io.github.isuru.oasis.services.controllers;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.Utils;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
+import io.github.isuru.oasis.services.dto.StatusResponse;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.security.*;
@@ -211,22 +212,20 @@ public class AuthControllerTest {
         // already authenticated users can logout
         {
             String playerToken = doLogin("player@oasis.com", "player");
-            Map map = Utils.fromJson(mvc.perform(postJson("/auth/logout", "Bearer " + playerToken))
+            StatusResponse response = Utils.fromJson(mvc.perform(postJson("/auth/logout", "Bearer " + playerToken))
                     .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
-                    .andReturn().getResponse().getContentAsString(), Map.class);
-            Assertions.assertEquals(1, map.size());
-            Assertions.assertTrue(map.containsKey("success"));
-            Assertions.assertEquals(true, map.get("success"));
+                    .andReturn().getResponse().getContentAsString(), StatusResponse.class);
+            Assertions.assertNotNull(response);
+            Assertions.assertTrue(response.isSuccess());
         }
 
         {
             String playerToken = doLogin("isuru@domain.com", "rightpw");
-            Map map = Utils.fromJson(mvc.perform(postJson("/auth/logout", "Bearer " + playerToken))
+            StatusResponse response = Utils.fromJson(mvc.perform(postJson("/auth/logout", "Bearer " + playerToken))
                     .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
-                    .andReturn().getResponse().getContentAsString(), Map.class);
-            Assertions.assertEquals(1, map.size());
-            Assertions.assertTrue(map.containsKey("success"));
-            Assertions.assertEquals(true, map.get("success"));
+                    .andReturn().getResponse().getContentAsString(), StatusResponse.class);
+            Assertions.assertNotNull(response);
+            Assertions.assertTrue(response.isSuccess());
         }
     }
 
