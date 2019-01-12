@@ -12,8 +12,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class OasisUserDetailsService implements UserDetailsService {
 
-    @Autowired
     private IProfileService profileService;
+
+    @Autowired
+    OasisUserDetailsService(IProfileService profileService) {
+        this.profileService = profileService;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

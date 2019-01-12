@@ -9,9 +9,9 @@ import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.security.*;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.utils.UserRole;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
@@ -33,7 +33,7 @@ import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(AuthController.class)
-public class AuthControllerTest {
+class AuthControllerTest {
 
     @Autowired
     private MockMvc mvc;
@@ -64,8 +64,8 @@ public class AuthControllerTest {
 
     private JwtTokenProvider tp;
 
-    @Before
-    public void doBefore() throws Exception {
+    @BeforeEach
+    void doBefore() throws Exception {
         OasisConfigurations tmpConfigs = new OasisConfigurations();
         tmpConfigs.setAuthJwtSecret("thisissecret");
         tmpConfigs.setAuthJwtExpirationTime(3600L * 1000 * 24);
@@ -142,7 +142,7 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void login() throws Exception {
+    void login() throws Exception {
         // without Authorization header, it should fail.
         mvc.perform(postJson("/auth/login", null))
             .andExpect(MockMvcResultMatchers.status().isBadRequest());
@@ -204,7 +204,7 @@ public class AuthControllerTest {
     }
 
     @Test
-    public void logout() throws Exception {
+    void logout() throws Exception {
         BDDMockito.given(ps.logoutUser(Mockito.anyLong(), Mockito.anyLong())).willReturn(true);
 
         // @TODO only authenticated users should be able to logout

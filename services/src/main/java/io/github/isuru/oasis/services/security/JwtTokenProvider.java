@@ -57,8 +57,6 @@ public class JwtTokenProvider {
             return tokenInfo;
         } catch (JwtException ex) {
             LOG.error("Invalid JWT signature! [Reason: " + ex.getMessage() + "]");
-        } catch (IllegalArgumentException ex) {
-            LOG.error("JWT claims string is empty.");
         }
         return null;
     }
