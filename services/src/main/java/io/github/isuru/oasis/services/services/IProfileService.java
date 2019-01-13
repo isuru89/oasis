@@ -1,6 +1,10 @@
 package io.github.isuru.oasis.services.services;
 
-import io.github.isuru.oasis.services.model.*;
+import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.TeamScope;
+import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.model.UserTeamScope;
 
 import java.util.List;
 

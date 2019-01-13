@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.api.dto;
+package io.github.isuru.oasis.services.dto.stats;
 
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 

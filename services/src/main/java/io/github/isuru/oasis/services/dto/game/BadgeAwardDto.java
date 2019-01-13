@@ -1,15 +1,24 @@
-package io.github.isuru.oasis.services.model;
+package io.github.isuru.oasis.services.dto.game;
 
 /**
  * @author iweerarathna
  */
-public class PointAwardDto {
+public class BadgeAwardDto {
 
+    private int badgeId;
+    private String subBadgeId;
     private long toUser;
-    private float amount;
     private String associatedEventId;
     private Long ts;
     private Integer gameId;
+
+    public Long getTs() {
+        return ts;
+    }
+
+    public void setTs(Long ts) {
+        this.ts = ts;
+    }
 
     public String getAssociatedEventId() {
         return associatedEventId;
@@ -27,20 +36,20 @@ public class PointAwardDto {
         this.toUser = toUser;
     }
 
-    public float getAmount() {
-        return amount;
+    public String getSubBadgeId() {
+        return subBadgeId;
     }
 
-    public void setAmount(float amount) {
-        this.amount = amount;
+    public void setSubBadgeId(String subBadgeId) {
+        this.subBadgeId = subBadgeId;
     }
 
-    public Long getTs() {
-        return ts;
+    public int getBadgeId() {
+        return badgeId;
     }
 
-    public void setTs(Long ts) {
-        this.ts = ts;
+    public void setBadgeId(int badgeId) {
+        this.badgeId = badgeId;
     }
 
     public Integer getGameId() {

@@ -1,11 +1,11 @@
 package io.github.isuru.oasis.services.controllers;
 
 import io.github.isuru.oasis.model.ShopItem;
-import io.github.isuru.oasis.services.api.dto.HeroDto;
 import io.github.isuru.oasis.services.dto.DefinitionAddResponse;
 import io.github.isuru.oasis.services.dto.ItemBuyReq;
 import io.github.isuru.oasis.services.dto.ItemShareReq;
 import io.github.isuru.oasis.services.dto.StatusResponse;
+import io.github.isuru.oasis.services.dto.defs.HeroDto;
 import io.github.isuru.oasis.services.security.CurrentUser;
 import io.github.isuru.oasis.services.security.UserPrincipal;
 import io.github.isuru.oasis.services.services.IMetaphorService;
@@ -14,7 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;

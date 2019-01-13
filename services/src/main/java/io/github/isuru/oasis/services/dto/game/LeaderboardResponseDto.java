@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.model;
+package io.github.isuru.oasis.services.dto.game;
 
 import java.util.List;
 

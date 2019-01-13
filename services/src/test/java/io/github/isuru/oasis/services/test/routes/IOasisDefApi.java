@@ -6,7 +6,7 @@ import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.KpiDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
-import io.github.isuru.oasis.services.api.dto.AddGameDto;
+import io.github.isuru.oasis.services.dto.defs.AddGameDto;
 import io.github.isuru.oasis.services.test.dto.AddResponse;
 import io.github.isuru.oasis.services.test.dto.BoolResponse;
 import retrofit2.Call;

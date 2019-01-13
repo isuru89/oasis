@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.services;
 
+import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.db.DbProperties;
 import io.github.isuru.oasis.model.db.IOasisDao;
-import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.model.db.OasisDbPool;
 import io.github.isuru.oasis.model.defs.BadgeDef;
 import io.github.isuru.oasis.model.defs.BadgesDef;
@@ -14,9 +14,9 @@ import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.MilestonesDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.defs.PointsDef;
-import io.github.isuru.oasis.services.services.IOasisApiService;
+import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.services.DefaultOasisApiService;
-import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import org.yaml.snakeyaml.Yaml;
 

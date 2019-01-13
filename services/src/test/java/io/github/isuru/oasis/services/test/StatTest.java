@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.services.test;
 
+import io.github.isuru.oasis.services.dto.stats.*;
 import io.github.isuru.oasis.services.services.IStatService;
-import io.github.isuru.oasis.services.api.dto.*;
 import io.github.isuru.oasis.services.model.PurchasedItem;
-import io.github.isuru.oasis.services.model.UserRankRecordDto;
+import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;

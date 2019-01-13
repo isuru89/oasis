@@ -1,11 +1,17 @@
 package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.model.ShopItem;
-import io.github.isuru.oasis.model.defs.*;
+import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
+import io.github.isuru.oasis.model.defs.KpiDef;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
+import io.github.isuru.oasis.model.defs.MilestoneDef;
+import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.StateDef;
+import io.github.isuru.oasis.services.dto.defs.AddGameDto;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IMetaphorService;
 import io.github.isuru.oasis.services.services.IOasisApiService;
-import io.github.isuru.oasis.services.api.dto.AddGameDto;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.UserRole;
 import spark.Spark;

@@ -5,7 +5,7 @@ import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.DataCache;
-import io.github.isuru.oasis.services.api.dto.HeroDto;
+import io.github.isuru.oasis.services.dto.defs.HeroDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.exception.OasisGameException;
 import io.github.isuru.oasis.services.model.UserProfile;

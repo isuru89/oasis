@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.model;
+package io.github.isuru.oasis.services.dto.game;
 
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 

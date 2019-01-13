@@ -3,7 +3,7 @@ package io.github.isuru.oasis.services.test;
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.model.defs.*;
 import io.github.isuru.oasis.services.services.IGameDefService;
-import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.services.IMetaphorService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;

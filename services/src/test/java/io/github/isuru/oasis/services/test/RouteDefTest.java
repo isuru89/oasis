@@ -2,8 +2,8 @@ package io.github.isuru.oasis.services.test;
 
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.KpiDef;
-import io.github.isuru.oasis.services.api.dto.AddGameDto;
-import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.dto.defs.AddGameDto;
+import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.test.dto.AddResponse;
 import io.github.isuru.oasis.services.test.dto.BoolResponse;
 import io.github.isuru.oasis.services.utils.Maps;

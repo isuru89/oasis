@@ -1,7 +1,6 @@
-package io.github.isuru.oasis.services.api.dto;
+package io.github.isuru.oasis.services.dto.defs;
 
 import io.github.isuru.oasis.model.defs.GameDef;
-import io.github.isuru.oasis.services.model.GameOptionsDto;
 
 /**
  * @author iweerarathna

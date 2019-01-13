@@ -1,13 +1,13 @@
 package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
+import io.github.isuru.oasis.model.defs.LeaderboardType;
+import io.github.isuru.oasis.services.dto.game.BadgeAwardDto;
+import io.github.isuru.oasis.services.dto.game.LeaderboardRequestDto;
+import io.github.isuru.oasis.services.dto.game.PointAwardDto;
+import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.services.IGameService;
 import io.github.isuru.oasis.services.services.IOasisApiService;
-import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.model.BadgeAwardDto;
-import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
-import io.github.isuru.oasis.services.model.PointAwardDto;
-import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.ValueMap;
 import spark.Request;

@@ -1,9 +1,9 @@
-package io.github.isuru.oasis.services.model;
+package io.github.isuru.oasis.services.dto.game;
 
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
-import io.github.isuru.oasis.model.utils.TimeUtils;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
+import io.github.isuru.oasis.model.utils.TimeUtils;
 
 import java.time.ZoneId;
 

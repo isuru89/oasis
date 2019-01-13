@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.api.dto;
+package io.github.isuru.oasis.services.dto.events;
 
 import java.util.List;
 import java.util.Map;

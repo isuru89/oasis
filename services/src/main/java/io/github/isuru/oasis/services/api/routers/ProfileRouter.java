@@ -1,11 +1,11 @@
 package io.github.isuru.oasis.services.api.routers;
 
-import io.github.isuru.oasis.services.services.IOasisApiService;
-import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.services.IOasisApiService;
+import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.utils.UserRole;

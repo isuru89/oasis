@@ -1,14 +1,27 @@
 package io.github.isuru.oasis.services.controllers;
 
-import io.github.isuru.oasis.model.defs.*;
-import io.github.isuru.oasis.services.api.dto.AddGameDto;
+import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
+import io.github.isuru.oasis.model.defs.GameDef;
+import io.github.isuru.oasis.model.defs.KpiDef;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
+import io.github.isuru.oasis.model.defs.MilestoneDef;
+import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.StateDef;
 import io.github.isuru.oasis.services.dto.DefinitionAddResponse;
 import io.github.isuru.oasis.services.dto.DeleteResponse;
+import io.github.isuru.oasis.services.dto.defs.AddGameDto;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 

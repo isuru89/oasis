@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.model.ShopItem;
-import io.github.isuru.oasis.services.api.dto.HeroDto;
+import io.github.isuru.oasis.services.dto.defs.HeroDto;
 
 import java.util.List;
 

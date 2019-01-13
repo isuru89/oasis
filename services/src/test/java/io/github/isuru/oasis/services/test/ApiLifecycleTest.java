@@ -10,7 +10,7 @@ import io.github.isuru.oasis.model.defs.MilestonesDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.defs.PointsDef;
-import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.services.LifeCycleServiceImpl;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;

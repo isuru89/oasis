@@ -1,7 +1,14 @@
 package io.github.isuru.oasis.services.services;
 
-import io.github.isuru.oasis.model.defs.*;
-import io.github.isuru.oasis.services.model.GameOptionsDto;
+import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
+import io.github.isuru.oasis.model.defs.GameDef;
+import io.github.isuru.oasis.model.defs.KpiDef;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
+import io.github.isuru.oasis.model.defs.MilestoneDef;
+import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.StateDef;
+import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 
 import java.util.List;
 import java.util.Map;

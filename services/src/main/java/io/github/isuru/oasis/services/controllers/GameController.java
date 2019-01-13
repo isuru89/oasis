@@ -1,10 +1,10 @@
 package io.github.isuru.oasis.services.controllers;
 
 import io.github.isuru.oasis.model.defs.LeaderboardType;
-import io.github.isuru.oasis.services.model.BadgeAwardDto;
-import io.github.isuru.oasis.services.model.LeaderboardRequestDto;
-import io.github.isuru.oasis.services.model.PointAwardDto;
-import io.github.isuru.oasis.services.model.UserRankRecordDto;
+import io.github.isuru.oasis.services.dto.game.BadgeAwardDto;
+import io.github.isuru.oasis.services.dto.game.LeaderboardRequestDto;
+import io.github.isuru.oasis.services.dto.game.PointAwardDto;
+import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IGameService;
 import io.github.isuru.oasis.services.utils.UserRole;
@@ -12,7 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
