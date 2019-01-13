@@ -93,11 +93,11 @@ class UserPrincipalTest {
             profile.setPassword("whoami");
 
             UserTeam team = new UserTeam();
-            team.setUserId((int) profile.getId());
+            team.setUserId(profile.getId());
             team.setTeamId(500);
             team.setRoleId(UserRole.CURATOR);
             team.setApproved(true);
-            team.setId(10001);
+            team.setId(10001L);
             UserPrincipal up = UserPrincipal.create(profile, team);
 
             Assertions.assertEquals(102L, (long) up.getId());
@@ -131,11 +131,11 @@ class UserPrincipalTest {
             profile.setPassword("iamadmin");
 
             UserTeam team = new UserTeam();
-            team.setUserId((int) profile.getId());
+            team.setUserId(profile.getId());
             team.setTeamId(555);
             team.setRoleId(UserRole.ADMIN);
             team.setApproved(false);
-            team.setId(10002);
+            team.setId(10002L);
             UserPrincipal up = UserPrincipal.create(profile, team);
 
             Assertions.assertEquals(103L, (long) up.getId());

@@ -5,8 +5,8 @@ package io.github.isuru.oasis.services.model;
  */
 public class UserTeam {
 
-    private Integer id;
-    private Integer userId;
+    private Long id;
+    private Long userId;
     private Integer teamId;
     private Integer roleId;
     private Integer scopeId;
@@ -14,11 +14,11 @@ public class UserTeam {
     private Long deallocatedTime;
     private boolean approved;
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -46,11 +46,11 @@ public class UserTeam {
         this.roleId = roleId;
     }
 
-    public Integer getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

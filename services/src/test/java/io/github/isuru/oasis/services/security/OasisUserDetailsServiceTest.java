@@ -99,7 +99,7 @@ class OasisUserDetailsServiceTest {
         UserTeam team = new UserTeam();
         team.setRoleId(role);
         team.setTeamId(id);
-        team.setUserId((int) profile.getId());
+        team.setUserId(profile.getId());
         return team;
     }
 

@@ -1,14 +1,11 @@
 package io.github.isuru.oasis.services.utils;
 
-import org.apache.commons.io.IOUtils;
 import sun.security.rsa.RSAPrivateCrtKeyImpl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 
 /**
