@@ -3,7 +3,7 @@ package io.github.isuru.oasis.services.test;
 import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.utils.EventSourceToken;
+import io.github.isuru.oasis.services.model.EventSourceToken;
 import io.github.isuru.oasis.services.utils.Maps;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;

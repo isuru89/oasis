@@ -12,7 +12,7 @@ import io.github.isuru.oasis.services.security.JwtTokenProvider;
 import io.github.isuru.oasis.services.security.OasisAuthenticator;
 import io.github.isuru.oasis.services.security.UserPrincipal;
 import io.github.isuru.oasis.services.services.IProfileService;
-import io.github.isuru.oasis.services.utils.Checks;
+import io.github.isuru.oasis.services.utils.Commons;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,7 +139,7 @@ public class AuthController {
     }
 
     private Pair<String, String> getBasicAuthPair(String authHeader) {
-        if (!Checks.isNullOrEmpty(authHeader)) {
+        if (!Commons.isNullOrEmpty(authHeader)) {
             if (authHeader.startsWith("Basic")) {
                 try {
                     String token = authHeader.substring("Basic".length()).trim();

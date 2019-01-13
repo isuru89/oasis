@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.services.services;
 
-import io.github.isuru.oasis.services.utils.EventSourceToken;
+import io.github.isuru.oasis.services.model.EventSourceToken;
 
 import java.util.List;
 import java.util.Map;

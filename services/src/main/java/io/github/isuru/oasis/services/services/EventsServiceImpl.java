@@ -8,6 +8,7 @@ import io.github.isuru.oasis.model.utils.ICacheProxy;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.model.EventSourceToken;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
@@ -154,13 +155,13 @@ public class EventsServiceImpl implements IEventsService {
             }
         } else {
             // make sluggist source name, if empty
-            if (Checks.isNullOrEmpty(srcName)) {
+            if (Commons.isNullOrEmpty(srcName)) {
                 srcName = SLUGIFY.slugify(sourceToken.getDisplayName());
             }
         }
 
-        Pair<String, Integer> tokenNoncePair = AuthUtils.get().issueSourceToken(sourceToken);
-        Pair<PrivateKey, PublicKey> key = AuthUtils.generateRSAKey(srcName);
+        Pair<String, Integer> tokenNoncePair = SecurityUtils.issueSourceToken(sourceToken);
+        Pair<PrivateKey, PublicKey> key = SecurityUtils.generateRSAKey(srcName);
         long id = dao.executeInsert(Q.EVENTS.ADD_EVENT_SOURCE,
                 Maps.create()
                     .put("token", tokenNoncePair.getValue0())

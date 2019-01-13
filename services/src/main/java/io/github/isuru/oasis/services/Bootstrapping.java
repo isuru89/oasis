@@ -9,7 +9,7 @@ import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.services.*;
 import io.github.isuru.oasis.services.model.*;
-import io.github.isuru.oasis.services.utils.EventSourceToken;
+import io.github.isuru.oasis.services.model.EventSourceToken;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.UserRole;
 import org.apache.commons.lang3.BooleanUtils;

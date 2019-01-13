@@ -5,16 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * @author iweerarathna
  */
 public class RUtils {
-
-    public static int generateNonce() {
-        return new Random(System.currentTimeMillis()).nextInt(999999) + 1;
-    }
 
     public static boolean isNullOrEmpty(Map<?, ?> map) {
         return map == null || map.isEmpty();

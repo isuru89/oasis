@@ -5,7 +5,7 @@ import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.utils.ICacheProxy;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.utils.EventSourceToken;
+import io.github.isuru.oasis.services.model.EventSourceToken;
 import io.github.isuru.oasis.services.utils.IGameController;
 import io.github.isuru.oasis.services.utils.cache.InMemoryCache;
 import org.junit.Assert;

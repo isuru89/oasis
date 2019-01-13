@@ -9,7 +9,7 @@ import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IProfileService;
-import io.github.isuru.oasis.services.utils.EventSourceToken;
+import io.github.isuru.oasis.services.model.EventSourceToken;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

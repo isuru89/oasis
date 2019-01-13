@@ -7,8 +7,9 @@ import io.github.isuru.oasis.services.api.dto.EventPushDto;
 import io.github.isuru.oasis.services.dto.StatusResponse;
 import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.utils.BodyRequestWrapper;
-import io.github.isuru.oasis.services.utils.EventSourceToken;
+import io.github.isuru.oasis.services.model.EventSourceToken;
 import io.github.isuru.oasis.services.utils.HmacUtils;
+import io.github.isuru.oasis.services.utils.SecurityUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -61,7 +62,7 @@ public class EventsController {
 
         BodyRequestWrapper requestWrapper = new BodyRequestWrapper(request);
         byte[] payload = requestWrapper.getPayload();
-        HmacUtils.verifyIntegrity(sourceToken, algorithm, digest, payload);
+        SecurityUtils.verifyIntegrity(sourceToken, algorithm, digest, payload);
 
         EventPushDto eventData = jsonMapper.readValue(payload, EventPushDto.class);
         Map<String, Object> meta = eventData.getMeta() == null ? new HashMap<>() : eventData.getMeta();

@@ -11,6 +11,7 @@ import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.utils.Checks;
+import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.RUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -366,21 +367,21 @@ public class GameDefServiceImpl implements IGameDefService {
         Checks.nonNullOrEmpty(challengeDef.getDisplayName(), "displayName");
 
         // map user and team ids, if specified
-        if (!Checks.isNullOrEmpty(challengeDef.getForUser())) {
+        if (!Commons.isNullOrEmpty(challengeDef.getForUser())) {
             UserProfile profile = profileService.readUserProfile(challengeDef.getForUser());
             if (profile == null) {
                 throw new InputValidationException("No user is found by email address " + challengeDef.getForUser() + "!");
             }
             challengeDef.setForUserId(profile.getId());
         }
-        if (!Checks.isNullOrEmpty(challengeDef.getForTeam())) {
+        if (!Commons.isNullOrEmpty(challengeDef.getForTeam())) {
             TeamProfile teamByName = profileService.findTeamByName(challengeDef.getForTeam());
             if (teamByName == null) {
                 throw new InputValidationException("No team is found by name '" + challengeDef.getForTeam() + "'!");
             }
             challengeDef.setForTeamId(teamByName.getId().longValue());
         }
-        if (!Checks.isNullOrEmpty(challengeDef.getForTeamScope())) {
+        if (!Commons.isNullOrEmpty(challengeDef.getForTeamScope())) {
             TeamScope scope = profileService.readTeamScope(challengeDef.getForTeamScope());
             if (scope == null) {
                 throw new InputValidationException("No team scope is found by name '"

@@ -9,6 +9,7 @@ import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Checks;
+import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,8 +119,8 @@ public class GameServiceImpl implements IGameService {
         Map<String, Object> templateData = Maps.create()
                 .put("hasUser", ServiceUtils.isValid(request.getForUser()))
                 .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
-                .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
-                .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
+                .put("hasInclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getRuleIds()))
+                .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
                 .put("isTopN", ServiceUtils.isValid(request.getTopN()))
                 .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
                 .build();
@@ -154,8 +155,8 @@ public class GameServiceImpl implements IGameService {
                 .put("hasTeam", true)
                 .put("hasUser", ServiceUtils.isValid(request.getForUser()))
                 .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
-                .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
-                .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
+                .put("hasInclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getRuleIds()))
+                .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
                 .put("isTopN", ServiceUtils.isValid(request.getTopN()))
                 .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
                 .build();
@@ -193,8 +194,8 @@ public class GameServiceImpl implements IGameService {
                 .put("hasTeam", false)
                 .put("hasUser", ServiceUtils.isValid(request.getForUser()))
                 .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
-                .put("hasInclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getRuleIds()))
-                .put("hasExclusions", ldef != null && !Checks.isNullOrEmpty(ldef.getExcludeRuleIds()))
+                .put("hasInclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getRuleIds()))
+                .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
                 .put("isTopN", ServiceUtils.isValid(request.getTopN()))
                 .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
                 .build();

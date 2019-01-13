@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.model.Constants;
+import io.github.isuru.oasis.services.model.EventSourceToken;
 import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.api.dto.EventPushDto;
@@ -55,7 +56,7 @@ public class EventsRouter extends BaseRouters {
         Optional<EventSourceToken> appIdOpt = es.readSourceByToken(ids[0]);
         EventSourceToken sourceToken = appIdOpt.orElseThrow((Supplier<Exception>)
                 () -> new ApiAuthException("Event source token is not recognized by the Oasis!"));
-        AuthUtils.verifyIntegrity(sourceToken, ids[1], body);
+        SecurityUtils.verifyIntegrity(sourceToken, ids[1], body);
 
         EventPushDto eventPushDto = bodyAs(req, EventPushDto.class);
         Map<String, Object> meta = eventPushDto.getMeta() == null ? new HashMap<>() : eventPushDto.getMeta();

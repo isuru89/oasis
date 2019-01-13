@@ -1,11 +1,10 @@
-package io.github.isuru.oasis.services.utils;
+package io.github.isuru.oasis.services.model;
 
-import sun.security.rsa.RSAPrivateCrtKeyImpl;
+import io.github.isuru.oasis.services.utils.SecurityUtils;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.InvalidKeyException;
 import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.Timestamp;
 
 /**
@@ -34,12 +33,12 @@ public class EventSourceToken {
             return secretPrivateKey;
         }
 
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            secretPrivateKey = RSAPrivateCrtKeyImpl.newKey(secretKey);
-            return secretPrivateKey;
-        } catch (InvalidKeyException e) {
-            throw new IOException(e.getMessage(), e);
+        try {
+            secretPrivateKey = SecurityUtils.convertToPrivateKey(secretKey);
+        } catch (InvalidKeySpecException e) {
+            throw new IOException("Corrupted private key in token [" + token + "]!", e);
         }
+        return secretPrivateKey;
     }
 
     public byte[] getSecretKey() {

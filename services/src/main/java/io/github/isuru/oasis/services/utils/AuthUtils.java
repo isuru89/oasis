@@ -2,31 +2,26 @@ package io.github.isuru.oasis.services.utils;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.model.TokenInfo;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.MessageDigest;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Formatter;
 import java.util.Hashtable;
 
 /**
@@ -35,8 +30,7 @@ import java.util.Hashtable;
 public final class AuthUtils {
 
     private static final String OASIS_ISSUER = "oasis";
-    private static final String HMAC_ALGORITHM = "HmacSHA1";
-    private static final int RSA_KEY_SIZE = 2048;
+
 
     private MessageDigest digest;
 
@@ -50,39 +44,6 @@ public final class AuthUtils {
 
     private AuthUtils() {}
 
-    private static String toHexString(byte[] data) {
-        Formatter result = new Formatter();
-        for (byte b : data) {
-            result.format("%02x", b);
-        }
-        return result.toString();
-    }
-
-    public static void verifyIntegrity(EventSourceToken token, String hash, String body) throws ApiAuthException {
-        try {
-            String hmac = generateHMAC(body, token.getSecretPrivateKey());
-            if (!hmac.equals(hash)) {
-                throw new IOException("Integrity of the event has been compromised!");
-            }
-        } catch (NoSuchAlgorithmException | IOException | InvalidKeyException e) {
-            throw new ApiAuthException("Unable to verify integrity of the event!", e);
-        }
-    }
-
-    public static String generateHMAC(String data, PrivateKey key) throws NoSuchAlgorithmException, InvalidKeyException {
-        SecretKeySpec signingKey = new SecretKeySpec(key.getEncoded(), HMAC_ALGORITHM);
-        Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-        mac.init(signingKey);
-        return toHexString(mac.doFinal(data.getBytes()));
-    }
-
-    public static Pair<PrivateKey, PublicKey> generateRSAKey(String tokenSourceName) throws NoSuchAlgorithmException {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-        SecureRandom secureRandom = new SecureRandom(tokenSourceName.getBytes());
-        keyGen.initialize(RSA_KEY_SIZE, secureRandom);
-        KeyPair keyPair = keyGen.generateKeyPair();
-        return Pair.of(keyPair.getPrivate(), keyPair.getPublic());
-    }
 
     public void init(Configs configs) throws Exception {
         this.configs = configs;
@@ -139,19 +100,7 @@ public final class AuthUtils {
         return expiryDate;
     }
 
-    public synchronized Pair<String, Integer> issueSourceToken(EventSourceToken token) throws IOException {
-        int nonce = RUtils.generateNonce();
-        String text = String.format("%s-%d-%d", token.getDisplayName(), System.currentTimeMillis(), nonce);
-        if (digest == null) {
-            try {
-                digest = MessageDigest.getInstance("SHA-1");
-            } catch (NoSuchAlgorithmException e) {
-                throw new IOException("Unable to generate a token for event source!", e);
-            }
-        }
-        byte[] digest = this.digest.digest(text.getBytes(StandardCharsets.UTF_8));
-        return Pair.of(byteArrayToHexString(digest), nonce);
-    }
+
 
     private static String byteArrayToHexString(byte[] b) {
         StringBuilder result = new StringBuilder();

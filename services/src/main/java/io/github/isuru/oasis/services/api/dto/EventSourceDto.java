@@ -1,6 +1,6 @@
 package io.github.isuru.oasis.services.api.dto;
 
-import io.github.isuru.oasis.services.utils.EventSourceToken;
+import io.github.isuru.oasis.services.model.EventSourceToken;
 
 public class EventSourceDto {
 
