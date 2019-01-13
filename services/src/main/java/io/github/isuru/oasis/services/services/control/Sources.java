@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.utils.local;
+package io.github.isuru.oasis.services.services.control;
 
 import io.github.isuru.oasis.model.Event;
 

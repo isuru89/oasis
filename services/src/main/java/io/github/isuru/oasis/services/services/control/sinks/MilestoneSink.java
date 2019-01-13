@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.utils.local.sinks;
+package io.github.isuru.oasis.services.services.control.sinks;
 
 import io.github.isuru.oasis.injector.ConsumerUtils;
 import io.github.isuru.oasis.injector.model.MilestoneModel;

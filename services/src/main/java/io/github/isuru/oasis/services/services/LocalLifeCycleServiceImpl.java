@@ -4,19 +4,21 @@ import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.services.control.LocalScheduler;
 import io.github.isuru.oasis.services.utils.Checks;
-import io.github.isuru.oasis.services.utils.IGameController;
+import org.springframework.stereotype.Service;
 
 /**
  * @author iweerarathna
  */
+@Service("localLifecycleService")
 public class LocalLifeCycleServiceImpl implements ILifecycleService {
 
-    private IGameController gameController;
+    private LocalScheduler gameController;
     private IGameDefService gameDefService;
     private Configs configs;
 
-    public LocalLifeCycleServiceImpl(IGameController gameController, IGameDefService gameDefService) {
+    public LocalLifeCycleServiceImpl(LocalScheduler gameController, IGameDefService gameDefService) {
         this.gameController = gameController;
         this.gameDefService = gameDefService;
     }

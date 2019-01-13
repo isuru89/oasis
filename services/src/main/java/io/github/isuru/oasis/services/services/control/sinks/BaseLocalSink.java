@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.utils.local.sinks;
+package io.github.isuru.oasis.services.services.control.sinks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.model.db.IOasisDao;

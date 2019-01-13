@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.utils.local;
+package io.github.isuru.oasis.services.services.control;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.game.persist.OasisSink;
@@ -11,6 +11,8 @@ import io.github.isuru.oasis.model.handlers.NotificationUtils;
 import io.github.isuru.oasis.services.utils.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author iweerarathna
  */
+@Component
 public class LocalChallengeProcessor implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalChallengeProcessor.class);
@@ -33,8 +36,11 @@ public class LocalChallengeProcessor implements Runnable {
     private final Map<Long, ChallengeDef> challengeDefMap = new ConcurrentHashMap<>();
     private final Map<Long, OasisSink> sinkMap = new ConcurrentHashMap<>();
     private boolean stop = false;
+
+
     private final IOasisDao dao;
 
+    @Autowired
     public LocalChallengeProcessor(IOasisDao dao) {
         this.dao = dao;
     }

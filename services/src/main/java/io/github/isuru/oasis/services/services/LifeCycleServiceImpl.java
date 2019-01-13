@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * @author iweerarathna
  */
-@Service("lifecycleService")
+@Service("remoteLifecycleService")
 public class LifeCycleServiceImpl implements ILifecycleService  {
 
     @Autowired

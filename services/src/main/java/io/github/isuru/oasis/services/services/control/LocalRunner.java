@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.utils.local;
+package io.github.isuru.oasis.services.services.control;
 
 import io.github.isuru.oasis.game.Main;
 import io.github.isuru.oasis.game.persist.OasisSink;
@@ -9,8 +9,8 @@ import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.model.events.JsonEvent;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.DataCache;
-import io.github.isuru.oasis.services.utils.local.sinks.DbSink;
-import io.github.isuru.oasis.services.utils.local.sinks.LocalSinks;
+import io.github.isuru.oasis.services.services.control.sinks.DbSink;
+import io.github.isuru.oasis.services.services.control.sinks.LocalSinks;
 
 import java.util.Map;
 import java.util.Properties;
@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author iweerarathna
  */
-public class LocalRunner implements Runnable {
+class LocalRunner implements Runnable {
 
     private Configs appConfigs;
     private final long gameId;

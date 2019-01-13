@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.controllers;
 
 import io.github.isuru.oasis.services.dto.StatusResponse;
 import io.github.isuru.oasis.services.services.ILifecycleService;
+import io.github.isuru.oasis.services.services.managers.LifecycleImplHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -14,10 +15,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/control")
 public class ControlController {
 
-    @Autowired
     private ILifecycleService lifecycleService;
 
-
+    @Autowired
+    public ControlController(LifecycleImplHolder lifecycleImplHolder) {
+        this.lifecycleService = lifecycleImplHolder.get();
+    }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/game/{gameId}/start")

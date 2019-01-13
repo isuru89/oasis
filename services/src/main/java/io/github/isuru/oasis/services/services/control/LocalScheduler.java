@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.utils.local;
+package io.github.isuru.oasis.services.services.control;
 
 import io.github.isuru.oasis.game.persist.OasisSink;
 import io.github.isuru.oasis.model.configs.Configs;
@@ -7,7 +7,9 @@ import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.utils.IGameController;
+import io.github.isuru.oasis.services.model.IGameController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +19,7 @@ import java.util.concurrent.Executors;
 /**
  * @author iweerarathna
  */
+@Component("schedulerLocal")
 public class LocalScheduler implements IGameController {
 
     private final ExecutorService pool = Executors.newCachedThreadPool();
@@ -24,7 +27,10 @@ public class LocalScheduler implements IGameController {
     private final Map<Long, LocalRunner> runners = new ConcurrentHashMap<>();
     private final LocalChallengeProcessor challengeProcessor;
 
+    @Autowired
     private final IOasisDao dao;
+
+    @Autowired
     private DataCache dataCache;
 
     @Override

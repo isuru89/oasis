@@ -6,8 +6,8 @@ import io.github.isuru.oasis.model.utils.ICacheProxy;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.EventSourceToken;
-import io.github.isuru.oasis.services.utils.IGameController;
-import io.github.isuru.oasis.services.utils.cache.InMemoryCache;
+import io.github.isuru.oasis.services.model.IGameController;
+import io.github.isuru.oasis.services.services.caches.InMemoryCache;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +39,7 @@ public class EventServiceTest {
 
         @Bean
         public ICacheProxy createMemCache() {
-            return new InMemoryCache(300);
+            return new InMemoryCache();
         }
 
     }

@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.utils.local;
+package io.github.isuru.oasis.services.services.control;
 
 import io.github.isuru.oasis.model.Event;
 
@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * @author iweerarathna
  */
-public class LocalEndEvent implements Event {
+class LocalEndEvent implements Event {
     @Override
     public Map<String, Object> getAllFieldValues() {
         return null;

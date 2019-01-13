@@ -10,6 +10,16 @@ import org.springframework.context.annotation.PropertySource;
 @ConfigurationProperties(prefix = "oasis")
 public class OasisConfigurations {
 
+    @Value("${mode:local}")
+    private String mode;
+
+    @Value("${cache.impl:memory}")
+    private String cacheImpl;
+    @Value("${cache.redis.url:localhost}")
+    private String cacheRedisHost;
+    @Value("${cache.memory.size:1000}")
+    private int cacheMemorySize;
+
     private String defaultAdminPassword;
     private String defaultCuratorPassword;
     private String defaultPlayerPassword;
@@ -27,6 +37,38 @@ public class OasisConfigurations {
     private String flinkURL;
     @Value("${flinkParallelism:1}")
     private int flinkParallelism = 1;
+
+    public int getCacheMemorySize() {
+        return cacheMemorySize;
+    }
+
+    public void setCacheMemorySize(int cacheMemorySize) {
+        this.cacheMemorySize = cacheMemorySize;
+    }
+
+    public String getCacheRedisHost() {
+        return cacheRedisHost;
+    }
+
+    public void setCacheRedisHost(String cacheRedisHost) {
+        this.cacheRedisHost = cacheRedisHost;
+    }
+
+    public String getCacheImpl() {
+        return cacheImpl;
+    }
+
+    public void setCacheImpl(String cacheImpl) {
+        this.cacheImpl = cacheImpl;
+    }
+
+    public String getMode() {
+        return mode;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
+    }
 
     public String getAuthJwtSecret() {
         return authJwtSecret;

@@ -17,6 +17,7 @@ import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.ILifecycleService;
 import io.github.isuru.oasis.services.services.IProfileService;
+import io.github.isuru.oasis.services.services.managers.LifecycleImplHolder;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.UserRole;
 import org.apache.commons.lang3.BooleanUtils;
@@ -46,7 +47,7 @@ public class Bootstrapping {
     private IGameDefService gameDefService;
 
     @Autowired
-    private ILifecycleService lifecycleService;
+    private LifecycleImplHolder lifecycleImplHolder;
 
     @Autowired
     private IOasisDao dao;
@@ -151,6 +152,8 @@ public class Bootstrapping {
             LOG.info("  - No active game exists. Nothing will be started.");
             return;
         }
+
+        ILifecycleService lifecycleService = lifecycleImplHolder.get();
 
         // resume game first...
         List<Integer> resumedGameIds = new LinkedList<>();

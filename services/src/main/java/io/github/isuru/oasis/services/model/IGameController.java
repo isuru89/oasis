@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.utils;
+package io.github.isuru.oasis.services.model;
 
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.defs.ChallengeDef;

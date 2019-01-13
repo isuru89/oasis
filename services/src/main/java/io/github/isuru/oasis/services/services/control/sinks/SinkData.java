@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.utils.local.sinks;
+package io.github.isuru.oasis.services.services.control.sinks;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -12,10 +12,11 @@ import io.github.isuru.oasis.services.model.EventSourceToken;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.services.managers.CacheProxyHolder;
+import io.github.isuru.oasis.services.services.managers.GameControllerHolder;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.EventSources;
-import io.github.isuru.oasis.services.utils.IGameController;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.SecurityUtils;
 import org.slf4j.Logger;
@@ -42,10 +43,10 @@ public class EventsServiceImpl implements IEventsService {
     private static final Slugify SLUGIFY = new Slugify();
 
     @Autowired
-    private ICacheProxy cacheProxy;
+    private CacheProxyHolder cacheProxyHolder;
 
     @Autowired
-    private IGameController gameController;
+    private GameControllerHolder gameControllerHolder;
 
     @Autowired
     private IOasisDao dao;
@@ -122,7 +123,7 @@ public class EventsServiceImpl implements IEventsService {
             }
         }
 
-        gameController.submitEvent(gid, event);
+        gameControllerHolder.get().submitEvent(gid, event);
     }
 
     @Override
@@ -226,6 +227,7 @@ public class EventsServiceImpl implements IEventsService {
     }
 
     private long resolveUser(String email) throws Exception {
+        ICacheProxy cacheProxy = cacheProxyHolder.get();
         String key = "user.email." + email;
         Optional<String> uidOpt = cacheProxy.get(key);
         if (uidOpt.isPresent()) {
