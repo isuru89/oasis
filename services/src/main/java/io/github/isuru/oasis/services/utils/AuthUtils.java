@@ -76,9 +76,9 @@ public final class AuthUtils {
         return toHexString(mac.doFinal(data.getBytes()));
     }
 
-    public static Pair<PrivateKey, PublicKey> generateRSAKey(EventSourceToken sourceToken) throws NoSuchAlgorithmException {
+    public static Pair<PrivateKey, PublicKey> generateRSAKey(String tokenSourceName) throws NoSuchAlgorithmException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-        SecureRandom secureRandom = new SecureRandom(sourceToken.getSourceName().getBytes());
+        SecureRandom secureRandom = new SecureRandom(tokenSourceName.getBytes());
         keyGen.initialize(RSA_KEY_SIZE, secureRandom);
         KeyPair keyPair = keyGen.generateKeyPair();
         return Pair.of(keyPair.getPrivate(), keyPair.getPublic());

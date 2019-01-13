@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.services;
 
+import com.github.slugify.Slugify;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.db.IOasisDao;
@@ -31,6 +32,8 @@ import java.util.Optional;
 public class EventsServiceImpl implements IEventsService {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventsServiceImpl.class);
+
+    private static final Slugify SLUGIFY = new Slugify();
 
     @Autowired
     private ICacheProxy cacheProxy;
@@ -141,21 +144,28 @@ public class EventsServiceImpl implements IEventsService {
     public EventSourceToken addEventSource(EventSourceToken sourceToken) throws Exception {
         Checks.nonNullOrEmpty(sourceToken.getDisplayName(), "displayName");
 
+        String srcName = sourceToken.getSourceName();
         if (sourceToken.isInternal()) {
             // check for existing internal sources
+            srcName = EventSourceToken.INTERNAL_NAME;
             Optional<EventSourceToken> eventSourceToken = readInternalSourceToken();
             if (eventSourceToken.isPresent()) {
                 throw new InputValidationException("Only one internal token can exist in the game!");
             }
+        } else {
+            // make sluggist source name, if empty
+            if (Checks.isNullOrEmpty(srcName)) {
+                srcName = SLUGIFY.slugify(sourceToken.getDisplayName());
+            }
         }
 
         Pair<String, Integer> tokenNoncePair = AuthUtils.get().issueSourceToken(sourceToken);
-        Pair<PrivateKey, PublicKey> key = AuthUtils.generateRSAKey(sourceToken);
+        Pair<PrivateKey, PublicKey> key = AuthUtils.generateRSAKey(srcName);
         long id = dao.executeInsert(Q.EVENTS.ADD_EVENT_SOURCE,
                 Maps.create()
                     .put("token", tokenNoncePair.getValue0())
                     .put("nonce", tokenNoncePair.getValue1())
-                    .put("sourceName", EventSourceToken.INTERNAL_NAME)
+                    .put("sourceName", srcName)
                     .put("keySecret", key.getValue0().getEncoded())
                     .put("keyPublic", key.getValue1().getEncoded())
                     .put("displayName", sourceToken.getDisplayName())

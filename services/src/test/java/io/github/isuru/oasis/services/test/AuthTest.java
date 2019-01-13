@@ -19,7 +19,7 @@ class AuthTest {
         token.setSourceName("jira");
         token.setDisplayName("Jira Source");
 
-        Pair<PrivateKey, PublicKey> keyPair = AuthUtils.generateRSAKey(token);
+        Pair<PrivateKey, PublicKey> keyPair = AuthUtils.generateRSAKey(token.getSourceName());
         String hash = AuthUtils.generateHMAC("{ name: 'Isuru', age: 23 }", keyPair.getValue0());
         Assertions.assertNotNull(hash);
         System.out.println(hash);
