@@ -17,7 +17,7 @@ public class OasisConfigurations {
     @Value("${mode:local}")
     private String mode;
 
-    @Value("${dispatcherImpl:local}")
+    @Value("${dispatcherImpl:rabbit}")
     private String dispatcherImpl;
 
     private String storageDir;
@@ -36,6 +36,8 @@ public class OasisConfigurations {
 
     @NotNull
     private AuthConfigs auth;
+
+    private RabbitConfigurations rabbit;
 
     public static class AuthConfigs {
         private String publicKeyPath;
@@ -185,6 +187,22 @@ public class OasisConfigurations {
         public void setMaximumPoolSize(int maximumPoolSize) {
             this.maximumPoolSize = maximumPoolSize;
         }
+    }
+
+    public OasisConfigurations() {
+        // by following my stackoverflow question
+        // https://stackoverflow.com/questions/54180163/spring-boot-initialize-new-instance-for-nested-configuration-binding-when-there
+        // I have to initialize them manually by myself
+        rabbit = new RabbitConfigurations();
+        rabbit.initToDefault();
+    }
+
+    public RabbitConfigurations getRabbit() {
+        return rabbit;
+    }
+
+    public void setRabbit(RabbitConfigurations rabbit) {
+        this.rabbit = rabbit;
     }
 
     public CacheConfigs getCache() {

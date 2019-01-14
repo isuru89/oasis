@@ -1,11 +1,9 @@
 package io.github.isuru.oasis.services.configs;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "oasis.rabbit")
 public class RabbitConfigurations {
 
     @Value("${host:localhost}")
@@ -31,6 +29,17 @@ public class RabbitConfigurations {
 
     @Value("${sourceExchangeDurable:true}")
     private boolean sourceExchangeDurable;
+
+    void initToDefault() {
+        host = "localhost";
+        username = "guest";
+        password = "guest";
+        port = 5672;
+        virtualHost = "oasis";
+        sourceExchangeName = "oasis.event.exchange";
+        sourceExchangeType = "fanout";
+        sourceExchangeDurable = true;
+    }
 
     public String getHost() {
         return host;
