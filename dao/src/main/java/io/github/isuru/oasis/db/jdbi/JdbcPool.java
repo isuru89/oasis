@@ -3,6 +3,8 @@ package io.github.isuru.oasis.db.jdbi;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.isuru.oasis.model.db.DbProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -11,6 +13,8 @@ import java.util.Properties;
  * @author iweerarathna
  */
 class JdbcPool {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JdbcPool.class);
 
     static DataSource createDataSource(DbProperties properties) {
         HikariConfig config = new HikariConfig();
@@ -38,7 +42,7 @@ class JdbcPool {
                 dataSource = new HikariDataSource(config);
                 return dataSource;
             } catch (Throwable e) {
-                e.printStackTrace();
+                LOG.warn("Failed to connect to the db using Hikari pool!", e);
             }
             retry--;
             try {

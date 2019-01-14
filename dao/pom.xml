@@ -44,6 +44,12 @@
             <!--<artifactId>mariadb-java-client</artifactId>-->
             <!--<version>2.2.6</version>-->
         <!--</dependency>-->
+        <dependency>
+            <groupId>com.google.jimfs</groupId>
+            <artifactId>jimfs</artifactId>
+            <version>1.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
