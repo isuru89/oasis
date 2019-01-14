@@ -19,7 +19,7 @@ public class InMemoryCache implements ICacheProxy {
 
     @Override
     public void init() {
-        this.cache = new LRUCache<>(Math.max(configurations.getCacheMemorySize(), 100));
+        this.cache = new LRUCache<>(Math.max(configurations.getCache().getMemorySize(), 100));
     }
 
     @Override

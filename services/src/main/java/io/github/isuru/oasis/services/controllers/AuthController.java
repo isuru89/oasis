@@ -117,17 +117,17 @@ public class AuthController {
             boolean success = false;
             if (DefaultEntities.DEF_ADMIN_USER.equals(username)) {
                 // admin
-                if (password.equals(oasisConfigurations.getDefaultAdminPassword())) {
+                if (password.equals(oasisConfigurations.getAuth().getDefaultAdminPassword())) {
                     success = true;
                 }
             } else if (DefaultEntities.DEF_CURATOR_USER.equals(username)) {
                 // curator
-                if (password.equals(oasisConfigurations.getDefaultCuratorPassword())) {
+                if (password.equals(oasisConfigurations.getAuth().getDefaultCuratorPassword())) {
                     success = true;
                 }
             } else {
                 // player
-                if (password.equals(oasisConfigurations.getDefaultPlayerPassword())) {
+                if (password.equals(oasisConfigurations.getAuth().getDefaultPlayerPassword())) {
                     success = true;
                 }
             }

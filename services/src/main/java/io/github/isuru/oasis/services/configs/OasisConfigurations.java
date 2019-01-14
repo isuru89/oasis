@@ -4,62 +4,219 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotNull;
 
 @Configuration
-@PropertySource("file:./configs/oasis.properties")
+@PropertySource("file:./configs/application.properties")
 @ConfigurationProperties(prefix = "oasis")
+@Validated
 public class OasisConfigurations {
 
     @Value("${mode:local}")
     private String mode;
 
-    @Value("${cache.impl:memory}")
-    private String cacheImpl;
-    @Value("${cache.redis.url:localhost}")
-    private String cacheRedisHost;
-    @Value("${cache.memory.size:1000}")
-    private int cacheMemorySize;
-
-    private String defaultAdminPassword;
-    private String defaultCuratorPassword;
-    private String defaultPlayerPassword;
+    @Value("${dispatcherImpl:local}")
+    private String dispatcherImpl;
 
     private String storageDir;
     private String gameRunTemplateLocation;
 
-    private String publicKeyPath;
-    private String privateKeyPath;
-
-    private String authJwtSecret;
-    @Value("${authJwtExpirationTime:604800000}")
-    private long authJwtExpirationTime;
-
     private String flinkURL;
+
     @Value("${flinkParallelism:1}")
     private int flinkParallelism = 1;
 
-    public int getCacheMemorySize() {
-        return cacheMemorySize;
+    @NotNull
+    private CacheConfigs cache;
+
+    @NotNull
+    private DatabaseConfigurations db;
+
+    @NotNull
+    private AuthConfigs auth;
+
+    public static class AuthConfigs {
+        private String publicKeyPath;
+        private String privateKeyPath;
+
+        private String defaultAdminPassword;
+        private String defaultCuratorPassword;
+        private String defaultPlayerPassword;
+
+        private String jwtSecret;
+        @Value("${jwtExpirationTime:604800000}")
+        private long jwtExpirationTime;
+
+        public void setDefaultAdminPassword(String defaultAdminPassword) {
+            this.defaultAdminPassword = defaultAdminPassword;
+        }
+
+        public void setDefaultCuratorPassword(String defaultCuratorPassword) {
+            this.defaultCuratorPassword = defaultCuratorPassword;
+        }
+
+        public void setDefaultPlayerPassword(String defaultPlayerPassword) {
+            this.defaultPlayerPassword = defaultPlayerPassword;
+        }
+
+        public String getDefaultAdminPassword() {
+            return defaultAdminPassword;
+        }
+
+        public String getDefaultCuratorPassword() {
+            return defaultCuratorPassword;
+        }
+
+        public String getDefaultPlayerPassword() {
+            return defaultPlayerPassword;
+        }
+
+        public String getPublicKeyPath() {
+            return publicKeyPath;
+        }
+
+        public void setPublicKeyPath(String publicKeyPath) {
+            this.publicKeyPath = publicKeyPath;
+        }
+
+        public String getPrivateKeyPath() {
+            return privateKeyPath;
+        }
+
+        public void setPrivateKeyPath(String privateKeyPath) {
+            this.privateKeyPath = privateKeyPath;
+        }
+
+        public String getJwtSecret() {
+            return jwtSecret;
+        }
+
+        public void setJwtSecret(String jwtSecret) {
+            this.jwtSecret = jwtSecret;
+        }
+
+        public long getJwtExpirationTime() {
+            return jwtExpirationTime;
+        }
+
+        public void setJwtExpirationTime(long jwtExpirationTime) {
+            this.jwtExpirationTime = jwtExpirationTime;
+        }
     }
 
-    public void setCacheMemorySize(int cacheMemorySize) {
-        this.cacheMemorySize = cacheMemorySize;
+    public static class CacheConfigs {
+        private String impl;
+        private String redisUrl;
+        private int memorySize;
+
+        public String getImpl() {
+            return impl;
+        }
+
+        public void setImpl(String impl) {
+            this.impl = impl;
+        }
+
+        public String getRedisUrl() {
+            return redisUrl;
+        }
+
+        public void setRedisUrl(String redisUrl) {
+            this.redisUrl = redisUrl;
+        }
+
+        public int getMemorySize() {
+            return memorySize;
+        }
+
+        public void setMemorySize(int memorySize) {
+            this.memorySize = memorySize;
+        }
     }
 
-    public String getCacheRedisHost() {
-        return cacheRedisHost;
+    public static class DatabaseConfigurations {
+
+        private String scriptsPath;
+
+        private String url;
+        private String username;
+        private String password;
+
+        private int maximumPoolSize;
+
+        public String getScriptsPath() {
+            return scriptsPath;
+        }
+
+        public void setScriptsPath(String scriptsPath) {
+            this.scriptsPath = scriptsPath;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public int getMaximumPoolSize() {
+            return maximumPoolSize;
+        }
+
+        public void setMaximumPoolSize(int maximumPoolSize) {
+            this.maximumPoolSize = maximumPoolSize;
+        }
     }
 
-    public void setCacheRedisHost(String cacheRedisHost) {
-        this.cacheRedisHost = cacheRedisHost;
+    public CacheConfigs getCache() {
+        return cache;
     }
 
-    public String getCacheImpl() {
-        return cacheImpl;
+    public DatabaseConfigurations getDb() {
+        return db;
     }
 
-    public void setCacheImpl(String cacheImpl) {
-        this.cacheImpl = cacheImpl;
+    public void setDb(DatabaseConfigurations db) {
+        this.db = db;
+    }
+
+    public void setCache(CacheConfigs cache) {
+        this.cache = cache;
+    }
+
+    public AuthConfigs getAuth() {
+        return auth;
+    }
+
+    public void setAuth(AuthConfigs auth) {
+        this.auth = auth;
+    }
+
+    public String getDispatcherImpl() {
+        return dispatcherImpl;
+    }
+
+    public void setDispatcherImpl(String dispatcherImpl) {
+        this.dispatcherImpl = dispatcherImpl;
     }
 
     public String getMode() {
@@ -70,40 +227,12 @@ public class OasisConfigurations {
         this.mode = mode;
     }
 
-    public String getAuthJwtSecret() {
-        return authJwtSecret;
-    }
-
-    public void setAuthJwtSecret(String authJwtSecret) {
-        this.authJwtSecret = authJwtSecret;
-    }
-
-    public long getAuthJwtExpirationTime() {
-        return authJwtExpirationTime;
-    }
-
-    public void setAuthJwtExpirationTime(long authJwtExpirationTime) {
-        this.authJwtExpirationTime = authJwtExpirationTime;
-    }
-
     public int getFlinkParallelism() {
         return flinkParallelism;
     }
 
     public void setFlinkParallelism(int flinkParallelism) {
         this.flinkParallelism = flinkParallelism;
-    }
-
-    public void setDefaultAdminPassword(String defaultAdminPassword) {
-        this.defaultAdminPassword = defaultAdminPassword;
-    }
-
-    public void setDefaultCuratorPassword(String defaultCuratorPassword) {
-        this.defaultCuratorPassword = defaultCuratorPassword;
-    }
-
-    public void setDefaultPlayerPassword(String defaultPlayerPassword) {
-        this.defaultPlayerPassword = defaultPlayerPassword;
     }
 
     public void setStorageDir(String storageDir) {
@@ -114,28 +243,8 @@ public class OasisConfigurations {
         this.gameRunTemplateLocation = gameRunTemplateLocation;
     }
 
-    public void setPublicKeyPath(String publicKeyPath) {
-        this.publicKeyPath = publicKeyPath;
-    }
-
-    public void setPrivateKeyPath(String privateKeyPath) {
-        this.privateKeyPath = privateKeyPath;
-    }
-
     public void setFlinkURL(String flinkURL) {
         this.flinkURL = flinkURL;
-    }
-
-    public String getDefaultAdminPassword() {
-        return defaultAdminPassword;
-    }
-
-    public String getDefaultCuratorPassword() {
-        return defaultCuratorPassword;
-    }
-
-    public String getDefaultPlayerPassword() {
-        return defaultPlayerPassword;
     }
 
     public String getStorageDir() {
@@ -144,14 +253,6 @@ public class OasisConfigurations {
 
     public String getGameRunTemplateLocation() {
         return gameRunTemplateLocation;
-    }
-
-    public String getPublicKeyPath() {
-        return publicKeyPath;
-    }
-
-    public String getPrivateKeyPath() {
-        return privateKeyPath;
     }
 
     public String getFlinkURL() {

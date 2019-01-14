@@ -33,14 +33,8 @@ public class OasisServer {
 
     public static IOasisApiService apiService;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         SpringApplication.run(OasisServer.class, args);
-//        configureLogs();
-//
-//        LOGGER.debug("Initializing configurations...");
-//        Configs configs = initConfigs();
-//
-//        start(configs);
     }
 
     public static void start(Configs configs) throws Exception {

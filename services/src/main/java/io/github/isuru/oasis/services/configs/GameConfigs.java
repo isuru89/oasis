@@ -2,7 +2,6 @@ package io.github.isuru.oasis.services.configs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.model.db.IOasisDao;
-import io.github.isuru.oasis.services.model.IEventDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +15,6 @@ public class GameConfigs {
 
     @Autowired
     private IOasisDao oasisDao;
-
-    @Autowired
-    private IEventDispatcher eventDispatcher;
 
     @Autowired
     private OasisConfigurations oasisConfigurations;

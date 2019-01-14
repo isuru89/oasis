@@ -25,7 +25,7 @@ public class RedisCache implements ICacheProxy {
     public void init() throws IOException {
         try {
             String host = OasisUtils.getEnvOr("OASIS_CACHE_REDIS_URL", "localhost");
-            jedis = new Jedis(Commons.firstNonNull(host, configurations.getCacheRedisHost()));
+            jedis = new Jedis(Commons.firstNonNull(host, configurations.getCache().getRedisUrl()));
 
             String msg = "Hello From Oasis!";
 

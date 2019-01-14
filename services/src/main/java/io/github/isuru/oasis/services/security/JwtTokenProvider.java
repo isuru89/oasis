@@ -29,11 +29,11 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(Authentication authentication) {
-
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        OasisConfigurations.AuthConfigs auth = oasisConfigurations.getAuth();
 
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + oasisConfigurations.getAuthJwtExpirationTime());
+        Date expiryDate = new Date(now.getTime() + auth.getJwtExpirationTime());
 
         return Jwts.builder()
                 .setIssuer(OASIS_ISSUER)
@@ -42,14 +42,14 @@ public class JwtTokenProvider {
                 .setExpiration(expiryDate)
                 .claim("user", userPrincipal.getEmail())
                 .claim("role", userPrincipal.getRole())
-                .signWith(SignatureAlgorithm.HS512, oasisConfigurations.getAuthJwtSecret())
+                .signWith(SignatureAlgorithm.HS512, auth.getJwtSecret())
                 .compact();
     }
 
     public TokenInfo validateToken(String authToken) {
         try {
             Claims claims = Jwts.parser()
-                    .setSigningKey(oasisConfigurations.getAuthJwtSecret())
+                    .setSigningKey(oasisConfigurations.getAuth().getJwtSecret())
                     .parseClaimsJws(authToken)
                     .getBody();
 

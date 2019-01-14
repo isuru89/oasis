@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * @author iweerarathna
  */
 @Component
-public class LocalChallengeProcessor implements Runnable {
+class LocalChallengeProcessor implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalChallengeProcessor.class);
 
@@ -36,7 +36,6 @@ public class LocalChallengeProcessor implements Runnable {
     private final Map<Long, ChallengeDef> challengeDefMap = new ConcurrentHashMap<>();
     private final Map<Long, OasisSink> sinkMap = new ConcurrentHashMap<>();
     private boolean stop = false;
-
 
     private final IOasisDao dao;
 

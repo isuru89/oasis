@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS OA_USER_HERO (
     display_name    VARCHAR(64),
     description     VARCHAR(1024),
     is_active       TINYINT(1) DEFAULT 1
-)
+);
 
 CREATE TABLE IF NOT EXISTS OA_TEAM (
     team_id         INT PRIMARY KEY AUTO_INCREMENT,

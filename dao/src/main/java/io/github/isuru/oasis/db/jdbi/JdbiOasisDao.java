@@ -254,5 +254,30 @@ public class JdbiOasisDao implements IOasisDao {
                 return (long) update.execute();
             }
         }
+
+        @Override
+        public Long executeInsert(String queryId, Map<String, Object> data, Map<String, Object> templatingData, String keyColumn) throws Exception {
+            String query = queryRepo.fetchQuery(queryId);
+            return jdbi.withHandle((HandleCallback<Long, Exception>) handle -> {
+                Update update = handle.createUpdate(query);
+                if (templatingData != null && !templatingData.isEmpty()) {
+                    for (Map.Entry<String, Object> entry : templatingData.entrySet()) {
+                        if (entry.getValue() instanceof List) {
+                            update = update.defineList(entry.getKey(), entry.getValue());
+                        } else {
+                            update = update.define(entry.getKey(), entry.getValue());
+                        }
+                    }
+                }
+                update = update.bindMap(data);
+                if (keyColumn != null && !keyColumn.isEmpty()) {
+                    return update.executeAndReturnGeneratedKeys(keyColumn)
+                            .mapTo(Long.class)
+                            .findOnly();
+                } else {
+                    return (long) update.execute();
+                }
+            });
+        }
     }
 }

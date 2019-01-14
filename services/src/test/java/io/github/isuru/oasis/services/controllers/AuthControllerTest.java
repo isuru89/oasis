@@ -67,13 +67,15 @@ class AuthControllerTest {
     @BeforeEach
     void doBefore() throws Exception {
         OasisConfigurations tmpConfigs = new OasisConfigurations();
-        tmpConfigs.setAuthJwtSecret("thisissecret");
-        tmpConfigs.setAuthJwtExpirationTime(3600L * 1000 * 24);
+        OasisConfigurations.AuthConfigs authConfigs = new OasisConfigurations.AuthConfigs();
+        tmpConfigs.setAuth(authConfigs);
+        authConfigs.setJwtSecret("thisissecret");
+        authConfigs.setJwtExpirationTime(3600L * 1000 * 24);
         tp = new JwtTokenProvider(tmpConfigs);
 
-        BDDMockito.given(oasisConfigurations.getDefaultAdminPassword()).willReturn("admin");
-        BDDMockito.given(oasisConfigurations.getDefaultCuratorPassword()).willReturn("curator");
-        BDDMockito.given(oasisConfigurations.getDefaultPlayerPassword()).willReturn("player");
+        BDDMockito.given(oasisConfigurations.getAuth().getDefaultAdminPassword()).willReturn("admin");
+        BDDMockito.given(oasisConfigurations.getAuth().getDefaultCuratorPassword()).willReturn("curator");
+        BDDMockito.given(oasisConfigurations.getAuth().getDefaultPlayerPassword()).willReturn("player");
 
         UserProfile isuruUser = createUser(200, "isuru@domain.com", "Isuru Weerarathna");
         UserTeam isuruTeam = new UserTeam(); isuruTeam.setRoleId(UserRole.PLAYER);

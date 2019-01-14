@@ -19,7 +19,7 @@ public class CacheProxyHolder {
 
     @Autowired
     public CacheProxyHolder(Map<String, ICacheProxy> cacheProxyMap, OasisConfigurations configurations) {
-        String cacheImpl = configurations.getCacheImpl();
+        String cacheImpl = configurations.getCache().getImpl();
         String key = "cache" + StringUtils.capitalize(cacheImpl);
         cacheProxy = cacheProxyMap.computeIfAbsent(key, s -> cacheProxyMap.get("cacheNone"));
         LOG.info("Loaded cache implementation: " + cacheProxy.getClass().getName());

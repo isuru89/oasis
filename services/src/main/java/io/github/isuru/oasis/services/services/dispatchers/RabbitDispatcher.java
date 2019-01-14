@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.utils;
+package io.github.isuru.oasis.services.services.dispatchers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
@@ -11,6 +11,10 @@ import io.github.isuru.oasis.services.configs.RabbitConfigurations;
 import io.github.isuru.oasis.services.model.IEventDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -21,6 +25,8 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author iweerarathna
  */
+@Component("dispatcherRabbit")
+@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public final class RabbitDispatcher implements IEventDispatcher {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitDispatcher.class);
@@ -31,6 +37,13 @@ public final class RabbitDispatcher implements IEventDispatcher {
     private String exchangeName;
 
     private final ObjectMapper mapper = new ObjectMapper();
+
+    private final RabbitConfigurations rabbitConfigurations;
+
+    @Autowired
+    public RabbitDispatcher(RabbitConfigurations rabbitConfigurations) {
+        this.rabbitConfigurations = rabbitConfigurations;
+    }
 
     public void init(Configs configs) throws IOException {
         try {
@@ -73,8 +86,9 @@ public final class RabbitDispatcher implements IEventDispatcher {
     }
 
     @Override
-    public void init(RabbitConfigurations configs) throws IOException {
+    public void init() throws IOException {
         try {
+            RabbitConfigurations configs = rabbitConfigurations;
             System.out.println("RABBIT HOST: " + configs.getHost());
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(configs.getHost());
@@ -108,8 +122,6 @@ public final class RabbitDispatcher implements IEventDispatcher {
         String routingKey = String.format("game.%d.event.%s", gameId, eventType);
         channel.basicPublish(exchangeName, routingKey, properties, msg);
     }
-
-    public RabbitDispatcher() {}
 
     @Override
     public void close() {

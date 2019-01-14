@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author iweerarathna
  */
-public class QueueSource implements SourceFunction<Event> {
+class QueueSource implements SourceFunction<Event> {
 
     private static final long DEF_TIMEOUT = 10000L;
 

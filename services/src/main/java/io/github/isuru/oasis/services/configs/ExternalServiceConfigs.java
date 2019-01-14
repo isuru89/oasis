@@ -3,8 +3,6 @@ package io.github.isuru.oasis.services.configs;
 import io.github.isuru.oasis.model.configs.EnvKeys;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.backend.FlinkServices;
-import io.github.isuru.oasis.services.model.IEventDispatcher;
-import io.github.isuru.oasis.services.utils.RabbitDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +10,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
-
-import java.io.IOException;
 
 @Configuration
 public class ExternalServiceConfigs {
@@ -35,15 +31,6 @@ public class ExternalServiceConfigs {
                 oasisConfigurations.getFlinkURL()));
 
         return flinkServices;
-    }
-
-    @Bean
-    @Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public IEventDispatcher createEventDispatcher() throws IOException {
-        LOG.info("Initializing rabbit event dispatcher...");
-        RabbitDispatcher rabbitDispatcher = new RabbitDispatcher();
-        rabbitDispatcher.init(rabbitConfigurations);
-        return rabbitDispatcher;
     }
 
 }

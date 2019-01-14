@@ -20,8 +20,10 @@ class JwtTokenProviderTest {
     @BeforeEach
     void beforeTest() {
         configurations = new OasisConfigurations();
-        configurations.setAuthJwtSecret("thisisasecret");
-        configurations.setAuthJwtExpirationTime(3600L * 1000 * 24); // 1 day
+        OasisConfigurations.AuthConfigs authConfigs = new OasisConfigurations.AuthConfigs();
+        configurations.setAuth(authConfigs);
+        authConfigs.setJwtSecret("thisisasecret");
+        authConfigs.setJwtExpirationTime(3600L * 1000 * 24); // 1 day
     }
 
     @Test

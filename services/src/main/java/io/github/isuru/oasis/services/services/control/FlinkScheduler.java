@@ -5,6 +5,7 @@ import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.services.model.IEventDispatcher;
 import io.github.isuru.oasis.services.model.IGameController;
+import io.github.isuru.oasis.services.services.managers.DispatcherManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,11 +17,11 @@ import java.util.Map;
 @Component("schedulerRemote")
 public class FlinkScheduler implements IGameController {
 
-    @Autowired
     private IEventDispatcher eventDispatcher;
 
-    public FlinkScheduler(IEventDispatcher eventDispatcher) {
-        this.eventDispatcher = eventDispatcher;
+    @Autowired
+    public FlinkScheduler(DispatcherManager dispatcherManager) {
+        this.eventDispatcher = dispatcherManager.getEventDispatcher();
     }
 
     @Override

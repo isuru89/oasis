@@ -152,6 +152,7 @@ public class ProfileServiceImpl implements IProfileService {
             Long teamId = input.executeInsert(Q.PROFILE.ADD_TEAM, data, "team_id");
 
             // add user for team scope
+            Map<String, Object> templating = Maps.create("isActivated", true);
             Map<String, Object> playerData = Maps.create()
                     .put("name", teamProfile.getName())
                     .put("male", false)
@@ -159,8 +160,9 @@ public class ProfileServiceImpl implements IProfileService {
                     .put("extId", null)
                     .put("email", "")
                     .put("isAutoUser", true)
+                    .put("activated", true)
                     .build();
-            Long userId = input.executeInsert(Q.PROFILE.ADD_USER, playerData, "user_id");
+            Long userId = input.executeInsert(Q.PROFILE.ADD_USER, playerData, templating,"user_id");
 
             input.executeInsert(Q.PROFILE.ADD_USER_TO_TEAM,
                     Maps.create()
@@ -232,6 +234,7 @@ public class ProfileServiceImpl implements IProfileService {
             Long addedTeamId = input.executeInsert(Q.PROFILE.ADD_TEAM, teamData, "team_id");
 
             // add user for team scope
+            Map<String, Object> templating = Maps.create("isActivated", true);
             Map<String, Object> playerData = Maps.create()
                     .put("name", teamScope.getName())
                     .put("male", false)
@@ -239,8 +242,9 @@ public class ProfileServiceImpl implements IProfileService {
                     .put("extId", null)
                     .put("email", "default@"+teamScope.getName() + ".oasis.com")
                     .put("isAutoUser", true)
+                    .put("activated", true)
                     .build();
-            Long userId = input.executeInsert(Q.PROFILE.ADD_USER, playerData, "user_id");
+            Long userId = input.executeInsert(Q.PROFILE.ADD_USER, playerData, templating,"user_id");
 
             input.executeInsert(Q.PROFILE.ADD_USER_TO_TEAM,
                     Maps.create()

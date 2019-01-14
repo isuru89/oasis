@@ -17,17 +17,17 @@ import java.util.Map;
 public class DataConfigs {
 
     @Autowired
-    private DatabaseConfigurations databaseConfigurations;
+    private OasisConfigurations oasisConfigurations;
 
     @Bean
     public IOasisDao createDao() throws Exception {
-        DbProperties dbProps = createDbProps(databaseConfigurations);
+        DbProperties dbProps = createDbProps(oasisConfigurations.getDb());
         return OasisDbFactory.create(dbProps);
     }
 
-    private DbProperties createDbProps(DatabaseConfigurations dbConfigs) throws IOException {
+    private DbProperties createDbProps(OasisConfigurations.DatabaseConfigurations dbConfigs) throws IOException {
         DbProperties properties = new DbProperties("default");
-        properties.setUrl(databaseConfigurations.getUrl());
+        properties.setUrl(dbConfigs.getUrl());
         properties.setUsername(dbConfigs.getUsername());
         properties.setPassword(dbConfigs.getPassword());
 
