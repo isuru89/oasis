@@ -7,7 +7,7 @@ import io.github.isuru.oasis.services.dto.game.PointAwardDto;
 import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IGameService;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;

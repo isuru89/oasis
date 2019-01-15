@@ -135,7 +135,7 @@ public class GameDefServiceImpl implements IGameDefService {
         DefWrapper wrp = dao.getDefinitionDao().readDefinition(gameId);
 
         GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, mapper);
-        if (!RUtils.isNullOrEmpty(gameDef.getConstants())) {
+        if (!Commons.isNullOrEmpty(gameDef.getConstants())) {
             for (String k : gameConstants) {
                 gameDef.getConstants().remove(k);
             }

@@ -1,13 +1,11 @@
 package io.github.isuru.oasis.services.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.db.IOasisDao;
-import io.github.isuru.oasis.services.OasisServer;
-import io.github.isuru.oasis.services.services.IOasisApiService;
-import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
+import io.github.isuru.oasis.services.services.IOasisApiService;
+import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.test.routes.IOasisApi;
 import io.github.isuru.oasis.services.test.routes.IOasisDefApi;
 import okhttp3.Headers;
@@ -107,20 +105,20 @@ public class RoutingTest extends AbstractApiTest {
     }
 
     static void startServer() throws Exception {
-        Configs configs = Configs.create();
-        System.setProperty("oasis.mode", "local");
-        configs.append("oasis.config.file", "./src/test/resources/oasis/configs/oasis.properties," +
-                "./src/test/resources/oasis/configs/jdbc.properties," +
-                "./src/test/resources/oasis/configs/ldap.properties");
-        OasisServer.loadConfigFiles(configs, configs.getStrReq("oasis.config.file"));
-        configs.append("oasis.public.key", "../configs/auth/public.der");
-        configs.append("oasis.private.key", "../configs/auth/private.der");
-        configs.append("oasis.logs.config.file", "./src/test/resources/oasis/configs/logger.properties");
-        OasisServer.start(configs);
+//        Configs configs = Configs.create();
+//        System.setProperty("oasis.mode", "local");
+//        configs.append("oasis.config.file", "./src/test/resources/oasis/configs/oasis.properties," +
+//                "./src/test/resources/oasis/configs/jdbc.properties," +
+//                "./src/test/resources/oasis/configs/ldap.properties");
+//        OasisServer.loadConfigFiles(configs, configs.getStrReq("oasis.config.file"));
+//        configs.append("oasis.public.key", "../configs/auth/public.der");
+//        configs.append("oasis.private.key", "../configs/auth/private.der");
+//        configs.append("oasis.logs.config.file", "./src/test/resources/oasis/configs/logger.properties");
+//        OasisServer.start(configs);
     }
 
     static void runBeforeApi() {
-        apiService = OasisServer.apiService;
+//        apiService = OasisServer.apiService;
         dao = apiService.getDao();
 
         ObjectMapper mapper = new ObjectMapper();

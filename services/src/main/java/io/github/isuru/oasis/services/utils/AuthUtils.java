@@ -15,7 +15,6 @@ import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
-import java.security.MessageDigest;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -28,11 +27,6 @@ import java.util.Hashtable;
  * @author iweerarathna
  */
 public final class AuthUtils {
-
-    private static final String OASIS_ISSUER = "oasis";
-
-
-    private MessageDigest digest;
 
     //private Algorithm algorithm;
     //private JWTVerifier verifier;
@@ -73,27 +67,7 @@ public final class AuthUtils {
     }
 
     public void ldapAuthUser(String username, String password) throws ApiAuthException {
-        DirContext context = null;
-        Hashtable<String, String> env = new Hashtable<>();
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(Context.PROVIDER_URL, configs.getStrReq("oasis.auth.ldap.url"));
-        env.put(Context.SECURITY_AUTHENTICATION, "simple");
-        env.put(Context.SECURITY_PRINCIPAL, username);
-        env.put(Context.SECURITY_CREDENTIALS, password);
 
-        try {
-            context = new InitialDirContext(env);
-        } catch (NamingException e) {
-            throw new ApiAuthException("User authentication failed! Username or password is incorrect!");
-        } finally {
-            try {
-                if (context != null) {
-                    context.close();
-                }
-            } catch (NamingException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public long getExpiryDate() {

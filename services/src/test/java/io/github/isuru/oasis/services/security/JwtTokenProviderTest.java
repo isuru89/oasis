@@ -2,7 +2,7 @@ package io.github.isuru.oasis.services.security;
 
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.model.TokenInfo;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.model.UserRole;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

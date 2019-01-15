@@ -5,7 +5,7 @@ import io.github.isuru.oasis.services.dto.events.EventSourceDto;
 import io.github.isuru.oasis.services.model.EventSourceToken;
 import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.utils.Checks;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.model.UserRole;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

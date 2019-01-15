@@ -3,7 +3,7 @@ package io.github.isuru.oasis.services.security;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.model.UserRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

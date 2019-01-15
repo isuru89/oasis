@@ -9,7 +9,7 @@ import io.github.isuru.oasis.services.dto.StatusResponse;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.security.CurrentUser;
 import io.github.isuru.oasis.services.security.JwtTokenProvider;
-import io.github.isuru.oasis.services.security.OasisAuthenticator;
+import io.github.isuru.oasis.services.security.OasisAuthManager;
 import io.github.isuru.oasis.services.security.UserPrincipal;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.utils.Commons;
@@ -54,7 +54,7 @@ public class AuthController {
     private DataCache dataCache;
 
     @Autowired
-    private OasisAuthenticator authenticator;
+    private OasisAuthManager authManager;
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/logout")
@@ -78,7 +78,7 @@ public class AuthController {
         if (!DefaultEntities.RESERVED_USERS.contains(username)) {
             // @TODO remove this in production
             if (!password.equals(dataCache.getAllUserTmpPassword())) {
-                if (!authenticator.authenticate(username, password)) {
+                if (!authManager.get().authenticate(username, password)) {
                     throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication failed for user " + username + "!");
                 }
             }

@@ -2,8 +2,13 @@ package io.github.isuru.oasis.services.utils;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Map;
 
 public class Commons {
+
+    public static boolean isNullOrEmpty(Map<?, ?> map) {
+        return map == null || map.isEmpty();
+    }
 
     public static boolean isNullOrEmpty(Collection<?> list) {
         return list == null || list.isEmpty();

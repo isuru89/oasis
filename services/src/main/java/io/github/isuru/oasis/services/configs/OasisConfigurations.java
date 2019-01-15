@@ -46,8 +46,28 @@ public class OasisConfigurations {
         private String defaultCuratorPassword;
         private String defaultPlayerPassword;
 
+        private String type = "none";
+
+        private LdapConfigs ldap;
+
         private String jwtSecret;
         private long jwtExpirationTime = 604800000L;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public LdapConfigs getLdap() {
+            return ldap;
+        }
+
+        public void setLdap(LdapConfigs ldap) {
+            this.ldap = ldap;
+        }
 
         public void setDefaultAdminPassword(String defaultAdminPassword) {
             this.defaultAdminPassword = defaultAdminPassword;

@@ -1,7 +1,5 @@
 package io.github.isuru.oasis.services.model;
 
-import io.github.isuru.oasis.services.utils.UserRole;
-
 public class TokenInfo {
 
     private long user;

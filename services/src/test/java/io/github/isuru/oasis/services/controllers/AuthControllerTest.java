@@ -8,7 +8,7 @@ import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.security.*;
 import io.github.isuru.oasis.services.services.IProfileService;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.model.UserRole;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -9,7 +9,7 @@ import io.github.isuru.oasis.services.dto.defs.HeroDto;
 import io.github.isuru.oasis.services.security.CurrentUser;
 import io.github.isuru.oasis.services.security.UserPrincipal;
 import io.github.isuru.oasis.services.services.IMetaphorService;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;

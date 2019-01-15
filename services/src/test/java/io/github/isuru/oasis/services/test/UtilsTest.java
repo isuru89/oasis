@@ -3,6 +3,7 @@ package io.github.isuru.oasis.services.test;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.TokenInfo;
+import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.utils.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;

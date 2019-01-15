@@ -10,7 +10,7 @@ import io.github.isuru.oasis.services.model.UserTeamScope;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

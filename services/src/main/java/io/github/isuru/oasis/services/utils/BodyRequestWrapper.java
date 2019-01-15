@@ -35,7 +35,7 @@ public class BodyRequestWrapper extends HttpServletRequestWrapper {
         return new ServletInputStream() {
 
             @Override
-            public int read() throws IOException {
+            public int read() {
                 return byteArrayInputStream.read();
             }
 

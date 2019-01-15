@@ -19,7 +19,7 @@ import io.github.isuru.oasis.services.services.ILifecycleService;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.services.LifecycleImplManager;
 import io.github.isuru.oasis.services.utils.Maps;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.model.UserRole;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

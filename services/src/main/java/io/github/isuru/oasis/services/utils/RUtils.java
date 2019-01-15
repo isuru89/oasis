@@ -4,16 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author iweerarathna
  */
 public class RUtils {
-
-    public static boolean isNullOrEmpty(Map<?, ?> map) {
-        return map == null || map.isEmpty();
-    }
 
     public static <T> T toObj(String value, Class<T> clz, ObjectMapper mapper) {
         try {

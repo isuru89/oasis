@@ -13,7 +13,7 @@ import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IMetaphorService;
 import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.utils.OasisOptions;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.model.UserRole;
 import spark.Spark;
 
 /**

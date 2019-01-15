@@ -8,7 +8,7 @@ import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.OasisOptions;
-import io.github.isuru.oasis.services.utils.UserRole;
+import io.github.isuru.oasis.services.model.UserRole;
 import spark.Request;
 import spark.Response;
 import spark.Spark;

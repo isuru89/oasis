@@ -16,7 +16,7 @@ import io.github.isuru.oasis.services.services.caches.CacheProxyManager;
 import io.github.isuru.oasis.services.services.control.GameControllerManager;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
-import io.github.isuru.oasis.services.utils.EventSources;
+import io.github.isuru.oasis.services.model.EventSources;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.SecurityUtils;
 import org.slf4j.Logger;
