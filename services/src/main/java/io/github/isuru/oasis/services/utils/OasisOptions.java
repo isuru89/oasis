@@ -2,7 +2,7 @@ package io.github.isuru.oasis.services.utils;
 
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.utils.ICacheProxy;
-import io.github.isuru.oasis.services.backend.FlinkServices;
+import io.github.isuru.oasis.services.services.backend.FlinkServices;
 import io.github.isuru.oasis.services.model.IGameController;
 
 /**

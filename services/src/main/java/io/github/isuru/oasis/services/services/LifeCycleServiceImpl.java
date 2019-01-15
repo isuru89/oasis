@@ -5,13 +5,13 @@ import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.DefWrapper;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
-import io.github.isuru.oasis.services.backend.FlinkClient;
-import io.github.isuru.oasis.services.backend.FlinkServices;
-import io.github.isuru.oasis.services.backend.model.FlinkJar;
-import io.github.isuru.oasis.services.backend.model.JarListInfo;
-import io.github.isuru.oasis.services.backend.model.JarRunResponse;
-import io.github.isuru.oasis.services.backend.model.JarUploadResponse;
-import io.github.isuru.oasis.services.backend.model.JobSaveRequest;
+import io.github.isuru.oasis.services.services.backend.FlinkClient;
+import io.github.isuru.oasis.services.services.backend.FlinkServices;
+import io.github.isuru.oasis.services.services.backend.model.FlinkJar;
+import io.github.isuru.oasis.services.services.backend.model.JarListInfo;
+import io.github.isuru.oasis.services.services.backend.model.JarRunResponse;
+import io.github.isuru.oasis.services.services.backend.model.JarUploadResponse;
+import io.github.isuru.oasis.services.services.backend.model.JobSaveRequest;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.SubmittedJob;
@@ -108,7 +108,7 @@ public class LifeCycleServiceImpl implements ILifecycleService  {
 
     private boolean startDef(long defId, boolean isGame) throws Exception {
         //File storageDir = configs.getPath(ConfigKeys.KEY_STORAGE_DIR, Constants.DEF_WORKSPACE_DIR);
-        File storageDir = new File(oasisConfigurations.getStorageDir());
+        File storageDir = oasisConfigurations.getStorageDir();
 
         SubmittedJob job = ServiceUtils.getTheOnlyRecord(dao, "getJobOfDef",
                 Maps.create("defId", defId),
@@ -174,7 +174,7 @@ public class LifeCycleServiceImpl implements ILifecycleService  {
 
     private File writeGameConfigFile(long defId, boolean isGame, File specificExecutionDir) throws IOException {
         File configFile = specificExecutionDir.toPath().resolve("run.properties").toFile();
-        File templateFile = new File(oasisConfigurations.getGameRunTemplateLocation());
+        File templateFile = oasisConfigurations.getGameRunTemplateLocation();
 
         //configs.getPath("game.run.template.file", Constants.DEF_LOCATION_RUN_TEMPLATE, true, false);
 

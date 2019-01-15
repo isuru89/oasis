@@ -2,18 +2,15 @@ package io.github.isuru.oasis.services;
 
 import io.github.isuru.oasis.db.OasisDbFactory;
 import io.github.isuru.oasis.model.configs.Configs;
-import io.github.isuru.oasis.model.configs.EnvKeys;
 import io.github.isuru.oasis.model.db.DbProperties;
 import io.github.isuru.oasis.model.db.IOasisDao;
-import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.api.routers.Routers;
-import io.github.isuru.oasis.services.backend.FlinkServices;
+import io.github.isuru.oasis.services.model.IGameController;
 import io.github.isuru.oasis.services.services.DefaultOasisApiService;
 import io.github.isuru.oasis.services.services.IOasisApiService;
-import io.github.isuru.oasis.services.utils.AuthUtils;
-import io.github.isuru.oasis.services.model.IGameController;
-import io.github.isuru.oasis.services.utils.OasisOptions;
 import io.github.isuru.oasis.services.services.control.LocalScheduler;
+import io.github.isuru.oasis.services.utils.AuthUtils;
+import io.github.isuru.oasis.services.utils.OasisOptions;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,9 +42,9 @@ public class OasisServer {
         IOasisDao oasisDao = OasisDbFactory.create(dbProperties);
 
         LOGGER.debug("Initializing Flink services...");
-        FlinkServices flinkServices = new FlinkServices();
-        flinkServices.init(OasisUtils.getEnvOr(EnvKeys.OASIS_FLINK_URL,
-                configs.getStrReq("oasis.flink.url")));
+//        FlinkServices flinkServices = new FlinkServices();
+//        flinkServices.init(OasisUtils.getEnvOr(EnvKeys.OASIS_FLINK_URL,
+//                configs.getStrReq("oasis.flink.url")));
 
         LOGGER.debug("Creating remote game controllers...");
         IGameController gameController;
@@ -59,7 +56,7 @@ public class OasisServer {
 
         LOGGER.debug("Initializing services...");
         OasisOptions oasisOptions = new OasisOptions();
-        oasisOptions.setFlinkServices(flinkServices);
+//        oasisOptions.setFlinkServices(flinkServices);
         oasisOptions.setGameController(gameController);
         oasisOptions.setConfigs(configs);
         //OasisCacheFactory factory = new OasisCacheFactory();

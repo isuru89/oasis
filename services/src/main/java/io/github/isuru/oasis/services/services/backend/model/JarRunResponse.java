@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.backend.model;
+package io.github.isuru.oasis.services.services.backend.model;
 
 public class JarRunResponse {
 

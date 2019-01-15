@@ -21,7 +21,6 @@ class JdbcPool {
         config.setJdbcUrl(properties.getUrl());
         config.setUsername(properties.getUsername());
         config.setPassword(properties.getPassword());
-        System.out.println(properties.getUsername() + " , " + properties.getPassword());
 
         Properties props = new Properties();
         if (properties.getOtherOptions() != null) {

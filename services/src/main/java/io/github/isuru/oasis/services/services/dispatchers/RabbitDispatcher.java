@@ -48,13 +48,13 @@ public final class RabbitDispatcher implements IEventDispatcher {
     public void init() throws IOException {
         try {
             RabbitConfigurations configs = rabbitConfigurations;
-            System.out.println("RABBIT HOST: " + configs.getHost());
+            LOG.debug("RABBIT HOST: " + configs.getHost());
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(configs.getHost());
             factory.setPort(configs.getPort());
             factory.setVirtualHost(configs.getVirtualHost());
-            factory.setUsername(configs.getUsername());
-            factory.setPassword(configs.getPassword());
+            factory.setUsername(configs.getServiceWriterUsername());
+            factory.setPassword(configs.getServiceWriterPassword());
 
             connection = factory.newConnection();
             channel = connection.createChannel();
@@ -90,14 +90,14 @@ public final class RabbitDispatcher implements IEventDispatcher {
                 channel.close();
             }
         } catch (IOException | TimeoutException e) {
-            e.printStackTrace();
+            LOG.error("Failed while closing rabbit channel!", e);
         }
         try {
             if (connection != null) {
                 connection.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Failed while closing rabbit connection!", e);
         }
     }
 }

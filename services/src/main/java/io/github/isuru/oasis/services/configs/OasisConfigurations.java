@@ -1,12 +1,12 @@
 package io.github.isuru.oasis.services.configs;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
+import java.io.File;
 
 @Configuration
 @PropertySource("file:./configs/application.properties")
@@ -14,18 +14,14 @@ import javax.validation.constraints.NotNull;
 @Validated
 public class OasisConfigurations {
 
-    @Value("${mode:local}")
-    private String mode;
+    private String mode = "local";
 
-    @Value("${dispatcherImpl:rabbit}")
-    private String dispatcherImpl;
+    private String dispatcherImpl = "rabbit";
 
-    private String storageDir;
-    private String gameRunTemplateLocation;
+    private File storageDir;
+    private File gameRunTemplateLocation;
 
     private String flinkURL;
-
-    @Value("${flinkParallelism:1}")
     private int flinkParallelism = 1;
 
     @NotNull
@@ -40,16 +36,15 @@ public class OasisConfigurations {
     private RabbitConfigurations rabbit;
 
     public static class AuthConfigs {
-        private String publicKeyPath;
-        private String privateKeyPath;
+        private File publicKeyPath;
+        private File privateKeyPath;
 
         private String defaultAdminPassword;
         private String defaultCuratorPassword;
         private String defaultPlayerPassword;
 
         private String jwtSecret;
-        @Value("${jwtExpirationTime:604800000}")
-        private long jwtExpirationTime;
+        private long jwtExpirationTime = 604800000L;
 
         public void setDefaultAdminPassword(String defaultAdminPassword) {
             this.defaultAdminPassword = defaultAdminPassword;
@@ -75,19 +70,19 @@ public class OasisConfigurations {
             return defaultPlayerPassword;
         }
 
-        public String getPublicKeyPath() {
+        public File getPublicKeyPath() {
             return publicKeyPath;
         }
 
-        public void setPublicKeyPath(String publicKeyPath) {
+        public void setPublicKeyPath(File publicKeyPath) {
             this.publicKeyPath = publicKeyPath;
         }
 
-        public String getPrivateKeyPath() {
+        public File getPrivateKeyPath() {
             return privateKeyPath;
         }
 
-        public void setPrivateKeyPath(String privateKeyPath) {
+        public void setPrivateKeyPath(File privateKeyPath) {
             this.privateKeyPath = privateKeyPath;
         }
 
@@ -194,7 +189,6 @@ public class OasisConfigurations {
         // https://stackoverflow.com/questions/54180163/spring-boot-initialize-new-instance-for-nested-configuration-binding-when-there
         // I have to initialize them manually by myself
         rabbit = new RabbitConfigurations();
-        rabbit.initToDefault();
     }
 
     public RabbitConfigurations getRabbit() {
@@ -245,6 +239,22 @@ public class OasisConfigurations {
         this.mode = mode;
     }
 
+    public File getStorageDir() {
+        return storageDir;
+    }
+
+    public void setStorageDir(File storageDir) {
+        this.storageDir = storageDir;
+    }
+
+    public File getGameRunTemplateLocation() {
+        return gameRunTemplateLocation;
+    }
+
+    public void setGameRunTemplateLocation(File gameRunTemplateLocation) {
+        this.gameRunTemplateLocation = gameRunTemplateLocation;
+    }
+
     public int getFlinkParallelism() {
         return flinkParallelism;
     }
@@ -253,24 +263,8 @@ public class OasisConfigurations {
         this.flinkParallelism = flinkParallelism;
     }
 
-    public void setStorageDir(String storageDir) {
-        this.storageDir = storageDir;
-    }
-
-    public void setGameRunTemplateLocation(String gameRunTemplateLocation) {
-        this.gameRunTemplateLocation = gameRunTemplateLocation;
-    }
-
     public void setFlinkURL(String flinkURL) {
         this.flinkURL = flinkURL;
-    }
-
-    public String getStorageDir() {
-        return storageDir;
-    }
-
-    public String getGameRunTemplateLocation() {
-        return gameRunTemplateLocation;
     }
 
     public String getFlinkURL() {

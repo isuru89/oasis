@@ -1,45 +1,25 @@
 package io.github.isuru.oasis.services.configs;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfigurations {
 
-    @Value("${host:localhost}")
-    private String host;
+    private String host = "localhost";
 
-    @Value("${servicew.username:guest}")
-    private String username;
+    private String serviceWriterUsername = "guest";
 
-    @Value("${servicew.password:guest}")
-    private String password;
+    private String serviceWriterPassword = "guest";
 
-    @Value("${port:5672}")
-    private int port;
+    private int port = 5672;
 
-    @Value("${virtualHost:oasis}")
-    private String virtualHost;
+    private String virtualHost = "oasis";
 
-    @Value("${sourceExchangeName:oasis.event.exchange}")
-    private String sourceExchangeName;
+    private String sourceExchangeName = "oasis.event.exchange";
 
-    @Value("${sourceExchangeType:fanout}")
-    private String sourceExchangeType;
+    private String sourceExchangeType = "fanout";
 
-    @Value("${sourceExchangeDurable:true}")
-    private boolean sourceExchangeDurable;
-
-    void initToDefault() {
-        host = "localhost";
-        username = "guest";
-        password = "guest";
-        port = 5672;
-        virtualHost = "oasis";
-        sourceExchangeName = "oasis.event.exchange";
-        sourceExchangeType = "fanout";
-        sourceExchangeDurable = true;
-    }
+    private boolean sourceExchangeDurable = true;
 
     public String getHost() {
         return host;
@@ -49,20 +29,20 @@ public class RabbitConfigurations {
         this.host = host;
     }
 
-    public String getUsername() {
-        return username;
+    public String getServiceWriterUsername() {
+        return serviceWriterUsername;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setServiceWriterUsername(String serviceWriterUsername) {
+        this.serviceWriterUsername = serviceWriterUsername;
     }
 
-    public String getPassword() {
-        return password;
+    public String getServiceWriterPassword() {
+        return serviceWriterPassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setServiceWriterPassword(String serviceWriterPassword) {
+        this.serviceWriterPassword = serviceWriterPassword;
     }
 
     public int getPort() {

@@ -1,10 +1,11 @@
 package io.github.isuru.oasis.services.test;
 
-import io.github.isuru.oasis.services.backend.FlinkClient;
-import io.github.isuru.oasis.services.backend.FlinkServices;
-import io.github.isuru.oasis.services.backend.model.JarListInfo;
-import io.github.isuru.oasis.services.backend.model.JarUploadResponse;
-import io.github.isuru.oasis.services.backend.model.JobsStatusResponse;
+import io.github.isuru.oasis.services.configs.OasisConfigurations;
+import io.github.isuru.oasis.services.services.backend.FlinkClient;
+import io.github.isuru.oasis.services.services.backend.FlinkServices;
+import io.github.isuru.oasis.services.services.backend.model.JarListInfo;
+import io.github.isuru.oasis.services.services.backend.model.JarUploadResponse;
+import io.github.isuru.oasis.services.services.backend.model.JobsStatusResponse;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -19,10 +20,13 @@ import java.io.IOException;
  */
 class FlinkTest {
 
+
+
     @Test
     void testFlinkApi() throws IOException {
-        FlinkServices flinkServices = new FlinkServices();
-        flinkServices.init("http://localhost:8084");
+        OasisConfigurations oasisConfigurations = new OasisConfigurations();
+        oasisConfigurations.setFlinkURL("http://localhost:8084");
+        FlinkServices flinkServices = new FlinkServices(oasisConfigurations);
 
         FlinkClient flinkClient = flinkServices.getFlinkClient();
         JarListInfo jarListInfo = flinkClient.getJars().blockingFirst();
