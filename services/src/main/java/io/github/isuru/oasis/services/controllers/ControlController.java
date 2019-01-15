@@ -2,7 +2,7 @@ package io.github.isuru.oasis.services.controllers;
 
 import io.github.isuru.oasis.services.dto.StatusResponse;
 import io.github.isuru.oasis.services.services.ILifecycleService;
-import io.github.isuru.oasis.services.services.managers.LifecycleImplHolder;
+import io.github.isuru.oasis.services.services.LifecycleImplManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -18,7 +18,7 @@ public class ControlController {
     private ILifecycleService lifecycleService;
 
     @Autowired
-    public ControlController(LifecycleImplHolder lifecycleImplHolder) {
+    public ControlController(LifecycleImplManager lifecycleImplHolder) {
         this.lifecycleService = lifecycleImplHolder.get();
     }
 

@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.services.managers;
+package io.github.isuru.oasis.services.services.dispatchers;
 
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.model.IEventDispatcher;

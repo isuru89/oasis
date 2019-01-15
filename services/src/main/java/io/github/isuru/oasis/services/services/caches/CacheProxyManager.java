@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.services.managers;
+package io.github.isuru.oasis.services.services.caches;
 
 import io.github.isuru.oasis.model.utils.ICacheProxy;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class CacheProxyHolder {
+public class CacheProxyManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CacheProxyHolder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CacheProxyManager.class);
 
     private final ICacheProxy cacheProxy;
 
     @Autowired
-    public CacheProxyHolder(Map<String, ICacheProxy> cacheProxyMap, OasisConfigurations configurations) {
+    public CacheProxyManager(Map<String, ICacheProxy> cacheProxyMap, OasisConfigurations configurations) {
         String cacheImpl = configurations.getCache().getImpl();
         String key = "cache" + StringUtils.capitalize(cacheImpl);
         cacheProxy = cacheProxyMap.computeIfAbsent(key, s -> cacheProxyMap.get("cacheNone"));

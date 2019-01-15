@@ -7,8 +7,8 @@ import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.model.events.JsonEvent;
-import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.DataCache;
+import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.services.control.sinks.DbSink;
 import io.github.isuru.oasis.services.services.control.sinks.LocalSinks;
 
@@ -21,17 +21,17 @@ import java.util.concurrent.ExecutorService;
  */
 class LocalRunner implements Runnable {
 
-    private Configs appConfigs;
     private final long gameId;
     private IOasisDao dao;
     private LocalSinks localSinks;
     private ExecutorService pool;
     private DbSink oasisSink;
     private DataCache dataCache;
+    private OasisConfigurations oasisConfigurations;
 
-    LocalRunner(Configs appConfigs, ExecutorService pool, IOasisDao dao, long gameId,
+    LocalRunner(OasisConfigurations configurations, ExecutorService pool, IOasisDao dao, long gameId,
                 DataCache dataCache) {
-        this.appConfigs = appConfigs;
+        this.oasisConfigurations = configurations;
         this.gameId = gameId;
         this.dao = dao;
         this.pool = pool;
@@ -42,11 +42,12 @@ class LocalRunner implements Runnable {
     @Override
     public void run() {
         // setup explicit configs
-        Properties props = appConfigs.getProps();
-        Map<String, Object> localProps = OasisUtils.filterKeys(props, "oasis.localrun.");
+        Map<String, Object> localRunProps = oasisConfigurations.getLocalRun();
+//        Properties props = appConfigs.getProps();
 
-        Configs configs = Configs.from(props);
-        for (Map.Entry<String, Object> entry : localProps.entrySet()) {
+        // @TODO convert OasisConfiguration object to Map and pass it here
+        Configs configs = Configs.from(new Properties());
+        for (Map.Entry<String, Object> entry : localRunProps.entrySet()) {
             configs.append(entry.getKey(), entry.getValue());
         }
 

@@ -11,16 +11,25 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import javax.annotation.PostConstruct;
+
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class FlinkServices {
 
     private static final Logger LOG = LoggerFactory.getLogger(FlinkServices.class);
 
+    private final OasisConfigurations configurations;
+
     private FlinkClient flinkClient;
 
     @Autowired
     public FlinkServices(OasisConfigurations configurations) {
+        this.configurations = configurations;
+    }
+
+    @PostConstruct
+    public void init() {
         init(configurations.getFlinkURL());
     }
 

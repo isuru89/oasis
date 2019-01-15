@@ -1,16 +1,22 @@
 package io.github.isuru.oasis.services.services.control;
 
 import io.github.isuru.oasis.game.persist.OasisSink;
-import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.services.DataCache;
+import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.IGameController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -20,18 +26,46 @@ import java.util.concurrent.Executors;
  * @author iweerarathna
  */
 @Component("schedulerLocal")
+@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class LocalScheduler implements IGameController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LocalScheduler.class);
 
     private final ExecutorService pool = Executors.newCachedThreadPool();
     private final ExecutorService challengePool = Executors.newCachedThreadPool();
     private final Map<Long, LocalRunner> runners = new ConcurrentHashMap<>();
     private final LocalChallengeProcessor challengeProcessor;
 
-    @Autowired
+
     private final IOasisDao dao;
+    private final DataCache dataCache;
+    private final OasisConfigurations oasisConfigurations;
 
     @Autowired
-    private DataCache dataCache;
+    public LocalScheduler(IOasisDao dao, DataCache dataCache, OasisConfigurations oasisConfigurations) {
+        this.dao = dao;
+        this.dataCache = dataCache;
+        this.oasisConfigurations = oasisConfigurations;
+
+        this.challengeProcessor = new LocalChallengeProcessor(dao);
+    }
+
+    @PostConstruct
+    public void init() {
+        // submit challenge processor...
+        LOG.info("Starting local challenge processing engine...");
+        challengePool.submit(challengeProcessor);
+
+        LOG.debug("Local Run Properties: ");
+        Map<String, Object> localRun = oasisConfigurations.getLocalRun();
+        if (localRun != null) {
+            for (Map.Entry<String, Object> entry : localRun.entrySet()) {
+                LOG.debug(" - {} = {}", entry.getKey(), entry.getValue());
+            }
+        } else {
+            LOG.debug(" - None specified!");
+        }
+    }
 
     @Override
     public void submitEvent(long gameId, Map<String, Object> event) throws Exception {
@@ -45,16 +79,16 @@ public class LocalScheduler implements IGameController {
     }
 
     @Override
-    public void startGame(long gameId, Configs appConfigs) {
+    public void startGame(long gameId) {
         Sources.get().create(gameId);
 
-        LocalRunner runner = new LocalRunner(appConfigs, pool, dao, gameId, dataCache);
+        LocalRunner runner = new LocalRunner(oasisConfigurations, pool, dao, gameId, dataCache);
         runners.put(gameId, runner);
         pool.submit(runner);
     }
 
     @Override
-    public void startChallenge(ChallengeDef challengeDef, Configs appConfigs) throws Exception {
+    public void startChallenge(ChallengeDef challengeDef) throws Exception {
         long id = challengeDef.getId();
         Long gameId = challengeDef.getGameId();
         if (gameId == null) {
@@ -86,37 +120,34 @@ public class LocalScheduler implements IGameController {
     }
 
     @Override
-    public void resumeChallenge(ChallengeDef challengeDef, Configs appConfigs) throws Exception {
-        startChallenge(challengeDef, appConfigs);
+    public void resumeChallenge(ChallengeDef challengeDef) throws Exception {
+        startChallenge(challengeDef);
     }
 
     @Override
-    public void resumeGame(GameDef gameDef, Configs appConfigs) throws Exception {
-        startGame(gameDef.getId(), appConfigs);
+    public void resumeGame(GameDef gameDef) throws Exception {
+        startGame(gameDef.getId());
     }
 
     private void stopAllChallengesOfGame(long gameId) throws Exception {
         challengeProcessor.stopChallengesOfGame(gameId);
     }
 
-    public LocalScheduler(IOasisDao dao) {
-        this.dao = dao;
-        this.challengeProcessor = new LocalChallengeProcessor(dao);
+    @Override
+    public void close() throws IOException {
+        LOG.debug("Stopping challenge processing engine...");
+        challengeProcessor.setStop();
 
-        // submit challenge processor...
-        challengePool.submit(challengeProcessor);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            for (Map.Entry<Long, LocalRunner> entry : runners.entrySet()) {
-                try {
-                    entry.getValue().stop();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        for (Map.Entry<Long, LocalRunner> entry : runners.entrySet()) {
+            try {
+                entry.getValue().stop();
+            } catch (InterruptedException e) {
+                LOG.debug("Interrupted challenge: {}", entry.getKey());
             }
-        }));
+        }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(challengeProcessor::setStop));
+        LOG.debug("Stopping engine pools...");
+        pool.shutdownNow();
+        challengePool.shutdownNow();
     }
-
 }

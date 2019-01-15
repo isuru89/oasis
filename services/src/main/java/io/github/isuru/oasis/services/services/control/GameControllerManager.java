@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.services.managers;
+package io.github.isuru.oasis.services.services.control;
 
 import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
@@ -11,14 +11,14 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class GameControllerHolder {
+public class GameControllerManager {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GameControllerHolder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GameControllerManager.class);
 
     private final IGameController gameController;
 
     @Autowired
-    public GameControllerHolder(Map<String, IGameController> gameControllerMap, OasisConfigurations configurations) {
+    public GameControllerManager(Map<String, IGameController> gameControllerMap, OasisConfigurations configurations) {
         boolean local = OasisUtils.getEnvOr("OASIS_MODE", "oasis.mode", configurations.getMode())
                 .trim()
                 .equalsIgnoreCase("local");

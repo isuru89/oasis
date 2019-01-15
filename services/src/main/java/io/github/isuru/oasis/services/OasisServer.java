@@ -8,7 +8,6 @@ import io.github.isuru.oasis.services.api.routers.Routers;
 import io.github.isuru.oasis.services.model.IGameController;
 import io.github.isuru.oasis.services.services.DefaultOasisApiService;
 import io.github.isuru.oasis.services.services.IOasisApiService;
-import io.github.isuru.oasis.services.services.control.LocalScheduler;
 import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import org.apache.log4j.PropertyConfigurator;
@@ -48,16 +47,16 @@ public class OasisServer {
 
         LOGGER.debug("Creating remote game controllers...");
         IGameController gameController;
-        if (configs.isLocal()) {
-            gameController = new LocalScheduler(oasisDao);
-        } else {
-            gameController = new LocalScheduler(oasisDao);
-        }
+//        if (configs.isLocal()) {
+//            gameController = new LocalScheduler(oasisDao);
+//        } else {
+//            gameController = new LocalScheduler(oasisDao);
+//        }
 
         LOGGER.debug("Initializing services...");
         OasisOptions oasisOptions = new OasisOptions();
 //        oasisOptions.setFlinkServices(flinkServices);
-        oasisOptions.setGameController(gameController);
+//        oasisOptions.setGameController(gameController);
         oasisOptions.setConfigs(configs);
         //OasisCacheFactory factory = new OasisCacheFactory();
         //oasisOptions.setCacheProxy(factory.create(new AbstractCacheFactory.CacheOptions(), configs));

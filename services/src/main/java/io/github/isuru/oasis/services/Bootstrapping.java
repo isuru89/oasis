@@ -17,7 +17,7 @@ import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.ILifecycleService;
 import io.github.isuru.oasis.services.services.IProfileService;
-import io.github.isuru.oasis.services.services.managers.LifecycleImplHolder;
+import io.github.isuru.oasis.services.services.LifecycleImplManager;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.UserRole;
 import org.apache.commons.lang3.BooleanUtils;
@@ -47,7 +47,7 @@ public class Bootstrapping {
     private IGameDefService gameDefService;
 
     @Autowired
-    private LifecycleImplHolder lifecycleImplHolder;
+    private LifecycleImplManager lifecycleImplManager;
 
     @Autowired
     private IOasisDao dao;
@@ -153,7 +153,7 @@ public class Bootstrapping {
             return;
         }
 
-        ILifecycleService lifecycleService = lifecycleImplHolder.get();
+        ILifecycleService lifecycleService = lifecycleImplManager.get();
 
         // resume game first...
         List<Integer> resumedGameIds = new LinkedList<>();

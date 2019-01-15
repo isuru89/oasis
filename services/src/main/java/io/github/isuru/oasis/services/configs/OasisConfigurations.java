@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
 import java.io.File;
+import java.util.Map;
 
 @Configuration
 @PropertySource("file:./configs/application.properties")
@@ -23,6 +24,8 @@ public class OasisConfigurations {
 
     private String flinkURL;
     private int flinkParallelism = 1;
+
+    private Map<String, Object> localRun;
 
     @NotNull
     private CacheConfigs cache;
@@ -189,6 +192,14 @@ public class OasisConfigurations {
         // https://stackoverflow.com/questions/54180163/spring-boot-initialize-new-instance-for-nested-configuration-binding-when-there
         // I have to initialize them manually by myself
         rabbit = new RabbitConfigurations();
+    }
+
+    public Map<String, Object> getLocalRun() {
+        return localRun;
+    }
+
+    public void setLocalRun(Map<String, Object> localRun) {
+        this.localRun = localRun;
     }
 
     public RabbitConfigurations getRabbit() {
