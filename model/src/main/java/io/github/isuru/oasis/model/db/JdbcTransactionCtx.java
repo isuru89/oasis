@@ -7,12 +7,12 @@ import java.util.Map;
  */
 public interface JdbcTransactionCtx {
 
-    Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data) throws Exception;
+    Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data) throws DbException;
 
-    <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws Exception;
+    <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws DbException;
 
-    long executeCommand(String queryId, Map<String, Object> data) throws Exception;
+    long executeCommand(String queryId, Map<String, Object> data) throws DbException;
 
-    Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws Exception;
-    Long executeInsert(String queryId, Map<String, Object> data, Map<String, Object> templateData, String keyColumn) throws Exception;
+    Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws DbException;
+    Long executeInsert(String queryId, Map<String, Object> data, Map<String, Object> templateData, String keyColumn) throws DbException;
 }

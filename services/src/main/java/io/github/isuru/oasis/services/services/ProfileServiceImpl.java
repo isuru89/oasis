@@ -1,16 +1,17 @@
 package io.github.isuru.oasis.services.services;
 
+import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.model.UserTeamScope;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
-import io.github.isuru.oasis.services.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,7 @@ public class ProfileServiceImpl implements IProfileService {
     private IGameDefService gameDefService;
 
     @Override
-    public long addUserProfile(UserProfile profile) throws Exception {
+    public long addUserProfile(UserProfile profile) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(profile.getEmail(), "email");
         Checks.nonNullOrEmpty(profile.getName(), "name");
 
@@ -54,7 +55,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public UserProfile readUserProfile(long userId) throws Exception {
+    public UserProfile readUserProfile(long userId) throws DbException, InputValidationException {
         Checks.greaterThanZero(userId, "userId");
 
         return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.READ_USER,
@@ -63,7 +64,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public UserProfile readUserProfile(String email) throws Exception {
+    public UserProfile readUserProfile(String email) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(email, "email");
 
         return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.READ_USER_BY_EMAIL,
@@ -72,14 +73,14 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public UserProfile readUserProfileByExtId(long extUserId) throws Exception {
+    public UserProfile readUserProfileByExtId(long extUserId) throws DbException {
         return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.READ_USER_BY_EXTID,
                 Maps.create("extId", extUserId),
                 UserProfile.class);
     }
 
     @Override
-    public boolean editUserProfile(long userId, UserProfile latest) throws Exception {
+    public boolean editUserProfile(long userId, UserProfile latest) throws DbException, InputValidationException {
         Checks.greaterThanZero(userId, "userId");
 
         UserProfile prev = readUserProfile(userId);
@@ -93,14 +94,14 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public boolean deleteUserProfile(long userId) throws Exception {
+    public boolean deleteUserProfile(long userId) throws DbException, InputValidationException {
         Checks.greaterThanZero(userId, "userId");
 
         return dao.executeCommand(Q.PROFILE.DISABLE_USER, Maps.create("userId", userId)) > 0;
     }
 
     @Override
-    public List<UserProfile> findUser(String email, String name) throws Exception {
+    public List<UserProfile> findUser(String email, String name) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(email, "email");
 
         if (email.length() < 4) {
@@ -123,7 +124,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public List<UserProfile> listUsers(long teamId, long offset, long size) throws Exception {
+    public List<UserProfile> listUsers(long teamId, long offset, long size) throws DbException, InputValidationException {
         Checks.greaterThanZero(teamId, "teamId");
         Checks.nonNegative(offset, "offset");
         Checks.nonNegative(size, "size");
@@ -138,7 +139,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public long addTeam(TeamProfile teamProfile) throws Exception {
+    public long addTeam(TeamProfile teamProfile) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(teamProfile.getName(), "name");
         Checks.greaterThanZero(teamProfile.getTeamScope(), "scope");
 
@@ -177,7 +178,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public TeamProfile readTeam(long teamId) throws Exception {
+    public TeamProfile readTeam(long teamId) throws DbException, InputValidationException {
         Checks.greaterThanZero(teamId, "teamId");
 
         return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.READ_TEAM,
@@ -186,7 +187,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public boolean editTeam(long teamId, TeamProfile latest) throws Exception {
+    public boolean editTeam(long teamId, TeamProfile latest) throws DbException, InputValidationException {
         Checks.greaterThanZero(teamId, "teamId");
 
         TeamProfile prev = readTeam(teamId);
@@ -201,7 +202,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public List<TeamProfile> listTeams(long scopeId) throws Exception {
+    public List<TeamProfile> listTeams(long scopeId) throws DbException, InputValidationException {
         Checks.greaterThanZero(scopeId, "scopeId");
 
         return ServiceUtils.toList(dao.executeQuery(Q.PROFILE.LIST_TEAMS_OF_SCOPE,
@@ -210,7 +211,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public long addTeamScope(TeamScope teamScope) throws Exception {
+    public long addTeamScope(TeamScope teamScope) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(teamScope.getName(), "name");
         Checks.nonNullOrEmpty(teamScope.getDisplayName(), "displayName");
 
@@ -261,7 +262,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public TeamScope readTeamScope(long scopeId) throws Exception {
+    public TeamScope readTeamScope(long scopeId) throws DbException, InputValidationException {
         Checks.greaterThanZero(scopeId, "scopeId");
 
         return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.READ_TEAMSCOPE,
@@ -270,7 +271,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public TeamScope readTeamScope(String scopeName) throws Exception {
+    public TeamScope readTeamScope(String scopeName) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(scopeName, "scopeName");
 
         return ServiceUtils.getTheOnlyRecord(dao,Q.PROFILE.FIND_SCOPE_BY_NAME,
@@ -279,13 +280,13 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public List<TeamScope> listTeamScopes() throws Exception {
+    public List<TeamScope> listTeamScopes() throws DbException {
         return ServiceUtils.toList(dao.executeQuery(Q.PROFILE.LIST_TEAM_SCOPES,
                 null, TeamScope.class));
     }
 
     @Override
-    public boolean editTeamScope(long scopeId, TeamScope latest) throws Exception {
+    public boolean editTeamScope(long scopeId, TeamScope latest) throws DbException, InputValidationException {
         Checks.greaterThanZero(scopeId, "scopeId");
 
         TeamScope prev = readTeamScope(scopeId);
@@ -298,12 +299,12 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public boolean addUserToTeam(long userId, long teamId, int roleId) throws Exception {
+    public boolean addUserToTeam(long userId, long teamId, int roleId) throws DbException, InputValidationException {
         return addUserToTeam(userId, teamId, roleId, false);
     }
 
     @Override
-    public boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval) throws Exception {
+    public boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval) throws DbException, InputValidationException {
         Checks.greaterThanZero(userId, "userId");
         Checks.greaterThanZero(teamId, "teamId");
         Checks.validate(roleId > 0 && roleId <= UserRole.ALL_ROLE, "roleId must be a flag of 1,2,4, or 8.");
@@ -346,17 +347,17 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public UserTeam findCurrentTeamOfUser(long userId) throws Exception {
+    public UserTeam findCurrentTeamOfUser(long userId) throws DbException, InputValidationException {
         return findCurrentTeamOfUser(userId, true);
     }
 
     @Override
-    public UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly) throws Exception {
+    public UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly) throws DbException, InputValidationException {
         return findCurrentTeamOfUser(userId, returnApprovedOnly, System.currentTimeMillis());
     }
 
     @Override
-    public UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly, long atTime) throws Exception {
+    public UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly, long atTime) throws DbException, InputValidationException {
         Checks.greaterThanZero(userId, "userId");
 
         // @TODO handle when no record is found
@@ -374,7 +375,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public TeamProfile findTeamByName(String name) throws Exception {
+    public TeamProfile findTeamByName(String name) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(name, "teamName");
 
         return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.FIND_TEAM_BY_NAME,
@@ -383,7 +384,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public boolean logoutUser(long userId, long ts) throws Exception {
+    public boolean logoutUser(long userId, long ts) throws DbException, InputValidationException {
         Checks.greaterThanZero(userId, "userId");
 
         return dao.executeCommand(Q.PROFILE.LOGOUT_USER,
@@ -391,7 +392,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public long requestForRole(long byUser, int teamScopeId, int roleId, long startTime) throws Exception {
+    public long requestForRole(long byUser, int teamScopeId, int roleId, long startTime) throws DbException, InputValidationException {
         Checks.greaterThanZero(byUser, "byUser");
         Checks.greaterThanZero(teamScopeId, "teamScopeId");
         Checks.greaterThanZero(roleId, "roleId");
@@ -408,7 +409,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public boolean rejectRequestedRole(int requestId, long rejectedBy) throws Exception {
+    public boolean rejectRequestedRole(int requestId, long rejectedBy) throws DbException, InputValidationException {
         Checks.greaterThanZero(requestId, "requestId");
         Checks.greaterThanZero(rejectedBy, "rejectedBy");
 
@@ -432,7 +433,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public boolean removeCurrentRole(long userId, int teamScopeId, long endTime, long removedBy) throws Exception {
+    public boolean removeCurrentRole(long userId, int teamScopeId, long endTime, long removedBy) throws DbException, InputValidationException {
         Checks.greaterThanZero(userId, "userId");
         Checks.greaterThanZero(teamScopeId, "teamScopeId");
         Checks.greaterThanZero(endTime, "endTime");
@@ -450,7 +451,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public boolean approveRole(int requestId, long approvedTime, long approvedBy) throws Exception {
+    public boolean approveRole(int requestId, long approvedTime, long approvedBy) throws DbException, InputValidationException {
         Checks.greaterThanZero(requestId, "requestId");
         Checks.greaterThanZero(approvedBy, "approvedBy");
         Checks.greaterThanZero(approvedTime, "approvedTime");
@@ -477,7 +478,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public List<UserTeamScope> listCurrentUserRoles(long userId) throws Exception {
+    public List<UserTeamScope> listCurrentUserRoles(long userId) throws DbException, InputValidationException {
         Checks.greaterThanZero(userId, "userId");
 
         return ServiceUtils.toList(dao.executeQuery("profile/flow/listCurrentUserRoles",

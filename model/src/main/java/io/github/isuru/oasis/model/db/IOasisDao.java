@@ -13,18 +13,18 @@ public interface IOasisDao extends AutoCloseable {
     void init(DbProperties properties) throws Exception;
 
     <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data,
-                                 Class<T> clz, Map<String, Object> templatingData) throws Exception;
-    Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data) throws Exception;
+                                 Class<T> clz, Map<String, Object> templatingData) throws DbException;
+    Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data) throws DbException;
     Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data,
-                                               Map<String, Object> templatingData) throws Exception;
-    <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws Exception;
-    long executeCommand(String queryId, Map<String, Object> data) throws Exception;
-    long executeCommand(String queryId, Map<String, Object> data, Map<String, Object> templatingData) throws Exception;
-    long executeRawCommand(String queryStr, Map<String, Object> data) throws Exception;
-    List<Integer> executeBatchInsert(String queryId, List<Map<String, Object>> batchData) throws Exception;
-    Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws Exception;
-    Long executeInsert(String queryId, Map<String, Object> data, Map<String, Object> templatingData, String keyColumn) throws Exception;
-    Object runTx(int transactionLevel, ConsumerEx<JdbcTransactionCtx> txBody) throws Exception;
+                                               Map<String, Object> templatingData) throws DbException;
+    <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws DbException;
+    long executeCommand(String queryId, Map<String, Object> data) throws DbException;
+    long executeCommand(String queryId, Map<String, Object> data, Map<String, Object> templatingData) throws DbException;
+    long executeRawCommand(String queryStr, Map<String, Object> data) throws DbException;
+    List<Integer> executeBatchInsert(String queryId, List<Map<String, Object>> batchData) throws DbException;
+    Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws DbException;
+    Long executeInsert(String queryId, Map<String, Object> data, Map<String, Object> templatingData, String keyColumn) throws DbException;
+    Object runTx(int transactionLevel, ConsumerEx<JdbcTransactionCtx> txBody) throws DbException;
 
     IDefinitionDao getDefinitionDao();
 

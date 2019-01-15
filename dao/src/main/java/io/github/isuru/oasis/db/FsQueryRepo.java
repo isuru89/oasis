@@ -2,6 +2,7 @@ package io.github.isuru.oasis.db;
 
 import io.github.isuru.oasis.model.db.DbProperties;
 import io.github.isuru.oasis.model.db.IQueryRepo;
+import io.github.isuru.oasis.model.db.ScriptNotFoundException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -69,12 +70,18 @@ public class FsQueryRepo implements IQueryRepo {
     }
 
     @Override
-    public String fetchQuery(String queryId) {
+    public String fetchQuery(String queryId) throws ScriptNotFoundException {
+        String script;
         if (queryId.endsWith(SQL)) {
-            return queries.get(queryId);
+            script = queries.get(queryId);
         } else {
-            return queries.getOrDefault(queryId + "-" + DB + SQL, queries.get(queryId + SQL));
+            script = queries.getOrDefault(queryId + "-" + DB + SQL, queries.get(queryId + SQL));
         }
+
+        if (script == null) {
+            throw new ScriptNotFoundException("Given script is not found in directory! [" + queryId + "]");
+        }
+        return script;
     }
 
     Map<String, String> getQueries() {

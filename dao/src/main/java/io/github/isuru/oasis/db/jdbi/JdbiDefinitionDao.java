@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.db.jdbi;
 
+import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IDefinitionDao;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.DefWrapper;
@@ -29,7 +30,7 @@ public class JdbiDefinitionDao implements IDefinitionDao {
     }
 
     @Override
-    public DefWrapper readDefinition(long id) throws Exception {
+    public DefWrapper readDefinition(long id) throws DbException {
         Map<String, Object> data = new HashMap<>();
         data.put("id", id);
 
@@ -43,7 +44,7 @@ public class JdbiDefinitionDao implements IDefinitionDao {
     }
 
     @Override
-    public List<DefWrapper> listDefinitions(int kind) throws Exception {
+    public List<DefWrapper> listDefinitions(int kind) throws DbException {
         Map<String, Object> data = new HashMap<>();
         data.put("type", kind);
 
@@ -56,7 +57,7 @@ public class JdbiDefinitionDao implements IDefinitionDao {
     }
 
     @Override
-    public List<DefWrapper> listDefinitionsOfGame(long gameId, int kind) throws Exception {
+    public List<DefWrapper> listDefinitionsOfGame(long gameId, int kind) throws DbException {
         Map<String, Object> data = new HashMap<>();
         data.put("type", kind);
         data.put("gameId", gameId);
@@ -70,7 +71,7 @@ public class JdbiDefinitionDao implements IDefinitionDao {
     }
 
     @Override
-    public long addDefinition(DefWrapper wrapper) throws Exception {
+    public long addDefinition(DefWrapper wrapper) throws DbException {
         Map<String, Object> data = new HashMap<>();
         data.put("typeId", wrapper.getKind());
         data.put("name", wrapper.getName());
@@ -81,20 +82,20 @@ public class JdbiDefinitionDao implements IDefinitionDao {
 
         Long id = dao.executeInsert(DEF_ADD_DEFINITION, data, "id");
         if (id == null || id < 0) {
-            throw new Exception("Unable to add definition to the game!");
+            throw new DbException("Unable to add definition to the game!");
         }
         return id;
     }
 
     @Override
-    public boolean disableDefinition(long id) throws Exception {
+    public boolean disableDefinition(long id) throws DbException {
         Map<String, Object> data = new HashMap<>();
         data.put("id", id);
         return dao.executeCommand(DEF_DISABLE_DEFINITION, data) > 0;
     }
 
     @Override
-    public long editDefinition(long id, DefWrapper latest) throws Exception {
+    public long editDefinition(long id, DefWrapper latest) throws DbException {
         DefWrapper prev = dao.getDefinitionDao().readDefinition(id);
         Map<String, Object> data = new HashMap<>();
         data.put("id", id);

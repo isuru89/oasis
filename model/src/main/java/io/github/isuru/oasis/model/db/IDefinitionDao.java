@@ -9,15 +9,15 @@ import java.util.List;
  */
 public interface IDefinitionDao {
 
-    DefWrapper readDefinition(long id) throws Exception;
+    DefWrapper readDefinition(long id) throws DbException;
 
-    List<DefWrapper> listDefinitions(int kind) throws Exception;
-    List<DefWrapper> listDefinitionsOfGame(long gameId, int kind) throws Exception;
+    List<DefWrapper> listDefinitions(int kind) throws DbException;
+    List<DefWrapper> listDefinitionsOfGame(long gameId, int kind) throws DbException;
 
-    long addDefinition(DefWrapper wrapper) throws Exception;
+    long addDefinition(DefWrapper wrapper) throws DbException;
 
-    boolean disableDefinition(long id) throws Exception;
+    boolean disableDefinition(long id) throws DbException;
 
-    long editDefinition(long id, DefWrapper wrapper) throws Exception;
+    long editDefinition(long id, DefWrapper wrapper) throws DbException;
 
 }

@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS OA_POINT (
     point_name      VARCHAR(128),
     points          FLOAT(4),
     tag             VARCHAR(512),
-    is_active       TINYINT(1) DEFAULT 1,
     game_id         INT,
     source_id       INT,
+    is_active       TINYINT(1) DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -26,8 +26,6 @@ CREATE TABLE IF NOT EXISTS OA_BADGE (
     ts              BIGINT,
     badge_id        INT,
     sub_badge_id    VARCHAR(64),
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     start_ext_id    VARCHAR(1024),
     end_ext_id      VARCHAR(1024),
     start_time      BIGINT,
@@ -35,7 +33,9 @@ CREATE TABLE IF NOT EXISTS OA_BADGE (
     tag             VARCHAR(512),
     game_id         INT,
     source_id       INT,
-    is_active       TINYINT(1) DEFAULT 1
+    is_active       TINYINT(1) DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 ALTER TABLE OA_BADGE ADD PRIMARY KEY (user_id, event_type, ts, badge_id, sub_badge_id);
@@ -49,10 +49,10 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONE (
     ts              BIGINT,
     milestone_id    INT,
     level           INT,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     is_active       TINYINT(1) DEFAULT 1,
-    game_id         INT
+    game_id         INT,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 ALTER TABLE OA_MILESTONE ADD PRIMARY KEY (user_id, milestone_id, level);

@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.services;
 
+import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
 
 import java.util.Iterator;
@@ -21,7 +22,7 @@ class ServiceUtils {
         return results;
     }
 
-    static <T> T getTheOnlyRecord(IOasisDao dao, String queryId, Map<String, Object> data, Class<T> clz) throws Exception {
+    static <T> T getTheOnlyRecord(IOasisDao dao, String queryId, Map<String, Object> data, Class<T> clz) throws DbException {
         Iterable<T> itUsers = dao.executeQuery(queryId, data, clz);
         Iterator<T> iterator = itUsers.iterator();
         if (iterator.hasNext()) {

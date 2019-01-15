@@ -9,6 +9,6 @@ public interface IQueryRepo extends Closeable {
 
     void init(DbProperties dbProperties) throws Exception;
 
-    String fetchQuery(String queryId) throws Exception;
+    String fetchQuery(String queryId) throws ScriptNotFoundException;
 
 }
