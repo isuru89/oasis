@@ -11,6 +11,8 @@ import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.services.control.sinks.DbSink;
 import io.github.isuru.oasis.services.services.control.sinks.LocalSinks;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Properties;
@@ -21,6 +23,8 @@ import java.util.concurrent.ExecutorService;
  */
 class LocalRunner implements Runnable {
 
+    private static final Logger LOG = LoggerFactory.getLogger(LocalRunner.class);
+
     private final long gameId;
     private IOasisDao dao;
     private LocalSinks localSinks;
@@ -29,7 +33,10 @@ class LocalRunner implements Runnable {
     private DataCache dataCache;
     private OasisConfigurations oasisConfigurations;
 
-    LocalRunner(OasisConfigurations configurations, ExecutorService pool, IOasisDao dao, long gameId,
+    LocalRunner(OasisConfigurations configurations,
+                ExecutorService pool,
+                IOasisDao dao,
+                long gameId,
                 DataCache dataCache) {
         this.oasisConfigurations = configurations;
         this.gameId = gameId;
@@ -43,7 +50,6 @@ class LocalRunner implements Runnable {
     public void run() {
         // setup explicit configs
         Map<String, Object> localRunProps = oasisConfigurations.getLocalRun();
-//        Properties props = appConfigs.getProps();
 
         // @TODO convert OasisConfiguration object to Map and pass it here
         Configs configs = Configs.from(new Properties());
@@ -61,7 +67,7 @@ class LocalRunner implements Runnable {
             OasisGameDef gameDef = dataCache.loadGameDefs(gameId);
             Main.startGame(configs, gameDef);
         } catch (Throwable e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
     }
@@ -83,7 +89,7 @@ class LocalRunner implements Runnable {
         return gameId;
     }
 
-    public OasisSink getOasisSink() {
+    OasisSink getOasisSink() {
         return oasisSink;
     }
 }

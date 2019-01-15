@@ -102,7 +102,7 @@ public class Main {
     }
 
     static OasisChallengeExecution createOutputHandler(Configs gameProps, OasisChallengeExecution execution) {
-        String outputType = gameProps.getStr(Constants.KEY_OUTPUT_TYPE, "kafka").trim();
+        String outputType = gameProps.getStr(ConfigKeys.KEY_OUTPUT_TYPE, "kafka").trim();
         if ("none".equalsIgnoreCase(outputType)) {
             return execution.outputHandler(new NoneOutputHandler());
         } else if ("rabbit".equalsIgnoreCase(outputType)) {
@@ -113,8 +113,8 @@ public class Main {
     }
 
     static OasisExecution createOutputHandler(Configs gameProps, OasisExecution execution) {
-        if (gameProps.has(Constants.KEY_OUTPUT_TYPE)) {
-            String outputType = gameProps.getStr(Constants.KEY_OUTPUT_TYPE, "rabbit").trim();
+        if (gameProps.has(ConfigKeys.KEY_OUTPUT_TYPE)) {
+            String outputType = gameProps.getStr(ConfigKeys.KEY_OUTPUT_TYPE, "rabbit").trim();
             if ("none".equalsIgnoreCase(outputType)) {
                 return execution.outputHandler(new NoneOutputHandler());
             } else if ("rabbit".equalsIgnoreCase(outputType)) {
@@ -153,10 +153,10 @@ public class Main {
 
     @SuppressWarnings("unchecked")
     static SourceFunction<Event> createSource(Configs gameProps) throws FileNotFoundException {
-        if (gameProps.has(Constants.KEY_SOURCE_TYPE)) {
-            String type = gameProps.getStrReq(Constants.KEY_SOURCE_TYPE);
+        if (gameProps.has(ConfigKeys.KEY_SOURCE_TYPE)) {
+            String type = gameProps.getStrReq(ConfigKeys.KEY_SOURCE_TYPE);
             if ("file".equalsIgnoreCase(type)) {
-                File inputCsv = new File(gameProps.getStrReq(Constants.KEY_SOURCE_FILE));
+                File inputCsv = new File(gameProps.getStrReq(ConfigKeys.KEY_SOURCE_FILE));
                 if (!inputCsv.exists()) {
                     throw new FileNotFoundException("Input source file does not exist! ["
                             + inputCsv.getAbsolutePath() + "]");
@@ -213,9 +213,9 @@ public class Main {
         if (configDir == null) {
             throw new IllegalArgumentException("The configuration file does not exist! [" + configsPath + "]!");
         }
-        gameProps.append("_location", configDir.getAbsolutePath());
+        gameProps.append(ConfigKeys.KEY_LOCATION, configDir.getAbsolutePath());
 
-        String filePath = gameProps.getStr("game.rule.file", null);
+        String filePath = gameProps.getStr(ConfigKeys.KEY_GAME_RULE_FILE, null);
         if (filePath == null) {
             throw new RuntimeException("Game rule file location had not specified!");
         }

@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.game;
 
 import io.github.isuru.oasis.game.process.sources.CsvEventSource;
-import io.github.isuru.oasis.game.utils.Constants;
 import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.junit.jupiter.api.Assertions;
@@ -19,8 +19,8 @@ class MainTest {
     void testCreateSource() throws FileNotFoundException {
         {
             Properties properties = new Properties();
-            properties.put(Constants.KEY_SOURCE_TYPE, "file");
-            properties.put(Constants.KEY_SOURCE_FILE, "../non/existing/file");
+            properties.put(ConfigKeys.KEY_SOURCE_TYPE, "file");
+            properties.put(ConfigKeys.KEY_SOURCE_FILE, "../non/existing/file");
             try {
                 Main.createSource(Configs.from(properties));
                 Assertions.fail("File source creation should fail when source does not exist!");
@@ -30,8 +30,8 @@ class MainTest {
         }
         {
             Properties properties = new Properties();
-            properties.put(Constants.KEY_SOURCE_TYPE, "file");
-            properties.put(Constants.KEY_SOURCE_FILE, "../scripts/examples/input.csv");
+            properties.put(ConfigKeys.KEY_SOURCE_TYPE, "file");
+            properties.put(ConfigKeys.KEY_SOURCE_FILE, "../scripts/examples/input.csv");
 
             SourceFunction<Event> source = Main.createSource(Configs.from(properties));
             Assertions.assertTrue(source instanceof CsvEventSource);

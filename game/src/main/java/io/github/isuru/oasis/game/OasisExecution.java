@@ -1,20 +1,48 @@
 package io.github.isuru.oasis.game;
 
-import io.github.isuru.oasis.game.factory.*;
+import io.github.isuru.oasis.game.factory.MilestoneNotifier;
+import io.github.isuru.oasis.game.factory.MilestoneOperator;
+import io.github.isuru.oasis.game.factory.PointsNotifier;
+import io.github.isuru.oasis.game.factory.PointsOperator;
+import io.github.isuru.oasis.game.factory.StatesNotifier;
+import io.github.isuru.oasis.game.factory.StatesOperator;
 import io.github.isuru.oasis.game.factory.badges.BadgeNotifier;
 import io.github.isuru.oasis.game.factory.badges.BadgeOperator;
 import io.github.isuru.oasis.game.persist.OasisSink;
-import io.github.isuru.oasis.game.persist.mappers.*;
-import io.github.isuru.oasis.game.process.*;
-import io.github.isuru.oasis.game.process.sinks.*;
-import io.github.isuru.oasis.game.utils.Constants;
+import io.github.isuru.oasis.game.persist.mappers.BadgeNotificationMapper;
+import io.github.isuru.oasis.game.persist.mappers.MilestoneNotificationMapper;
+import io.github.isuru.oasis.game.persist.mappers.MilestoneStateNotificationMapper;
+import io.github.isuru.oasis.game.persist.mappers.PointNotificationMapper;
+import io.github.isuru.oasis.game.persist.mappers.StatesNotificationMapper;
+import io.github.isuru.oasis.game.process.EventTimestampSelector;
+import io.github.isuru.oasis.game.process.EventUserSelector;
+import io.github.isuru.oasis.game.process.FieldInjector;
+import io.github.isuru.oasis.game.process.PointErrorSplitter;
+import io.github.isuru.oasis.game.process.PointsFromBadgeMapper;
+import io.github.isuru.oasis.game.process.PointsFromMilestoneMapper;
+import io.github.isuru.oasis.game.process.PointsFromStateMapper;
+import io.github.isuru.oasis.game.process.sinks.OasisBadgesSink;
+import io.github.isuru.oasis.game.process.sinks.OasisMilestoneSink;
+import io.github.isuru.oasis.game.process.sinks.OasisMilestoneStateSink;
+import io.github.isuru.oasis.game.process.sinks.OasisPointsSink;
+import io.github.isuru.oasis.game.process.sinks.OasisStatesSink;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.OState;
+import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
-import io.github.isuru.oasis.model.events.*;
-import io.github.isuru.oasis.model.handlers.*;
+import io.github.isuru.oasis.model.events.BadgeEvent;
+import io.github.isuru.oasis.model.events.EventNames;
+import io.github.isuru.oasis.model.events.MilestoneEvent;
+import io.github.isuru.oasis.model.events.MilestoneStateEvent;
+import io.github.isuru.oasis.model.events.OStateEvent;
+import io.github.isuru.oasis.model.events.PointEvent;
+import io.github.isuru.oasis.model.handlers.BadgeNotification;
+import io.github.isuru.oasis.model.handlers.IOutputHandler;
+import io.github.isuru.oasis.model.handlers.MilestoneNotification;
+import io.github.isuru.oasis.model.handlers.OStateNotification;
+import io.github.isuru.oasis.model.handlers.PointNotification;
 import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
 import io.github.isuru.oasis.model.rules.BadgeFromPoints;
 import io.github.isuru.oasis.model.rules.BadgeRule;
@@ -26,7 +54,10 @@ import org.apache.flink.runtime.state.StateBackend;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
-import org.apache.flink.streaming.api.datastream.*;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
+import org.apache.flink.streaming.api.datastream.SplitStream;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
@@ -61,15 +92,15 @@ public class OasisExecution {
     private IOutputHandler outputHandler;
 
     static void appendCheckpointStatus(StreamExecutionEnvironment env, Configs gameProperties) throws IOException {
-        if (gameProperties.has(Constants.KEY_CHECKPOINT_ENABLED) &&
-                gameProperties.getBool(Constants.KEY_CHECKPOINT_ENABLED, true)) {
-            int interval = gameProperties.getInt(Constants.KEY_CHECKPOINT_INTERVAL, 20000);
+        if (gameProperties.has(ConfigKeys.KEY_CHECKPOINT_ENABLED) &&
+                gameProperties.getBool(ConfigKeys.KEY_CHECKPOINT_ENABLED, true)) {
+            int interval = gameProperties.getInt(ConfigKeys.KEY_CHECKPOINT_INTERVAL, 20000);
             env.enableCheckpointing(interval, CheckpointingMode.EXACTLY_ONCE);
             env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
             
-            if (gameProperties.has(Constants.KEY_CHECKPOINT_DIR)) {
-                File configDir = new File(gameProperties.getStrReq(Constants.KEY_LOCATION));
-                String relPath = gameProperties.getStrReq(Constants.KEY_CHECKPOINT_DIR);
+            if (gameProperties.has(ConfigKeys.KEY_CHECKPOINT_DIR)) {
+                File configDir = new File(gameProperties.getStrReq(ConfigKeys.KEY_LOCATION));
+                String relPath = gameProperties.getStrReq(ConfigKeys.KEY_CHECKPOINT_DIR);
                 File chkDir = new File(configDir, relPath);
                 FileUtils.forceMkdir(chkDir);
 
@@ -90,7 +121,7 @@ public class OasisExecution {
         if (externalEnv == null) {
             env = StreamExecutionEnvironment.getExecutionEnvironment();
             appendCheckpointStatus(env, gameProperties);
-            env.setParallelism(gameProperties.getInt(Constants.KEY_FLINK_PARALLELISM, 1));
+            env.setParallelism(gameProperties.getInt(ConfigKeys.KEY_FLINK_PARALLELISM, 1));
             env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         } else {
             env = externalEnv;

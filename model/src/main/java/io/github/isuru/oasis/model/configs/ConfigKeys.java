@@ -5,6 +5,20 @@ package io.github.isuru.oasis.model.configs;
  */
 public class ConfigKeys {
 
+    public static final String KEY_LOCATION = "_location";
+
+    public static final String KEY_SOURCE_TYPE = "source.type";
+    public static final String KEY_SOURCE_FILE = "source.file";
+    public static final String KEY_OUTPUT_TYPE = "output.type";
+
+    public static final String KEY_FLINK_PARALLELISM = "flink.parallelism";
+
+    public static final String KEY_GAME_RULE_FILE = "game.rule.file";
+
+    public static final String KEY_CHECKPOINT_ENABLED = "checkpoint.enabled";
+    public static final String KEY_CHECKPOINT_INTERVAL = "checkpoint.interval";
+    public static final String KEY_CHECKPOINT_DIR = "checkpoint.dir";
+
     public static final String KEY_JDBC_SCRIPTS_PATH = "oasis.db.scripts.path";
     public static final String KEY_JDBC_URL = "oasis.db.url";
     public static final String KEY_JDBC_USERNAME = "oasis.db.username";
