@@ -1,12 +1,8 @@
 package io.github.isuru.oasis.db.jdbi;
 
 import com.zaxxer.hikari.HikariDataSource;
-import io.github.isuru.oasis.model.db.DbException;
-import io.github.isuru.oasis.model.db.DbProperties;
-import io.github.isuru.oasis.model.db.IDefinitionDao;
-import io.github.isuru.oasis.model.db.IOasisDao;
-import io.github.isuru.oasis.model.db.IQueryRepo;
-import io.github.isuru.oasis.model.db.JdbcTransactionCtx;
+import io.github.isuru.oasis.db.Utils;
+import io.github.isuru.oasis.model.db.*;
 import io.github.isuru.oasis.model.utils.ConsumerEx;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.HandleCallback;
@@ -21,8 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -45,10 +46,37 @@ public class JdbiOasisDao implements IOasisDao {
     }
 
     @Override
-    public void init(DbProperties properties) {
+    public void init(DbProperties properties) throws IOException, DbException {
         source = JdbcPool.createDataSource(properties);
         jdbi = Jdbi.create(source);
         jdbi.setTemplateEngine(new StringTemplateEngine());
+
+        runForSchema(properties);
+    }
+
+    private void runForSchema(DbProperties dbProperties) throws IOException, DbException {
+        if (dbProperties.isAutoSchema()) {
+            String prefix = Utils.captureDbName(dbProperties.getUrl());
+            String schemaFileLoc = "schema" + (prefix.length() > 0 ? "-" + prefix : prefix) + ".sql";
+            File schemaDir = new File(dbProperties.getSchemaDir());
+            File schemaFile = new File(schemaDir, schemaFileLoc);
+
+            String queryStr;
+            if (schemaFile.exists()) {
+                queryStr = Files.readAllLines(schemaFile.toPath(), StandardCharsets.UTF_8).stream()
+                        .collect(Collectors.joining("\n"));
+            } else {
+                schemaFile = new File(schemaDir, "schema.sql");
+                if (schemaFile.exists()) {
+                    queryStr = Files.readAllLines(schemaFile.toPath(), StandardCharsets.UTF_8).stream()
+                            .collect(Collectors.joining("\n"));
+                } else {
+                    throw new FileNotFoundException("No valid schema file found to create schema in " + prefix + "!");
+                }
+            }
+
+            executeRawCommand(queryStr, new HashMap<>());
+        }
     }
 
     @Override

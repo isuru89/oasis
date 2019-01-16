@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -47,12 +46,7 @@ public class FsQueryRepo implements IQueryRepo {
     }
 
     String captureDbName(String url) {
-        Matcher matcher = JDBC_PATTERN.matcher(url.trim());
-        if (matcher.find()) {
-            DB = matcher.group(2);
-        } else {
-            DB = "";
-        }
+        DB = Utils.captureDbName(url);
         return DB;
     }
 

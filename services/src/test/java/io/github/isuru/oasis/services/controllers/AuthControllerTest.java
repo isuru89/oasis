@@ -5,10 +5,10 @@ import io.github.isuru.oasis.services.Utils;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.dto.StatusResponse;
 import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.security.*;
 import io.github.isuru.oasis.services.services.IProfileService;
-import io.github.isuru.oasis.services.model.UserRole;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Map;
 
@@ -42,10 +42,13 @@ class AuthControllerTest {
     private IProfileService ps;
 
     @MockBean
+    private WebApplicationContext context;
+
+    @MockBean
     private OasisConfigurations oasisConfigurations;
 
     @MockBean
-    private AuthenticationManager authenticationManager;
+    private OasisAuthManager authenticationManager;
 
     @MockBean
     private JwtTokenProvider tokenProvider;
@@ -66,6 +69,8 @@ class AuthControllerTest {
 
     @BeforeEach
     void doBefore() throws Exception {
+        BDDMockito.given(authenticationManager.get()).willReturn(authenticator);
+
         OasisConfigurations tmpConfigs = new OasisConfigurations();
         OasisConfigurations.AuthConfigs authConfigs = new OasisConfigurations.AuthConfigs();
         tmpConfigs.setAuth(authConfigs);
@@ -73,9 +78,11 @@ class AuthControllerTest {
         authConfigs.setJwtExpirationTime(3600L * 1000 * 24);
         tp = new JwtTokenProvider(tmpConfigs);
 
-        BDDMockito.given(oasisConfigurations.getAuth().getDefaultAdminPassword()).willReturn("admin");
-        BDDMockito.given(oasisConfigurations.getAuth().getDefaultCuratorPassword()).willReturn("curator");
-        BDDMockito.given(oasisConfigurations.getAuth().getDefaultPlayerPassword()).willReturn("player");
+        OasisConfigurations.AuthConfigs authCnf = new OasisConfigurations.AuthConfigs();
+        authCnf.setDefaultAdminPassword("admin");
+        authCnf.setDefaultCuratorPassword("curator");
+        authCnf.setDefaultPlayerPassword("player");
+        BDDMockito.given(oasisConfigurations.getAuth()).willReturn(authCnf);
 
         UserProfile isuruUser = createUser(200, "isuru@domain.com", "Isuru Weerarathna");
         UserTeam isuruTeam = new UserTeam(); isuruTeam.setRoleId(UserRole.PLAYER);
@@ -214,7 +221,8 @@ class AuthControllerTest {
         // already authenticated users can logout
         {
             String playerToken = doLogin("player@oasis.com", "player");
-            StatusResponse response = Utils.fromJson(mvc.perform(postJson("/auth/logout", "Bearer " + playerToken))
+            StatusResponse response = Utils.fromJson(
+                    mvc.perform(postJson("/auth/logout", null))
                     .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
                     .andReturn().getResponse().getContentAsString(), StatusResponse.class);
             Assertions.assertNotNull(response);

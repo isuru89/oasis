@@ -19,6 +19,10 @@ public class Utils {
         return mapper.readValue(text, clz);
     }
 
+    public static <T> T fromJson(byte[] text, Class<T> clz) throws IOException {
+        return mapper.readValue(text, clz);
+    }
+
     public static String toBase64(String text) {
         return Base64.getEncoder().encodeToString(text.getBytes(StandardCharsets.UTF_8));
     }

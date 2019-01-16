@@ -23,6 +23,8 @@ public class ConfigKeys {
     public static final String KEY_JDBC_URL = "oasis.db.url";
     public static final String KEY_JDBC_USERNAME = "oasis.db.username";
     public static final String KEY_JDBC_PASSWORD = "oasis.db.password";
+    public static final String KEY_JDBC_AUTO_SCHEMA = "oasis.db.autoSchema";
+    public static final String KEY_JDBC_SCHEMA_DIR = "oasis.db.schemaDir";
 
     public static final String KEY_STORAGE_DIR = "oasis.storage.dir";
     public static final String KEY_EXEC_PARALLELISM = "oasis.exec.parallelism";

@@ -11,6 +11,8 @@ import java.util.Optional;
  */
 public interface IEventsService {
 
+    void init();
+
     void submitEvent(String token, Map<String, Object> eventData) throws Exception;
 
     void submitEvents(String token, List<Map<String, Object>> events) throws Exception;

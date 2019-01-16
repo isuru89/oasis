@@ -20,7 +20,27 @@ public class DbProperties {
     private String url;
     private String username;
     private String password;
+
+    private boolean autoSchema = false;
+    private String schemaDir;
+
     private Map<String, Object> otherOptions;
+
+    public boolean isAutoSchema() {
+        return autoSchema;
+    }
+
+    public void setAutoSchema(boolean autoSchema) {
+        this.autoSchema = autoSchema;
+    }
+
+    public String getSchemaDir() {
+        return schemaDir;
+    }
+
+    public void setSchemaDir(String schemaDir) {
+        this.schemaDir = schemaDir;
+    }
 
     public DbProperties(String daoName) {
         this.daoName = daoName;
@@ -87,6 +107,13 @@ public class DbProperties {
         } else {
             throw new FileNotFoundException("The given scripts dir '" + scriptsDir.getAbsolutePath()
                     + "' does not exist!");
+        }
+
+        dbProps.setAutoSchema(configs.getBool(ConfigKeys.KEY_JDBC_AUTO_SCHEMA, false));
+        dbProps.setSchemaDir(configs.getStr(ConfigKeys.KEY_JDBC_SCHEMA_DIR, "./scripts"));
+        if (dbProps.isAutoSchema() && !new File(dbProps.getSchemaDir()).exists()) {
+            throw new FileNotFoundException("The given schema dir does not exist '"
+                + dbProps.getSchemaDir() + "'!");
         }
 
         Map<String, Object> map = OasisUtils.filterKeys(configs.getProps(), "oasis.db.pool.");

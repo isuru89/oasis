@@ -31,6 +31,11 @@ public class UserPrincipal implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
+    @JsonIgnore
+    private UserProfile profile;
+    @JsonIgnore
+    private UserTeam team;
+
     UserPrincipal(Long id,
                   String name,
                   String username,
@@ -54,14 +59,14 @@ public class UserPrincipal implements UserDetails {
         List<GrantedAuthority> authorities = new LinkedList<>();
 
         if (UserRole.hasRole(roleId, UserRole.ADMIN)) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            authorities.add(new SimpleGrantedAuthority(UserRole.ROLE_ADMIN));
         }
         if (UserRole.hasRole(roleId, UserRole.CURATOR)) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_CURATOR"));
+            authorities.add(new SimpleGrantedAuthority(UserRole.ROLE_CURATOR));
         }
-        authorities.add(new SimpleGrantedAuthority("ROLE_PLAYER"));
+        authorities.add(new SimpleGrantedAuthority(UserRole.ROLE_PLAYER));
 
-        return new UserPrincipal(
+        UserPrincipal principal = new UserPrincipal(
                 user.getId(),
                 user.getName(),
                 user.getNickName(),
@@ -71,6 +76,17 @@ public class UserPrincipal implements UserDetails {
                 user.isActive(),
                 authorities
         );
+        principal.team = userTeam;
+        principal.profile = user;
+        return principal;
+    }
+
+    public UserProfile getProfile() {
+        return profile;
+    }
+
+    public UserTeam getTeam() {
+        return team;
     }
 
     public int getRole() {

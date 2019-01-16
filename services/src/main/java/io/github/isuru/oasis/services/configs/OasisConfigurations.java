@@ -158,6 +158,9 @@ public class OasisConfigurations {
 
     public static class DatabaseConfigurations {
 
+        private boolean autoSchema = false;
+        private String schemaDir;
+
         private String scriptsPath;
 
         private String url;
@@ -165,6 +168,22 @@ public class OasisConfigurations {
         private String password;
 
         private int maximumPoolSize;
+
+        public String getSchemaDir() {
+            return schemaDir;
+        }
+
+        public void setSchemaDir(String schemaDir) {
+            this.schemaDir = schemaDir;
+        }
+
+        public boolean isAutoSchema() {
+            return autoSchema;
+        }
+
+        public void setAutoSchema(boolean autoSchema) {
+            this.autoSchema = autoSchema;
+        }
 
         public String getScriptsPath() {
             return scriptsPath;

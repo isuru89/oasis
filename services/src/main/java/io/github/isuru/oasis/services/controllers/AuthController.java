@@ -84,13 +84,6 @@ public class AuthController {
             }
         }
 
-        // if ldap auth success
-        UserProfile profile = profileService.readUserProfile(username);
-        if (profile == null) {
-            // no profiles associated with user.
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is not found or registered in the Oasis!");
-        }
-
         checkReservedUserAuth(username, password);
 
         Authentication authentication = authenticationManager.authenticate(
@@ -104,6 +97,8 @@ public class AuthController {
 
         // authentication successful. Let's create the token
         //
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        UserProfile profile = principal.getProfile();
         AuthResponse authResponse = new AuthResponse();
         authResponse.setSuccess(true);
         authResponse.setActivated(profile.isActivated());

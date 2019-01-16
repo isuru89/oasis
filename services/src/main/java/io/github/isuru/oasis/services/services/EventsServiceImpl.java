@@ -8,15 +8,11 @@ import io.github.isuru.oasis.model.utils.ICacheProxy;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.model.EventSourceToken;
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.UserProfile;
-import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.services.caches.CacheProxyManager;
 import io.github.isuru.oasis.services.services.control.GameControllerManager;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
-import io.github.isuru.oasis.services.model.EventSources;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.SecurityUtils;
 import org.slf4j.Logger;
@@ -24,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.HashMap;
@@ -59,7 +54,7 @@ public class EventsServiceImpl implements IEventsService {
 
     private final EventSources sources = new EventSources();
 
-    @PostConstruct
+    @Override
     public void init() {
         try {
             LOG.debug("Fetching all event sources from database...");

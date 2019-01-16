@@ -39,6 +39,9 @@ public class DataConfigs {
                     + "' does not exist!");
         }
 
+        properties.setAutoSchema(dbConfigs.isAutoSchema());
+        properties.setSchemaDir(dbConfigs.getSchemaDir());
+
         Map<String, Object> poolProps = new HashMap<>();
         poolProps.put("maximumPoolSize", dbConfigs.getMaximumPoolSize());
         properties.setOtherOptions(poolProps);

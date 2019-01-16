@@ -7,6 +7,7 @@ import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.model.utils.OasisUtils;
+import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.model.EventSourceToken;
 import io.github.isuru.oasis.services.model.SubmittedJob;
@@ -24,7 +25,9 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class Bootstrapping {
 
     private static final Logger LOG = LoggerFactory.getLogger(Bootstrapping.class);
@@ -55,11 +59,17 @@ public class Bootstrapping {
     @Autowired
     private DataCache dataCache;
 
+    @Autowired
+    private OasisConfigurations oasisConfigurations;
+
     @EventListener(ApplicationReadyEvent.class)
     public void initialize() throws Exception {
         LOG.info("-------------------------------------------------------");
         LOG.info("OASIS - STARTUP / Initialized");
         LOG.info("-------------------------------------------------------");
+
+        eventsService.init();
+
         initSystem(dao);
 
         // setup data cache
