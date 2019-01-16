@@ -1,176 +1,67 @@
 package io.github.isuru.oasis.services.services;
 
 import com.github.slugify.Slugify;
-import io.github.isuru.oasis.model.db.IOasisDao;
-import io.github.isuru.oasis.model.utils.ICacheProxy;
-import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.EventSourceToken;
-import io.github.isuru.oasis.services.model.IGameController;
-import io.github.isuru.oasis.services.services.caches.InMemoryCache;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
 
-@RunWith(SpringRunner.class)
-public class EventServiceTest {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-    @TestConfiguration
-    static class EventServiceCtx {
+public class EventServiceTest extends AbstractServiceTest {
 
-        @Bean
-        public IEventsService createService() {
-            return new EventsServiceImpl();
-        }
-
-        @Bean
-        public ICacheProxy createMemCache() {
-            return new InMemoryCache();
-        }
-
-    }
+//    @TestConfiguration
+//    static class EventServiceCtx {
+//
+//        @Bean
+//        public IEventsService createService() {
+//            return new EventsServiceImpl();
+//        }
+//
+//        @Bean
+//        public ICacheProxy createMemCache() {
+//            return new InMemoryCache();
+//        }
+//
+//    }
 
     @Autowired
     private IEventsService eventsService;
 
-    @MockBean
-    private IOasisDao dao;
-
-    @Autowired
-    private ICacheProxy cacheProxy;
-
-    @MockBean
-    private IGameController gameController;
-
-    @MockBean
-    private DataCache dataCache;
-
-    @MockBean
-    private IProfileService profileService;
-
     @Before
     public void beforeEach() throws Exception {
-        Mockito.reset(dao);
-        Mockito.reset(gameController);
+        truncateTables("OA_EVENT_SOURCE");
 
-        List<EventSourceToken> tokens = new ArrayList<>();
-
-        Mockito.when(dao.executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class))
-                .thenAnswer((Answer<List<EventSourceToken>>) invocation ->
-                        tokens.stream().filter(EventSourceToken::isActive).collect(Collectors.toList()));
-        Mockito.when(dao.executeInsert(Mockito.eq(Q.EVENTS.ADD_EVENT_SOURCE), Mockito.anyMap(), Mockito.eq("id")))
-                .thenAnswer(new Answer<Long>() {
-                    long count = 0;
-                    @Override
-                    public Long answer(InvocationOnMock invocation) {
-                        count++;
-                        Map<String, Object> data = invocation.getArgument(1);
-                        EventSourceToken token = new EventSourceToken();
-                        token.setId((int) count);
-                        token.setActive(true);
-                        token.setSourceName(data.get("sourceName").toString());
-                        token.setInternal((Boolean) data.get("isInternal"));
-                        token.setDisplayName(data.get("displayName").toString());
-                        token.setDownloaded(false);
-                        token.setPublicKey((byte[]) data.get("keyPublic"));
-                        token.setSecretKey((byte[]) data.get("keySecret"));
-                        token.setToken((String) data.get("token"));
-                        tokens.add(token);
-                        return count;
-                    }
-                });
-        Mockito.when(dao.executeCommand(Mockito.eq(Q.EVENTS.UPDATE_AS_DOWNLOADED), Mockito.anyMap()))
-                .thenAnswer((Answer<Long>) invocation -> {
-                    Map<String, Object> data = invocation.getArgument(1);
-                    int id = (int) data.get("id");
-                    Optional<EventSourceToken> first = tokens.stream().filter(t -> t.getId() == id).findFirst();
-                    if (first.isPresent() && !first.get().isDownloaded()) {
-                        first.get().setDownloaded(true);
-                        return first.get().getId().longValue();
-                    } else {
-                        return 0L;
-                    }
-                });
-        Mockito.when(dao.executeQuery(Mockito.eq(Q.EVENTS.READ_EVENT_SOURCE), Mockito.anyMap(), (Class<?>) Mockito.any()))
-                .thenAnswer((Answer<Iterable<EventSourceToken>>) invocation -> {
-                    Map<String, Object> data = invocation.getArgument(1);
-                    int id = (int) data.get("id");
-                    Optional<EventSourceToken> first = tokens.stream().filter(t -> t.getId() == id).findFirst();
-                    return Collections.singleton(first.orElse(null));
-                });
-        Mockito.when(dao.executeCommand(Mockito.eq(Q.EVENTS.DISABLE_EVENT_SOURCE), Mockito.anyMap()))
-                .thenAnswer((Answer<Long>) invocation -> {
-                    Map<String, Object> data = invocation.getArgument(1);
-                    int id = (int) data.get("id");
-                    Optional<EventSourceToken> first = tokens.stream().filter(t -> t.getId() == id).findFirst();
-                    if (first.isPresent() && !first.get().isInternal()) {
-                        first.get().setActive(false);
-                        return first.get().getId().longValue();
-                    } else {
-                        return 0L;
-                    }
-                });
+        List<EventSourceToken> eventSourceTokens = eventsService.listAllEventSources();
+        assertThat(eventSourceTokens).isNotNull().hasSize(0);
     }
 
     @Test
-    public void testTokenAdd() throws Exception {
-        int invoc = 0;
-        List<EventSourceToken> sourceTokens = eventsService.listAllEventSources();
-        Assert.assertNotNull(sourceTokens);
-        Assert.assertEquals(0, sourceTokens.size());
-
-        invoc++;
-        Mockito.verify(dao, Mockito.only()).executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class);
-
+    @DisplayName("Testing Event Source Token CRUDs for external applications")
+    public void testAddToken() throws Exception {
         {
             // add internal token
-            EventSourceToken tokenInt = new EventSourceToken();
-            tokenInt.setDisplayName("Oasis");
-            tokenInt.setInternal(true);
-            tokenInt.setSourceName("Oasis-Internal");
-            tokenInt.setActive(true);
-
+            EventSourceToken tokenInt = getInternalToken("Oasis", "Oasis-Internal");
             EventSourceToken addedToken = eventsService.addEventSource(tokenInt);
-            Assert.assertNotNull(addedToken);
-            Assert.assertEquals("Oasis", addedToken.getDisplayName());
-            Assert.assertEquals(EventSourceToken.INTERNAL_NAME, addedToken.getSourceName());
-            Assert.assertTrue(addedToken.isInternal());
-            Assert.assertTrue(addedToken.isActive());
-            Assert.assertFalse(addedToken.isDownloaded());
-            Assert.assertTrue(addedToken.getToken().length() > 0);
-            Assert.assertTrue(addedToken.getPublicKey().length > 0);
-            Assert.assertTrue(addedToken.getSecretKey().length > 0);
 
-            invoc += 2;
-            Mockito.verify(dao, Mockito.times(invoc))
-                    .executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class);
+            addedToken = assertToken(addedToken, tokenInt.getDisplayName(), EventSourceToken.INTERNAL_NAME);
+            Assert.assertTrue(addedToken.isActive());
         }
 
         {
             // try to add another internal token => should fail
-            EventSourceToken tokenInt = new EventSourceToken();
-            tokenInt.setDisplayName("Oasis2");
-            tokenInt.setInternal(true);
-            tokenInt.setSourceName("Oasis2-Internal");
-            tokenInt.setActive(true);
+            EventSourceToken tokenInt = getInternalToken("Oasis2", "Oasis2-Internal");
 
-            Assertions.assertThrows(InputValidationException.class, () -> eventsService.addEventSource(tokenInt));
-            Mockito.verify(dao, Mockito.times(++invoc))
-                    .executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class);
+            assertThatThrownBy(() -> eventsService.addEventSource(tokenInt))
+                    .isInstanceOf(InputValidationException.class);
         }
 
         {
@@ -185,19 +76,10 @@ public class EventServiceTest {
             appToken.setPublicKey("sourcepublic".getBytes(StandardCharsets.UTF_8));
 
             EventSourceToken addedToken = eventsService.addEventSource(appToken);
-            Assert.assertNotNull(addedToken);
-            Assert.assertEquals("Stack Overflow", addedToken.getDisplayName());
-            Assert.assertEquals("stackoverflow", addedToken.getSourceName());
-            Assert.assertFalse(addedToken.isInternal());
-            Assert.assertTrue(addedToken.isActive());
-            Assert.assertFalse(addedToken.isDownloaded());
-            Assert.assertTrue(addedToken.getToken().length() > 0);
+            addedToken = assertToken(addedToken, appToken.getDisplayName(), appToken.getSourceName());
             Assert.assertFalse(addedToken.getToken().equalsIgnoreCase(appToken.getToken()));
             Assert.assertNotEquals(addedToken.getSecretKey().length, appToken.getSecretKey().length);
             Assert.assertNotEquals(addedToken.getPublicKey().length, appToken.getPublicKey().length);
-
-            Mockito.verify(dao, Mockito.times(++invoc))
-                    .executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class);
 
             // read token again using different method
             Optional<EventSourceToken> eventSourceToken = eventsService.readSourceByToken(addedToken.getToken());
@@ -214,11 +96,13 @@ public class EventServiceTest {
         {
             // when display name is null or empty => must fail
             EventSourceToken token = new EventSourceToken();
-
             token.setDisplayName(null);
-            Assertions.assertThrows(InputValidationException.class, () -> eventsService.addEventSource(token));
+            assertThatThrownBy(() -> eventsService.addEventSource(token))
+                    .isInstanceOf(InputValidationException.class);
+
             token.setDisplayName(" ");
-            Assertions.assertThrows(InputValidationException.class, () -> eventsService.addEventSource(token));
+            assertThatThrownBy(() -> eventsService.addEventSource(token))
+                    .isInstanceOf(InputValidationException.class);
         }
 
         {
@@ -227,15 +111,14 @@ public class EventServiceTest {
             Assert.assertEquals(2, eventSourceTokens.size());
             Assert.assertEquals(1, eventSourceTokens.stream().filter(EventSourceToken::isInternal).count());
             Assert.assertEquals(1, eventSourceTokens.stream().filter(t -> !t.isInternal()).count());
-
-            Mockito.verify(dao, Mockito.times(++invoc))
-                    .executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class);
         }
 
         {
             // try to disable with invalid id => should fail
-            Assertions.assertThrows(InputValidationException.class, () -> eventsService.disableEventSource(0));
-            Assertions.assertThrows(InputValidationException.class, () -> eventsService.disableEventSource(-10));
+            assertThatThrownBy(() -> eventsService.disableEventSource(0))
+                    .isInstanceOf(InputValidationException.class);
+            assertThatThrownBy(() -> eventsService.disableEventSource(-10))
+                    .isInstanceOf(InputValidationException.class);
         }
 
         {
@@ -245,8 +128,6 @@ public class EventServiceTest {
 
             // internal token cannot be deleted/disabled
             Assert.assertFalse(eventsService.disableEventSource(eventSourceToken.get().getId()));
-            Mockito.verify(dao, Mockito.times(++invoc))
-                    .executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class);
         }
 
         {
@@ -266,16 +147,11 @@ public class EventServiceTest {
             Assert.assertFalse(addedToken.isDownloaded());
             Assert.assertTrue(addedToken.getToken().length() > 0);
 
-            Mockito.verify(dao, Mockito.times(++invoc))
-                    .executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class);
-
             // now there should have 3 tokens => 1 internal, 2 external
             List<EventSourceToken> eventSourceTokens = eventsService.listAllEventSources();
             Assert.assertEquals(3, eventSourceTokens.size());
             Assert.assertEquals(1, eventSourceTokens.stream().filter(EventSourceToken::isInternal).count());
             Assert.assertEquals(2, eventSourceTokens.stream().filter(t -> !t.isInternal()).count());
-            Mockito.verify(dao, Mockito.times(++invoc))
-                    .executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class);
 
 
             // should be able to download key first time
@@ -290,8 +166,6 @@ public class EventServiceTest {
 
             // disable the just added token
             Assert.assertTrue(eventsService.disableEventSource(addedToken.getId()));
-            Mockito.verify(dao, Mockito.times(++invoc))
-                    .executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class);
         }
 
         {
@@ -300,8 +174,6 @@ public class EventServiceTest {
             Assert.assertEquals(2, eventSourceTokens.size());
             Assert.assertEquals(1, eventSourceTokens.stream().filter(EventSourceToken::isInternal).count());
             Assert.assertEquals(1, eventSourceTokens.stream().filter(t -> !t.isInternal()).count());
-            Mockito.verify(dao, Mockito.times(++invoc))
-                    .executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class);
         }
 
         {
@@ -316,12 +188,30 @@ public class EventServiceTest {
             Assert.assertNotNull(addedToken);
             Assert.assertEquals("Bitbucket Code Repository", addedToken.getDisplayName());
             String srcName = slugify.slugify("Bitbucket Code Repository");
-            System.out.println(srcName);
             Assert.assertEquals(srcName, addedToken.getSourceName());
-
-            Mockito.verify(dao, Mockito.times(++invoc))
-                    .executeQuery(Q.EVENTS.LIST_ALL_EVENT_SOURCES, null, EventSourceToken.class);
         }
     }
 
+    private EventSourceToken assertToken(EventSourceToken token,
+                                         String name,
+                                         String srcName) {
+        Assert.assertNotNull(token);
+        Assert.assertEquals(name, token.getDisplayName());
+        Assert.assertEquals(srcName, token.getSourceName());
+        Assert.assertTrue(token.isActive());
+        Assert.assertFalse(token.isDownloaded());
+        Assert.assertTrue(token.getToken().length() > 0);
+        Assert.assertTrue(token.getPublicKey().length > 0);
+        Assert.assertTrue(token.getSecretKey().length > 0);
+        return token;
+    }
+
+    private EventSourceToken getInternalToken(String name, String srcName) {
+        EventSourceToken tokenInt = new EventSourceToken();
+        tokenInt.setDisplayName(name);
+        tokenInt.setInternal(true);
+        tokenInt.setSourceName(srcName);
+        tokenInt.setActive(true);
+        return tokenInt;
+    }
 }
