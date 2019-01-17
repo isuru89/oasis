@@ -13,6 +13,7 @@ import io.github.isuru.oasis.services.model.UserTeamScope;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -203,14 +204,21 @@ public class ProfileServiceImpl implements IProfileService {
         Checks.greaterThanZero(teamId, "teamId");
 
         TeamProfile prev = readTeam(teamId);
-        Map<String, Object> data = Maps.create()
-                .put("name", Pojos.compareWith(latest.getName(), prev.getName()))
-                .put("avatarId", Pojos.compareWith(latest.getAvatarId(), prev.getAvatarId()))
-                .put("teamScope", Pojos.compareWith(latest.getTeamScope(), prev.getTeamScope()))
-                .put("teamId", teamId)
-                .build();
+        if (prev == null) {
+            throw new InputValidationException("No team is found by id " + teamId + "!");
+        }
 
-        return dao.executeCommand(Q.PROFILE.EDIT_TEAM, data) > 0;
+        String nameNew = Pojos.compareWith(latest.getName(), prev.getName());
+        Maps.MapBuilder dataMap = Maps.create()
+                .put("avatarId", Pojos.compareWith(latest.getAvatarId(), prev.getAvatarId()))
+                .put("teamId", teamId)
+                .put("name", nameNew);
+
+        if (prev.isAutoTeam() && !StringUtils.equals(nameNew, prev.getName())) {
+            throw new InputValidationException("Not allowed to modify default team name!");
+        }
+
+        return dao.executeCommand(Q.PROFILE.EDIT_TEAM, dataMap.build()) > 0;
     }
 
     @Override
@@ -242,7 +250,7 @@ public class ProfileServiceImpl implements IProfileService {
             // add default team
             Map<String, Object> teamData = Maps.create()
                     .put("teamScope", addedScopeId)
-                    .put("name", "default_" + SLUGIFY.slugify(teamScope.getName()))
+                    .put("name", String.format("%s.default", SLUGIFY.slugify(teamScope.getName())))
                     .put("avatarId", null)
                     .put("isAutoTeam", true)
                     .build();
@@ -306,6 +314,10 @@ public class ProfileServiceImpl implements IProfileService {
         Checks.greaterThanZero(scopeId, "scopeId");
 
         TeamScope prev = readTeamScope(scopeId);
+        if (prev == null) {
+            throw new InputValidationException("No scope is found by id " + scopeId + "!");
+        }
+
         Map<String, Object> data = Maps.create()
                 .put("displayName", Pojos.compareWith(latest.getDisplayName(), prev.getDisplayName()))
                 .put("scopeId", scopeId)
