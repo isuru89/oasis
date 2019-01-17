@@ -18,21 +18,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class EventServiceTest extends AbstractServiceTest {
 
-//    @TestConfiguration
-//    static class EventServiceCtx {
-//
-//        @Bean
-//        public IEventsService createService() {
-//            return new EventsServiceImpl();
-//        }
-//
-//        @Bean
-//        public ICacheProxy createMemCache() {
-//            return new InMemoryCache();
-//        }
-//
-//    }
-
     @Autowired
     private IEventsService eventsService;
 

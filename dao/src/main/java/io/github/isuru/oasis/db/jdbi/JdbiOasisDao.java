@@ -207,6 +207,22 @@ public class JdbiOasisDao implements IOasisDao {
     }
 
     @Override
+    public Iterable<Map<String, Object>> executeRawQuery(String queryStr, Map<String, Object> data) throws DbException {
+        try {
+            return jdbi.withHandle((HandleCallback<Iterable<Map<String, Object>>, Exception>) handle -> {
+                Query query = handle.createQuery(queryStr);
+                if (data != null && !data.isEmpty()) {
+                    query = query.bindMap(data);
+                }
+                return query.mapToMap().list();
+            });
+
+        } catch (Exception e) {
+            throw new DbException(e);
+        }
+    }
+
+    @Override
     public Object runTx(int transactionLevel, ConsumerEx<JdbcTransactionCtx> txBody) throws DbException {
         try {
             return jdbi.inTransaction(TransactionIsolationLevel.valueOf(transactionLevel),

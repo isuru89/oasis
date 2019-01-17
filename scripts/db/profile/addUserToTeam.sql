@@ -2,14 +2,18 @@ INSERT INTO OA_TEAM_USER (
     team_id,
     user_id,
     role_id,
-    since,
+    <if(hasApproved)>
     is_approved,
-    approved_at
+    approved_at,
+    <endif>
+    since
 ) VALUES (
     :teamId,
     :userId,
     :roleId,
-    :since,
+    <if(hasApproved)>
     :isApproved,
-    :approvedAt
+    :approvedAt,
+    <endif>
+    :since
 )

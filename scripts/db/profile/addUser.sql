@@ -1,6 +1,7 @@
 INSERT INTO OA_USER (
     ext_id,
     user_name,
+    nickname,
     email,
     avatar_ref,
     is_auto_user,
@@ -11,6 +12,7 @@ INSERT INTO OA_USER (
 ) VALUES (
     :extId,
     :name,
+    :nickname,
     :email,
     :avatarId,
     :isAutoUser,

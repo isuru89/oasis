@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.services;
 
+import com.github.slugify.Slugify;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.services.exception.InputValidationException;
@@ -28,6 +29,8 @@ import java.util.Map;
 @Service("profileService")
 public class ProfileServiceImpl implements IProfileService {
 
+    private static final Slugify SLUGIFY = new Slugify();
+
     @Autowired
     private IOasisDao dao;
 
@@ -43,6 +46,7 @@ public class ProfileServiceImpl implements IProfileService {
 
         Map<String, Object> data = Maps.create()
                 .put("name", profile.getName())
+                .put("nickname", profile.getNickName())
                 .put("male", profile.isMale())
                 .put("avatarId", profile.getAvatarId())
                 .put("extId", profile.getExtId())
@@ -141,6 +145,7 @@ public class ProfileServiceImpl implements IProfileService {
     @Override
     public long addTeam(TeamProfile teamProfile) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(teamProfile.getName(), "name");
+        Checks.nonNull(teamProfile.getTeamScope(), "scope");
         Checks.greaterThanZero(teamProfile.getTeamScope(), "scope");
 
         return (Long) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
@@ -156,10 +161,11 @@ public class ProfileServiceImpl implements IProfileService {
             Map<String, Object> templating = Maps.create("isActivated", true);
             Map<String, Object> playerData = Maps.create()
                     .put("name", teamProfile.getName())
+                    .put("nickname", teamProfile.getName())
                     .put("male", false)
                     .put("avatarId", null)
                     .put("extId", null)
-                    .put("email", "")
+                    .put("email", String.format("user@%s.oasis.com", SLUGIFY.slugify(teamProfile.getName())))
                     .put("isAutoUser", true)
                     .put("activated", true)
                     .build();
@@ -229,7 +235,7 @@ public class ProfileServiceImpl implements IProfileService {
             // add default team
             Map<String, Object> teamData = Maps.create()
                     .put("teamScope", addedScopeId)
-                    .put("name", "default_" + teamScope.getName())
+                    .put("name", "default_" + SLUGIFY.slugify(teamScope.getName()))
                     .put("avatarId", null)
                     .build();
             Long addedTeamId = input.executeInsert(Q.PROFILE.ADD_TEAM, teamData, "team_id");
@@ -238,10 +244,11 @@ public class ProfileServiceImpl implements IProfileService {
             Map<String, Object> templating = Maps.create("isActivated", true);
             Map<String, Object> playerData = Maps.create()
                     .put("name", teamScope.getName())
+                    .put("nickname", teamScope.getName())
                     .put("male", false)
                     .put("avatarId", null)
                     .put("extId", null)
-                    .put("email", "default@"+teamScope.getName() + ".oasis.com")
+                    .put("email", String.format("default@%s.oasis.com", SLUGIFY.slugify(teamScope.getName())))
                     .put("isAutoUser", true)
                     .put("activated", true)
                     .build();

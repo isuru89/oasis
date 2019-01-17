@@ -76,4 +76,19 @@ public class TeamScope {
     public boolean isDefault() {
         return DefaultEntities.DEFAULT_TEAM_SCOPE_NAME.equalsIgnoreCase(getName());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TeamScope scope = (TeamScope) o;
+
+        return id != null ? id.equals(scope.id) : scope.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }
