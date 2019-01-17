@@ -1,9 +1,11 @@
 INSERT INTO OA_TEAM (
     team_scope,
     name,
-    avatar_ref
+    avatar_ref,
+    is_auto_team
 ) VALUES (
     :teamScope,
     :name,
-    :avatarId
+    :avatarId,
+    :isAutoTeam
 )

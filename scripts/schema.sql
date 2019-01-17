@@ -154,6 +154,7 @@ CREATE TABLE IF NOT EXISTS OA_TEAM (
     team_scope      INT,
     name            VARCHAR(128),
     avatar_ref      VARCHAR(1024),
+    is_auto_team    TINYINT(1) DEFAULT 0,
     is_active       TINYINT(1) DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -164,6 +165,7 @@ CREATE TABLE IF NOT EXISTS OA_TEAM_SCOPE (
     name            VARCHAR(128),
     display_name    VARCHAR(255),
     ext_id          BIGINT,
+    is_auto_scope   TINYINT(1) DEFAULT 0,
     is_active       TINYINT(1) DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

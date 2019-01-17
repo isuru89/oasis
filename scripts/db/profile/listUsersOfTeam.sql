@@ -13,7 +13,8 @@ SELECT
     oau.email as email,
     oau.avatar_ref as avatarId,
     oau.is_male as male,
-    oau.is_active as active
+    oau.is_active as active,
+    oau.is_auto_user as autoUser
 FROM currentTeams oact
     INNER JOIN OA_TEAM_USER oatu ON oatu.since = oact.since AND oatu.user_id = oact.user_id
     INNER JOIN OA_USER oau ON oatu.user_id = oau.user_id

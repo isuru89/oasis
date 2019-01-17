@@ -361,6 +361,26 @@ public class JdbiOasisDao implements IOasisDao {
         }
 
         @Override
+        public long executeCommand(String queryId, Map<String, Object> data, Map<String, Object> templatingData) throws DbException {
+            String query = queryRepo.fetchQuery(queryId);
+            try {
+                Update update = handle.createUpdate(query);
+                if (templatingData != null && !templatingData.isEmpty()) {
+                    for (Map.Entry<String, Object> entry : templatingData.entrySet()) {
+                        if (entry.getValue() instanceof List) {
+                            update = update.defineList(entry.getKey(), entry.getValue());
+                        } else {
+                            update = update.define(entry.getKey(), entry.getValue());
+                        }
+                    }
+                }
+                return update.bindMap(data).execute();
+            } catch (Exception e) {
+                throw new DbException(e);
+            }
+        }
+
+        @Override
         public Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws DbException {
             String query = queryRepo.fetchQuery(queryId);
             try {

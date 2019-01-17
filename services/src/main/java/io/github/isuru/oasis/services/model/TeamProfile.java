@@ -8,9 +8,18 @@ public class TeamProfile {
     private Integer teamScope;
     private String name;
     private String avatarId;
+    private boolean autoTeam;
     private boolean active;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+
+    public boolean isAutoTeam() {
+        return autoTeam;
+    }
+
+    public void setAutoTeam(boolean autoTeam) {
+        this.autoTeam = autoTeam;
+    }
 
     public Timestamp getCreatedAt() {
         return createdAt;

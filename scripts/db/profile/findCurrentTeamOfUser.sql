@@ -6,7 +6,8 @@ SELECT
     oats.scope_id AS scopeId,
     otu.since AS joinedTime,
     otu.until AS deallocatedTime,
-    otu.is_approved AS approved
+    otu.is_approved AS approved,
+    ot.is_auto_team AS autoTeam
 
 FROM OA_TEAM_USER otu
     LEFT JOIN OA_TEAM ot ON otu.team_id = ot.team_id

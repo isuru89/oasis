@@ -13,6 +13,15 @@ public class UserTeam {
     private Long joinedTime;
     private Long deallocatedTime;
     private boolean approved;
+    private boolean autoTeam;
+
+    public boolean isAutoTeam() {
+        return autoTeam;
+    }
+
+    public void setAutoTeam(boolean autoTeam) {
+        this.autoTeam = autoTeam;
+    }
 
     public Long getId() {
         return id;

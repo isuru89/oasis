@@ -30,19 +30,22 @@ public class ProfileServiceTest extends AbstractServiceTest {
         List<TeamScope> teamScopes = ps.listTeamScopes();
         Assertions.assertThat(teamScopes)
                 .isNotNull()
-                .hasSize(1);
+                .hasSize(1)
+                .allMatch(TeamScope::isAutoScope);
 
         Integer scopeId = teamScopes.get(0).getId();
         List<TeamProfile> teamProfiles = ps.listTeams(scopeId);
         Assertions.assertThat(teamProfiles)
                 .isNotNull()
-                .hasSize(1);
+                .hasSize(1)
+                .allMatch(TeamProfile::isAutoTeam);
 
         Integer teamId = teamProfiles.get(0).getId();
         List<UserProfile> userProfiles = ps.listUsers(teamId, 0, 100);
         Assertions.assertThat(userProfiles)
                 .isNotNull()
-                .hasSize(4);        // (admin, curator, player) + default
+                .hasSize(4)        // (admin, curator, player) + default
+                .allMatch(UserProfile::isAutoUser);
 
         Assertions.assertThat(userProfiles)
                 .extracting("email")
@@ -231,7 +234,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
                 Assertions.assertThat(userProfiles).isNotNull()
                         .hasSize(1)
                         .extracting("email")
-                        .contains(String.format("user@%s.oasis.com", SLUGIFY.slugify(hrTeam1.getName())));
+                        .contains(String.format("user@%s.oasis.com", SLUGIFY.slugify(finTeam1.getName())));
             }
 
             {
@@ -246,8 +249,8 @@ public class ProfileServiceTest extends AbstractServiceTest {
             }
 
             // now there must have one team in each scope
-            Assertions.assertThat(ps.listTeams(hrId)).isNotNull().hasSize(1);
-            Assertions.assertThat(ps.listTeams(finId)).isNotNull().hasSize(1);
+            Assertions.assertThat(ps.listTeams(hrId)).isNotNull().hasSize(2);
+            Assertions.assertThat(ps.listTeams(finId)).isNotNull().hasSize(2);
         }
     }
 

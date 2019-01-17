@@ -1,7 +1,5 @@
 package io.github.isuru.oasis.services.model;
 
-import io.github.isuru.oasis.model.DefaultEntities;
-
 import java.sql.Timestamp;
 
 /**
@@ -13,9 +11,18 @@ public class TeamScope {
     private String name;
     private String displayName;
     private Long extId;
+    private boolean autoScope;
     private boolean active;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+
+    public boolean isAutoScope() {
+        return autoScope;
+    }
+
+    public void setAutoScope(boolean autoScope) {
+        this.autoScope = autoScope;
+    }
 
     public Timestamp getCreatedAt() {
         return createdAt;
@@ -71,10 +78,6 @@ public class TeamScope {
 
     public void setExtId(Long extId) {
         this.extId = extId;
-    }
-
-    public boolean isDefault() {
-        return DefaultEntities.DEFAULT_TEAM_SCOPE_NAME.equalsIgnoreCase(getName());
     }
 
     @Override

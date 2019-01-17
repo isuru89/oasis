@@ -112,6 +112,7 @@ public class Bootstrapping {
             TeamScope teamScope = new TeamScope();
             teamScope.setName(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
             teamScope.setDisplayName(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
+            teamScope.setAutoScope(true);
             long id = profileService.addTeamScope(teamScope);
             return profileService.readTeamScope(id);
         } else {
@@ -201,6 +202,7 @@ public class Bootstrapping {
             admin.setEmail(DefaultEntities.DEF_ADMIN_USER);
             admin.setName("Admin");
             admin.setActivated(true);
+            admin.setAutoUser(true);
             long adminId = profileService.addUserProfile(admin);
             profileService.addUserToTeam(adminId, defTeamId, UserRole.ADMIN);
         } else {
@@ -214,6 +216,7 @@ public class Bootstrapping {
             curator.setEmail(DefaultEntities.DEF_CURATOR_USER);
             curator.setName("Curator");
             curator.setActivated(true);
+            curator.setAutoUser(true);
             long curatorId = profileService.addUserProfile(curator);
             profileService.addUserToTeam(curatorId, defTeamId, UserRole.CURATOR);
         } else {
@@ -227,6 +230,7 @@ public class Bootstrapping {
             player.setEmail(DefaultEntities.DEF_PLAYER_USER);
             player.setName("Player");
             player.setActivated(true);
+            player.setAutoUser(true);
             long playerId = profileService.addUserProfile(player);
             profileService.addUserToTeam(playerId, defTeamId, UserRole.PLAYER);
         } else {
@@ -250,6 +254,7 @@ public class Bootstrapping {
         TeamProfile profile = new TeamProfile();
         profile.setName(DefaultEntities.DEFAULT_TEAM_NAME);
         profile.setTeamScope(teamScope.getId());
+        profile.setAutoTeam(true);
         long id = profileService.addTeam(profile);
         return profileService.readTeam(id);
     }

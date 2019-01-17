@@ -51,7 +51,7 @@ public class ProfileServiceImpl implements IProfileService {
                 .put("avatarId", profile.getAvatarId())
                 .put("extId", profile.getExtId())
                 .put("email", profile.getEmail())
-                .put("isAutoUser", false)
+                .put("isAutoUser", profile.isAutoUser())
                 .put("activated", profile.isActivated())
                 .build();
 
@@ -149,10 +149,13 @@ public class ProfileServiceImpl implements IProfileService {
         Checks.greaterThanZero(teamProfile.getTeamScope(), "scope");
 
         return (Long) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
+            long currTime = System.currentTimeMillis();
+
             Map<String, Object> data = Maps.create()
                     .put("teamScope", teamProfile.getTeamScope())
                     .put("name", teamProfile.getName())
                     .put("avatarId", teamProfile.getAvatarId())
+                    .put("isAutoTeam", teamProfile.isAutoTeam())
                     .build();
 
             Long teamId = input.executeInsert(Q.PROFILE.ADD_TEAM, data, "team_id");
@@ -176,8 +179,11 @@ public class ProfileServiceImpl implements IProfileService {
                             .put("userId", userId)
                             .put("teamId", teamId)
                             .put("roleId", UserRole.PLAYER)
-                            .put("since", System.currentTimeMillis())
+                            .put("since", currTime)
+                            .put("isApproved", true)
+                            .put("approvedAt", currTime)
                             .build(),
+                    Maps.create("hasApproved", true),
                     null);
             return teamId;
         });
@@ -228,6 +234,7 @@ public class ProfileServiceImpl implements IProfileService {
                     .put("extId", teamScope.getExtId())
                     .put("name", teamScope.getName())
                     .put("displayName", teamScope.getDisplayName())
+                    .put("isAutoScope", teamScope.isAutoScope())
                     .build();
 
             Long addedScopeId = input.executeInsert(Q.PROFILE.ADD_TEAMSCOPE, data, "scope_id");
@@ -237,6 +244,7 @@ public class ProfileServiceImpl implements IProfileService {
                     .put("teamScope", addedScopeId)
                     .put("name", "default_" + SLUGIFY.slugify(teamScope.getName()))
                     .put("avatarId", null)
+                    .put("isAutoTeam", true)
                     .build();
             Long addedTeamId = input.executeInsert(Q.PROFILE.ADD_TEAM, teamData, "team_id");
 
@@ -260,9 +268,10 @@ public class ProfileServiceImpl implements IProfileService {
                             .put("teamId", addedTeamId)
                             .put("roleId", UserRole.PLAYER)
                             .put("since", currTime)
-                            .put("isApproved", teamScope.isDefault())
+                            .put("isApproved", teamScope.isAutoScope())
                             .put("approvedAt", currTime)
                             .build(),
+                    Maps.create("hasApproved", true),
                     null);
             return addedScopeId;
         });
@@ -349,7 +358,8 @@ public class ProfileServiceImpl implements IProfileService {
                             .put("since", currentTimeMillis)
                             .put("isApproved", !pendingApproval)
                             .put("approvedAt", pendingApproval ? null : currentTimeMillis)
-                            .build()) > 0;
+                            .build(),
+                    Maps.create("hasApproved", true)) > 0;
         });
     }
 

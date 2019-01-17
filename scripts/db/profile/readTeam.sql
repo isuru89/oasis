@@ -3,6 +3,7 @@ SELECT
     team_scope as teamScope,
     name as name,
     avatar_ref as avatarId,
+    is_auto_team as autoTeam,
     is_active as active,
     created_at as createdAt,
     updated_at as updatedAt
