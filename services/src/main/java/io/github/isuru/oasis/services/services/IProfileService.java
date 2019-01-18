@@ -33,6 +33,8 @@ public interface IProfileService {
 
     boolean addUserToTeam(long userId, long teamId, int roleId) throws Exception;
     boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval) throws Exception;
+    boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval,
+                          long since) throws Exception;
     UserTeam findCurrentTeamOfUser(long userId) throws Exception;
     UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly) throws Exception;
     UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly, long atTime) throws Exception;

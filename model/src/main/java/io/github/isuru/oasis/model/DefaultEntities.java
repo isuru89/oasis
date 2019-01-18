@@ -31,4 +31,15 @@ public class DefaultEntities {
         DEFAULT_LEADERBOARD_DEF.setDisplayName("Oasis Leaderboard");
     }
 
+    public static String deriveDefaultTeamName(String teamScopeName) {
+        return String.format("%s.default", teamScopeName);
+    }
+
+    public static String deriveDefScopeUser(String teamScopeName) {
+        return String.format("default@%s.oasis.com", teamScopeName);
+    }
+
+    public static String deriveDefTeamUser(String teamName) {
+        return String.format("user@%s.oasis.com", teamName);
+    }
 }

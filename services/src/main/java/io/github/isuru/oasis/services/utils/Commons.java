@@ -18,6 +18,16 @@ public class Commons {
         return text == null || text.trim().isEmpty();
     }
 
+    public static String fixSearchQuery(String param) {
+        if (param == null) {
+            return null;
+        }
+        return param.replace("!", "!!")
+                .replace("%", "!%")
+                .replace("_", "!_")
+                .replace("[", "![");
+    }
+
     @Nullable
     public static <T> T firstNonNull(T... items) {
         if (items == null) {

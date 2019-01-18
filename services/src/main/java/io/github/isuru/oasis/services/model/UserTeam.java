@@ -86,4 +86,38 @@ public class UserTeam {
     public void setScopeId(Integer scopeId) {
         this.scopeId = scopeId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserTeam team = (UserTeam) o;
+
+        if (userId != null ? !userId.equals(team.userId) : team.userId != null) return false;
+        if (teamId != null ? !teamId.equals(team.teamId) : team.teamId != null) return false;
+        return roleId != null ? roleId.equals(team.roleId) : team.roleId == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = userId != null ? userId.hashCode() : 0;
+        result = 31 * result + (teamId != null ? teamId.hashCode() : 0);
+        result = 31 * result + (roleId != null ? roleId.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "UserTeam{" +
+                "userId=" + userId +
+                ", teamId=" + teamId +
+                ", roleId=" + roleId +
+                ", scopeId=" + scopeId +
+                ", joinedTime=" + joinedTime +
+                ", deallocatedTime=" + deallocatedTime +
+                ", approved=" + approved +
+                ", autoTeam=" + autoTeam +
+                '}';
+    }
 }

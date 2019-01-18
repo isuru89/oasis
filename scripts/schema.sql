@@ -180,6 +180,7 @@ CREATE TABLE IF NOT EXISTS OA_TEAM_USER (
     role_id         INT DEFAULT 8,
     since           BIGINT,
     until           BIGINT,
+    will_end_at     BIGINT,
     is_approved     TINYINT(1) DEFAULT 1,
     approved_at     BIGINT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP

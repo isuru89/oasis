@@ -14,6 +14,10 @@ import java.util.Map;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class AbstractServiceTest {
 
+    static final boolean TRUE = true;
+    static final boolean FALSE = false;
+
+
     @Autowired
     IOasisDao dao;
 

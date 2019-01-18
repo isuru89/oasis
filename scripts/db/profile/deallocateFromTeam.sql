@@ -1,6 +1,6 @@
 UPDATE OA_TEAM_USER
 SET
-    until = :endTime
+    will_end_at = :endTime
 WHERE
     id = :id
     AND

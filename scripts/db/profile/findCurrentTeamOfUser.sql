@@ -20,12 +20,14 @@ WHERE
     otu.is_approved = 1
     <endif>
     AND
-    :currentEpoch > otu.since
+    :currentEpoch >= otu.since
     AND
     (
     otu.until IS NULL
     OR
-    otu.until >= :currentEpoch
+    otu.until > :currentEpoch
     )
+ORDER BY
+    otu.since DESC
 LIMIT
     1

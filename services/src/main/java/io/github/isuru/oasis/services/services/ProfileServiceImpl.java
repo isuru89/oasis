@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.services.services;
 
 import com.github.slugify.Slugify;
+import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.services.exception.InputValidationException;
@@ -11,6 +12,7 @@ import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.model.UserTeamScope;
 import io.github.isuru.oasis.services.utils.Checks;
+import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.Pojos;
 import org.apache.commons.lang3.StringUtils;
@@ -89,9 +91,13 @@ public class ProfileServiceImpl implements IProfileService {
         Checks.greaterThanZero(userId, "userId");
 
         UserProfile prev = readUserProfile(userId);
+        if (prev == null) {
+            throw new InputValidationException("No user is found by id " + userId + "!");
+        }
         Map<String, Object> data = new HashMap<>();
         data.put("name", Pojos.compareWith(latest.getName(), prev.getName()));
         data.put("avatarId", Pojos.compareWith(latest.getAvatarId(), prev.getAvatarId()));
+        data.put("nickname", Pojos.compareWith(latest.getNickName(), prev.getNickName()));
         data.put("isMale", latest.isMale());
         data.put("userId", userId);
 
@@ -107,24 +113,22 @@ public class ProfileServiceImpl implements IProfileService {
 
     @Override
     public List<UserProfile> findUser(String email, String name) throws DbException, InputValidationException {
-        Checks.nonNullOrEmpty(email, "email");
+        Checks.nonNullOrEmpty(email, "search text");
 
         if (email.length() < 4) {
             return new LinkedList<>();
         }
 
-        String param = email.replace("!", "!!")
-                            .replace("%", "!%")
-                            .replace("_", "!_")
-                            .replace("[", "![");
+        String param = Commons.fixSearchQuery(email);
+        String sName = Commons.fixSearchQuery(name);
 
         return ServiceUtils.toList(dao.executeQuery(Q.PROFILE.SEARCH_USER,
                 Maps.create()
                     .put("email", "%" + param + "%")
-                    .put("name", name)
+                    .put("name", "%" + name + "%")
                     .build(),
                 UserProfile.class,
-                Maps.create("hasName", name != null && name.length() > 3)
+                Maps.create("hasName", sName != null && sName.length() > 3)
         ));
     }
 
@@ -169,7 +173,7 @@ public class ProfileServiceImpl implements IProfileService {
                     .put("male", false)
                     .put("avatarId", null)
                     .put("extId", null)
-                    .put("email", String.format("user@%s.oasis.com", SLUGIFY.slugify(teamProfile.getName())))
+                    .put("email", DefaultEntities.deriveDefTeamUser(SLUGIFY.slugify(teamProfile.getName())))
                     .put("isAutoUser", true)
                     .put("activated", true)
                     .build();
@@ -203,18 +207,18 @@ public class ProfileServiceImpl implements IProfileService {
     public boolean editTeam(long teamId, TeamProfile latest) throws DbException, InputValidationException {
         Checks.greaterThanZero(teamId, "teamId");
 
-        TeamProfile prev = readTeam(teamId);
-        if (prev == null) {
+        TeamProfile curr = readTeam(teamId);
+        if (curr == null) {
             throw new InputValidationException("No team is found by id " + teamId + "!");
         }
 
-        String nameNew = Pojos.compareWith(latest.getName(), prev.getName());
+        String nameNew = Pojos.compareWith(latest.getName(), curr.getName());
         Maps.MapBuilder dataMap = Maps.create()
-                .put("avatarId", Pojos.compareWith(latest.getAvatarId(), prev.getAvatarId()))
+                .put("avatarId", Pojos.compareWith(latest.getAvatarId(), curr.getAvatarId()))
                 .put("teamId", teamId)
                 .put("name", nameNew);
 
-        if (prev.isAutoTeam() && !StringUtils.equals(nameNew, prev.getName())) {
+        if (curr.isAutoTeam() && !StringUtils.equals(nameNew, curr.getName())) {
             throw new InputValidationException("Not allowed to modify default team name!");
         }
 
@@ -250,7 +254,7 @@ public class ProfileServiceImpl implements IProfileService {
             // add default team
             Map<String, Object> teamData = Maps.create()
                     .put("teamScope", addedScopeId)
-                    .put("name", String.format("%s.default", SLUGIFY.slugify(teamScope.getName())))
+                    .put("name", DefaultEntities.deriveDefaultTeamName(SLUGIFY.slugify(teamScope.getName())))
                     .put("avatarId", null)
                     .put("isAutoTeam", true)
                     .build();
@@ -264,7 +268,7 @@ public class ProfileServiceImpl implements IProfileService {
                     .put("male", false)
                     .put("avatarId", null)
                     .put("extId", null)
-                    .put("email", String.format("default@%s.oasis.com", SLUGIFY.slugify(teamScope.getName())))
+                    .put("email", DefaultEntities.deriveDefScopeUser(SLUGIFY.slugify(teamScope.getName())))
                     .put("isAutoUser", true)
                     .put("activated", true)
                     .build();
@@ -333,32 +337,36 @@ public class ProfileServiceImpl implements IProfileService {
 
     @Override
     public boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval) throws DbException, InputValidationException {
+        return addUserToTeam(userId, teamId, roleId, pendingApproval, System.currentTimeMillis());
+    }
+
+    @Override
+    public boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval,
+                                 long since) throws DbException, InputValidationException {
         Checks.greaterThanZero(userId, "userId");
         Checks.greaterThanZero(teamId, "teamId");
         Checks.validate(roleId > 0 && roleId <= UserRole.ALL_ROLE, "roleId must be a flag of 1,2,4, or 8.");
 
-        UserTeam userTeam = findCurrentTeamOfUser(userId, false);
-        if (userTeam != null && userTeam.getTeamId() == teamId) {
+        UserTeam currentTeam = findCurrentTeamOfUser(userId, false);
+        if (currentTeam != null && currentTeam.getTeamId() == teamId) {
             // if the current team is same as previous team, then don't add
-            if (roleId == userTeam.getRoleId()) {
+            if (roleId == currentTeam.getRoleId()) {
                 return false;
             }
         }
 
         // if the previous team is not yet approved, then disable it
-        if (userTeam != null && !userTeam.isApproved()) {
+        if (currentTeam != null && !currentTeam.isApproved()) {
             dao.executeCommand(Q.PROFILE.REJECT_USER_IN_TEAM,
-                    Maps.create("id", userTeam.getId()));
+                    Maps.create("id", currentTeam.getId()));
         }
 
         return (Boolean) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
-            long currentTimeMillis = System.currentTimeMillis();
-
-            if (userTeam != null) {
+            if (currentTeam != null) {
                 ctx.executeCommand(Q.PROFILE.DEALLOCATE_FROM_TEAM,
                         Maps.create()
-                                .put("id", userTeam.getId())
-                                .put("endTime", currentTimeMillis)
+                                .put("id", currentTeam.getId())
+                                .put("endTime", since)
                                 .build());
             }
 
@@ -367,9 +375,9 @@ public class ProfileServiceImpl implements IProfileService {
                             .put("userId", userId)
                             .put("teamId", teamId)
                             .put("roleId", roleId)
-                            .put("since", currentTimeMillis)
+                            .put("since", since)
                             .put("isApproved", !pendingApproval)
-                            .put("approvedAt", pendingApproval ? null : currentTimeMillis)
+                            .put("approvedAt", pendingApproval ? null : since)
                             .build(),
                     Maps.create("hasApproved", true)) > 0;
         });
@@ -394,11 +402,9 @@ public class ProfileServiceImpl implements IProfileService {
                 Maps.create("userId", userId, "currentEpoch", atTime),
                 UserTeam.class,
                 Maps.create("checkApproved", returnApprovedOnly));
-        if (userTeams != null) {
-            Iterator<UserTeam> iterator = userTeams.iterator();
-            if (iterator.hasNext()) {
-                return iterator.next();
-            }
+        Iterator<UserTeam> iterator = userTeams.iterator();
+        if (iterator.hasNext()) {
+            return iterator.next();
         }
         return null;
     }
@@ -408,7 +414,7 @@ public class ProfileServiceImpl implements IProfileService {
         Checks.nonNullOrEmpty(name, "teamName");
 
         return ServiceUtils.getTheOnlyRecord(dao, Q.PROFILE.FIND_TEAM_BY_NAME,
-                Maps.create("teamName", name),
+                Maps.create("teamName", name.toLowerCase()),
                 TeamProfile.class);
     }
 
