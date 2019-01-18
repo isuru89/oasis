@@ -4,6 +4,9 @@ import com.github.slugify.Slugify;
 import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.services.dto.edits.TeamProfileEditDto;
+import io.github.isuru.oasis.services.dto.edits.TeamScopeEditDto;
+import io.github.isuru.oasis.services.dto.edits.UserProfileEditDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
@@ -87,7 +90,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public boolean editUserProfile(long userId, UserProfile latest) throws DbException, InputValidationException {
+    public boolean editUserProfile(long userId, UserProfileEditDto latest) throws DbException, InputValidationException {
         Checks.greaterThanZero(userId, "userId");
 
         UserProfile prev = readUserProfile(userId);
@@ -98,7 +101,7 @@ public class ProfileServiceImpl implements IProfileService {
         data.put("name", Pojos.compareWith(latest.getName(), prev.getName()));
         data.put("avatarId", Pojos.compareWith(latest.getAvatarId(), prev.getAvatarId()));
         data.put("nickname", Pojos.compareWith(latest.getNickName(), prev.getNickName()));
-        data.put("isMale", latest.isMale());
+        data.put("isMale", latest.getMale() != null ? latest.getMale() : prev.isMale());
         data.put("userId", userId);
 
         return dao.executeCommand(Q.PROFILE.EDIT_USER, data) > 0;
@@ -204,7 +207,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public boolean editTeam(long teamId, TeamProfile latest) throws DbException, InputValidationException {
+    public boolean editTeam(long teamId, TeamProfileEditDto latest) throws DbException, InputValidationException {
         Checks.greaterThanZero(teamId, "teamId");
 
         TeamProfile curr = readTeam(teamId);
@@ -314,7 +317,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public boolean editTeamScope(long scopeId, TeamScope latest) throws DbException, InputValidationException {
+    public boolean editTeamScope(long scopeId, TeamScopeEditDto latest) throws DbException, InputValidationException {
         Checks.greaterThanZero(scopeId, "scopeId");
 
         TeamScope prev = readTeamScope(scopeId);

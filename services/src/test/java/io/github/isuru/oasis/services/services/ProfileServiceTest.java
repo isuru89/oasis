@@ -3,6 +3,9 @@ package io.github.isuru.oasis.services.services;
 import com.github.slugify.Slugify;
 import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.db.DbException;
+import io.github.isuru.oasis.services.dto.edits.TeamProfileEditDto;
+import io.github.isuru.oasis.services.dto.edits.TeamScopeEditDto;
+import io.github.isuru.oasis.services.dto.edits.UserProfileEditDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -255,26 +258,24 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
         {
             Assertions.assertThatThrownBy(
-                    () -> ps.editTeamScope(0L, createScope("name", "Name", 1L)))
+                    () -> ps.editTeamScope(0L, createEditScope("Name")))
                     .isInstanceOf(InputValidationException.class);
 
             Assertions.assertThatThrownBy(
-                    () -> ps.editTeamScope(-1L, createScope("name", "Name", 1L)))
+                    () -> ps.editTeamScope(-1L, createEditScope("Name")))
                     .isInstanceOf(InputValidationException.class);
         }
 
         {
             // non existing id should fail
             Assertions.assertThatThrownBy(
-                    () -> ps.editTeamScope(999999L,
-                            createScope("name", "Name", 1L)))
+                    () -> ps.editTeamScope(999999L, createEditScope("Name")))
                     .isInstanceOf(InputValidationException.class);
         }
 
         {
             // can edit display name
-            TeamScope scopeToAdd = createScope(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME,
-                    "Edited : " + DefaultEntities.DEFAULT_TEAM_SCOPE_NAME, 234L);
+            TeamScopeEditDto scopeToAdd = createEditScope("Edited : " + DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
             Assert.assertTrue(ps.editTeamScope(defScope.getId(), scopeToAdd));
 
             TeamScope readScope = ps.readTeamScope(defScope.getId());
@@ -285,8 +286,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
         {
             // should not be able to change name at all
-            TeamScope scopeToAdd = createScope("New Name",
-                    "Edited : " + DefaultEntities.DEFAULT_TEAM_SCOPE_NAME, 234L);
+            TeamScopeEditDto scopeToAdd = createEditScope("Edited : " + DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
             Assert.assertTrue(ps.editTeamScope(defScope.getId(), scopeToAdd));
 
             TeamScope readScope = ps.readTeamScope(defScope.getId());
@@ -382,21 +382,21 @@ public class ProfileServiceTest extends AbstractServiceTest {
         {
             // invalid team Ids
             Assertions.assertThatThrownBy(
-                    () -> ps.editTeam(0L, createTeam(defScope.getId(), "temp")))
+                    () -> ps.editTeam(0L, createEditTeam("temp", null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ps.editTeam(-1L, createTeam(defScope.getId(), "temp")))
+                    () -> ps.editTeam(-1L, createEditTeam("temp", null)))
                     .isInstanceOf(InputValidationException.class);
 
             // non existing team Ids
             Assertions.assertThatThrownBy(
-                    () -> ps.editTeam(999999L, createTeam(defScope.getId(), "temp")))
+                    () -> ps.editTeam(999999L, createEditTeam("temp", null)))
                     .isInstanceOf(InputValidationException.class);
         }
 
         {
             // Must not allow to edit default team name
-            TeamProfile defNew = createTeam(defScope.getId(), "New Default");
+            TeamProfileEditDto defNew = createEditTeam("New Default", null);
             Assertions.assertThatThrownBy(() -> ps.editTeam(defTeam.getId(), defNew))
                     .isInstanceOf(InputValidationException.class);
 
@@ -685,6 +685,11 @@ public class ProfileServiceTest extends AbstractServiceTest {
         Assertions.assertThat(ps.listTeams(northId)).hasSize(2);
         Assertions.assertThat(ps.listUsers(wid, 0, 10)).hasSize(1);
 
+        {
+            // delete non existing users must return unsuccessful
+            Assert.assertFalse(ps.deleteUserProfile(30001L));
+        }
+
         UserProfile nedStark = createProfile("Ned Stark", "ned@winterfell.com");
         nedStark.setExtId(30001L);
         long nedId = ps.addUserProfile(nedStark);
@@ -752,7 +757,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
         {
             // non existing user ids
             Assertions.assertThatThrownBy(
-                    () -> ps.editUserProfile(9999L, createProfile("", "")))
+                    () -> ps.editUserProfile(9999L, createEditUser("", "", null)))
                     .isInstanceOf(InputValidationException.class);
         }
 
@@ -770,31 +775,29 @@ public class ProfileServiceTest extends AbstractServiceTest {
         {
             // invalid user ids
             Assertions.assertThatThrownBy(
-                    () -> ps.editUserProfile(0L, createProfile("", "")))
+                    () -> ps.editUserProfile(0L, createEditUser("", "", null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ps.editUserProfile(-1L, createProfile("", "")))
+                    () -> ps.editUserProfile(-1L, createEditUser("", "", null)))
                     .isInstanceOf(InputValidationException.class);
 
         }
 
         {
             // edit name and avatar id
-            UserProfile editedProfile = createProfile("Brandan Stark", branStark.getEmail());
-            editedProfile.setAvatarId("/img/nightking.jpg");
+            UserProfileEditDto editedProfile = createEditUser("Brandan Stark", null, "/img/nightking.jpg");
             editedProfile.setMale(true);
             Assert.assertTrue(ps.editUserProfile(branId, editedProfile));
 
             UserProfile branNew = ps.readUserProfile(branId);
             Assert.assertEquals(editedProfile.getName(), branNew.getName());
             Assert.assertEquals(editedProfile.getAvatarId(), branNew.getAvatarId());
-            Assert.assertEquals(editedProfile.getEmail(), branStark.getEmail());
-            Assert.assertEquals(editedProfile.getNickName(), branStark.getNickName());
+            Assert.assertEquals(branStark.getEmail(), branNew.getEmail());
+            Assert.assertEquals(editedProfile.getNickName(), branNew.getNickName());
             Assert.assertTrue(branNew.isMale());
 
             // edit nick name
-            UserProfile p2 = createProfile(branNew.getName(), branNew.getEmail());
-            p2.setNickName("Nightking");
+            UserProfileEditDto p2 = createEditUser(branNew.getName(), "Nightking", null);
             p2.setMale(true);
             Assert.assertTrue(ps.editUserProfile(branId, p2));
 
@@ -808,7 +811,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
         {
             // change gender
-            UserProfile p1 = createProfile(aryaStark.getName(), aryaStark.getEmail());
+            UserProfileEditDto p1 = createEditUser(aryaStark.getName(), null, null);
             p1.setMale(false);
             Assert.assertTrue(ps.editUserProfile(aryaId, p1));
 
@@ -852,4 +855,24 @@ public class ProfileServiceTest extends AbstractServiceTest {
         return profile;
     }
 
+    private UserProfileEditDto createEditUser(String name, String nickName, String avtId) {
+        UserProfileEditDto editDto = new UserProfileEditDto();
+        editDto.setName(name);
+        editDto.setNickName(nickName);
+        editDto.setAvatarId(avtId);
+        return editDto;
+    }
+
+    private TeamScopeEditDto createEditScope(String displayName) {
+        TeamScopeEditDto editDto = new TeamScopeEditDto();
+        editDto.setDisplayName(displayName);
+        return editDto;
+    }
+
+    private TeamProfileEditDto createEditTeam(String name, String avtId) {
+        TeamProfileEditDto editDto = new TeamProfileEditDto();
+        editDto.setName(name);
+        editDto.setAvatarId(avtId);
+        return editDto;
+    }
 }

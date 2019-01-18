@@ -1,5 +1,8 @@
 package io.github.isuru.oasis.services.services;
 
+import io.github.isuru.oasis.services.dto.edits.TeamProfileEditDto;
+import io.github.isuru.oasis.services.dto.edits.TeamScopeEditDto;
+import io.github.isuru.oasis.services.dto.edits.UserProfileEditDto;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
@@ -14,7 +17,7 @@ public interface IProfileService {
     UserProfile readUserProfile(long userId) throws Exception;
     UserProfile readUserProfile(String email) throws Exception;
     UserProfile readUserProfileByExtId(long extUserId) throws Exception;
-    boolean editUserProfile(long userId, UserProfile profile) throws Exception;
+    boolean editUserProfile(long userId, UserProfileEditDto profile) throws Exception;
     boolean deleteUserProfile(long userId) throws Exception;
     List<UserProfile> findUser(String email, String name) throws Exception;
 
@@ -22,14 +25,14 @@ public interface IProfileService {
 
     long addTeam(TeamProfile teamProfile) throws Exception;
     TeamProfile readTeam(long teamId) throws Exception;
-    boolean editTeam(long teamId, TeamProfile teamProfile) throws Exception;
+    boolean editTeam(long teamId, TeamProfileEditDto teamProfile) throws Exception;
     List<TeamProfile> listTeams(long scopeId) throws Exception;
 
     long addTeamScope(TeamScope teamScope) throws Exception;
     TeamScope readTeamScope(long scopeId) throws Exception;
     TeamScope readTeamScope(String scopeName) throws Exception;
     List<TeamScope> listTeamScopes() throws Exception;
-    boolean editTeamScope(long scopeId, TeamScope scope) throws Exception;
+    boolean editTeamScope(long scopeId, TeamScopeEditDto scope) throws Exception;
 
     boolean addUserToTeam(long userId, long teamId, int roleId) throws Exception;
     boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval) throws Exception;

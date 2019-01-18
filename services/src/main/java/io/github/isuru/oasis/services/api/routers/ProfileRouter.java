@@ -1,5 +1,8 @@
 package io.github.isuru.oasis.services.api.routers;
 
+import io.github.isuru.oasis.services.dto.edits.TeamProfileEditDto;
+import io.github.isuru.oasis.services.dto.edits.TeamScopeEditDto;
+import io.github.isuru.oasis.services.dto.edits.UserProfileEditDto;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
@@ -89,7 +92,7 @@ public class ProfileRouter extends BaseRouters {
 
         return asResBool(getProfileService().editUserProfile(
                 asPLong(req, USER_ID),
-                bodyAs(req, UserProfile.class)));
+                bodyAs(req, UserProfileEditDto.class)));
     }
 
     private Object findUsersInTeam(Request req, Response res) throws Exception {
@@ -102,7 +105,7 @@ public class ProfileRouter extends BaseRouters {
     private Object editTeam(Request req, Response res) throws Exception {
         return asResBool(getProfileService().editTeam(
                 asPLong(req, TEAM_ID),
-                bodyAs(req, TeamProfile.class)));
+                bodyAs(req, TeamProfileEditDto.class)));
     }
 
     private Object addTeam(Request req, Response res) throws Exception {
@@ -116,7 +119,7 @@ public class ProfileRouter extends BaseRouters {
     private Object editScope(Request req, Response res) throws Exception {
         return asResBool(getProfileService().editTeamScope(
                 asPLong(req, SCOPE_ID),
-                bodyAs(req, TeamScope.class)));
+                bodyAs(req, TeamScopeEditDto.class)));
     }
 
     private Object findUserTeam(Request req, Response res) throws Exception {

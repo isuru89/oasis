@@ -3,6 +3,9 @@ package io.github.isuru.oasis.services.controllers;
 import io.github.isuru.oasis.services.dto.DefinitionAddResponse;
 import io.github.isuru.oasis.services.dto.DeleteResponse;
 import io.github.isuru.oasis.services.dto.EditResponse;
+import io.github.isuru.oasis.services.dto.edits.TeamProfileEditDto;
+import io.github.isuru.oasis.services.dto.edits.TeamScopeEditDto;
+import io.github.isuru.oasis.services.dto.edits.UserProfileEditDto;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
@@ -43,9 +46,9 @@ public class AdminController {
     @PostMapping("/user/{id}/edit")
     @ResponseBody
     public EditResponse editUser(@PathVariable("id") long userId,
-                                 @RequestBody UserProfile profile,
+                                 @RequestBody UserProfileEditDto profileEditDto,
                                  @CurrentUser UserPrincipal authUser) throws Exception {
-        return new EditResponse("user", profileService.editUserProfile(userId, profile));
+        return new EditResponse("user", profileService.editUserProfile(userId, profileEditDto));
     }
 
     @GetMapping("/user/{id}")
@@ -78,8 +81,8 @@ public class AdminController {
     @PostMapping("/team/{id}/edit")
     @ResponseBody
     public EditResponse editTeam(@PathVariable("id") int teamId,
-                                 @RequestBody TeamProfile profile) throws Exception {
-        return new EditResponse("team", profileService.editTeam(teamId, profile));
+                                 @RequestBody TeamProfileEditDto editDto) throws Exception {
+        return new EditResponse("team", profileService.editTeam(teamId, editDto));
     }
 
     @GetMapping("/team/{id}")
@@ -107,8 +110,8 @@ public class AdminController {
     @PostMapping("/scope/{id}/edit")
     @ResponseBody
     public EditResponse editTeamScope(@PathVariable("id") int scopeId,
-                                      @RequestBody TeamScope scope) throws Exception {
-        return new EditResponse("scope", profileService.editTeamScope(scopeId, scope));
+                                      @RequestBody TeamScopeEditDto editDto) throws Exception {
+        return new EditResponse("scope", profileService.editTeamScope(scopeId, editDto));
     }
 
     @GetMapping("/scope/list")
