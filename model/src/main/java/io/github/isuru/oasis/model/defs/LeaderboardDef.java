@@ -1,8 +1,13 @@
 package io.github.isuru.oasis.model.defs;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class LeaderboardDef {
+
+    public static final Set<String> ORDER_BY_ALLOWED = new HashSet<>(Arrays.asList("asc", "desc"));
 
     private Long id;
     private String name;

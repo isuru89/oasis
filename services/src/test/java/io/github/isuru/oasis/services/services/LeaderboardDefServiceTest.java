@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class LeaderboardDefServiceTest extends BaseDefServiceTest {
 
@@ -27,33 +28,59 @@ public class LeaderboardDefServiceTest extends BaseDefServiceTest {
         {
             // invalid or insufficient parameters
             Assertions.assertThatThrownBy(
-                    () -> ds.addLeaderboardDef(0L, create(null, null)))
+                    () -> ds.addLeaderboardDef(0L, create(null, null, null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addLeaderboardDef(-1L, create(null, null)))
+                    () -> ds.addLeaderboardDef(-1L, create(null, null, null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addLeaderboardDef(9999L, create(null, null)))
-                    .isInstanceOf(InputValidationException.class);
-
-            Assertions.assertThatThrownBy(
-                    () -> ds.addLeaderboardDef(gameId, create("", null)))
-                    .isInstanceOf(InputValidationException.class);
-            Assertions.assertThatThrownBy(
-                    () -> ds.addLeaderboardDef(gameId, create(null, null)))
-                    .isInstanceOf(InputValidationException.class);
-            Assertions.assertThatThrownBy(
-                    () -> ds.addLeaderboardDef(gameId, create("  ", null)))
+                    () -> ds.addLeaderboardDef(9999L, create(null, null, null)))
                     .isInstanceOf(InputValidationException.class);
 
             Assertions.assertThatThrownBy(
-                    () -> ds.addLeaderboardDef(gameId, create("scholar", "")))
+                    () -> ds.addLeaderboardDef(gameId, create("", null, null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addLeaderboardDef(gameId, create("scholar", null)))
+                    () -> ds.addLeaderboardDef(gameId, create(null, null, null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addLeaderboardDef(gameId, create("scholar", "\t ")))
+                    () -> ds.addLeaderboardDef(gameId, create("  ", null, null)))
+                    .isInstanceOf(InputValidationException.class);
+
+            Assertions.assertThatThrownBy(
+                    () -> ds.addLeaderboardDef(gameId, create("votes", "", null)))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ds.addLeaderboardDef(gameId, create("votes", null, null)))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ds.addLeaderboardDef(gameId, create("votes", "\t ", null)))
+                    .isInstanceOf(InputValidationException.class);
+
+            Assertions.assertThatThrownBy(
+                    () -> ds.addLeaderboardDef(gameId, create("votes", "Total Votes", "")))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ds.addLeaderboardDef(gameId, create("votes", "Total Votes", null)))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ds.addLeaderboardDef(gameId, create("votes", "Total Votes", " ")))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ds.addLeaderboardDef(gameId, create("votes", "Total Votes", "ASC")))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ds.addLeaderboardDef(gameId, create("votes", "Total Votes", "DESC")))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ds.addLeaderboardDef(gameId, create("votes", "Total Votes", "Other")))
+                    .isInstanceOf(InputValidationException.class);
+
+            // both inclusion and exclusion cannot exist together.
+            LeaderboardDef def = create("stars", "Total Stars", "desc");
+            def.setRuleIds(Arrays.asList("rule-1", "rule-2"));
+            def.setExcludeRuleIds(Arrays.asList("rule-8", "rule-9", "rule-10"));
+            Assertions.assertThatThrownBy(() -> ds.addLeaderboardDef(gameId, def))
                     .isInstanceOf(InputValidationException.class);
         }
     }
@@ -64,7 +91,7 @@ public class LeaderboardDefServiceTest extends BaseDefServiceTest {
         long gameId = savedGame.getId();
         int size = getTotalCount(gameId);
 
-        LeaderboardDef def = create("reputations", "Total Reputation");
+        LeaderboardDef def = create("reputations", "Total Reputation", "asc");
         {
             long defId = addAssert(gameId, def);
 
@@ -113,7 +140,28 @@ public class LeaderboardDefServiceTest extends BaseDefServiceTest {
 
     @Test
     public void testLeaderboardTypeAdds() throws Exception {
-        // @TODO write tests for different types of badges
+        GameDef savedGame = createSavedGame("so", "Stackoverflow");
+        long gameId = savedGame.getId();
+        int size = getTotalCount(gameId);
+
+        // write tests for different types of leaderboards
+        {
+            LeaderboardDef def = create("reputations", "Total Reputation", "asc");
+            def.setRuleIds(Arrays.asList("rule-1", "rule-2"));
+
+            readAssert(addAssert(gameId, def));
+
+            checkTotalCount(gameId, size + 1);
+        }
+
+        {
+            LeaderboardDef def = create("questions", "Total Questions", "desc");
+            def.setExcludeRuleIds(Arrays.asList("ex-rule-1", "ex-rule-2"));
+
+            readAssert(addAssert(gameId, def));
+
+            checkTotalCount(gameId, size + 2);
+        }
     }
 
     @Test
@@ -133,8 +181,8 @@ public class LeaderboardDefServiceTest extends BaseDefServiceTest {
         long gameId = savedGame.getId();
         int defSize = getTotalCount(gameId);
 
-        LeaderboardDef def1 = create("votes", "Total Votes");
-        LeaderboardDef def2 = create("stars", "Total Stars");
+        LeaderboardDef def1 = create("votes", "Total Votes", "asc");
+        LeaderboardDef def2 = create("stars", "Total Stars", "desc");
 
         LeaderboardDef addedDef1 = readAssert(addAssert(gameId, def1), def1);
         LeaderboardDef addedDef2 = readAssert(addAssert(gameId, def2), def2);
@@ -195,6 +243,25 @@ public class LeaderboardDefServiceTest extends BaseDefServiceTest {
         Assert.assertEquals(id, addedDef.getId().longValue());
         Assert.assertEquals(check.getName(), addedDef.getName());
         Assert.assertEquals(check.getDisplayName(), addedDef.getDisplayName());
+        Assert.assertEquals(check.getDescription(), addedDef.getDescription());
+        Assert.assertEquals(check.getOrderBy(), addedDef.getOrderBy());
+        if (check.getRuleIds() == null) {
+            Assert.assertNull(addedDef.getRuleIds());
+        } else {
+            Assertions.assertThat(addedDef.getRuleIds())
+                    .isNotNull()
+                    .hasSize(check.getRuleIds().size())
+                    .containsAll(check.getRuleIds());
+        }
+
+        if (check.getExcludeRuleIds() == null) {
+            Assert.assertNull(addedDef.getExcludeRuleIds());
+        } else {
+            Assertions.assertThat(addedDef.getExcludeRuleIds())
+                    .isNotNull()
+                    .hasSize(check.getExcludeRuleIds().size())
+                    .containsAll(check.getExcludeRuleIds());
+        }
         return addedDef;
     }
 
@@ -213,10 +280,11 @@ public class LeaderboardDefServiceTest extends BaseDefServiceTest {
         return def;
     }
 
-    private LeaderboardDef create(String name, String displayName) {
+    private LeaderboardDef create(String name, String displayName, String orderBy) {
         LeaderboardDef def = new LeaderboardDef();
         def.setName(name);
         def.setDisplayName(displayName);
+        def.setOrderBy(orderBy);
         return def;
     }
 

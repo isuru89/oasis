@@ -4,11 +4,21 @@ import io.github.isuru.oasis.services.exception.InputValidationException;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna
  */
 public final class Checks {
+
+    public static <T> void isOneOf(T value, Set<T> allowedValues, String param) throws InputValidationException {
+        if (!allowedValues.contains(value)) {
+            throw new InputValidationException(String.format("Parameter '%s' must be one of "
+                    + allowedValues.stream().map(Object::toString)
+                    .collect(Collectors.joining(", ", "[", "]")), param));
+        }
+    }
 
     public static void validate(boolean condition, String message) throws InputValidationException {
         if (!condition) {

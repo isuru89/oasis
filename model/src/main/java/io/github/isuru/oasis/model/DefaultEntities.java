@@ -29,6 +29,7 @@ public class DefaultEntities {
         DEFAULT_LEADERBOARD_DEF = new LeaderboardDef();
         DEFAULT_LEADERBOARD_DEF.setName("Oasis_Leaderboard");
         DEFAULT_LEADERBOARD_DEF.setDisplayName("Oasis Leaderboard");
+        DEFAULT_LEADERBOARD_DEF.setOrderBy("asc");
     }
 
     public static String deriveDefaultTeamName(String teamScopeName) {

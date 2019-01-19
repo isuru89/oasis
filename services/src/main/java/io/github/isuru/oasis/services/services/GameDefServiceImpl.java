@@ -341,6 +341,11 @@ public class GameDefServiceImpl implements IGameDefService {
         Checks.greaterThanZero(gameId, "gameId");
         Checks.nonNullOrEmpty(leaderboardDef.getName(), "name");
         Checks.nonNullOrEmpty(leaderboardDef.getDisplayName(), "displayName");
+        Checks.nonNullOrEmpty(leaderboardDef.getOrderBy(), "orderBy");
+        Checks.isOneOf(leaderboardDef.getOrderBy(), LeaderboardDef.ORDER_BY_ALLOWED, "orderBy");
+        Checks.validate(Commons.isNullOrEmpty(leaderboardDef.getRuleIds()) ||
+                Commons.isNullOrEmpty(leaderboardDef.getExcludeRuleIds()),
+                "Both inclusion and exclusion rule ids cannot exist together!");
 
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.LEADERBOARD.getTypeId());
