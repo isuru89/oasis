@@ -161,7 +161,7 @@ public class GameDefServiceImpl implements IGameDefService {
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.KPI.getTypeId());
         wrapper.setName(kpi.getName());
-        wrapper.setDisplayName(wrapper.getName());
+        wrapper.setDisplayName(kpi.getDisplayName());
         wrapper.setContent(RUtils.toStr(kpi, mapper));
         wrapper.setGameId(gameId);
 

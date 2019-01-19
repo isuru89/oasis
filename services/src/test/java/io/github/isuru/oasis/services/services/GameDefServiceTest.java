@@ -8,7 +8,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,19 +15,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GameDefServiceTest extends AbstractServiceTest {
-
-    @Autowired
-    private IGameDefService ds;
+public class GameDefServiceTest extends BaseDefServiceTest {
 
     @Before
     public void beforeEach() throws Exception {
-        resetSchema();
-
-        Assertions.assertThat(ds.listGames()).isEmpty();
-        Assertions.assertThat(ds.listBadgeDefs()).isEmpty();
-        Assertions.assertThat(ds.listKpiCalculations()).isEmpty();
-        Assertions.assertThat(ds.listMilestoneDefs()).isEmpty();
+        verifyDefsAreEmpty();
     }
 
     @Test
@@ -298,10 +289,4 @@ public class GameDefServiceTest extends AbstractServiceTest {
         }
     }
 
-    private GameDef createGame(String name, String displayName) {
-        GameDef gameDef = new GameDef();
-        gameDef.setName(name);
-        gameDef.setDisplayName(displayName);
-        return gameDef;
-    }
 }
