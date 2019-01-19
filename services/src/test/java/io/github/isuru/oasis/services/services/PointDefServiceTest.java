@@ -1,15 +1,15 @@
 package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.model.db.DbException;
-import io.github.isuru.oasis.model.defs.BadgeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
+import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class BadgeDefServiceTest extends BaseDefServiceTest {
+public class PointDefServiceTest extends BaseDefServiceTest {
 
     @Before
     public void beforeEach() throws Exception {
@@ -17,132 +17,132 @@ public class BadgeDefServiceTest extends BaseDefServiceTest {
     }
 
     @Test
-    public void testBadgeAddFailures() throws Exception {
+    public void testPointAddFailures() throws Exception {
         GameDef savedGame = createSavedGame("so", "Stackoverflow");
         long gameId = savedGame.getId();
 
         {
             // invalid or insufficient parameters
             Assertions.assertThatThrownBy(
-                    () -> ds.addBadgeDef(0L, create(null, null)))
+                    () -> ds.addPointDef(0L, create(null, null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addBadgeDef(-1L, create(null, null)))
+                    () -> ds.addPointDef(-1L, create(null, null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addBadgeDef(9999L, create(null, null)))
-                    .isInstanceOf(InputValidationException.class);
-
-            Assertions.assertThatThrownBy(
-                    () -> ds.addBadgeDef(gameId, create("", null)))
-                    .isInstanceOf(InputValidationException.class);
-            Assertions.assertThatThrownBy(
-                    () -> ds.addBadgeDef(gameId, create(null, null)))
-                    .isInstanceOf(InputValidationException.class);
-            Assertions.assertThatThrownBy(
-                    () -> ds.addBadgeDef(gameId, create("  ", null)))
+                    () -> ds.addPointDef(9999L, create(null, null)))
                     .isInstanceOf(InputValidationException.class);
 
             Assertions.assertThatThrownBy(
-                    () -> ds.addBadgeDef(gameId, create("scholar", "")))
+                    () -> ds.addPointDef(gameId, create("", null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addBadgeDef(gameId, create("scholar", null)))
+                    () -> ds.addPointDef(gameId, create(null, null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addBadgeDef(gameId, create("scholar", "\t ")))
+                    () -> ds.addPointDef(gameId, create("  ", null)))
+                    .isInstanceOf(InputValidationException.class);
+
+            Assertions.assertThatThrownBy(
+                    () -> ds.addPointDef(gameId, create("scholar", "")))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ds.addPointDef(gameId, create("scholar", null)))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ds.addPointDef(gameId, create("scholar", "\t ")))
                     .isInstanceOf(InputValidationException.class);
         }
     }
 
     @Test
-    public void testBadgeAdds() throws Exception {
+    public void testPointAdds() throws Exception {
         GameDef savedGame = createSavedGame("so", "Stackoverflow");
         long gameId = savedGame.getId();
-        int size = ds.listBadgeDefs(gameId).size();
+        int size = getTotalCount(gameId);
 
-        BadgeDef def = create("scholar", "Scholar");
+        PointDef def = create("reputations", "Total Reputation");
         {
             long defId = addAssert(gameId, def);
 
-            BadgeDef addedDef = readAssert(defId);
+            PointDef addedDef = readAssert(defId);
             Assert.assertEquals(defId, addedDef.getId().longValue());
             Assert.assertEquals(def.getName(), addedDef.getName());
             Assert.assertEquals(def.getDisplayName(), addedDef.getDisplayName());
 
             // one more should be added
-            Assertions.assertThat(ds.listBadgeDefs(gameId).size()).isEqualTo(size + 1);
+            checkTotalCount(gameId, size + 1);
         }
 
         {
             // add kpi with same name in to the same game should throw an error
-            Assertions.assertThatThrownBy(() -> ds.addBadgeDef(gameId, clone(def)))
+            Assertions.assertThatThrownBy(() -> ds.addPointDef(gameId, clone(def)))
                     .isInstanceOf(DbException.class);
         }
 
         {
-            size = ds.listBadgeDefs(gameId).size();
+            size = getTotalCount(gameId);
 
             // with description and display name
-            BadgeDef cloned = clone(def);
-            cloned.setName("scholar-new");
-            cloned.setDisplayName("Scholar-Updated");
-            cloned.setDescription("Normalize favourites before processing.");
+            PointDef cloned = clone(def);
+            cloned.setName("reputation-new");
+            cloned.setDisplayName("Total Reputation - Updated");
+            cloned.setDescription("Sum of reputation a user has gathered forever.");
 
             long kpiId = addAssert(gameId, cloned);
             readAssert(kpiId, cloned);
 
             // one more should be added
-            Assertions.assertThat(ds.listBadgeDefs(gameId).size()).isEqualTo(size + 1);
+            checkTotalCount(gameId, size + 1);
         }
 
         {
             // add same kpi to a different game must be successful
             GameDef gameNew = createSavedGame("so-updated", "Updated Stackoverflow");
-            int sizeNew = ds.listBadgeDefs(gameNew.getId()).size();
+            int sizeNew = getTotalCount(gameNew.getId());
 
-            BadgeDef clone = clone(def);
+            PointDef clone = clone(def);
             long otherId = addAssert(gameNew.getId(), clone);
             readAssert(otherId, clone);
-            Assertions.assertThat(ds.listBadgeDefs(gameNew.getId()).size()).isEqualTo(sizeNew  + 1);
+            checkTotalCount(gameNew.getId(), sizeNew + 1);
         }
     }
 
     @Test
-    public void testBadgeTypeAdds() throws Exception {
+    public void testPointTypeAdds() throws Exception {
         // @TODO write tests for different types of badges
     }
 
     @Test
-    public void testBadgeDisable() throws Exception {
+    public void testPointDisable() throws Exception {
         {
             // invalid disable params
-            Assertions.assertThatThrownBy(() -> ds.disableBadgeDef(0L))
+            Assertions.assertThatThrownBy(() -> ds.disablePointDef(0L))
                     .isInstanceOf(InputValidationException.class);
-            Assertions.assertThatThrownBy(() -> ds.disableBadgeDef(-1L))
+            Assertions.assertThatThrownBy(() -> ds.disablePointDef(-1L))
                     .isInstanceOf(InputValidationException.class);
 
             // non existing
-            Assert.assertFalse(ds.disableBadgeDef(9999L));
+            Assert.assertFalse(ds.disablePointDef(9999L));
         }
 
         GameDef savedGame = createSavedGame("so", "Stackoverflow");
         long gameId = savedGame.getId();
-        int kpiSize = ds.listBadgeDefs(gameId).size();
+        int defSize = getTotalCount(gameId);
 
-        BadgeDef def1 = create("scholar", "Scholar");
-        BadgeDef def2 = create("fanatic", "Fanatic");
+        PointDef def1 = create("votes", "Total Votes");
+        PointDef def2 = create("stars", "Total Stars");
 
-        BadgeDef addedDef1 = readAssert(addAssert(gameId, def1), def1);
-        BadgeDef addedDef2 = readAssert(addAssert(gameId, def2), def2);
-        Assert.assertEquals(kpiSize + 2, ds.listBadgeDefs(gameId).size());
+        PointDef addedDef1 = readAssert(addAssert(gameId, def1), def1);
+        PointDef addedDef2 = readAssert(addAssert(gameId, def2), def2);
+        checkTotalCount(gameId, defSize + 2);
 
         {
             // disable def-1
-            Assert.assertTrue(ds.disableBadgeDef(addedDef1.getId()));
+            Assert.assertTrue(ds.disablePointDef(addedDef1.getId()));
 
             // listing should not return disabled ones...
-            Assert.assertEquals(kpiSize + 1, ds.listBadgeDefs(gameId).size());
+            checkTotalCount(gameId, defSize + 1);
 
             // ... but read does
             readAssert(addedDef1.getId());
@@ -150,10 +150,10 @@ public class BadgeDefServiceTest extends BaseDefServiceTest {
 
         {
             // disable def-2
-            Assert.assertTrue(ds.disableBadgeDef(addedDef2.getId()));
+            Assert.assertTrue(ds.disablePointDef(addedDef2.getId()));
 
             // listing should not return disabled ones...
-            Assert.assertEquals(kpiSize, ds.listBadgeDefs(gameId).size());
+            checkTotalCount(gameId, defSize);
 
             // ... but read does
             readAssert(addedDef2.getId());
@@ -165,30 +165,38 @@ public class BadgeDefServiceTest extends BaseDefServiceTest {
         }
     }
 
-    private long addAssert(long gameId, BadgeDef def) throws Exception {
-        long l = ds.addBadgeDef(gameId, def);
+    private int getTotalCount(long gameId) throws Exception {
+        return ds.listPointDefs(gameId).size();
+    }
+
+    private void checkTotalCount(long gameId, int expected) throws Exception {
+        Assertions.assertThat(getTotalCount(gameId)).isEqualTo(expected);
+    }
+
+    private long addAssert(long gameId, PointDef def) throws Exception {
+        long l = ds.addPointDef(gameId, def);
         Assert.assertTrue(l > 0);
         return l;
     }
 
-    private BadgeDef readAssert(long badgeId) throws Exception {
-        BadgeDef def = ds.readBadgeDef(badgeId);
+    private PointDef readAssert(long id) throws Exception {
+        PointDef def = ds.readPointDef(id);
         Assert.assertNotNull(def);
-        Assert.assertEquals(badgeId, def.getId().longValue());
+        Assert.assertEquals(id, def.getId().longValue());
         return def;
     }
 
-    private BadgeDef readAssert(long badgeId, BadgeDef check) throws Exception {
-        BadgeDef addedDef = ds.readBadgeDef(badgeId);
+    private PointDef readAssert(long id, PointDef check) throws Exception {
+        PointDef addedDef = ds.readPointDef(id);
         Assert.assertNotNull(addedDef);
-        Assert.assertEquals(badgeId, addedDef.getId().longValue());
+        Assert.assertEquals(id, addedDef.getId().longValue());
         Assert.assertEquals(check.getName(), addedDef.getName());
         Assert.assertEquals(check.getDisplayName(), addedDef.getDisplayName());
         return addedDef;
     }
 
-    private BadgeDef clone(BadgeDef other) {
-        BadgeDef def = new BadgeDef();
+    private PointDef clone(PointDef other) {
+        PointDef def = new PointDef();
         def.setName(other.getName());
         def.setDisplayName(other.getDisplayName());
         def.setDescription(other.getDescription());
@@ -196,8 +204,8 @@ public class BadgeDefServiceTest extends BaseDefServiceTest {
         return def;
     }
 
-    private BadgeDef create(String name, String displayName) {
-        BadgeDef def = new BadgeDef();
+    private PointDef create(String name, String displayName) {
+        PointDef def = new PointDef();
         def.setName(name);
         def.setDisplayName(displayName);
         return def;
