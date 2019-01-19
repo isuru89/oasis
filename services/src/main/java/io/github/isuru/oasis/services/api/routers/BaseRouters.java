@@ -5,6 +5,7 @@ import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.TokenInfo;
 import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.ILifecycleService;
 import io.github.isuru.oasis.services.services.IOasisApiService;
@@ -12,14 +13,13 @@ import io.github.isuru.oasis.services.utils.AuthUtils;
 import io.github.isuru.oasis.services.utils.JsonTransformer;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.OasisOptions;
-import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.utils.ValueMap;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 import spark.Spark;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
@@ -57,12 +57,12 @@ public abstract class BaseRouters {
 
     public void register() {}
 
-    Pair<String, String> getBasicAuthPair(Request request) throws ApiAuthException, UnsupportedEncodingException {
+    Pair<String, String> getBasicAuthPair(Request request) throws ApiAuthException {
         String auth = request.headers(AUTHORIZATION);
         if (auth != null) {
             if (auth.startsWith(BASIC)) {
                 String token = auth.substring(BASIC.length());
-                String decode = new String(Base64.getDecoder().decode(token), "UTF-8");
+                String decode = new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
                 String uname = decode.substring(0, decode.indexOf(":"));
                 String pword = decode.substring(decode.indexOf(":") + 1);
                 return Pair.of(uname, pword);

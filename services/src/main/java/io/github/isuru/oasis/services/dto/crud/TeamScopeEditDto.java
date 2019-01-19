@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.dto.edits;
+package io.github.isuru.oasis.services.dto.crud;
 
 public class TeamScopeEditDto {
 

@@ -8,19 +8,22 @@ import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.model.EventSourceToken;
 import io.github.isuru.oasis.services.model.SubmittedJob;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.ILifecycleService;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.services.LifecycleImplManager;
 import io.github.isuru.oasis.services.utils.Maps;
-import io.github.isuru.oasis.services.model.UserRole;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +112,7 @@ public class Bootstrapping {
         TeamScope defaultTeamScope = profileService.readTeamScope(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
         if (defaultTeamScope == null) {
             LOG.info("  - Default team scope does not exist. Creating...");
-            TeamScope teamScope = new TeamScope();
+            TeamScopeAddDto teamScope = new TeamScopeAddDto();
             teamScope.setName(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
             teamScope.setDisplayName(DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
             teamScope.setAutoScope(true);
@@ -198,7 +201,7 @@ public class Bootstrapping {
         UserProfile adminUser = profileService.readUserProfile(DefaultEntities.DEF_ADMIN_USER);
         if (adminUser == null) {
             LOG.info("  - Admin user does not exist. Creating...");
-            UserProfile admin = new UserProfile();
+            UserProfileAddDto admin = new UserProfileAddDto();
             admin.setEmail(DefaultEntities.DEF_ADMIN_USER);
             admin.setName("Admin");
             admin.setActivated(true);
@@ -212,7 +215,7 @@ public class Bootstrapping {
         UserProfile curatorUser = profileService.readUserProfile(DefaultEntities.DEF_CURATOR_USER);
         if (curatorUser == null) {
             LOG.info("  - Curator user does not exist. Creating...");
-            UserProfile curator = new UserProfile();
+            UserProfileAddDto curator = new UserProfileAddDto();
             curator.setEmail(DefaultEntities.DEF_CURATOR_USER);
             curator.setName("Curator");
             curator.setActivated(true);
@@ -226,7 +229,7 @@ public class Bootstrapping {
         UserProfile playerUser = profileService.readUserProfile(DefaultEntities.DEF_PLAYER_USER);
         if (playerUser == null) {
             LOG.info("  - Player user does not exist. Creating...");
-            UserProfile player = new UserProfile();
+            UserProfileAddDto player = new UserProfileAddDto();
             player.setEmail(DefaultEntities.DEF_PLAYER_USER);
             player.setName("Player");
             player.setActivated(true);
@@ -251,7 +254,7 @@ public class Bootstrapping {
     private static TeamProfile addDefaultTeamProfile(IProfileService profileService, TeamScope teamScope) throws Exception {
         LOG.info("  - Default team does not exist. Creating...");
 
-        TeamProfile profile = new TeamProfile();
+        TeamProfileAddDto profile = new TeamProfileAddDto();
         profile.setName(DefaultEntities.DEFAULT_TEAM_NAME);
         profile.setTeamScope(teamScope.getId());
         profile.setAutoTeam(true);
@@ -263,7 +266,7 @@ public class Bootstrapping {
         defService.addLeaderboardDef(gameId, DefaultEntities.DEFAULT_LEADERBOARD_DEF);
     }
 
-    private static void addDefaultPointRules(IGameDefService gameDefService, long gameId, GameOptionsDto optionsDto) throws Exception {
+    private static void addDefaultPointRules(IGameDefService gameDefService, long gameId, GameOptionsDto optionsDto) throws Exception  {
         if (optionsDto.isAllowPointCompensation()) {
             // add compensation point event
             PointDef compDef = new PointDef();

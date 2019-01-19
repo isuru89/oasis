@@ -3,9 +3,12 @@ package io.github.isuru.oasis.services.services;
 import com.github.slugify.Slugify;
 import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.db.DbException;
-import io.github.isuru.oasis.services.dto.edits.TeamProfileEditDto;
-import io.github.isuru.oasis.services.dto.edits.TeamScopeEditDto;
-import io.github.isuru.oasis.services.dto.edits.UserProfileEditDto;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileEditDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeEditDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileEditDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -93,7 +96,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
     @Test
     public void testAddUserProfile() throws Exception {
         {
-            UserProfile profile = createProfile("Isuru Weerarathna", "isuru@dmain.com");
+            UserProfileAddDto profile = createProfile("Isuru Weerarathna", "isuru@dmain.com");
             profile.setMale(true);
             profile.setActivated(true);
             profile.setExtId(1001L);
@@ -121,7 +124,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
             asserts.assertAll();
 
             // should not be able to add the same user again.
-            UserProfile dupProfile = createProfile("Isuru Madushanka", profile.getEmail());
+            UserProfileAddDto dupProfile = createProfile("Isuru Madushanka", profile.getEmail());
             profile.setMale(true);
             profile.setActivated(true);
             profile.setExtId(1001L);
@@ -143,7 +146,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
         }
 
         {
-            TeamScope scope = createScope("HR", "Human Resource", 100L);
+            TeamScopeAddDto scope = createScope("HR", "Human Resource", 100L);
             Assertions.assertThat(ps.addTeamScope(scope)).isGreaterThan(0);
 
             // adding same scope again should fail
@@ -160,7 +163,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
     @Test
     public void testAddTeamScope() throws Exception {
         {
-            TeamScope scope = createScope("HR", "Human Resource", 123L);
+            TeamScopeAddDto scope = createScope("HR", "Human Resource", 123L);
 
             long sid = ps.addTeamScope(scope);
             Assertions.assertThat(sid).isGreaterThan(0);
@@ -206,7 +209,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
         {
             // cannot add the same scope with name again
-            TeamScope scope = createScope("HR", "Human Resource", 123L);
+            TeamScopeAddDto scope = createScope("HR", "Human Resource", 123L);
 
             Assertions.assertThatThrownBy(() -> ps.addTeamScope(scope))
                     .isInstanceOf(DbException.class);
@@ -298,21 +301,21 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
     @Test
     public void testAddTeam() throws Exception {
-        TeamScope scopeHr = createScope("HR", "Human Resource", 120L);
+        TeamScopeAddDto scopeHr = createScope("HR", "Human Resource", 120L);
         long hrId = ps.addTeamScope(scopeHr);
-        TeamScope scopeFin = createScope("Finance", "Finance Dept.", 121L);
+        TeamScopeAddDto scopeFin = createScope("Finance", "Finance Dept.", 121L);
         long finId = ps.addTeamScope(scopeFin);
 
         {
             // without scope id, should fail
-            TeamProfile team = createTeam(null, "Team 1");
+            TeamProfileAddDto team = createTeam(null, "Team 1");
             Assertions.assertThatThrownBy(() -> ps.addTeam(team))
                     .isInstanceOf(InputValidationException.class);
         }
 
         {
             // add first team
-            TeamProfile hrTeam1 = createTeam(hrId, "HR - Team Recruiters");
+            TeamProfileAddDto hrTeam1 = createTeam(hrId, "HR - Team Recruiters");
             long tid = ps.addTeam(hrTeam1);
             Assertions.assertThat(tid).isGreaterThan(0);
 
@@ -336,7 +339,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
             }
 
             // add other team
-            TeamProfile finTeam1 = createTeam(finId, "Team Insurance");
+            TeamProfileAddDto finTeam1 = createTeam(finId, "Team Insurance");
             long fid = ps.addTeam(finTeam1);
             Assertions.assertThat(fid).isGreaterThan(0);
 
@@ -418,18 +421,18 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
     @Test
     public void testReadUser() throws Exception {
-        TeamScope north = createScope("North", "North Region", 7L);
+        TeamScopeAddDto north = createScope("North", "North Region", 7L);
         long northId = ps.addTeamScope(north);
-        TeamProfile winterfell = createTeam(northId, "Winterfell");
+        TeamProfileAddDto winterfell = createTeam(northId, "Winterfell");
         long wid = ps.addTeam(winterfell);
 
         Assertions.assertThat(ps.listTeams(northId)).hasSize(2);
         Assertions.assertThat(ps.listUsers(wid, 0, 10)).hasSize(1);
 
-        UserProfile nedStark = createProfile("Ned Stark", "ned@winterfell.com");
+        UserProfileAddDto nedStark = createProfile("Ned Stark", "ned@winterfell.com");
         nedStark.setExtId(30001L);
         long nedId = ps.addUserProfile(nedStark);
-        UserProfile branStark = createProfile("Bran Stark", "bran@winterfell.com");
+        UserProfileAddDto branStark = createProfile("Bran Stark", "bran@winterfell.com");
         branStark.setExtId(30005L);
         long branId = ps.addUserProfile(branStark);
 
@@ -511,17 +514,17 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
     @Test
     public void testTransferTeam() throws Exception {
-        TeamScope river = createScope("River", "The River", 9L);
+        TeamScopeAddDto river = createScope("River", "The River", 9L);
         long riverId = ps.addTeamScope(river);
         Assert.assertTrue(riverId > 0);
 
-        TeamScope north = createScope("North", "North Region", 7L);
+        TeamScopeAddDto north = createScope("North", "North Region", 7L);
         long northId = ps.addTeamScope(north);
         Assert.assertTrue(northId > 0);
 
-        TeamProfile winterfell = createTeam(northId, "Winterfell");
+        TeamProfileAddDto winterfell = createTeam(northId, "Winterfell");
         long wid = ps.addTeam(winterfell);
-        TeamProfile tully = createTeam(riverId, "Tully");
+        TeamProfileAddDto tully = createTeam(riverId, "Tully");
         long tid = ps.addTeam(tully);
 
         Assertions.assertThat(ps.listTeams(northId)).hasSize(2);
@@ -529,12 +532,12 @@ public class ProfileServiceTest extends AbstractServiceTest {
         Assertions.assertThat(ps.listUsers(wid, 0, 10)).hasSize(1);
         Assertions.assertThat(ps.listUsers(tid, 0, 10)).hasSize(1);
 
-        UserProfile catelyn = createProfile("Catelyn Tully", "catelyn@tully.com");
+        UserProfileAddDto catelyn = createProfile("Catelyn Tully", "catelyn@tully.com");
         catelyn.setExtId(90001L);
         long catId = ps.addUserProfile(catelyn);
         Assert.assertTrue(catId > 0);
 
-        UserProfile nedStark = createProfile("Ned Stark", "ned@winterfell.com");
+        UserProfileAddDto nedStark = createProfile("Ned Stark", "ned@winterfell.com");
         nedStark.setExtId(30001L);
         long nedId = ps.addUserProfile(nedStark);
         Assert.assertTrue(nedId > 0);
@@ -575,20 +578,20 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
     @Test
     public void testAssignUsers() throws Exception {
-        TeamScope rock = createScope("Rock", "The Rock", 8L);
+        TeamScopeAddDto rock = createScope("Rock", "The Rock", 8L);
         long rockId = ps.addTeamScope(rock);
         Assert.assertTrue(rockId > 0);
-        TeamProfile casterlyRock = createTeam(rockId, "Casterly Rock");
+        TeamProfileAddDto casterlyRock = createTeam(rockId, "Casterly Rock");
         long cid = ps.addTeam(casterlyRock);
         Assert.assertTrue(cid > 0);
 
         Assertions.assertThat(ps.listTeams(rockId)).hasSize(2);
         Assertions.assertThat(ps.listUsers(cid, 0, 10)).hasSize(1);
 
-        UserProfile tywin = createProfile("Tywin Lannister", "tywin@caterlyrock.com");
+        UserProfileAddDto tywin = createProfile("Tywin Lannister", "tywin@caterlyrock.com");
         tywin.setExtId(40001L);
         long tywinId = ps.addUserProfile(tywin);
-        UserProfile jaime = createProfile("Jaime Lannister", "jaime@caterlyrock.com");
+        UserProfileAddDto jaime = createProfile("Jaime Lannister", "jaime@caterlyrock.com");
         jaime.setExtId(40005L);
         long jaimeId = ps.addUserProfile(jaime);
 
@@ -677,9 +680,9 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
     @Test
     public void testDeleteUsers() throws Exception {
-        TeamScope north = createScope("North", "North Region", 7L);
+        TeamScopeAddDto north = createScope("North", "North Region", 7L);
         long northId = ps.addTeamScope(north);
-        TeamProfile winterfell = createTeam(northId, "Winterfell");
+        TeamProfileAddDto winterfell = createTeam(northId, "Winterfell");
         long wid = ps.addTeam(winterfell);
 
         Assertions.assertThat(ps.listTeams(northId)).hasSize(2);
@@ -690,13 +693,13 @@ public class ProfileServiceTest extends AbstractServiceTest {
             Assert.assertFalse(ps.deleteUserProfile(30001L));
         }
 
-        UserProfile nedStark = createProfile("Ned Stark", "ned@winterfell.com");
+        UserProfileAddDto nedStark = createProfile("Ned Stark", "ned@winterfell.com");
         nedStark.setExtId(30001L);
         long nedId = ps.addUserProfile(nedStark);
-        UserProfile branStark = createProfile("Bran Stark", "bran@winterfell.com");
+        UserProfileAddDto branStark = createProfile("Bran Stark", "bran@winterfell.com");
         branStark.setExtId(30005L);
         long branId = ps.addUserProfile(branStark);
-        UserProfile aryaStark = createProfile("Arya Stark", "arya@winterfell.com");
+        UserProfileAddDto aryaStark = createProfile("Arya Stark", "arya@winterfell.com");
         aryaStark.setExtId(30006L);
         long aryaId = ps.addUserProfile(aryaStark);
 
@@ -746,9 +749,9 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
     @Test
     public void testEditUsers() throws Exception {
-        TeamScope north = createScope("North", "North Region", 7L);
+        TeamScopeAddDto north = createScope("North", "North Region", 7L);
         long northId = ps.addTeamScope(north);
-        TeamProfile winterfell = createTeam(northId, "Winterfell");
+        TeamProfileAddDto winterfell = createTeam(northId, "Winterfell");
         long wid = ps.addTeam(winterfell);
 
         Assertions.assertThat(ps.listTeams(northId)).hasSize(2);
@@ -761,14 +764,14 @@ public class ProfileServiceTest extends AbstractServiceTest {
                     .isInstanceOf(InputValidationException.class);
         }
 
-        UserProfile nedStark = createProfile("Ned Stark", "ned@winterfell.com");
+        UserProfileAddDto nedStark = createProfile("Ned Stark", "ned@winterfell.com");
         nedStark.setExtId(30001L);
         long nedId = ps.addUserProfile(nedStark);
-        UserProfile branStark = createProfile("Bran Stark", "bran@winterfell.com");
+        UserProfileAddDto branStark = createProfile("Bran Stark", "bran@winterfell.com");
         branStark.setExtId(30005L);
         branStark.setMale(true);
         long branId = ps.addUserProfile(branStark);
-        UserProfile aryaStark = createProfile("Arya Stark", "arya@winterfell.com");
+        UserProfileAddDto aryaStark = createProfile("Arya Stark", "arya@winterfell.com");
         aryaStark.setExtId(30006L);
         long aryaId = ps.addUserProfile(aryaStark);
 
@@ -831,8 +834,8 @@ public class ProfileServiceTest extends AbstractServiceTest {
                 .findFirst().orElseThrow(IllegalStateException::new);
     }
 
-    private TeamProfile createTeam(Number scopeId, String name) {
-        TeamProfile team = new TeamProfile();
+    private TeamProfileAddDto createTeam(Number scopeId, String name) {
+        TeamProfileAddDto team = new TeamProfileAddDto();
         if (scopeId != null) {
             team.setTeamScope(scopeId.intValue());
         }
@@ -840,16 +843,16 @@ public class ProfileServiceTest extends AbstractServiceTest {
         return team;
     }
 
-    private TeamScope createScope(String name, String displayName, Long extId) {
-        TeamScope scope = new TeamScope();
+    private TeamScopeAddDto createScope(String name, String displayName, Long extId) {
+        TeamScopeAddDto scope = new TeamScopeAddDto();
         scope.setDisplayName(displayName);
         scope.setName(name);
         scope.setExtId(extId);
         return scope;
     }
 
-    private UserProfile createProfile(String username, String email) {
-        UserProfile profile = new UserProfile();
+    private UserProfileAddDto createProfile(String username, String email) {
+        UserProfileAddDto profile = new UserProfileAddDto();
         profile.setName(username);
         profile.setEmail(email);
         return profile;

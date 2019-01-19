@@ -3,9 +3,12 @@ package io.github.isuru.oasis.services.controllers;
 import io.github.isuru.oasis.services.dto.DefinitionAddResponse;
 import io.github.isuru.oasis.services.dto.DeleteResponse;
 import io.github.isuru.oasis.services.dto.EditResponse;
-import io.github.isuru.oasis.services.dto.edits.TeamProfileEditDto;
-import io.github.isuru.oasis.services.dto.edits.TeamScopeEditDto;
-import io.github.isuru.oasis.services.dto.edits.UserProfileEditDto;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileEditDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeEditDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileEditDto;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
@@ -38,7 +41,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/user/add")
     @ResponseBody
-    public DefinitionAddResponse addUser(@RequestBody UserProfile profile) throws Exception {
+    public DefinitionAddResponse addUser(@RequestBody UserProfileAddDto profile) throws Exception {
         return new DefinitionAddResponse("user", profileService.addUserProfile(profile));
     }
 
@@ -73,7 +76,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/team/add")
     @ResponseBody
-    public DefinitionAddResponse addTeam(@RequestBody TeamProfile teamProfile) throws Exception {
+    public DefinitionAddResponse addTeam(@RequestBody TeamProfileAddDto teamProfile) throws Exception {
         return new DefinitionAddResponse("team", profileService.addTeam(teamProfile));
     }
 
@@ -102,7 +105,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/scope/add")
     @ResponseBody
-    public DefinitionAddResponse addTeamScope(@RequestBody TeamScope scope) throws Exception {
+    public DefinitionAddResponse addTeamScope(@RequestBody TeamScopeAddDto scope) throws Exception {
         return new DefinitionAddResponse("scope", profileService.addTeamScope(scope));
     }
 

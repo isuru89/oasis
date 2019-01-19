@@ -4,9 +4,12 @@ import com.github.slugify.Slugify;
 import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
-import io.github.isuru.oasis.services.dto.edits.TeamProfileEditDto;
-import io.github.isuru.oasis.services.dto.edits.TeamScopeEditDto;
-import io.github.isuru.oasis.services.dto.edits.UserProfileEditDto;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileEditDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeEditDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileEditDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
@@ -44,7 +47,7 @@ public class ProfileServiceImpl implements IProfileService {
     private IGameDefService gameDefService;
 
     @Override
-    public long addUserProfile(UserProfile profile) throws DbException, InputValidationException {
+    public long addUserProfile(UserProfileAddDto profile) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(profile.getEmail(), "email");
         Checks.nonNullOrEmpty(profile.getName(), "name");
 
@@ -151,7 +154,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public long addTeam(TeamProfile teamProfile) throws DbException, InputValidationException {
+    public long addTeam(TeamProfileAddDto teamProfile) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(teamProfile.getName(), "name");
         Checks.nonNull(teamProfile.getTeamScope(), "scope");
         Checks.greaterThanZero(teamProfile.getTeamScope(), "scope");
@@ -238,7 +241,7 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public long addTeamScope(TeamScope teamScope) throws DbException, InputValidationException {
+    public long addTeamScope(TeamScopeAddDto teamScope) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(teamScope.getName(), "name");
         Checks.nonNullOrEmpty(teamScope.getDisplayName(), "displayName");
 

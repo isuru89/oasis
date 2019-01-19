@@ -35,6 +35,8 @@ class JdbcPool {
 
         DataSource dataSource;
 
+        LOG.info("Connecting to db: " + properties.getUrl());
+
         int retry = 10;
         while (retry > 0) {
             try {

@@ -1,8 +1,11 @@
 package io.github.isuru.oasis.services.services;
 
-import io.github.isuru.oasis.services.dto.edits.TeamProfileEditDto;
-import io.github.isuru.oasis.services.dto.edits.TeamScopeEditDto;
-import io.github.isuru.oasis.services.dto.edits.UserProfileEditDto;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileEditDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeEditDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileEditDto;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
@@ -13,7 +16,7 @@ import java.util.List;
 
 public interface IProfileService {
 
-    long addUserProfile(UserProfile profile) throws Exception;
+    long addUserProfile(UserProfileAddDto profile) throws Exception;
     UserProfile readUserProfile(long userId) throws Exception;
     UserProfile readUserProfile(String email) throws Exception;
     UserProfile readUserProfileByExtId(long extUserId) throws Exception;
@@ -23,12 +26,12 @@ public interface IProfileService {
 
     List<UserProfile> listUsers(long teamId, long offset, long size) throws Exception;
 
-    long addTeam(TeamProfile teamProfile) throws Exception;
+    long addTeam(TeamProfileAddDto teamProfile) throws Exception;
     TeamProfile readTeam(long teamId) throws Exception;
     boolean editTeam(long teamId, TeamProfileEditDto teamProfile) throws Exception;
     List<TeamProfile> listTeams(long scopeId) throws Exception;
 
-    long addTeamScope(TeamScope teamScope) throws Exception;
+    long addTeamScope(TeamScopeAddDto teamScope) throws Exception;
     TeamScope readTeamScope(long scopeId) throws Exception;
     TeamScope readTeamScope(String scopeName) throws Exception;
     List<TeamScope> listTeamScopes() throws Exception;

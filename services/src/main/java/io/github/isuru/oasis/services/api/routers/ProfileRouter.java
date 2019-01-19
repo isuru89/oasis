@@ -1,17 +1,17 @@
 package io.github.isuru.oasis.services.api.routers;
 
-import io.github.isuru.oasis.services.dto.edits.TeamProfileEditDto;
-import io.github.isuru.oasis.services.dto.edits.TeamScopeEditDto;
-import io.github.isuru.oasis.services.dto.edits.UserProfileEditDto;
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.TeamScope;
-import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileEditDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeEditDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileEditDto;
+import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.utils.Maps;
 import io.github.isuru.oasis.services.utils.OasisOptions;
-import io.github.isuru.oasis.services.model.UserRole;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
@@ -83,7 +83,7 @@ public class ProfileRouter extends BaseRouters {
     }
 
     private Object addUser(Request req, Response res) throws Exception {
-        return asResAdd(getProfileService().addUserProfile(bodyAs(req, UserProfile.class)));
+        return asResAdd(getProfileService().addUserProfile(bodyAs(req, UserProfileAddDto.class)));
     }
 
     private Object editUser(Request req, Response res) throws Exception {
@@ -109,11 +109,11 @@ public class ProfileRouter extends BaseRouters {
     }
 
     private Object addTeam(Request req, Response res) throws Exception {
-        return asResAdd(getProfileService().addTeam(bodyAs(req, TeamProfile.class)));
+        return asResAdd(getProfileService().addTeam(bodyAs(req, TeamProfileAddDto.class)));
     }
 
     private Object addScope(Request req, Response res) throws Exception {
-        return asResAdd(getProfileService().addTeamScope(bodyAs(req, TeamScope.class)));
+        return asResAdd(getProfileService().addTeamScope(bodyAs(req, TeamScopeAddDto.class)));
     }
 
     private Object editScope(Request req, Response res) throws Exception {

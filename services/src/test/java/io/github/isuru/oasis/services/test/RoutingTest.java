@@ -2,8 +2,8 @@ package io.github.isuru.oasis.services.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.model.db.IOasisDao;
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.TeamScope;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
 import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.test.routes.IOasisApi;
@@ -135,12 +135,12 @@ public class RoutingTest extends AbstractApiTest {
     static void createUsers() throws Exception {
         IProfileService profileService = apiService.getProfileService();
 
-        TeamScope scope = new TeamScope();
+        TeamScopeAddDto scope = new TeamScopeAddDto();
         scope.setName("testoasis");
         scope.setDisplayName("Test-OASIS");
         long scopeId = profileService.addTeamScope(scope);
 
-        TeamProfile test = new TeamProfile();
+        TeamProfileAddDto test = new TeamProfileAddDto();
         test.setName("test-group");
         test.setTeamScope((int) scopeId);
         long teamId = profileService.addTeam(test);

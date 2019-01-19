@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.services.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.BadgeDef;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
@@ -16,7 +17,6 @@ import io.github.isuru.oasis.model.defs.StateDef;
 import io.github.isuru.oasis.services.Bootstrapping;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.exception.OasisGameException;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
@@ -27,6 +27,7 @@ import io.github.isuru.oasis.services.utils.RUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -48,9 +49,15 @@ public class GameDefServiceImpl implements IGameDefService {
     private IProfileService profileService;
 
     @Override
-    public Long createGame(GameDef gameDef, GameOptionsDto optionsDto) throws Exception {
+    public long createGame(GameDef gameDef, GameOptionsDto optionsDto) throws Exception {
         Checks.nonNull(gameDef, "gameDef");
         Checks.nonNull(optionsDto, "gameOptions");
+        Checks.nonNullOrEmpty(gameDef.getName(), "game.name");
+
+        if (listGames().stream()
+                .anyMatch(g -> g.getName().equalsIgnoreCase(gameDef.getName()))) {
+            throw new InputValidationException("There is already a game with same name!");
+        }
 
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.GAME.getTypeId());
@@ -58,43 +65,27 @@ public class GameDefServiceImpl implements IGameDefService {
         wrapper.setDisplayName(gameDef.getDisplayName());
         wrapper.setContent(RUtils.toStr(gameDef, mapper));
 
-        dao.getDefinitionDao().addDefinition(wrapper);
-
-        long gameId = -1;
-        List<DefWrapper> wrappers = dao.getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
-        for (DefWrapper wrp : wrappers) {
-            if (wrp.getName().equals(gameDef.getName())) {
-                gameId = wrp.getId();
-                break;
-            }
-        }
-
-        if (gameId < 0) {
-            throw new OasisGameException("Game could not add to the persistence storage!");
-        }
+        long gameId = dao.getDefinitionDao().addDefinition(wrapper);
 
         Bootstrapping.initGame(this, gameId, optionsDto);
-
         return gameId;
     }
 
     @Override
-    public GameDef readGame(long gameId) throws Exception {
+    public GameDef readGame(long gameId) throws DbException, InputValidationException {
         Checks.greaterThanZero(gameId, "gameId");
 
-        List<DefWrapper> wrappers = dao.getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
-        for (DefWrapper wrp : wrappers) {
-            if (wrp.getId() == gameId) {
-                GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, mapper);
-                gameDef.setId(wrp.getId());
-                return gameDef;
-            }
+        DefWrapper defWrapper = dao.getDefinitionDao().readDefinition(gameId);
+        if (defWrapper == null) {
+            throw new InputValidationException("No game definition is found by id " + gameId + "!");
         }
-        throw new Exception("No game definition is found by id " + gameId + "!");
+        GameDef def = RUtils.toObj(defWrapper.getContent(), GameDef.class, mapper);
+        def.setId(gameId);
+        return def;
     }
 
     @Override
-    public List<GameDef> listGames() throws Exception {
+    public List<GameDef> listGames() throws DbException {
         List<DefWrapper> wrappers = dao.getDefinitionDao().listDefinitions(OasisDefinition.GAME.getTypeId());
         List<GameDef> gameDefs = new LinkedList<>();
         for (DefWrapper wrp : wrappers) {
@@ -121,7 +112,13 @@ public class GameDefServiceImpl implements IGameDefService {
         DefWrapper wrp = dao.getDefinitionDao().readDefinition(gameId);
 
         GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, mapper);
-        gameDef.setConstants(gameConstants);
+        if (gameDef.getConstants() == null) {
+            gameDef.setConstants(gameConstants);
+        } else {
+            Map<String, Object> tmp = new HashMap<>(gameDef.getConstants());
+            tmp.putAll(gameConstants);
+            gameDef.setConstants(tmp);
+        }
         wrp.setContent(RUtils.toStr(gameDef, mapper));
 
         return dao.getDefinitionDao().editDefinition(wrp.getId(), wrp) > 0;
@@ -136,9 +133,18 @@ public class GameDefServiceImpl implements IGameDefService {
 
         GameDef gameDef = RUtils.toObj(wrp.getContent(), GameDef.class, mapper);
         if (!Commons.isNullOrEmpty(gameDef.getConstants())) {
+            int deleted = 0;
             for (String k : gameConstants) {
-                gameDef.getConstants().remove(k);
+                if (gameDef.getConstants().remove(k) != null) {
+                    deleted++;
+                }
             }
+
+            if (deleted == 0) {
+                return false;
+            }
+        } else {
+            return false;
         }
         wrp.setContent(RUtils.toStr(gameDef, mapper));
 

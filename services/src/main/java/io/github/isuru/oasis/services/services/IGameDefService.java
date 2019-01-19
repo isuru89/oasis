@@ -15,7 +15,7 @@ import java.util.Map;
 
 public interface IGameDefService {
 
-    Long createGame(GameDef gameDef, GameOptionsDto optionsDto) throws Exception;
+    long createGame(GameDef gameDef, GameOptionsDto optionsDto) throws Exception;
     GameDef readGame(long gameId) throws Exception;
     List<GameDef> listGames() throws Exception;
     boolean disableGame(long gameId) throws Exception;
