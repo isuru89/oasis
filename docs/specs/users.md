@@ -1,6 +1,7 @@
 
 # Users
  * All users are uniquely identified by their _email_ address.
+   * Email cannot be changed at all.
  * _username_ and _nickname_ can be modified at anytime.
  * User has a role within existing team.
  * A user belongs to exactly one team at any given time.
@@ -8,11 +9,11 @@
 
 #### Users CRUD
  * Only admin can add/delete users.
- * Before the game starts, admin can pump initial users from external system(s).
+ * Before the game starts, admin can pump initial users from the external system(s).
  * By doing so, all users should activate their account by logging once to the system.
    * Activation gives __N__ points to the user to start with. N will be decided by admin.
- * Regardless of the activation status, users will still recieve points, badges and all game elements.
- * User registration is disabled.
+ * Regardless of the activation status, users will still receive points, badges and all other game elements.
+ * New user registration is disabled.
  * Only admin and user him/herself is allowed to modify the user account details.
  * Username, nickname, gender, email, avatar will be publically available to any other user.
 
@@ -31,8 +32,8 @@
    * CURATOR
    * ADMIN
  * Only one admin can exist in the system.
- * Globally, any number of curators and players exist.
- * TeamScope can have only maximum 3 curators.
+ * Curators and players can exist within a team scope.
+ * TeamScope can have only maximum of 3 curators.
  * At the beginning all users are players.
  * Admin has the previleges to change role of anyone.
  * Admin has the authority to assign curators for a TeamScope.
@@ -44,9 +45,11 @@
 
 ## Teams
  * Teams can be created by curators or admin scoped to a TeamScope.
- * Team name must be globally unique and case insensitive.
+ * Each team has a user to represent team itself.
+    * It is identified by email, _user@<teamName>.oasis.com_ format.
+ * Team name must be globally unique and case sensitive.
  * Once given, team name cannot be changed.
- * Team owner is the curator of the TeamScope.
+ * Team owner is the curator(s) of the TeamScope.
  * When creating new teams (except default team), at least 2 players must exist initially.
  * Teams cannot be deleted.
  * There is no limit to the number of players in a team.
@@ -55,9 +58,9 @@
 ## TeamScope
  * TeamScopes can be created _only_ by admin.
  * TeamScopes cannot be deleted.
- * TeamScope name must be globally unique case insensitively.
+ * TeamScope name must be globally unique case sensitively.
  * When created, a _default_ team will be created under it.
-   * Its name is: **_defaultteam.{teamscope}_**
+   * Its name is: **{teamscope}.default**
  * A new [TeamScope] user will be created under this default team.
  * A TeamScope can have as many as teams.
 
@@ -65,8 +68,9 @@
 #### Team User
  * A new _team-user_ will be created for each team, at the time of team creation, except for __default__ team of the TeamScope.
  * Purpose is to represent team level achivements (points/badges/states, etc.) 
- * Name of _team-user_ will be '__teamdefault.{team}.oasis__'
- * Email format of _team-user_ will be '__teamdefault@{team}.oasis.com__'
+ * Name of _team-user_ will be '__user.{team}.oasis__'
+   * Hence the name _user_ is reserved.
+ * Email format of _team-user_ will be '__user@{team}.oasis.com__'
  * This auto-user will behave exactly as same as other regular players.
 
 #### TeamScope User
