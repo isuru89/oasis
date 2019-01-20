@@ -7,12 +7,7 @@ import java.util.List;
 /**
  * @author iweerarathna
  */
-public class ChallengeDef implements Serializable {
-
-    private Long id;
-    private String name;
-    private String displayName;
-    private String description;
+public class ChallengeDef extends BaseDef implements Serializable {
 
     private long expireAfter;
     private Long startAt;
@@ -30,14 +25,6 @@ public class ChallengeDef implements Serializable {
     private List<String> conditions;
 
     private Long gameId;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     public Long getGameId() {
         return gameId;
@@ -93,30 +80,6 @@ public class ChallengeDef implements Serializable {
 
     public void setForUser(String forUser) {
         this.forUser = forUser;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
     }
 
     public long getExpireAfter() {

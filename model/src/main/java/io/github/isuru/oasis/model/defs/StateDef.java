@@ -6,12 +6,7 @@ import java.util.List;
 /**
  * @author iweerarathna
  */
-public class StateDef {
-
-    private Long id;
-    private String name;
-    private String displayName;
-    private String description;
+public class StateDef extends BaseDef {
 
     private String event;
     private String condition;
@@ -90,14 +85,6 @@ public class StateDef {
         }
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public List<StateChangeAwards> getStateChangeAwards() {
         return stateChangeAwards;
     }
@@ -128,30 +115,6 @@ public class StateDef {
 
     public void setStates(List<State> states) {
         this.states = states;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
     }
 
     public String getEvent() {

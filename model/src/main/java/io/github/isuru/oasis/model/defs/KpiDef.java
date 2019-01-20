@@ -3,54 +3,17 @@ package io.github.isuru.oasis.model.defs;
 /**
  * @author iweerarathna
  */
-public class KpiDef {
-
-    private Long id;
-    private String name;
-    private String displayName;
-    private String description;
+public class KpiDef extends BaseDef {
 
     private String event;
     private String field;
     private String expression;
 
     public String assignName() {
-        if (name == null) {
-            name = event + "::" + field;
+        if (getName() == null) {
+            setName(event + "::" + field);
         }
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        return getName();
     }
 
     public String getEvent() {

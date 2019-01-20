@@ -5,12 +5,7 @@ import java.util.List;
 /**
  * @author iweerarathna
  */
-public class PointDef {
-
-    private Long id;
-    private String name;
-    private String displayName;
-    private String description;
+public class PointDef extends BaseDef {
 
     private String event;
     private String source;
@@ -18,14 +13,6 @@ public class PointDef {
     private String conditionClass;
     private Object amount;
     private List<PointsAdditional> additionalPoints;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
     public String getSource() {
         return source;
@@ -41,30 +28,6 @@ public class PointDef {
 
     public void setEvent(String event) {
         this.event = event;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
     }
 
     public String getCondition() {

@@ -6,12 +6,7 @@ import java.util.Map;
 /**
  * @author iweerarathna
  */
-public class MilestoneDef {
-
-    private Long id;
-    private String name;
-    private String displayName;
-    private String description;
+public class MilestoneDef extends BaseDef {
 
     private String from;
     private List<String> pointRefs;
@@ -29,14 +24,6 @@ public class MilestoneDef {
             return awardPoints.get(level);
         }
         return null;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public void setAwardPoints(Map<Integer, Double> awardPoints) {
@@ -65,30 +52,6 @@ public class MilestoneDef {
 
     public void setAccumulatorType(String accumulatorType) {
         this.accumulatorType = accumulatorType;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
     }
 
     public String getEvent() {

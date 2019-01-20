@@ -5,12 +5,8 @@ import java.util.List;
 /**
  * @author iweerarathna
  */
-public class BadgeDef {
+public class BadgeDef extends BaseDef {
 
-    private Long id;
-    private String name;
-    private String displayName;
-    private String description;
     private boolean manual = false;
     private BadgeSourceDef from;
     private String event;
@@ -48,14 +44,6 @@ public class BadgeDef {
         this.continuous = continuous;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public boolean isManual() {
         return manual;
     }
@@ -70,22 +58,6 @@ public class BadgeDef {
 
     public void setAwardPoints(Double awardPoints) {
         this.awardPoints = awardPoints;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
     }
 
     public String getWithin() {
@@ -126,14 +98,6 @@ public class BadgeDef {
 
     public void setSubBadges(List<SubBadgeDef> subBadges) {
         this.subBadges = subBadges;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public BadgeSourceDef getFrom() {
