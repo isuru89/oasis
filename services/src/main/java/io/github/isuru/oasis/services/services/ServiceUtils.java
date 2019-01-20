@@ -16,8 +16,10 @@ class ServiceUtils {
             return (List)src;
         }
         List<T> results = new LinkedList<>();
-        for (T t : src) {
-            results.add(t);
+        if (src != null) {
+            for (T t : src) {
+                results.add(t);
+            }
         }
         return results;
     }
