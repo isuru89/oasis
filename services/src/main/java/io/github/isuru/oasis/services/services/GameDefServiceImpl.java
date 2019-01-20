@@ -263,6 +263,8 @@ public class GameDefServiceImpl implements IGameDefService {
         Checks.greaterThanZero(gameId, "gameId");
         Checks.nonNullOrEmpty(pointRule.getName(), "name");
         Checks.nonNullOrEmpty(pointRule.getDisplayName(), "displayName");
+        Checks.havingBoth(!Commons.isNullOrEmpty(pointRule.getCondition()),
+            !Commons.isNullOrEmpty(pointRule.getConditionClass()), "condition", "conditionClass");
 
         DefWrapper wrapper = new DefWrapper();
         wrapper.setKind(OasisDefinition.POINT.getTypeId());

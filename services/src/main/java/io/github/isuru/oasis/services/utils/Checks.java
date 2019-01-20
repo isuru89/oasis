@@ -12,6 +12,20 @@ import java.util.stream.Collectors;
  */
 public final class Checks {
 
+    public static void onlyOneOf(boolean condition1, boolean condition2, String param1, String param2) throws InputValidationException {
+        if (condition1 == condition2) {
+            throw new InputValidationException(String.format("There can be either '%s' or '%s', not both!",
+                    param1, param2));
+        }
+    }
+    public static void havingBoth(boolean condition1, boolean condition2, String param1, String param2) throws InputValidationException {
+        if (condition1 && condition2) {
+            throw new InputValidationException(String.format("Parameter '%s' and '%s' cannot be defined at the same time!",
+                    param1, param2));
+        }
+    }
+
+
     public static <T> void isOneOf(T value, Set<T> allowedValues, String param) throws InputValidationException {
         if (!allowedValues.contains(value)) {
             throw new InputValidationException(String.format("Parameter '%s' must be one of "

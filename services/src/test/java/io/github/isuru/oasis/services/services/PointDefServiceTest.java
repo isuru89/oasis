@@ -3,11 +3,14 @@ package io.github.isuru.oasis.services.services;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.PointsAdditional;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Collections;
 
 public class PointDefServiceTest extends BaseDefServiceTest {
 
@@ -52,6 +55,15 @@ public class PointDefServiceTest extends BaseDefServiceTest {
             Assertions.assertThatThrownBy(
                     () -> ds.addPointDef(gameId, create("scholar", "\t ")))
                     .isInstanceOf(InputValidationException.class);
+
+            {
+                // having both condition and conditionClass defines should raise error
+                PointDef pointDef = create("reputation", "Total Reputation");
+                pointDef.setCondition("true");
+                pointDef.setConditionClass(this.getClass().getName());
+                Assertions.assertThatThrownBy(() -> ds.addPointDef(gameId, pointDef))
+                        .isInstanceOf(InputValidationException.class);
+            }
         }
     }
 
@@ -110,7 +122,71 @@ public class PointDefServiceTest extends BaseDefServiceTest {
 
     @Test
     public void testPointTypeAdds() throws Exception {
-        // @TODO write tests for different types of badges
+        // write tests for different types of points
+        GameDef savedGame = createSavedGame("so", "Stackoverflow");
+        long gameId = savedGame.getId();
+
+        {
+            int size = getTotalCount(gameId);
+
+            // points with a condition
+            PointDef def = create("reputation", "Increase reputation on Votes");
+            def.setCondition("votes > 0");
+            def.setAmount("votes * 10");
+            def.setEvent("so.vote.up");
+
+            readAssert(addAssert(gameId, def), def);
+
+            checkTotalCount(gameId, size + 1);
+        }
+
+        {
+            // points with a condition class
+            int size = getTotalCount(gameId);
+
+            PointDef def = create("reputation-down", "Decrease reputation on down votes");
+            def.setConditionClass("io.github.isuru.oasis.test.so.CheckVotePositive");
+            def.setAmount("votes * -2");
+            def.setEvent("so.vote.down");
+
+            readAssert(addAssert(gameId, def), def);
+
+            checkTotalCount(gameId, size + 1);
+        }
+
+        {
+            // create a point definition with awarding additional points to a different user
+            int size = getTotalCount(gameId);
+
+            PointDef def = create("bounty-reward", "Award Reputation for Bounty question");
+            def.setAmount(50);
+            def.setEvent("so.bounty");
+            PointsAdditional extra = new PointsAdditional();
+            extra.setToUser("askedBy");
+            extra.setAmount(10);
+            extra.setName("bounty-award");
+            def.setAdditionalPoints(Collections.singletonList(extra));
+
+            readAssert(addAssert(gameId, def), def);
+
+            checkTotalCount(gameId, size + 1);
+        }
+
+        {
+            // a single event may generate multiple points
+            // a rule can be created to award bonus points based on total points of a event
+            int size = getTotalCount(gameId);
+
+            PointDef def = create("reputation-bonus", "Bonus reputation on up votes");
+            def.setSource("POINTS");
+            def.setCondition("$TOTAL >= 20");
+            def.setAmount(5);
+            def.setEvent("so.vote.up");
+
+            readAssert(addAssert(gameId, def), def);
+
+            checkTotalCount(gameId, size + 1);
+        }
     }
 
     @Test
@@ -192,6 +268,19 @@ public class PointDefServiceTest extends BaseDefServiceTest {
         Assert.assertEquals(id, addedDef.getId().longValue());
         Assert.assertEquals(check.getName(), addedDef.getName());
         Assert.assertEquals(check.getDisplayName(), addedDef.getDisplayName());
+        Assert.assertEquals(check.getDescription(), addedDef.getDescription());
+        Assert.assertEquals(check.getCondition(), addedDef.getCondition());
+        Assert.assertEquals(check.getEvent(), addedDef.getEvent());
+        Assert.assertEquals(check.getSource(), addedDef.getSource());
+        Assert.assertEquals(check.getConditionClass(), addedDef.getConditionClass());
+        Assert.assertEquals(check.getAmount(), addedDef.getAmount());
+        if (check.getAdditionalPoints() == null) {
+            Assert.assertNull(addedDef.getAdditionalPoints());
+        } else {
+            Assertions.assertThat(addedDef.getAdditionalPoints())
+                    .isNotNull()
+                    .hasSize(check.getAdditionalPoints().size());
+        }
         return addedDef;
     }
 
