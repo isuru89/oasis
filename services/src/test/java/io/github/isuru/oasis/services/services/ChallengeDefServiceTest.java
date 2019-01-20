@@ -3,13 +3,22 @@ package io.github.isuru.oasis.services.services;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.model.UserRole;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ChallengeDefServiceTest extends BaseDefServiceTest {
+
+    @Autowired
+    private IProfileService ps;
+
 
     @Before
     public void beforeEach() throws Exception {
@@ -52,6 +61,30 @@ public class ChallengeDefServiceTest extends BaseDefServiceTest {
             Assertions.assertThatThrownBy(
                     () -> ds.addChallenge(gameId, create("scholar", "\t ")))
                     .isInstanceOf(InputValidationException.class);
+
+            {
+                // non existing user for challenge must fail
+                ChallengeDef def = create("answer-123-by-user", "Answer Q123 by userX");
+                def.setForUser("isuru@domain.com");
+                Assertions.assertThatThrownBy(() -> ds.addChallenge(gameId, def))
+                        .isInstanceOf(InputValidationException.class);
+            }
+
+            {
+                // non existing team for challenge must fail
+                ChallengeDef def = create("answer-123-by-user", "Answer Q123 by userX");
+                def.setForTeam("nonexist-team");
+                Assertions.assertThatThrownBy(() -> ds.addChallenge(gameId, def))
+                        .isInstanceOf(InputValidationException.class);
+            }
+
+            {
+                // non existing team scope for challenge must fail
+                ChallengeDef def = create("answer-123-by-user", "Answer Q123 by userX");
+                def.setForTeamScope("nonexist-teamscope");
+                Assertions.assertThatThrownBy(() -> ds.addChallenge(gameId, def))
+                        .isInstanceOf(InputValidationException.class);
+            }
         }
     }
 
@@ -110,7 +143,66 @@ public class ChallengeDefServiceTest extends BaseDefServiceTest {
 
     @Test
     public void testChallengeTypeAdds() throws Exception {
-        // @TODO write tests for different types of badges
+        // write tests for different types of challenges
+        GameDef savedGame = createSavedGame("so", "Stackoverflow");
+        long gameId = savedGame.getId();
+
+        // initialize user, team and a team scope
+        TeamScopeAddDto teamScopeAddDto = new TeamScopeAddDto();
+        teamScopeAddDto.setName("North");
+        teamScopeAddDto.setDisplayName("The North");
+        long scopeId = ps.addTeamScope(teamScopeAddDto);
+        Assert.assertTrue(scopeId > 0);
+
+        TeamProfileAddDto teamProfileAddDto = new TeamProfileAddDto();
+        teamProfileAddDto.setName("winterfell");
+        teamProfileAddDto.setTeamScope((int)scopeId);
+        long teamId = ps.addTeam(teamProfileAddDto);
+        Assert.assertTrue(teamId > 0);
+
+        UserProfileAddDto userProfileAddDto = new UserProfileAddDto();
+        userProfileAddDto.setName("ned stark");
+        userProfileAddDto.setEmail("ned@winterfell.com");
+        userProfileAddDto.setExtId(30001L);
+        userProfileAddDto.setMale(true);
+        long userId = ps.addUserProfile(userProfileAddDto);
+        Assert.assertTrue(userId > 0);
+
+        Assert.assertTrue(ps.addUserToTeam(userId, teamId, UserRole.CURATOR, false));
+
+        {
+            int size = getTotalCount(gameId);
+
+            // create challenge for user
+            ChallengeDef def = create("answer-123-by-ned", "Answer Q123 by Ned");
+            def.setForUser("ned@winterfell.com");
+            readAssert(addAssert(gameId, def), def);
+
+            checkTotalCount(gameId, size + 1);
+        }
+
+        {
+            int size = getTotalCount(gameId);
+
+            // create challenge for user
+            ChallengeDef def = create("answer-123-by-winterfell", "Answer Q123 by Winterfell");
+            def.setForTeam("winterfell");
+            readAssert(addAssert(gameId, def), def);
+
+            checkTotalCount(gameId, size + 1);
+        }
+
+
+        {
+            int size = getTotalCount(gameId);
+
+            // create challenge for user
+            ChallengeDef def = create("answer-123-by-ts", "Answer Q123 by North");
+            def.setForTeamScope("North");
+            readAssert(addAssert(gameId, def), def);
+
+            checkTotalCount(gameId, size + 1);
+        }
     }
 
     @Test
@@ -192,6 +284,34 @@ public class ChallengeDefServiceTest extends BaseDefServiceTest {
         Assert.assertEquals(id, addedDef.getId().longValue());
         Assert.assertEquals(check.getName(), addedDef.getName());
         Assert.assertEquals(check.getDisplayName(), addedDef.getDisplayName());
+        Assert.assertEquals(check.getDescription(), addedDef.getDescription());
+
+        Assert.assertEquals(check.getExpireAfter(), addedDef.getExpireAfter());
+        Assert.assertEquals(check.getPoints(), addedDef.getPoints(), 0.1);
+        Assert.assertEquals(check.getForTeam(), addedDef.getForTeam());
+        Assert.assertEquals(check.getForTeamScope(), addedDef.getForTeamScope());
+        Assert.assertEquals(check.getForUser(), addedDef.getForUser());
+        Assert.assertEquals(check.getWinnerCount(), addedDef.getWinnerCount());
+        Assert.assertEquals(check.getForTeamId(), addedDef.getForTeamId());
+        Assert.assertEquals(check.getForUserId(), addedDef.getForUserId());
+        Assert.assertEquals(check.getForTeamScopeId(), addedDef.getForTeamScopeId());
+        Assert.assertEquals(check.getStartAt(), addedDef.getStartAt());
+
+        if (check.getForEvents() == null) {
+            Assert.assertNull(addedDef.getForEvents());
+        } else {
+            Assertions.assertThat(addedDef.getForEvents())
+                    .isNotNull()
+                    .hasSize(check.getForEvents().size());
+        }
+
+        if (check.getConditions() == null) {
+            Assert.assertNull(addedDef.getConditions());
+        } else {
+            Assertions.assertThat(addedDef.getConditions())
+                    .isNotNull()
+                    .hasSize(check.getConditions().size());
+        }
         return addedDef;
     }
 
