@@ -23,16 +23,31 @@
   
 ## Tie Breakers
 
-* When two users have same number of points, they will have the **same rank**.
-  * For eg: Adam and Lily will get same rank because they have exactly same total points.
+* When two users have same number of points, we will be using total event count contributed
+ to the total points as tie breaker.
+* The lower the count, will be the higher in rank.
+* If it is to have same event count, then they will have the **same rank**.
+  * For eg: Adam and Lily will get two ranks because their count is different although they have exactly same total points.
   
-| User | Points | Rank |
-|---     |---   | --- |
-| Jon | 7739 | 1 |
-| **Adam** | 3864 | **2** |
-| **Lily** | 3864 | **2** |
-| Shanon | 2705 | 4 |
-| Gabriel |  921 | 5 |
+| User | Points | #Events | Rank |
+|---     |---   |--- | --- |
+| Jon | 7739 | 121 | 1 |
+| **Adam** | 3864 | 78 | **2** |
+| **Lily** | 3864 | 91 | **3** |
+| Shanon | 2705 | 74 | 4 |
+| Gabriel |  921 | 32 |  5 |
+
+* In case, assume that Adam and Lily has the same count, then both of their ranks will be same.
+  * Here Lily and Adam both will be ranked #2.
+  * And Shanon will still be 4th, not 3rd.
+
+| User | Points | #Events | Rank |
+|---     |---   |--- | --- |
+| Jon | 7739 | 121 | 1 |
+| **Adam** | 3864 | 78 | **2** |
+| **Lily** | 3864 | 78 | **2** |
+| Shanon | 2705 | 74 | 4 |
+| Gabriel |  921 | 32 |  5 |
 
 * When you want to get top 3 from above leaderboard, it will return only based on rank.
   * Therefore, only Jon, Adam and Lily will be returned. 

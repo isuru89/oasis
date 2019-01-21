@@ -10,6 +10,7 @@ public class UserRankRecordDto {
     private Integer teamId;
     private Integer teamScopeId;
     private Double totalPoints;
+    private Long totalCount;
     private Integer rankGlobal;
     private Integer rankTeam;
     private Integer rankTeamScope;
@@ -18,6 +19,14 @@ public class UserRankRecordDto {
     private Double nextRankVal;
     private Double topRankVal;
     private Double nextTeamScopeRankVal;
+
+    public Long getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(Long totalCount) {
+        this.totalCount = totalCount;
+    }
 
     public Double getNextTeamScopeRankVal() {
         return nextTeamScopeRankVal;

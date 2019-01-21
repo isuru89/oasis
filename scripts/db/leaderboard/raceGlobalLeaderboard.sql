@@ -8,14 +8,16 @@ FROM
     SELECT
         tbl.user_id AS userId,
         tbl.totalPoints AS totalPoints,
-        (RANK() over (ORDER BY tbl.totalPoints DESC)) AS 'rankGlobal',
-        (LAG(tbl.totalPoints) over (ORDER BY tbl.totalPoints DESC)) AS 'nextRankVal',
-        (FIRST_VALUE(tbl.totalPoints) over (ORDER BY tbl.totalPoints DESC)) AS 'topRankVal',
+        tbl.totalCount AS totalCount,
+        (RANK() over (w)) AS 'rankGlobal',
+        (LAG(tbl.totalPoints) over (w)) AS 'nextRankVal',
+        (FIRST_VALUE(tbl.totalPoints) over (w)) AS 'topRankVal',
         UNIX_TIMESTAMP(NOW()) * 1000 AS calculatedTime
     FROM
     (
         SELECT
             user_id,
+            COUNT(points) AS totalCount,
             ROUND(<aggType>(points), 2) AS totalPoints
         FROM OA_POINT
         WHERE
@@ -31,6 +33,7 @@ FROM
         GROUP BY
             user_id
     ) tbl
+    WINDOW w AS (ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)
 
 <if(hasUser||isTopN||isBottomN)>
 ) rankTbl

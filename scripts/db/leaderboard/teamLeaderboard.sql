@@ -10,21 +10,26 @@ FROM
         tbl.team_id AS teamId,
         tbl.team_scope_id AS teamScopeId,
         tbl.totalPoints AS totalPoints,
-        (RANK() over (PARTITION BY tbl.team_id ORDER BY tbl.totalPoints DESC)) AS 'rankTeam',
-        (RANK() over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC)) AS 'rankTeamScope',
-        (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_id ORDER BY tbl.totalPoints DESC)) AS 'nextRankVal',
-        (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC)) AS 'nextTeamScopeRankVal',
+        tbl.totalCount AS totalCount,
+        (RANK() over (PARTITION BY tbl.team_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'rankTeam',
+        (RANK() over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'rankTeamScope',
+        (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'nextRankVal',
+        (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'nextTeamScopeRankVal',
         UNIX_TIMESTAMP(NOW()) * 1000 AS calculatedTime
     FROM
     (
         SELECT
-          user_id, team_scope_id, team_id,
+          user_id,
+          team_scope_id,
+          team_id,
+          SUM(totalCount) AS totalCount,
           ROUND(SUM(totalPoints), 2) AS totalPoints
         FROM (
             SELECT
                 user_id,
                 team_scope_id,
                 team_id,
+                COUNT(points) AS totalCount,
                 ROUND(SUM(points), 2) AS totalPoints
             FROM OA_POINT
             WHERE
@@ -51,6 +56,7 @@ FROM
                 user_id,
                 team_scope_id,
                 team_id,
+                COUNT(current_points) AS totalCount,
                 ROUND(SUM(current_points), 2) AS totalPoints
             FROM OA_STATE
             WHERE

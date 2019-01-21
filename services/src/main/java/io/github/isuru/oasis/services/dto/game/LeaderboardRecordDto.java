@@ -10,6 +10,7 @@ public class LeaderboardRecordDto {
     private Integer teamScopeId;
     private String timeScope;
     private Double totalPoints;
+    private Long totalCount;
     private Integer rank;
 
     public Integer getUserId() {
@@ -58,6 +59,14 @@ public class LeaderboardRecordDto {
 
     public void setRank(Integer rank) {
         this.rank = rank;
+    }
+
+    public Long getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(Long totalCount) {
+        this.totalCount = totalCount;
     }
 
     @Override
