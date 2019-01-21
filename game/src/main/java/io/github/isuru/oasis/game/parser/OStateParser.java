@@ -27,6 +27,7 @@ public class OStateParser {
             oState.setId(def.getId());
             oState.setName(def.getName());
             oState.setDisplayName(def.getDisplayName());
+            oState.setCurrency(def.isCurrency());
 
             oState.setEvent(def.getEvent());
             oState.setDefaultState(def.getDefaultState());

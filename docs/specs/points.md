@@ -8,6 +8,8 @@
  * The timestamp, team and source will be recorded against each point.
  * Once scored, points cannot be deleted or modified
    * To delete, same amount of penalty points needs to be added against same user
+ * Not all points are considered as currency.
+   * But by default, all point rules considered as currency.
 
 
 ## Scoring Methods:

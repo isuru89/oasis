@@ -47,6 +47,7 @@ public class ConsumerUtils {
         map.put("currState", stateModel.getCurrentState());
         map.put("currValue", stateModel.getCurrentValue());
         map.put("currPoints", stateModel.getCurrentPoints());
+        map.put("isCurrency", stateModel.isCurrency());
         map.put("extId", stateModel.getExtId());
         map.put("ts", stateModel.getTs());
         map.put("gameId", gameId);
@@ -94,6 +95,7 @@ public class ConsumerUtils {
         map.put("pointId", pointModel.getRuleId());
         map.put("pointName", pointModel.getRuleName());
         map.put("points", pointModel.getAmount());
+        map.put("isCurrency", pointModel.getCurrency());
         map.put("gameId", gameId);
         map.put("sourceId", pointModel.getSourceId());
         map.put("tag", pointModel.getTag());

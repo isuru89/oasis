@@ -12,6 +12,7 @@ public class StateDef extends BaseDef {
     private String condition;
     private Integer defaultState;
     private String stateValueExpression;
+    private boolean currency = true;
 
     private List<State> states;
     private List<StateChangeAwards> stateChangeAwards;
@@ -83,6 +84,14 @@ public class StateDef extends BaseDef {
         public void setPoints(Double points) {
             this.points = points;
         }
+    }
+
+    public boolean isCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(boolean currency) {
+        this.currency = currency;
     }
 
     public List<StateChangeAwards> getStateChangeAwards() {

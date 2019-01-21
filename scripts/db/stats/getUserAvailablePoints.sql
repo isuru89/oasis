@@ -4,6 +4,8 @@ SELECT (
         WHERE
             user_id = :userId
             AND
+            is_currency = 1
+            AND
             is_active = 1
     )
 
@@ -13,6 +15,8 @@ SELECT (
         FROM OA_STATE
         WHERE
             user_id = :userId
+            AND
+            is_currency = 1
             AND
             is_active = 1
     )

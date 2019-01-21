@@ -12,7 +12,17 @@ public class PointDef extends BaseDef {
     private String condition;
     private String conditionClass;
     private Object amount;
+    private boolean currency = true;        // can this points be considered as currency
+
     private List<PointsAdditional> additionalPoints;
+
+    public boolean isCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(boolean currency) {
+        this.currency = currency;
+    }
 
     public String getSource() {
         return source;

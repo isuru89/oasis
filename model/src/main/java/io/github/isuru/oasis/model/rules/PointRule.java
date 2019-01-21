@@ -14,6 +14,7 @@ public class PointRule implements Serializable {
     private String name;
     private Serializable conditionExpression;
     private double amount;
+    private boolean currency;
     private Serializable amountExpression;
     private List<AdditionalPointReward> additionalPoints;
 
@@ -21,6 +22,15 @@ public class PointRule implements Serializable {
         private String toUser;
         private Serializable amount;
         private String name;
+        private boolean currency;
+
+        public boolean isCurrency() {
+            return currency;
+        }
+
+        public void setCurrency(boolean currency) {
+            this.currency = currency;
+        }
 
         public String getName() {
             return name;
@@ -45,6 +55,14 @@ public class PointRule implements Serializable {
         public void setAmount(Serializable amount) {
             this.amount = amount;
         }
+    }
+
+    public boolean isCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(boolean currency) {
+        this.currency = currency;
     }
 
     public String getSource() {

@@ -8,6 +8,7 @@ INSERT INTO OA_POINT (
     point_id,
     point_name,
     points,
+    is_currency,
     game_id,
     source_id,
     tag
@@ -21,6 +22,7 @@ INSERT INTO OA_POINT (
     :pointId,
     :pointName,
     :points,
+    :isCurrency,
     :gameId,
     :sourceId,
     :tag

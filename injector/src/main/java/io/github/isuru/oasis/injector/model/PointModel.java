@@ -19,8 +19,17 @@ public class PointModel {
     private Double amount;
     private Integer ruleId;
     private String ruleName;
+    private Boolean currency;
     private Long ts;
     private Integer sourceId;
+
+    public Boolean getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Boolean currency) {
+        this.currency = currency;
+    }
 
     public Integer getSourceId() {
         return sourceId;

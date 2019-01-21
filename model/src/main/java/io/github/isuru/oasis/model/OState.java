@@ -1,7 +1,5 @@
 package io.github.isuru.oasis.model;
 
-import io.github.isuru.oasis.model.defs.StateDef;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -15,6 +13,7 @@ public class OState implements Serializable {
     private Serializable condition;
     private Integer defaultState;
     private Serializable stateValueExpression;
+    private boolean currency;
 
     private List<OAState> states;
     private List<OAStateChangeAwards> stateChangeAwards;
@@ -86,6 +85,14 @@ public class OState implements Serializable {
         public void setPoints(Double points) {
             this.points = points;
         }
+    }
+
+    public boolean isCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(boolean currency) {
+        this.currency = currency;
     }
 
     public List<OAStateChangeAwards> getStateChangeAwards() {

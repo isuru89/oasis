@@ -25,6 +25,7 @@ public class PointParser {
             pr.setName(record.getName());
             pr.setForEvent(record.getEvent());
             pr.setSource(record.getSource());
+            pr.setCurrency(record.isCurrency());
 
             Object amount = record.getAmount();
             if (amount != null) {
@@ -54,6 +55,11 @@ public class PointParser {
                     PointRule.AdditionalPointReward apr = new PointRule.AdditionalPointReward();
                     apr.setToUser(pa.getToUser());
                     apr.setName(pa.getName());
+                    if (pa.getCurrency() == null) {
+                        apr.setCurrency(pr.isCurrency());
+                    } else {
+                        apr.setCurrency(pa.getCurrency());
+                    }
 
                     if (pa.getAmount() instanceof Number) {
                         apr.setAmount((Number) pa.getAmount());

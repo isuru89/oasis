@@ -16,6 +16,15 @@ public class OStateModel {
     private JsonEvent event;
     private String extId;
     private Integer sourceId;
+    private boolean currency;
+
+    public boolean isCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(boolean currency) {
+        this.currency = currency;
+    }
 
     public Integer getSourceId() {
         return sourceId;

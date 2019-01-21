@@ -5,6 +5,15 @@ public class PointsAdditional {
     private String name;
     private String toUser;
     private Object amount;
+    private Boolean currency;
+
+    public Boolean getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Boolean currency) {
+        this.currency = currency;
+    }
 
     public String getName() {
         return name;
