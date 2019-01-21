@@ -1,20 +1,12 @@
 package io.github.isuru.oasis.game.parser;
 
-import io.github.isuru.oasis.game.utils.Utils;
-import io.github.isuru.oasis.model.Badge;
-import io.github.isuru.oasis.model.rules.BadgeFromEvents;
-import io.github.isuru.oasis.model.rules.BadgeFromMilestone;
-import io.github.isuru.oasis.model.rules.BadgeFromPoints;
-import io.github.isuru.oasis.model.rules.BadgeRule;
+import io.github.isuru.oasis.model.Parsers;
 import io.github.isuru.oasis.model.defs.BadgeDef;
-import io.github.isuru.oasis.model.defs.BadgeSourceDef;
 import io.github.isuru.oasis.model.defs.BadgesDef;
-import org.mvel2.MVEL;
+import io.github.isuru.oasis.model.rules.BadgeRule;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,116 +15,19 @@ import java.util.List;
  */
 public class BadgeParser {
 
-    public static List<BadgeRule> parse(List<BadgeDef> badgeDefs) throws IOException {
+    public static List<BadgeRule> parse(List<BadgeDef> badgeDefs) {
         List<BadgeRule> badgeRules = new LinkedList<>();
         for (BadgeDef badgeDef : badgeDefs) {
             if (badgeDef.isManual()) {
                 continue;
             }
 
-            Badge badge = new Badge(badgeDef.getId(), badgeDef.getName());
-            badge.setAwardPoints(badgeDef.getAwardPoints());
-
-            BadgeSourceDef from = badgeDef.getFrom();
-            if (from != null) {
-                if (from.getPointsRef() != null) {
-                    BadgeFromPoints bp = new BadgeFromPoints();
-                    bp.setId(badgeDef.getId());
-                    bp.setMaxBadges(badgeDef.getMaxBadges());
-                    bp.setPointsId(from.getPointsRef());
-                    bp.setDuration(from.getWithin());
-                    bp.setStreak(from.getStreak() != null ? from.getStreak() : 0);
-                    bp.setBadge(badge);
-                    bp.setAggregator(from.getAggregator());
-                    bp.setCondition(from.getCondition());
-
-                    if (from.getSubBadges() != null) {
-                        List<Badge> subBadges = new LinkedList<>();
-                        for (BadgeDef.SubBadgeDef sbd : from.getSubBadges()) {
-                            if (sbd.getCondition() != null) {
-                                subBadges.add(new BadgeFromEvents.ConditionalSubBadge(sbd.getName(), badge,
-                                                Utils.compileExpression(sbd.getCondition())));
-                            } else {
-                                BadgeFromPoints.StreakSubBadge streakSubBadge = new BadgeFromPoints.StreakSubBadge(sbd.getName(), badge, sbd.getStreak());
-                                streakSubBadge.setAwardPoints(sbd.getAwardPoints());
-                                subBadges.add(streakSubBadge);
-                            }
-                        }
-                        bp.setSubBadges(subBadges);
-                    }
-                    badgeRules.add(bp);
-
-                } else if (from.getMilestoneRef() != null) {
-                    BadgeFromMilestone bfm = new BadgeFromMilestone();
-                    bfm.setId(badgeDef.getId());
-                    bfm.setMilestoneId(from.getMilestoneRef());
-                    bfm.setLevel(from.getLevel());
-                    bfm.setBadge(badge);
-
-                    if (from.getSubBadges() != null) {
-                        List<BadgeFromMilestone.LevelSubBadge> subBadges = new LinkedList<>();
-                        for (BadgeDef.SubBadgeDef sbd : from.getSubBadges()) {
-                            BadgeFromMilestone.LevelSubBadge levelSubBadge = new BadgeFromMilestone.LevelSubBadge(sbd.getName(), badge, sbd.getLevel());
-                            levelSubBadge.setAwardPoints(sbd.getAwardPoints());
-                            subBadges.add(levelSubBadge);
-                        }
-                        bfm.setSubBadges(subBadges);
-                    }
-                    badgeRules.add(bfm);
-                }
-
-            } else {
-                BadgeFromEvents bfe = new BadgeFromEvents();
-                bfe.setId(badgeDef.getId());
-                bfe.setBadge(badge);
-                bfe.setEventType(badgeDef.getEvent());
-                bfe.setDuration(badgeDef.getWithin());
-                bfe.setMaxBadges(badgeDef.getMaxBadges());
-                if (badgeDef.getContinuous() != null) {
-                    bfe.setContinuous(badgeDef.getContinuous());
-                }
-                if (!Utils.isNullOrEmpty(badgeDef.getContinuousAggregator())) {
-                    bfe.setContinuousAggregator(MVEL.compileExpression(badgeDef.getContinuousAggregator()));
-                }
-                if (!Utils.isNullOrEmpty(badgeDef.getContinuousCondition())) {
-                    bfe.setContinuousCondition(MVEL.compileExpression(badgeDef.getContinuousCondition()));
-                }
-                if (badgeDef.getCondition() != null) {
-                    bfe.setCondition(MVEL.compileExpression(badgeDef.getCondition()));
-                }
-                if (badgeDef.getStreak() != null) {
-                    bfe.setStreak(badgeDef.getStreak());
-                }
-
-                if (badgeDef.getSubBadges() != null) {
-                    List<Badge> subBadges = new LinkedList<>();
-                    for (BadgeDef.SubBadgeDef sbd : badgeDef.getSubBadges()) {
-                        if (sbd.getStreak() != null) {
-                            BadgeFromPoints.StreakSubBadge streakSubBadge = new BadgeFromPoints.StreakSubBadge(sbd.getName(), badge, sbd.getStreak());
-                            streakSubBadge.setAwardPoints(sbd.getAwardPoints());
-                            subBadges.add(streakSubBadge);
-                        } else if (sbd.getCondition() != null) {
-                            Serializable serializable = MVEL.compileExpression(sbd.getCondition());
-                            BadgeFromEvents.ConditionalSubBadge conditionalSubBadge = new BadgeFromEvents.ConditionalSubBadge(sbd.getName(), badge, serializable);
-                            conditionalSubBadge.setAwardPoints(sbd.getAwardPoints());
-                            subBadges.add(conditionalSubBadge);
-                        } else if (bfe.isContinuous() && sbd.getWithin() != null) {
-                            BadgeFromEvents.ContinuousSubBadge csb = new BadgeFromEvents.ContinuousSubBadge(sbd.getName(), badge, sbd.getWithin());
-                            subBadges.add(csb);
-                        } else {
-                            throw new IOException("Unknown sub badge type!");
-                        }
-                    }
-                    bfe.setSubBadges(subBadges);
-                }
-                badgeRules.add(bfe);
-            }
-
+            badgeRules.add(Parsers.parse(badgeDef));
         }
         return badgeRules;
     }
 
-    public static List<BadgeRule> parse(InputStream inputStream) throws IOException {
+    public static List<BadgeRule> parse(InputStream inputStream) {
         Yaml yaml = new Yaml();
         BadgesDef badgesDef = yaml.loadAs(inputStream, BadgesDef.class);
 

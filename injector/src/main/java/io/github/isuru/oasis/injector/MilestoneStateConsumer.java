@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.injector;
 
 import com.rabbitmq.client.Channel;
-import io.github.isuru.oasis.injector.model.MilestoneStateModel;
 import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
 
 import java.util.Map;
 

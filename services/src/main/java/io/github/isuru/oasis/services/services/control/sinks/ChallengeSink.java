@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.services.services.control.sinks;
 
 import io.github.isuru.oasis.injector.ConsumerUtils;
-import io.github.isuru.oasis.injector.model.ChallengeModel;
 import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
 
 import java.util.Map;
 

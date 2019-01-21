@@ -1,12 +1,7 @@
 package io.github.isuru.oasis.injector;
 
-import io.github.isuru.oasis.injector.model.BadgeModel;
-import io.github.isuru.oasis.injector.model.ChallengeModel;
-import io.github.isuru.oasis.injector.model.MilestoneModel;
-import io.github.isuru.oasis.injector.model.MilestoneStateModel;
-import io.github.isuru.oasis.injector.model.OStateModel;
-import io.github.isuru.oasis.injector.model.PointModel;
 import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.handlers.output.*;
 
 import java.util.HashMap;
 import java.util.Map;
