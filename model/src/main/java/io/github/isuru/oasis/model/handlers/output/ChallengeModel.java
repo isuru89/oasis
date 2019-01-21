@@ -12,7 +12,7 @@ public class ChallengeModel {
     private Long wonAt;
     private Integer challengeId;
     private Double points;
-    private Long eventExtId;
+    private String eventExtId;
     private Long ts;
     private Integer sourceId;
 
@@ -72,11 +72,11 @@ public class ChallengeModel {
         this.points = points;
     }
 
-    public Long getEventExtId() {
+    public String getEventExtId() {
         return eventExtId;
     }
 
-    public void setEventExtId(Long eventExtId) {
+    public void setEventExtId(String eventExtId) {
         this.eventExtId = eventExtId;
     }
 
