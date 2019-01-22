@@ -21,17 +21,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-@Controller
+@RestController
 @SuppressWarnings("unused")
 @RequestMapping("/auth")
 public class AuthController {
@@ -58,14 +54,12 @@ public class AuthController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/logout")
-    @ResponseBody
     public StatusResponse logout(@CurrentUser UserPrincipal user) throws Exception {
         boolean success = profileService.logoutUser(user.getId(), System.currentTimeMillis());
         return new StatusResponse(success);
     }
 
     @PostMapping("/login")
-    @ResponseBody
     public AuthResponse login(@RequestHeader("Authorization") String authHeader) throws Exception {
         Pair<String, String> basicAuthPair = getBasicAuthPair(authHeader);
         if (basicAuthPair == null) {

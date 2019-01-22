@@ -3,9 +3,9 @@ package io.github.isuru.oasis.services.controllers;
 import io.github.isuru.oasis.services.dto.DeleteResponse;
 import io.github.isuru.oasis.services.dto.events.EventSourceDto;
 import io.github.isuru.oasis.services.model.EventSourceToken;
+import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.services.IEventsService;
 import io.github.isuru.oasis.services.utils.Checks;
-import io.github.isuru.oasis.services.model.UserRole;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,14 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletResponse;
@@ -30,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Controller
+@RestController
 @SuppressWarnings("unused")
 @RequestMapping("/event")
 public class EventSourceController {
@@ -42,7 +35,6 @@ public class EventSourceController {
 
     @Secured(UserRole.ROLE_ADMIN)
     @PostMapping("/source")
-    @ResponseBody
     public EventSourceDto addEventSource(@RequestBody EventSourceToken eventSourceToken) throws Exception {
         // duplicate events source names are ignored.
         if (eventsService.listAllEventSources().stream()
@@ -56,7 +48,6 @@ public class EventSourceController {
     }
 
     @GetMapping("/source/list")
-    @ResponseBody
     public List<EventSourceDto> listEventSource() throws Exception {
         return eventsService.listAllEventSources()
                 .stream()
@@ -65,7 +56,6 @@ public class EventSourceController {
     }
 
     @PostMapping(value = "/source/{id}/downloadKey", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    @ResponseBody
     public void downloadEventSourceKey(@PathVariable("id") int sourceId, HttpServletResponse response) throws Exception {
         Checks.greaterThanZero(sourceId, "id");
 
@@ -96,7 +86,6 @@ public class EventSourceController {
 
     @Secured(UserRole.ROLE_ADMIN)
     @DeleteMapping("/source/{id}")
-    @ResponseBody
     public DeleteResponse deleteEventSource(@PathVariable("id") int sourceId) throws Exception {
         boolean success = eventsService.disableEventSource(sourceId);
         return new DeleteResponse("eventSource", success);

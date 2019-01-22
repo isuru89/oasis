@@ -13,10 +13,9 @@ import io.github.isuru.oasis.services.utils.SecurityUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-@Controller
+@RestController
 @SuppressWarnings("unused")
 @RequestMapping("/event")
 public class EventsController {
@@ -38,7 +37,6 @@ public class EventsController {
     private ObjectMapper jsonMapper;
 
     @PostMapping("/submit")
-    @ResponseBody
     public StatusResponse submitEvent(HttpServletRequest request,
                                       HttpServletResponse response) throws Exception {
 

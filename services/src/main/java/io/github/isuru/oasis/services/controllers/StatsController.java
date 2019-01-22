@@ -3,16 +3,7 @@ package io.github.isuru.oasis.services.controllers;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
-import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownReqDto;
-import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownResDto;
-import io.github.isuru.oasis.services.dto.stats.ChallengeInfoDto;
-import io.github.isuru.oasis.services.dto.stats.PointBreakdownReqDto;
-import io.github.isuru.oasis.services.dto.stats.PointBreakdownResDto;
-import io.github.isuru.oasis.services.dto.stats.TeamHistoryRecordDto;
-import io.github.isuru.oasis.services.dto.stats.UserBadgeStatDto;
-import io.github.isuru.oasis.services.dto.stats.UserMilestoneStatDto;
-import io.github.isuru.oasis.services.dto.stats.UserStatDto;
-import io.github.isuru.oasis.services.dto.stats.UserStateStatDto;
+import io.github.isuru.oasis.services.dto.stats.*;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.model.enums.ScopingType;
 import io.github.isuru.oasis.services.services.IGameDefService;
@@ -20,16 +11,12 @@ import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.services.IStatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-@Controller
+@RestController
 public class StatsController {
 
     @Autowired
@@ -43,27 +30,23 @@ public class StatsController {
 
 
     @GetMapping("/stats/user/{userId}/summary")
-    @ResponseBody
     public UserStatDto getUserStatSummary(@PathVariable("userId") long userId,
                                           @RequestParam(value = "since", defaultValue = "0") long since) throws Exception {
         return statService.readUserGameStats(userId, since);
     }
 
     @GetMapping("/stats/user/{userId}/badges")
-    @ResponseBody
     public List<UserBadgeStatDto> getUserBadgesStats(@PathVariable("userId") long userId,
                                                      @RequestParam(value = "since", defaultValue = "0") long since) throws Exception {
         return statService.readUserBadges(userId, since);
     }
 
     @GetMapping("/stats/user/{userId}/milestones")
-    @ResponseBody
     public List<UserMilestoneStatDto> getUserMilestoneStats(@PathVariable("userId") long userId) throws Exception {
         return statService.readUserMilestones(userId);
     }
 
     @GetMapping("/stats/user/{userId}/states")
-    @ResponseBody
     public List<UserStateStatDto> getUserStatesStats(@PathVariable("userId") long userId) throws Exception {
         UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(userId);
         if (currentTeamOfUser == null) {
@@ -74,7 +57,6 @@ public class StatsController {
     }
 
     @GetMapping("/stats/user/{userId}/point-breakdown")
-    @ResponseBody
     public PointBreakdownResDto getUserPointBreakdown(@RequestParam(value = "userId") long userId,
                                       @RequestParam(value = "pointId") int pointId,
                                       @RequestParam(value = "offset", defaultValue = "0") int offset,
@@ -93,7 +75,6 @@ public class StatsController {
     }
 
     @GetMapping("/stats/user/{userId}/badge-breakdown")
-    @ResponseBody
     public BadgeBreakdownResDto getUserBadgesBreakdown(@RequestParam(value = "userId") long userId,
                                                        @RequestParam(value = "badgeId") int badgeId,
                                                        @RequestParam(value = "offset", defaultValue = "0") int offset,
@@ -112,20 +93,17 @@ public class StatsController {
     }
 
     @GetMapping("/stats/user/{userId}/team-history")
-    @ResponseBody
     public List<TeamHistoryRecordDto> getUserTeamHistory(@PathVariable("userId") long userId) throws Exception {
         return statService.readUserTeamHistoryStat(userId);
     }
 
     @GetMapping("/stats/user/{userId}/team-rankings")
-    @ResponseBody
     public List<UserRankRecordDto> getUserTeamRankings(@PathVariable("userId") long userId,
                                                        @RequestParam(value = "current", defaultValue = "true") boolean current) throws Exception {
         return statService.readUserTeamRankings(userId, current);
     }
 
     @GetMapping("/stats/user/{userId}/rankings")
-    @ResponseBody
     public List<UserRankRecordDto> getUserRankingsStat(@PathVariable("userId") long userId,
                                                        @RequestParam(value = "gameId", defaultValue = "-1") long gameId,
                                                        @RequestParam(value = "scope", defaultValue = "") String scope,
@@ -144,7 +122,6 @@ public class StatsController {
     }
 
     @GetMapping("/stats/challenge/{challengeId}")
-    @ResponseBody
     public ChallengeInfoDto readChallengeStats(@PathVariable("challengeId") long challengeId) throws Exception {
         return statService.readChallengeStats(challengeId);
     }
