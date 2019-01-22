@@ -15,6 +15,7 @@ import io.github.isuru.oasis.model.handlers.output.*;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,8 @@ import java.util.UUID;
 public class MappersTest {
 
     private Random random;
+
+    private ObjectMapper mapper = new ObjectMapper();
 
     @BeforeEach
     public void before() {
@@ -368,7 +371,7 @@ public class MappersTest {
     }
 
     private <T> T toObj(String content, Class<T> clz) throws IOException {
-        return BaseNotificationMapper.OBJECT_MAPPER.readValue(content, clz);
+        return mapper.readValue(content, clz);
     }
 
     private BadgeRule readRule(String resPath, int index) throws IOException {

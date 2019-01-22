@@ -2,6 +2,9 @@ package io.github.isuru.oasis.game;
 
 import io.github.isuru.oasis.game.utils.HistogramCounter;
 import io.github.isuru.oasis.game.utils.Utils;
+import io.github.isuru.oasis.model.Constants;
+import io.github.isuru.oasis.model.events.EventNames;
+import io.github.isuru.oasis.model.events.JsonEvent;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 import io.github.isuru.oasis.game.utils.TestMapState;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -22,6 +25,59 @@ class UtilsTest {
     private static final long ONE_HOUR = 1000 * 3600;
     private static final long ONE_MIN = 1000 * 60;
     private static final long ONE_SEC = 1000;
+
+
+    @Test
+    void testQueueReplace() {
+        {
+            String qName = "queue.{gid}.msg";
+            System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "1");
+            Assertions.assertEquals("queue.1.msg", Utils.queueReplace(qName));
+
+            System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "");
+            Assertions.assertEquals("queue..msg", Utils.queueReplace(qName));
+        }
+        {
+            String qName = "queue.{gidx}.msg";
+            System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "1");
+            Assertions.assertEquals(qName, Utils.queueReplace(qName));
+
+            System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "");
+            Assertions.assertEquals(qName, Utils.queueReplace(qName));
+        }
+        {
+            String qName = "queue.{}.msg";
+            System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "1");
+            Assertions.assertEquals(qName, Utils.queueReplace(qName));
+
+            System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "");
+            Assertions.assertEquals(qName, Utils.queueReplace(qName));
+        }
+    }
+
+    @Test
+    void testIsEndOfStream() {
+        {
+            JsonEvent event = new JsonEvent();
+            event.setFieldValue(Constants.FIELD_EVENT_TYPE, EventNames.TERMINATE_GAME);
+            Assertions.assertTrue(Utils.isEndOfStream(event));
+        }
+        {
+            JsonEvent event = new JsonEvent();
+            event.setFieldValue(Constants.FIELD_EVENT_TYPE, EventNames.TERMINATE_GAME + " ");
+            Assertions.assertFalse(Utils.isEndOfStream(event));
+        }
+        {
+            JsonEvent event = new JsonEvent();
+            event.setFieldValue(Constants.FIELD_EVENT_TYPE, EventNames.TERMINATE_GAME + "-abc");
+            Assertions.assertFalse(Utils.isEndOfStream(event));
+        }
+        {
+            JsonEvent event = new JsonEvent();
+            event.setFieldValue(Constants.FIELD_EVENT_TYPE, "xyz");
+            Assertions.assertFalse(Utils.isEndOfStream(event));
+        }
+    }
 
     @Test
     void testHistogramCounterCts() throws Exception {
@@ -202,16 +258,8 @@ class UtilsTest {
         Assertions.assertEquals((double) Utils.strNum("5 b"), 5000000000.0);
         Assertions.assertEquals((double) Utils.strNum(" 5 B  "), 5000000000.0);
         Assertions.assertEquals((double) Utils.strNum(" 5 bil  "), 5000000000.0);
-    }
 
-    @Test
-    void numStrFail() {
-        try {
-            //Utils.strNum("k3");
-            //Assertions.fail();
-        } catch (IllegalArgumentException e) {
-            // do nothing
-        }
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Utils.strNum("abc"));
     }
 
     @Test
@@ -271,6 +319,8 @@ class UtilsTest {
         Assertions.assertTrue(Utils.isDurationBusinessDaysOnly("1 businessday"));
         Assertions.assertFalse(Utils.isDurationBusinessDaysOnly("1 day"));
         Assertions.assertFalse(Utils.isDurationBusinessDaysOnly("7 days"));
+
+        Assertions.assertFalse(Utils.isDurationBusinessDaysOnly("business 7"));
     }
 
     @Test

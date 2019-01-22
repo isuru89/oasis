@@ -1,27 +1,25 @@
 package io.github.isuru.oasis.game.persist.mappers;
 
 import io.github.isuru.oasis.model.events.MilestoneStateEvent;
-
-import java.util.HashMap;
-import java.util.Map;
+import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
 
 /**
  * @author iweerarathna
  */
-public class MilestoneStateNotificationMapper extends BaseNotificationMapper<MilestoneStateEvent> {
-    @Override
-    public String map(MilestoneStateEvent value) throws Exception {
-        Map<String, Object> data = new HashMap<>();
-        data.put("userId", value.getUserId());
-        data.put("value", value.getValue());
-        data.put("valueInt", value.getValueInt());
-        data.put("nextValue", value.getNextValue());
-        data.put("nextValueInt", value.getNextValueInt());
-        data.put("lossUpdate", value.isLossUpdate());
-        data.put("lossValue", value.getLossValue());
-        data.put("lossValueInt", value.getLossValueInt());
-        data.put("milestoneId", value.getMilestone().getId());
+public class MilestoneStateNotificationMapper extends BaseNotificationMapper<MilestoneStateEvent, MilestoneStateModel> {
 
-        return BaseNotificationMapper.OBJECT_MAPPER.writeValueAsString(data);
+    @Override
+    MilestoneStateModel create(MilestoneStateEvent notification) throws Exception {
+        MilestoneStateModel model = new MilestoneStateModel();
+        model.setUserId(notification.getUserId());
+        model.setValue(notification.getValue());
+        model.setValueInt(notification.getValueInt());
+        model.setNextValue(notification.getNextValue());
+        model.setNextValueInt(notification.getNextValueInt());
+        model.setLossUpdate(notification.isLossUpdate());
+        model.setLossValue(notification.getLossValue());
+        model.setLossValueInt(notification.getLossValueInt());
+        model.setMilestoneId(notification.getMilestone().getId());
+        return model;
     }
 }

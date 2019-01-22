@@ -32,6 +32,10 @@ public class ChallengeEvent implements Event {
 
     }
 
+    public Event getEvent() {
+        return event;
+    }
+
     @Override
     public Object getFieldValue(String fieldName) {
         return event.getFieldValue(fieldName);

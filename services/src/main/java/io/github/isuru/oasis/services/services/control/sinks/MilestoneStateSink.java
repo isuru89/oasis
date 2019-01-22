@@ -19,7 +19,7 @@ public class MilestoneStateSink extends BaseLocalSink {
     protected void handle(String value) throws Exception {
         MilestoneStateModel model = mapper.readValue(value, MilestoneStateModel.class);
         Map<String, Object> data;
-        if (model.isLoss()) {
+        if (model.getLossUpdate() != null && model.getLossUpdate()) {
             data = ConsumerUtils.toMilestoneLossStateDaoData(getGameId(), model);
             dao.executeCommand("game/updateMilestoneStateLoss", data);
         } else {

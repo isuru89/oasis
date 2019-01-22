@@ -7,7 +7,7 @@ public class OStateModel {
     private Long userId;
     private Long teamId;
     private Long teamScopeId;
-    private Integer stateId;
+    private Long stateId;
 
     private Integer currentState;
     private String currentValue;
@@ -82,11 +82,11 @@ public class OStateModel {
         this.userId = userId;
     }
 
-    public Integer getStateId() {
+    public Long getStateId() {
         return stateId;
     }
 
-    public void setStateId(Integer stateId) {
+    public void setStateId(Long stateId) {
         this.stateId = stateId;
     }
 

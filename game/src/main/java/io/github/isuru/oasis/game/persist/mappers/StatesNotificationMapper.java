@@ -2,29 +2,27 @@ package io.github.isuru.oasis.game.persist.mappers;
 
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.handlers.OStateNotification;
-import org.apache.flink.api.common.functions.MapFunction;
+import io.github.isuru.oasis.model.handlers.output.OStateModel;
 
-import java.util.HashMap;
-import java.util.Map;
+public class StatesNotificationMapper extends BaseNotificationMapper<OStateNotification, OStateModel> {
 
-public class StatesNotificationMapper implements MapFunction<OStateNotification, String> {
     @Override
-    public String map(OStateNotification value) throws Exception {
-        Map<String, Object> data = new HashMap<>();
-        Event event = value.getEvent();
-        data.put("userId", value.getUserId());
-        data.put("teamId", event.getTeam());
-        data.put("teamScopeId", event.getTeamScope());
-        data.put("stateId", value.getStateRef().getId());
-        data.put("currentState", value.getState().getId());
-        data.put("currentValue", value.getCurrentValue());
-        data.put("currentPoints", value.getState().getPoints());
-        data.put("currency", value.getStateRef().isCurrency());
-        data.put("event", event);
-        data.put("ts", event.getTimestamp());
-        data.put("extId", event.getExternalId());
-        data.put("sourceId", event.getSource());
+    OStateModel create(OStateNotification notification) {
+        OStateModel model = new OStateModel();
+        Event event = notification.getEvent();
 
-        return BaseNotificationMapper.OBJECT_MAPPER.writeValueAsString(data);
+        model.setUserId(notification.getUserId());
+        model.setTeamId(event.getTeam());
+        model.setTeamScopeId(event.getTeamScope());
+        model.setStateId(notification.getStateRef().getId());
+        model.setCurrentState(notification.getState().getId());
+        model.setCurrentValue(notification.getCurrentValue());
+        model.setCurrentPoints(notification.getState().getPoints());
+        model.setCurrency(notification.getStateRef().isCurrency());
+        model.setEvent(extractRawEvents(event));
+        model.setTs(event.getTimestamp());
+        model.setExtId(event.getExternalId());
+        model.setSourceId(event.getSource());
+        return model;
     }
 }

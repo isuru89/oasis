@@ -1,37 +1,37 @@
 package io.github.isuru.oasis.game.persist.mappers;
 
 import io.github.isuru.oasis.model.Event;
-import io.github.isuru.oasis.model.events.PointEvent;
 import io.github.isuru.oasis.model.handlers.PointNotification;
-import org.apache.flink.api.common.functions.MapFunction;
+import io.github.isuru.oasis.model.handlers.output.PointModel;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna
  */
-public class PointNotificationMapper implements MapFunction<PointNotification, String> {
+public class PointNotificationMapper extends BaseNotificationMapper<PointNotification, PointModel> {
 
     @Override
-    public String map(PointNotification value) throws Exception {
-        Map<String, Object> data = new HashMap<>();
-        Event event = value.getEvents().get(value.getEvents().size() - 1);
-        data.put("teamId", event.getTeam());
-        data.put("teamScopeId", event.getTeamScope());
-        data.put("userId", value.getUserId());
-        data.put("eventType", event.getEventType());
-        data.put("events", value.getEvents().stream()
-            .map(e -> ((PointEvent)e).getRefEvent()).collect(Collectors.toList()));
-        data.put("tag", value.getTag());
-        data.put("amount", value.getAmount());
-        data.put("ruleId", value.getRule().getId());
-        data.put("ruleName", value.getRule().getName());
-        data.put("currency", value.getRule().isCurrency());
-        data.put("ts", event.getTimestamp());
-        data.put("sourceId", event.getSource());
+    PointModel create(PointNotification notification) {
+        PointModel model = new PointModel();
+        Event event = notification.getEvents().get(notification.getEvents().size() - 1);
 
-        return BaseNotificationMapper.OBJECT_MAPPER.writeValueAsString(data);
+        model.setTeamId(event.getTeam());
+        model.setTeamScopeId(event.getTeamScope());
+        model.setUserId(notification.getUserId());
+        model.setEventType(event.getEventType());
+        model.setEvents(notification.getEvents().stream()
+                .map(this::extractRawEvents)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        model.setTag(notification.getTag());
+        model.setAmount(notification.getAmount());
+        model.setRuleId(notification.getRule().getId());
+        model.setRuleName(notification.getRule().getName());
+        model.setCurrency(notification.getRule().isCurrency());
+        model.setTs(event.getTimestamp());
+        model.setSourceId(event.getSource());
+        return model;
     }
 }

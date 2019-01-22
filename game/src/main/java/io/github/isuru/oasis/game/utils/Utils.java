@@ -100,7 +100,7 @@ public class Utils {
                 return Time.seconds(val);
             } else if (unit.startsWith("min")) {
                 return Time.minutes(val);
-            }else if (unit.startsWith("h")) {
+            } else if (unit.startsWith("h")) {
                 return Time.hours(val);
             } else if (unit.startsWith("m")) {
                 return Time.days(val * 30L);
@@ -118,23 +118,23 @@ public class Utils {
         return false;
     }
 
-    public static Event getLatestEvent(Event e1, Event e2) {
-        if (e1 == null) {
-            if (e2 == null) {
-                return null;
-            } else {
-                return e2;
-            }
-        } else {
-            if (e2 == null) {
-                return e1;
-            } else {
-                if (e1.getTimestamp() > e1.getTimestamp()) {
-                    return e1;
-                } else {
-                    return e2;
-                }
-            }
-        }
-    }
+//    public static Event getLatestEvent(Event e1, Event e2) {
+//        if (e1 == null) {
+//            if (e2 == null) {
+//                return null;
+//            } else {
+//                return e2;
+//            }
+//        } else {
+//            if (e2 == null) {
+//                return e1;
+//            } else {
+//                if (e1.getTimestamp() > e1.getTimestamp()) {
+//                    return e1;
+//                } else {
+//                    return e2;
+//                }
+//            }
+//        }
+//    }
 }

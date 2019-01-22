@@ -17,7 +17,7 @@ public class PointModel {
     private String eventType;
     private String tag;
     private Double amount;
-    private Integer ruleId;
+    private Long ruleId;
     private String ruleName;
     private Boolean currency;
     private Long ts;
@@ -95,11 +95,11 @@ public class PointModel {
         this.amount = amount;
     }
 
-    public Integer getRuleId() {
+    public Long getRuleId() {
         return ruleId;
     }
 
-    public void setRuleId(Integer ruleId) {
+    public void setRuleId(Long ruleId) {
         this.ruleId = ruleId;
     }
 

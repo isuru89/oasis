@@ -6,7 +6,7 @@ package io.github.isuru.oasis.model.handlers.output;
 public class MilestoneStateModel {
 
     private Long userId;
-    private Integer milestoneId;
+    private Long milestoneId;
 
     private Double value;
     private Long valueInt;
@@ -16,10 +16,6 @@ public class MilestoneStateModel {
     private Boolean lossUpdate;
     private Double lossValue;
     private Long lossValueInt;
-
-    public boolean isLoss() {
-        return lossUpdate != null && lossUpdate;
-    }
 
     public Boolean getLossUpdate() {
         return lossUpdate;
@@ -53,11 +49,11 @@ public class MilestoneStateModel {
         this.userId = userId;
     }
 
-    public Integer getMilestoneId() {
+    public Long getMilestoneId() {
         return milestoneId;
     }
 
-    public void setMilestoneId(Integer milestoneId) {
+    public void setMilestoneId(Long milestoneId) {
         this.milestoneId = milestoneId;
     }
 

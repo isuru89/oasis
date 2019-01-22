@@ -14,7 +14,7 @@ public class MilestoneModel {
     private JsonEvent event;
     private String eventType;
     private Integer level;
-    private Integer milestoneId;
+    private Long milestoneId;
     private Long ts;
     private Integer sourceId;
 
@@ -66,11 +66,11 @@ public class MilestoneModel {
         this.level = level;
     }
 
-    public Integer getMilestoneId() {
+    public Long getMilestoneId() {
         return milestoneId;
     }
 
-    public void setMilestoneId(Integer milestoneId) {
+    public void setMilestoneId(Long milestoneId) {
         this.milestoneId = milestoneId;
     }
 
