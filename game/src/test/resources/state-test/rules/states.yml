@@ -24,3 +24,30 @@ states:
       - from: 3
         to: 1
         points: -50
+
+  - event: bug-x
+    id: 702
+    name: bug-density-rate-x
+    defaultState: 2
+    condition: "bd % 2 == 0"    # Only even values consider
+    stateValueExpression: "bd"
+    states:
+      - id: 1
+        name: bad
+        condition: "bd < 0"
+        points: -10
+      - id: 2
+        name: neutral
+        condition: "bd == 0"
+        points: 0
+      - id: 3
+        name: good
+        condition: "bd > 0"
+        points: 10
+    stateChangeAwards:
+      - from: 1
+        to: 3
+        points: 50
+      - from: 3
+        to: 1
+        points: -50
