@@ -158,6 +158,13 @@ public class GameDefServiceTest extends BaseDefServiceTest {
             Assertions.assertThat(ds.listGames()).isEmpty();
             Assertions.assertThat(ds.listPointDefs(gameId)).isEmpty();
             Assertions.assertThat(ds.listLeaderboardDefs(gameId)).isEmpty();
+
+            {
+                // game with same name should be able to add again
+                GameDef dupGame = createGame(game.getName(), game.getDisplayName());
+                long newGameId = ds.createGame(dupGame, new GameOptionsDto());
+                Assert.assertTrue(newGameId > 0);
+            }
         }
     }
 

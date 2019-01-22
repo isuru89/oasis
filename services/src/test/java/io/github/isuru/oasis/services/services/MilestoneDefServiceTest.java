@@ -160,8 +160,9 @@ public class MilestoneDefServiceTest extends BaseDefServiceTest {
         }
 
         {
-            // @TODO after disabling, user should be able to add new with a same name again
-
+            // after disabling, user should be able to add new with a same name again
+            MilestoneDef clone = clone(def1);
+            readAssert(addAssert(gameId, clone), clone);
         }
     }
 

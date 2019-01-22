@@ -160,8 +160,9 @@ public class BadgeDefServiceTest extends BaseDefServiceTest {
         }
 
         {
-            // @TODO after disabling, user should be able to add new with a same name again
-
+            // after disabling, user should be able to add new with a same name again
+            BadgeDef clone = clone(def1);
+            readAssert(addAssert(gameId, clone), clone);
         }
     }
 

@@ -177,8 +177,9 @@ public class KpiDefServiceTest extends BaseDefServiceTest {
         }
 
         {
-            // @TODO after disabling, user should be able to add new with a same name again
-
+            // after disabling, user should be able to add new with a same name again
+            KpiDef clone = clone(kpiDef1);
+            readAssert(addAssert(gameId, clone), clone);
         }
     }
 
