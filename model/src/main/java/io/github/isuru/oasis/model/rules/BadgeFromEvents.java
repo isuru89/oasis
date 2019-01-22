@@ -15,11 +15,20 @@ public class BadgeFromEvents extends BadgeRule {
     private String eventType;
     private Serializable condition;
     private int streak;
-    private boolean continuous;
+    private Boolean continuous;
     private Serializable continuousAggregator;
     private Serializable continuousCondition;
+    private int countThreshold = 1;
     private String duration;
     private List<? extends Badge> subBadges;
+
+    public int getCountThreshold() {
+        return countThreshold;
+    }
+
+    public void setCountThreshold(int countThreshold) {
+        this.countThreshold = countThreshold;
+    }
 
     public boolean hasSubStreakBadges() {
         return subBadges != null && !subBadges.isEmpty() && streak > 0;
@@ -69,11 +78,11 @@ public class BadgeFromEvents extends BadgeRule {
         this.continuousCondition = continuousCondition;
     }
 
-    public boolean isContinuous() {
+    public Boolean getContinuous() {
         return continuous;
     }
 
-    public void setContinuous(boolean continuous) {
+    public void setContinuous(Boolean continuous) {
         this.continuous = continuous;
     }
 

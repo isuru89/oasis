@@ -1,0 +1,105 @@
+badges:
+  - id: 351
+    name: enthusiast-sc
+    displayName: Enthusiast
+    description: Visit the site each day for 3 separate days
+
+    event: "so-login"
+    condition: "user > 0"
+    within: "3 days"
+    continuous: false
+
+    subBadges:
+    - name: fanatic-sc
+      displayName: Fanatic
+      description: Visit the site each day for 5 separate days
+      within: "5 days"
+
+  - id: 353
+    name: energetic-s
+    displayName: Energetic
+    description: Have reputation 10+ for 3 separate days
+
+    event: "so-reputation"
+    condition: "user > 0"
+    within: "3 days"
+    continuousAggregator: "reputation"
+    continuousCondition: "sum >= 10"
+    continuous: false
+
+    subBadges:
+      - name: electric-s
+        displayName: Electric
+        description: Have reputation 10+ for 5 separate days
+        within: "5 days"
+
+  - id: 354
+    name: energetic-s-mx
+    displayName: Energetic
+    description: Have reputation 10+ for 3 separate days
+
+    event: "so-reputation-mx"
+    condition: "user > 0"
+    within: "3 days"
+    continuousAggregator: "reputation"
+    continuousCondition: "sum >= 10"
+    continuous: false
+    maxBadges: 1
+
+    subBadges:
+      - name: electric-s-mx
+        displayName: Electric
+        description: Have reputation 10+ for 5 separate days
+        within: "5 days"
+
+  - id: 355
+    name: enthusiast-mx
+    displayName: Enthusiast
+    description: Visit the site each day for 3 separate days
+
+    event: "so-login-mx"
+    condition: "user > 0"
+    within: "3 days"
+    continuous: false
+    maxBadges: 1
+
+    subBadges:
+      - name: fanatic-mx
+        displayName: Fanatic
+        description: Visit the site each day for 5 separate days
+        within: "5 days"
+
+  - id: 356
+    name: enthusiast-c-mx
+    displayName: Enthusiast
+    description: Visit the site each day for 3 separate days
+
+    event: "so-login-c-mx"
+    condition: "user > 0"
+    within: "3 days"
+    continuous: false
+    countThreshold: 3
+    maxBadges: 1
+
+    subBadges:
+      - name: fanatic-c-mx
+        displayName: Fanatic
+        description: Visit the site each day for 5 separate days
+        within: "5 days"
+
+  - id: 357
+    name: enthusiast-c
+    displayName: Enthusiast
+    description: Visit the site each day for 3 separate days
+
+    event: "so-login-c"
+    condition: "user > 0"
+    within: "3 days"
+    continuous: false
+    countThreshold: 3
+
+    subBadges:
+      - name: fanatic-c
+        displayName: Fanatic
+        description: Visit the site each day for 5 separate days
+        within: "5 days"

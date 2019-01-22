@@ -135,9 +135,11 @@ public class Parsers {
             bfe.setEventType(badgeDef.getEvent());
             bfe.setDuration(badgeDef.getWithin());
             bfe.setMaxBadges(badgeDef.getMaxBadges());
-            if (badgeDef.getContinuous() != null) {
-                bfe.setContinuous(badgeDef.getContinuous());
+            bfe.setContinuous(badgeDef.getContinuous());
+            if (badgeDef.getCountThreshold() != null) {
+                bfe.setCountThreshold(badgeDef.getCountThreshold());
             }
+
             if (!isNullOrEmpty(badgeDef.getContinuousAggregator())) {
                 bfe.setContinuousAggregator(MVEL.compileExpression(badgeDef.getContinuousAggregator()));
             }
@@ -163,7 +165,7 @@ public class Parsers {
                         BadgeFromEvents.ConditionalSubBadge conditionalSubBadge = new BadgeFromEvents.ConditionalSubBadge(sbd.getName(), badge, serializable);
                         conditionalSubBadge.setAwardPoints(sbd.getAwardPoints());
                         subBadges.add(conditionalSubBadge);
-                    } else if (bfe.isContinuous() && sbd.getWithin() != null) {
+                    } else if (bfe.getContinuous() != null && sbd.getWithin() != null) {
                         BadgeFromEvents.ContinuousSubBadge csb = new BadgeFromEvents.ContinuousSubBadge(sbd.getName(), badge, sbd.getWithin());
                         subBadges.add(csb);
                     } else {

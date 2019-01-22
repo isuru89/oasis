@@ -60,6 +60,11 @@ public class HistogramSumProcessor<E extends Event, W extends Window> extends Hi
         if (isConditionFulfil(sum, badgeRule)) {
             countMap.put(timeKey, 1);
 
+            if (isSeparate()) {
+                calculateSeparate(userId, out, badgeRule, countMap, timeKey, lastE, holidayPredicate);
+                return;
+            }
+
             int streakLength = HistogramCounter.processContinuous(timeKey, countMap, holidayPredicate);
             if (streakLength < 2) {
                 countMap.clear();
@@ -97,8 +102,10 @@ public class HistogramSumProcessor<E extends Event, W extends Window> extends Hi
             }
 
         } else {
-            // clear map because consecutive is dropped.
-            HistogramCounter.clearLessThan(timeKey, countMap);
+            if (!isSeparate()) {
+                // clear map because consecutive is dropped.
+                HistogramCounter.clearLessThan(timeKey, countMap);
+            }
         }
     }
 

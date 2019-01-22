@@ -5,6 +5,7 @@ import org.apache.flink.api.common.state.MapState;
 import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -27,6 +28,19 @@ public class HistogramCounter {
                 currDate = currDate.minusDays(1);
             }
         }
+    }
+
+    public static int processSeparate(String key, MapState<String, Integer> mapState,
+                                      Predicate<LocalDate> isHoliday) throws Exception {
+        int p = 0;
+        for (Map.Entry<String, Integer> entry : mapState.entries()) {
+            Integer count = entry.getValue();
+            if (count == null || count <= 0) {
+                continue;
+            }
+            p++;
+        }
+        return p;
     }
 
     public static void clearLessThan(String key, MapState<String, Integer> mapState) throws Exception {

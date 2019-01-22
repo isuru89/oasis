@@ -1,13 +1,12 @@
 package io.github.isuru.oasis.game;
 
-import io.github.isuru.oasis.game.utils.Utils;
+import io.github.isuru.oasis.game.utils.*;
 import io.github.isuru.oasis.model.Badge;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
-import io.github.isuru.oasis.game.utils.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Assertions;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -119,6 +119,8 @@ abstract class AbstractTest {
             Assertions.assertNotNull(expected);
             Assertions.assertNotNull(actual);
             Assertions.assertNull(Memo.getBadgeErrors(id));
+            expected.sort(Comparator.comparingLong(o -> o.f0));
+            actual.sort(Comparator.comparingLong(o -> o.f0));
             Assertions.assertEquals(expected.size(), actual.size(), "Expected badges are not equal!");
 
             assertBadges(actual, expected);

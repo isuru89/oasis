@@ -12,13 +12,22 @@ public class BadgeDef extends BaseDef {
     private String event;
     private String condition;
     private Integer streak;
-    private Boolean continuous = Boolean.FALSE;
+    private Boolean continuous;
     private String continuousAggregator;
     private String continuousCondition;
+    private Integer countThreshold;
     private String within;
     private Double awardPoints;
     private int maxBadges = Integer.MAX_VALUE;
     private List<SubBadgeDef> subBadges;
+
+    public Integer getCountThreshold() {
+        return countThreshold;
+    }
+
+    public void setCountThreshold(Integer countThreshold) {
+        this.countThreshold = countThreshold;
+    }
 
     public String getContinuousAggregator() {
         return continuousAggregator;

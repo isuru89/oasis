@@ -6,6 +6,7 @@ import io.github.isuru.oasis.model.Badge;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.events.BadgeEvent;
 import io.github.isuru.oasis.model.rules.BadgeFromEvents;
+import io.github.isuru.oasis.model.rules.BadgeRule;
 import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.state.ValueState;
@@ -37,10 +38,12 @@ class HistogramCountProcessor<E extends Event, W extends Window> extends Process
     private Function<Long, String> timeConverter;
     private long maxStreak = 0L;
     private long minStreak = Long.MAX_VALUE;
+    private boolean separate = false;
 
     HistogramCountProcessor(BadgeFromEvents badgeRule, Function<Long, String> timeConverter) {
         this.badge = badgeRule;
         this.timeConverter = timeConverter;
+        this.separate = badgeRule.getContinuous() != null && !badgeRule.getContinuous();
         currStreakDesc = new ValueStateDescriptor<>(
                 String.format("badge-%d-curr-streak", badge.getBadge().getId()), Long.class);
         maxAchDesc = new ValueStateDescriptor<>(
@@ -78,8 +81,15 @@ class HistogramCountProcessor<E extends Event, W extends Window> extends Process
             count++;
         }
 
-        if (count > 0) {
+        // count threshold
+        if (count >= badge.getCountThreshold()) {
             countMap.put(timeKey, count);
+
+            // calculate only for separate days
+            if (isSeparate()) {
+                calculateSeparate(userId, out, badge, countMap, timeKey, lastE, holidayPredicate);
+                return;
+            }
 
             // if current date is a holiday and should count only for business days,
             // then we ignore the today count.
@@ -131,9 +141,48 @@ class HistogramCountProcessor<E extends Event, W extends Window> extends Process
             }
 
         } else {
-            HistogramCounter.clearLessThan(timeKey, countMap);
+            if (!isSeparate()) {
+                HistogramCounter.clearLessThan(timeKey, countMap);
+            }
         }
     }
+
+    void calculateSeparate(Long userId, Collector<BadgeEvent> out,
+                                   BadgeRule badgeRule, MapState<String, Integer> countMap,
+                                   String timeKey, Event lastE,
+                                   Predicate<LocalDate> holidayPredicate) throws Exception {
+        long occurrences = HistogramCounter.processSeparate(timeKey, countMap, holidayPredicate);
+        long currentOcc = 0;
+        for (long t : getStreaks()) {
+            if (occurrences >= t) {
+                currentOcc = t;
+            } else {
+                break;
+            }
+        }
+
+        Long currStreak = getCurrentStreak().value();   // current occurrences
+        Long maxAchieved = getMaxAchieved().value();
+        if (getMinStreak() <= currentOcc && currStreak < currentOcc) {
+            // badge can be created
+
+            BadgeEvent badgeEvent = new BadgeEvent(userId,
+                    getStreakBadges().get(currentOcc),
+                    badgeRule,
+                    Collections.singletonList(lastE),
+                    lastE);
+            out.collect(badgeEvent);
+            getMaxAchieved().update(Math.max(maxAchieved, currentOcc));
+
+            if (badgeRule.getMaxBadges() != 1 && getMaxStreak() <= currentOcc) {
+                clearCurrentStreak();
+                countMap.clear();   // clear all so it will be reset again
+            } else {
+                getCurrentStreak().update(currentOcc);
+            }
+        }
+    }
+
 
     void initDefaultState() throws IOException {
         if (Objects.equals(currentStreak.value(), currStreakDesc.getDefaultValue())) {
@@ -197,6 +246,10 @@ class HistogramCountProcessor<E extends Event, W extends Window> extends Process
 
     long getMinStreak() {
         return minStreak;
+    }
+
+    boolean isSeparate() {
+        return separate;
     }
 
     /**

@@ -80,7 +80,7 @@ public class BadgeOperator {
 
         WindowedStream<Event, Long, ? extends Window> window;
 
-        if (badgeRule.isContinuous()) {
+        if (badgeRule.getContinuous() != null) {
             //
             // Badge rules like: Event happens for N continuous days
             //
@@ -92,7 +92,8 @@ public class BadgeOperator {
                 }
             };
 
-            KeyedStream<Event, Long> keyedUserStream = rawStream.filter(combinedFilter).keyBy(new EventUserSelector<>());
+            KeyedStream<Event, Long> keyedUserStream = rawStream.filter(combinedFilter)
+                    .keyBy(new EventUserSelector<>());
 
             // @TODO histogram like counting support for weeks and months
             WindowedStream<Event, Long, TimeWindow> tmpWindowed = timeHistogramStream(badgeRule.getDuration(), keyedUserStream)
