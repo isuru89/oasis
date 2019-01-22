@@ -1,13 +1,15 @@
 package io.github.isuru.oasis.game;
 
 import io.github.isuru.oasis.game.utils.HistogramCounter;
+import io.github.isuru.oasis.game.utils.TestMapState;
 import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.model.events.JsonEvent;
 import io.github.isuru.oasis.model.utils.OasisUtils;
-import io.github.isuru.oasis.game.utils.TestMapState;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.junit.Rule;
+import org.junit.contrib.java.lang.system.ClearSystemProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +28,9 @@ class UtilsTest {
     private static final long ONE_MIN = 1000 * 60;
     private static final long ONE_SEC = 1000;
 
+    @Rule
+    public final ClearSystemProperties oasisGameIdCleared =
+            new ClearSystemProperties(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID);
 
     @Test
     void testQueueReplace() {
@@ -34,7 +39,7 @@ class UtilsTest {
             System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "1");
             Assertions.assertEquals("queue.1.msg", Utils.queueReplace(qName));
 
-            System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "");
+            System.clearProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID);
             Assertions.assertEquals("queue..msg", Utils.queueReplace(qName));
         }
         {
@@ -42,7 +47,7 @@ class UtilsTest {
             System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "1");
             Assertions.assertEquals(qName, Utils.queueReplace(qName));
 
-            System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "");
+            System.clearProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID);
             Assertions.assertEquals(qName, Utils.queueReplace(qName));
         }
         {
@@ -50,7 +55,7 @@ class UtilsTest {
             System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "1");
             Assertions.assertEquals(qName, Utils.queueReplace(qName));
 
-            System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "");
+            System.clearProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID);
             Assertions.assertEquals(qName, Utils.queueReplace(qName));
         }
     }

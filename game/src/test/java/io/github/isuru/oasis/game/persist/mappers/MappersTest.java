@@ -359,6 +359,10 @@ public class MappersTest {
     }
 
     private JsonEvent randomJsonEvent() {
+        return randomJsonEvent(random);
+    }
+
+    public static JsonEvent randomJsonEvent(Random random) {
         JsonEvent jsonEvent = new JsonEvent();
         jsonEvent.put(Constants.FIELD_TIMESTAMP, System.currentTimeMillis());
         jsonEvent.put(Constants.FIELD_USER, random.nextInt(1000) + 1);

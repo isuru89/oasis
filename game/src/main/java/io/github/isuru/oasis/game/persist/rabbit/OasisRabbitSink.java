@@ -74,4 +74,28 @@ public class OasisRabbitSink extends OasisSink implements Serializable {
     public SinkFunction<String> createStatesSink() {
         return new RMQOasisSink<>(config, statesQueue, new SimpleStringSchema(), gameProperties);
     }
+
+    String getPointQueue() {
+        return pointQueue;
+    }
+
+    String getMilestoneQueue() {
+        return milestoneQueue;
+    }
+
+    String getMilestoneStateQueue() {
+        return milestoneStateQueue;
+    }
+
+    String getBadgeQueue() {
+        return badgeQueue;
+    }
+
+    String getChallengeQueue() {
+        return challengeQueue;
+    }
+
+    String getStatesQueue() {
+        return statesQueue;
+    }
 }
