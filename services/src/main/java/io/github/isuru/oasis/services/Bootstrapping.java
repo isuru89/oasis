@@ -96,7 +96,7 @@ public class Bootstrapping {
             createInternalToken();
 
             // add users
-            addUsers(defaultTeam.getId());
+            addUsers(defaultTeam);
 
             // resume
             resumeGameAndChallenges();
@@ -192,12 +192,12 @@ public class Bootstrapping {
     private static void cleanTables(IOasisDao dao, String... tableNames) throws Exception {
         if (tableNames != null) {
             for (String tbl : tableNames) {
-                dao.executeRawCommand("TRUNCATE " + tbl, null);
+                dao.executeRawCommand("TRUNCATE TABLE " + tbl, null);
             }
         }
     }
 
-    private void addUsers(long defTeamId) throws Exception {
+    private void addUsers(TeamProfile defTeam) throws Exception {
         UserProfile adminUser = profileService.readUserProfile(DefaultEntities.DEF_ADMIN_USER);
         if (adminUser == null) {
             LOG.info("  - Admin user does not exist. Creating...");
@@ -206,8 +206,7 @@ public class Bootstrapping {
             admin.setName("Admin");
             admin.setActivated(true);
             admin.setAutoUser(true);
-            long adminId = profileService.addUserProfile(admin);
-            profileService.addUserToTeam(adminId, defTeamId, UserRole.ADMIN);
+            profileService.addUserProfile(admin, defTeam, UserRole.ADMIN);
         } else {
             LOG.info("  - Admin user exists.");
         }
@@ -220,8 +219,7 @@ public class Bootstrapping {
             curator.setName("Curator");
             curator.setActivated(true);
             curator.setAutoUser(true);
-            long curatorId = profileService.addUserProfile(curator);
-            profileService.addUserToTeam(curatorId, defTeamId, UserRole.CURATOR);
+            profileService.addUserProfile(curator, defTeam, UserRole.CURATOR);
         } else {
             LOG.info("  - Curator user exists.");
         }
@@ -234,8 +232,7 @@ public class Bootstrapping {
             player.setName("Player");
             player.setActivated(true);
             player.setAutoUser(true);
-            long playerId = profileService.addUserProfile(player);
-            profileService.addUserToTeam(playerId, defTeamId, UserRole.PLAYER);
+            profileService.addUserProfile(player, defTeam, UserRole.PLAYER);
         } else {
             LOG.info("  - Player user exists.");
         }

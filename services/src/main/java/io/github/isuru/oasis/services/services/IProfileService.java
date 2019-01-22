@@ -17,6 +17,7 @@ import java.util.List;
 public interface IProfileService {
 
     long addUserProfile(UserProfileAddDto profile) throws Exception;
+    long addUserProfile(UserProfileAddDto profile, TeamProfile team, int roleId) throws Exception;
     UserProfile readUserProfile(long userId) throws Exception;
     UserProfile readUserProfile(String email) throws Exception;
     UserProfile readUserProfileByExtId(long extUserId) throws Exception;

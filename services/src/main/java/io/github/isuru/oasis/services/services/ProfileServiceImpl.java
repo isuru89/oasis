@@ -4,19 +4,10 @@ import com.github.slugify.Slugify;
 import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
-import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
-import io.github.isuru.oasis.services.dto.crud.TeamProfileEditDto;
-import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
-import io.github.isuru.oasis.services.dto.crud.TeamScopeEditDto;
-import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
-import io.github.isuru.oasis.services.dto.crud.UserProfileEditDto;
+import io.github.isuru.oasis.services.DataCache;
+import io.github.isuru.oasis.services.dto.crud.*;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.TeamScope;
-import io.github.isuru.oasis.services.model.UserProfile;
-import io.github.isuru.oasis.services.model.UserRole;
-import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.model.UserTeamScope;
+import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -26,11 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author iweerarathna
@@ -46,25 +33,51 @@ public class ProfileServiceImpl implements IProfileService {
     @Autowired
     private IGameDefService gameDefService;
 
+    @Autowired
+    private DataCache dataCache;
+
+
     @Override
     public long addUserProfile(UserProfileAddDto profile) throws DbException, InputValidationException {
+        TeamProfile teamDefault = dataCache.getTeamDefault();
+        return addUserProfile(profile, teamDefault, UserRole.PLAYER);
+    }
+
+    @Override
+    public long addUserProfile(UserProfileAddDto profile, TeamProfile team, int roleId) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(profile.getEmail(), "email");
         Checks.nonNullOrEmpty(profile.getName(), "name");
+        Checks.nonNull(team, "team");
+        Checks.validate(roleId > 0 && roleId <= UserRole.ALL_ROLE, "roleId must be a flag of 1,2,4, or 8.");
 
-        Map<String, Object> templating = Maps.create("isActivated", profile.isActivated());
+        return (Long) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
+            Map<String, Object> templating = Maps.create("isActivated", profile.isActivated());
 
-        Map<String, Object> data = Maps.create()
-                .put("name", profile.getName())
-                .put("nickname", profile.getNickName())
-                .put("male", profile.isMale())
-                .put("avatarId", profile.getAvatarId())
-                .put("extId", profile.getExtId())
-                .put("email", profile.getEmail())
-                .put("isAutoUser", profile.isAutoUser())
-                .put("activated", profile.isActivated())
-                .build();
+            Map<String, Object> data = Maps.create()
+                    .put("name", profile.getName())
+                    .put("nickname", profile.getNickName())
+                    .put("male", profile.isMale())
+                    .put("avatarId", profile.getAvatarId())
+                    .put("extId", profile.getExtId())
+                    .put("email", profile.getEmail())
+                    .put("isAutoUser", profile.isAutoUser())
+                    .put("activated", profile.isActivated())
+                    .build();
 
-        return dao.executeInsert(Q.PROFILE.ADD_USER, data, templating, "user_id");
+            Long userId = ctx.executeInsert(Q.PROFILE.ADD_USER, data, templating, "user_id");
+
+            ctx.executeCommand(Q.PROFILE.ADD_USER_TO_TEAM,
+                    Maps.create()
+                            .put("userId", userId)
+                            .put("teamId", team.getId())
+                            .put("roleId", roleId)
+                            .put("since", 1L)
+                            .put("isApproved", true)
+                            .put("approvedAt", System.currentTimeMillis())
+                            .build(),
+                    Maps.create("hasApproved", true));
+            return userId;
+        });
     }
 
     @Override

@@ -3,6 +3,7 @@ package io.github.isuru.oasis.services.services;
 import com.github.slugify.Slugify;
 import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.db.DbException;
+import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
 import io.github.isuru.oasis.services.dto.crud.TeamProfileEditDto;
 import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
@@ -31,6 +32,9 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
     @Autowired
     private IProfileService ps;
+
+    @Autowired
+    private DataCache dataCache;
 
     @Before
     public void verify() throws Exception {
@@ -596,9 +600,9 @@ public class ProfileServiceTest extends AbstractServiceTest {
         long jaimeId = ps.addUserProfile(jaime);
 
         {
-            // @TODO before assignment user must be in default team of oasis.
+            // before assignment user must be in default team of oasis.
             UserTeam currentTeamOfUser = ps.findCurrentTeamOfUser(tywinId);
-            Assert.assertNull(currentTeamOfUser);   // @TODO fix to not null and check for default team
+            assertToDefaultTeam(currentTeamOfUser);
 
             // cannot add with invalid roles
             Assertions.assertThatThrownBy(() -> ps.addUserToTeam(tywinId, cid, 0))
@@ -632,11 +636,10 @@ public class ProfileServiceTest extends AbstractServiceTest {
                 Assert.assertEquals(ps.findCurrentTeamOfUser(tywinId, TRUE), tywinTeam);
                 Assert.assertEquals(ps.findCurrentTeamOfUser(tywinId, FALSE), tywinTeam);
 
-                // same should be returned null for past timestamps
-                // @TODO actually must be in default team
+                // should be returned default team for past timestamps
                 long assignStartTime = tywinTeam.getJoinedTime();
-                Assert.assertNull(ps.findCurrentTeamOfUser(tywinId, TRUE, assignStartTime - 1));
-                Assert.assertNull(ps.findCurrentTeamOfUser(tywinId, FALSE, assignStartTime - 1));
+                assertToDefaultTeam(ps.findCurrentTeamOfUser(tywinId, TRUE, assignStartTime - 1));
+                assertToDefaultTeam(ps.findCurrentTeamOfUser(tywinId, FALSE, assignStartTime - 1));
 
                 // current team should return for after assign or future timestamps
                 Assert.assertEquals(ps.findCurrentTeamOfUser(tywinId, TRUE, assignStartTime),
@@ -877,5 +880,12 @@ public class ProfileServiceTest extends AbstractServiceTest {
         editDto.setName(name);
         editDto.setAvatarId(avtId);
         return editDto;
+    }
+
+    private void assertToDefaultTeam(UserTeam team) {
+        Assert.assertNotNull(team);
+        TeamProfile teamDefault = dataCache.getTeamDefault();
+        Assert.assertEquals(teamDefault.getId(), team.getTeamId());
+        Assert.assertEquals(1L, team.getJoinedTime().longValue());
     }
 }
