@@ -3,6 +3,7 @@ package io.github.isuru.oasis.db;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import io.github.isuru.oasis.model.db.DbProperties;
+import io.github.isuru.oasis.model.db.ScriptNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +47,7 @@ public class FsQueryRepoTest {
         Files.createDirectories(subDir11);
 
         Files.write(dirRoot.resolve("getItem.sql"), Arrays.asList("SELECT *", "FROM item;"));
-        Files.write(dirRoot.resolve("getItem-h2.sql"), Arrays.asList("SELECT *", "FROM ITEM;"));
+        Files.write(dirRoot.resolve("getItem.h2.sql"), Arrays.asList("SELECT *", "FROM ITEM;"));
         Files.write(dirRoot.resolve("getItem2.txt"), Arrays.asList("SELECT *", "FROM item2;"));
         Files.write(dirRoot.resolve("getItem3.SQL"), Arrays.asList("SELECT *", "FROM item3;"));
         Files.write(subDir1.resolve("updateItem.sql"), Arrays.asList("UPDATE ", "SET item;"));
@@ -77,8 +78,8 @@ public class FsQueryRepoTest {
         String q2 = queryRepo.fetchQuery("getItem.sql");
         Assertions.assertNotEquals(q1, q2);
 
-        Assertions.assertNull(queryRepo.fetchQuery("getItem2"));
-        Assertions.assertNull(queryRepo.fetchQuery("getItem3"));
+        Assertions.assertThrows(ScriptNotFoundException.class, () -> queryRepo.fetchQuery("getItem2"));
+        Assertions.assertThrows(ScriptNotFoundException.class, () -> queryRepo.fetchQuery("getItem3"));
 
         // get from sub-path
         Assertions.assertEquals("UPDATE \nSET item;",
@@ -86,7 +87,7 @@ public class FsQueryRepoTest {
 
         Assertions.assertEquals("DELETE \nFROM item;",
                 queryRepo.fetchQuery("subdir-a/subdir-a-a/deleteItem"));
-        Assertions.assertNull(queryRepo.fetchQuery("subdir-a/subdir-a-a/a"));
+        Assertions.assertThrows(ScriptNotFoundException.class, () -> queryRepo.fetchQuery("subdir-a/subdir-a-a/a"));
 
         queryRepo.close();
 

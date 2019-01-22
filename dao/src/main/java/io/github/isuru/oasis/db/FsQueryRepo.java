@@ -69,7 +69,7 @@ public class FsQueryRepo implements IQueryRepo {
         if (queryId.endsWith(SQL)) {
             script = queries.get(queryId);
         } else {
-            script = queries.getOrDefault(queryId + "-" + DB + SQL, queries.get(queryId + SQL));
+            script = queries.getOrDefault(queryId + "." + DB + SQL, queries.get(queryId + SQL));
         }
 
         if (script == null) {
