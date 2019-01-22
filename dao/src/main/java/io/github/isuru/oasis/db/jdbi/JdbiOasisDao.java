@@ -57,7 +57,7 @@ public class JdbiOasisDao implements IOasisDao {
     private void runForSchema(DbProperties dbProperties) throws IOException, DbException {
         if (dbProperties.isAutoSchema()) {
             String prefix = Utils.captureDbName(dbProperties.getUrl());
-            String schemaFileLoc = "schema" + (prefix.length() > 0 ? "-" + prefix : prefix) + ".sql";
+            String schemaFileLoc = "schema" + (prefix.length() > 0 ? "." + prefix : prefix) + ".sql";
             File schemaDir = new File(dbProperties.getSchemaDir());
             File schemaFile = new File(schemaDir, schemaFileLoc);
 
