@@ -3,9 +3,9 @@ package io.github.isuru.oasis.services.controllers;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.Utils;
 import io.github.isuru.oasis.services.dto.AuthResponse;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class TestServer {
+public class TestServer {
 
     @Autowired
     private WebTestClient webClient;
@@ -30,8 +30,8 @@ class TestServer {
     @Autowired
     private TestAuthenticator testAuthenticator;
 
-    @BeforeEach
-    void beforeEach() {
+    @Before
+    public void beforeEach() {
         Map<String, String> users = new HashMap<>();
         users.put("isuru@domain.com", "rightpw");
         users.put("admin@oasis.com", "admin");
@@ -40,8 +40,8 @@ class TestServer {
         testAuthenticator.refill(users);
     }
 
-    @Test
-    void testLogout() throws IOException {
+    @org.junit.Test
+    public void testLogout() throws IOException {
         AuthResponse adminAuth = assertAuthResponse(readResponseJson(
                 doLogin("Basic " + Utils.toBase64("admin@oasis.com:admin"))
                         .expectStatus().isOk()));
@@ -55,7 +55,7 @@ class TestServer {
     }
 
     @Test
-    void testSuccessfulLogins() throws IOException {
+    public void testSuccessfulLogins() throws IOException {
         AuthResponse adminAuth = assertAuthResponse(readResponseJson(
                 doLogin("Basic " + Utils.toBase64("admin@oasis.com:admin"))
                         .expectStatus().isOk()));
@@ -88,7 +88,7 @@ class TestServer {
     }
 
     @Test
-    void testInvalidLogins() {
+    public void testInvalidLogins() {
         // header invalid errors
         doLogin(null).expectStatus().is4xxClientError();
         doLogin("").expectStatus().is4xxClientError();
