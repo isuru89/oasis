@@ -3,20 +3,20 @@ package io.github.isuru.oasis.services.services.control;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.game.persist.OasisSink;
 import io.github.isuru.oasis.model.Event;
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.events.ChallengeEvent;
 import io.github.isuru.oasis.model.events.JsonEvent;
 import io.github.isuru.oasis.model.handlers.NotificationUtils;
-import io.github.isuru.oasis.services.utils.Maps;
+import io.github.isuru.oasis.services.model.SubmittedJob;
+import io.github.isuru.oasis.services.services.IJobService;
+import org.apache.flink.shaded.netty4.io.netty.util.internal.ConcurrentSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -30,46 +30,68 @@ class LocalChallengeProcessor implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalChallengeProcessor.class);
 
+    private static final int TIMEOUT = 5;
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     private final BlockingQueue<Event> events = new LinkedBlockingDeque<>();
     private final Map<Long, ChallengeDef> challengeDefMap = new ConcurrentHashMap<>();
+    private final Map<Long, ChallengeCheck> challengeCheckMap = new ConcurrentHashMap<>();
     private final Map<Long, OasisSink> sinkMap = new ConcurrentHashMap<>();
     private boolean stop = false;
+    private final Set<String> refEvents = new ConcurrentSet<>();
 
-    private final IOasisDao dao;
+    private final IJobService jobService;
 
     @Autowired
-    public LocalChallengeProcessor(IOasisDao dao) {
-        this.dao = dao;
+    LocalChallengeProcessor(IJobService jobService) {
+        this.jobService = jobService;
     }
 
-    public boolean containChallenge(long id) {
-        return challengeDefMap.containsKey(id);
-    }
+    void submitChallenge(ChallengeDef challengeDef, OasisSink sink) throws Exception {
+        SubmittedJob job = readJobState(challengeDef);
+        ChallengeCheck challengeCheck = deserializeChallengeState(job.getStateData());
+        if (challengeCheck == null) {
+            challengeCheck = new ChallengeCheck(challengeDef);
+        }
 
-    public void submitChallenge(ChallengeDef challengeDef, OasisSink sink) {
+        refEvents.addAll(challengeDef.getForEvents());
+
         sinkMap.put(challengeDef.getId(), sink);
+        challengeCheckMap.put(challengeDef.getId(), challengeCheck);
         challengeDefMap.put(challengeDef.getId(), challengeDef);
     }
 
-    public void stopChallenge(long challengeId) throws Exception {
-        dao.executeCommand("jobs/stopJobByDefId", Maps.create("defId", challengeId));
+    private void stopChallenge(long challengeId) throws Exception {
+        if (jobService.stopJobByDef(challengeId)) {
 
-        challengeDefMap.remove(challengeId);
+            challengeDefMap.remove(challengeId);
+            challengeCheckMap.remove(challengeId);
+            sinkMap.remove(challengeId);
+        } else {
+            throw new IllegalStateException("Cannot stop challenge #" + challengeId + " in db!");
+        }
+    }
+
+    void stopChallenge(ChallengeDef challengeDef) throws Exception {
+        long challengeId = challengeDef.getId();
+
+        refEvents.removeAll(challengeDef.getForEvents());
+
+        stopChallenge(challengeId);
     }
 
     void stopChallengesOfGame(long gameId) throws Exception {
-        List<Long> ids = new LinkedList<>();
+        List<ChallengeDef> defs = new LinkedList<>();
         for (Map.Entry<Long, ChallengeDef> entry : challengeDefMap.entrySet()) {
             Long gid = entry.getValue().getGameId();
             if (gameId == gid) {
-                ids.add(gameId);
+                defs.add(entry.getValue());
             }
         }
 
-        for (Long id : ids) {
-            stopChallenge(id);
+        for (ChallengeDef def : defs) {
+            stopChallenge(def);
         }
     }
 
@@ -79,20 +101,37 @@ class LocalChallengeProcessor implements Runnable {
         events.add(jsonEvent);
     }
 
-    private void processEvent(Event event) {
-        List<Long> toRemove = new LinkedList<>();
+    private synchronized void processEvent(Event event) {
+        // unnecessary events will be ignored...
+        if (!refEvents.contains(event.getEventType())) {
+            return;
+        }
+
+        List<ChallengeDef> toRemove = new LinkedList<>();
 
         for (Map.Entry<Long, ChallengeDef> entry : challengeDefMap.entrySet()) {
-            ChallengeDef challengeDef = entry.getValue();
-            ChallengeFilterResult result = isChallengeSatisfied(event, challengeDef);
+            long challengeId = entry.getKey();
+            ChallengeDef challenge = entry.getValue();
+            ChallengeCheck challengeChecker = challengeCheckMap.get(challengeId);
+
+            ChallengeCheck.ChallengeFilterResult result = challengeChecker.check(event);
             if (result.isSatisfied()) {
-                OasisSink oasisSink = sinkMap.get(entry.getKey());
+                OasisSink oasisSink = sinkMap.get(challengeId);
                 if (oasisSink != null) {
                     // send out a winner
-                    ChallengeEvent challengeEvent = new ChallengeEvent(event, challengeDef);
+                    ChallengeEvent challengeEvent = new ChallengeEvent(event, challenge);
                     Map<String, Object> winnerInfo = NotificationUtils.mapChallenge(challengeEvent);
                     try {
-                        oasisSink.createChallengeSink().invoke(mapper.writeValueAsString(winnerInfo), null);
+                        // persist checker change to db
+                        byte[] dataState = serializeChallengeState(challengeChecker);
+                        if (jobService.updateJobState(challengeId, dataState)) {
+                            // when success, notify sink
+                            oasisSink.createChallengeSink().invoke(mapper.writeValueAsString(winnerInfo), null);
+                        } else {
+                            // @TODO do something when we can't save state to db
+                            LOG.error("Cannot update job state in persistent storage.");
+                        }
+
                     } catch (Exception e) {
                         LOG.error("Error sending challenge winner notification!", e);
                     }
@@ -104,7 +143,7 @@ class LocalChallengeProcessor implements Runnable {
 
             if (!result.isContinue()) {
                 // remove challenge
-                toRemove.add(entry.getKey());
+                toRemove.add(challenge);
             }
         }
 
@@ -119,8 +158,48 @@ class LocalChallengeProcessor implements Runnable {
         }
     }
 
-    private ChallengeFilterResult isChallengeSatisfied(Event event, ChallengeDef challengeDef) {
-        return new ChallengeFilterResult(false, true);
+    private SubmittedJob readJobState(ChallengeDef challengeDef) throws Exception {
+        // add a job to db, if not exists
+        Long id = challengeDef.getId();
+        SubmittedJob submittedJob = jobService.readJob(id);
+        if (submittedJob != null) {
+            return submittedJob;
+        } else {
+            SubmittedJob job = new SubmittedJob();
+            job.setDefId(id);
+            job.setJobId(UUID.randomUUID().toString());
+            job.setToBeFinishedAt(challengeDef.getExpireAfter());
+            job.setActive(true);
+
+            if (jobService.submitJob(job) > 0) {
+                return jobService.readJob(id);
+            } else {
+                throw new IOException("Cannot add a job for the challenge '" + id + "'!");
+            }
+        }
+    }
+
+    private ChallengeCheck deserializeChallengeState(byte[] stateData) throws IOException, ClassNotFoundException {
+        if (stateData == null || stateData.length == 0) {
+            return null;
+        }
+
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(stateData);
+             ObjectInputStream ois = new ObjectInputStream(bais)) {
+
+            return (ChallengeCheck) ois.readObject();
+        }
+    }
+
+    private byte[] serializeChallengeState(ChallengeCheck check) throws IOException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+
+            oos.writeObject(check);
+            oos.flush();
+
+            return baos.toByteArray();
+        }
     }
 
     @Override
@@ -128,7 +207,7 @@ class LocalChallengeProcessor implements Runnable {
         while (!stop) {
 
             try {
-                Event event = events.poll(5, TimeUnit.SECONDS);
+                Event event = events.poll(TIMEOUT, TimeUnit.SECONDS);
                 if (event != null) {
                     if (event instanceof LocalEndEvent) {
                         break;
@@ -138,32 +217,16 @@ class LocalChallengeProcessor implements Runnable {
                 }
 
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOG.error(e.getMessage(), e);
             }
-
         }
+        LOG.debug("Local challenge processor terminated. [Stop: {}]", stop);
     }
 
     void setStop() {
+        LOG.debug("Stopping signal sent for local challenge processor...");
         events.add(new LocalEndEvent());
         stop = true;
     }
 
-    private static class ChallengeFilterResult {
-        private final boolean satisfied;
-        private final boolean isContinue;
-
-        private ChallengeFilterResult(boolean satisfied, boolean isContinue) {
-            this.satisfied = satisfied;
-            this.isContinue = isContinue;
-        }
-
-        public boolean isSatisfied() {
-            return satisfied;
-        }
-
-        public boolean isContinue() {
-            return isContinue;
-        }
-    }
 }

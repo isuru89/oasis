@@ -31,19 +31,22 @@ class LocalRunner implements Runnable {
     private ExecutorService pool;
     private DbSink oasisSink;
     private DataCache dataCache;
+    private Sources sources;
     private OasisConfigurations oasisConfigurations;
 
     LocalRunner(OasisConfigurations configurations,
                 ExecutorService pool,
                 IOasisDao dao,
                 long gameId,
-                DataCache dataCache) {
+                DataCache dataCache,
+                Sources sources) {
         this.oasisConfigurations = configurations;
         this.gameId = gameId;
         this.dao = dao;
         this.pool = pool;
         this.oasisSink = new DbSink(gameId);
         this.dataCache = dataCache;
+        this.sources = sources;
     }
 
     @Override
@@ -57,7 +60,7 @@ class LocalRunner implements Runnable {
             configs.append(entry.getKey(), entry.getValue());
         }
 
-        QueueSource queueSource = new QueueSource(gameId);
+        QueueSource queueSource = new QueueSource(sources, gameId);
         localSinks = LocalSinks.applySinks(pool, oasisSink, dao, gameId);
 
         configs.append(ConfigKeys.KEY_LOCAL_REF_SOURCE, queueSource);
@@ -76,13 +79,13 @@ class LocalRunner implements Runnable {
         if (localSinks != null) {
             localSinks.stop();
         }
-        Sources.get().finish(gameId);
+        sources.finish(gameId);
     }
 
     void submitEvent(Map<String, Object> event) throws Exception {
         JsonEvent jsonEvent = new JsonEvent();
         jsonEvent.putAll(event);
-        Sources.get().poll(gameId).put(jsonEvent);
+        sources.poll(gameId).put(jsonEvent);
     }
 
     public long getGameId() {

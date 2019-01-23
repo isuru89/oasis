@@ -247,12 +247,14 @@ CREATE TABLE IF NOT EXISTS OA_PURCHASE (
 );
 
 CREATE TABLE IF NOT EXISTS OA_JOB (
+    id              INT PRIMARY KEY AUTO_INCREMENT,
     def_id          INT,
     jar_id          VARCHAR(2048),
     job_id          VARCHAR(2048),
     snapshot_dir    VARCHAR(2048),
     is_active       TINYINT(1) DEFAULT 1,
     to_be_finished_at BIGINT,
+    state_data      BLOB,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

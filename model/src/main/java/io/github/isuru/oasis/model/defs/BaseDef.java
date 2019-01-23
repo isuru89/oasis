@@ -1,6 +1,8 @@
 package io.github.isuru.oasis.model.defs;
 
-public abstract class BaseDef {
+import java.io.Serializable;
+
+public abstract class BaseDef implements Serializable {
 
     private Long id;
     private String name;

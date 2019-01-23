@@ -2,6 +2,17 @@ package io.github.isuru.oasis.services.services;
 
 final class Q {
 
+    static class JOBS {
+        private static final String PATH = "jobs/";
+
+        static final String SUBMIT_JOB = PATH + "submitJob";
+        static final String UPDATE_JOB = PATH + "updateJob";
+        static final String STOP_JOB = PATH + "stopJob";
+        static final String STOP_JOB_BY_DEF = PATH + "stopJobByDefId";
+        static final String GET_JOB = PATH + "getJobOfDef";
+        static final String GET_HAD_RUNNING_JOBS = PATH + "getHadRunningJobs";
+    }
+
     static class EVENTS {
         private static final String PATH = "events/";
 

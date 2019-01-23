@@ -5,19 +5,37 @@ package io.github.isuru.oasis.services.model;
  */
 public class SubmittedJob {
 
-    private Integer defId;
+    private Long id;
+    private Long defId;
     private String jobId;
     private String jarId;
     private String snapshotDir;
     private boolean active;
     private long toBeFinishedAt;
+    private byte[] stateData;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setToBeFinishedAt(long toBeFinishedAt) {
+        this.toBeFinishedAt = toBeFinishedAt;
+    }
+
+    public byte[] getStateData() {
+        return stateData;
+    }
+
+    public void setStateData(byte[] stateData) {
+        this.stateData = stateData;
+    }
 
     public Long getToBeFinishedAt() {
         return toBeFinishedAt;
-    }
-
-    public void setToBeFinishedAt(Long toBeFinishedAt) {
-        this.toBeFinishedAt = toBeFinishedAt;
     }
 
     public boolean isActive() {
@@ -36,11 +54,11 @@ public class SubmittedJob {
         this.snapshotDir = snapshotDir;
     }
 
-    public Integer getDefId() {
+    public Long getDefId() {
         return defId;
     }
 
-    public void setDefId(Integer defId) {
+    public void setDefId(Long defId) {
         this.defId = defId;
     }
 

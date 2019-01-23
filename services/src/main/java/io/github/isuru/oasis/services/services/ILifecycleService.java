@@ -7,9 +7,11 @@ public interface ILifecycleService {
 
     boolean start(long gameId) throws Exception;
 
-    boolean stop(long defId) throws Exception;
+    boolean stop(long gameId) throws Exception;
 
     boolean startChallenge(long challengeId) throws Exception;
+
+    boolean stopChallenge(long challengeId) throws Exception;
 
     boolean resumeGame(long gameId) throws Exception;
 

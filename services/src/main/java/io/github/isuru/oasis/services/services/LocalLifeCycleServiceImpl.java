@@ -30,15 +30,16 @@ public class LocalLifeCycleServiceImpl implements ILifecycleService {
     @Override
     public boolean start(long gameId) throws Exception {
         Checks.greaterThanZero(gameId, "gameId");
+        GameDef gameDef = gameDefService.readGame(gameId);
 
-        gameController.startGame(gameId);
+        gameController.startGame(gameDef.getId());
         return true;
     }
 
     @Override
-    public boolean stop(long defId) throws Exception {
-        Checks.greaterThanZero(defId, "defId");
-        gameController.stopGame(defId);
+    public boolean stop(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        gameController.stopGame(gameId);
         return true;
     }
 
@@ -51,6 +52,18 @@ public class LocalLifeCycleServiceImpl implements ILifecycleService {
             throw new InputValidationException("No challenge is found by id " + challengeId + "!");
         }
         gameController.startChallenge(challengeDef);
+        return true;
+    }
+
+    @Override
+    public boolean stopChallenge(long challengeId) throws Exception {
+        Checks.greaterThanZero(challengeId, "challengeId");
+
+        ChallengeDef challengeDef = gameDefService.readChallenge(challengeId);
+        if (challengeDef == null) {
+            throw new InputValidationException("No challenge is found by id " + challengeId + "!");
+        }
+        gameController.stopChallenge(challengeDef);
         return true;
     }
 

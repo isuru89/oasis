@@ -97,6 +97,11 @@ public class LifeCycleServiceImpl implements ILifecycleService  {
     }
 
     @Override
+    public boolean stopChallenge(long challengeId) throws Exception {
+        return false;
+    }
+
+    @Override
     public boolean resumeGame(long gameId) throws Exception {
         return false;
     }

@@ -14,6 +14,7 @@ public interface IGameController extends Closeable {
     void submitEvent(long gameId, Map<String, Object> event) throws Exception;
     void startGame(long gameId) throws Exception;
     void startChallenge(ChallengeDef challengeDef) throws Exception;
+    void stopChallenge(ChallengeDef challengeDef) throws Exception;
     void stopGame(long gameId) throws Exception;
     void resumeChallenge(ChallengeDef challengeDef) throws Exception;
     void resumeGame(GameDef gameDef) throws Exception;

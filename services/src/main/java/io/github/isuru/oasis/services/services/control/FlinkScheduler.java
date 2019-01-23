@@ -43,6 +43,11 @@ public class FlinkScheduler implements IGameController {
     }
 
     @Override
+    public void stopChallenge(ChallengeDef challengeDef) throws Exception {
+
+    }
+
+    @Override
     public void stopGame(long gameId) {
 
     }

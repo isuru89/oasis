@@ -16,13 +16,16 @@ class QueueSource implements SourceFunction<Event> {
     private final long queueId;
     private boolean isRunning = true;
 
-    public QueueSource(long qId) {
+    private final Sources sources;
+
+    public QueueSource(Sources sources, long qId) {
         this.queueId = qId;
+        this.sources = sources;
     }
 
     @Override
     public void run(SourceContext<Event> ctx) throws Exception {
-        LinkedBlockingQueue<Event> queue = Sources.get().poll(queueId);
+        LinkedBlockingQueue<Event> queue = sources.poll(queueId);
         while (isRunning) {
             Event poll = queue.poll(DEF_TIMEOUT, TimeUnit.MILLISECONDS);
             if (poll != null) {

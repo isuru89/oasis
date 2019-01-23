@@ -12,18 +12,8 @@ import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
 import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
 import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
-import io.github.isuru.oasis.services.model.EventSourceToken;
-import io.github.isuru.oasis.services.model.SubmittedJob;
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.TeamScope;
-import io.github.isuru.oasis.services.model.UserProfile;
-import io.github.isuru.oasis.services.model.UserRole;
-import io.github.isuru.oasis.services.services.IEventsService;
-import io.github.isuru.oasis.services.services.IGameDefService;
-import io.github.isuru.oasis.services.services.ILifecycleService;
-import io.github.isuru.oasis.services.services.IProfileService;
-import io.github.isuru.oasis.services.services.LifecycleImplManager;
-import io.github.isuru.oasis.services.utils.Maps;
+import io.github.isuru.oasis.services.model.*;
+import io.github.isuru.oasis.services.services.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +42,9 @@ public class Bootstrapping {
 
     @Autowired
     private IGameDefService gameDefService;
+
+    @Autowired
+    private IJobService jobService;
 
     @Autowired
     private LifecycleImplManager lifecycleImplManager;
@@ -170,17 +163,15 @@ public class Bootstrapping {
         ILifecycleService lifecycleService = lifecycleImplManager.get();
 
         // resume game first...
-        List<Integer> resumedGameIds = new LinkedList<>();
+        List<Long> resumedGameIds = new LinkedList<>();
         for (GameDef gameDef : gameDefs) {
             LOG.info("  - Resuming game: {}", gameDef.getName());
             lifecycleService.resumeGame(gameDef.getId());
-            resumedGameIds.add(gameDef.getId().intValue());
+            resumedGameIds.add(gameDef.getId());
         }
 
         // resume previously running challenges...
-        Iterable<SubmittedJob> runningJobs = dao.executeQuery("jobs/getHadRunningJobs",
-                Maps.create("currentTime", System.currentTimeMillis()),
-                SubmittedJob.class);
+        Iterable<SubmittedJob> runningJobs = jobService.listHadRunningJobs(System.currentTimeMillis());
         for (SubmittedJob job : runningJobs) {
             if (!resumedGameIds.contains(job.getDefId())) {
                 LOG.info("  - Resuming challenge: {}", job.getDefId());

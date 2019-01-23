@@ -8,6 +8,7 @@ import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.IGameController;
+import io.github.isuru.oasis.services.services.IJobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -38,16 +38,24 @@ public class LocalScheduler implements IGameController {
 
 
     private final IOasisDao dao;
+    private final IJobService jobService;
     private final DataCache dataCache;
     private final OasisConfigurations oasisConfigurations;
+    private final Sources sources;
 
     @Autowired
-    public LocalScheduler(IOasisDao dao, DataCache dataCache, OasisConfigurations oasisConfigurations) {
+    public LocalScheduler(IOasisDao dao,
+                          IJobService jobService,
+                          DataCache dataCache,
+                          Sources sources,
+                          OasisConfigurations oasisConfigurations) {
         this.dao = dao;
         this.dataCache = dataCache;
         this.oasisConfigurations = oasisConfigurations;
+        this.sources = sources;
+        this.jobService = jobService;
 
-        this.challengeProcessor = new LocalChallengeProcessor(dao);
+        this.challengeProcessor = new LocalChallengeProcessor(jobService);
     }
 
     @PostConstruct
@@ -80,9 +88,9 @@ public class LocalScheduler implements IGameController {
 
     @Override
     public void startGame(long gameId) {
-        Sources.get().create(gameId);
+        sources.create(gameId);
 
-        LocalRunner runner = new LocalRunner(oasisConfigurations, pool, dao, gameId, dataCache);
+        LocalRunner runner = new LocalRunner(oasisConfigurations, pool, dao, gameId, dataCache, sources);
         runners.put(gameId, runner);
         pool.submit(runner);
     }
@@ -104,18 +112,17 @@ public class LocalScheduler implements IGameController {
     }
 
     @Override
-    public void stopGame(long defId) throws Exception {
-        LocalRunner runner = runners.get(defId);
+    public void stopChallenge(ChallengeDef challengeDef) throws Exception {
+        challengeProcessor.stopChallenge(challengeDef);
+    }
+
+    @Override
+    public void stopGame(long gameId) throws Exception {
+        LocalRunner runner = runners.get(gameId);
         if (runner != null) {
             runner.stop();
-            stopAllChallengesOfGame(defId);
-            runners.remove(defId);
-        } else {
-            if (challengeProcessor.containChallenge(defId)) {
-                challengeProcessor.stopChallenge(defId);
-            } else {
-                throw new InputValidationException("Stop failed! No game or challenge is running by id " + defId + "!");
-            }
+            stopAllChallengesOfGame(gameId);
+            runners.remove(gameId);
         }
     }
 
@@ -134,7 +141,7 @@ public class LocalScheduler implements IGameController {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         LOG.debug("Stopping challenge processing engine...");
         challengeProcessor.setStop();
 
