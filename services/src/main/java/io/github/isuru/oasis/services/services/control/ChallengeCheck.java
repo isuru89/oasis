@@ -16,12 +16,14 @@ public class ChallengeCheck implements Serializable {
     private static final ChallengeFilterResult HALT =
             new ChallengeFilterResult(false, false);
 
-    private final ChallengeDef def;
-    private final Set<String> eventNames;
-    private final List<Serializable> conditions;
+    private ChallengeDef def;
+    private Set<String> eventNames;
+    private List<Serializable> conditions;
     private int winners;
 
-    ChallengeCheck(ChallengeDef def) {
+    public ChallengeCheck() {}
+
+    public ChallengeCheck(ChallengeDef def) {
         this.def = def;
         this.eventNames = new HashSet<>(def.getForEvents());
         this.winners = 0;
@@ -88,6 +90,17 @@ public class ChallengeCheck implements Serializable {
         return BooleanUtils.toBoolean(val.toString());
     }
 
+    public ChallengeDef getDef() {
+        return def;
+    }
+
+    public Set<String> getEventNames() {
+        return new HashSet<>(eventNames);
+    }
+
+    public List<Serializable> getConditions() {
+        return conditions;
+    }
 
     static class ChallengeFilterResult {
         private final boolean satisfied;

@@ -1,4 +1,5 @@
 SELECT
+    id AS id,
     def_id as defId,
     job_id as jobId,
     jar_id as jarId,

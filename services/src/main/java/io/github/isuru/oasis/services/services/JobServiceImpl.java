@@ -26,8 +26,8 @@ public class JobServiceImpl implements IJobService {
     }
 
     @Override
-    public boolean stopJob(long jobId) throws Exception {
-        Checks.greaterThanZero(jobId, "jobId");
+    public boolean stopJob(String jobId) throws Exception {
+        Checks.nonNullOrEmpty(jobId, "jobId");
 
         return dao.executeCommand(Q.JOBS.STOP_JOB, Maps.create("jobId", jobId)) > 0;
     }

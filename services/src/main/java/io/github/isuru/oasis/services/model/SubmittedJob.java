@@ -11,8 +11,16 @@ public class SubmittedJob {
     private String jarId;
     private String snapshotDir;
     private boolean active;
-    private long toBeFinishedAt;
+    private Long toBeFinishedAt;
     private byte[] stateData;
+
+    public Long getToBeFinishedAt() {
+        return toBeFinishedAt;
+    }
+
+    public void setToBeFinishedAt(Long toBeFinishedAt) {
+        this.toBeFinishedAt = toBeFinishedAt;
+    }
 
     public Long getId() {
         return id;
@@ -22,20 +30,12 @@ public class SubmittedJob {
         this.id = id;
     }
 
-    public void setToBeFinishedAt(long toBeFinishedAt) {
-        this.toBeFinishedAt = toBeFinishedAt;
-    }
-
     public byte[] getStateData() {
         return stateData;
     }
 
     public void setStateData(byte[] stateData) {
         this.stateData = stateData;
-    }
-
-    public Long getToBeFinishedAt() {
-        return toBeFinishedAt;
     }
 
     public boolean isActive() {

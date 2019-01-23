@@ -9,6 +9,7 @@ import io.github.isuru.oasis.model.events.JsonEvent;
 import io.github.isuru.oasis.model.handlers.NotificationUtils;
 import io.github.isuru.oasis.services.model.SubmittedJob;
 import io.github.isuru.oasis.services.services.IJobService;
+import io.github.isuru.oasis.services.utils.Pojos;
 import org.apache.flink.shaded.netty4.io.netty.util.internal.ConcurrentSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ class LocalChallengeProcessor implements Runnable {
 
     void submitChallenge(ChallengeDef challengeDef, OasisSink sink) throws Exception {
         SubmittedJob job = readJobState(challengeDef);
-        ChallengeCheck challengeCheck = deserializeChallengeState(job.getStateData());
+        ChallengeCheck challengeCheck = Pojos.deserialize(job.getStateData());
         if (challengeCheck == null) {
             challengeCheck = new ChallengeCheck(challengeDef);
         }
@@ -123,7 +124,7 @@ class LocalChallengeProcessor implements Runnable {
                     Map<String, Object> winnerInfo = NotificationUtils.mapChallenge(challengeEvent);
                     try {
                         // persist checker change to db
-                        byte[] dataState = serializeChallengeState(challengeChecker);
+                        byte[] dataState = Pojos.serialize(challengeChecker);
                         if (jobService.updateJobState(challengeId, dataState)) {
                             // when success, notify sink
                             oasisSink.createChallengeSink().invoke(mapper.writeValueAsString(winnerInfo), null);
@@ -176,29 +177,6 @@ class LocalChallengeProcessor implements Runnable {
             } else {
                 throw new IOException("Cannot add a job for the challenge '" + id + "'!");
             }
-        }
-    }
-
-    private ChallengeCheck deserializeChallengeState(byte[] stateData) throws IOException, ClassNotFoundException {
-        if (stateData == null || stateData.length == 0) {
-            return null;
-        }
-
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(stateData);
-             ObjectInputStream ois = new ObjectInputStream(bais)) {
-
-            return (ChallengeCheck) ois.readObject();
-        }
-    }
-
-    private byte[] serializeChallengeState(ChallengeCheck check) throws IOException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-
-            oos.writeObject(check);
-            oos.flush();
-
-            return baos.toByteArray();
         }
     }
 

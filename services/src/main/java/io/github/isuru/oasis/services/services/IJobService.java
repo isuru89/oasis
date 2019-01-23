@@ -8,7 +8,7 @@ public interface IJobService {
 
     SubmittedJob readJob(long defId) throws Exception;
 
-    boolean stopJob(long jobId) throws Exception;
+    boolean stopJob(String jobId) throws Exception;
 
     boolean stopJobByDef(long defId) throws Exception;
 
