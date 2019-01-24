@@ -168,7 +168,7 @@ public class ChallengeDefServiceTest extends BaseDefServiceTest {
         long userId = ps.addUserProfile(userProfileAddDto);
         Assert.assertTrue(userId > 0);
 
-        Assert.assertTrue(ps.addUserToTeam(userId, teamId, UserRole.CURATOR, false));
+        Assert.assertTrue(ps.assignUserToTeam(userId, teamId, UserRole.CURATOR, false));
 
         {
             int size = getTotalCount(gameId);

@@ -197,7 +197,7 @@ public class Bootstrapping {
             admin.setName("Admin");
             admin.setActivated(true);
             admin.setAutoUser(true);
-            profileService.addUserProfile(admin, defTeam, UserRole.ADMIN);
+            profileService.addUserProfile(admin, defTeam.getId(), UserRole.ADMIN);
         } else {
             LOG.info("  - Admin user exists.");
         }
@@ -210,7 +210,7 @@ public class Bootstrapping {
             curator.setName("Curator");
             curator.setActivated(true);
             curator.setAutoUser(true);
-            profileService.addUserProfile(curator, defTeam, UserRole.CURATOR);
+            profileService.addUserProfile(curator, defTeam.getId(), UserRole.CURATOR);
         } else {
             LOG.info("  - Curator user exists.");
         }
@@ -223,7 +223,7 @@ public class Bootstrapping {
             player.setName("Player");
             player.setActivated(true);
             player.setAutoUser(true);
-            profileService.addUserProfile(player, defTeam, UserRole.PLAYER);
+            profileService.addUserProfile(player, defTeam.getId(), UserRole.PLAYER);
         } else {
             LOG.info("  - Player user exists.");
         }

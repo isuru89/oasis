@@ -110,8 +110,14 @@ public class AdminController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CURATOR')")
     @PostMapping("/user/add-to-team")
-    public void addUserToTeam(@RequestBody UserTeam userTeam) throws Exception {
-        profileService.addUserToTeam(userTeam.getUserId(), userTeam.getTeamId(), userTeam.getRoleId());
+    public void addUserToTeam(@RequestBody AddUserToTeamDto userTeam) throws Exception {
+        profileService.addUserProfile(userTeam.getUser(), userTeam.getTeamId(), userTeam.getRoleId());
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CURATOR')")
+    @PostMapping("/user/assign-to-team")
+    public void assignUserToTeam(@RequestBody UserTeam userTeam) throws Exception {
+        profileService.assignUserToTeam(userTeam.getUserId(), userTeam.getTeamId(), userTeam.getRoleId());
     }
 
     @PostMapping("/user/{id}/current-team")

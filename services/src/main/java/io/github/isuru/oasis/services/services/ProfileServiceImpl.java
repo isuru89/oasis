@@ -40,15 +40,19 @@ public class ProfileServiceImpl implements IProfileService {
     @Override
     public long addUserProfile(UserProfileAddDto profile) throws DbException, InputValidationException {
         TeamProfile teamDefault = dataCache.getTeamDefault();
-        return addUserProfile(profile, teamDefault, UserRole.PLAYER);
+        return addUserProfile(profile, teamDefault.getId(), UserRole.PLAYER);
     }
 
     @Override
-    public long addUserProfile(UserProfileAddDto profile, TeamProfile team, int roleId) throws DbException, InputValidationException {
+    public long addUserProfile(UserProfileAddDto profile, long teamId, int roleId) throws DbException, InputValidationException {
         Checks.nonNullOrEmpty(profile.getEmail(), "email");
         Checks.nonNullOrEmpty(profile.getName(), "name");
-        Checks.nonNull(team, "team");
+        Checks.greaterThanZero(teamId, "teamId");
         Checks.validate(roleId > 0 && roleId <= UserRole.ALL_ROLE, "roleId must be a flag of 1,2,4, or 8.");
+
+        if (readTeam(teamId) == null) {
+            throw new InputValidationException("No team is found by id [" + teamId + "]!");
+        }
 
         return (Long) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
             Map<String, Object> templating = Maps.create("isActivated", profile.isActivated());
@@ -69,7 +73,7 @@ public class ProfileServiceImpl implements IProfileService {
             ctx.executeCommand(Q.PROFILE.ADD_USER_TO_TEAM,
                     Maps.create()
                             .put("userId", userId)
-                            .put("teamId", team.getId())
+                            .put("teamId", teamId)
                             .put("roleId", roleId)
                             .put("since", 1L)
                             .put("isApproved", true)
@@ -350,17 +354,17 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public boolean addUserToTeam(long userId, long teamId, int roleId) throws DbException, InputValidationException {
-        return addUserToTeam(userId, teamId, roleId, false);
+    public boolean assignUserToTeam(long userId, long teamId, int roleId) throws DbException, InputValidationException {
+        return assignUserToTeam(userId, teamId, roleId, false);
     }
 
     @Override
-    public boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval) throws DbException, InputValidationException {
-        return addUserToTeam(userId, teamId, roleId, pendingApproval, System.currentTimeMillis());
+    public boolean assignUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval) throws DbException, InputValidationException {
+        return assignUserToTeam(userId, teamId, roleId, pendingApproval, System.currentTimeMillis());
     }
 
     @Override
-    public boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval,
+    public boolean assignUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval,
                                  long since) throws DbException, InputValidationException {
         Checks.greaterThanZero(userId, "userId");
         Checks.greaterThanZero(teamId, "teamId");

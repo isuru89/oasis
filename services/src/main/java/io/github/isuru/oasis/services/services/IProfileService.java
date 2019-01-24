@@ -17,7 +17,7 @@ import java.util.List;
 public interface IProfileService {
 
     long addUserProfile(UserProfileAddDto profile) throws Exception;
-    long addUserProfile(UserProfileAddDto profile, TeamProfile team, int roleId) throws Exception;
+    long addUserProfile(UserProfileAddDto profile, long teamId, int roleId) throws Exception;
     UserProfile readUserProfile(long userId) throws Exception;
     UserProfile readUserProfile(String email) throws Exception;
     UserProfile readUserProfileByExtId(long extUserId) throws Exception;
@@ -38,9 +38,9 @@ public interface IProfileService {
     List<TeamScope> listTeamScopes() throws Exception;
     boolean editTeamScope(long scopeId, TeamScopeEditDto scope) throws Exception;
 
-    boolean addUserToTeam(long userId, long teamId, int roleId) throws Exception;
-    boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval) throws Exception;
-    boolean addUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval,
+    boolean assignUserToTeam(long userId, long teamId, int roleId) throws Exception;
+    boolean assignUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval) throws Exception;
+    boolean assignUserToTeam(long userId, long teamId, int roleId, boolean pendingApproval,
                           long since) throws Exception;
     UserTeam findCurrentTeamOfUser(long userId) throws Exception;
     UserTeam findCurrentTeamOfUser(long userId, boolean returnApprovedOnly) throws Exception;

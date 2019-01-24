@@ -98,6 +98,81 @@ public class ProfileServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    public void testAddUsersDirectlyToTeam() throws Exception {
+        long scopeId = ps.addTeamScope(createScope("north", "The North", 300L));
+        Assert.assertTrue(scopeId > 0);
+        long winterfell = ps.addTeam(createTeam(scopeId, "Winterfell"));
+        Assert.assertTrue(winterfell > 0);
+
+        {
+            // failures for non existence team
+            Assertions.assertThatThrownBy(
+                    () -> ps.addUserProfile(createProfile("ned", "ned@winterfell.com"),
+                            9999L, UserRole.PLAYER))
+                    .isInstanceOf(InputValidationException.class);
+
+            // failures when incorrect role.
+            Assertions.assertThatThrownBy(
+                    () -> ps.addUserProfile(createProfile("ned", "ned@winterfell.com"),
+                            winterfell, UserRole.ALL_ROLE + 1))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ps.addUserProfile(createProfile("ned", "ned@winterfell.com"),
+                            winterfell, 0))
+                    .isInstanceOf(InputValidationException.class);
+        }
+
+        {
+            UserProfileAddDto ned = createProfile("ned", "ned@winterfell.com");
+            ned.setExtId(30001L);
+            ned.setActivated(true);
+            ned.setMale(true);
+
+            long nedId = ps.addUserProfile(ned, winterfell, UserRole.CURATOR);
+            Assert.assertTrue(nedId > 0);
+            UserProfile nedProfile = ps.readUserProfile(nedId);
+            Assert.assertNotNull(nedProfile);
+            Assert.assertEquals(nedId, nedProfile.getId());
+            Assert.assertEquals(ned.getExtId(), nedProfile.getExtId());
+            Assert.assertEquals(ned.getName(), nedProfile.getName());
+            Assert.assertEquals(ned.getEmail(), nedProfile.getEmail());
+
+            // check user team history
+            {
+                UserTeam curTeam = ps.findCurrentTeamOfUser(nedId, true);
+                Assert.assertNotNull(curTeam);
+                Assert.assertEquals(winterfell, curTeam.getTeamId().longValue());
+                Assert.assertEquals(nedId, curTeam.getUserId().longValue());
+                Assert.assertEquals(UserRole.CURATOR, curTeam.getRoleId().intValue());
+                Assert.assertEquals(1L, curTeam.getJoinedTime().longValue());
+                Assert.assertTrue(curTeam.isApproved());
+
+                UserTeam teamOfUser = ps.findCurrentTeamOfUser(nedId, false);
+                Assert.assertNotNull(teamOfUser);
+                Assert.assertEquals(curTeam.getId(), teamOfUser.getId());
+            }
+
+            {
+                // user must be in the team from beginning of time
+                UserTeam curTeam = ps.findCurrentTeamOfUser(nedId, true, 1L);
+                Assert.assertNotNull(curTeam);
+                Assert.assertEquals(winterfell, curTeam.getTeamId().longValue());
+                Assert.assertEquals(nedId, curTeam.getUserId().longValue());
+                Assert.assertEquals(UserRole.CURATOR, curTeam.getRoleId().intValue());
+                Assert.assertEquals(1L, curTeam.getJoinedTime().longValue());
+                Assert.assertTrue(curTeam.isApproved());
+
+
+                UserTeam teamOfUser = ps.findCurrentTeamOfUser(nedId, false, 1L);
+                Assert.assertNotNull(teamOfUser);
+                Assert.assertEquals(curTeam.getId(), teamOfUser.getId());
+            }
+
+
+        }
+    }
+
+    @Test
     public void testAddUserProfile() throws Exception {
         {
             UserProfileAddDto profile = createProfile("Isuru Weerarathna", "isuru@dmain.com");
@@ -548,7 +623,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
         {
             // add catelyn to tully team
-            Assert.assertTrue(ps.addUserToTeam(catId, tid, UserRole.PLAYER, FALSE));
+            Assert.assertTrue(ps.assignUserToTeam(catId, tid, UserRole.PLAYER, FALSE));
 
             // catelyn should be in tully team
             UserTeam catTeam = ps.findCurrentTeamOfUser(catId);
@@ -561,7 +636,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
             // transfer catelyn to Stark team, with pending approval
             long transferTime = catTeam.getJoinedTime() + (ONE_DAY * 7);
 
-            Assert.assertTrue(ps.addUserToTeam(catId, wid, UserRole.CURATOR, TRUE, transferTime));
+            Assert.assertTrue(ps.assignUserToTeam(catId, wid, UserRole.CURATOR, TRUE, transferTime));
 
             // catelyn current team still must be tully
             Assert.assertEquals(catTeam, ps.findCurrentTeamOfUser(catId, TRUE, transferTime));
@@ -605,13 +680,13 @@ public class ProfileServiceTest extends AbstractServiceTest {
             assertToDefaultTeam(currentTeamOfUser);
 
             // cannot add with invalid roles
-            Assertions.assertThatThrownBy(() -> ps.addUserToTeam(tywinId, cid, 0))
+            Assertions.assertThatThrownBy(() -> ps.assignUserToTeam(tywinId, cid, 0))
                     .isInstanceOf(InputValidationException.class);
-            Assertions.assertThatThrownBy(() -> ps.addUserToTeam(tywinId, cid, UserRole.ALL_ROLE + 1))
+            Assertions.assertThatThrownBy(() -> ps.assignUserToTeam(tywinId, cid, UserRole.ALL_ROLE + 1))
                     .isInstanceOf(InputValidationException.class);
 
             // add to team by default approved
-            Assert.assertTrue(ps.addUserToTeam(tywinId, cid, UserRole.CURATOR, false));
+            Assert.assertTrue(ps.assignUserToTeam(tywinId, cid, UserRole.CURATOR, false));
 
             // now there must be two members of team
             Assertions.assertThat(ps.listUsers(cid, 0, 10))
@@ -654,15 +729,15 @@ public class ProfileServiceTest extends AbstractServiceTest {
         {
             // adding tywin to the same team with same role, should return unsuccessful state,
             // regardless of approval state
-            Assert.assertFalse(ps.addUserToTeam(tywinId, cid, UserRole.CURATOR, FALSE));
-            Assert.assertFalse(ps.addUserToTeam(tywinId, cid, UserRole.CURATOR, TRUE));
+            Assert.assertFalse(ps.assignUserToTeam(tywinId, cid, UserRole.CURATOR, FALSE));
+            Assert.assertFalse(ps.assignUserToTeam(tywinId, cid, UserRole.CURATOR, TRUE));
 
             UserTeam prevTywinTeam = ps.findCurrentTeamOfUser(tywinId);
             Assert.assertNotNull(prevTywinTeam);
 
             // but with a different role, should return successful
             long newAssignedTime = prevTywinTeam.getJoinedTime() + ONE_DAY;
-            Assert.assertTrue(ps.addUserToTeam(tywinId, cid, UserRole.PLAYER, FALSE, newAssignedTime));
+            Assert.assertTrue(ps.assignUserToTeam(tywinId, cid, UserRole.PLAYER, FALSE, newAssignedTime));
 
             // new role should have changed
             UserTeam tywinWithNewRole = ps.findCurrentTeamOfUser(tywinId, TRUE, newAssignedTime);
@@ -707,9 +782,9 @@ public class ProfileServiceTest extends AbstractServiceTest {
         long aryaId = ps.addUserProfile(aryaStark);
 
         {
-            Assert.assertTrue(ps.addUserToTeam(nedId, wid, UserRole.CURATOR));
-            Assert.assertTrue(ps.addUserToTeam(branId, wid, UserRole.PLAYER));
-            Assert.assertTrue(ps.addUserToTeam(aryaId, wid, UserRole.PLAYER));
+            Assert.assertTrue(ps.assignUserToTeam(nedId, wid, UserRole.CURATOR));
+            Assert.assertTrue(ps.assignUserToTeam(branId, wid, UserRole.PLAYER));
+            Assert.assertTrue(ps.assignUserToTeam(aryaId, wid, UserRole.PLAYER));
 
             Assertions.assertThat(ps.listUsers(wid, 0, 10)).hasSize(4);
 
