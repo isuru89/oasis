@@ -16,37 +16,6 @@ public class OState implements Serializable {
     private boolean currency;
 
     private List<OAState> states;
-    private List<OAStateChangeAwards> stateChangeAwards;
-
-    public static class OAStateChangeAwards implements Serializable {
-        private Integer from;
-        private Integer to;
-        private Double points;
-
-        public Integer getFrom() {
-            return from;
-        }
-
-        public void setFrom(Integer from) {
-            this.from = from;
-        }
-
-        public Integer getTo() {
-            return to;
-        }
-
-        public void setTo(Integer to) {
-            this.to = to;
-        }
-
-        public Double getPoints() {
-            return points;
-        }
-
-        public void setPoints(Double points) {
-            this.points = points;
-        }
-    }
 
     public static class OAState implements Serializable {
         private Integer id;
@@ -93,14 +62,6 @@ public class OState implements Serializable {
 
     public void setCurrency(boolean currency) {
         this.currency = currency;
-    }
-
-    public List<OAStateChangeAwards> getStateChangeAwards() {
-        return stateChangeAwards;
-    }
-
-    public void setStateChangeAwards(List<OAStateChangeAwards> stateChangeAwards) {
-        this.stateChangeAwards = stateChangeAwards;
     }
 
     public Serializable getCondition() {

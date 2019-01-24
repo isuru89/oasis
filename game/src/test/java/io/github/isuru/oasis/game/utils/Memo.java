@@ -1,14 +1,14 @@
 package io.github.isuru.oasis.game.utils;
 
-import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Badge;
+import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.events.ChallengeEvent;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
-import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.api.java.tuple.Tuple6;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public class Memo {
     private static final Map<String, List<Tuple4<Long, List<? extends Event>, PointRule, Double>>> pointsMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple4<Long, List<? extends Event>, Badge, BadgeRule>>> badgeMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple4<Long, Integer, Event, Milestone>>> milestoneMap = new ConcurrentHashMap<>();
-    private static final Map<String, List<Tuple5<Long, Integer, String, Integer, String>>> statesMap = new ConcurrentHashMap<>();
+    private static final Map<String, List<Tuple6<Long, Integer, String, Integer, String, Integer>>> statesMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, PointRule>>> pointsErrorMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, BadgeRule>>> badgesErrorMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, Milestone>>> milestoneErrorMap = new ConcurrentHashMap<>();
@@ -97,11 +97,11 @@ public class Memo {
     // STATES EVENTS
     //
 
-    public static void addState(String id, Tuple5<Long, Integer, String, Integer, String> record) {
+    public static void addState(String id, Tuple6<Long, Integer, String, Integer, String, Integer> record) {
         statesMap.computeIfAbsent(id, s -> new ArrayList<>()).add(record);
     }
 
-    public static List<Tuple5<Long, Integer, String, Integer, String>> getStates(String id) {
+    public static List<Tuple6<Long, Integer, String, Integer, String, Integer>> getStates(String id) {
         return statesMap.get(id);
     }
 

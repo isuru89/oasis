@@ -29,5 +29,5 @@ ON DUPLICATE KEY
 UPDATE current_state = :currState,
     current_value = :currValue,
     current_points = :currPoints
-    changed_at = :ts,
+    changed_at = :changedAt,
     ext_id = :extId

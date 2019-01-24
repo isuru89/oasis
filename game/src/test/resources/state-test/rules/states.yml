@@ -17,13 +17,6 @@ states:
         name: good
         condition: "bd > 0"
         points: 10
-    stateChangeAwards:
-      - from: 1
-        to: 3
-        points: 50
-      - from: 3
-        to: 1
-        points: -50
 
   - event: bug-x
     id: 702
@@ -44,10 +37,3 @@ states:
         name: good
         condition: "bd > 0"
         points: 10
-    stateChangeAwards:
-      - from: 1
-        to: 3
-        points: 50
-      - from: 3
-        to: 1
-        points: -50

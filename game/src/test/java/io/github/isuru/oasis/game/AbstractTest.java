@@ -10,6 +10,7 @@ import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.commons.io.FileUtils;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.api.java.tuple.Tuple6;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.File;
@@ -127,8 +128,8 @@ abstract class AbstractTest {
         }
 
         if (TestUtils.isResourceExist(outputStates)) {
-            List<Tuple5<Long, Integer, String, Integer, String>> expected = TestUtils.parseStatesOutput(outputStates);
-            List<Tuple5<Long, Integer, String, Integer, String>> actual = Memo.getStates(id);
+            List<Tuple6<Long, Integer, String, Integer, String, Integer>> expected = TestUtils.parseStatesOutput(outputStates);
+            List<Tuple6<Long, Integer, String, Integer, String, Integer>> actual = Memo.getStates(id);
             Assertions.assertNotNull(expected);
             Assertions.assertNotNull(actual);
             Assertions.assertEquals(expected.size(), actual.size(), "Expected states are not equal!");
@@ -193,14 +194,14 @@ abstract class AbstractTest {
         }
     }
 
-    private void assertStates(List<Tuple5<Long, Integer, String, Integer, String>> actual,
-                              List<Tuple5<Long, Integer, String, Integer, String>> expected) {
-        List<Tuple5<Long, Integer, String, Integer, String>> dupActual = new LinkedList<>(actual);
-        for (Tuple5<Long, Integer, String, Integer, String> row : expected) {
+    private void assertStates(List<Tuple6<Long, Integer, String, Integer, String, Integer>> actual,
+                              List<Tuple6<Long, Integer, String, Integer, String, Integer>> expected) {
+        List<Tuple6<Long, Integer, String, Integer, String, Integer>> dupActual = new LinkedList<>(actual);
+        for (Tuple6<Long, Integer, String, Integer, String, Integer> row : expected) {
 
             boolean foundFlag = false;
-            Tuple5<Long, Integer, String, Integer, String> found = null;
-            for (Tuple5<Long, Integer, String, Integer, String> given : dupActual) {
+            Tuple6<Long, Integer, String, Integer, String, Integer> found = null;
+            for (Tuple6<Long, Integer, String, Integer, String, Integer> given : dupActual) {
                 if (row.equals(given)) {
                     foundFlag = true;
                     found = given;

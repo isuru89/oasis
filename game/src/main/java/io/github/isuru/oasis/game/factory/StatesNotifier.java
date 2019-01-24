@@ -6,7 +6,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 
 public class StatesNotifier implements MapFunction<OStateEvent, OStateNotification> {
     @Override
-    public OStateNotification map(OStateEvent value) throws Exception {
+    public OStateNotification map(OStateEvent value) {
         OStateNotification notification = new OStateNotification();
         notification.setUserId(value.getUserId());
         notification.setCurrentValue(value.getCurrentValue());
@@ -15,6 +15,7 @@ public class StatesNotifier implements MapFunction<OStateEvent, OStateNotificati
         notification.setStateRef(value.getStateRef());
         notification.setTs(value.getTs());
         notification.setPreviousState(value.getPrevStateId());
+        notification.setPreviousChangeAt(value.getPrevChangedAt());
         return notification;
     }
 }

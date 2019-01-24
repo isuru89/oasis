@@ -11,9 +11,18 @@ public class OStateNotification implements Serializable {
     private OState stateRef;
     private Event event;
     private Integer previousState;
+    private long previousChangeAt;
     private OState.OAState state;
     private String currentValue;
     private Long ts;
+
+    public long getPreviousChangeAt() {
+        return previousChangeAt;
+    }
+
+    public void setPreviousChangeAt(long previousChangeAt) {
+        this.previousChangeAt = previousChangeAt;
+    }
 
     public Integer getPreviousState() {
         return previousState;

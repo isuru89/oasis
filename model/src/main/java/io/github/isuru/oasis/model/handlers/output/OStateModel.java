@@ -9,14 +9,32 @@ public class OStateModel {
     private Long teamScopeId;
     private Long stateId;
 
+    private Integer previousState;
     private Integer currentState;
     private String currentValue;
     private Double currentPoints;
     private Long ts;
+    private long prevStateChangedAt;
     private JsonEvent event;
     private String extId;
     private Integer sourceId;
     private boolean currency;
+
+    public long getPrevStateChangedAt() {
+        return prevStateChangedAt;
+    }
+
+    public void setPrevStateChangedAt(long prevStateChangedAt) {
+        this.prevStateChangedAt = prevStateChangedAt;
+    }
+
+    public Integer getPreviousState() {
+        return previousState;
+    }
+
+    public void setPreviousState(Integer previousState) {
+        this.previousState = previousState;
+    }
 
     public boolean isCurrency() {
         return currency;

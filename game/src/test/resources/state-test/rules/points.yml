@@ -1,6 +1,0 @@
-points:
-  - event: bug
-    id: 301
-    name: state-change-bug-density-rate
-    condition: "false"
-    amount: "0"

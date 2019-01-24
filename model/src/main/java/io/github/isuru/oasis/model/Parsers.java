@@ -247,12 +247,6 @@ public class Parsers {
             throw new IllegalArgumentException("State 'stateValueExpression' has not been set!");
         }
 
-        if (def.getStateChangeAwards() != null) {
-            oState.setStateChangeAwards(def.getStateChangeAwards().stream()
-                    .map(Parsers::fromDefTo)
-                    .collect(Collectors.toList()));
-        }
-
         List<OState.OAState> oaStateList = new ArrayList<>();
         boolean defStateFound = false;
         for (StateDef.State state : def.getStates()) {
@@ -296,14 +290,6 @@ public class Parsers {
             Double d = strNum(val.toString());
             return asRealValues ? d : d.longValue();
         }
-    }
-
-    private static OState.OAStateChangeAwards fromDefTo(StateDef.StateChangeAwards changeAwards) {
-        OState.OAStateChangeAwards awards = new OState.OAStateChangeAwards();
-        awards.setTo(changeAwards.getTo());
-        awards.setFrom(changeAwards.getFrom());
-        awards.setPoints(changeAwards.getPoints());
-        return awards;
     }
 
     private static Double strNum(String numStr) {

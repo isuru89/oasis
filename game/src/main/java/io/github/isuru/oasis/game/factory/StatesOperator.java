@@ -35,7 +35,7 @@ public class StatesOperator {
 
         return eventDataStream.filter(filter)
                 .keyBy(new EventUserSelector<>())
-                .process(new StatesProcess(oState, filter))
+                .process(new StatesProcess(oState))
                 .uid(String.format("oasis-%s-states-processor-%d", oasis.getId(), oState.getId()));
     }
 

@@ -14,11 +14,14 @@ public class OStateEvent implements Serializable {
     private OState.OAState state;
     private String currentValue;
     private Long ts;
+    private long prevChangedAt;
 
     public OStateEvent() {
     }
 
-    public OStateEvent(Long userId, OState stateRef, Event event, Integer prevStateId, OState.OAState state, String currentValue) {
+    public OStateEvent(Long userId, OState stateRef, Event event,
+                       Integer prevStateId, OState.OAState state, String currentValue,
+                       long prevChangedAt) {
         this.userId = userId;
         this.stateRef = stateRef;
         this.event = event;
@@ -26,6 +29,11 @@ public class OStateEvent implements Serializable {
         this.prevStateId = prevStateId;
         this.currentValue = currentValue;
         this.ts = event.getTimestamp();
+        this.prevChangedAt = prevChangedAt;
+    }
+
+    public long getPrevChangedAt() {
+        return prevChangedAt;
     }
 
     public Integer getPrevStateId() {

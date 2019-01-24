@@ -12,6 +12,7 @@ import org.apache.commons.io.LineIterator;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
@@ -134,22 +135,23 @@ public class TestUtils {
         }
     }
 
-    public static List<Tuple5<Long, Integer, String, Integer, String>> parseStatesOutput(String file) throws IOException {
+    public static List<Tuple6<Long, Integer, String, Integer, String, Integer>> parseStatesOutput(String file) throws IOException {
         try (InputStream inputStream = TestUtils.loadResource(file)) {
             LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
-            List<Tuple5<Long, Integer, String, Integer, String>> list = new LinkedList<>();
+            List<Tuple6<Long, Integer, String, Integer, String, Integer>> list = new LinkedList<>();
             while (lineIterator.hasNext()) {
                 String line = lineIterator.next();
                 if (line.trim().isEmpty()) continue;
                 if (line.startsWith("#")) continue;
                 String[] parts = line.split("[,]");
 
-                Tuple5<Long, Integer, String, Integer, String> row = Tuple5.of(
+                Tuple6<Long, Integer, String, Integer, String, Integer> row = Tuple6.of(
                         Long.parseLong(parts[0]),
                         Integer.parseInt(parts[1]),
                         parts[2],
                         Integer.parseInt(parts[3]),
-                        parts[4]
+                        parts[4],
+                        Integer.parseInt(parts[5])
                 );
                 list.add(row);
             }

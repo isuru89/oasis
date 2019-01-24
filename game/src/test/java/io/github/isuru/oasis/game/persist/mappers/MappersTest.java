@@ -131,6 +131,7 @@ public class MappersTest {
             notification.setState(state.getStates().stream().skip(1).findFirst().get());
             notification.setCurrentValue("123");
             notification.setPreviousState(0);
+            notification.setPreviousChangeAt(System.currentTimeMillis() - 16000);
 
             String content = mapper.map(notification);
             OStateModel model = toObj(content, OStateModel.class);
@@ -274,6 +275,10 @@ public class MappersTest {
         Assertions.assertEquals(event.getTimestamp(), model.getTs().longValue());
         Assertions.assertEquals(event.getUser(), model.getUserId().longValue());
         Assertions.assertEquals(event.getExternalId(), model.getExtId());
+        Assertions.assertNotNull(model.getPreviousState());
+        Assertions.assertTrue(model.getPrevStateChangedAt() > 0);
+        Assertions.assertEquals(notification.getPreviousState(), model.getPreviousState());
+        Assertions.assertEquals(notification.getPreviousChangeAt(), model.getPrevStateChangedAt());
     }
 
     private void assertPointOutput(PointModel model,
