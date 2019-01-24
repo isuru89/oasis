@@ -4,23 +4,22 @@ import io.github.isuru.oasis.services.dto.DefinitionAddResponse;
 import io.github.isuru.oasis.services.dto.DeleteResponse;
 import io.github.isuru.oasis.services.dto.EditResponse;
 import io.github.isuru.oasis.services.dto.crud.*;
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.TeamScope;
-import io.github.isuru.oasis.services.model.UserProfile;
-import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.security.CurrentUser;
 import io.github.isuru.oasis.services.security.UserPrincipal;
 import io.github.isuru.oasis.services.services.IProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @SuppressWarnings("unused")
 @RestController
 @RequestMapping("/admin")
-public class AdminController {
+public class AdminController extends AbstractController {
 
     @Autowired
     private IProfileService profileService;
@@ -64,7 +63,13 @@ public class AdminController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CURATOR')")
     @PostMapping("/team/{id}/edit")
     public EditResponse editTeam(@PathVariable("id") int teamId,
-                                 @RequestBody TeamProfileEditDto editDto) throws Exception {
+                                 @RequestBody TeamProfileEditDto editDto,
+                                 @CurrentUser UserPrincipal authUser) throws Exception {
+        if (curatorNotOwnsTeam(profileService, authUser, teamId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    "You don't have permission to edit team #" + teamId
+                            + " because you are not a curator in that team's scope!");
+        }
         return new EditResponse("team", profileService.editTeam(teamId, editDto));
     }
 
@@ -110,13 +115,26 @@ public class AdminController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CURATOR')")
     @PostMapping("/user/add-to-team")
-    public void addUserToTeam(@RequestBody AddUserToTeamDto userTeam) throws Exception {
+    public void addUserToTeam(@RequestBody AddUserToTeamDto userTeam,
+                              @CurrentUser UserPrincipal authUser) throws Exception {
+        // check curator owns the team going to add
+        if (curatorNotOwnsTeam(profileService, authUser, userTeam.getTeamId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    "You don't have permission to add user to team #" + userTeam.getTeamId()
+                            + " because you are not a curator in that team's scope!");
+        }
         profileService.addUserProfile(userTeam.getUser(), userTeam.getTeamId(), userTeam.getRoleId());
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CURATOR')")
     @PostMapping("/user/assign-to-team")
-    public void assignUserToTeam(@RequestBody UserTeam userTeam) throws Exception {
+    public void assignUserToTeam(@RequestBody UserTeam userTeam,
+                                 @CurrentUser UserPrincipal authUser) throws Exception {
+        if (curatorNotOwnsTeam(profileService, authUser, userTeam.getTeamId())) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "You don't have permission to assign user to team #" + userTeam.getTeamId()
+                                + " because you are not a curator in that team's scope!");
+        }
         profileService.assignUserToTeam(userTeam.getUserId(), userTeam.getTeamId(), userTeam.getRoleId());
     }
 

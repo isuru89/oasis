@@ -30,7 +30,7 @@ import java.util.Base64;
 @RestController
 @SuppressWarnings("unused")
 @RequestMapping("/auth")
-public class AuthController {
+public class AuthController extends AbstractController {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthController.class);
 
