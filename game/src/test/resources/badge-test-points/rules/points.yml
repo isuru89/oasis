@@ -17,5 +17,5 @@ points:
     condition: "introducedViolations > 0 && fixedViolations == 0"
     amount: -3
 
-  - name: __oasis_badge_bonus__
+  - name: oasis.rules.badge.bonus
     id: 304

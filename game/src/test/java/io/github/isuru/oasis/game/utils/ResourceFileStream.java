@@ -62,6 +62,8 @@ public class ResourceFileStream implements EventSource<Event>, Serializable {
                         s.put(title, Boolean.parseBoolean(value));
                     } else if (suffix.equals("t")) {
                         s.put(title, Instant.parse(value).toEpochMilli());
+                    } else if (suffix.equals("d")) {
+                        s.put(title, value.isEmpty() ? 0.0 : Double.parseDouble(value));
                     } else {
                         throw new Exception("Unknown value type!");
                     }

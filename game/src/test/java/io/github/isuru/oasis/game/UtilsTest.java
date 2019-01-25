@@ -8,6 +8,7 @@ import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.model.events.JsonEvent;
 import io.github.isuru.oasis.model.utils.OasisUtils;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.contrib.java.lang.system.ClearSystemProperties;
 import org.junit.jupiter.api.Assertions;
@@ -31,6 +32,21 @@ class UtilsTest {
     @Rule
     public final ClearSystemProperties oasisGameIdCleared =
             new ClearSystemProperties(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID);
+
+    @Test
+    void testTypeConv() {
+        Assert.assertEquals(0.0, Utils.asDouble(null), 0.1);
+        Assert.assertEquals(1.1, Utils.asDouble(Double.parseDouble("1.1")), 0.1);
+        Assert.assertEquals(2.34, Utils.asDouble("2.34"), 0.1);
+        Assert.assertEquals(-2.34, Utils.asDouble("-2.34"), 0.1);
+        Assert.assertEquals(0.0, Utils.asDouble("a"), 0.1);
+
+        Assert.assertNull(Utils.asLong(null));
+        Assert.assertEquals(1L, Utils.asLong("1").longValue());
+        Assert.assertEquals(1234L, Utils.asLong(Long.parseLong("1234")).longValue());
+        Assert.assertEquals(-1234L, Utils.asLong(Long.parseLong("-1234")).longValue());
+        Assert.assertNull(Utils.asLong("-a"));
+    }
 
     @Test
     void testQueueReplace() {

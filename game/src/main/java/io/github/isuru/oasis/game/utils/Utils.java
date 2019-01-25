@@ -118,6 +118,34 @@ public class Utils {
         return false;
     }
 
+    public static double asDouble(Object val) {
+        if (val == null) {
+            return 0.0;
+        } else if (val instanceof Number) {
+            return ((Number) val).doubleValue();
+        } else {
+            try {
+                return Double.parseDouble(String.valueOf(val));
+            } catch (NumberFormatException nfe) {
+                return 0.0;
+            }
+        }
+    }
+
+    public static Long asLong(Object val) {
+        if (val == null) {
+            return null;
+        } else if (val instanceof Number) {
+            return ((Number) val).longValue();
+        } else {
+            try {
+                return Long.parseLong(String.valueOf(val));
+            } catch (NumberFormatException nfe) {
+                return null;
+            }
+        }
+    }
+
 //    public static Event getLatestEvent(Event e1, Event e2) {
 //        if (e1 == null) {
 //            if (e2 == null) {

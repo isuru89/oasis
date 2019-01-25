@@ -221,7 +221,6 @@ public class LifeCycleServiceImpl implements ILifecycleService  {
             Long gameId = wrapper.getGameId();
 
             oasisGameDef.setGame(gameDefService.readGame(gameId));
-            oasisGameDef.setChallenge(gameDefService.readChallenge(defId));
         }
 
         Yaml yaml = new Yaml();

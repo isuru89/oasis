@@ -20,21 +20,13 @@ public class Memo {
     private static final Map<String, List<Tuple4<Long, List<? extends Event>, PointRule, Double>>> pointsMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple4<Long, List<? extends Event>, Badge, BadgeRule>>> badgeMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple4<Long, Integer, Event, Milestone>>> milestoneMap = new ConcurrentHashMap<>();
+    private static final Map<String, List<Tuple4<Long, String, Long, Double>>> challengeMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple6<Long, Integer, String, Integer, String, Integer>>> statesMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, PointRule>>> pointsErrorMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, BadgeRule>>> badgesErrorMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, Milestone>>> milestoneErrorMap = new ConcurrentHashMap<>();
 
     private static final Map<String, List<ChallengeEvent>> challengesMap = new ConcurrentHashMap<>();
-
-    public static void addChallenge(String name, ChallengeEvent event) {
-        challengesMap.computeIfAbsent(name, s -> new ArrayList<>())
-                .add(event);
-    }
-
-    public static List<ChallengeEvent> getChallenges(String name) {
-        return challengesMap.getOrDefault(name, new ArrayList<>());
-    }
 
 
     public static void addPoint(String id, Tuple4<Long, List<? extends Event>, PointRule, Double> record) {
@@ -103,6 +95,18 @@ public class Memo {
 
     public static List<Tuple6<Long, Integer, String, Integer, String, Integer>> getStates(String id) {
         return statesMap.get(id);
+    }
+
+    //
+    // CHALLENGE EVENTS
+    //
+
+    public static void addChallenge(String id, Tuple4<Long, String, Long, Double> record) {
+        challengeMap.computeIfAbsent(id, s -> new ArrayList<>()).add(record);
+    }
+
+    public static List<Tuple4<Long, String, Long, Double>> getChallenges(String id) {
+        return challengeMap.get(id);
     }
 
     //

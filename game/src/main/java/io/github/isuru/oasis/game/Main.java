@@ -1,10 +1,6 @@
 package io.github.isuru.oasis.game;
 
-import io.github.isuru.oasis.game.parser.BadgeParser;
-import io.github.isuru.oasis.game.parser.KpiParser;
-import io.github.isuru.oasis.game.parser.MilestoneParser;
-import io.github.isuru.oasis.game.parser.OStateParser;
-import io.github.isuru.oasis.game.parser.PointParser;
+import io.github.isuru.oasis.game.parser.*;
 import io.github.isuru.oasis.game.persist.NoneOutputHandler;
 import io.github.isuru.oasis.game.persist.OasisSink;
 import io.github.isuru.oasis.game.persist.rabbit.OasisRabbitSink;
@@ -19,7 +15,6 @@ import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.OState;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
-import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
@@ -30,11 +25,7 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.rabbitmq.common.RMQConnectionConfig;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.List;
 
 public class Main {
@@ -50,65 +41,34 @@ public class Main {
 
     public static void startGame(Configs gameProperties, OasisGameDef oasisGameDef) throws Exception {
         try {
-            if (oasisGameDef.getChallenge() == null) {
-                GameDef gameDef = oasisGameDef.getGame();
-                System.setProperty(Constants.ENV_OASIS_GAME_ID, String.valueOf(gameDef.getId()));
-                Oasis oasis = new Oasis(gameDef.getName());
+            GameDef gameDef = oasisGameDef.getGame();
+            System.setProperty(Constants.ENV_OASIS_GAME_ID, String.valueOf(gameDef.getId()));
+            Oasis oasis = new Oasis(gameDef.getName());
 
-                SourceFunction<Event> source = createSource(gameProperties);
-                List<FieldCalculator> kpis = KpiParser.parse(oasisGameDef.getKpis());
-                List<PointRule> pointRules = PointParser.parse(oasisGameDef.getPoints());
-                List<Milestone> milestones = MilestoneParser.parse(oasisGameDef.getMilestones());
-                List<BadgeRule> badges = BadgeParser.parse(oasisGameDef.getBadges());
-                List<OState> states = OStateParser.parse(oasisGameDef.getStates());
+            SourceFunction<Event> source = createSource(gameProperties);
+            List<FieldCalculator> kpis = KpiParser.parse(oasisGameDef.getKpis());
+            List<PointRule> pointRules = PointParser.parse(oasisGameDef.getPoints());
+            List<Milestone> milestones = MilestoneParser.parse(oasisGameDef.getMilestones());
+            List<BadgeRule> badges = BadgeParser.parse(oasisGameDef.getBadges());
+            List<OState> states = OStateParser.parse(oasisGameDef.getStates());
 
-                OasisExecution execution = new OasisExecution()
-                        .havingGameProperties(gameProperties)
-                        .withSource(source)
-                        .fieldTransformer(kpis)
-                        .setPointRules(pointRules)
-                        .setMilestones(milestones)
-                        .setStates(states)
-                        .setBadgeRules(badges);
+            OasisExecution execution = new OasisExecution()
+                    .havingGameProperties(gameProperties)
+                    .withSource(source)
+                    .fieldTransformer(kpis)
+                    .setPointRules(pointRules)
+                    .setMilestones(milestones)
+                    .setStates(states)
+                    .setBadgeRules(badges);
 
-                execution = createOutputHandler(gameProperties, execution)
-                        .build(oasis);
+            execution = createOutputHandler(gameProperties, execution)
+                    .build(oasis);
 
-                execution.start();
+            execution.start();
 
-            } else {
-                startChallenge(oasisGameDef, gameProperties);
-            }
         } catch (Throwable e) {
             e.printStackTrace();
             throw e;
-        }
-    }
-
-    private static void startChallenge(OasisGameDef oasisGameDef, Configs gameProps) throws Exception {
-        ChallengeDef challengeDef = oasisGameDef.getChallenge();
-        System.setProperty(Constants.ENV_OASIS_GAME_ID, String.valueOf(challengeDef.getId()));
-        Oasis oasis = new Oasis(String.format("challenge-%s", challengeDef.getName()));
-        SourceFunction<Event> source = createSource(gameProps);
-
-        OasisChallengeExecution execution = new OasisChallengeExecution()
-                .havingGameProperties(gameProps)
-                .withSource(source);  // append kafka source
-
-        execution = createOutputHandler(gameProps, execution)
-                .build(oasis, challengeDef);
-
-        execution.start();
-    }
-
-    static OasisChallengeExecution createOutputHandler(Configs gameProps, OasisChallengeExecution execution) {
-        String outputType = gameProps.getStr(ConfigKeys.KEY_OUTPUT_TYPE, "kafka").trim();
-        if ("none".equalsIgnoreCase(outputType)) {
-            return execution.outputHandler(new NoneOutputHandler());
-        } else if ("rabbit".equalsIgnoreCase(outputType)) {
-            return execution.outputHandler(new OasisRabbitSink(gameProps));
-        } else {
-            throw new RuntimeException("Unknown output type!");
         }
     }
 

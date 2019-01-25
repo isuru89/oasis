@@ -44,6 +44,7 @@ abstract class AbstractTest {
         IOutputHandler assertOutput = TestUtils.getAssertConfigs(new PointCollector(id),
                 new BadgeCollector(id),
                 new MilestoneCollector(id),
+                new ChallengeSink(id),
                 new StatesCollector(id));
 
         Oasis oasis = new Oasis(id);
@@ -59,6 +60,7 @@ abstract class AbstractTest {
         String outputBadges = id + "/output-badges.csv";
         String outputMilestones = id + "/output-milestones.csv";
         String outputStates = id + "/output-states.csv";
+        String outputChallenges = id + "/output-challenges.csv";
 
         ResourceFileStream rfs;
         OasisExecution execution = new OasisExecution();
@@ -101,6 +103,16 @@ abstract class AbstractTest {
             Assertions.assertEquals(expected.size(), actual.size(), "Expected points are not equal!");
 
             assertPoints(actual, expected);
+        }
+
+        if (TestUtils.isResourceExist(outputChallenges)) {
+            List<Tuple4<Long, String, Long, Double>> expected = TestUtils.parseChallengeOutput(outputChallenges);
+            List<Tuple4<Long, String, Long, Double>> actual = Memo.getChallenges(id);
+            Assertions.assertNotNull(expected);
+            Assertions.assertNotNull(actual);
+            Assertions.assertEquals(expected.size(), actual.size(), "Expected challenges are not equal!");
+
+            assertChallenges(actual, expected);
         }
 
         if (TestUtils.isResourceExist(outputMilestones)) {
@@ -217,6 +229,35 @@ abstract class AbstractTest {
             }
         }
     }
+
+
+    private void assertChallenges(List<Tuple4<Long, String, Long, Double>> actual,
+                              List<Tuple4<Long, String, Long, Double>> expected) {
+        List<Tuple4<Long, String, Long, Double>> dupActual = new LinkedList<>(actual);
+        for (Tuple4<Long, String, Long, Double> row : expected) {
+
+            boolean foundFlag = false;
+            Tuple4<Long, String, Long, Double> found = null;
+            for (Tuple4<Long, String, Long, Double> given : dupActual) {
+                if (row.f0.equals(given.f0)
+                        && row.f1.equals(given.f1)
+                        && row.f2.equals(given.f2)
+                        && row.f3.equals(given.f3)) {
+                    foundFlag = true;
+                    found = given;
+                    break;
+                }
+            }
+
+            if (!foundFlag) {
+                Assertions.fail("Expected challenge row " + row + " is not found!");
+            } else {
+                dupActual.remove(found);
+                System.out.println("\tFound challenge: " + row);
+            }
+        }
+    }
+
 
     private void assertPoints(List<Tuple4<Long, List<? extends Event>, PointRule, Double>> actual,
                               List<Tuple5<Long, String, String, Double, String>> expected) {

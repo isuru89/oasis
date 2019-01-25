@@ -46,10 +46,10 @@
 101,mark-50-value,,48,18,74,1433149559068
 102,mark-50-value,,70,20,85,1433334554000
 
-100,__oasis_milestone_bonus__,,30,14
-100,__oasis_milestone_bonus__,,50,14
-101,__oasis_milestone_bonus__,,30,9
-101,__oasis_milestone_bonus__,,50,9
-102,__oasis_milestone_bonus__,,30,20
-103,__oasis_milestone_bonus__,,30,3
-103,__oasis_milestone_bonus__,,50,3
+100,oasis.rules.milestone.bonus,,30,14
+100,oasis.rules.milestone.bonus,,50,14
+101,oasis.rules.milestone.bonus,,30,9
+101,oasis.rules.milestone.bonus,,50,9
+102,oasis.rules.milestone.bonus,,30,20
+103,oasis.rules.milestone.bonus,,30,3
+103,oasis.rules.milestone.bonus,,50,3

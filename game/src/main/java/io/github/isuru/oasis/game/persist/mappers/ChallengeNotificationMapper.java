@@ -15,8 +15,8 @@ public class ChallengeNotificationMapper extends BaseNotificationMapper<Challeng
         model.setTeamScopeId(notification.getTeamScope());
         model.setUserId(notification.getUser());
         model.setWonAt(notification.getTimestamp());
-        model.setChallengeId(notification.getChallengeDef().getId());
-        model.setPoints(notification.getChallengeDef().getPoints());
+        model.setChallengeId(notification.getChallengeId());
+        model.setPoints(notification.getPoints());
         model.setEventExtId(notification.getExternalId());
         model.setTs(notification.getTimestamp());
         model.setSourceId(notification.getSource());

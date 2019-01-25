@@ -10,6 +10,9 @@ import java.util.Map;
  */
 public class ChallengeEvent implements Event {
 
+    public static final String KEY_DEF_ID = "defId";
+    public static final String KEY_POINTS = "points";
+
     private Event event;
     private ChallengeDef challengeDef;
 
@@ -18,8 +21,20 @@ public class ChallengeEvent implements Event {
         this.challengeDef = challengeDef;
     }
 
-    public ChallengeDef getChallengeDef() {
-        return challengeDef;
+    public Long getChallengeId() {
+        if (challengeDef != null) {
+            return challengeDef.getId();
+        } else {
+            return (Long) getFieldValue(KEY_DEF_ID);
+        }
+    }
+
+    public double getPoints() {
+        if (challengeDef != null) {
+            return challengeDef.getPoints();
+        } else {
+            return (Double) getFieldValue(KEY_POINTS);
+        }
     }
 
     @Override

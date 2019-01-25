@@ -7,6 +7,8 @@ public final class EventNames {
 
     public static final String TERMINATE_GAME = "__OASIS_TERMINATE__";
 
+    public static final String OASIS_CHALLENGE_WINNER = "oasis.challenge.winner";
+
     public static final String EVENT_COMPENSATE_POINTS = "__OASIS_COMPENSATE_POINTS__";
     public static final String EVENT_AWARD_BADGE = "__OASIS_MANUAL_BADGE__";
     public static final String EVENT_SHOP_ITEM_SHARE = "__OASIS_ITEM_SHARE__";
@@ -19,9 +21,11 @@ public final class EventNames {
 
 
     public static final String POINT_RULE_COMPENSATION_NAME = EVENT_COMPENSATE_POINTS.toLowerCase();
-    public static final String POINT_RULE_MILESTONE_BONUS_NAME = "__oasis_milestone_bonus__";
-    public static final String POINT_RULE_BADGE_BONUS_NAME = "__oasis_badge_bonus__";
+    public static final String POINT_RULE_MILESTONE_BONUS_NAME = "oasis.rules.milestone.bonus";
+    public static final String POINT_RULE_BADGE_BONUS_NAME = "oasis.rules.badge.bonus";
 
     public static final String POINT_RULE_RACE_POINTS = "__oasis_race_award__";
+
+    public static final String POINT_RULE_CHALLENGE_POINTS = "oasis.rules.point.challenge";
 
 }

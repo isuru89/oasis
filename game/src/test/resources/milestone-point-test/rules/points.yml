@@ -11,5 +11,5 @@ points:
     condition: "marks > 50"
     amount: "(marks - 50) * 2"
 
-  - name: __oasis_milestone_bonus__
+  - name: oasis.rules.milestone.bonus
     id: 303

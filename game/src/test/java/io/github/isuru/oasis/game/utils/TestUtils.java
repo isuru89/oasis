@@ -66,6 +66,29 @@ public class TestUtils {
         }
     }
 
+    public static List<Tuple4<Long, String, Long, Double>> parseChallengeOutput(String file) throws IOException {
+        try (InputStream inputStream = TestUtils.loadResource(file)) {
+            LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
+            List<Tuple4<Long, String, Long, Double>> list = new LinkedList<>();
+            while (lineIterator.hasNext()) {
+                String line = lineIterator.next();
+                if (line.trim().isEmpty()) continue;
+                if (line.startsWith("#")) continue;
+
+                String[] parts = line.split("[,]");
+
+                Tuple4<Long, String, Long, Double> row = Tuple4.of(
+                        Long.parseLong(parts[0]),
+                        parts[1],
+                        Long.parseLong(parts[2]),
+                        Double.parseDouble(parts[3])
+                );
+                list.add(row);
+            }
+            return list;
+        }
+    }
+
     public static List<Tuple5<Long, String, String, Double, String>> parsePointOutput(String file) throws IOException {
         try (InputStream inputStream = TestUtils.loadResource(file)) {
             LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
