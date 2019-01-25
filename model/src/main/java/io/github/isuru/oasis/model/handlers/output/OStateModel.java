@@ -19,6 +19,15 @@ public class OStateModel {
     private String extId;
     private Integer sourceId;
     private boolean currency;
+    private Integer gameId;
+
+    public Integer getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(Integer gameId) {
+        this.gameId = gameId;
+    }
 
     public long getPrevStateChangedAt() {
         return prevStateChangedAt;

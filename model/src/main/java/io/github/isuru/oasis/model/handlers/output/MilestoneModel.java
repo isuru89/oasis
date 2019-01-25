@@ -17,6 +17,15 @@ public class MilestoneModel {
     private Long milestoneId;
     private Long ts;
     private Integer sourceId;
+    private Integer gameId;
+
+    public Integer getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(Integer gameId) {
+        this.gameId = gameId;
+    }
 
     public Integer getSourceId() {
         return sourceId;

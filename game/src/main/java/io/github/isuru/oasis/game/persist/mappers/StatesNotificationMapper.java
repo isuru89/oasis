@@ -23,6 +23,7 @@ public class StatesNotificationMapper extends BaseNotificationMapper<OStateNotif
         model.setTs(event.getTimestamp());
         model.setExtId(event.getExternalId());
         model.setSourceId(event.getSource());
+        model.setGameId(event.getGameId());
         model.setPreviousState(notification.getPreviousState());
         model.setPrevStateChangedAt(notification.getPreviousChangeAt());
         return model;

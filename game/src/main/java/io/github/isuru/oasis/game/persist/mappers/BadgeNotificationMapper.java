@@ -24,6 +24,7 @@ public class BadgeNotificationMapper extends BaseNotificationMapper<BadgeNotific
         model.setUserId(notification.getUserId());
         model.setEventType(event.getEventType());
         model.setSourceId(event.getSource());
+        model.setGameId(event.getGameId());
 
         if (event instanceof BadgeEvent) {
             model.setEvents(((BadgeEvent) event).getEvents().stream()

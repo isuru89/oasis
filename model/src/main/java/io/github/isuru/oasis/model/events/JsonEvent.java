@@ -73,6 +73,16 @@ public class JsonEvent extends HashMap<String, Object> implements Event {
         }
     }
 
+    @Override
+    public Integer getGameId() {
+        Object o = get(Constants.FIELD_GAME_ID);
+        if (o == null) {
+            return null;
+        } else {
+            return Integer.parseInt(o.toString());
+        }
+    }
+
     private Long getLongOrNull(String key) {
         Object o = get(key);
         if (o != null) {

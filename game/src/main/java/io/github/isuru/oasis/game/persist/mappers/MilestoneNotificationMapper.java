@@ -23,6 +23,7 @@ public class MilestoneNotificationMapper extends BaseNotificationMapper<Mileston
         model.setMilestoneId(notification.getMilestone().getId());
         model.setTs(event.getTimestamp());
         model.setSourceId(event.getSource());
+        model.setGameId(event.getGameId());
         return model;
     }
 }

@@ -260,6 +260,7 @@ public class MappersTest {
         Assertions.assertEquals(event.getSource(), model.getSourceId());
         Assertions.assertEquals(event.getTimestamp(), model.getWonAt().longValue());
         Assertions.assertEquals(challengeEvent.getExternalId(), model.getEventExtId());
+        Assertions.assertEquals(event.getGameId(), model.getGameId());
     }
 
     private void assertStateOutput(OStateModel model,
@@ -279,6 +280,7 @@ public class MappersTest {
         Assertions.assertTrue(model.getPrevStateChangedAt() > 0);
         Assertions.assertEquals(notification.getPreviousState(), model.getPreviousState());
         Assertions.assertEquals(notification.getPreviousChangeAt(), model.getPrevStateChangedAt());
+        Assertions.assertEquals(event.getGameId(), model.getGameId());
     }
 
     private void assertPointOutput(PointModel model,
@@ -296,6 +298,7 @@ public class MappersTest {
         Assertions.assertEquals(event.getTeamScope(), model.getTeamScopeId());
         Assertions.assertEquals(event.getTimestamp(), model.getTs().longValue());
         Assertions.assertEquals(event.getUser(), model.getUserId().longValue());
+        Assertions.assertEquals(event.getGameId(), model.getGameId());
     }
 
     private void assertMilestoneOutput(MilestoneModel model,
@@ -308,6 +311,7 @@ public class MappersTest {
         Assertions.assertEquals(event.getTeam(), model.getTeamId());
         Assertions.assertEquals(event.getTeamScope(), model.getTeamScopeId());
         Assertions.assertEquals(event.getTimestamp(), model.getTs().longValue());
+        Assertions.assertEquals(event.getGameId(), model.getGameId());
     }
 
     private void assertMilestoneStateOutput(MilestoneStateModel model,
@@ -340,6 +344,7 @@ public class MappersTest {
         Assertions.assertEquals(badgeId, model.getBadgeId());
         Assertions.assertEquals(notification.getTag(), model.getTag());
         Assertions.assertEquals(notification.getUserId(), model.getUserId().longValue());
+        Assertions.assertEquals(event.getGameId(), model.getGameId());
     }
 
     private MilestoneEvent randomMilestoneEvent(Milestone milestone) {

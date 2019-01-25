@@ -94,7 +94,7 @@ public class EventsServiceImpl implements IEventsService {
         long gid = gobj != null ? Long.parseLong(gobj.toString()) : dataCache.getDefGameId();
 
         Map<String, Object> event = new HashMap<>(eventData);
-        event.remove(Constants.FIELD_GAME_ID);
+        event.put(Constants.FIELD_GAME_ID, gid);
 
         if (!event.containsKey(Constants.FIELD_TEAM)) {
             UserTeam userTeam = profileService.findCurrentTeamOfUser(userId);

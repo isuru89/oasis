@@ -62,4 +62,9 @@ class LocalEndEvent implements Event {
     public Integer getSource() {
         return null;
     }
+
+    @Override
+    public Integer getGameId() {
+        return null;
+    }
 }

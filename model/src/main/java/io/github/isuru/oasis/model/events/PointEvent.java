@@ -111,6 +111,11 @@ public class PointEvent implements Event {
     }
 
     @Override
+    public Integer getGameId() {
+        return refEvent.getGameId();
+    }
+
+    @Override
     public String toString() {
         return "PointEvent{" +
                 "receivedPoints=" + receivedPoints +

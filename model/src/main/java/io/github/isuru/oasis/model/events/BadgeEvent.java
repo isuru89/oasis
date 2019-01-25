@@ -107,4 +107,9 @@ public class BadgeEvent implements Event {
     public Integer getSource() {
         return causedEvent.getSource();
     }
+
+    @Override
+    public Integer getGameId() {
+        return causedEvent.getGameId();
+    }
 }

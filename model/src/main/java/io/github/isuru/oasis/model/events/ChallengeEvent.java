@@ -95,4 +95,9 @@ public class ChallengeEvent implements Event {
     public Integer getSource() {
         return event.getSource();
     }
+
+    @Override
+    public Integer getGameId() {
+        return event.getGameId();
+    }
 }

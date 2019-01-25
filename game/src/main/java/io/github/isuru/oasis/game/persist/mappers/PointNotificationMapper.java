@@ -32,6 +32,7 @@ public class PointNotificationMapper extends BaseNotificationMapper<PointNotific
         model.setCurrency(notification.getRule().isCurrency());
         model.setTs(event.getTimestamp());
         model.setSourceId(event.getSource());
+        model.setGameId(event.getGameId());
         return model;
     }
 }

@@ -96,6 +96,11 @@ public class MilestoneEvent implements Event {
     }
 
     @Override
+    public Integer getGameId() {
+        return causedEvent.getGameId();
+    }
+
+    @Override
     public String toString() {
         return getEventType() + "#" + getExternalId();
     }

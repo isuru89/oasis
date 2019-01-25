@@ -8,7 +8,7 @@ import java.util.Map;
 
 class StateConsumer extends BaseConsumer<OStateModel> {
 
-    public static final String GAME_UPDATE_STATE = "game/updateState";
+    private static final String GAME_UPDATE_STATE = "game/updateState";
 
     /**
      * Constructs a new instance and records its association to the passed-in channel.

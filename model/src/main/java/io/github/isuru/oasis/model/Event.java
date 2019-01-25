@@ -81,4 +81,11 @@ public interface Event extends Serializable {
      * @return source id
      */
     Integer getSource();
+
+    /**
+     * Returns associated game id of this event.
+     *
+     * @return game id.
+     */
+    Integer getGameId();
 }
