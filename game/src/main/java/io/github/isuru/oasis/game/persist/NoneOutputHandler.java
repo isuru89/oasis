@@ -5,7 +5,19 @@ import io.github.isuru.oasis.model.handlers.*;
 
 public class NoneOutputHandler implements IOutputHandler {
 
-    private final NoneHandler noneHandler = new NoneHandler();
+    private final NoneHandler noneHandler;
+
+    public NoneOutputHandler() {
+        this(null);
+    }
+
+    NoneOutputHandler(NoneHandler noneHandler) {
+        if (noneHandler == null) {
+            this.noneHandler = new NoneHandler();
+        } else {
+            this.noneHandler = noneHandler;
+        }
+    }
 
     @Override
     public IPointHandler getPointsHandler() {

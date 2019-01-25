@@ -283,6 +283,15 @@ public class Bootstrapping {
         }
 
         {
+            // add challenge point award rule
+            PointDef challengePointDef = new PointDef();
+            challengePointDef.setName(EventNames.POINT_RULE_CHALLENGE_POINTS);
+            challengePointDef.setDisplayName("Award points for challenge winners.");
+            challengePointDef.setEvent(EventNames.OASIS_CHALLENGE_WINNER);
+            gameDefService.addPointDef(gameId, challengePointDef);
+        }
+
+        {
             // add race point award rule...
             PointDef raceAwardDef = new PointDef();
             raceAwardDef.setName(EventNames.POINT_RULE_RACE_POINTS);

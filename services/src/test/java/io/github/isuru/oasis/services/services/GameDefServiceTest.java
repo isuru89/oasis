@@ -64,7 +64,7 @@ public class GameDefServiceTest extends BaseDefServiceTest {
             Assert.assertNull(addedGame.getConstants());
 
             // for default options
-            Assertions.assertThat(ds.listPointDefs(gameId)).hasSize(4);
+            Assertions.assertThat(ds.listPointDefs(gameId)).hasSize(5);
             Assertions.assertThat(ds.listMilestoneDefs(gameId)).hasSize(0);
             Assertions.assertThat(ds.listKpiCalculations(gameId)).hasSize(0);
             Assertions.assertThat(ds.listBadgeDefs(gameId)).hasSize(0);
@@ -110,7 +110,7 @@ public class GameDefServiceTest extends BaseDefServiceTest {
                     .containsEntry("MyThreshold", 100);
 
             // for default options
-            Assertions.assertThat(ds.listPointDefs(gameId)).hasSize(1);
+            Assertions.assertThat(ds.listPointDefs(gameId)).hasSize(2);
             Assertions.assertThat(ds.listMilestoneDefs(gameId)).hasSize(0);
             Assertions.assertThat(ds.listKpiCalculations(gameId)).hasSize(0);
             Assertions.assertThat(ds.listBadgeDefs(gameId)).hasSize(0);
@@ -140,7 +140,7 @@ public class GameDefServiceTest extends BaseDefServiceTest {
 
             GameDef addedGame = ds.readGame(gameId);
             Assert.assertNotNull(addedGame);
-            Assertions.assertThat(ds.listPointDefs(gameId)).hasSize(4);
+            Assertions.assertThat(ds.listPointDefs(gameId)).hasSize(5);
             Assertions.assertThat(ds.listLeaderboardDefs(gameId)).hasSize(1);
 
             Assertions.assertThat(ds.listGames()).hasSize(1);
