@@ -3,6 +3,8 @@ package io.github.isuru.oasis.injector;
 import com.rabbitmq.client.Channel;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.handlers.output.BadgeModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -11,20 +13,22 @@ import java.util.Map;
  */
 class BadgeConsumer extends BaseConsumer<BadgeModel> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(BadgeConsumer.class);
+
+    private static final String GAME_BATCH_ADD_BADGE = "game/batch/addBadge";
+
     BadgeConsumer(Channel channel, IOasisDao dao, ContextInfo contextInfo) {
         super(channel, dao, BadgeModel.class, contextInfo);
     }
 
     @Override
-    public boolean handle(BadgeModel msg) {
-        Map<String, Object> map = ConsumerUtils.toBadgeDaoData(contextInfo.getGameId(), msg);
-
-        try {
-            dao.executeCommand("game/addBadge", map);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public Map<String, Object> handle(BadgeModel msg) {
+        return ConsumerUtils.toBadgeDaoData(contextInfo.getGameId(), msg);
     }
+
+    @Override
+    public String getInsertScriptName() {
+        return GAME_BATCH_ADD_BADGE;
+    }
+
 }

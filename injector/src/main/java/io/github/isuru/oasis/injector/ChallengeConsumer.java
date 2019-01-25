@@ -11,20 +11,19 @@ import java.util.Map;
  */
 class ChallengeConsumer extends BaseConsumer<ChallengeModel> {
 
+    private static final String GAME_ADD_CHALLENGE_WINNER = "game/batch/addChallengeWinner";
+
     ChallengeConsumer(Channel channel, IOasisDao dao, ContextInfo contextInfo) {
         super(channel, dao, ChallengeModel.class, contextInfo);
     }
 
     @Override
-    public boolean handle(ChallengeModel msg) {
-        Map<String, Object> map = ConsumerUtils.toChallengeDaoData(contextInfo.getGameId(), msg);
+    public Map<String, Object> handle(ChallengeModel msg) {
+        return ConsumerUtils.toChallengeDaoData(contextInfo.getGameId(), msg);
+    }
 
-        try {
-            dao.executeCommand("game/addChallengeWinner", map);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    @Override
+    public String getInsertScriptName() {
+        return GAME_ADD_CHALLENGE_WINNER;
     }
 }

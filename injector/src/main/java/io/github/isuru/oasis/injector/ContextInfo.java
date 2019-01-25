@@ -1,11 +1,24 @@
 package io.github.isuru.oasis.injector;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * @author iweerarathna
  */
 class ContextInfo {
 
     private long gameId;
+
+    private final ExecutorService pool;
+
+    ContextInfo(int maxPoolSize) {
+        pool = Executors.newFixedThreadPool(maxPoolSize);
+    }
+
+    ExecutorService getPool() {
+        return pool;
+    }
 
     long getGameId() {
         return gameId;
@@ -15,8 +28,4 @@ class ContextInfo {
         this.gameId = gameId;
     }
 
-    public static void main(String[] args) {
-        String text = "game.o{gid}.milestone";
-        System.out.println(text.replace("{gid}", "1"));
-    }
 }

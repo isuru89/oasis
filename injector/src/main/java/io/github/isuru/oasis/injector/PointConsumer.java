@@ -11,20 +11,19 @@ import java.util.Map;
  */
 class PointConsumer extends BaseConsumer<PointModel> {
 
+    private static final String GAME_ADD_POINT = "game/batch/addPoint";
+
     PointConsumer(Channel channel, IOasisDao dao, ContextInfo contextInfo) {
         super(channel, dao, PointModel.class, contextInfo);
     }
 
     @Override
-    public boolean handle(PointModel msg) {
-        Map<String, Object> map = ConsumerUtils.toPointDaoData(contextInfo.getGameId(), msg);
+    public Map<String, Object> handle(PointModel msg) {
+        return ConsumerUtils.toPointDaoData(contextInfo.getGameId(), msg);
+    }
 
-        try {
-            dao.executeCommand("game/addPoint", map);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    @Override
+    public String getInsertScriptName() {
+        return GAME_ADD_POINT;
     }
 }

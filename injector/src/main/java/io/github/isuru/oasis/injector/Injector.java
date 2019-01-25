@@ -18,10 +18,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -35,27 +32,29 @@ public class Injector {
     private static final boolean AUTO_ACK = false;
     private static final boolean AUTO_DEL = false;
     private static final boolean EXCLUSIVE = false;
+    private static final String OASIS_INJECTOR = "OasisInjector";
 
     private Connection connection;
     private Channel channel;
     private IOasisDao dao;
 
     private void run() throws Exception {
-        System.out.println(System.currentTimeMillis());
-        //PropertyConfigurator.configure();
+        LOG.info("Starting injector...");
+
         Configs configs = initConfigs();
         DbProperties dbProps = DbProperties.fromProps(configs);
 
+        LOG.debug("Initializing database connection...");
         dao = OasisDbFactory.create(dbProps);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 dao.close();
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
-                e.printStackTrace();
             }
         }));
 
+        LOG.debug("Initializing rabbitmq connection...");
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(OasisUtils.getEnvOr(EnvKeys.OASIS_RABBIT_HOST,
                 configs.getStr(ConfigKeys.KEY_RABBIT_HOST, "localhost")));
@@ -85,25 +84,23 @@ public class Injector {
                 channel.close();
             } catch (IOException | TimeoutException e) {
                 LOG.error(e.getMessage(), e);
-                e.printStackTrace();
             }
             try {
                 connection.close();
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);
-                e.printStackTrace();
             }
         }));
     }
 
     private static void startScheduler(Configs configs, IOasisDao dao, int[] gameIds) throws SchedulerException {
+        LOG.debug("Starting daily/weekly/monthly scheduler...");
         Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 scheduler.shutdown(true);
             } catch (SchedulerException e) {
                 LOG.error(e.getMessage(), e);
-                e.printStackTrace();
             }
         }));
 
@@ -116,28 +113,28 @@ public class Injector {
             dataMap.put("gameId", gameIds[i]);
 
             JobDetail jobDaily = JobBuilder.newJob(DailyScheduler.class)
-                    .withIdentity("dailyScheduler", "OasisInjector")
+                    .withIdentity("dailyScheduler", OASIS_INJECTOR)
                     .setJobData(dataMap)
                     .build();
             JobDetail jobWeekly = JobBuilder.newJob(WeeklyScheduler.class)
-                    .withIdentity("weeklyScheduler", "OasisInjector")
+                    .withIdentity("weeklyScheduler", OASIS_INJECTOR)
                     .setJobData(dataMap)
                     .build();
             JobDetail jobMonthly = JobBuilder.newJob(MonthlyScheduler.class)
-                    .withIdentity("monthlyScheduler", "OasisInjector")
+                    .withIdentity("monthlyScheduler", OASIS_INJECTOR)
                     .setJobData(dataMap)
                     .build();
 
             CronTrigger triggerDaily = TriggerBuilder.newTrigger()
-                    .withIdentity("triggerDailyCron", "OasisInjector")
+                    .withIdentity("triggerDailyCron", OASIS_INJECTOR)
                     .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?"))
                     .build();
             CronTrigger triggerWeekly = TriggerBuilder.newTrigger()
-                    .withIdentity("triggerWeeklyCron", "OasisInjector")
+                    .withIdentity("triggerWeeklyCron", OASIS_INJECTOR)
                     .withSchedule(CronScheduleBuilder.cronSchedule("1 0 0 * * MON"))
                     .build();
             CronTrigger triggerMonthly = TriggerBuilder.newTrigger()
-                    .withIdentity("triggerMonthlyCron", "OasisInjector")
+                    .withIdentity("triggerMonthlyCron", OASIS_INJECTOR)
                     .withSchedule(CronScheduleBuilder.cronSchedule("1 0 0 1 * ?"))
                     .build();
 
@@ -150,7 +147,7 @@ public class Injector {
     }
 
     private void subscribeForGame(int gameId) throws Exception {
-        ContextInfo contextInfo = new ContextInfo();
+        ContextInfo contextInfo = new ContextInfo(7);
         contextInfo.setGameId(gameId);
 
         String pointsQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_POINTS_SINK, contextInfo.getGameId());
@@ -167,12 +164,36 @@ public class Injector {
         channel.queueDeclare(challengesQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(stateQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
 
-        channel.basicConsume(pointsQ, AUTO_ACK, new PointConsumer(channel, dao, contextInfo));
-        channel.basicConsume(msQ, AUTO_ACK, new MilestoneConsumer(channel, dao, contextInfo));
-        channel.basicConsume(msStateQ, AUTO_ACK, new MilestoneStateConsumer(channel, dao, contextInfo));
-        channel.basicConsume(badgesQ, AUTO_ACK, new BadgeConsumer(channel, dao, contextInfo));
-        channel.basicConsume(challengesQ, AUTO_ACK, new ChallengeConsumer(channel, dao, contextInfo));
-        channel.basicConsume(stateQ, AUTO_ACK, new StateConsumer(channel, dao, contextInfo));
+        PointConsumer pointConsumer = new PointConsumer(channel, dao, contextInfo);
+        MilestoneConsumer milestoneConsumer = new MilestoneConsumer(channel, dao, contextInfo);
+        MilestoneStateConsumer milestoneStateConsumer = new MilestoneStateConsumer(channel, dao, contextInfo);
+        BadgeConsumer badgeConsumer = new BadgeConsumer(channel, dao, contextInfo);
+        ChallengeConsumer challengeConsumer = new ChallengeConsumer(channel, dao, contextInfo);
+        StateConsumer stateConsumer = new StateConsumer(channel, dao, contextInfo);
+
+        registerShutdownHook(pointConsumer);
+        registerShutdownHook(milestoneConsumer);
+        registerShutdownHook(milestoneStateConsumer);
+        registerShutdownHook(badgeConsumer);
+        registerShutdownHook(challengeConsumer);
+        registerShutdownHook(stateConsumer);
+
+        channel.basicConsume(pointsQ, AUTO_ACK, pointConsumer);
+        channel.basicConsume(msQ, AUTO_ACK, milestoneConsumer);
+        channel.basicConsume(msStateQ, AUTO_ACK, milestoneStateConsumer);
+        channel.basicConsume(badgesQ, AUTO_ACK, badgeConsumer);
+        channel.basicConsume(challengesQ, AUTO_ACK, challengeConsumer);
+        channel.basicConsume(stateQ, AUTO_ACK, stateConsumer);
+    }
+
+    private void registerShutdownHook(Closeable closeable) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                LOG.error("Error closing {}!", closeable.getClass().getName());
+            }
+        }));
     }
 
     public static void main(String[] args) throws Exception {
@@ -187,6 +208,8 @@ public class Injector {
 
     private Configs initConfigs() throws IOException {
         String configDirStr = OasisUtils.getEnvOr(EnvKeys.OASIS_CONFIG_DIR, "./configs");
+        LOG.debug("Loading configurations from {}", configDirStr);
+
         File configDir = new File(configDirStr);
         if (!configDir.exists()) {
             throw new RuntimeException("Configuration directory is not found! '" + configDirStr + "'");

@@ -11,20 +11,19 @@ import java.util.Map;
  */
 class MilestoneConsumer extends BaseConsumer<MilestoneModel> {
 
+    private static final String GAME_ADD_MILESTONE = "game/batch/addMilestone";
+
     MilestoneConsumer(Channel channel, IOasisDao dao, ContextInfo contextInfo) {
         super(channel, dao, MilestoneModel.class, contextInfo);
     }
 
     @Override
-    public boolean handle(MilestoneModel msg) {
-        Map<String, Object> map = ConsumerUtils.toMilestoneDaoData(contextInfo.getGameId(), msg);
+    public Map<String, Object> handle(MilestoneModel msg) {
+        return ConsumerUtils.toMilestoneDaoData(contextInfo.getGameId(), msg);
+    }
 
-        try {
-            dao.executeCommand("game/addMilestone", map);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    @Override
+    public String getInsertScriptName() {
+        return GAME_ADD_MILESTONE;
     }
 }

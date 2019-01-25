@@ -8,6 +8,8 @@ import java.util.Map;
 
 class StateConsumer extends BaseConsumer<OStateModel> {
 
+    public static final String GAME_UPDATE_STATE = "game/updateState";
+
     /**
      * Constructs a new instance and records its association to the passed-in channel.
      *
@@ -20,15 +22,12 @@ class StateConsumer extends BaseConsumer<OStateModel> {
     }
 
     @Override
-    public boolean handle(OStateModel msg) {
-        Map<String, Object> map = ConsumerUtils.toStateDaoData(contextInfo.getGameId(), msg);
+    public Map<String, Object> handle(OStateModel msg) {
+        return ConsumerUtils.toStateDaoData(contextInfo.getGameId(), msg);
+    }
 
-        try {
-            dao.executeCommand("game/updateState", map);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    @Override
+    public String getInsertScriptName() {
+        return GAME_UPDATE_STATE;
     }
 }
