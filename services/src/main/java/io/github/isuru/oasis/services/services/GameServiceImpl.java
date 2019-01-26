@@ -9,15 +9,15 @@ import io.github.isuru.oasis.services.dto.game.BadgeAwardDto;
 import io.github.isuru.oasis.services.dto.game.GlobalLeaderboardRecordDto;
 import io.github.isuru.oasis.services.dto.game.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.dto.game.PointAwardDto;
-import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
+import io.github.isuru.oasis.services.dto.game.TeamLeaderboardRecordDto;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.Maps;
-import io.github.isuru.oasis.services.model.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -152,7 +152,7 @@ public class GameServiceImpl implements IGameService {
     }
 
     @Override
-    public List<UserRankRecordDto> readTeamLeaderboard(long teamId, LeaderboardRequestDto request) throws Exception {
+    public List<TeamLeaderboardRecordDto> readTeamLeaderboard(long teamId, LeaderboardRequestDto request) throws Exception {
         Checks.greaterThanZero(teamId, "teamId");
         checkLeaderboardRequest(request);
 
@@ -186,12 +186,12 @@ public class GameServiceImpl implements IGameService {
         return ServiceUtils.toList(dao.executeQuery(
                 Q.LEADERBOARD.TEAM_LEADERBOARD,
                 dataBuilder.build(),
-                UserRankRecordDto.class,
+                TeamLeaderboardRecordDto.class,
                 templateData));
     }
 
     @Override
-    public List<UserRankRecordDto> readTeamScopeLeaderboard(long teamScopeId, LeaderboardRequestDto request) throws Exception {
+    public List<TeamLeaderboardRecordDto> readTeamScopeLeaderboard(long teamScopeId, LeaderboardRequestDto request) throws Exception {
         Checks.greaterThanZero(teamScopeId, "teamScopeId");
         checkLeaderboardRequest(request);
 
@@ -222,7 +222,7 @@ public class GameServiceImpl implements IGameService {
         return ServiceUtils.toList(dao.executeQuery(
                 Q.LEADERBOARD.TEAM_LEADERBOARD,
                 dataBuilder.build(),
-                UserRankRecordDto.class,
+                TeamLeaderboardRecordDto.class,
                 templateData));
     }
 

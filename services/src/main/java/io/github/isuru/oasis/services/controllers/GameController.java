@@ -2,16 +2,24 @@ package io.github.isuru.oasis.services.controllers;
 
 import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.dto.game.BadgeAwardDto;
+import io.github.isuru.oasis.services.dto.game.GlobalLeaderboardRecordDto;
 import io.github.isuru.oasis.services.dto.game.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.dto.game.PointAwardDto;
-import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
+import io.github.isuru.oasis.services.dto.game.TeamLeaderboardRecordDto;
 import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -29,14 +37,14 @@ public class GameController {
 
 
     @GetMapping("/leaderboard/{id}/global")
-    public List<UserRankRecordDto> readGlobalLeaderboard(@PathVariable("id") int leaderboardId,
-                                                         @RequestParam(value = "range", defaultValue = "weekly") String range,
-                                                         @RequestParam(value = "top", defaultValue = "50") int top,
-                                                         @RequestParam(value = "bottom", defaultValue = "0") int bottom,
-                                                         @RequestParam(value = "when", defaultValue = "0") long when,
-                                                         @RequestParam(value = "start", defaultValue = "-1") long start,
-                                                         @RequestParam(value = "end", defaultValue = "-1") long end,
-                                                         @RequestParam(value = "user", defaultValue = "0") int userId) throws Exception {
+    public List<GlobalLeaderboardRecordDto> readGlobalLeaderboard(@PathVariable("id") int leaderboardId,
+                                                                  @RequestParam(value = "range", defaultValue = "weekly") String range,
+                                                                  @RequestParam(value = "top", defaultValue = "50") int top,
+                                                                  @RequestParam(value = "bottom", defaultValue = "0") int bottom,
+                                                                  @RequestParam(value = "when", defaultValue = "0") long when,
+                                                                  @RequestParam(value = "start", defaultValue = "-1") long start,
+                                                                  @RequestParam(value = "end", defaultValue = "-1") long end,
+                                                                  @RequestParam(value = "user", defaultValue = "0") int userId) throws Exception {
 
         LeaderboardRequestDto dto = generate(toType(range), top, bottom, when, start, end, userId);
         dto.setLeaderboardDef(gameDefService.readLeaderboardDef(leaderboardId));
@@ -44,15 +52,15 @@ public class GameController {
     }
 
     @GetMapping("/leaderboard/{id}/team/{teamId}")
-    public List<UserRankRecordDto> readTeamLeaderboard(@PathVariable("id") int leaderboardId,
-                                                       @PathVariable("teamId") int teamId,
-                                                       @RequestParam(value = "range", defaultValue = "weekly") String range,
-                                                       @RequestParam(value = "top", defaultValue = "50") int top,
-                                                       @RequestParam(value = "bottom", defaultValue = "0") int bottom,
-                                                       @RequestParam(value = "when", defaultValue = "0") long when,
-                                                       @RequestParam(value = "start", defaultValue = "-1") long start,
-                                                       @RequestParam(value = "end", defaultValue = "-1") long end,
-                                                       @RequestParam(value = "user", defaultValue = "0") int userId) throws Exception {
+    public List<TeamLeaderboardRecordDto> readTeamLeaderboard(@PathVariable("id") int leaderboardId,
+                                                              @PathVariable("teamId") int teamId,
+                                                              @RequestParam(value = "range", defaultValue = "weekly") String range,
+                                                              @RequestParam(value = "top", defaultValue = "50") int top,
+                                                              @RequestParam(value = "bottom", defaultValue = "0") int bottom,
+                                                              @RequestParam(value = "when", defaultValue = "0") long when,
+                                                              @RequestParam(value = "start", defaultValue = "-1") long start,
+                                                              @RequestParam(value = "end", defaultValue = "-1") long end,
+                                                              @RequestParam(value = "user", defaultValue = "0") int userId) throws Exception {
 
         LeaderboardRequestDto dto = generate(toType(range), top, bottom, when, start, end, userId);
         dto.setLeaderboardDef(gameDefService.readLeaderboardDef(leaderboardId));
@@ -60,7 +68,7 @@ public class GameController {
     }
 
     @GetMapping("/leaderboard/{id}/teamscope/{scopeId}")
-    public List<UserRankRecordDto> readTeamScopeLeaderboard(@PathVariable("id") int leaderboardId,
+    public List<TeamLeaderboardRecordDto> readTeamScopeLeaderboard(@PathVariable("id") int leaderboardId,
                                                             @PathVariable("scopeId") int scopeId,
                                                             @RequestParam(value = "range", defaultValue = "weekly") String range,
                                                             @RequestParam(value = "top", defaultValue = "50") int top,

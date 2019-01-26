@@ -87,8 +87,7 @@ public class StatsRouter extends BaseRouters {
 
     private Object userTeamRankingStat(Request req, Response res) throws Exception {
         long userId = asPLong(req, "userId");
-        boolean current = asQBool(req, "current", true);
-        return getApiService().getStatService().readUserTeamRankings(userId, current);
+        return getApiService().getStatService().readUserTeamRankings(userId);
     }
 
     private Object userRankingStat(Request req, Response res) throws Exception {

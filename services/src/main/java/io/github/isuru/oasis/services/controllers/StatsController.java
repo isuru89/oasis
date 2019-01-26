@@ -3,6 +3,7 @@ package io.github.isuru.oasis.services.controllers;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
+import io.github.isuru.oasis.services.dto.game.UserRankingsInRangeDto;
 import io.github.isuru.oasis.services.dto.stats.*;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.model.enums.ScopingType;
@@ -98,9 +99,8 @@ public class StatsController {
     }
 
     @GetMapping("/stats/user/{userId}/team-rankings")
-    public List<UserRankRecordDto> getUserTeamRankings(@PathVariable("userId") long userId,
-                                                       @RequestParam(value = "current", defaultValue = "true") boolean current) throws Exception {
-        return statService.readUserTeamRankings(userId, current);
+    public UserRankingsInRangeDto getUserTeamRankings(@PathVariable("userId") long userId) throws Exception {
+        return statService.readUserTeamRankings(userId);
     }
 
     @GetMapping("/stats/user/{userId}/rankings")

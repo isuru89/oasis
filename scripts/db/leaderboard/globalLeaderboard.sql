@@ -8,6 +8,7 @@ FROM
     SELECT
         tbl.user_id AS userId,
         COALESCE(oau.nickname, oau.user_name, oau.email) AS userName,
+
         tbl.totalPoints AS totalPoints,
         tbl.totalCount AS totalCount,
         (RANK() over (ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'rankGlobal',

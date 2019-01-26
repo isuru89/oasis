@@ -1,9 +1,17 @@
 package io.github.isuru.oasis.services.test;
 
-import io.github.isuru.oasis.services.dto.stats.*;
-import io.github.isuru.oasis.services.services.IStatService;
+import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownReqDto;
+import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownResDto;
+import io.github.isuru.oasis.services.dto.stats.BadgeRecordDto;
+import io.github.isuru.oasis.services.dto.stats.PointBreakdownReqDto;
+import io.github.isuru.oasis.services.dto.stats.PointBreakdownResDto;
+import io.github.isuru.oasis.services.dto.stats.PointRecordDto;
+import io.github.isuru.oasis.services.dto.stats.TeamHistoryRecordDto;
+import io.github.isuru.oasis.services.dto.stats.UserBadgeStatDto;
+import io.github.isuru.oasis.services.dto.stats.UserMilestoneStatDto;
+import io.github.isuru.oasis.services.dto.stats.UserStatDto;
 import io.github.isuru.oasis.services.model.PurchasedItem;
-import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
+import io.github.isuru.oasis.services.services.IStatService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,8 +48,8 @@ class StatTest extends AbstractApiTest {
         List<TeamHistoryRecordDto> teamHistoryRecordDtos = statService.readUserTeamHistoryStat(145);
         Assertions.assertEquals(1, teamHistoryRecordDtos.size());
 
-        List<UserRankRecordDto> userRankRecordDtos = statService.readUserTeamRankings(55, true);
-        System.out.println(userRankRecordDtos);
+//        List<UserRankRecordDto> userRankRecordDtos = statService.readUserTeamRankings(55, true);
+//        System.out.println(userRankRecordDtos);
     }
 
     @Test

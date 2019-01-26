@@ -7,11 +7,10 @@ public class GlobalLeaderboardRecordDto {
 
     private Long totalCount;
     private Double totalPoints;
-
     private Integer rankGlobal;
-
     private Double nextRankValue;
     private Double topRankValue;
+    private Long calculatedTime;
 
     public Long getUserId() {
         return userId;
@@ -67,5 +66,13 @@ public class GlobalLeaderboardRecordDto {
 
     public void setTopRankValue(Double topRankValue) {
         this.topRankValue = topRankValue;
+    }
+
+    public Long getCalculatedTime() {
+        return calculatedTime;
+    }
+
+    public void setCalculatedTime(Long calculatedTime) {
+        this.calculatedTime = calculatedTime;
     }
 }

@@ -4,7 +4,7 @@ import io.github.isuru.oasis.services.dto.game.BadgeAwardDto;
 import io.github.isuru.oasis.services.dto.game.GlobalLeaderboardRecordDto;
 import io.github.isuru.oasis.services.dto.game.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.dto.game.PointAwardDto;
-import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
+import io.github.isuru.oasis.services.dto.game.TeamLeaderboardRecordDto;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public interface IGameService {
     void awardBadge(long byUser, BadgeAwardDto awardDto) throws Exception;
 
     List<GlobalLeaderboardRecordDto> readGlobalLeaderboard(LeaderboardRequestDto request) throws Exception;
-    List<UserRankRecordDto> readTeamLeaderboard(long teamId, LeaderboardRequestDto request) throws Exception;
-    List<UserRankRecordDto> readTeamScopeLeaderboard(long teamScopeId, LeaderboardRequestDto request) throws Exception;
+    List<TeamLeaderboardRecordDto> readTeamLeaderboard(long teamId, LeaderboardRequestDto request) throws Exception;
+    List<TeamLeaderboardRecordDto> readTeamScopeLeaderboard(long teamScopeId, LeaderboardRequestDto request) throws Exception;
 
 }

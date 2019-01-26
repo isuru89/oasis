@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
+import io.github.isuru.oasis.services.dto.game.UserRankingsInRangeDto;
 import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownReqDto;
 import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownResDto;
 import io.github.isuru.oasis.services.dto.stats.ChallengeInfoDto;
@@ -29,7 +30,7 @@ public interface IStatService {
     List<PurchasedItem> readUserPurchasedItems(long userId, long since) throws Exception;
     List<UserBadgeStatDto> readUserBadges(long userId, long since) throws Exception;
     List<UserMilestoneStatDto> readUserMilestones(long userId) throws Exception;
-    List<UserRankRecordDto> readUserTeamRankings(long userId, boolean currentTeamOnly) throws Exception;
+    UserRankingsInRangeDto readUserTeamRankings(long userId) throws Exception;
     List<UserRankRecordDto> readMyLeaderboardRankings(long gameId, long userId, ScopingType scopingType,
                                                       LeaderboardType rangeType) throws Exception;
     List<TeamHistoryRecordDto> readUserTeamHistoryStat(long userId) throws Exception;

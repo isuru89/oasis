@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services;
 
 import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.defs.GameDef;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.services.model.EventSourceToken;
 import io.github.isuru.oasis.services.model.TeamProfile;
@@ -50,6 +51,8 @@ public class DataCache {
     private TeamScope teamScopeDefault;
     private EventSourceToken internalEventSourceToken;
 
+    private LeaderboardDef defaultLeaderboard;
+
     void setup() throws Exception {
         allUserTmpPassword = RandomStringUtils.randomAlphanumeric(10);
         LOG.info(" *** Temporary password for all player authentication: " + allUserTmpPassword);
@@ -89,6 +92,13 @@ public class DataCache {
             throw new IllegalStateException("No admin user is found on the system!");
         }
         adminUserId = userProfile.getId();
+
+        // read default leaderboard definition
+        String defLbName = DefaultEntities.DEFAULT_LEADERBOARD_DEF.getName();
+        gameDefService.listLeaderboardDefs(defGameId).stream()
+                .filter(l -> defLbName.equals(l.getName()))
+                .findFirst()
+                .ifPresent(l -> defaultLeaderboard = l);
 
         internalEventSourceToken = eventsService.readInternalSourceToken()
                 .orElseThrow(() -> new IllegalStateException(
@@ -143,4 +153,7 @@ public class DataCache {
         return cache.size();
     }
 
+    public LeaderboardDef getDefaultLeaderboard() {
+        return defaultLeaderboard;
+    }
 }

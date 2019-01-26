@@ -7,14 +7,18 @@ FROM
 
     SELECT
         tbl.user_id AS userId,
+        COALESCE(oau.nickname, oau.user_name, oau.email) AS userName,
         tbl.team_id AS teamId,
+        oat.name AS teamName,
         tbl.team_scope_id AS teamScopeId,
+        COALESCE(oats.display_name, oats.name) AS teamScopeName,
+
         tbl.totalPoints AS totalPoints,
         tbl.totalCount AS totalCount,
-        (RANK() over (PARTITION BY tbl.team_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'rankTeam',
-        (RANK() over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'rankTeamScope',
-        (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'nextRankVal',
-        (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'nextTeamScopeRankVal',
+        (RANK() over (PARTITION BY tbl.team_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'rankInTeam',
+        (RANK() over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'rankInTeamScope',
+        (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'nextTeamRankValue',
+        (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'nextTeamScopeRankValue',
         UNIX_TIMESTAMP(NOW()) * 1000 AS calculatedTime
     FROM
     (
@@ -72,6 +76,9 @@ FROM
         ) grpPoints
         GROUP BY grpPoints.user_id, grpPoints.team_scope_id, grpPoints.team_id
     ) tbl
+    INNER JOIN OA_USER oau ON oau.user_id = tbl.user_id
+    INNER JOIN OA_TEAM oat ON oat.team_id = tbl.team_id
+    INNER JOIN OA_TEAM_SCOPE oats ON oats.scope_id = tbl.team_scope_id
 
 <if(hasTeam||hasUser||isTopN||isBottomN)>
 ) rankTbl
