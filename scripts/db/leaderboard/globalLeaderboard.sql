@@ -7,11 +7,12 @@ FROM
 
     SELECT
         tbl.user_id AS userId,
+        COALESCE(oau.nickname, oau.user_name, oau.email) AS userName,
         tbl.totalPoints AS totalPoints,
         tbl.totalCount AS totalCount,
         (RANK() over (ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'rankGlobal',
-        (LAG(tbl.totalPoints) over (ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'nextRankVal',
-        (FIRST_VALUE(tbl.totalPoints) over (ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'topRankVal',
+        (LAG(tbl.totalPoints) over (ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'nextRankValue',
+        (FIRST_VALUE(tbl.totalPoints) over (ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'topRankValue',
         UNIX_TIMESTAMP(NOW()) * 1000 AS calculatedTime
     FROM
     (
@@ -57,6 +58,8 @@ FROM
         ) AS groupedPoints
         GROUP BY groupedPoints.user_id
     ) tbl
+    INNER JOIN OA_USER oau
+        ON oau.user_id = tbl.user_id
 
 
 <if(hasUser||isTopN||isBottomN)>

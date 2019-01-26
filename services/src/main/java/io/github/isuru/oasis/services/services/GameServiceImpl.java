@@ -6,6 +6,7 @@ import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.dto.game.BadgeAwardDto;
+import io.github.isuru.oasis.services.dto.game.GlobalLeaderboardRecordDto;
 import io.github.isuru.oasis.services.dto.game.LeaderboardRequestDto;
 import io.github.isuru.oasis.services.dto.game.PointAwardDto;
 import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
@@ -117,7 +118,7 @@ public class GameServiceImpl implements IGameService {
     }
 
     @Override
-    public List<UserRankRecordDto> readGlobalLeaderboard(LeaderboardRequestDto request) throws Exception {
+    public List<GlobalLeaderboardRecordDto> readGlobalLeaderboard(LeaderboardRequestDto request) throws Exception {
         checkLeaderboardRequest(request);
 
         LeaderboardDef ldef = request.getLeaderboardDef();
@@ -146,7 +147,7 @@ public class GameServiceImpl implements IGameService {
         return ServiceUtils.toList(dao.executeQuery(
                 Q.LEADERBOARD.GLOBAL_LEADERBOARD,
                 dataBuilder.build(),
-                UserRankRecordDto.class,
+                GlobalLeaderboardRecordDto.class,
                 templateData));
     }
 
