@@ -22,7 +22,7 @@ public enum AggregatorType {
 
     public static AggregatorType from(String text) {
         for (AggregatorType val : values()) {
-            if (val.name().toLowerCase().equals(text)) {
+            if (val.name().equalsIgnoreCase(text)) {
                 return val;
             }
         }

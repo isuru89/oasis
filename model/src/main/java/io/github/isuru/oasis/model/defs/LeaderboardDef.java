@@ -19,7 +19,7 @@ public class LeaderboardDef extends BaseDef {
     private boolean includeStatePoints = true;
 
     public boolean hasStates() {
-        AggregatorType from = AggregatorType.from(aggregatorType);
+        AggregatorType from = AggregatorType.from(getAggregatorType());
         return isIncludeStatePoints() && from != null && from.isMultiAggregatable();
     }
 

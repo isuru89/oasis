@@ -131,7 +131,7 @@ public abstract class BaseScheduler {
             vars.put("$winner", winner);
 
             double awardPoints = Commons.asDouble(MVEL.executeExpression(expr, vars));
-            if (awardPoints == Double.NaN) {
+            if (Double.isNaN(awardPoints)) {
                 awardPoints = DefaultEntities.DEFAULT_RACE_WIN_VALUE;
             }
             winner.setAwardedPoints(awardPoints);

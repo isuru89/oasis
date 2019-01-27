@@ -99,6 +99,10 @@ public class LeaderboardDefServiceTest extends BaseDefServiceTest {
             Assert.assertEquals(defId, addedDef.getId().longValue());
             Assert.assertEquals(def.getName(), addedDef.getName());
             Assert.assertEquals(def.getDisplayName(), addedDef.getDisplayName());
+            // default values
+            Assert.assertEquals("SUM", addedDef.getAggregatorType());
+            Assert.assertTrue(addedDef.isIncludeStatePoints());
+            Assert.assertTrue(addedDef.hasStates());
 
             // one more should be added
             checkTotalCount(gameId, size + 1);
@@ -246,6 +250,8 @@ public class LeaderboardDefServiceTest extends BaseDefServiceTest {
         Assert.assertEquals(check.getDisplayName(), addedDef.getDisplayName());
         Assert.assertEquals(check.getDescription(), addedDef.getDescription());
         Assert.assertEquals(check.getOrderBy(), addedDef.getOrderBy());
+        Assert.assertEquals(check.getAggregatorType(), addedDef.getAggregatorType());
+        Assert.assertEquals(check.isIncludeStatePoints(), addedDef.isIncludeStatePoints());
         if (check.getRuleIds() == null) {
             Assert.assertNull(addedDef.getRuleIds());
         } else {

@@ -502,8 +502,11 @@ public class GameDefServiceImpl implements IGameDefService {
         Checks.nonNullOrEmpty(raceDef.getName(), "name");
         Checks.nonNullOrEmpty(raceDef.getDisplayName(), "displayName");
         Checks.greaterThanZero(raceDef.getLeaderboardId(), "leaderboardId");
+        Checks.validate(raceDef.getTop() != null && raceDef.getTop() > 0, "top");
+        Checks.onlyOneOf(!Commons.isNullOrEmpty(raceDef.getRankPointsExpression()),
+                !Commons.isNullOrEmpty(raceDef.getRankPoints()), "rankPointExpression", "rankPointMap");
 
-        if (readLeaderboardDef(raceDef.getLeaderboardId()) != null) {
+        if (listLeaderboardDefs(gameId).stream().noneMatch(l -> l.getId() == raceDef.getLeaderboardId())) {
             throw new InputValidationException("Leaderboard does not exist by id #" + raceDef.getLeaderboardId() + "!");
         }
 
