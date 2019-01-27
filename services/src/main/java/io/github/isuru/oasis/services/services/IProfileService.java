@@ -6,6 +6,7 @@ import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
 import io.github.isuru.oasis.services.dto.crud.TeamScopeEditDto;
 import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
 import io.github.isuru.oasis.services.dto.crud.UserProfileEditDto;
+import io.github.isuru.oasis.services.dto.stats.UserCountStat;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
@@ -26,6 +27,8 @@ public interface IProfileService {
     List<UserProfile> findUser(String email, String name) throws Exception;
 
     List<UserProfile> listUsers(long teamId, long offset, long size) throws Exception;
+    List<UserCountStat> listUserCountInTeams() throws Exception;
+    List<UserCountStat> listUserCountInTeamScopes() throws Exception;
 
     long addTeam(TeamProfileAddDto teamProfile) throws Exception;
     TeamProfile readTeam(long teamId) throws Exception;

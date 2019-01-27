@@ -81,6 +81,13 @@ final class Q {
         private static final String PATH = "def/";
     }
 
+    static class GAME {
+        private static final String PATH = "game/";
+        private static final String BATCH = PATH + "batch/";
+
+        static final String ADD_RACE_AWARD = BATCH + "addRaceAward";
+    }
+
     static class LEADERBOARD {
         static final String GLOBAL_LEADERBOARD = "leaderbaord/globalLeaderboard";
         static final String RACE_GLOBAL_LEADERBOARD = "leaderbaord/raceGlobalLeaderboard";

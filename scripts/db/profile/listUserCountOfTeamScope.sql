@@ -7,7 +7,7 @@ WITH currentTeams AS (
 )
 
 SELECT
-    oatu.team_scope_id AS teamScopeId,
+    oatu.team_scope_id AS id,
     COUNT(*) AS totalUsers
 
 FROM currentTeams oact

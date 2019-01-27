@@ -6,6 +6,7 @@ import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.dto.crud.*;
+import io.github.isuru.oasis.services.dto.stats.UserCountStat;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Checks;
@@ -168,6 +169,20 @@ public class ProfileServiceImpl implements IProfileService {
                         .put("limit", size).build(),
                 UserProfile.class
         ));
+    }
+
+    @Override
+    public List<UserCountStat> listUserCountInTeams() throws Exception {
+        return ServiceUtils.toList(dao.executeQuery(Q.PROFILE.LIST_USER_COUNT_OF_TEAMS,
+                new HashMap<>(),
+                UserCountStat.class));
+    }
+
+    @Override
+    public List<UserCountStat> listUserCountInTeamScopes() throws Exception {
+        return ServiceUtils.toList(dao.executeQuery(Q.PROFILE.LIST_USER_COUNT_OF_TEAMSCOPE,
+                new HashMap<>(),
+                UserCountStat.class));
     }
 
     @Override

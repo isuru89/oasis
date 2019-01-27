@@ -13,6 +13,7 @@ import io.github.isuru.oasis.services.dto.game.PointAwardDto;
 import io.github.isuru.oasis.services.dto.game.TeamLeaderboardRecordDto;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.model.RaceWinRecord;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.model.UserTeam;
@@ -22,6 +23,8 @@ import io.github.isuru.oasis.services.utils.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -119,6 +122,30 @@ public class GameServiceImpl implements IGameService {
     }
 
     @Override
+    public void addRaceWinners(long gameId, long raceId, List<RaceWinRecord> winners) throws Exception {
+        List<Map<String, Object>> records = new ArrayList<>();
+        winners.forEach(winner -> {
+            Map<String, Object> rec = new HashMap<>();
+            rec.put("userId", winner.getUserId());
+            rec.put("teamId", winner.getTeamId());
+            rec.put("teamScopeId", winner.getTeamScopeId());
+            rec.put("raceId", winner.getRaceId());
+            rec.put("raceStartAt", winner.getRaceStartAt());
+            rec.put("raceEndAt", winner.getRaceEndAt());
+            rec.put("rankPos", winner.getRank());
+            rec.put("points", winner.getPoints());
+            rec.put("totalCount", winner.getTotalCount());
+            rec.put("awardedPoints", winner.getAwardedPoints().floatValue());
+            rec.put("awardedAt", winner.getAwardedAt());
+            rec.put("gameId", winner.getGameId());
+
+            records.add(rec);
+        });
+
+        dao.executeBatchInsert(Q.GAME.ADD_RACE_AWARD, records);
+    }
+
+    @Override
     public List<GlobalLeaderboardRecordDto> readGlobalLeaderboard(LeaderboardRequestDto request) throws Exception {
         checkLeaderboardRequest(request);
 
@@ -130,7 +157,7 @@ public class GameServiceImpl implements IGameService {
                 .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
                 .put("isTopN", ServiceUtils.isValid(request.getTopN()))
                 .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
-                .put("onlyFinalTops", false)
+                .put("onlyFinalTops", ServiceUtils.isValid(request.getTopThreshold()))
                 .put("hasStates", ldef != null && ldef.hasStates())
                 .build();
 
@@ -169,7 +196,7 @@ public class GameServiceImpl implements IGameService {
                 .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
                 .put("isTopN", ServiceUtils.isValid(request.getTopN()))
                 .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
-                .put("onlyFinalTops", false)
+                .put("onlyFinalTops", ServiceUtils.isValid(request.getTopThreshold()))
                 .put("hasStates", ldef != null && ldef.hasStates())
                 .build();
 
@@ -179,6 +206,45 @@ public class GameServiceImpl implements IGameService {
                 .put("teamId", teamId)
                 .put("userId", request.getForUser())
                 .put("teamScopeId", teamProfile.getTeamScope())
+                .put("rangeStart", request.getRangeStart())
+                .put("rangeEnd", request.getRangeEnd())
+                .put("topN", request.getTopN())
+                .put("bottomN", request.getBottomN());
+
+        if (ldef != null) {
+            dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
+                    .put("aggType", Commons.orDefault(ldef.getAggregatorType(), AggregatorType.SUM.name()))
+                    .put("excludeRuleIds", ldef.getExcludeRuleIds());
+        }
+
+        return ServiceUtils.toList(dao.executeQuery(
+                Q.LEADERBOARD.TEAM_LEADERBOARD,
+                dataBuilder.build(),
+                TeamLeaderboardRecordDto.class,
+                templateData));
+    }
+
+    @Override
+    public List<TeamLeaderboardRecordDto> readTeamLeaderboard(LeaderboardRequestDto request) throws Exception {
+        checkLeaderboardRequest(request);
+
+        LeaderboardDef ldef = request.getLeaderboardDef();
+        Map<String, Object> templateData = Maps.create()
+                .put("hasTeam", false)
+                .put("hasUser", ServiceUtils.isValid(request.getForUser()))
+                .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
+                .put("hasInclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getRuleIds()))
+                .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
+                .put("isTopN", ServiceUtils.isValid(request.getTopN()))
+                .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
+                .put("onlyFinalTops", ServiceUtils.isValid(request.getTopThreshold()))
+                .put("hasStates", ldef != null && ldef.hasStates())
+                .build();
+
+        Maps.MapBuilder dataBuilder = Maps.create()
+                .put("teamId", null)
+                .put("userId", request.getForUser())
+                .put("teamScopeId", null)
                 .put("rangeStart", request.getRangeStart())
                 .put("rangeEnd", request.getRangeEnd())
                 .put("topN", request.getTopN())
@@ -211,7 +277,7 @@ public class GameServiceImpl implements IGameService {
                 .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
                 .put("isTopN", ServiceUtils.isValid(request.getTopN()))
                 .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
-                .put("onlyFinalTops", false)
+                .put("onlyFinalTops", ServiceUtils.isValid(request.getTopThreshold()))
                 .put("hasStates", ldef != null && ldef.hasStates())
                 .build();
 

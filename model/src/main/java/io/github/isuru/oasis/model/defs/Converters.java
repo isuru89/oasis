@@ -18,6 +18,14 @@ public class Converters {
         return def;
     }
 
+    public static RaceDef toRaceDef(DefWrapper wrapper, Function<DefWrapper, RaceDef> creator) {
+        RaceDef def = creator.apply(wrapper);
+        def.setId(wrapper.getId());
+        def.setName(wrapper.getName());
+        def.setDisplayName(wrapper.getDisplayName());
+        return def;
+    }
+
     public static ChallengeDef toChallengeDef(DefWrapper wrapper, Function<DefWrapper, ChallengeDef> creator) {
         ChallengeDef def = creator.apply(wrapper);
         def.setId(wrapper.getId());

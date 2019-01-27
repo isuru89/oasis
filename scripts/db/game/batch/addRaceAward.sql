@@ -26,6 +26,6 @@ INSERT INTO OA_RACE (
     :gameId
 )
 ON DUPLICATE KEY
-UPDATE awarded_at = :awardedAt,
-       rank_pos = :rankPos,
-       points = :points
+UPDATE awarded_at = VALUES(awarded_at),
+       rank_pos = VALUES(rank_pos),
+       points = VALUES(points)

@@ -1,4 +1,4 @@
-<if(hasUser||isTopN||isBottomN)>
+<if(hasUser||isTopN||isBottomN||onlyFinalTops)>
 SELECT
     *
 FROM
@@ -70,12 +70,17 @@ FROM
         ON oau.user_id = tbl.user_id
 
 
-<if(hasUser||isTopN||isBottomN)>
+<if(hasUser||isTopN||isBottomN||onlyFinalTops)>
 ) rankTbl
 
-<if(hasUser)>
 WHERE
-    rankTbl.userId = :userId
+    1 = 1
+<if(hasUser)>
+    AND rankTbl.userId = :userId
+<endif>
+
+<if(onlyFinalTops)>
+    AND rankTbl.rankGlobal \<= :topThreshold
 <endif>
 
 <if(isTopN)>

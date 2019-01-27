@@ -13,6 +13,7 @@ import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.OasisDefinition;
 import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.RaceDef;
 import io.github.isuru.oasis.model.defs.StateDef;
 import io.github.isuru.oasis.services.Bootstrapping;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
@@ -495,6 +496,51 @@ public class GameDefServiceImpl implements IGameDefService {
         return dao.getDefinitionDao().disableDefinition(id);
     }
 
+    @Override
+    public long addRace(long gameId, RaceDef raceDef) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(raceDef.getName(), "name");
+        Checks.nonNullOrEmpty(raceDef.getDisplayName(), "displayName");
+        Checks.greaterThanZero(raceDef.getLeaderboardId(), "leaderboardId");
+
+        if (readLeaderboardDef(raceDef.getLeaderboardId()) != null) {
+            throw new InputValidationException("Leaderboard does not exist by id #" + raceDef.getLeaderboardId() + "!");
+        }
+
+        DefWrapper wrapper = new DefWrapper();
+        wrapper.setKind(OasisDefinition.RACE.getTypeId());
+        wrapper.setName(raceDef.getName());
+        wrapper.setDisplayName(raceDef.getDisplayName());
+        wrapper.setContent(RUtils.toStr(raceDef, mapper));
+        wrapper.setGameId(gameId);
+
+        return dao.getDefinitionDao().addDefinition(wrapper);
+    }
+
+    @Override
+    public RaceDef readRace(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
+        return wrapperToRace(dao.getDefinitionDao().readDefinition(id));
+    }
+
+    @Override
+    public List<RaceDef> listRaces(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
+        return dao.getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.RACE.getTypeId())
+                .stream()
+                .map(this::wrapperToRace)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean disableRace(long id) throws Exception {
+        Checks.greaterThanZero(id, "id");
+
+        return dao.getDefinitionDao().disableDefinition(id);
+    }
+
     private ChallengeDef wrapperToChallenge(DefWrapper wrapper) {
         return Converters.toChallengeDef(wrapper,
                 wrp -> RUtils.toObj(wrp.getContent(), ChallengeDef.class, mapper));
@@ -503,6 +549,11 @@ public class GameDefServiceImpl implements IGameDefService {
     private StateDef wrapperToStatePlay(DefWrapper wrapper) {
         return Converters.toStateDef(wrapper,
                 wrp -> RUtils.toObj(wrp.getContent(), StateDef.class, mapper));
+    }
+
+    private RaceDef wrapperToRace(DefWrapper wrapper) {
+        return Converters.toRaceDef(wrapper,
+                wrp -> RUtils.toObj(wrp.getContent(), RaceDef.class, mapper));
     }
 
     private BadgeDef wrapperToBadge(DefWrapper wrapper) {

@@ -7,6 +7,7 @@ import io.github.isuru.oasis.model.defs.KpiDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.RaceDef;
 import io.github.isuru.oasis.model.defs.StateDef;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 
@@ -61,4 +62,8 @@ public interface IGameDefService {
     List<StateDef> listStatePlays(long gameId) throws Exception;
     boolean disableStatePlay(long id) throws Exception;
 
+    long addRace(long gameId, RaceDef raceDef) throws Exception;
+    RaceDef readRace(long id) throws Exception;
+    List<RaceDef> listRaces(long gameId) throws Exception;
+    boolean disableRace(long id) throws Exception;
 }

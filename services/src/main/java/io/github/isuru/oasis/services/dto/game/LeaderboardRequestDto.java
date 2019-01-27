@@ -22,6 +22,8 @@ public class LeaderboardRequestDto {
     private Integer bottomN;
     private LeaderboardType type;
 
+    private Integer topThreshold;
+
     public LeaderboardRequestDto(LeaderboardType type, long relativeTimeEpoch) {
         this.type = type;
         if (type == LeaderboardType.CURRENT_WEEK) {
@@ -45,6 +47,14 @@ public class LeaderboardRequestDto {
         this.setRangeStart(rangeStart);
         this.setRangeEnd(rangeEnd);
         this.type = LeaderboardType.CUSTOM;
+    }
+
+    public Integer getTopThreshold() {
+        return topThreshold;
+    }
+
+    public void setTopThreshold(Integer topThreshold) {
+        this.topThreshold = topThreshold;
     }
 
     public LeaderboardDef getLeaderboardDef() {

@@ -87,7 +87,7 @@ FROM
     INNER JOIN OA_TEAM oat ON oat.team_id = tbl.team_id
     INNER JOIN OA_TEAM_SCOPE oats ON oats.scope_id = tbl.team_scope_id
 
-<if(hasTeam||hasUser||isTopN||isBottomN)>
+<if(hasTeam||hasUser||isTopN||isBottomN||onlyFinalTops)>
 ) rankTbl
 
 WHERE

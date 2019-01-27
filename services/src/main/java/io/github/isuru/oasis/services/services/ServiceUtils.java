@@ -42,6 +42,10 @@ class ServiceUtils {
         return val == null ? def : val;
     }
 
+    static boolean isValid(Boolean val) {
+        return val != null && val;
+    }
+
     static boolean isValid(Integer val) {
         return val != null && val > 0;
     }
