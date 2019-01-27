@@ -18,6 +18,20 @@ public class Commons {
         return text == null || text.trim().isEmpty();
     }
 
+    public static double asDouble(Object val) {
+        if (val == null) {
+            return Double.NaN;
+        } else if (val instanceof Number) {
+            return ((Number) val).doubleValue();
+        } else {
+            try {
+                return Double.parseDouble(val.toString());
+            } catch (NumberFormatException e) {
+                return Double.NaN;
+            }
+        }
+    }
+
     public static String fixSearchQuery(String param) {
         if (param == null) {
             return null;

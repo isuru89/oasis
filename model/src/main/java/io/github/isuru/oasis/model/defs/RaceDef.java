@@ -12,6 +12,15 @@ public class RaceDef extends BaseDef {
     private Integer top;
 
     private Map<Integer, Double> rankPoints;
+    private String rankPointsExpression;
+
+    public String getRankPointsExpression() {
+        return rankPointsExpression;
+    }
+
+    public void setRankPointsExpression(String rankPointsExpression) {
+        this.rankPointsExpression = rankPointsExpression;
+    }
 
     public Map<Integer, Double> getRankPoints() {
         return rankPoints;

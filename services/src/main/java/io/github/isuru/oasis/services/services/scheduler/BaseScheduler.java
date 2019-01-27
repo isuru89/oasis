@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.services.scheduler;
 
+import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.RaceDef;
@@ -13,9 +14,12 @@ import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IGameService;
 import io.github.isuru.oasis.services.services.IProfileService;
+import io.github.isuru.oasis.services.utils.Commons;
+import org.mvel2.MVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -53,6 +57,10 @@ public abstract class BaseScheduler {
                 ScopingType scopingType = ScopingType.from(raceDef.getFromScope());
 
                 Pair<Long, Long> timeRange = deriveTimeRange(awardedAt, ZoneId.systemDefault());
+
+                Serializable expr = !Commons.isNullOrEmpty(raceDef.getRankPointsExpression())
+                        ? MVEL.compileExpression(raceDef.getRankPointsExpression())
+                        : null;
 
                 LeaderboardRequestDto requestDto = new LeaderboardRequestDto(timeRange.getValue0(), timeRange.getValue1());
                 requestDto.setLeaderboardDef(lb);
@@ -100,6 +108,8 @@ public abstract class BaseScheduler {
                     record.setRaceEndAt(timeRange.getValue1());
                     record.setRaceId(raceDef.getId());
                     record.setAwardedAt(awardedAt);
+
+                    calculateAwardPoints(record, raceDef, expr);
                 });
 
                 // insert winners to database
@@ -112,6 +122,26 @@ public abstract class BaseScheduler {
         return winnersByRace;
     }
 
+    private void calculateAwardPoints(RaceWinRecord winner, RaceDef raceDef, Serializable expr) {
+        if (expr != null) {
+            Map<String, Object> vars = new HashMap<>();
+            vars.put("$rank", winner.getRank());
+            vars.put("$points", winner.getPoints());
+            vars.put("$count", winner.getTotalCount());
+            vars.put("$winner", winner);
+
+            double awardPoints = Commons.asDouble(MVEL.executeExpression(expr, vars));
+            if (awardPoints == Double.NaN) {
+                awardPoints = DefaultEntities.DEFAULT_RACE_WIN_VALUE;
+            }
+            winner.setAwardedPoints(awardPoints);
+
+        } else {
+            winner.setAwardedPoints(raceDef.getRankPoints().getOrDefault(winner.getRank(),
+                    DefaultEntities.DEFAULT_RACE_WIN_VALUE));
+        }
+    }
+
     private List<RaceWinRecord> deriveGlobalWinners(IProfileService profileService,
                                                     List<GlobalLeaderboardRecordDto> recordOrder) throws Exception {
         List<RaceWinRecord> winners = new LinkedList<>();
@@ -122,8 +152,6 @@ public abstract class BaseScheduler {
             winnerRecord.setUserId(userId);
             winnerRecord.setPoints(row.getTotalPoints());
             winnerRecord.setTotalCount(row.getTotalCount());
-
-            LOG.info("  * User: {} is rank #{}", userId, row.getRankGlobal());
 
             UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(userId);
             winnerRecord.setTeamId(currentTeamOfUser.getTeamId());
@@ -179,7 +207,6 @@ public abstract class BaseScheduler {
                 winnerRecord.setTeamId(teamId.intValue());
                 winnerRecord.setTeamScopeId(row.getTeamScopeId().intValue());
             }
-            LOG.info("  * User: {} is rank #{}", userId, rank);
             winners.add(winnerRecord);
         }
         return winners;

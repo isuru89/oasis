@@ -13,6 +13,8 @@ public class DefaultEntities {
 
     public static final LeaderboardDef DEFAULT_LEADERBOARD_DEF;
 
+    public static final double DEFAULT_RACE_WIN_VALUE = 50.0;
+
     public static final String DEFAULT_TEAM_NAME = "default.default";
     public static final String DEFAULT_TEAM_SCOPE_NAME = "Default";
 
