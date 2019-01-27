@@ -370,6 +370,14 @@ public class GameDefServiceImpl implements IGameDefService {
     }
 
     @Override
+    public List<LeaderboardDef> listLeaderboardDefs() throws Exception {
+        return dao.getDefinitionDao().listDefinitions(OasisDefinition.LEADERBOARD.getTypeId())
+                .stream()
+                .map(this::wrapperToLeaderboard)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public LeaderboardDef readLeaderboardDef(long id) throws Exception {
         Checks.greaterThanZero(id, "id");
 

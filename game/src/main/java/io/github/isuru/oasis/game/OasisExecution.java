@@ -263,6 +263,13 @@ public class OasisExecution {
             pointNotyStream = pointNotyStream.union(challengePointStream);
         }
 
+        // award points from races
+        Optional<PointRule> racePointRule = findPointRule(EventNames.POINT_RULE_RACE_POINTS);
+        if (racePointRule.isPresent()) {
+            DataStream<PointNotification> raceStream = RaceOperator.createRacePipeline(inputSource, racePointRule.get());
+            pointNotyStream = pointNotyStream.union(raceStream);
+        }
+
         //
         // ---------------------------------------------------------------------------
         // SETUP SINKS

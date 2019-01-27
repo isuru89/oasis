@@ -261,7 +261,7 @@ public class Bootstrapping {
             compDef.setName(EventNames.POINT_RULE_COMPENSATION_NAME);
             compDef.setDisplayName("Rule to compensate points at any time.");
             compDef.setAmount("amount");
-            compDef.setEvent(EventNames.EVENT_COMPENSATE_POINTS);
+            compDef.setEvent(EventNames.OASIS_EVENT_COMPENSATE_POINTS);
             compDef.setCondition("true");
             gameDefService.addPointDef(gameId, compDef);
         }
@@ -287,7 +287,7 @@ public class Bootstrapping {
             PointDef challengePointDef = new PointDef();
             challengePointDef.setName(EventNames.POINT_RULE_CHALLENGE_POINTS);
             challengePointDef.setDisplayName("Award points for challenge winners.");
-            challengePointDef.setEvent(EventNames.OASIS_CHALLENGE_WINNER);
+            challengePointDef.setEvent(EventNames.OASIS_EVENT_CHALLENGE_WINNER);
             gameDefService.addPointDef(gameId, challengePointDef);
         }
 
@@ -295,10 +295,8 @@ public class Bootstrapping {
             // add race point award rule...
             PointDef raceAwardDef = new PointDef();
             raceAwardDef.setName(EventNames.POINT_RULE_RACE_POINTS);
-            raceAwardDef.setDisplayName("Rule to calculate points awarded from races.");
-            raceAwardDef.setAmount("amount");
-            raceAwardDef.setEvent(EventNames.EVENT_AWARD_BADGE);
-            raceAwardDef.setCondition("true");
+            raceAwardDef.setDisplayName("Award points for race winners.");
+            raceAwardDef.setEvent(EventNames.OASIS_EVENT_RACE_AWARD);
             gameDefService.addPointDef(gameId, raceAwardDef);
         }
     }

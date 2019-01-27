@@ -14,7 +14,7 @@ import io.github.isuru.oasis.services.dto.stats.UserMilestoneStatDto;
 import io.github.isuru.oasis.services.dto.stats.UserStatDto;
 import io.github.isuru.oasis.services.dto.stats.UserStateStatDto;
 import io.github.isuru.oasis.services.model.PurchasedItem;
-import io.github.isuru.oasis.services.model.enums.ScopingType;
+import io.github.isuru.oasis.model.defs.ScopingType;
 
 import java.util.List;
 

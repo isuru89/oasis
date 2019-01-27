@@ -1,0 +1,5 @@
+#userId,pointRule,subPointRuleId,points,eventId
+100,oasis.rules.point.race,,50,1
+100,oasis.rules.point.race,,100,3
+
+101,oasis.rules.point.race,,75,4

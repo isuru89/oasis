@@ -1,4 +1,4 @@
-<if(hasTeam||hasUser||isTopN||isBottomN)>
+<if(hasTeam||hasUser||isTopN||isBottomN||onlyFinalTops)>
 SELECT
     *
 FROM
@@ -22,19 +22,22 @@ FROM
         UNIX_TIMESTAMP(NOW()) * 1000 AS calculatedTime
     FROM
     (
+       <if(hasStates)>
         SELECT
           user_id,
           team_scope_id,
           team_id,
           SUM(totalCount) AS totalCount,
-          ROUND(SUM(totalPoints), 2) AS totalPoints
+          ROUND(<aggType>(totalPoints), 2) AS totalPoints
         FROM (
+       <endif>
+
             SELECT
                 user_id,
                 team_scope_id,
                 team_id,
                 COUNT(points) AS totalCount,
-                ROUND(SUM(points), 2) AS totalPoints
+                ROUND(<aggType>(points), 2) AS totalPoints
             FROM OA_POINT
             WHERE
                 is_active = 1
@@ -55,13 +58,15 @@ FROM
                 team_id,
                 team_scope_id,
                 user_id
+
+       <if(hasStates)>
         UNION ALL
             SELECT
                 user_id,
                 team_scope_id,
                 team_id,
                 COUNT(current_points) AS totalCount,
-                ROUND(SUM(current_points), 2) AS totalPoints
+                ROUND(<aggType>(current_points), 2) AS totalPoints
             FROM OA_STATE
             WHERE
                 is_active = 1
@@ -75,6 +80,8 @@ FROM
                 user_id, team_scope_id, team_id
         ) grpPoints
         GROUP BY grpPoints.user_id, grpPoints.team_scope_id, grpPoints.team_id
+       <endif>
+
     ) tbl
     INNER JOIN OA_USER oau ON oau.user_id = tbl.user_id
     INNER JOIN OA_TEAM oat ON oat.team_id = tbl.team_id
@@ -90,6 +97,14 @@ WHERE
 <endif>
 <if(hasUser)>
     AND rankTbl.userId = :userId
+<endif>
+
+<if(onlyFinalTops)>
+    <if(hasTeam)>
+    AND rankTbl.rankInTeam \<= :topThreshold
+    <else>
+    AND rankTbl.rankInTeamScope \<= :topThreshold
+    <endif>
 <endif>
 
 <if(isTopN)>

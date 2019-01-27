@@ -47,6 +47,7 @@ public interface IGameDefService {
 
     long addLeaderboardDef(long gameId, LeaderboardDef leaderboardDef) throws Exception;
     List<LeaderboardDef> listLeaderboardDefs(long gameId) throws Exception;
+    List<LeaderboardDef> listLeaderboardDefs() throws Exception;
     LeaderboardDef readLeaderboardDef(long id) throws Exception;
     boolean disableLeaderboardDef(long id) throws Exception;
 

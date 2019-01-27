@@ -1,17 +1,13 @@
 package io.github.isuru.oasis.model.defs;
 
-import java.util.List;
-
 public class RaceDef extends BaseDef {
 
-    private String fromScope;
-    private List<String> ruleIds;
-    private String aggregatorType;
+    private int leaderboardId;
 
-    private String timewindow = "weekly";
+    private String fromScope = ScopingType.TEAM_SCOPE.name();
+    private String timeWindow = "weekly";
 
     private Integer top;
-    private Integer bottom;
 
     public String getFromScope() {
         return fromScope;
@@ -21,28 +17,20 @@ public class RaceDef extends BaseDef {
         this.fromScope = fromScope;
     }
 
-    public List<String> getRuleIds() {
-        return ruleIds;
+    public int getLeaderboardId() {
+        return leaderboardId;
     }
 
-    public void setRuleIds(List<String> ruleIds) {
-        this.ruleIds = ruleIds;
+    public void setLeaderboardId(int leaderboardId) {
+        this.leaderboardId = leaderboardId;
     }
 
-    public String getAggregatorType() {
-        return aggregatorType;
+    public String getTimeWindow() {
+        return timeWindow;
     }
 
-    public void setAggregatorType(String aggregatorType) {
-        this.aggregatorType = aggregatorType;
-    }
-
-    public String getTimewindow() {
-        return timewindow;
-    }
-
-    public void setTimewindow(String timewindow) {
-        this.timewindow = timewindow;
+    public void setTimeWindow(String timeWindow) {
+        this.timeWindow = timeWindow;
     }
 
     public Integer getTop() {
@@ -53,11 +41,4 @@ public class RaceDef extends BaseDef {
         this.top = top;
     }
 
-    public Integer getBottom() {
-        return bottom;
-    }
-
-    public void setBottom(Integer bottom) {
-        this.bottom = bottom;
-    }
 }

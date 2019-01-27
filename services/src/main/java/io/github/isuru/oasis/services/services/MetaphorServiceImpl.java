@@ -168,7 +168,7 @@ public class MetaphorServiceImpl implements IMetaphorService {
                 eventsService.submitEvent(
                         dataCache.getInternalEventSourceToken().getToken(),
                         Maps.create()
-                                .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_SHOP_ITEM_SHARE)
+                                .put(Constants.FIELD_EVENT_TYPE, EventNames.OASIS_EVENT_SHOP_ITEM_SHARE)
                                 .put(Constants.FIELD_TIMESTAMP, currTs)
                                 .put(Constants.FIELD_USER, userBy)
                                 .put(Constants.FIELD_TEAM, teamId)

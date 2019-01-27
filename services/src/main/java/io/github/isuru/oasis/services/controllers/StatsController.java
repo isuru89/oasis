@@ -6,7 +6,7 @@ import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
 import io.github.isuru.oasis.services.dto.game.UserRankingsInRangeDto;
 import io.github.isuru.oasis.services.dto.stats.*;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.model.enums.ScopingType;
+import io.github.isuru.oasis.model.defs.ScopingType;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.services.IStatService;

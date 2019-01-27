@@ -95,7 +95,7 @@ public class DataCache {
 
         // read default leaderboard definition
         String defLbName = DefaultEntities.DEFAULT_LEADERBOARD_DEF.getName();
-        gameDefService.listLeaderboardDefs(defGameId).stream()
+        gameDefService.listLeaderboardDefs().stream()
                 .filter(l -> defLbName.equals(l.getName()))
                 .findFirst()
                 .ifPresent(l -> defaultLeaderboard = l);

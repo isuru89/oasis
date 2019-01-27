@@ -28,6 +28,14 @@ public class Commons {
                 .replace("[", "![");
     }
 
+    public static <T> T orDefault(T value, T defValue) {
+        if (value == null) {
+            return defValue;
+        } else {
+            return value;
+        }
+    }
+
     @Nullable
     public static <T> T firstNonNull(T... items) {
         if (items == null) {

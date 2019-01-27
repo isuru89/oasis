@@ -4,8 +4,10 @@ import io.github.isuru.oasis.injector.BaseConsumer;
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.DefWrapper;
+import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.OasisDefinition;
 import io.github.isuru.oasis.model.defs.RaceDef;
+import io.github.isuru.oasis.model.defs.ScopingType;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -26,7 +28,7 @@ abstract class BaseScheduler implements Job {
         for (DefWrapper wrapper : defWrappers) {
             try {
                 RaceDef raceDef = BaseConsumer.MAPPER.readValue(wrapper.getContent(), RaceDef.class);
-                if (timePeriod.equalsIgnoreCase(raceDef.getTimewindow())) {
+                if (timePeriod.equalsIgnoreCase(raceDef.getTimeWindow())) {
                     raceDefList.add(raceDef);
                 }
             } catch (IOException e) {
@@ -37,12 +39,12 @@ abstract class BaseScheduler implements Job {
     }
 
     boolean validateTeamAndScope(RaceDef raceDef, IOasisDao dao) throws Exception {
-        Integer maxN = Math.max(raceDef.getTop() == null ? 0 : raceDef.getTop(),
-                raceDef.getBottom() == null ? 0 : raceDef.getBottom());
+        Integer maxN = raceDef.getTop() == null ? 0 : raceDef.getTop();
+        ScopingType scope = ScopingType.from(raceDef.getFromScope());
 
-        if ("teamScope".equalsIgnoreCase(raceDef.getFromScope())) {
+        if (scope == ScopingType.TEAM_SCOPE) {
             return true;
-        } else if ("team".equalsIgnoreCase(raceDef.getFromScope())) {
+        } else if (scope == ScopingType.TEAM) {
             Map<String, Object> map = new HashMap<>();
             map.put("teamId", 0);
             map.put("offset", 0);
@@ -79,14 +81,28 @@ abstract class BaseScheduler implements Job {
 
             List<RaceDef> raceDefList = readRaces(gameId, dao, "weekly");
             for (RaceDef raceDef : raceDefList) {
+                DefWrapper lbWrapper = dao.getDefinitionDao().readDefinition(raceDef.getLeaderboardId());
+                LeaderboardDef leaderboardDef;
+                if (lbWrapper != null) {
+                    leaderboardDef = BaseConsumer.MAPPER.readValue(lbWrapper.getContent(), LeaderboardDef.class);
+                } else {
+                    LOG.warn("No leaderboard is found by referenced id '{}' in race definition '{}'!",
+                            raceDef.getLeaderboardId(), raceDef.getId());
+                    continue;
+                }
+
+                ScopingType scopingType = ScopingType.from(raceDef.getFromScope());
+
                 Map<String, Object> templateData = new HashMap<>();
                 templateData.put("hasUser", false);
                 templateData.put("hasTeam", false);
                 templateData.put("hasTimeRange", true);
-                templateData.put("hasInclusions", raceDef.getRuleIds() != null && !raceDef.getRuleIds().isEmpty());
+                templateData.put("hasInclusions", leaderboardDef.getRuleIds() != null && !leaderboardDef.getRuleIds().isEmpty());
+                templateData.put("hasExclusions", leaderboardDef.getExcludeRuleIds() != null && !leaderboardDef.getExcludeRuleIds().isEmpty());
                 templateData.put("isTopN", false);
                 templateData.put("isBottomN", false);
-                templateData.put("hasFinalTops", true);
+                templateData.put("hasStates", leaderboardDef.hasStates());
+                templateData.put("onlyFinalTops", true);
 
                 long currMs = System.currentTimeMillis();
                 Pair<Long, Long> timeRange = deriveTimeRange(currMs, ZoneId.systemDefault());
@@ -95,14 +111,12 @@ abstract class BaseScheduler implements Job {
                 data.put("rangeStart", timeRange.getValue0());
                 data.put("rangeEnd", timeRange.getValue1());
                 data.put("topN", raceDef.getTop());
-                data.put("bottomN", raceDef.getBottom());
-                data.put("ruleIds", raceDef.getRuleIds());
-                data.put("aggType", raceDef.getAggregatorType());
+                data.put("ruleIds", leaderboardDef.getRuleIds());
+                data.put("aggType", leaderboardDef.getAggregatorType());
                 data.put("topThreshold", raceDef.getTop());
 
                 String qFile = "leaderboard/raceGlobalLeaderboard";
-                if ("teamScope".equalsIgnoreCase(raceDef.getFromScope())
-                        || "team".equalsIgnoreCase(raceDef.getFromScope())) {
+                if (scopingType == ScopingType.TEAM_SCOPE || scopingType == ScopingType.TEAM) {
                     qFile = "leaderboard/raceTeamLeaderboard";
                 }
 

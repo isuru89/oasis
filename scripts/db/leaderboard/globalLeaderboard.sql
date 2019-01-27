@@ -17,15 +17,18 @@ FROM
         UNIX_TIMESTAMP(NOW()) * 1000 AS calculatedTime
     FROM
     (
-        SELECT
-          user_id,
-          SUM(totalCount) AS totalCount,
-          ROUND(SUM(totalPoints), 2) AS totalPoints
-        FROM (
+        <if(hasStates)>
+            SELECT
+              user_id,
+              SUM(totalCount) AS totalCount,
+              ROUND(<aggType>(totalPoints), 2) AS totalPoints
+            FROM (
+        <endif>
+
             SELECT
                 user_id,
                 COUNT(points) AS totalCount,
-                ROUND(SUM(points), 2) AS totalPoints
+                ROUND(<aggType>(points), 2) AS totalPoints
             FROM OA_POINT
             WHERE
                 is_active = 1
@@ -42,22 +45,26 @@ FROM
                 <endif>
             GROUP BY
                 user_id
-        UNION ALL
-            SELECT
-                user_id,
-                COUNT(current_points) AS totalCount,
-                ROUND(SUM(current_points), 2) AS totalPoints
-            FROM OA_STATE
-            WHERE
-                is_active = 1
-                <if(hasTimeRange)>
-                AND changed_at >= :rangeStart
-                AND changed_at \< :rangeEnd
-                <endif>
-            GROUP BY
-                user_id
-        ) AS groupedPoints
-        GROUP BY groupedPoints.user_id
+
+        <if(hasStates)>
+            UNION ALL
+                SELECT
+                    user_id,
+                    COUNT(current_points) AS totalCount,
+                    ROUND(<aggType>(current_points), 2) AS totalPoints
+                FROM OA_STATE
+                WHERE
+                    is_active = 1
+                    <if(hasTimeRange)>
+                    AND changed_at >= :rangeStart
+                    AND changed_at \< :rangeEnd
+                    <endif>
+                GROUP BY
+                    user_id
+            ) AS groupedPoints
+            GROUP BY groupedPoints.user_id
+        <endif>
+
     ) tbl
     INNER JOIN OA_USER oau
         ON oau.user_id = tbl.user_id

@@ -5,11 +5,30 @@ package io.github.isuru.oasis.model;
  */
 public enum AggregatorType {
 
-    SUM,
-    COUNT,
+    SUM(true),
+    COUNT(true),
 
-    AVG,
-    MIN,
-    MAX
+    AVG(true),
+    MIN(false),
+    MAX(false);
 
-}
+    AggregatorType(boolean multiAggregatable) {
+        this.multiAggregatable = multiAggregatable;
+    }
+
+    // whether this aggregation type can handle multiple heterogeneous tables at once
+    // for eg: for now OA_POINT, and OA_STATE
+    private final boolean multiAggregatable;
+
+    public static AggregatorType from(String text) {
+        for (AggregatorType val : values()) {
+            if (val.name().toLowerCase().equals(text)) {
+                return val;
+            }
+        }
+        return null;
+    }
+
+    public boolean isMultiAggregatable() {
+        return multiAggregatable;
+    }}

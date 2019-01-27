@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.services;
 
+import io.github.isuru.oasis.model.AggregatorType;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
@@ -64,7 +65,7 @@ public class GameServiceImpl implements IGameService {
         }
 
         Map<String, Object> data = Maps.create()
-                .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_COMPENSATE_POINTS)
+                .put(Constants.FIELD_EVENT_TYPE, EventNames.OASIS_EVENT_COMPENSATE_POINTS)
                 .put(Constants.FIELD_TIMESTAMP, awardDto.getTs() == null ? System.currentTimeMillis() : awardDto.getTs())
                 .put(Constants.FIELD_USER, awardDto.getToUser())
                 .put(Constants.FIELD_TEAM, teamId)
@@ -101,7 +102,7 @@ public class GameServiceImpl implements IGameService {
         }
 
         Map<String, Object> data = Maps.create()
-                .put(Constants.FIELD_EVENT_TYPE, EventNames.EVENT_AWARD_BADGE)
+                .put(Constants.FIELD_EVENT_TYPE, EventNames.OASIS_EVENT_AWARD_BADGE)
                 .put(Constants.FIELD_TIMESTAMP, awardDto.getTs() == null ? System.currentTimeMillis() : awardDto.getTs())
                 .put(Constants.FIELD_USER, awardDto.getToUser())
                 .put(Constants.FIELD_TEAM, teamId)
@@ -129,6 +130,8 @@ public class GameServiceImpl implements IGameService {
                 .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
                 .put("isTopN", ServiceUtils.isValid(request.getTopN()))
                 .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
+                .put("onlyFinalTops", false)
+                .put("hasStates", ldef != null && ldef.hasStates())
                 .build();
 
 
@@ -141,6 +144,7 @@ public class GameServiceImpl implements IGameService {
 
         if (ldef != null) {
             dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
+                    .put("aggType", Commons.orDefault(ldef.getAggregatorType(), AggregatorType.SUM.name()))
                     .put("excludeRuleIds", ldef.getExcludeRuleIds());
         }
 
@@ -165,6 +169,8 @@ public class GameServiceImpl implements IGameService {
                 .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
                 .put("isTopN", ServiceUtils.isValid(request.getTopN()))
                 .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
+                .put("onlyFinalTops", false)
+                .put("hasStates", ldef != null && ldef.hasStates())
                 .build();
 
         TeamProfile teamProfile = profileService.readTeam(teamId);
@@ -180,6 +186,7 @@ public class GameServiceImpl implements IGameService {
 
         if (ldef != null) {
             dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
+                    .put("aggType", Commons.orDefault(ldef.getAggregatorType(), AggregatorType.SUM.name()))
                     .put("excludeRuleIds", ldef.getExcludeRuleIds());
         }
 
@@ -204,6 +211,8 @@ public class GameServiceImpl implements IGameService {
                 .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
                 .put("isTopN", ServiceUtils.isValid(request.getTopN()))
                 .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
+                .put("onlyFinalTops", false)
+                .put("hasStates", ldef != null && ldef.hasStates())
                 .build();
 
         Maps.MapBuilder dataBuilder = Maps.create()
@@ -216,6 +225,7 @@ public class GameServiceImpl implements IGameService {
 
         if (ldef != null) {
             dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
+                    .put("aggType", Commons.orDefault(ldef.getAggregatorType(), AggregatorType.SUM.name()))
                     .put("excludeRuleIds", ldef.getExcludeRuleIds());
         }
 

@@ -6,7 +6,7 @@ import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownReqDto;
 import io.github.isuru.oasis.services.dto.stats.PointBreakdownReqDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.model.enums.ScopingType;
+import io.github.isuru.oasis.model.defs.ScopingType;
 import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import spark.Request;

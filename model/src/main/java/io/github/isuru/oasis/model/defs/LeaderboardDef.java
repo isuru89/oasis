@@ -1,5 +1,7 @@
 package io.github.isuru.oasis.model.defs;
 
+import io.github.isuru.oasis.model.AggregatorType;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +14,30 @@ public class LeaderboardDef extends BaseDef {
     private List<String> ruleIds;
     private List<String> excludeRuleIds;
     private String orderBy;
+
+    private String aggregatorType = AggregatorType.SUM.name();
+    private boolean includeStatePoints = true;
+
+    public boolean hasStates() {
+        AggregatorType from = AggregatorType.from(aggregatorType);
+        return isIncludeStatePoints() && from != null && from.isMultiAggregatable();
+    }
+
+    public boolean isIncludeStatePoints() {
+        return includeStatePoints;
+    }
+
+    public void setIncludeStatePoints(boolean includeStatePoints) {
+        this.includeStatePoints = includeStatePoints;
+    }
+
+    public String getAggregatorType() {
+        return aggregatorType;
+    }
+
+    public void setAggregatorType(String aggregatorType) {
+        this.aggregatorType = aggregatorType;
+    }
 
     public List<String> getRuleIds() {
         return ruleIds;

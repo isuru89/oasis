@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS OA_RACE (
     race_end_at     BIGINT,
     rank_pos        INT,
     points          FLOAT(4),
+    total_count     INT,
     awarded_at      BIGINT,
     game_id         INT,
     is_active       TINYINT(1) DEFAULT 1,

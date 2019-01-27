@@ -21,7 +21,7 @@ public class ChallengeOperator {
                 .filter(new FilterFunction<Event>() {
                     @Override
                     public boolean filter(Event event) {
-                        return Utils.eventEquals(event, EventNames.OASIS_CHALLENGE_WINNER);
+                        return Utils.eventEquals(event, EventNames.OASIS_EVENT_CHALLENGE_WINNER);
                     }
                 }).process(new ChallengeProcess(pointRule, pointOutputTag)).uid("oasis-challenge-process");
 

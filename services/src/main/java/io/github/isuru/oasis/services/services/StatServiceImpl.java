@@ -27,7 +27,7 @@ import io.github.isuru.oasis.services.dto.stats.UserStateStatDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.PurchasedItem;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.model.enums.ScopingType;
+import io.github.isuru.oasis.model.defs.ScopingType;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -177,7 +177,7 @@ public class StatServiceImpl implements IStatService {
 
         return ServiceUtils.toList(dao.executeQuery(
                 Q.STATS.GET_USER_BADGE_STAT,
-                Maps.create().put("userId", userId).put("since", since).build(),
+                Maps.create("userId", userId, "since", since),
                 UserBadgeStatDto.class,
                 tdata));
     }
