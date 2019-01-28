@@ -60,5 +60,10 @@ public class DailyScheduler extends BaseScheduler {
                 localDate.plusDays(1L).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
     }
 
+    @Override
+    protected String filterTimeWindow() {
+        return "daily";
+    }
+
 
 }

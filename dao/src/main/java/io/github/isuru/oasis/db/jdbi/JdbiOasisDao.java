@@ -425,6 +425,22 @@ public class JdbiOasisDao implements IOasisDao {
                 throw new DbException(e);
             }
         }
+
+        @Override
+        public List<Integer> batchInsert(String queryId, List<Map<String, Object>> records) throws DbException {
+            String query = queryRepo.fetchQuery(queryId);
+
+            try {
+                    PreparedBatch insert = handle.prepareBatch(query);
+                    for (Map<String, Object> record : records) {
+                        insert = insert.bindMap(record).add();
+                    }
+                    return Arrays.stream(insert.execute()).boxed().collect(Collectors.toList());
+
+            } catch (Exception e) {
+                throw new DbException(e);
+            }
+        }
     }
 
     public static <EX extends Throwable> void propagateIfInstOf(Throwable t, Class<EX> type) throws EX {

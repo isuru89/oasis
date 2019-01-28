@@ -21,10 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class BaseScheduler {
@@ -32,6 +29,8 @@ public abstract class BaseScheduler {
     private static final Logger LOG = LoggerFactory.getLogger(BaseScheduler.class);
 
     protected abstract Pair<Long, Long> deriveTimeRange(long ms, ZoneId zoneId);
+
+    protected abstract String filterTimeWindow();
 
     protected Map<Long, List<RaceWinRecord>> runForGame(IProfileService profileService,
                               IGameDefService gameDefService,
@@ -44,75 +43,18 @@ public abstract class BaseScheduler {
             Map<Long, Long> teamCountMap = loadTeamStatus(profileService);
             Map<Long, Long> teamScopeCountMap = loadTeamScopeStatus(profileService);
 
-            List<RaceDef> raceDefList = readRaces(gameDefService, gameId, "weekly");
+            List<RaceDef> raceDefList = readRaces(gameDefService, gameId, filterTimeWindow());
             LOG.info(" #{} race(s) found for game #{}", raceDefList.size(), gameId);
             for (RaceDef raceDef : raceDefList) {
-                LeaderboardDef lb = gameDefService.readLeaderboardDef(raceDef.getLeaderboardId());
-                if (lb == null) {
-                    LOG.warn("No leaderboard is found by referenced id '{}' in race definition '{}'!",
-                            raceDef.getLeaderboardId(), raceDef.getId());
-                    continue;
-                }
+                List<RaceWinRecord> winners = calcWinnersForRace(raceDef,
+                        awardedAt,
+                        gameId,
+                        gameDefService,
+                        gameService,
+                        profileService,
+                        teamCountMap,
+                        teamScopeCountMap);
 
-                ScopingType scopingType = ScopingType.from(raceDef.getFromScope());
-
-                Pair<Long, Long> timeRange = deriveTimeRange(awardedAt, ZoneId.systemDefault());
-
-                Serializable expr = !Commons.isNullOrEmpty(raceDef.getRankPointsExpression())
-                        ? MVEL.compileExpression(raceDef.getRankPointsExpression())
-                        : null;
-
-                LeaderboardRequestDto requestDto = new LeaderboardRequestDto(timeRange.getValue0(), timeRange.getValue1());
-                requestDto.setLeaderboardDef(lb);
-                requestDto.setTopThreshold(raceDef.getTop());
-
-
-//                Map<String, Object> templateData = new HashMap<>();
-//                templateData.put("hasUser", false);
-//                templateData.put("hasTeam", false);
-//                templateData.put("hasTimeRange", true);
-//                templateData.put("hasInclusions", lb.getRuleIds() != null && !lb.getRuleIds().isEmpty());
-//                templateData.put("hasExclusions", lb.getExcludeRuleIds() != null && !lb.getExcludeRuleIds().isEmpty());
-//                templateData.put("isTopN", false);
-//                templateData.put("isBottomN", false);
-//                templateData.put("hasStates", lb.hasStates());
-//                templateData.put("onlyFinalTops", true);
-//
-//
-//                Map<String, Object> data = new HashMap<>();
-//                data.put("rangeStart", timeRange.getValue0());
-//                data.put("rangeEnd", timeRange.getValue1());
-//                data.put("topN", raceDef.getTop());
-//                data.put("ruleIds", lb.getRuleIds());
-//                data.put("aggType", lb.getAggregatorType());
-//                data.put("topThreshold", raceDef.getTop());
-
-                // @TODO consider sending conditional statement as well
-
-                LOG.info(" - Executing leaderboard for race #{} between @[{}, {}]...",
-                        raceDef.getId(), timeRange.getValue0(), timeRange.getValue1());
-
-                List<RaceWinRecord> winners;
-                if (scopingType == ScopingType.TEAM || scopingType == ScopingType.TEAM_SCOPE) {
-                    List<TeamLeaderboardRecordDto> recordOrder = gameService.readTeamLeaderboard(requestDto);
-                    winners = deriveTeamWinners(recordOrder, scopingType, raceDef, teamCountMap, teamScopeCountMap);
-                } else {
-                    List<GlobalLeaderboardRecordDto> recordOrder = gameService.readGlobalLeaderboard(requestDto);
-                    winners = deriveGlobalWinners(profileService, recordOrder);
-                }
-
-                // append other information to the record
-                winners.forEach(record -> {
-                    record.setGameId(gameId);
-                    record.setRaceStartAt(timeRange.getValue0());
-                    record.setRaceEndAt(timeRange.getValue1());
-                    record.setRaceId(raceDef.getId());
-                    record.setAwardedAt(awardedAt);
-
-                    calculateAwardPoints(record, raceDef, expr);
-                });
-
-                // insert winners to database
                 winnersByRace.put(raceDef.getId(), winners);
             }
 
@@ -120,6 +62,63 @@ public abstract class BaseScheduler {
             LOG.error("Error while reading race definitions from database!", e);
         }
         return winnersByRace;
+    }
+
+    List<RaceWinRecord> calcWinnersForRace(RaceDef raceDef,
+                                           long awardedAt,
+                                           long gameId,
+                                           IGameDefService gameDefService,
+                                           IGameService gameService,
+                                           IProfileService profileService,
+                                           Map<Long, Long> teamCountMap,
+                                           Map<Long, Long> teamScopeCountMap) throws Exception {
+
+        LeaderboardDef lb = gameDefService.readLeaderboardDef(raceDef.getLeaderboardId());
+        if (lb == null) {
+            LOG.warn("No leaderboard is found by referenced id '{}' in race definition '{}'!",
+                    raceDef.getLeaderboardId(), raceDef.getId());
+            return new ArrayList<>();
+        }
+
+        ScopingType scopingType = ScopingType.from(raceDef.getFromScope());
+
+        Pair<Long, Long> timeRange = deriveTimeRange(awardedAt, ZoneId.systemDefault());
+
+        Serializable expr = !Commons.isNullOrEmpty(raceDef.getRankPointsExpression())
+                ? MVEL.compileExpression(raceDef.getRankPointsExpression())
+                : null;
+
+        LeaderboardRequestDto requestDto = new LeaderboardRequestDto(timeRange.getValue0(), timeRange.getValue1());
+        requestDto.setLeaderboardDef(lb);
+        requestDto.setTopThreshold(raceDef.getTop());
+
+        // @TODO consider sending conditional statement as well
+
+        LOG.info(" - Executing leaderboard for race #{} between @[{}, {}]...",
+                raceDef.getId(), timeRange.getValue0(), timeRange.getValue1());
+
+        List<RaceWinRecord> winners;
+        if (scopingType == ScopingType.TEAM || scopingType == ScopingType.TEAM_SCOPE) {
+            List<TeamLeaderboardRecordDto> recordOrder = gameService.readTeamLeaderboard(requestDto);
+            winners = deriveTeamWinners(recordOrder, scopingType, raceDef, teamCountMap, teamScopeCountMap);
+        } else {
+            List<GlobalLeaderboardRecordDto> recordOrder = gameService.readGlobalLeaderboard(requestDto);
+            winners = deriveGlobalWinners(profileService, recordOrder, timeRange.getValue1());
+        }
+
+        // append other information to the record
+        winners.forEach(record -> {
+            record.setGameId(gameId);
+            record.setRaceStartAt(timeRange.getValue0());
+            record.setRaceEndAt(timeRange.getValue1());
+            record.setRaceId(raceDef.getId());
+            record.setAwardedAt(awardedAt);
+
+            calculateAwardPoints(record, raceDef, expr);
+        });
+
+        // insert winners to database
+        return winners;
     }
 
     private void calculateAwardPoints(RaceWinRecord winner, RaceDef raceDef, Serializable expr) {
@@ -143,7 +142,8 @@ public abstract class BaseScheduler {
     }
 
     private List<RaceWinRecord> deriveGlobalWinners(IProfileService profileService,
-                                                    List<GlobalLeaderboardRecordDto> recordOrder) throws Exception {
+                                                    List<GlobalLeaderboardRecordDto> recordOrder,
+                                                    long atTime) throws Exception {
         List<RaceWinRecord> winners = new LinkedList<>();
         for (GlobalLeaderboardRecordDto row : recordOrder) {
             RaceWinRecord winnerRecord = new RaceWinRecord();
@@ -153,7 +153,7 @@ public abstract class BaseScheduler {
             winnerRecord.setPoints(row.getTotalPoints());
             winnerRecord.setTotalCount(row.getTotalCount());
 
-            UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(userId);
+            UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(userId, true, atTime);
             winnerRecord.setTeamId(currentTeamOfUser.getTeamId());
             winnerRecord.setTeamScopeId(currentTeamOfUser.getScopeId());
             winnerRecord.setRank(row.getRankGlobal());
@@ -183,9 +183,14 @@ public abstract class BaseScheduler {
                 rank = row.getRankInTeamScope();
 
                 long playerCount = teamScopeCountMap.get(teamScopeId);
-                if (playerCount == 1) {
+                if (playerCount <= 1) {     // we don't award when there is only one player
+                    LOG.warn(" * No player in team scope #{} will be awarded, " +
+                            "because this team scope has only 1 player!", teamScopeId);
                     continue;
-                } else if (playerCount < raceDef.getTop() && rank != 1) {
+                } else if (playerCount < raceDef.getTop() && rank > 1) {
+                    LOG.warn(" * Only the top player will be awarded points, " +
+                            "because this team scope #{} has players less than top {}!",
+                            teamScopeId, raceDef.getTop());
                     continue;
                 }
 
@@ -198,9 +203,14 @@ public abstract class BaseScheduler {
 
                 long playerCount = teamCountMap.get(teamId);
                 if (playerCount <= 1) { // no awards. skip.
+                    LOG.warn(" * No player in team #{} will be awarded, " +
+                            "because this team has only 1 player!", teamId);
                     continue;
-                } else if (playerCount < raceDef.getTop() && rank != 1) {   // @TODO review
+                } else if (playerCount < raceDef.getTop() && rank > 1) {
                     // only the top will be awarded points
+                    LOG.warn(" * Only the top player will be awarded points, " +
+                                    "because this team #{} has players less than top {}!",
+                            teamId, raceDef.getTop());
                     continue;
                 }
 
@@ -213,7 +223,7 @@ public abstract class BaseScheduler {
     }
 
 
-    private Map<Long, Long> loadTeamStatus(IProfileService profileService) throws Exception {
+    Map<Long, Long> loadTeamStatus(IProfileService profileService) throws Exception {
         List<UserCountStat> teamList = profileService.listUserCountInTeams();
         Map<Long, Long> teamCounts = new HashMap<>();
         for (UserCountStat statusStat : teamList) {
@@ -222,7 +232,7 @@ public abstract class BaseScheduler {
         return teamCounts;
     }
 
-    private Map<Long, Long> loadTeamScopeStatus(IProfileService profileService) throws Exception {
+    Map<Long, Long> loadTeamScopeStatus(IProfileService profileService) throws Exception {
         List<UserCountStat> teamList = profileService.listUserCountInTeamScopes();
         Map<Long, Long> teamScopeCounts = new HashMap<>();
         for (UserCountStat statusStat : teamList) {
@@ -233,7 +243,7 @@ public abstract class BaseScheduler {
 
     private List<RaceDef> readRaces(IGameDefService gameDefService, long gameId, String timePeriod) throws Exception {
         return gameDefService.listRaces(gameId).stream()
-                .filter(r -> timePeriod.equals(r.getTimeWindow()))
+                .filter(r -> timePeriod.equalsIgnoreCase(r.getTimeWindow()))
                 .collect(Collectors.toList());
     }
 

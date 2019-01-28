@@ -34,7 +34,6 @@ public class WeeklyScheduler extends BaseScheduler {
     @Autowired
     private IProfileService profileService;
 
-
     @Scheduled(cron = "1 0 0 * * MON")
     public void runWeeklyAtMidnight() throws Exception {
         long awardedAt = System.currentTimeMillis();
@@ -62,5 +61,10 @@ public class WeeklyScheduler extends BaseScheduler {
         long rangeStart = startT.toInstant().toEpochMilli();
         long rangeEnd = startT.plusDays(7).toInstant().toEpochMilli();
         return Pair.of(rangeStart, rangeEnd);
+    }
+
+    @Override
+    protected String filterTimeWindow() {
+        return "weekly";
     }
 }

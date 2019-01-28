@@ -64,4 +64,9 @@ public class MonthlyScheduler extends BaseScheduler {
                 .toInstant(ZoneOffset.UTC).toEpochMilli();
         return Pair.of(start, end);
     }
+
+    @Override
+    protected String filterTimeWindow() {
+        return "monthly";
+    }
 }

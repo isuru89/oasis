@@ -3,36 +3,41 @@ package io.github.isuru.oasis.services.services;
 import io.github.isuru.oasis.model.AggregatorType;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
+import io.github.isuru.oasis.model.defs.RaceDef;
+import io.github.isuru.oasis.model.events.ChallengeEvent;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.services.DataCache;
-import io.github.isuru.oasis.services.dto.game.BadgeAwardDto;
-import io.github.isuru.oasis.services.dto.game.GlobalLeaderboardRecordDto;
-import io.github.isuru.oasis.services.dto.game.LeaderboardRequestDto;
-import io.github.isuru.oasis.services.dto.game.PointAwardDto;
-import io.github.isuru.oasis.services.dto.game.TeamLeaderboardRecordDto;
+import io.github.isuru.oasis.services.dto.game.*;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.RaceWinRecord;
 import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.services.scheduler.CustomScheduler;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Connection;
+import java.util.*;
 
 /**
  * @author iweerarathna
  */
 @Service("gameService")
 public class GameServiceImpl implements IGameService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GameServiceImpl.class);
+
+    @Autowired
+    private IGameDefService gameDefService;
 
     @Autowired
     private IProfileService profileService;
@@ -122,6 +127,28 @@ public class GameServiceImpl implements IGameService {
     }
 
     @Override
+    public List<RaceWinRecord> calculateRaceWinners(long gameId, long raceId,
+                                                    RaceCalculationDto calculationDto) throws Exception {
+        GameDef gameDef = gameDefService.readGame(gameId);
+        Optional<RaceDef> raceOpt = gameDefService.listRaces(gameId).stream()
+                .filter(r -> r.getId() == raceId)
+                .findFirst();
+
+        if (!raceOpt.isPresent()) {
+            throw new InputValidationException("No race is found by id #" + raceId + "!");
+        }
+
+        CustomScheduler customScheduler = new CustomScheduler(calculationDto.getStartTime(),
+                calculationDto.getEndTime(),
+                gameDefService,
+                profileService,
+                this);
+
+        long ts = System.currentTimeMillis();
+        return customScheduler.runCustomInvoke(raceOpt.get(), gameDef.getId(), ts);
+    }
+
+    @Override
     public void addRaceWinners(long gameId, long raceId, List<RaceWinRecord> winners) throws Exception {
         List<Map<String, Object>> records = new ArrayList<>();
         winners.forEach(winner -> {
@@ -142,7 +169,35 @@ public class GameServiceImpl implements IGameService {
             records.add(rec);
         });
 
-        dao.executeBatchInsert(Q.GAME.ADD_RACE_AWARD, records);
+        // prepare for events...
+        String token = getInternalToken();
+        long ts = System.currentTimeMillis();
+
+        List<Map<String, Object>> events = new ArrayList<>();
+        winners.forEach(winner -> {
+            Map<String, Object> event = new HashMap<>();
+            // event.put(Constants.FIELD_ID, UUID.randomUUID().toString());  // no id is needed for now
+            event.put(Constants.FIELD_GAME_ID, gameId);
+            event.put(Constants.FIELD_EVENT_TYPE, EventNames.OASIS_EVENT_RACE_AWARD);
+            event.put(Constants.FIELD_USER, winner.getUserId());
+            event.put(Constants.FIELD_TIMESTAMP, ts);
+            event.put(Constants.FIELD_TEAM, winner.getTeamId());
+            event.put(Constants.FIELD_SCOPE, winner.getTeamScopeId());
+
+            event.put(ChallengeEvent.KEY_DEF_ID, winner.getRaceId());
+            event.put(ChallengeEvent.KEY_POINTS, winner.getAwardedPoints());
+
+            events.add(event);
+        });
+
+
+        dao.runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
+            List<Integer> ids = input.batchInsert(Q.GAME.ADD_RACE_AWARD, records);
+
+            LOG.info("Sending #{} race events to game engine...", events.size());
+            eventsService.submitEvents(token, events);
+            return ids;
+        });
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.model.db;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,4 +17,6 @@ public interface JdbcTransactionCtx {
 
     Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws DbException;
     Long executeInsert(String queryId, Map<String, Object> data, Map<String, Object> templateData, String keyColumn) throws DbException;
+
+    List<Integer> batchInsert(String queryId, List<Map<String, Object>> records) throws DbException;
 }

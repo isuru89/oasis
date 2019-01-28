@@ -10,7 +10,8 @@ public class RaceDef extends BaseDef {
     public static final Set<String> FROM_SCOPES = new HashSet<>(Arrays.asList(ScopingType.GLOBAL.name(),
             ScopingType.TEAM.name(), ScopingType.TEAM_SCOPE.name()));
 
-    public static final Set<String> TIME_WINDOWS = new HashSet<>(Arrays.asList("WEEKLY", "MONTHLY", "DAILY"));
+    public static final Set<String> TIME_WINDOWS = new HashSet<>(
+            Arrays.asList("WEEKLY", "MONTHLY", "DAILY", "CUSTOM"));
 
     private int leaderboardId;
 
