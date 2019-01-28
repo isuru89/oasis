@@ -4,6 +4,7 @@ import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.RaceDef;
+import io.github.isuru.oasis.model.defs.ScopingType;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -56,7 +57,7 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
     }
 
     @Test
-    public void testRaceAddFailures() throws Exception {
+    public void testRaceAddFailures() {
 
         {
             // invalid or insufficient parameters
@@ -81,24 +82,13 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
                     .isInstanceOf(InputValidationException.class);
 
             Assertions.assertThatThrownBy(
-                    () -> ds.addRace(gameId, create("scholar", "")))
+                    () -> ds.addRace(gameId, create("lb1", "")))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addRace(gameId, create("scholar", null)))
+                    () -> ds.addRace(gameId, create("lb1", null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addRace(gameId, create("scholar", "\t ")))
-                    .isInstanceOf(InputValidationException.class);
-
-            // invalid leaderboard ids
-            Assertions.assertThatThrownBy(
-                    () -> ds.addRace(gameId, create("lb1", "Leaderboard-1", -1)))
-                    .isInstanceOf(InputValidationException.class);
-            Assertions.assertThatThrownBy(
-                    () -> ds.addRace(gameId, create("lb1", "Leaderboard-1", 0)))
-                    .isInstanceOf(InputValidationException.class);
-            Assertions.assertThatThrownBy(
-                    () -> ds.addRace(gameId, create("lb1", "Leaderboard-1", 9999)))
+                    () -> ds.addRace(gameId, create("lb1", "\t ")))
                     .isInstanceOf(InputValidationException.class);
 
             {
@@ -108,6 +98,7 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
                         .isInstanceOf(InputValidationException.class);
 
                 {
+                    // invalid top value
                     RaceDef r2 = clone(race1);
                     r2.setTop(0);
                     Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r2))
@@ -126,6 +117,67 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
                     Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r2))
                             .isInstanceOf(InputValidationException.class);
                 }
+
+                // field 'fromScope' cannot null or empty, and must be one of valid values
+                {
+                    RaceDef r2 = clone(race1);
+                    r2.setTop(10);
+                    addRankPointMap(r2);
+                    r2.setFromScope(null);
+                    Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r2))
+                            .isInstanceOf(InputValidationException.class);
+
+                    RaceDef r3 = clone(r2);
+                    r3.setFromScope("  ");
+                    Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r3))
+                            .isInstanceOf(InputValidationException.class);
+
+                    RaceDef r4 = clone(r2);
+                    r4.setFromScope("unknown");
+                    Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r4))
+                            .isInstanceOf(InputValidationException.class);
+                }
+
+                // field 'timeWindow' cannot be null or empty, must be one of valid values
+                {
+                    RaceDef r2 = clone(race1);
+                    r2.setTop(10);
+                    addRankPointMap(r2);
+                    r2.setFromScope(ScopingType.TEAM_SCOPE.name());
+                    r2.setTimeWindow(null);
+                    Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r2))
+                            .isInstanceOf(InputValidationException.class);
+
+                    RaceDef r3 = clone(r2);
+                    r3.setTimeWindow("  ");
+                    Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r3))
+                            .isInstanceOf(InputValidationException.class);
+
+                    RaceDef r4 = clone(r2);
+                    r4.setTimeWindow("unknown");
+                    Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r4))
+                            .isInstanceOf(InputValidationException.class);
+                }
+
+                // invalid leaderboard ids
+                {
+                    RaceDef r2 = clone(race1);
+                    r2.setLeaderboardId(0);
+                    r2.setTop(10);
+                    r2.setRankPointsExpression("$points");
+                    Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r2))
+                            .isInstanceOf(InputValidationException.class);
+
+                    RaceDef r3 = clone(r2);
+                    r3.setLeaderboardId(-1);
+                    Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r3))
+                            .isInstanceOf(InputValidationException.class);
+
+                    RaceDef r4 = clone(r2);
+                    r4.setLeaderboardId(9999);
+                    Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r4))
+                            .isInstanceOf(InputValidationException.class);
+                }
             }
         }
     }
@@ -134,7 +186,7 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
     public void testRaceAdds() throws Exception {
         int size = getTotalCount(gameId);
 
-        RaceDef def = create("reputations", "Total Reputation", l1.getId().intValue());
+        RaceDef def = create("lb1", "Leaderboard 1", l1.getId().intValue());
         def.setTop(10);
         def.setRankPointsExpression("(10 - $rank) * 10");
 
@@ -161,9 +213,9 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
 
             // with description and display name
             RaceDef cloned = clone(def);
-            cloned.setName("reputation-new");
-            cloned.setDisplayName("Total Reputation - Updated");
-            cloned.setDescription("Sum of reputation a user has gathered forever.");
+            cloned.setName("lb1-new");
+            cloned.setDisplayName("Leaderboard 1 - Updated");
+            cloned.setDescription("Sum of total reputations.");
 
             long kpiId = addAssert(gameId, cloned);
             readAssert(kpiId, cloned);
@@ -183,7 +235,7 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
             ln1.setDisplayName("Sample 1");
             ln1.setRuleIds(Arrays.asList("a", "b"));
             ln1.setOrderBy("desc");
-            ln1.setAggregatorType("SUM");
+            ln1.setAggregatorType("sum");
             long l = ds.addLeaderboardDef(gameNew.getId(), ln1);
             ln1 = ds.readLeaderboardDef(l);
 
@@ -202,8 +254,8 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
         {
             int size = getTotalCount(gameId);
 
-            // points with a condition
-            RaceDef def = create("reputation", "Increase reputation on Votes", l1.getId().intValue());
+            // creates with a default values
+            RaceDef def = create("lb1", "Leaderboard 1", l1.getId().intValue());
             def.setTop(20);
             addRankPointMap(def);
 
@@ -215,10 +267,10 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
         }
 
         {
-            // points with a condition class
+            // create with team_scope and daily
             int size = getTotalCount(gameId);
 
-            RaceDef def = create("reputation-down", "Decrease reputation on down votes");
+            RaceDef def = create("lb1-down", "Leaderboard 2", l2.getId().intValue());
             def.setTop(10);
             def.setRankPointsExpression("$points");
             def.setTimeWindow("daily");
@@ -230,10 +282,10 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
         }
 
         {
-            // create a point definition with awarding additional points to a different user
+            // create with custom scope and timewindow
             int size = getTotalCount(gameId);
 
-            RaceDef def = create("bounty-reward", "Award Reputation for Bounty question");
+            RaceDef def = create("l2-v2", "Leaderboard 1", l2.getId().intValue());
             def.setTop(10);
             def.setRankPointsExpression("(10-$rank) * 20");
             def.setTimeWindow("monthly");
@@ -245,11 +297,14 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
         }
 
         {
-            // a single event may generate multiple points
-            // a rule can be created to award bonus points based on total points of a event
+            // create with upper case
             int size = getTotalCount(gameId);
 
-            RaceDef def = create("reputation-bonus", "Bonus reputation on up votes");
+            RaceDef def = create("l1-v2", "Leaderboard 2", l1.getId().intValue());
+            def.setTop(10);
+            def.setRankPointsExpression("(10-$rank) * 20");
+            def.setTimeWindow("WEEKLY");
+            def.setFromScope("GLOBAL");
 
             readAssert(addAssert(gameId, def), def);
 
@@ -364,7 +419,9 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
         def.setFromScope(other.getFromScope());
         def.setLeaderboardId(other.getLeaderboardId());
         def.setRankPointsExpression(other.getRankPointsExpression());
-        def.setRankPoints(other.getRankPoints());
+        if (other.getRankPoints() != null) {
+            def.setRankPoints(new HashMap<>(other.getRankPoints()));
+        }
         def.setTimeWindow(other.getTimeWindow());
         def.setTop(other.getTop());
         return def;

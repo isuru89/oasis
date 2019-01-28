@@ -1,8 +1,16 @@
 package io.github.isuru.oasis.model.defs;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class RaceDef extends BaseDef {
+
+    public static final Set<String> FROM_SCOPES = new HashSet<>(Arrays.asList(ScopingType.GLOBAL.name(),
+            ScopingType.TEAM.name(), ScopingType.TEAM_SCOPE.name()));
+
+    public static final Set<String> TIME_WINDOWS = new HashSet<>(Arrays.asList("WEEKLY", "MONTHLY", "DAILY"));
 
     private int leaderboardId;
 
