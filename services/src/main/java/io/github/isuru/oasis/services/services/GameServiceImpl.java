@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna
@@ -192,11 +193,16 @@ public class GameServiceImpl implements IGameService {
 
 
         dao.runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
-            List<Integer> ids = input.batchInsert(Q.GAME.ADD_RACE_AWARD, records);
+            List<List<Map<String, Object>>> batches = Commons.batches(records, 100)
+                    .collect(Collectors.toList());
+
+            for (List<Map<String, Object>> aBatch : batches) {
+                input.batchInsert(Q.GAME.ADD_RACE_AWARD, aBatch);
+            }
 
             LOG.info("Sending #{} race events to game engine...", events.size());
             eventsService.submitEvents(token, events);
-            return ids;
+            return true;
         });
     }
 
