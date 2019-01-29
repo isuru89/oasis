@@ -10,6 +10,25 @@ public class UserBadgeStatDto {
     private String subBadgeId;
     private int badgeCount;
 
+    private Integer badgeAttr;
+    private String badgeAttrDisplayName;
+
+    public Integer getBadgeAttr() {
+        return badgeAttr;
+    }
+
+    public void setBadgeAttr(Integer badgeAttr) {
+        this.badgeAttr = badgeAttr;
+    }
+
+    public String getBadgeAttrDisplayName() {
+        return badgeAttrDisplayName;
+    }
+
+    public void setBadgeAttrDisplayName(String badgeAttrDisplayName) {
+        this.badgeAttrDisplayName = badgeAttrDisplayName;
+    }
+
     public int getUserId() {
         return userId;
     }

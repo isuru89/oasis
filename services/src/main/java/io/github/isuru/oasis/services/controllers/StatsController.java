@@ -36,10 +36,10 @@ public class StatsController {
         return statService.readUserGameStats(userId, since);
     }
 
-    @GetMapping("/stats/user/{userId}/badges")
+    @PostMapping("/stats/user/{userId}/badges")
     public List<UserBadgeStatDto> getUserBadgesStats(@PathVariable("userId") long userId,
-                                                     @RequestParam(value = "since", defaultValue = "0") long since) throws Exception {
-        return statService.readUserBadges(userId, since);
+                                                     @RequestBody UserBadgeStatReq req) throws Exception {
+        return statService.readUserBadgesSummary(userId, req);
     }
 
     @GetMapping("/stats/user/{userId}/milestones")

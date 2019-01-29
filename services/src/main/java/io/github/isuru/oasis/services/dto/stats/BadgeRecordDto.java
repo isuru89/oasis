@@ -12,6 +12,24 @@ public class BadgeRecordDto extends OasisRecordDto {
 
     private Integer badgeId;
     private String subBadgeId;
+    private Integer badgeAttr;
+    private String badgeAttrDisplayName;
+
+    public String getBadgeAttrDisplayName() {
+        return badgeAttrDisplayName;
+    }
+
+    public void setBadgeAttrDisplayName(String badgeAttrDisplayName) {
+        this.badgeAttrDisplayName = badgeAttrDisplayName;
+    }
+
+    public Integer getBadgeAttr() {
+        return badgeAttr;
+    }
+
+    public void setBadgeAttr(Integer badgeAttr) {
+        this.badgeAttr = badgeAttr;
+    }
 
     public Long getTimeStart() {
         return timeStart;

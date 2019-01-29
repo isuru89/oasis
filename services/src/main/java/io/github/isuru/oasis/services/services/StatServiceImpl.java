@@ -11,19 +11,7 @@ import io.github.isuru.oasis.services.dto.game.RankingRecord;
 import io.github.isuru.oasis.services.dto.game.TeamLeaderboardRecordDto;
 import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
 import io.github.isuru.oasis.services.dto.game.UserRankingsInRangeDto;
-import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownReqDto;
-import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownResDto;
-import io.github.isuru.oasis.services.dto.stats.BadgeRecordDto;
-import io.github.isuru.oasis.services.dto.stats.ChallengeInfoDto;
-import io.github.isuru.oasis.services.dto.stats.ChallengeWinnerDto;
-import io.github.isuru.oasis.services.dto.stats.PointBreakdownReqDto;
-import io.github.isuru.oasis.services.dto.stats.PointBreakdownResDto;
-import io.github.isuru.oasis.services.dto.stats.PointRecordDto;
-import io.github.isuru.oasis.services.dto.stats.TeamHistoryRecordDto;
-import io.github.isuru.oasis.services.dto.stats.UserBadgeStatDto;
-import io.github.isuru.oasis.services.dto.stats.UserMilestoneStatDto;
-import io.github.isuru.oasis.services.dto.stats.UserStatDto;
-import io.github.isuru.oasis.services.dto.stats.UserStateStatDto;
+import io.github.isuru.oasis.services.dto.stats.*;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.PurchasedItem;
 import io.github.isuru.oasis.services.model.UserTeam;
@@ -169,15 +157,23 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
-    public List<UserBadgeStatDto> readUserBadges(long userId, long since) throws Exception {
+    public List<UserBadgeStatDto> readUserBadgesSummary(long userId, UserBadgeStatReq req) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
         Map<String, Object> tdata = new HashMap<>();
-        tdata.put("hasSince", since > 0);
+        tdata.put("hasRangeStart", ServiceUtils.isValid(req.getStartTime()));
+        tdata.put("hasRangeEnd", ServiceUtils.isValid(req.getEndTime()));
+        tdata.put("hasBadgeId", ServiceUtils.isValid(req.getBadgeId()));
 
         return ServiceUtils.toList(dao.executeQuery(
                 Q.STATS.GET_USER_BADGE_STAT,
-                Maps.create("userId", userId, "since", since),
+                Maps.create().put("userId", userId)
+                        .put("rangeStart", req.getStartTime())
+                        .put("rangeEnd", req.getEndTime())
+                        .put("badgeId", req.getBadgeId())
+                        .put("size", req.getSize())
+                        .put("offset", req.getOffset())
+                        .build(),
                 UserBadgeStatDto.class,
                 tdata));
     }

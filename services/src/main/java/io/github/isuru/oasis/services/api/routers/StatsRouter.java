@@ -55,7 +55,8 @@ public class StatsRouter extends BaseRouters {
     private Object userBadgesStat(Request req, Response res) throws Exception {
         long userId = asPLong(req, "userId");
         long since = asQLong(req, "since", 0);
-        return getApiService().getStatService().readUserBadges(userId, since);
+        //return getApiService().getStatService().readUserBadges(userId, since);
+        return null;
     }
 
     private Object userMilestoneStat(Request req, Response res) throws Exception {
