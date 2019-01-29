@@ -3,6 +3,12 @@ WITH currentTeams AS (
         user_id,
         MAX(since) AS since
     FROM OA_TEAM_USER
+    WHERE
+        is_approved = 1
+        AND
+        :atTime >= since
+        AND
+        (until IS NULL OR until > :atTime)
     GROUP BY user_id
 )
 

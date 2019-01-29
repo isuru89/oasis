@@ -27,8 +27,8 @@ public interface IProfileService {
     List<UserProfile> findUser(String email, String name) throws Exception;
 
     List<UserProfile> listUsers(long teamId, long offset, long size) throws Exception;
-    List<UserCountStat> listUserCountInTeams() throws Exception;
-    List<UserCountStat> listUserCountInTeamScopes() throws Exception;
+    List<UserCountStat> listUserCountInTeams(long atTime) throws Exception;
+    List<UserCountStat> listUserCountInTeamScopes(long atTime) throws Exception;
 
     long addTeam(TeamProfileAddDto teamProfile) throws Exception;
     TeamProfile readTeam(long teamId) throws Exception;

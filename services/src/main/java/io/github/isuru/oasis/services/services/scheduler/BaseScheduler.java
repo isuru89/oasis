@@ -40,8 +40,8 @@ public abstract class BaseScheduler {
         Map<Long, List<RaceWinRecord>> winnersByRace = new HashMap<>();
 
         try {
-            Map<Long, Long> teamCountMap = loadTeamStatus(profileService);
-            Map<Long, Long> teamScopeCountMap = loadTeamScopeStatus(profileService);
+            Map<Long, Long> teamCountMap = loadTeamStatus(profileService, awardedAt);
+            Map<Long, Long> teamScopeCountMap = loadTeamScopeStatus(profileService, awardedAt);
 
             List<RaceDef> raceDefList = readRaces(gameDefService, gameId, filterTimeWindow());
             LOG.info(" #{} race(s) found for game #{}", raceDefList.size(), gameId);
@@ -222,8 +222,8 @@ public abstract class BaseScheduler {
     }
 
 
-    Map<Long, Long> loadTeamStatus(IProfileService profileService) throws Exception {
-        List<UserCountStat> teamList = profileService.listUserCountInTeams();
+    Map<Long, Long> loadTeamStatus(IProfileService profileService, long atTime) throws Exception {
+        List<UserCountStat> teamList = profileService.listUserCountInTeams(atTime);
         Map<Long, Long> teamCounts = new HashMap<>();
         for (UserCountStat statusStat : teamList) {
             teamCounts.put(statusStat.getId(), statusStat.getTotalUsers());
@@ -231,8 +231,8 @@ public abstract class BaseScheduler {
         return teamCounts;
     }
 
-    Map<Long, Long> loadTeamScopeStatus(IProfileService profileService) throws Exception {
-        List<UserCountStat> teamList = profileService.listUserCountInTeamScopes();
+    Map<Long, Long> loadTeamScopeStatus(IProfileService profileService, long atTime) throws Exception {
+        List<UserCountStat> teamList = profileService.listUserCountInTeamScopes(atTime);
         Map<Long, Long> teamScopeCounts = new HashMap<>();
         for (UserCountStat statusStat : teamList) {
             teamScopeCounts.put(statusStat.getId(), statusStat.getTotalUsers());

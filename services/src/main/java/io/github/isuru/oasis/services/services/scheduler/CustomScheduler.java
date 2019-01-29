@@ -44,8 +44,8 @@ public class CustomScheduler extends BaseScheduler {
 
         LOG.info("  Calculating All Race Winners for race {}", raceDef.getId());
 
-        Map<Long, Long> teamCountMap = loadTeamStatus(profileService);
-        Map<Long, Long> teamScopeCountMap = loadTeamScopeStatus(profileService);
+        Map<Long, Long> teamCountMap = loadTeamStatus(profileService, awardedAt);
+        Map<Long, Long> teamScopeCountMap = loadTeamScopeStatus(profileService, awardedAt);
 
         List<RaceWinRecord> winners = calcWinnersForRace(raceDef,
                 awardedAt,
