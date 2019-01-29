@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.model.defs;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author iweerarathna
@@ -19,7 +20,16 @@ public class BadgeDef extends BaseDef {
     private String within;
     private Double awardPoints;
     private int maxBadges = Integer.MAX_VALUE;
+    private Integer attribute;
     private List<SubBadgeDef> subBadges;
+
+    public Integer getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(Integer attribute) {
+        this.attribute = attribute;
+    }
 
     public Integer getCountThreshold() {
         return countThreshold;
@@ -125,6 +135,16 @@ public class BadgeDef extends BaseDef {
         this.maxBadges = maxBadges;
     }
 
+    public Optional<SubBadgeDef> findSubBadge(String name) {
+        if (subBadges == null) {
+            return Optional.empty();
+        } else {
+            return subBadges.stream()
+                    .filter(s -> s.getName().equals(name))
+                    .findFirst();
+        }
+    }
+
     public static class SubBadgeDef {
         private Integer streak;
         private String id;
@@ -135,6 +155,15 @@ public class BadgeDef extends BaseDef {
         private Double awardPoints;
         private Integer level;
         private String within;
+        private Integer attribute;
+
+        public Integer getAttribute() {
+            return attribute;
+        }
+
+        public void setAttribute(Integer attribute) {
+            this.attribute = attribute;
+        }
 
         public String getWithin() {
             return within;

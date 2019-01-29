@@ -3,23 +3,112 @@ package io.github.isuru.oasis.services.services;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.model.FeatureAttr;
 import io.github.isuru.oasis.services.utils.Maps;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class GameDefServiceTest extends BaseDefServiceTest {
 
     @Before
     public void beforeEach() throws Exception {
         verifyDefsAreEmpty();
+    }
+
+    @Test
+    public void testAddAttrFailures() {
+        {
+            // invalid game ids
+            Assertions.assertThatThrownBy(() -> ds.addAttribute(0, new FeatureAttr()))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(() -> ds.addAttribute(-1, new FeatureAttr()))
+                    .isInstanceOf(InputValidationException.class);
+
+            // non existing game id
+            Assertions.assertThatThrownBy(() -> ds.addAttribute(9, new FeatureAttr()))
+                    .isInstanceOf(InputValidationException.class);
+
+            // empty name
+            Assertions.assertThatThrownBy(() -> ds.addAttribute(1,
+                    new FeatureAttr(null, "Gold", 1)))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(() -> ds.addAttribute(1,
+                    new FeatureAttr("", "Gold", 1)))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(() -> ds.addAttribute(1,
+                    new FeatureAttr(" ", "Gold", 1)))
+                    .isInstanceOf(InputValidationException.class);
+
+            // empty display name
+            Assertions.assertThatThrownBy(() -> ds.addAttribute(1,
+                    new FeatureAttr("gold", null, 1)))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(() -> ds.addAttribute(1,
+                    new FeatureAttr("gold", "", 1)))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(() -> ds.addAttribute(1,
+                    new FeatureAttr("gold", "\t", 1)))
+                    .isInstanceOf(InputValidationException.class);
+
+            // non-positive priority
+            Assertions.assertThatThrownBy(() -> ds.addAttribute(1,
+                    new FeatureAttr("gold", "Gold", 0)))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(() -> ds.addAttribute(1,
+                    new FeatureAttr("gold", "Gold", -1)))
+                    .isInstanceOf(InputValidationException.class);
+        }
+    }
+
+    @Test
+    public void testListAttributesFailures() {
+        {
+            Assertions.assertThatThrownBy(() -> ds.listAttributes(0))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(() -> ds.listAttributes(-1))
+                    .isInstanceOf(InputValidationException.class);
+        }
+    }
+
+    @Test
+    public void testAddAttributes() throws Exception {
+        GameDef game = createGame("Stackoverflow", "Stack Badges Game");
+        long gameId = ds.createGame(game, new GameOptionsDto());
+        Assert.assertTrue(gameId > 0);
+
+        {
+            FeatureAttr attr = new FeatureAttr("gold", "Gold", 1);
+            long id = ds.addAttribute(gameId, attr);
+            Assert.assertTrue(id > 0);
+
+            List<FeatureAttr> featureAttrs = ds.listAttributes(gameId);
+            Assertions.assertThat(featureAttrs).isNotNull().isNotEmpty()
+                    .hasSize(1);
+            FeatureAttr addedAttr = featureAttrs.get(0);
+            Assert.assertEquals(id, addedAttr.getId().longValue());
+            Assert.assertEquals(attr.getName(), addedAttr.getName());
+            Assert.assertEquals(attr.getDisplayName(), addedAttr.getDisplayName());
+            Assert.assertEquals(attr.getPriority(), addedAttr.getPriority());
+        }
+
+        {
+            FeatureAttr attr = new FeatureAttr("silver", "Silver", 2);
+            long id = ds.addAttribute(gameId, attr);
+            Assert.assertTrue(id > 0);
+
+            List<FeatureAttr> featureAttrs = ds.listAttributes(gameId);
+            Assertions.assertThat(featureAttrs).isNotNull().isNotEmpty()
+                    .hasSize(2);
+            FeatureAttr addedAttr = featureAttrs.get(1);
+            Assert.assertEquals(id, addedAttr.getId().longValue());
+            Assert.assertEquals(attr.getName(), addedAttr.getName());
+            Assert.assertEquals(attr.getDisplayName(), addedAttr.getDisplayName());
+            Assert.assertEquals(attr.getPriority(), addedAttr.getPriority());
+        }
     }
 
     @Test

@@ -10,11 +10,15 @@ import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.defs.RaceDef;
 import io.github.isuru.oasis.model.defs.StateDef;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
+import io.github.isuru.oasis.services.model.FeatureAttr;
 
 import java.util.List;
 import java.util.Map;
 
 public interface IGameDefService {
+
+    long addAttribute(long gameId, FeatureAttr featureAttr) throws Exception;
+    List<FeatureAttr> listAttributes(long gameId) throws Exception;
 
     long createGame(GameDef gameDef, GameOptionsDto optionsDto) throws Exception;
     GameDef readGame(long gameId) throws Exception;

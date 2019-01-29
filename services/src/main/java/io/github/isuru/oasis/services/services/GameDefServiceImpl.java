@@ -18,9 +18,7 @@ import io.github.isuru.oasis.model.defs.StateDef;
 import io.github.isuru.oasis.services.Bootstrapping;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.TeamScope;
-import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -28,10 +26,7 @@ import io.github.isuru.oasis.services.utils.RUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +43,33 @@ public class GameDefServiceImpl implements IGameDefService {
 
     @Autowired
     private IProfileService profileService;
+
+    @Override
+    public long addAttribute(long gameId, FeatureAttr featureAttr) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.nonNullOrEmpty(featureAttr.getName(), "name");
+        Checks.nonNullOrEmpty(featureAttr.getDisplayName(), "displayName");
+        Checks.greaterThanZero(featureAttr.getPriority(), "priority");
+
+        GameDef gameDef = readGame(gameId);
+
+        Map<String, Object> data = Maps.create()
+                .put("name", featureAttr.getName())
+                .put("displayName", featureAttr.getDisplayName())
+                .put("priority", featureAttr.getPriority())
+                .put("gameId", gameDef.getId())
+                .build();
+
+        return dao.executeInsert(Q.DEF.ADD_ATTRIBUTE, data, "id");
+    }
+
+    @Override
+    public List<FeatureAttr> listAttributes(long gameId) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+
+        return ServiceUtils.toList(dao.executeQuery(
+                Q.DEF.LIST_ATTRIBUTE, null, FeatureAttr.class));
+    }
 
     @Override
     public long createGame(GameDef gameDef, GameOptionsDto optionsDto) throws Exception {
@@ -214,39 +236,87 @@ public class GameDefServiceImpl implements IGameDefService {
         wrapper.setContent(RUtils.toStr(badge, mapper));
         wrapper.setGameId(gameId);
 
-        return dao.getDefinitionDao().addDefinition(wrapper);
+        long id = dao.getDefinitionDao().addDefinition(wrapper);
+
+        // add badge attributes
+        List<Map<String, Object>> attrs = new ArrayList<>();
+        if (ServiceUtils.isValid(badge.getAttribute())) {
+            attrs.add(Maps.create()
+                    .put("defId", id)
+                    .put("defSubId", "")
+                    .put("attributeId", badge.getAttribute()).build());
+        }
+
+        if (!Commons.isNullOrEmpty(badge.getSubBadges())) {
+            for (BadgeDef.SubBadgeDef subBadgeDef : badge.getSubBadges()) {
+                if (ServiceUtils.isValid(subBadgeDef.getAttribute())) {
+                    attrs.add(Maps.create()
+                            .put("defId", id)
+                            .put("defSubId", subBadgeDef.getName())
+                            .put("attributeId", subBadgeDef.getAttribute()).build());
+                }
+            }
+        }
+
+        if (!attrs.isEmpty()) {
+            dao.executeBatchInsert(Q.DEF.ADD_DEF_ATTRIBUTE, attrs);
+        }
+        return id;
     }
 
     @Override
     public List<BadgeDef> listBadgeDefs() throws Exception {
-        return dao.getDefinitionDao().listDefinitions(OasisDefinition.BADGE.getTypeId())
+        List<BadgeDef> badges = dao.getDefinitionDao().listDefinitions(OasisDefinition.BADGE.getTypeId())
                 .stream()
                 .map(this::wrapperToBadge)
                 .collect(Collectors.toList());
+
+        Iterable<DefinitionAttr> defAttrs = dao.executeQuery(Q.DEF.LIST_ALL_DEF_ATTRIBUTE,
+                null,
+                DefinitionAttr.class);
+        matchAttrsWithBadges(defAttrs, badges);
+        return badges;
     }
 
     @Override
     public List<BadgeDef> listBadgeDefs(long gameId) throws Exception {
         Checks.greaterThanZero(gameId, "gameId");
 
-        return dao.getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.BADGE.getTypeId())
+        List<BadgeDef> badges = dao.getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.BADGE.getTypeId())
                 .stream()
                 .map(this::wrapperToBadge)
                 .collect(Collectors.toList());
+
+        Iterable<DefinitionAttr> defAttrs = dao.executeQuery(Q.DEF.LIST_DEF_ATTRIBUTE_GAME,
+                Maps.create("gameId", gameId), DefinitionAttr.class);
+        matchAttrsWithBadges(defAttrs, badges);
+        return badges;
     }
 
     @Override
     public BadgeDef readBadgeDef(long id) throws Exception {
         Checks.greaterThanZero(id, "id");
 
-        return wrapperToBadge(dao.getDefinitionDao().readDefinition(id));
+        BadgeDef badgeDef = wrapperToBadge(dao.getDefinitionDao().readDefinition(id));
+
+        // read feature attr
+        Iterable<DefinitionAttr> definitionAttrs = dao.executeQuery(Q.DEF.LIST_DEF_ATTRIBUTE,
+                Maps.create("defId", id),
+                DefinitionAttr.class);
+        matchAttrsWithBadges(definitionAttrs, Collections.singletonList(badgeDef));
+        return badgeDef;
     }
 
     @Override
     public boolean disableBadgeDef(long id) throws Exception {
         Checks.greaterThanZero(id, "id");
 
-        return dao.getDefinitionDao().disableDefinition(id);
+        boolean success = dao.getDefinitionDao().disableDefinition(id);
+        if (success) {
+            // delete all attrs
+            dao.executeCommand(Q.DEF.DISABLE_DEF_ATTRIBUTES, Maps.create("defId", id));
+        }
+        return success;
     }
 
     @Override
@@ -587,6 +657,22 @@ public class GameDefServiceImpl implements IGameDefService {
     private LeaderboardDef wrapperToLeaderboard(DefWrapper wrapper) {
         return Converters.toLeaderboardDef(wrapper,
                 wrp -> RUtils.toObj(wrp.getContent(), LeaderboardDef.class, mapper));
+    }
+
+    private void matchAttrsWithBadges(Iterable<DefinitionAttr> definitionAttrs,
+                                      Collection<BadgeDef> badgeDefs) {
+        for (DefinitionAttr attr : definitionAttrs) {
+            for (BadgeDef badgeDef : badgeDefs) {
+                if (badgeDef.getId().equals(attr.getDefId())) {
+                    if (Commons.isNullOrEmpty(attr.getDefSubId())) {
+                        badgeDef.setAttribute(attr.getAttrId());
+                    } else {
+                        badgeDef.findSubBadge(attr.getDefSubId())
+                                .ifPresent(subBadgeDef -> subBadgeDef.setAttribute(attr.getAttrId()));
+                    }
+                }
+            }
+        }
     }
 
 }

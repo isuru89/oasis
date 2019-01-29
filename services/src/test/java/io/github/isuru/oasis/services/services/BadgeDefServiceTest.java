@@ -109,6 +109,26 @@ public class BadgeDefServiceTest extends BaseDefServiceTest {
     }
 
     @Test
+    public void testBadgeWithAttrs() throws Exception {
+        GameDef savedGame = createSavedGame("so", "Stackoverflow");
+        long gameId = savedGame.getId();
+        int size = ds.listBadgeDefs(gameId).size();
+
+        BadgeDef def = create("scholar", "Scholar");
+        {
+            long defId = addAssert(gameId, def);
+
+            BadgeDef addedDef = readAssert(defId);
+            Assert.assertEquals(defId, addedDef.getId().longValue());
+            Assert.assertEquals(def.getName(), addedDef.getName());
+            Assert.assertEquals(def.getDisplayName(), addedDef.getDisplayName());
+
+            // one more should be added
+            Assertions.assertThat(ds.listBadgeDefs(gameId).size()).isEqualTo(size + 1);
+        }
+    }
+
+    @Test
     public void testBadgeTypeAdds() throws Exception {
         // @TODO write tests for different types of badges
     }

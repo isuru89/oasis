@@ -79,6 +79,15 @@ final class Q {
 
     static class DEF {
         private static final String PATH = "def/";
+        private static final String ATTR = PATH + "attr/";
+
+        static final String ADD_ATTRIBUTE = ATTR + "addAttributes";
+        static final String ADD_DEF_ATTRIBUTE = ATTR + "addDefAttribute";
+        static final String DISABLE_DEF_ATTRIBUTES = ATTR + "disableDefAttributes";
+        static final String LIST_ATTRIBUTE = ATTR + "listAttributes";
+        static final String LIST_DEF_ATTRIBUTE = ATTR + "listDefAttributes";
+        static final String LIST_ALL_DEF_ATTRIBUTE = ATTR + "listAllDefAttributes";
+        static final String LIST_DEF_ATTRIBUTE_GAME = ATTR + "listDefAttributesOfGame";
     }
 
     static class GAME {

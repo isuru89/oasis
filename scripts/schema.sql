@@ -127,6 +127,26 @@ CREATE TABLE IF NOT EXISTS OA_DEFINITION (
 );
 ALTER TABLE OA_DEFINITION ADD UNIQUE (game_id, kind, name);
 
+CREATE TABLE IF NOT EXISTS OA_ATTRIBUTE (
+    id              INT PRIMARY KEY AUTO_INCREMENT,
+    name            VARCHAR(32),
+    display_name    VARCHAR(64),
+    priority        INT,
+    game_id         INT,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS OA_DEFINITION_ATTR (
+    def_id          INT,
+    def_sub_id      VARCHAR(64),
+    attribute_id    INT,
+    is_active       TINYINT(1) DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+ALTER TABLE OA_DEFINITION_ATTR ADD PRIMARY KEY (def_id, def_sub_id);
+
 CREATE TABLE IF NOT EXISTS OA_USER (
     user_id         INT PRIMARY KEY AUTO_INCREMENT,
     user_name       VARCHAR(512),
