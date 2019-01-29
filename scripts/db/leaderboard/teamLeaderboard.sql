@@ -1,4 +1,4 @@
-<if(hasTeam||hasUser||isTopN||isBottomN||onlyFinalTops)>
+<if(hasTeam||hasUser||isTopN||onlyFinalTops||hasPointThreshold)>
 SELECT
     *
 FROM
@@ -87,7 +87,7 @@ FROM
     INNER JOIN OA_TEAM oat ON oat.team_id = tbl.team_id
     INNER JOIN OA_TEAM_SCOPE oats ON oats.scope_id = tbl.team_scope_id
 
-<if(hasTeam||hasUser||isTopN||isBottomN||onlyFinalTops)>
+<if(hasTeam||hasUser||isTopN||onlyFinalTops||hasPointThreshold)>
 ) rankTbl
 
 WHERE
@@ -97,6 +97,10 @@ WHERE
 <endif>
 <if(hasUser)>
     AND rankTbl.userId = :userId
+<endif>
+
+<if(hasPointThreshold)>
+    AND rankTbl.totalPoints >= :pointThreshold
 <endif>
 
 <if(onlyFinalTops)>
@@ -114,15 +118,6 @@ WHERE
     ORDER BY rankTbl.rankTeamScope ASC
     <endif>
 LIMIT :topN
-<endif>
-
-<if(isBottomN)>
-    <if(hasTeam)>
-    ORDER BY rankTbl.rankTeam DESC
-    <else>
-    ORDER BY rankTbl.rankTeamScope DESC
-    <endif>
-LIMIT :bottomN
 <endif>
 
 <endif>

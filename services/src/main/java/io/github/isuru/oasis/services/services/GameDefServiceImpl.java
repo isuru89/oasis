@@ -502,7 +502,8 @@ public class GameDefServiceImpl implements IGameDefService {
         Checks.nonNullOrEmpty(raceDef.getName(), "name");
         Checks.nonNullOrEmpty(raceDef.getDisplayName(), "displayName");
         Checks.greaterThanZero(raceDef.getLeaderboardId(), "leaderboardId");
-        Checks.validate(raceDef.getTop() != null && raceDef.getTop() > 0, "top");
+        Checks.havingBoth(ServiceUtils.isValid(raceDef.getTop()),
+                ServiceUtils.isValid(raceDef.getMinPointThreshold()), "top", "minPointThreshold");
         Checks.onlyOneOf(!Commons.isNullOrEmpty(raceDef.getRankPointsExpression()),
                 !Commons.isNullOrEmpty(raceDef.getRankPoints()), "rankPointExpression", "rankPointMap");
         Checks.nonNullOrEmpty(raceDef.getFromScope(), "fromScope");

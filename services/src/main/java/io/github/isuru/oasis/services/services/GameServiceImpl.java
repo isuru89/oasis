@@ -205,34 +205,13 @@ public class GameServiceImpl implements IGameService {
         checkLeaderboardRequest(request);
 
         LeaderboardDef ldef = request.getLeaderboardDef();
-        Map<String, Object> templateData = Maps.create()
-                .put("hasUser", ServiceUtils.isValid(request.getForUser()))
-                .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
-                .put("hasInclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getRuleIds()))
-                .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
-                .put("isTopN", ServiceUtils.isValid(request.getTopN()))
-                .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
-                .put("onlyFinalTops", ServiceUtils.isValid(request.getTopThreshold()))
-                .put("hasStates", ldef != null && ldef.hasStates())
-                .build();
+        Map<String, Object> templateData = createLeaderboardTemplateMap(request, ldef);
 
-
-        Maps.MapBuilder dataBuilder = Maps.create()
-                .put("userId", request.getForUser())
-                .put("rangeStart", request.getRangeStart())
-                .put("rangeEnd", request.getRangeEnd())
-                .put("topN", request.getTopN())
-                .put("bottomN", request.getBottomN());
-
-        if (ldef != null) {
-            dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
-                    .put("aggType", Commons.orDefault(ldef.getAggregatorType(), AggregatorType.SUM.name()))
-                    .put("excludeRuleIds", ldef.getExcludeRuleIds());
-        }
+        Map<String, Object> data = createLeaderboardParams(request, ldef);
 
         return ServiceUtils.toList(dao.executeQuery(
                 Q.LEADERBOARD.GLOBAL_LEADERBOARD,
-                dataBuilder.build(),
+                data,
                 GlobalLeaderboardRecordDto.class,
                 templateData));
     }
@@ -243,38 +222,18 @@ public class GameServiceImpl implements IGameService {
         checkLeaderboardRequest(request);
 
         LeaderboardDef ldef = request.getLeaderboardDef();
-        Map<String, Object> templateData = Maps.create()
-                .put("hasTeam", true)
-                .put("hasUser", ServiceUtils.isValid(request.getForUser()))
-                .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
-                .put("hasInclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getRuleIds()))
-                .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
-                .put("isTopN", ServiceUtils.isValid(request.getTopN()))
-                .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
-                .put("onlyFinalTops", ServiceUtils.isValid(request.getTopThreshold()))
-                .put("hasStates", ldef != null && ldef.hasStates())
-                .build();
+        Map<String, Object> templateData = createLeaderboardTemplateMap(request, ldef);
+        templateData.put("hasTeam", true);
 
         TeamProfile teamProfile = profileService.readTeam(teamId);
 
-        Maps.MapBuilder dataBuilder = Maps.create()
-                .put("teamId", teamId)
-                .put("userId", request.getForUser())
-                .put("teamScopeId", teamProfile.getTeamScope())
-                .put("rangeStart", request.getRangeStart())
-                .put("rangeEnd", request.getRangeEnd())
-                .put("topN", request.getTopN())
-                .put("bottomN", request.getBottomN());
-
-        if (ldef != null) {
-            dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
-                    .put("aggType", Commons.orDefault(ldef.getAggregatorType(), AggregatorType.SUM.name()))
-                    .put("excludeRuleIds", ldef.getExcludeRuleIds());
-        }
+        Map<String, Object> data = createLeaderboardParams(request, ldef);
+        data.put("teamId", teamId);
+        data.put("teamScopeId", teamProfile.getTeamScope());
 
         return ServiceUtils.toList(dao.executeQuery(
                 Q.LEADERBOARD.TEAM_LEADERBOARD,
-                dataBuilder.build(),
+                data,
                 TeamLeaderboardRecordDto.class,
                 templateData));
     }
@@ -284,36 +243,15 @@ public class GameServiceImpl implements IGameService {
         checkLeaderboardRequest(request);
 
         LeaderboardDef ldef = request.getLeaderboardDef();
-        Map<String, Object> templateData = Maps.create()
-                .put("hasTeam", false)
-                .put("hasUser", ServiceUtils.isValid(request.getForUser()))
-                .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
-                .put("hasInclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getRuleIds()))
-                .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
-                .put("isTopN", ServiceUtils.isValid(request.getTopN()))
-                .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
-                .put("onlyFinalTops", ServiceUtils.isValid(request.getTopThreshold()))
-                .put("hasStates", ldef != null && ldef.hasStates())
-                .build();
+        Map<String, Object> templateData = createLeaderboardTemplateMap(request, ldef);
 
-        Maps.MapBuilder dataBuilder = Maps.create()
-                .put("teamId", null)
-                .put("userId", request.getForUser())
-                .put("teamScopeId", null)
-                .put("rangeStart", request.getRangeStart())
-                .put("rangeEnd", request.getRangeEnd())
-                .put("topN", request.getTopN())
-                .put("bottomN", request.getBottomN());
-
-        if (ldef != null) {
-            dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
-                    .put("aggType", Commons.orDefault(ldef.getAggregatorType(), AggregatorType.SUM.name()))
-                    .put("excludeRuleIds", ldef.getExcludeRuleIds());
-        }
+        Map<String, Object> data = createLeaderboardParams(request, ldef);
+        data.put("teamId", null);
+        data.put("teamScopeId", null);
 
         return ServiceUtils.toList(dao.executeQuery(
                 Q.LEADERBOARD.TEAM_LEADERBOARD,
-                dataBuilder.build(),
+                data,
                 TeamLeaderboardRecordDto.class,
                 templateData));
     }
@@ -324,35 +262,14 @@ public class GameServiceImpl implements IGameService {
         checkLeaderboardRequest(request);
 
         LeaderboardDef ldef = request.getLeaderboardDef();
-        Map<String, Object> templateData = Maps.create()
-                .put("hasTeam", false)
-                .put("hasUser", ServiceUtils.isValid(request.getForUser()))
-                .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
-                .put("hasInclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getRuleIds()))
-                .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
-                .put("isTopN", ServiceUtils.isValid(request.getTopN()))
-                .put("isBottomN", ServiceUtils.isValid(request.getBottomN()))
-                .put("onlyFinalTops", ServiceUtils.isValid(request.getTopThreshold()))
-                .put("hasStates", ldef != null && ldef.hasStates())
-                .build();
+        Map<String, Object> templateData = createLeaderboardTemplateMap(request, ldef);
 
-        Maps.MapBuilder dataBuilder = Maps.create()
-                .put("teamScopeId", teamScopeId)
-                .put("userId", request.getForUser())
-                .put("rangeStart", request.getRangeStart())
-                .put("rangeEnd", request.getRangeEnd())
-                .put("topN", request.getTopN())
-                .put("bottomN", request.getBottomN());
-
-        if (ldef != null) {
-            dataBuilder = dataBuilder.put("ruleIds", ldef.getRuleIds())
-                    .put("aggType", Commons.orDefault(ldef.getAggregatorType(), AggregatorType.SUM.name()))
-                    .put("excludeRuleIds", ldef.getExcludeRuleIds());
-        }
+        Map<String, Object> data = createLeaderboardParams(request, ldef);
+        data.put("teamScopeId", teamScopeId);
 
         return ServiceUtils.toList(dao.executeQuery(
                 Q.LEADERBOARD.TEAM_LEADERBOARD,
-                dataBuilder.build(),
+                data,
                 TeamLeaderboardRecordDto.class,
                 templateData));
     }
@@ -361,9 +278,43 @@ public class GameServiceImpl implements IGameService {
         return dataCache.getInternalEventSourceToken().getToken();
     }
 
+    private Map<String, Object> createLeaderboardParams(LeaderboardRequestDto request,
+                                                        LeaderboardDef ldef) {
+        Maps.MapBuilder dataBuilder = Maps.create()
+                .put("userId", request.getForUser())
+                .put("rangeStart", request.getRangeStart())
+                .put("rangeEnd", request.getRangeEnd())
+                .put("topN", request.getTopN())
+                .put("pointThreshold", request.getMinPointThreshold());
+
+        if (ldef != null) {
+            dataBuilder = dataBuilder
+                    .put("ruleIds", ldef.getRuleIds())
+                    .put("aggType", Commons.orDefault(ldef.getAggregatorType(), AggregatorType.SUM.name()))
+                    .put("excludeRuleIds", ldef.getExcludeRuleIds());
+        }
+
+        return dataBuilder.build();
+    }
+
+    private Map<String, Object> createLeaderboardTemplateMap(LeaderboardRequestDto request,
+                                                             LeaderboardDef ldef) {
+        return Maps.create()
+                .put("hasTeam", false)
+                .put("hasUser", ServiceUtils.isValid(request.getForUser()))
+                .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
+                .put("hasInclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getRuleIds()))
+                .put("hasExclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getExcludeRuleIds()))
+                .put("isTopN", ServiceUtils.isValid(request.getTopN()))
+                .put("hasPointThreshold", ServiceUtils.isValid(request.getMinPointThreshold()))
+                .put("onlyFinalTops", ServiceUtils.isValid(request.getTopThreshold()))
+                .put("hasStates", ldef != null && ldef.hasStates())
+                .build();
+    }
+
     private void checkLeaderboardRequest(LeaderboardRequestDto dto) throws InputValidationException {
         Checks.validate(dto.getRangeStart() <= dto.getRangeEnd(), "Time range end must be greater than or equal to start time!");
-        if (ServiceUtils.isValid(dto.getForUser()) && (ServiceUtils.isValid(dto.getTopN()) || ServiceUtils.isValid(dto.getBottomN()))) {
+        if (ServiceUtils.isValid(dto.getForUser()) && ServiceUtils.isValid(dto.getTopN())) {
             throw new InputValidationException("Top or bottom listing is not supported when " +
                     "a specific user has been specified in the request!");
         }

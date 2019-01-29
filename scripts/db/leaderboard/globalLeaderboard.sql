@@ -1,4 +1,4 @@
-<if(hasUser||isTopN||isBottomN||onlyFinalTops)>
+<if(hasUser||isTopN||onlyFinalTops||hasPointThreshold)>
 SELECT
     *
 FROM
@@ -70,13 +70,17 @@ FROM
         ON oau.user_id = tbl.user_id
 
 
-<if(hasUser||isTopN||isBottomN||onlyFinalTops)>
+<if(hasUser||isTopN||onlyFinalTops||hasPointThreshold)>
 ) rankTbl
 
 WHERE
     1 = 1
 <if(hasUser)>
     AND rankTbl.userId = :userId
+<endif>
+
+<if(hasPointThreshold)>
+    AND rankTbl.totalPoints >= :pointThreshold
 <endif>
 
 <if(onlyFinalTops)>
@@ -86,11 +90,6 @@ WHERE
 <if(isTopN)>
 ORDER BY rankTbl.rankGlobal ASC
 LIMIT :topN
-<endif>
-
-<if(isBottomN)>
-ORDER BY rankTbl.rankGlobal DESC
-LIMIT :bottomN
 <endif>
 
 <endif>

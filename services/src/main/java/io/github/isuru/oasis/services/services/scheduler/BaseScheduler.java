@@ -91,8 +91,7 @@ public abstract class BaseScheduler {
         LeaderboardRequestDto requestDto = new LeaderboardRequestDto(timeRange.getValue0(), timeRange.getValue1());
         requestDto.setLeaderboardDef(lb);
         requestDto.setTopThreshold(raceDef.getTop());
-
-        // @TODO consider sending conditional statement as well
+        requestDto.setMinPointThreshold(raceDef.getMinPointThreshold());
 
         LOG.info(" - Executing leaderboard for race #{} between @[{}, {}]...",
                 raceDef.getId(), timeRange.getValue0(), timeRange.getValue1());

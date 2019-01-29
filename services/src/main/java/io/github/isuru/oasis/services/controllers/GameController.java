@@ -129,7 +129,6 @@ public class GameController {
 
         requestDto.setForUser(userId > 0 ? userId : null);
         requestDto.setTopN(top > 0 ? top : null);
-        requestDto.setBottomN(bottom > 0 ? bottom : null);
         return requestDto;
     }
 

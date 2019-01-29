@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
  */
 public final class Checks {
 
+    public static final String MSG_HAVING_BOTH = "Parameter '%s' and '%s' cannot be defined at the same time!";
+
     public static void onlyOneOf(boolean condition1, boolean condition2, String param1, String param2) throws InputValidationException {
         if (condition1 == condition2) {
             throw new InputValidationException(String.format("There can be either '%s' or '%s', not both!",
@@ -20,8 +22,7 @@ public final class Checks {
     }
     public static void havingBoth(boolean condition1, boolean condition2, String param1, String param2) throws InputValidationException {
         if (condition1 && condition2) {
-            throw new InputValidationException(String.format("Parameter '%s' and '%s' cannot be defined at the same time!",
-                    param1, param2));
+            throw new InputValidationException(String.format(MSG_HAVING_BOTH, param1, param2));
         }
     }
 

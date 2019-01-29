@@ -19,7 +19,7 @@ public class LeaderboardRequestDto {
 
     private LeaderboardDef leaderboardDef;
     private Integer topN;
-    private Integer bottomN;
+    private Double minPointThreshold;
     private LeaderboardType type;
 
     private Integer topThreshold;
@@ -47,6 +47,14 @@ public class LeaderboardRequestDto {
         this.setRangeStart(rangeStart);
         this.setRangeEnd(rangeEnd);
         this.type = LeaderboardType.CUSTOM;
+    }
+
+    public Double getMinPointThreshold() {
+        return minPointThreshold;
+    }
+
+    public void setMinPointThreshold(Double minPointThreshold) {
+        this.minPointThreshold = minPointThreshold;
     }
 
     public Integer getTopThreshold() {
@@ -79,14 +87,6 @@ public class LeaderboardRequestDto {
 
     public void setTopN(Integer topN) {
         this.topN = topN;
-    }
-
-    public Integer getBottomN() {
-        return bottomN;
-    }
-
-    public void setBottomN(Integer bottomN) {
-        this.bottomN = bottomN;
     }
 
     public LeaderboardType getType() {

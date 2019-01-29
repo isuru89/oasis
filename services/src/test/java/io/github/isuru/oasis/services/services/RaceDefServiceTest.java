@@ -6,6 +6,7 @@ import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.RaceDef;
 import io.github.isuru.oasis.model.defs.ScopingType;
 import io.github.isuru.oasis.services.exception.InputValidationException;
+import io.github.isuru.oasis.services.utils.Checks;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Before;
@@ -103,6 +104,16 @@ public class RaceDefServiceTest extends BaseDefServiceTest {
                     r2.setTop(0);
                     Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r2))
                             .isInstanceOf(InputValidationException.class);
+                }
+
+                {
+                    // cannot define both top and min point threshold value
+                    RaceDef r2 = clone(race1);
+                    r2.setTop(50);
+                    r2.setMinPointThreshold(100.0);
+                    Assertions.assertThatThrownBy(() -> ds.addRace(gameId, r2))
+                            .isInstanceOf(InputValidationException.class)
+                            .hasMessage(String.format(Checks.MSG_HAVING_BOTH, "top", "minPointThreshold"));
                 }
 
                 // cannot have both point expr and point map

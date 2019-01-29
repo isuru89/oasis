@@ -190,7 +190,6 @@ public class GameRouters extends BaseRouters {
 
         requestDto.setForUser(hasQ(req, Q_USER) ? asQLong(req, Q_USER, -1) : null);
         requestDto.setTopN(hasQ(req, Q_TOP) ? asQInt(req, Q_TOP, 50) : null);
-        requestDto.setBottomN(hasQ(req, Q_BOTTOM) ? asQInt(req, Q_BOTTOM, 50) : null);
         return requestDto;
     }
 

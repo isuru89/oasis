@@ -15,6 +15,12 @@ public class RaceDef extends BaseDef {
 
     private int leaderboardId;
 
+    /**
+     * Minimum point threshold to be filtered out.
+     * Either this or field `top` must be specified.
+     */
+    private Double minPointThreshold;
+
     private String fromScope = ScopingType.TEAM_SCOPE.name();
     private String timeWindow = "weekly";
 
@@ -22,6 +28,14 @@ public class RaceDef extends BaseDef {
 
     private Map<Integer, Double> rankPoints;
     private String rankPointsExpression;
+
+    public Double getMinPointThreshold() {
+        return minPointThreshold;
+    }
+
+    public void setMinPointThreshold(Double minPointThreshold) {
+        this.minPointThreshold = minPointThreshold;
+    }
 
     public String getRankPointsExpression() {
         return rankPointsExpression;
