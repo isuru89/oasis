@@ -21,6 +21,7 @@ public class Memo {
     private static final Map<String, List<Tuple4<Long, List<? extends Event>, Badge, BadgeRule>>> badgeMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple4<Long, Integer, Event, Milestone>>> milestoneMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple4<Long, String, Long, Double>>> challengeMap = new ConcurrentHashMap<>();
+    private static final Map<String, List<Tuple4<Long, Long, Double, String>>> raceMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple6<Long, Integer, String, Integer, String, Integer>>> statesMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, PointRule>>> pointsErrorMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, BadgeRule>>> badgesErrorMap = new ConcurrentHashMap<>();
@@ -108,6 +109,19 @@ public class Memo {
     public static List<Tuple4<Long, String, Long, Double>> getChallenges(String id) {
         return challengeMap.get(id);
     }
+
+    ///
+    ///  RACE EVENTS
+    ///
+
+    public static void addRace(String id, Tuple4<Long, Long, Double, String> record) {
+        raceMap.computeIfAbsent(id, s -> new ArrayList<>()).add(record);
+    }
+
+    public static List<Tuple4<Long, Long, Double, String>> getRaces(String id) {
+        return raceMap.get(id);
+    }
+
 
     //
     // CLEAR ALL

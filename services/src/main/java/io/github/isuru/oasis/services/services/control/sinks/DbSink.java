@@ -14,6 +14,7 @@ public class DbSink extends OasisSink {
     private OutputSink milestoneSink;
     private OutputSink milestoneStateSink;
     private OutputSink stateSink;
+    private OutputSink raceSink;
 
     public DbSink(long gameId) {
         badgeSink = new OutputSink(gameId, LocalSinks.SQ_BADGES);
@@ -22,6 +23,7 @@ public class DbSink extends OasisSink {
         milestoneSink = new OutputSink(gameId, LocalSinks.SQ_MILESTONES);
         milestoneStateSink = new OutputSink(gameId, LocalSinks.SQ_MILESTONE_STATES);
         stateSink = new OutputSink(gameId, LocalSinks.SQ_STATES);
+        raceSink = new OutputSink(gameId, LocalSinks.SQ_RACES);
     }
 
     @Override
@@ -47,6 +49,11 @@ public class DbSink extends OasisSink {
     @Override
     public SinkFunction<String> createChallengeSink() {
         return challengeSink;
+    }
+
+    @Override
+    public SinkFunction<String> createRaceSink() {
+        return raceSink;
     }
 
     @Override

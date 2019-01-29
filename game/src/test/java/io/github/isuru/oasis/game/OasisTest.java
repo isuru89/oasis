@@ -46,7 +46,7 @@ public class OasisTest {
     void buildOasis() throws Exception {
         IOutputHandler assertOutputs = TestUtils.getAssertConfigs(new PointCollector("t"),
                 new BadgeCollector("t"), new MilestoneCollector("t"),
-                new StatesCollector("t"));
+                new StatesCollector("t"), new RaceCollector("t"));
         Oasis oasis = new Oasis("test-1");
 
         List<FieldCalculator> fields = TestUtils.getFields("fields.yml");

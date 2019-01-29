@@ -72,7 +72,7 @@ public class Injector {
         int[] gameIds = {1}; // @TODO change game id
 
         for (int gId : gameIds) {
-            subscribeForGame(gId);
+            subscribeForGame(dao, gId);
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -89,9 +89,10 @@ public class Injector {
         }));
     }
 
-    private void subscribeForGame(int gameId) throws Exception {
-        ContextInfo contextInfo = new ContextInfo(7);
+    private void subscribeForGame(IOasisDao dao, int gameId) throws Exception {
+        ContextInfo contextInfo = new ContextInfo(10);
         contextInfo.setGameId(gameId);
+        contextInfo.getInterceptor().init(dao);
 
         String pointsQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_POINTS_SINK, contextInfo.getGameId());
         String badgesQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_BADGES_SINK, contextInfo.getGameId());
@@ -99,6 +100,7 @@ public class Injector {
         String msStateQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_MILESTONESTATE_SINK, contextInfo.getGameId());
         String challengesQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_CHALLENGES_SINK, contextInfo.getGameId());
         String stateQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_STATES_SINK, contextInfo.getGameId());
+        String raceQ = replaceQ(ConfigKeys.DEF_RABBIT_Q_RACES_SINK, contextInfo.getGameId());
 
         channel.queueDeclare(pointsQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(msQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
@@ -106,6 +108,7 @@ public class Injector {
         channel.queueDeclare(badgesQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(challengesQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(stateQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
+        channel.queueDeclare(raceQ, DURABLE, EXCLUSIVE, AUTO_DEL, null);
 
         PointConsumer pointConsumer = new PointConsumer(channel, dao, contextInfo);
         MilestoneConsumer milestoneConsumer = new MilestoneConsumer(channel, dao, contextInfo);
@@ -113,6 +116,7 @@ public class Injector {
         BadgeConsumer badgeConsumer = new BadgeConsumer(channel, dao, contextInfo);
         ChallengeConsumer challengeConsumer = new ChallengeConsumer(channel, dao, contextInfo);
         StateConsumer stateConsumer = new StateConsumer(channel, dao, contextInfo);
+        RaceConsumer raceConsumer = new RaceConsumer(channel, dao, contextInfo);
 
         registerShutdownHook(pointConsumer);
         registerShutdownHook(milestoneConsumer);
@@ -120,6 +124,7 @@ public class Injector {
         registerShutdownHook(badgeConsumer);
         registerShutdownHook(challengeConsumer);
         registerShutdownHook(stateConsumer);
+        registerShutdownHook(raceConsumer);
 
         channel.basicConsume(pointsQ, AUTO_ACK, pointConsumer);
         channel.basicConsume(msQ, AUTO_ACK, milestoneConsumer);
@@ -127,6 +132,7 @@ public class Injector {
         channel.basicConsume(badgesQ, AUTO_ACK, badgeConsumer);
         channel.basicConsume(challengesQ, AUTO_ACK, challengeConsumer);
         channel.basicConsume(stateQ, AUTO_ACK, stateConsumer);
+        channel.basicConsume(raceQ, AUTO_ACK, raceConsumer);
     }
 
     private void registerShutdownHook(Closeable closeable) {

@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.game.persist;
 
 import io.github.isuru.oasis.model.events.ChallengeEvent;
+import io.github.isuru.oasis.model.events.RaceEvent;
 import io.github.isuru.oasis.model.handlers.*;
 
 public class NoneOutputHandler implements IOutputHandler {
@@ -40,12 +41,17 @@ public class NoneOutputHandler implements IOutputHandler {
     }
 
     @Override
+    public IRaceHandler getRaceHandler() {
+        return noneHandler;
+    }
+
+    @Override
     public IStatesHandler getStatesHandler() {
         return noneHandler;
     }
 
     public static class NoneHandler implements IMilestoneHandler, IBadgeHandler,
-            IPointHandler, IChallengeHandler, IStatesHandler {
+            IPointHandler, IChallengeHandler, IStatesHandler, IRaceHandler {
 
         @Override
         public void milestoneReached(MilestoneNotification milestoneNotification) {
@@ -69,6 +75,11 @@ public class NoneOutputHandler implements IOutputHandler {
 
         @Override
         public void handleStateChange(OStateNotification stateNotification) {
+
+        }
+
+        @Override
+        public void addRaceWinner(RaceEvent raceEvent) {
 
         }
     }

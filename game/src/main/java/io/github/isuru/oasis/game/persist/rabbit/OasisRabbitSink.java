@@ -22,6 +22,7 @@ public class OasisRabbitSink extends OasisSink implements Serializable {
     private final String milestoneStateQueue;
     private final String badgeQueue;
     private final String challengeQueue;
+    private final String raceQueue;
     private final String statesQueue;
 
     private final Configs gameProperties;
@@ -41,6 +42,8 @@ public class OasisRabbitSink extends OasisSink implements Serializable {
                 ConfigKeys.DEF_RABBIT_Q_CHALLENGES_SINK));
         statesQueue = Utils.queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_STATES,
                 ConfigKeys.DEF_RABBIT_Q_STATES_SINK));
+        raceQueue = Utils.queueReplace(gameProps.getStr(ConfigKeys.KEY_RABBIT_QUEUE_OUT_RACES,
+                ConfigKeys.DEF_RABBIT_Q_RACES_SINK));
 
         config = RabbitUtils.createRabbitSinkConfig(gameProps);
     }
@@ -75,6 +78,11 @@ public class OasisRabbitSink extends OasisSink implements Serializable {
         return new RMQOasisSink<>(config, statesQueue, new SimpleStringSchema(), gameProperties);
     }
 
+    @Override
+    public SinkFunction<String> createRaceSink() {
+        return new RMQOasisSink<>(config, raceQueue, new SimpleStringSchema(), gameProperties);
+    }
+
     String getPointQueue() {
         return pointQueue;
     }
@@ -97,5 +105,9 @@ public class OasisRabbitSink extends OasisSink implements Serializable {
 
     String getStatesQueue() {
         return statesQueue;
+    }
+
+    String getRaceQueue() {
+        return raceQueue;
     }
 }

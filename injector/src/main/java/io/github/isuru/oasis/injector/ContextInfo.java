@@ -12,8 +12,15 @@ class ContextInfo {
 
     private final ExecutorService pool;
 
+    private final ConsumerInterceptor consumerInterceptor;
+
     ContextInfo(int maxPoolSize) {
         pool = Executors.newFixedThreadPool(maxPoolSize);
+        consumerInterceptor = new ConsumerInterceptor(this);
+    }
+
+    public ConsumerInterceptor getInterceptor() {
+        return consumerInterceptor;
     }
 
     ExecutorService getPool() {

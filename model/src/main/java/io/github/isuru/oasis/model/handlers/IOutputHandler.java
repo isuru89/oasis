@@ -18,4 +18,6 @@ public interface IOutputHandler extends Serializable {
     default IChallengeHandler getChallengeHandler() {
         return null;
     }
+
+    IRaceHandler getRaceHandler();
 }

@@ -1,12 +1,7 @@
 package io.github.isuru.oasis.game.utils;
 
-import io.github.isuru.oasis.model.handlers.BadgeNotification;
-import io.github.isuru.oasis.model.handlers.IBadgeHandler;
-import io.github.isuru.oasis.model.handlers.IMilestoneHandler;
-import io.github.isuru.oasis.model.handlers.IOutputHandler;
-import io.github.isuru.oasis.model.handlers.IPointHandler;
-import io.github.isuru.oasis.model.handlers.MilestoneNotification;
-import io.github.isuru.oasis.model.handlers.PointNotification;
+import io.github.isuru.oasis.model.events.RaceEvent;
+import io.github.isuru.oasis.model.handlers.*;
 
 public class NullOutputHandler implements IOutputHandler {
 
@@ -28,6 +23,12 @@ public class NullOutputHandler implements IOutputHandler {
 
         }
     };
+    private final IRaceHandler raceHandler = new IRaceHandler() {
+        @Override
+        public void addRaceWinner(RaceEvent raceEvent) {
+
+        }
+    };
 
     @Override
     public IPointHandler getPointsHandler() {
@@ -42,5 +43,10 @@ public class NullOutputHandler implements IOutputHandler {
     @Override
     public IMilestoneHandler getMilestoneHandler() {
         return milestoneHandler;
+    }
+
+    @Override
+    public IRaceHandler getRaceHandler() {
+        return raceHandler;
     }
 }

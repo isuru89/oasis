@@ -120,4 +120,21 @@ public class ConsumerUtils {
         return map;
     }
 
+    public static Map<String, Object> toRaceData(long gameId, RaceModel model) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("userId", model.getUserId());
+        map.put("teamId", model.getTeamId());
+        map.put("teamScopeId", model.getTeamScopeId());
+        map.put("raceId", model.getRaceId());
+        map.put("raceStartAt", model.getRaceStartedAt());
+        map.put("raceEndAt", model.getRaceEndedAt());
+        map.put("rankPos", model.getRank());
+        map.put("totalPoints", model.getScoredPoints());
+        map.put("totalCount", model.getScoredCount());
+        map.put("awardedPoints", model.getPoints());
+        map.put("awardedAt", model.getTs());
+        map.put("gameId", model.getGameId());
+        return map;
+    }
+
 }

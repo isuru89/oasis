@@ -13,6 +13,7 @@ public abstract class OasisSink {
     public abstract SinkFunction<String> createBadgeSink();
 
     public abstract SinkFunction<String> createChallengeSink();
+    public abstract SinkFunction<String> createRaceSink();
     public abstract SinkFunction<String> createStatesSink();
 
 }

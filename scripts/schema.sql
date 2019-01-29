@@ -295,3 +295,21 @@ CREATE TABLE IF NOT EXISTS OA_EVENT_SOURCE (
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS OA_FEED (
+    id              BIGINT PRIMARY KEY AUTO_INCREMENT,
+    game_id         INT,
+    user_id         INT,
+    team_id         INT,
+    team_scope_id   INT,
+    def_kind_id     INT,
+    def_id          INT,
+    action_id       INT,
+    message         VARCHAR(512),
+    sub_message     VARCHAR(1024),
+    event_type      VARCHAR(128),
+    caused_event    VARCHAR(1024),
+    tag             VARCHAR(2048),
+    ts              BIGINT,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

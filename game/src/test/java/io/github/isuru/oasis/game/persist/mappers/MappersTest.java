@@ -116,6 +116,27 @@ public class MappersTest {
     }
 
     @Test
+    public void testRaceNotifier() throws Exception {
+        MapFunction<RaceEvent, String> mapper = new RaceNotificationMapper();
+        {
+            JsonEvent jsonEvent = randomJsonEvent();
+            RaceEvent event = new RaceEvent(jsonEvent);
+            event.setFieldValue(RaceEvent.KEY_POINTS, 50.0);
+            event.setFieldValue(RaceEvent.KEY_DEF_ID, 20);
+            event.setFieldValue(RaceEvent.KEY_RACE_ENDED_AT, System.currentTimeMillis());
+            event.setFieldValue(RaceEvent.KEY_RACE_STARTED_AT, System.currentTimeMillis() - 84000L);
+            event.setFieldValue(RaceEvent.KEY_RACE_RANK, 2);
+            event.setFieldValue(RaceEvent.KEY_RACE_SCORE, 1234.3);
+            event.setFieldValue(RaceEvent.KEY_RACE_SCORE_COUNT, 64L);
+
+            String content = mapper.map(event);
+            RaceModel model = toObj(content, RaceModel.class);
+
+            assertRace(model, event);
+        }
+    }
+
+    @Test
     public void testStateNotifier() throws Exception {
         MapFunction<OStateNotification, String> mapper = new StatesNotificationMapper();
         OState state = readState("/state-test/rules/states.yml", 0);
@@ -246,6 +267,21 @@ public class MappersTest {
 
             assertBadgeOutput(model, event, badgeRule, notification);
         }
+    }
+
+    private void assertRace(RaceModel model, RaceEvent event) {
+        Assertions.assertEquals(event.getTeam(), model.getTeamId());
+        Assertions.assertEquals(event.getTeamScope(), model.getTeamScopeId());
+        Assertions.assertEquals(event.getUser(), model.getUserId().longValue());
+        Assertions.assertEquals(event.getSource(), model.getSourceId());
+        Assertions.assertEquals(event.getGameId(), model.getGameId());
+        Assertions.assertEquals(event.getAwardedPoints(), model.getPoints());
+        Assertions.assertEquals(event.getRaceEndedAt(), model.getRaceEndedAt());
+        Assertions.assertEquals(event.getRaceStartedAt(), model.getRaceStartedAt());
+        Assertions.assertEquals(event.getRaceId(), model.getRaceId());
+        Assertions.assertEquals(event.getRank(), model.getRank());
+        Assertions.assertEquals(event.getScoredCount(), model.getScoredCount());
+        Assertions.assertEquals(event.getScoredPoints(), model.getScoredPoints());
     }
 
     private void assertChallenge(ChallengeModel model,

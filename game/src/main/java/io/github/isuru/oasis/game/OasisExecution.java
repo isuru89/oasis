@@ -202,6 +202,20 @@ public class OasisExecution {
             challengePointStream = challengePipeline.getPointNotificationStream();
         }
 
+        // create race notifications
+        Optional<PointRule> racePointRule = findPointRule(EventNames.POINT_RULE_RACE_POINTS);
+        DataStream<RaceEvent> rStream = null;
+        DataStream<PointNotification> racePointStream = null;
+        if (racePointRule.isPresent()) {
+            OutputTag<PointNotification> outputTag = new OutputTag<>("oasis-race-point-tag",
+                    TypeInformation.of(PointNotification.class));
+            RaceOperator.RacePipelineResult pipeline = RaceOperator.createRacePipeline(inputSource,
+                    outputTag,
+                    racePointRule.get());
+            rStream = pipeline.getRaceStream();
+            racePointStream = pipeline.getPointStream();
+        }
+
 
         //
         // ---------------------------------------------------------------------------
@@ -264,10 +278,8 @@ public class OasisExecution {
         }
 
         // award points from races
-        Optional<PointRule> racePointRule = findPointRule(EventNames.POINT_RULE_RACE_POINTS);
-        if (racePointRule.isPresent()) {
-            DataStream<PointNotification> raceStream = RaceOperator.createRacePipeline(inputSource, racePointRule.get());
-            pointNotyStream = pointNotyStream.union(raceStream);
+        if (racePointStream != null) {
+            pointNotyStream = pointNotyStream.union(racePointStream);
         }
 
         //
@@ -282,6 +294,7 @@ public class OasisExecution {
                 badgeNotyStream,
                 statesNotyStream,
                 cStream,
+                rStream,
                 oasisId);
 
         //
@@ -324,6 +337,7 @@ public class OasisExecution {
                              DataStream<BadgeNotification> badgeNotyStream,
                              DataStream<OStateNotification> statesNotyStream,
                              DataStream<ChallengeEvent> challengeEventStream,
+                             DataStream<RaceEvent> raceEventStream,
                              String oasisId) {
 
         if (outputHandler != null) {
@@ -362,6 +376,12 @@ public class OasisExecution {
                 challengeEventStream
                         .addSink(new OasisChallengeSink(outputHandler.getChallengeHandler()))
                         .uid(String.format("challenge-sink-%s", oasisId));
+            }
+
+            if (raceEventStream != null) {
+                raceEventStream
+                        .addSink(new OasisRaceSink(outputHandler.getRaceHandler()))
+                        .uid(String.format("race-sink-%s", oasisId));
             }
 
         } else if (oasisSink != null) {
@@ -405,6 +425,13 @@ public class OasisExecution {
                         .map(new ChallengeNotificationMapper())
                         .addSink(oasisSink.createChallengeSink())
                         .uid(String.format("challenge-sink-%s", oasisId));
+            }
+
+            if (raceEventStream != null) {
+                raceEventStream
+                        .map(new RaceNotificationMapper())
+                        .addSink(oasisSink.createRaceSink())
+                        .uid(String.format("race-sink-%s", oasisId));
             }
         }
     }

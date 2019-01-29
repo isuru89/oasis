@@ -6,8 +6,8 @@ import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.RaceDef;
-import io.github.isuru.oasis.model.events.ChallengeEvent;
 import io.github.isuru.oasis.model.events.EventNames;
+import io.github.isuru.oasis.model.events.RaceEvent;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.dto.game.*;
 import io.github.isuru.oasis.services.exception.ApiAuthException;
@@ -185,8 +185,13 @@ public class GameServiceImpl implements IGameService {
             event.put(Constants.FIELD_TEAM, winner.getTeamId());
             event.put(Constants.FIELD_SCOPE, winner.getTeamScopeId());
 
-            event.put(ChallengeEvent.KEY_DEF_ID, winner.getRaceId());
-            event.put(ChallengeEvent.KEY_POINTS, winner.getAwardedPoints());
+            event.put(RaceEvent.KEY_DEF_ID, winner.getRaceId());
+            event.put(RaceEvent.KEY_POINTS, winner.getAwardedPoints());
+            event.put(RaceEvent.KEY_RACE_STARTED_AT, winner.getRaceStartAt());
+            event.put(RaceEvent.KEY_RACE_ENDED_AT, winner.getRaceEndAt());
+            event.put(RaceEvent.KEY_RACE_RANK, winner.getRank());
+            event.put(RaceEvent.KEY_RACE_SCORE, winner.getPoints());
+            event.put(RaceEvent.KEY_RACE_SCORE_COUNT, winner.getTotalCount());
 
             events.add(event);
         });

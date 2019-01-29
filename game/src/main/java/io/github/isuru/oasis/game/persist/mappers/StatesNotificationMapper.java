@@ -1,6 +1,7 @@
 package io.github.isuru.oasis.game.persist.mappers;
 
 import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.OState;
 import io.github.isuru.oasis.model.handlers.OStateNotification;
 import io.github.isuru.oasis.model.handlers.output.OStateModel;
 
@@ -16,6 +17,7 @@ public class StatesNotificationMapper extends BaseNotificationMapper<OStateNotif
         model.setTeamScopeId(event.getTeamScope());
         model.setStateId(notification.getStateRef().getId());
         model.setCurrentState(notification.getState().getId());
+        model.setCurrentStateName(notification.getState().getName());
         model.setCurrentValue(notification.getCurrentValue());
         model.setCurrentPoints(notification.getState().getPoints());
         model.setCurrency(notification.getStateRef().isCurrency());
@@ -26,6 +28,10 @@ public class StatesNotificationMapper extends BaseNotificationMapper<OStateNotif
         model.setGameId(event.getGameId());
         model.setPreviousState(notification.getPreviousState());
         model.setPrevStateChangedAt(notification.getPreviousChangeAt());
+        model.setPreviousStateName(notification.getStateRef().getStates().stream()
+                .filter(s -> s.getId().equals(notification.getPreviousState()))
+                .map(OState.OAState::getName)
+                .findFirst().orElse(""));
         return model;
     }
 }

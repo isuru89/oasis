@@ -16,6 +16,7 @@ public class LocalSinks {
     static final String SQ_MILESTONES = "milestones";
     static final String SQ_MILESTONE_STATES = "milestone-states";
     static final String SQ_STATES = "states";
+    static final String SQ_RACES = "races";
     static final String SQ_CHALLENGES = "challenges";
 
     private final List<BaseLocalSink> localSinks = new LinkedList<>();

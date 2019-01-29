@@ -11,6 +11,8 @@ public class OStateModel {
 
     private Integer previousState;
     private Integer currentState;
+    private String previousStateName;
+    private String currentStateName;
     private String currentValue;
     private Double currentPoints;
     private Long ts;
@@ -20,6 +22,22 @@ public class OStateModel {
     private Integer sourceId;
     private boolean currency;
     private Integer gameId;
+
+    public String getPreviousStateName() {
+        return previousStateName;
+    }
+
+    public void setPreviousStateName(String previousStateName) {
+        this.previousStateName = previousStateName;
+    }
+
+    public String getCurrentStateName() {
+        return currentStateName;
+    }
+
+    public void setCurrentStateName(String currentStateName) {
+        this.currentStateName = currentStateName;
+    }
 
     public Integer getGameId() {
         return gameId;

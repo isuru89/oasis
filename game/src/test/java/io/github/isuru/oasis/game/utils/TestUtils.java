@@ -89,6 +89,29 @@ public class TestUtils {
         }
     }
 
+    public static List<Tuple4<Long, Long, Double, String>> parseRaceOutput(String file) throws IOException {
+        try (InputStream inputStream = TestUtils.loadResource(file)) {
+            LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
+            List<Tuple4<Long, Long, Double, String>> list = new LinkedList<>();
+            while (lineIterator.hasNext()) {
+                String line = lineIterator.next();
+                if (line.trim().isEmpty()) continue;
+                if (line.startsWith("#")) continue;
+
+                String[] parts = line.split("[,]");
+
+                Tuple4<Long, Long, Double, String> row = Tuple4.of(
+                        Long.parseLong(parts[0]),
+                        Long.parseLong(parts[1]),
+                        Double.parseDouble(parts[2]),
+                        parts[3]
+                );
+                list.add(row);
+            }
+            return list;
+        }
+    }
+
     public static List<Tuple5<Long, String, String, Double, String>> parsePointOutput(String file) throws IOException {
         try (InputStream inputStream = TestUtils.loadResource(file)) {
             LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
@@ -204,17 +227,19 @@ public class TestUtils {
     public static IOutputHandler getAssertConfigs(IPointHandler pointHandler,
                                                   IBadgeHandler badgeHandler,
                                                   IMilestoneHandler milestoneHandler,
-                                                  IStatesHandler statesHandler) {
-        return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler, statesHandler);
+                                                  IStatesHandler statesHandler,
+                                                  IRaceHandler raceHandler) {
+        return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler, statesHandler, raceHandler);
     }
 
     public static IOutputHandler getAssertConfigs(IPointHandler pointHandler,
                                                   IBadgeHandler badgeHandler,
                                                   IMilestoneHandler milestoneHandler,
                                                   IChallengeHandler challengeHandler,
-                                                  IStatesHandler statesHandler) {
+                                                  IStatesHandler statesHandler,
+                                                  IRaceHandler raceHandler) {
         return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler, challengeHandler,
-                statesHandler);
+                statesHandler, raceHandler);
     }
 
     public static List<FieldCalculator> getFields(String resourceId) throws IOException {

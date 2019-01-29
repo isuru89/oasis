@@ -16,6 +16,7 @@ public class OasisRabbitSinkTest {
     private static final String MILESTONE_STATE_QUEUE = "milestoneStateQueue";
     private static final String POINTS_QUEUE = "pointsQueue";
     private static final String STATES_QUEUE = "statesQueue";
+    private static final String RACES_QUEUE = "racesQueue";
 
     @Test
     public void testSink() {
@@ -28,6 +29,7 @@ public class OasisRabbitSinkTest {
         props.setProperty(ConfigKeys.KEY_RABBIT_QUEUE_OUT_MILESTONESTATES, MILESTONE_STATE_QUEUE);
         props.setProperty(ConfigKeys.KEY_RABBIT_QUEUE_OUT_POINTS, POINTS_QUEUE);
         props.setProperty(ConfigKeys.KEY_RABBIT_QUEUE_OUT_STATES, STATES_QUEUE);
+        props.setProperty(ConfigKeys.KEY_RABBIT_QUEUE_OUT_RACES, RACES_QUEUE);
 
         OasisRabbitSink sink = new OasisRabbitSink(Configs.from(props));
         Assert.assertEquals(BADGE_QUEUE, sink.getBadgeQueue());
@@ -36,6 +38,7 @@ public class OasisRabbitSinkTest {
         Assert.assertEquals(MILESTONE_STATE_QUEUE, sink.getMilestoneStateQueue());
         Assert.assertEquals(POINTS_QUEUE, sink.getPointQueue());
         Assert.assertEquals(STATES_QUEUE, sink.getStatesQueue());
+        Assert.assertEquals(RACES_QUEUE, sink.getRaceQueue());
 
         Assertions.assertThat(sink.createBadgeSink()).isInstanceOf(RMQOasisSink.class)
                 .hasFieldOrPropertyWithValue("durable", true)
@@ -60,6 +63,10 @@ public class OasisRabbitSinkTest {
         Assertions.assertThat(sink.createStatesSink()).isInstanceOf(RMQOasisSink.class)
                 .hasFieldOrPropertyWithValue("durable", true)
                 .hasFieldOrPropertyWithValue("queueName", STATES_QUEUE);
+
+        Assertions.assertThat(sink.createRaceSink()).isInstanceOf(RMQOasisSink.class)
+                .hasFieldOrPropertyWithValue("durable", true)
+                .hasFieldOrPropertyWithValue("queueName", RACES_QUEUE);
     }
 
 }

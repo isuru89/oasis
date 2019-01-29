@@ -63,6 +63,7 @@ public abstract class BaseConsumer<T> extends DefaultConsumer implements Closeab
             BufferedRecords.ElementRecord record = new BufferedRecords.ElementRecord(serializedData,
                     envelope.getDeliveryTag());
             buffer.push(record);
+            contextInfo.getInterceptor().consume(message);
 
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
