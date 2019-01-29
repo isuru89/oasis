@@ -9,6 +9,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 public class BadgeDefServiceTest extends BaseDefServiceTest {
 
     @Before
@@ -114,14 +116,54 @@ public class BadgeDefServiceTest extends BaseDefServiceTest {
         long gameId = savedGame.getId();
         int size = ds.listBadgeDefs(gameId).size();
 
-        BadgeDef def = create("scholar", "Scholar");
         {
+            BadgeDef def = create("Nice-Answer", "Nice Answer");
+            def.setAttribute(1);
             long defId = addAssert(gameId, def);
 
             BadgeDef addedDef = readAssert(defId);
             Assert.assertEquals(defId, addedDef.getId().longValue());
             Assert.assertEquals(def.getName(), addedDef.getName());
             Assert.assertEquals(def.getDisplayName(), addedDef.getDisplayName());
+            Assert.assertEquals(def.getAttribute(), addedDef.getAttribute());
+
+            // one more should be added
+            Assertions.assertThat(ds.listBadgeDefs(gameId).size()).isEqualTo(size + 1);
+        }
+
+        {
+            size = ds.listBadgeDefs(gameId).size();
+            BadgeDef def = create("favourite-q", "Favourite Question");
+            def.setAttribute(1);
+            BadgeDef.SubBadgeDef sub1 = new BadgeDef.SubBadgeDef();
+            sub1.setName("stellar-q");
+            sub1.setDisplayName("Stellar Question");
+            sub1.setAttribute(2);
+            BadgeDef.SubBadgeDef sub2 = new BadgeDef.SubBadgeDef();
+            sub1.setName("excellent-q");
+            sub1.setDisplayName("Excellent Question");
+            def.setSubBadges(Arrays.asList(sub1, sub2));
+            long defId = addAssert(gameId, def);
+
+            BadgeDef addedDef = readAssert(defId);
+            Assert.assertEquals(defId, addedDef.getId().longValue());
+            Assert.assertEquals(def.getName(), addedDef.getName());
+            Assert.assertEquals(def.getDisplayName(), addedDef.getDisplayName());
+            Assert.assertEquals(def.getAttribute(), addedDef.getAttribute());
+            Assert.assertEquals(2, addedDef.getSubBadges().size());
+
+            {
+                BadgeDef.SubBadgeDef addedSub = addedDef.getSubBadges().get(0);
+                Assert.assertEquals(sub1.getName(), addedSub.getName());
+                Assert.assertEquals(sub1.getDisplayName(), addedSub.getDisplayName());
+                Assert.assertEquals(sub1.getAttribute(), addedSub.getAttribute());
+            }
+            {
+                BadgeDef.SubBadgeDef addedSub = addedDef.getSubBadges().get(1);
+                Assert.assertEquals(sub2.getName(), addedSub.getName());
+                Assert.assertEquals(sub2.getDisplayName(), addedSub.getDisplayName());
+                Assert.assertNull(addedSub.getAttribute());
+            }
 
             // one more should be added
             Assertions.assertThat(ds.listBadgeDefs(gameId).size()).isEqualTo(size + 1);
