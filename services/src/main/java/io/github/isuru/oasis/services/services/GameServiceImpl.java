@@ -25,9 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna
@@ -151,25 +149,6 @@ public class GameServiceImpl implements IGameService {
 
     @Override
     public void addRaceWinners(long gameId, long raceId, List<RaceWinRecord> winners) throws Exception {
-        List<Map<String, Object>> records = new ArrayList<>();
-        winners.forEach(winner -> {
-            Map<String, Object> rec = new HashMap<>();
-            rec.put("userId", winner.getUserId());
-            rec.put("teamId", winner.getTeamId());
-            rec.put("teamScopeId", winner.getTeamScopeId());
-            rec.put("raceId", winner.getRaceId());
-            rec.put("raceStartAt", winner.getRaceStartAt());
-            rec.put("raceEndAt", winner.getRaceEndAt());
-            rec.put("rankPos", winner.getRank());
-            rec.put("points", winner.getPoints());
-            rec.put("totalCount", winner.getTotalCount());
-            rec.put("awardedPoints", winner.getAwardedPoints().floatValue());
-            rec.put("awardedAt", winner.getAwardedAt());
-            rec.put("gameId", winner.getGameId());
-
-            records.add(rec);
-        });
-
         // prepare for events...
         String token = getInternalToken();
         long ts = System.currentTimeMillis();
@@ -197,18 +176,8 @@ public class GameServiceImpl implements IGameService {
         });
 
 
-        dao.runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
-            List<List<Map<String, Object>>> batches = Commons.batches(records, 100)
-                    .collect(Collectors.toList());
-
-            for (List<Map<String, Object>> aBatch : batches) {
-                input.batchInsert(Q.GAME.ADD_RACE_AWARD, aBatch);
-            }
-
-            LOG.info("Sending #{} race events to game engine...", events.size());
-            eventsService.submitEvents(token, events);
-            return true;
-        });
+        LOG.info("Sending #{} race events to game engine...", events.size());
+        eventsService.submitEvents(token, events);
     }
 
     @Override
