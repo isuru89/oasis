@@ -15,7 +15,6 @@ import io.github.isuru.oasis.services.utils.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,7 +81,7 @@ public class MetaphorServiceImpl implements IMetaphorService {
             throw new InputValidationException("User cannot purchase this item as it is not available for your hero!");
         }
 
-        dao.runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
+        dao.runTx(ctx -> {
             Iterable<Map<String, Object>> userPoints = ctx.executeQuery(
                     Q.STATS.GET_USER_AVAILABLE_POINTS,
                     Maps.create("userId", userBy));
@@ -134,7 +133,7 @@ public class MetaphorServiceImpl implements IMetaphorService {
         }
         final int toUserHero = Integer.parseInt(String.valueOf(userHeros.get(0).get("user2Hero")));
 
-        dao.runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
+        dao.runTx(ctx -> {
             long currTs = System.currentTimeMillis();
             Map<String, Object> data = Maps.create().put("userId", userBy)
                     .put("itemId", itemId)
@@ -279,7 +278,7 @@ public class MetaphorServiceImpl implements IMetaphorService {
                 .put("updateLimit", 2)      // @TODO load from deployment configs
                 .build();
 
-        return (Boolean) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
+        return (Boolean) dao.runTx(ctx -> {
             boolean success = ctx.executeCommand(Q.METAPHOR.UPDATE_HERO, data) > 0;
             if (success) {
                 Map<String, Object> userMap = Maps.create("userId", userId);

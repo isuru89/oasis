@@ -183,7 +183,11 @@ public class Bootstrapping {
     private static void cleanTables(IOasisDao dao, String... tableNames) throws Exception {
         if (tableNames != null) {
             for (String tbl : tableNames) {
-                dao.executeRawCommand("TRUNCATE TABLE " + tbl, null);
+                try {
+                    dao.executeRawCommand("TRUNCATE TABLE " + tbl, null);
+                } catch (Exception e) {
+                    dao.executeRawCommand("DELETE FROM " + tbl, null);
+                }
             }
         }
     }

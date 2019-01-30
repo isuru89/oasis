@@ -8,8 +8,10 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.HandleCallback;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.JdbiException;
+import org.jdbi.v3.core.mapper.ColumnMapper;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.Query;
+import org.jdbi.v3.core.statement.StatementContext;
 import org.jdbi.v3.core.statement.Update;
 import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
 import org.jdbi.v3.stringtemplate4.StringTemplateEngine;
@@ -22,10 +24,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -35,11 +41,19 @@ public class JdbiOasisDao implements IOasisDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(JdbiOasisDao.class);
 
+    private static final Set<String> SCHEMA_SEP = new HashSet<>(Arrays.asList("sqlite"));
+    private static final Map<String, Integer> DEF_TX = new HashMap<String, Integer>() {{
+        put("sqlite", Connection.TRANSACTION_SERIALIZABLE);
+    }};
+
+    private static final DateTimeFormatter f = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     private final IQueryRepo queryRepo;
 
     private Jdbi jdbi;
     private IDefinitionDao definitionDao;
     private DataSource source;
+    private String prefix;
 
     public JdbiOasisDao(IQueryRepo queryRepo) {
         this.queryRepo = queryRepo;
@@ -50,13 +64,29 @@ public class JdbiOasisDao implements IOasisDao {
         source = JdbcPool.createDataSource(properties);
         jdbi = Jdbi.create(source);
         jdbi.setTemplateEngine(new StringTemplateEngine());
+        prefix = Utils.captureDbName(properties.getUrl());
+
+        if ("sqlite".equalsIgnoreCase(prefix)) {
+            jdbi.registerColumnMapper(new ColumnMapper<Timestamp>() {
+                @Override
+                public Timestamp map(ResultSet r, int columnNumber, StatementContext ctx) throws SQLException {
+                    LocalDateTime dateTime = LocalDateTime.from(f.parse(r.getString(columnNumber)));
+                    return new Timestamp(dateTime.toInstant(ZoneOffset.UTC).toEpochMilli());
+                }
+            });
+        }
 
         runForSchema(properties);
     }
 
+    @Override
+    public String getDbType() {
+        return prefix;
+    }
+
     private void runForSchema(DbProperties dbProperties) throws IOException, DbException {
         if (dbProperties.isAutoSchema()) {
-            String prefix = Utils.captureDbName(dbProperties.getUrl());
+            prefix = Utils.captureDbName(dbProperties.getUrl());
             String schemaFileLoc = "schema" + (prefix.length() > 0 ? "." + prefix : prefix) + ".sql";
             File schemaDir = new File(dbProperties.getSchemaDir());
             File schemaFile = new File(schemaDir, schemaFileLoc);
@@ -75,7 +105,30 @@ public class JdbiOasisDao implements IOasisDao {
                 }
             }
 
-            executeRawCommand(queryStr, new HashMap<>());
+            if (SCHEMA_SEP.contains(prefix)) {
+                List<String> lines = Files.readAllLines(schemaFile.toPath(), StandardCharsets.UTF_8);
+                List<String> statements = new LinkedList<>();
+                StringBuilder sb = new StringBuilder();
+                for (String line : lines) {
+                    if (line.trim().startsWith(";") || line.trim().startsWith(");")) {
+                        if (line.trim().startsWith(")")) {
+                            sb.append(')');
+                        }
+                        statements.add(sb.toString());
+                        sb = new StringBuilder();
+                    } else {
+                        sb.append(line).append('\n');
+                    }
+                }
+                statements.add(sb.toString());
+                for (String cmd : statements) {
+                    if (cmd.trim().length() > 0) {
+                        executeRawCommand(cmd, null);
+                    }
+                }
+            } else {
+                executeRawCommand(queryStr, new HashMap<>());
+            }
         }
     }
 
@@ -231,6 +284,12 @@ public class JdbiOasisDao implements IOasisDao {
             propagateIfInstOf(e, DbException.class);
             throw new DbException(e);
         }
+    }
+
+    @Override
+    public Object runTx(ConsumerEx<JdbcTransactionCtx> txBody) throws DbException {
+        return runTx(DEF_TX.getOrDefault(prefix, Connection.TRANSACTION_READ_COMMITTED),
+                txBody);
     }
 
     @Override

@@ -12,6 +12,8 @@ public interface IOasisDao extends AutoCloseable {
 
     void init(DbProperties properties) throws Exception;
 
+    String getDbType();
+
     <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data,
                                  Class<T> clz, Map<String, Object> templatingData) throws DbException;
     Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data) throws DbException;
@@ -26,6 +28,7 @@ public interface IOasisDao extends AutoCloseable {
     Long executeInsert(String queryId, Map<String, Object> data, String keyColumn) throws DbException;
     Long executeInsert(String queryId, Map<String, Object> data, Map<String, Object> templatingData, String keyColumn) throws DbException;
     Object runTx(int transactionLevel, ConsumerEx<JdbcTransactionCtx> txBody) throws DbException;
+    Object runTx(ConsumerEx<JdbcTransactionCtx> txBody) throws DbException;
 
     IDefinitionDao getDefinitionDao();
 

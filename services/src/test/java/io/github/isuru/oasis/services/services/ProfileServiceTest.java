@@ -357,6 +357,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
 
         {
             // can edit display name
+            Thread.sleep(1000);
             TeamScopeEditDto scopeToAdd = createEditScope("Edited : " + DefaultEntities.DEFAULT_TEAM_SCOPE_NAME);
             Assert.assertTrue(ps.editTeamScope(defScope.getId(), scopeToAdd));
 
@@ -483,6 +484,7 @@ public class ProfileServiceTest extends AbstractServiceTest {
                     .isInstanceOf(InputValidationException.class);
 
             // but can edit avatar id
+            Thread.sleep(1000);
             defNew.setName(DefaultEntities.DEFAULT_TEAM_NAME);
             defNew.setAvatarId("img/newAvatarId.jpg");
             Assert.assertTrue(ps.editTeam(defTeam.getId(), defNew));

@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
 import java.util.*;
 
 /**
@@ -55,7 +54,7 @@ public class ProfileServiceImpl implements IProfileService {
             throw new InputValidationException("No team is found by id [" + teamId + "]!");
         }
 
-        return (Long) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
+        return (Long) dao.runTx(ctx -> {
             Map<String, Object> templating = Maps.create("isActivated", profile.isActivated());
 
             Map<String, Object> data = Maps.create()
@@ -191,7 +190,7 @@ public class ProfileServiceImpl implements IProfileService {
         Checks.nonNull(teamProfile.getTeamScope(), "scope");
         Checks.greaterThanZero(teamProfile.getTeamScope(), "scope");
 
-        return (Long) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
+        return (Long) dao.runTx(input -> {
             long currTime = System.currentTimeMillis();
 
             Map<String, Object> data = Maps.create()
@@ -277,7 +276,7 @@ public class ProfileServiceImpl implements IProfileService {
         Checks.nonNullOrEmpty(teamScope.getName(), "name");
         Checks.nonNullOrEmpty(teamScope.getDisplayName(), "displayName");
 
-        return (Long) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, input -> {
+        return (Long) dao.runTx(input -> {
             long currTime = System.currentTimeMillis();
 
             Map<String, Object> data = Maps.create()
@@ -399,7 +398,7 @@ public class ProfileServiceImpl implements IProfileService {
                     Maps.create("id", currentTeam.getId()));
         }
 
-        return (Boolean) dao.runTx(Connection.TRANSACTION_READ_COMMITTED, ctx -> {
+        return (Boolean) dao.runTx(ctx -> {
             if (currentTeam != null) {
                 ctx.executeCommand(Q.PROFILE.DEALLOCATE_FROM_TEAM,
                         Maps.create()

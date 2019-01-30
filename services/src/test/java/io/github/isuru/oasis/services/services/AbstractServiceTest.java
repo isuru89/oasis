@@ -25,9 +25,16 @@ abstract class AbstractServiceTest {
     private Bootstrapping bootstrapping;
 
     void resetSchema() throws Exception {
-        Iterable<Map<String, Object>> tableList = dao.executeRawQuery("SHOW TABLES", null);
-        for (Map<String, Object> map : tableList) {
-            dao.executeRawCommand("TRUNCATE TABLE " + map.get("table_name").toString(), null);
+        if (dao.getDbType().equalsIgnoreCase("sqlite")) {
+            Iterable<Map<String, Object>> maps = dao.executeRawQuery("SELECT name FROM sqlite_master WHERE type = \"table\"", null);
+            for (Map<String, Object> map : maps) {
+                dao.executeRawCommand("DELETE FROM " + map.get("name").toString(), null);
+            }
+        } else {
+            Iterable<Map<String, Object>> tableList = dao.executeRawQuery("SHOW TABLES", null);
+            for (Map<String, Object> map : tableList) {
+                dao.executeRawCommand("TRUNCATE TABLE " + map.get("table_name").toString(), null);
+            }
         }
 
         bootstrapping.initialize();
@@ -35,7 +42,11 @@ abstract class AbstractServiceTest {
 
     void truncateTables(String... tableNames) throws DbException {
         for (String tbl : tableNames) {
-            dao.executeRawCommand("TRUNCATE TABLE " + tbl, null);
+            try {
+                dao.executeRawCommand("TRUNCATE TABLE " + tbl, null);
+            } catch (Exception e) {
+                dao.executeRawCommand("DELETE FROM " + tbl, null);
+            }
         }
     }
 

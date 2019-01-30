@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.services;
 
+import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
@@ -71,6 +72,41 @@ public class GameDefServiceTest extends BaseDefServiceTest {
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(() -> ds.listAttributes(-1))
                     .isInstanceOf(InputValidationException.class);
+        }
+    }
+
+    @Test
+    public void testAddMultipleAttributesOnce() throws DbException {
+        {
+            List<Map<String, Object>> records = new ArrayList<>();
+            {
+                Map<String, Object> r = new HashMap<>();
+                r.put("defId", 1);
+                r.put("defSubId", 1);
+                r.put("attributeId", 1);
+                records.add(r);
+            }
+            {
+                Map<String, Object> r = new HashMap<>();
+                r.put("defId", 1);
+                r.put("defSubId", 2);
+                r.put("attributeId", 3);
+                records.add(r);
+            }
+            {
+                Map<String, Object> r = new HashMap<>();
+                r.put("defId", 1);
+                r.put("defSubId", 1);
+                r.put("attributeId", 10);
+                records.add(r);
+            }
+
+            dao.executeBatchInsert("def/attr/addDefAttribute", records);
+
+            Iterable<Map<String, Object>> maps = dao.executeQuery("def/attr/listAllDefAttributes", null);
+            Assertions.assertThat(maps)
+                    .isNotEmpty()
+                    .hasSize(2);
         }
     }
 

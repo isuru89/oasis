@@ -8,5 +8,5 @@ SELECT
     created_at as createdAt,
     updated_at as updatedAt
 FROM OA_TEAM
-WHERE name = :teamName AND is_active = 1
+WHERE LOWER(name) = LOWER(:teamName) AND is_active = 1
 LIMIT 1
