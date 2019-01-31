@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.services.scheduler;
 
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.defs.RaceDef;
+import io.github.isuru.oasis.services.dto.game.RaceCalculationDto;
 import io.github.isuru.oasis.services.model.RaceWinRecord;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IGameService;
@@ -19,19 +20,17 @@ public class CustomScheduler extends BaseScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(CustomScheduler.class);
 
-    private long startTime;
-    private long endTime;
+    private RaceCalculationDto calculationOptions;
 
     private IGameService gameService;
     private IGameDefService gameDefService;
     private IProfileService profileService;
 
-    public CustomScheduler(long startTime, long endTime,
+    public CustomScheduler(RaceCalculationDto calculationDto,
                            IGameDefService gameDefService,
                            IProfileService profileService,
                            IGameService gameService) {
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.calculationOptions = calculationDto;
 
         this.gameDefService = gameDefService;
         this.gameService = gameService;
@@ -56,13 +55,15 @@ public class CustomScheduler extends BaseScheduler {
                 teamCountMap,
                 teamScopeCountMap);
 
-        gameService.addRaceWinners(gameId, raceDef.getId(), winners);
+        if (calculationOptions.isDoPersist()) {
+            gameService.addRaceWinners(gameId, raceDef.getId(), winners);
+        }
         return winners;
     }
 
     @Override
     protected Pair<Long, Long> deriveTimeRange(long ms, ZoneId zoneId) {
-        return Pair.of(startTime, endTime);
+        return Pair.of(calculationOptions.getStartTime(), calculationOptions.getEndTime());
     }
 
     @Override

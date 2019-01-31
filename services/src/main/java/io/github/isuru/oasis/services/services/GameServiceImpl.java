@@ -54,76 +54,90 @@ public class GameServiceImpl implements IGameService {
     @Override
     public void awardPoints(long byUser, PointAwardDto awardDto) throws Exception {
         Checks.greaterThanZero(byUser, "user");
-        Checks.greaterThanZero(awardDto.getToUser(), "toUser");
+        long toUser = awardDto.getToUser();
+        Checks.greaterThanZero(toUser, "toUser");
         Checks.validate(awardDto.getAmount() != 0.0f, "Point amount should not be equal to zero!");
-        Checks.validate(awardDto.getToUser() != byUser, "You cannot award points to yourself!");
+        Checks.validate(toUser != byUser, "You cannot award points to yourself!");
 
-        UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(awardDto.getToUser());
-        long teamId = currentTeamOfUser != null ? currentTeamOfUser.getTeamId() : dataCache.getTeamDefault().getId();
-        long scopeId = currentTeamOfUser != null ? currentTeamOfUser.getScopeId() : dataCache.getTeamScopeDefault().getId();
+        UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(toUser);
+        Checks.nonNull(currentTeamOfUser, "Cannot derive the current team of user #" + toUser + "!");
+
+        UserTeam curTeamOfAwardBy = profileService.findCurrentTeamOfUser(byUser);
+        Checks.nonNull(curTeamOfAwardBy, "Cannot derive the current team of awarding user #" + toUser + "!");
+
+        long teamId = currentTeamOfUser.getTeamId();
+        long scopeId = currentTeamOfUser.getScopeId();
         long gameId = awardDto.getGameId() != null ? awardDto.getGameId() : dataCache.getDefGameId();
 
-        // only curators and admins can award points to the same user as
-        if (dataCache.getAdminUserId() != byUser
-                && profileService.listCurrentUserRoles(byUser).stream().noneMatch(uts -> uts.isApproved()
-                                    && scopeId == uts.getTeamScopeId()
-                                    && uts.getUserRole() == UserRole.CURATOR)) {
-            throw new ApiAuthException("You cannot award points to user " + awardDto.getToUser()
+        // awarder and awardee must be in same team scope now
+        if (dataCache.getAdminUserId() == byUser
+                || (UserRole.hasRole(curTeamOfAwardBy.getRoleId(), UserRole.CURATOR)
+                && curTeamOfAwardBy.getScopeId().equals(currentTeamOfUser.getScopeId()))) {
+
+            Map<String, Object> data = Maps.create()
+                    .put(Constants.FIELD_EVENT_TYPE, EventNames.OASIS_EVENT_COMPENSATE_POINTS)
+                    .put(Constants.FIELD_TIMESTAMP, awardDto.getTs() == null ? System.currentTimeMillis() : awardDto.getTs())
+                    .put(Constants.FIELD_USER, toUser)
+                    .put(Constants.FIELD_TEAM, teamId)
+                    .put(Constants.FIELD_SCOPE, scopeId)
+                    .put(Constants.FIELD_GAME_ID, gameId)
+                    .put(Constants.FIELD_ID, awardDto.getAssociatedEventId())
+                    .put("amount", awardDto.getAmount())
+                    .put("tag", String.valueOf(byUser))
+                    .build();
+
+            String token = getInternalToken();
+            eventsService.submitEvent(token, data);
+
+        } else {
+            throw new ApiAuthException("You cannot award points to user " + toUser
                     + ", because you do not have required permissions or user is not belong to same team scope as you!");
         }
-
-        Map<String, Object> data = Maps.create()
-                .put(Constants.FIELD_EVENT_TYPE, EventNames.OASIS_EVENT_COMPENSATE_POINTS)
-                .put(Constants.FIELD_TIMESTAMP, awardDto.getTs() == null ? System.currentTimeMillis() : awardDto.getTs())
-                .put(Constants.FIELD_USER, awardDto.getToUser())
-                .put(Constants.FIELD_TEAM, teamId)
-                .put(Constants.FIELD_SCOPE, scopeId)
-                .put(Constants.FIELD_GAME_ID, gameId)
-                .put(Constants.FIELD_ID, awardDto.getAssociatedEventId())
-                .put("amount", awardDto.getAmount())
-                .put("tag", String.valueOf(byUser))
-                .build();
-
-        String token = getInternalToken();
-        eventsService.submitEvent(token, data);
     }
 
     @Override
     public void awardBadge(long byUser, BadgeAwardDto awardDto) throws Exception {
         Checks.greaterThanZero(byUser, "user");
-        Checks.greaterThanZero(awardDto.getToUser(), "toUser");
+        long toUser = awardDto.getToUser();
+        Checks.greaterThanZero(toUser, "toUser");
         Checks.greaterThanZero(awardDto.getBadgeId(), "Badge id must be a valid one!");
-        Checks.validate(byUser != awardDto.getToUser(), "You cannot award badges to yourself!");
+        Checks.validate(byUser != toUser, "You cannot award badges to yourself!");
 
-        UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(awardDto.getToUser());
-        long teamId = currentTeamOfUser != null ? currentTeamOfUser.getTeamId() : dataCache.getTeamDefault().getId();
-        long scopeId = currentTeamOfUser != null ? currentTeamOfUser.getScopeId() : dataCache.getTeamScopeDefault().getId();
+        UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(toUser);
+        Checks.nonNull(currentTeamOfUser, "Cannot derive the current team of user #" + toUser + "!");
+
+        UserTeam curTeamOfAwardBy = profileService.findCurrentTeamOfUser(byUser);
+        Checks.nonNull(curTeamOfAwardBy, "Cannot derive the current team of awarding user #" + toUser + "!");
+
+        long teamId = currentTeamOfUser.getTeamId();
+        long scopeId = currentTeamOfUser.getScopeId();
         long gameId = awardDto.getGameId() != null ? awardDto.getGameId() : dataCache.getDefGameId();
 
-        // only curators and admins can award points to the same user as
-        if (dataCache.getAdminUserId() != byUser
-                && profileService.listCurrentUserRoles(byUser).stream().noneMatch(uts -> uts.isApproved()
-                && scopeId == uts.getTeamScopeId()
-                && uts.getUserRole() == UserRole.CURATOR)) {
-            throw new ApiAuthException("You cannot award badges to user " + awardDto.getToUser()
-                    + ", because you do not have required permissions or user is not belong to same team scope as you!");
+        // awarder and awardee must be in same team scope now
+        if (dataCache.getAdminUserId() == byUser
+                || (UserRole.hasRole(curTeamOfAwardBy.getRoleId(), UserRole.CURATOR)
+                    && curTeamOfAwardBy.getScopeId().equals(currentTeamOfUser.getScopeId()))) {
+
+            Map<String, Object> data = Maps.create()
+                    .put(Constants.FIELD_EVENT_TYPE, EventNames.OASIS_EVENT_AWARD_BADGE)
+                    .put(Constants.FIELD_TIMESTAMP, awardDto.getTs() == null ? System.currentTimeMillis() : awardDto.getTs())
+                    .put(Constants.FIELD_USER, toUser)
+                    .put(Constants.FIELD_TEAM, teamId)
+                    .put(Constants.FIELD_SCOPE, scopeId)
+                    .put(Constants.FIELD_GAME_ID, gameId)
+                    .put(Constants.FIELD_ID, awardDto.getAssociatedEventId())
+                    .put("badge", awardDto.getBadgeId())
+                    .put("subBadge", awardDto.getSubBadgeId())
+                    .put("tag", String.valueOf(byUser))
+                    .build();
+
+            String token = getInternalToken();
+            eventsService.submitEvent(token, data);
+
+        } else {
+            throw new ApiAuthException("You cannot award badges to user #" + toUser
+                + ", because you do not have required permissions or user is not belong to same team scope as you!");
         }
-
-        Map<String, Object> data = Maps.create()
-                .put(Constants.FIELD_EVENT_TYPE, EventNames.OASIS_EVENT_AWARD_BADGE)
-                .put(Constants.FIELD_TIMESTAMP, awardDto.getTs() == null ? System.currentTimeMillis() : awardDto.getTs())
-                .put(Constants.FIELD_USER, awardDto.getToUser())
-                .put(Constants.FIELD_TEAM, teamId)
-                .put(Constants.FIELD_SCOPE, scopeId)
-                .put(Constants.FIELD_GAME_ID, gameId)
-                .put(Constants.FIELD_ID, awardDto.getAssociatedEventId())
-                .put("badge", awardDto.getBadgeId())
-                .put("subBadge", awardDto.getSubBadgeId())
-                .put("tag", String.valueOf(byUser))
-                .build();
-
-        String token = getInternalToken();
-        eventsService.submitEvent(token, data);
     }
 
     @Override
@@ -138,14 +152,14 @@ public class GameServiceImpl implements IGameService {
             throw new InputValidationException("No race is found by id #" + raceId + "!");
         }
 
-        CustomScheduler customScheduler = new CustomScheduler(calculationDto.getStartTime(),
-                calculationDto.getEndTime(),
+        CustomScheduler customScheduler = new CustomScheduler(calculationDto,
                 gameDefService,
                 profileService,
                 this);
 
         long ts = System.currentTimeMillis();
         return customScheduler.runCustomInvoke(raceOpt.get(), gameDef.getId(), ts);
+
     }
 
     @Override
