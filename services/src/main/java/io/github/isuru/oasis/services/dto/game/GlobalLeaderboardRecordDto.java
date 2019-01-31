@@ -75,4 +75,18 @@ public class GlobalLeaderboardRecordDto {
     public void setCalculatedTime(Long calculatedTime) {
         this.calculatedTime = calculatedTime;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "userId=" + userId +
+                ", userName='" + userName + '\'' +
+                ", totalCount=" + totalCount +
+                ", totalPoints=" + totalPoints +
+                ", rankGlobal=" + rankGlobal +
+                ", nextRankValue=" + nextRankValue +
+                ", topRankValue=" + topRankValue +
+                ", calculatedTime=" + calculatedTime +
+                '}';
+    }
 }

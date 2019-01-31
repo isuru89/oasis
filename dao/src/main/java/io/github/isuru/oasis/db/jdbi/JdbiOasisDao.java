@@ -9,10 +9,7 @@ import org.jdbi.v3.core.HandleCallback;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.JdbiException;
 import org.jdbi.v3.core.mapper.ColumnMapper;
-import org.jdbi.v3.core.statement.PreparedBatch;
-import org.jdbi.v3.core.statement.Query;
-import org.jdbi.v3.core.statement.StatementContext;
-import org.jdbi.v3.core.statement.Update;
+import org.jdbi.v3.core.statement.*;
 import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
 import org.jdbi.v3.stringtemplate4.StringTemplateEngine;
 import org.slf4j.Logger;
@@ -65,6 +62,15 @@ public class JdbiOasisDao implements IOasisDao {
         jdbi = Jdbi.create(source);
         jdbi.setTemplateEngine(new StringTemplateEngine());
         prefix = Utils.captureDbName(properties.getUrl());
+
+//        jdbi.setSqlLogger(new SqlLogger() {
+//            @Override
+//            public void logBeforeExecution(StatementContext context) {
+//                System.out.println(context.getParsedSql().getSql());
+//                System.out.println(context.getParsedSql().getParameters().getParameterCount());
+//                System.out.println(context.getParsedSql().getParameters().getParameterNames());
+//            }
+//        });
 
         if ("sqlite".equalsIgnoreCase(prefix)) {
             jdbi.registerColumnMapper(new ColumnMapper<Timestamp>() {
@@ -145,13 +151,14 @@ public class JdbiOasisDao implements IOasisDao {
                     for (Map.Entry<String, Object> entry : templatingData.entrySet()) {
                         Object value = entry.getValue();
                         if (value instanceof List) {
-                            handleQuery = handleQuery.defineList(entry.getKey(), value);
+                            handleQuery = handleQuery.defineList(entry.getKey(), (List<?>) value);
                         } else {
                             handleQuery = handleQuery.define(entry.getKey(), value);
                         }
                     }
                 }
-                return handleQuery.bindMap(data).mapToBean(clz).list();
+                bindArgs(handleQuery, data);
+                return handleQuery.mapToBean(clz).list();
             });
 
         } catch (Exception e) {
@@ -163,8 +170,11 @@ public class JdbiOasisDao implements IOasisDao {
     public Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data) throws DbException {
         String query = queryRepo.fetchQuery(queryId);
         try {
-            return jdbi.withHandle((HandleCallback<Iterable<Map<String, Object>>, Exception>) handle ->
-                    handle.createQuery(query).bindMap(data).mapToMap().list());
+            return jdbi.withHandle((HandleCallback<Iterable<Map<String, Object>>, Exception>) handle -> {
+                Query handleQuery = handle.createQuery(query);
+                bindArgs(handleQuery, data);
+                return handleQuery.mapToMap().list();
+            });
 
         } catch (Exception e) {
             throw new DbException(e);
@@ -189,7 +199,8 @@ public class JdbiOasisDao implements IOasisDao {
                         }
                     }
                 }
-                return handleQuery.bindMap(data).mapToMap().list();
+                bindArgs(handleQuery, data);
+                return handleQuery.mapToMap().list();
             });
 
         } catch (Exception e) {
@@ -201,8 +212,11 @@ public class JdbiOasisDao implements IOasisDao {
     public <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws DbException {
         String query = queryRepo.fetchQuery(queryId);
         try {
-            return jdbi.withHandle((HandleCallback<Iterable<T>, Exception>) handle ->
-                    handle.createQuery(query).bindMap(data).mapToBean(clz).list());
+            return jdbi.withHandle((HandleCallback<Iterable<T>, Exception>) handle -> {
+                Query handleQuery = handle.createQuery(query);
+                bindArgs(handleQuery, data);
+                return handleQuery.bindMap(data).mapToBean(clz).list();
+            });
         } catch (Exception e) {
             throw new DbException(e);
         }
@@ -363,6 +377,21 @@ public class JdbiOasisDao implements IOasisDao {
         }
     }
 
+    private static void bindArgs(Query handleQuery, Map<String, Object> data) {
+        if (data != null) {
+            for (Map.Entry<String, Object> entry : data.entrySet()) {
+                Object val = entry.getValue();
+                if (val instanceof List) {
+                    handleQuery = handleQuery.bindList(entry.getKey(), (List<?>) val);
+                } else {
+                    handleQuery = handleQuery.bind(entry.getKey(), val);
+                }
+            }
+        } else {
+            handleQuery.bindMap(null);
+        }
+    }
+
     @Override
     public IDefinitionDao getDefinitionDao() {
         if (definitionDao == null) {
@@ -393,7 +422,9 @@ public class JdbiOasisDao implements IOasisDao {
         public Iterable<Map<String, Object>> executeQuery(String queryId, Map<String, Object> data) throws DbException {
             String query = queryRepo.fetchQuery(queryId);
             try {
-                return handle.createQuery(query).bindMap(data).mapToMap().list();
+                Query handleQuery = handle.createQuery(query);
+                bindArgs(handleQuery, data);
+                return  handleQuery.mapToMap().list();
             } catch (JdbiException e) {
                 throw new DbException(e);
             }
@@ -403,7 +434,9 @@ public class JdbiOasisDao implements IOasisDao {
         public <T> Iterable<T> executeQuery(String queryId, Map<String, Object> data, Class<T> clz) throws DbException {
             String query = queryRepo.fetchQuery(queryId);
             try {
-                return handle.createQuery(query).bindMap(data).mapToBean(clz).list();
+                Query handleQuery = handle.createQuery(query);
+                bindArgs(handleQuery, data);
+                return handleQuery.mapToBean(clz).list();
             } catch (JdbiException e) {
                 throw new DbException(e);
             }

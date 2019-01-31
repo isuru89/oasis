@@ -98,10 +98,10 @@ final class Q {
     }
 
     static class LEADERBOARD {
-        static final String GLOBAL_LEADERBOARD = "leaderbaord/globalLeaderboard";
-        static final String RACE_GLOBAL_LEADERBOARD = "leaderbaord/raceGlobalLeaderboard";
-        static final String RACE_TEAM_LEADERBOARD = "leaderbaord/raceTeamLeaderboard";
-        static final String TEAM_LEADERBOARD = "leaderbaord/teamLeaderboard";
+        private static final String PATH = "leaderboard/";
+
+        static final String GLOBAL_LEADERBOARD = PATH + "globalLeaderboard";
+        static final String TEAM_LEADERBOARD = PATH + "teamLeaderboard";
     }
 
     static class STATS {

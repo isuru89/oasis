@@ -122,4 +122,23 @@ public class TeamLeaderboardRecordDto {
     public void setCalculatedTime(Long calculatedTime) {
         this.calculatedTime = calculatedTime;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "userId=" + userId +
+                ", userName='" + userName + '\'' +
+                ", teamId=" + teamId +
+                ", teamName='" + teamName + '\'' +
+                ", teamScopeId=" + teamScopeId +
+                ", teamScopeName='" + teamScopeName + '\'' +
+                ", totalPoints=" + totalPoints +
+                ", totalCount=" + totalCount +
+                ", rankInTeam=" + rankInTeam +
+                ", rankInTeamScope=" + rankInTeamScope +
+                ", nextTeamRankValue=" + nextTeamRankValue +
+                ", nextTeamScopeRankValue=" + nextTeamScopeRankValue +
+                ", calculatedTime=" + calculatedTime +
+                '}';
+    }
 }

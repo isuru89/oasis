@@ -35,20 +35,21 @@ public class GameServiceImpl implements IGameService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GameServiceImpl.class);
 
-    @Autowired
     private IGameDefService gameDefService;
-
-    @Autowired
     private IProfileService profileService;
-
-    @Autowired
     private IEventsService eventsService;
 
-    @Autowired
     private IOasisDao dao;
+    private DataCache dataCache;
 
     @Autowired
-    private DataCache dataCache;
+    public GameServiceImpl(IGameDefService gameDefService, IProfileService profileService, IEventsService eventsService, IOasisDao dao, DataCache dataCache) {
+        this.gameDefService = gameDefService;
+        this.profileService = profileService;
+        this.eventsService = eventsService;
+        this.dao = dao;
+        this.dataCache = dataCache;
+    }
 
     @Override
     public void awardPoints(long byUser, PointAwardDto awardDto) throws Exception {
@@ -243,6 +244,7 @@ public class GameServiceImpl implements IGameService {
 
         LeaderboardDef ldef = request.getLeaderboardDef();
         Map<String, Object> templateData = createLeaderboardTemplateMap(request, ldef);
+        templateData.put("hasTeamScope", true);
 
         Map<String, Object> data = createLeaderboardParams(request, ldef);
         data.put("teamScopeId", teamScopeId);
@@ -265,7 +267,9 @@ public class GameServiceImpl implements IGameService {
                 .put("rangeStart", request.getRangeStart())
                 .put("rangeEnd", request.getRangeEnd())
                 .put("topN", request.getTopN())
-                .put("pointThreshold", request.getMinPointThreshold());
+                .put("pointThreshold", request.getMinPointThreshold())
+                .put("topThreshold", request.getTopThreshold())
+                .put("aggType", AggregatorType.SUM.name());
 
         if (ldef != null) {
             dataBuilder = dataBuilder
@@ -281,6 +285,7 @@ public class GameServiceImpl implements IGameService {
                                                              LeaderboardDef ldef) {
         return Maps.create()
                 .put("hasTeam", false)
+                .put("hasTeamScope", false)
                 .put("hasUser", ServiceUtils.isValid(request.getForUser()))
                 .put("hasTimeRange", request.getRangeStart() > 0 && request.getRangeEnd() > request.getRangeStart())
                 .put("hasInclusions", ldef != null && !Commons.isNullOrEmpty(ldef.getRuleIds()))
@@ -289,6 +294,9 @@ public class GameServiceImpl implements IGameService {
                 .put("hasPointThreshold", ServiceUtils.isValid(request.getMinPointThreshold()))
                 .put("onlyFinalTops", ServiceUtils.isValid(request.getTopThreshold()))
                 .put("hasStates", ldef != null && ldef.hasStates())
+                .put("aggType", ldef != null ?
+                        (Commons.orDefault(ldef.getAggregatorType(), AggregatorType.SUM.name()))
+                    : AggregatorType.SUM.name())
                 .build();
     }
 

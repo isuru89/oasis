@@ -19,7 +19,7 @@ FROM
         (RANK() over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'rankInTeamScope',
         (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'nextTeamRankValue',
         (LAG(tbl.totalPoints) over (PARTITION BY tbl.team_scope_id ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'nextTeamScopeRankValue',
-        UNIX_TIMESTAMP(NOW()) * 1000 AS calculatedTime
+        strftime('%s','now') AS calculatedTime
     FROM
     (
        <if(hasStates)>

@@ -14,7 +14,7 @@ FROM
         (RANK() over (ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'rankGlobal',
         (LAG(tbl.totalPoints) over (ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'nextRankValue',
         (FIRST_VALUE(tbl.totalPoints) over (ORDER BY tbl.totalPoints DESC, tbl.totalCount ASC)) AS 'topRankValue',
-        UNIX_TIMESTAMP(NOW()) * 1000 AS calculatedTime
+        strftime('%s','now') AS calculatedTime
     FROM
     (
         <if(hasStates)>

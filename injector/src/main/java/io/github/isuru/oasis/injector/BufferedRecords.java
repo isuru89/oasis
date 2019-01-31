@@ -24,7 +24,7 @@ public class BufferedRecords implements Closeable {
 
     private final Consumer<List<ElementRecord>> recordConsumer;
 
-    BufferedRecords(Consumer<List<ElementRecord>> recordConsumer) {
+    public BufferedRecords(Consumer<List<ElementRecord>> recordConsumer) {
         this.recordConsumer = recordConsumer;
     }
 
@@ -33,7 +33,7 @@ public class BufferedRecords implements Closeable {
         pool.shutdown();
     }
 
-    void push(ElementRecord map) {
+    public void push(ElementRecord map) {
         queue.offer(map);
         if (queue.size() == MAX_SIZE) {
             flush();
@@ -58,17 +58,21 @@ public class BufferedRecords implements Closeable {
         }
     }
 
+    public void flushNow() {
+        flush();
+    }
+
     @Override
     public void close() {
         LOG.warn("Shutdown signal received for buffer.");
         timer.doStop();
     }
 
-    static class ElementRecord {
+    public static class ElementRecord {
         private Map<String, Object> data;
         private long deliveryTag;
 
-        ElementRecord(Map<String, Object> data, long deliveryTag) {
+        public ElementRecord(Map<String, Object> data, long deliveryTag) {
             this.data = data;
             this.deliveryTag = deliveryTag;
         }
