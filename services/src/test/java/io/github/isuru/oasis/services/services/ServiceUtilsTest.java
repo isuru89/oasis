@@ -59,5 +59,11 @@ public class ServiceUtilsTest {
 
         Assert.assertFalse(ServiceUtils.isValid((Integer) null));
         Assert.assertFalse(ServiceUtils.isValid((Long) null));
+
+        Assert.assertFalse(ServiceUtils.isValid((Boolean) null));
+        Assert.assertTrue(ServiceUtils.isValid(true));
+        Assert.assertTrue(ServiceUtils.isValid(false));
+        Assert.assertTrue(ServiceUtils.isValid(Boolean.TRUE));
+        Assert.assertTrue(ServiceUtils.isValid(Boolean.FALSE));
     }
 }

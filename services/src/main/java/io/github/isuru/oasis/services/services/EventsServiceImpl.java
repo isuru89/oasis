@@ -37,22 +37,29 @@ public class EventsServiceImpl implements IEventsService {
 
     private static final Slugify SLUGIFY = new Slugify();
 
-    @Autowired
     private CacheProxyManager cacheProxyManager;
 
-    @Autowired
     private GameControllerManager gameControllerManager;
 
-    @Autowired
     private IOasisDao dao;
 
-    @Autowired
     private IProfileService profileService;
 
-    @Autowired
     private DataCache dataCache;
 
     private final EventSources sources = new EventSources();
+
+    @Autowired
+    public EventsServiceImpl(CacheProxyManager cacheProxyManager,
+                             GameControllerManager gameControllerManager,
+                             IOasisDao dao, IProfileService profileService,
+                             DataCache dataCache) {
+        this.cacheProxyManager = cacheProxyManager;
+        this.gameControllerManager = gameControllerManager;
+        this.dao = dao;
+        this.profileService = profileService;
+        this.dataCache = dataCache;
+    }
 
     @Override
     public void init() {
@@ -67,6 +74,7 @@ public class EventsServiceImpl implements IEventsService {
     @Override
     public void submitEvent(String token, Map<String, Object> eventData) throws Exception {
         Checks.nonNullOrEmpty(token, "token");
+        Checks.nonNull(eventData, "eventData");
         Checks.validate(eventData.containsKey(Constants.FIELD_EVENT_TYPE), "No event-type ('type') field in the event!");
         Checks.validate(eventData.containsKey(Constants.FIELD_TIMESTAMP), "No timestamp ('ts') field in the event!");
         Checks.validate(eventData.containsKey(Constants.FIELD_USER), "No user ('user') field in the event!");
@@ -113,8 +121,11 @@ public class EventsServiceImpl implements IEventsService {
                 event.put(Constants.FIELD_TEAM, teamProfile.getId());
                 event.put(Constants.FIELD_SCOPE, teamProfile.getTeamScope());
             } else {
-                event.put(Constants.FIELD_TEAM, Long.parseLong(String.valueOf(team)));
-                event.put(Constants.FIELD_SCOPE, dataCache.getTeamScopeDefault().getId());
+                long tid = Long.parseLong(String.valueOf(team));
+                TeamProfile teamProfile = profileService.readTeam(tid);
+                // @TODO when no team is found by id
+                event.put(Constants.FIELD_TEAM, tid);
+                event.put(Constants.FIELD_SCOPE, teamProfile.getTeamScope());
             }
         }
 

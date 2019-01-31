@@ -43,7 +43,7 @@ class ServiceUtils {
     }
 
     static boolean isValid(Boolean val) {
-        return val != null && val;
+        return val != null;
     }
 
     static boolean isValid(Double val) {
