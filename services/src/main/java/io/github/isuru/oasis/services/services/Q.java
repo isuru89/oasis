@@ -105,8 +105,15 @@ final class Q {
     }
 
     static class STATS {
+        private static final String PATH = "stats/";
+        private static final String POINTS = PATH + "points/";
+        private static final String BADGES = PATH + "badges/";
+
+        static final String GET_POINT_BREAKDOWN = POINTS + "getPointBreakdown";
+        static final String GET_POINT_SUMMARY = POINTS + "getPointsSummary";
+        static final String GET_BADGE_SUMMARY = BADGES + "getBadgesSummary";
+        static final String GET_BADGE_BREAKDOWN = BADGES + "getBadgeBreakdown";
         static final String GET_CHALLENGE_WINNERS = "stats/getChallengeWinners";
-        static final String GET_USER_POINTS_LIST = "stats/getUserPointsList";
         static final String GET_USER_BADGES_LIST = "stats/getUserBadgesList";
         static final String GET_USER_STAT_SUMMARY = "stats/getUserStatSummary";
         static final String GET_PURCHASED_ITEMS = "stats/getPurchasedItems";

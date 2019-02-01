@@ -1,35 +1,22 @@
 package io.github.isuru.oasis.services.dto.stats;
 
-/**
- * @author iweerarathna
- */
-public class PointBreakdownReqDto {
-
-    private Integer offset;
-    private Integer size;
-
-    private Long userId;
+public class BadgeSummaryReq {
     private Long teamId;
+    private Long userId;
     private Long teamScopeId;
-    private Integer pointId;
 
     private Long rangeStart;
     private Long rangeEnd;
 
-    public Integer getOffset() {
-        return offset;
+    private Integer offset;
+    private Integer size;
+
+    public Long getTeamId() {
+        return teamId;
     }
 
-    public void setOffset(Integer offset) {
-        this.offset = offset;
-    }
-
-    public Integer getSize() {
-        return size;
-    }
-
-    public void setSize(Integer size) {
-        this.size = size;
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
     }
 
     public Long getUserId() {
@@ -40,28 +27,12 @@ public class PointBreakdownReqDto {
         this.userId = userId;
     }
 
-    public Long getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(Long teamId) {
-        this.teamId = teamId;
-    }
-
     public Long getTeamScopeId() {
         return teamScopeId;
     }
 
     public void setTeamScopeId(Long teamScopeId) {
         this.teamScopeId = teamScopeId;
-    }
-
-    public Integer getPointId() {
-        return pointId;
-    }
-
-    public void setPointId(Integer pointId) {
-        this.pointId = pointId;
     }
 
     public Long getRangeStart() {
@@ -78,5 +49,21 @@ public class PointBreakdownReqDto {
 
     public void setRangeEnd(Long rangeEnd) {
         this.rangeEnd = rangeEnd;
+    }
+
+    public Integer getOffset() {
+        return offset;
+    }
+
+    public void setOffset(Integer offset) {
+        this.offset = offset;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
     }
 }

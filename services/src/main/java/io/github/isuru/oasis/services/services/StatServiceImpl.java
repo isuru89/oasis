@@ -4,18 +4,13 @@ import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
+import io.github.isuru.oasis.model.defs.ScopingType;
 import io.github.isuru.oasis.services.DataCache;
-import io.github.isuru.oasis.services.dto.game.GlobalLeaderboardRecordDto;
-import io.github.isuru.oasis.services.dto.game.LeaderboardRequestDto;
-import io.github.isuru.oasis.services.dto.game.RankingRecord;
-import io.github.isuru.oasis.services.dto.game.TeamLeaderboardRecordDto;
-import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
-import io.github.isuru.oasis.services.dto.game.UserRankingsInRangeDto;
+import io.github.isuru.oasis.services.dto.game.*;
 import io.github.isuru.oasis.services.dto.stats.*;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.PurchasedItem;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.model.defs.ScopingType;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -23,14 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.beans.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -59,18 +47,23 @@ public class StatServiceImpl implements IStatService {
 
     @Override
     public PointBreakdownResDto getPointBreakdownList(PointBreakdownReqDto request) throws Exception {
-        Checks.greaterThanZero(request.getUserId(), "userId");
-        Checks.greaterThanZero(request.getPointId(), "pointId");
-
         Map<String, Object> conditions = Maps.create()
                 .put("hasOffset", ServiceUtils.isValid(request.getOffset()))
                 .put("hasSize", ServiceUtils.isValid(request.getSize()))
                 .put("hasRangeStart", ServiceUtils.isValid(request.getRangeStart()))
                 .put("hasRangeEnd", ServiceUtils.isValid(request.getRangeEnd()))
+                .put("hasPointId", ServiceUtils.isValid(request.getPointId()))
+                .put("hasUserId", ServiceUtils.isValid(request.getUserId()))
+                .put("hasTeamId", ServiceUtils.isValid(request.getTeamId()))
+                .put("hasTeamScopeId", ServiceUtils.isValid(request.getTeamScopeId()))
                 .build();
 
-        List<PointRecordDto> recordDtos = ServiceUtils.toList(dao.executeQuery(Q.STATS.GET_USER_POINTS_LIST,
-                Maps.create().put("userId", request.getUserId())
+        List<PointRecordDto> recordDtos = ServiceUtils.toList(dao.executeQuery(
+                Q.STATS.GET_POINT_BREAKDOWN,
+                Maps.create()
+                    .put("userId", request.getUserId())
+                    .put("teamId", request.getTeamId())
+                    .put("teamScopeId", request.getTeamScopeId())
                     .put("pointId", request.getPointId())
                     .put("offset", ServiceUtils.orDefault(request.getOffset(), 0))
                     .put("size", ServiceUtils.orDefault(request.getSize(), 100))
@@ -87,19 +80,56 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
-    public BadgeBreakdownResDto getBadgeBreakdownList(BadgeBreakdownReqDto request) throws Exception {
-        Checks.greaterThanZero(request.getUserId(), "userId");
+    public PointSummaryRes getPointSummary(PointSummaryReq request) throws Exception {
+        Map<String, Object> conditions = Maps.create()
+                .put("hasOffset", ServiceUtils.isValid(request.getOffset()))
+                .put("hasSize", ServiceUtils.isValid(request.getSize()))
+                .put("hasRangeStart", ServiceUtils.isValid(request.getRangeStart()))
+                .put("hasRangeEnd", ServiceUtils.isValid(request.getRangeEnd()))
+                .put("hasUserId", ServiceUtils.isValid(request.getUserId()))
+                .put("hasTeamId", ServiceUtils.isValid(request.getTeamId()))
+                .put("hasTeamScopeId", ServiceUtils.isValid(request.getTeamScopeId()))
+                .build();
 
+        List<PointSummaryRes.PointSummaryRecord> recordDtos = ServiceUtils.toList(dao.executeQuery(
+                Q.STATS.GET_POINT_SUMMARY,
+                Maps.create()
+                        .put("userId", request.getUserId())
+                        .put("teamId", request.getTeamId())
+                        .put("teamScopeId", request.getTeamScopeId())
+                        .put("offset", ServiceUtils.orDefault(request.getOffset(), 0))
+                        .put("size", ServiceUtils.orDefault(request.getSize(), 100))
+                        .put("rangeStart", ServiceUtils.orDefault(request.getRangeStart(), 0L))
+                        .put("rangeEnd", ServiceUtils.orDefault(request.getRangeEnd(), 0L))
+                        .build(),
+                PointSummaryRes.PointSummaryRecord.class,
+                conditions));
+
+        PointSummaryRes resDto = new PointSummaryRes();
+        resDto.setRecords(recordDtos);
+        resDto.setCount(recordDtos.size());
+        return resDto;
+    }
+
+    @Override
+    public BadgeBreakdownResDto getBadgeBreakdownList(BadgeBreakdownReqDto request) throws Exception {
         Map<String, Object> conditions = Maps.create()
                 .put("hasBadgeId", ServiceUtils.isValid(request.getBadgeId()))
                 .put("hasOffset", ServiceUtils.isValid(request.getOffset()))
                 .put("hasSize", ServiceUtils.isValid(request.getSize()))
                 .put("hasRangeStart", ServiceUtils.isValid(request.getRangeStart()))
                 .put("hasRangeEnd", ServiceUtils.isValid(request.getRangeEnd()))
+                .put("hasUserId", ServiceUtils.isValid(request.getUserId()))
+                .put("hasTeamId", ServiceUtils.isValid(request.getTeamId()))
+                .put("hasTeamScopeId", ServiceUtils.isValid(request.getTeamScopeId()))
                 .build();
 
-        List<BadgeRecordDto> recordDtos = ServiceUtils.toList(dao.executeQuery(Q.STATS.GET_USER_BADGES_LIST,
-                Maps.create().put("userId", request.getUserId())
+        List<BadgeRecordDto> recordDtos = ServiceUtils.toList(dao.executeQuery(
+                Q.STATS.GET_BADGE_BREAKDOWN,
+                Maps.create()
+                        .put("userId", request.getUserId())
+                        .put("teamId", request.getTeamId())
+                        .put("teamScopeId", request.getTeamScopeId())
                         .put("badgeId", ServiceUtils.orDefault(request.getBadgeId(), 0))
                         .put("offset", ServiceUtils.orDefault(request.getOffset(), 0))
                         .put("size", ServiceUtils.orDefault(request.getSize(), 100))
@@ -116,28 +146,67 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
+    public BadgeSummaryRes getBadgeSummary(BadgeSummaryReq request) throws Exception {
+        Map<String, Object> conditions = Maps.create()
+                .put("hasOffset", ServiceUtils.isValid(request.getOffset()))
+                .put("hasSize", ServiceUtils.isValid(request.getSize()))
+                .put("hasRangeStart", ServiceUtils.isValid(request.getRangeStart()))
+                .put("hasRangeEnd", ServiceUtils.isValid(request.getRangeEnd()))
+                .put("hasUserId", ServiceUtils.isValid(request.getUserId()))
+                .put("hasTeamId", ServiceUtils.isValid(request.getTeamId()))
+                .put("hasTeamScopeId", ServiceUtils.isValid(request.getTeamScopeId()))
+                .build();
+
+        List<BadgeSummaryRes.BadgeSummaryRecord> recordDtos = ServiceUtils.toList(dao.executeQuery(
+                Q.STATS.GET_BADGE_SUMMARY,
+                Maps.create()
+                        .put("userId", request.getUserId())
+                        .put("teamId", request.getTeamId())
+                        .put("teamScopeId", request.getTeamScopeId())
+                        .put("offset", ServiceUtils.orDefault(request.getOffset(), 0))
+                        .put("size", ServiceUtils.orDefault(request.getSize(), 100))
+                        .put("rangeStart", ServiceUtils.orDefault(request.getRangeStart(), 0L))
+                        .put("rangeEnd", ServiceUtils.orDefault(request.getRangeEnd(), 0L))
+                        .build(),
+                BadgeSummaryRes.BadgeSummaryRecord.class,
+                conditions));
+
+        BadgeSummaryRes resDto = new BadgeSummaryRes();
+        resDto.setRecords(recordDtos);
+        resDto.setCount(recordDtos.size());
+        return resDto;
+    }
+
+    @Override
     public UserStatDto readUserGameStats(long userId, long since) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
         Map<String, Object> tdata = new HashMap<>();
         tdata.put("hasSince", since > 0);
 
-        Iterable<Map<String, Object>> summaryStat = dao.executeQuery(
+        Iterable<UserStatDto.StatRecord> summaryStat = dao.executeQuery(
                 Q.STATS.GET_USER_STAT_SUMMARY,
                 Maps.create()
                         .put("userId", userId)
                         .put("since", since)
                         .build(),
+                UserStatDto.StatRecord.class,
                 tdata);
 
         UserStatDto dto = new UserStatDto();
         dto.setUserId((int)userId);
-        for (Map<String, Object> row : summaryStat) {
+        String uName = null;
+        String email = null;
+        for (UserStatDto.StatRecord row : summaryStat) {
             Statement stmt = new Statement(dto,
-                    "set" + row.get("type").toString(),
-                    new Object[] { firstNonNull(row.get("value_i"), row.get("value_f")) });
+                    "set" + row.getType(),
+                    new Object[] { firstNonNull(row.getValue_i(), row.getValue_f()) });
             stmt.execute();
+            uName = (String) firstNonNull(uName, row.getUserName());
+            email = (String) firstNonNull(email, row.getUserEmail());
         }
+        dto.setUserName(uName);
+        dto.setUserEmail(email);
         return dto;
     }
 

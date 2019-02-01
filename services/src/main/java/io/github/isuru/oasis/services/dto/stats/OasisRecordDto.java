@@ -6,6 +6,7 @@ package io.github.isuru.oasis.services.dto.stats;
 public class OasisRecordDto {
 
     private Integer userId;
+    private String userName;
     private Long teamId;
     private String teamName;
     private Long teamScopeId;
@@ -21,6 +22,14 @@ public class OasisRecordDto {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public Long getTeamId() {

@@ -15,7 +15,9 @@ import java.util.List;
 public interface IStatService {
 
     PointBreakdownResDto getPointBreakdownList(PointBreakdownReqDto request) throws Exception;
+    PointSummaryRes getPointSummary(PointSummaryReq request) throws Exception;
     BadgeBreakdownResDto getBadgeBreakdownList(BadgeBreakdownReqDto request) throws Exception;
+    BadgeSummaryRes getBadgeSummary(BadgeSummaryReq request) throws Exception;
 
     UserStatDto readUserGameStats(long userId, long since) throws Exception;
     List<PurchasedItem> readUserPurchasedItems(long userId, long since) throws Exception;

@@ -21,6 +21,63 @@ public class UserStatDto {
     private long deltaItems;
     private double deltaAmountSpent;
 
+    public static class StatRecord {
+        private Long userId;
+        private String userName;
+        private String userEmail;
+        private String type;
+        private Long value_i;
+        private Double value_f;
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public void setUserName(String userName) {
+            this.userName = userName;
+        }
+
+        public String getUserEmail() {
+            return userEmail;
+        }
+
+        public void setUserEmail(String userEmail) {
+            this.userEmail = userEmail;
+        }
+
+        public Long getUserId() {
+            return userId;
+        }
+
+        public void setUserId(Long userId) {
+            this.userId = userId;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public Long getValue_i() {
+            return value_i;
+        }
+
+        public void setValue_i(Long value_i) {
+            this.value_i = value_i;
+        }
+
+        public Double getValue_f() {
+            return value_f;
+        }
+
+        public void setValue_f(Double value_f) {
+            this.value_f = value_f;
+        }
+    }
+
     public double getDeltaAmountSpent() {
         return deltaAmountSpent;
     }
@@ -127,13 +184,20 @@ public class UserStatDto {
 
     @Override
     public String toString() {
-        return "{" +
+        return "UserStatDto{" +
                 "userId=" + userId +
+                ", userName='" + userName + '\'' +
+                ", userEmail='" + userEmail + '\'' +
                 ", totalPoints=" + totalPoints +
                 ", totalBadges=" + totalBadges +
                 ", totalTrophies=" + totalTrophies +
                 ", totalItems=" + totalItems +
                 ", amountSpent=" + amountSpent +
+                ", deltaPoints=" + deltaPoints +
+                ", deltaBadges=" + deltaBadges +
+                ", deltaTrophies=" + deltaTrophies +
+                ", deltaItems=" + deltaItems +
+                ", deltaAmountSpent=" + deltaAmountSpent +
                 '}';
     }
 }

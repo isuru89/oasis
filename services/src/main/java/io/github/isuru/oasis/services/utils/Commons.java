@@ -35,6 +35,20 @@ public class Commons {
         }
     }
 
+    public static Long asLong(Object val) {
+        if (val == null) {
+            return null;
+        } else if (val instanceof Number) {
+            return ((Number) val).longValue();
+        } else {
+            try {
+                return Long.parseLong(val.toString());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+    }
+
     public static String fixSearchQuery(String param) {
         if (param == null) {
             return null;

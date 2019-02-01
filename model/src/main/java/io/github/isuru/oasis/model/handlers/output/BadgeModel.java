@@ -18,7 +18,6 @@ public class BadgeModel {
     private String tag;
     private Long badgeId;
     private String subBadgeId;
-    private Long ruleId;
     private Long ts;
     private Integer sourceId;
     private Integer gameId;
@@ -93,14 +92,6 @@ public class BadgeModel {
 
     public void setSubBadgeId(String subBadgeId) {
         this.subBadgeId = subBadgeId;
-    }
-
-    public Long getRuleId() {
-        return ruleId;
-    }
-
-    public void setRuleId(Long ruleId) {
-        this.ruleId = ruleId;
     }
 
     public Long getTs() {

@@ -1,5 +1,8 @@
 SELECT
     oab.user_id AS userId,
+    <if(!hasUserId)>
+        COALESCE(oau.nickname, oau.user_name, oau.email) AS userName,
+    <endif>
     oab.team_id AS teamId,
     oat.name AS teamName,
     oab.team_scope_id  AS teamScopeId,
@@ -23,19 +26,30 @@ FROM OA_BADGE oab
     LEFT JOIN OA_DEFINITION_ATTR oada
             ON oada.def_id = oab.badge_id AND oada.def_sub_id = oab.sub_badge_id
     LEFT JOIN OA_ATTRIBUTE oaat ON oaat.id = oada.attribute_id
+    <if(!hasUserId)>
+        LEFT JOIN OA_USER oau ON oau.user_id = oab.user_id
+    <endif>
 
 WHERE
-    oab.user_id = :userId
-    AND
     oab.is_active = 1
+    <if(hasUserId)>
+        AND oab.user_id = :userId
+    <endif>
+    <if(hasTeamId)>
+        AND oab.team_id = :teamId
+    <endif>
+    <if(hasTeamScopeId)>
+        AND oab.team_scope_id = :teamScopeId
+    <endif>
+
     <if(hasBadgeId)>
-    AND oab.badge_id = :badgeId
+        AND oab.badge_id = :badgeId
     <endif>
     <if(hasRangeStart)>
-    AND oab.ts >= :rangeStart
+        AND oab.ts >= :rangeStart
     <endif>
     <if(hasRangeEnd)>
-    AND oab.ts \< :rangeEnd
+        AND oab.ts \< :rangeEnd
     <endif>
 
 ORDER BY oab.ts DESC

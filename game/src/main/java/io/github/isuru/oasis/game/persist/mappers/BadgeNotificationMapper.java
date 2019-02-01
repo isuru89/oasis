@@ -41,7 +41,7 @@ public class BadgeNotificationMapper extends BaseNotificationMapper<BadgeNotific
 
         model.setBadgeId(badgeId);
         model.setSubBadgeId(subBadgeId);
-        model.setRuleId(notification.getRule().getId());
+        //model.setRuleId(notification.getRule().getId());
         model.setTs(event.getTimestamp());
         return model;
     }

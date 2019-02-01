@@ -8,11 +8,38 @@ public class BadgeBreakdownReqDto {
     private Integer offset;
     private Integer size;
 
-    private long userId;
+    private Long userId;
+    private Long teamId;
+    private Long teamScopeId;
+
     private Integer badgeId;
 
     private Long rangeStart;
     private Long rangeEnd;
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public Long getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
+    }
+
+    public Long getTeamScopeId() {
+        return teamScopeId;
+    }
+
+    public void setTeamScopeId(Long teamScopeId) {
+        this.teamScopeId = teamScopeId;
+    }
 
     public Integer getOffset() {
         return offset;
@@ -28,14 +55,6 @@ public class BadgeBreakdownReqDto {
 
     public void setSize(Integer size) {
         this.size = size;
-    }
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
     }
 
     public Integer getBadgeId() {

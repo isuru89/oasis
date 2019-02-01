@@ -43,54 +43,6 @@ class StatTest extends AbstractApiTest {
 //        System.out.println(userRankRecordDtos);
     }
 
-    @Test
-    void testStat() throws Exception {
-        IStatService statService = apiService.getStatService();
-
-        {
-            PointBreakdownReqDto reqDto = new PointBreakdownReqDto();
-            reqDto.setUserId(55);
-            reqDto.setPointId(12);
-            PointBreakdownResDto pointBreakdownList = statService.getPointBreakdownList(reqDto);
-            Assertions.assertNotNull(pointBreakdownList);
-            Assertions.assertTrue(pointBreakdownList.getCount() > 0);
-            List<PointRecordDto> records = pointBreakdownList.getRecords();
-            for (PointRecordDto recordDto : records) {
-                Assertions.assertEquals((int) recordDto.getPointId(), 12);
-                Assertions.assertEquals((int) recordDto.getUserId(), 55);
-            }
-            System.out.println(records.size());
-        }
-
-        {
-            BadgeBreakdownReqDto breakdownReqDto = new BadgeBreakdownReqDto();
-            breakdownReqDto.setUserId(145);
-            BadgeBreakdownResDto badgeBreakdownList = statService.getBadgeBreakdownList(breakdownReqDto);
-            Assertions.assertNotNull(badgeBreakdownList);
-            Assertions.assertTrue(badgeBreakdownList.getCount() > 0);
-            List<BadgeRecordDto> records = badgeBreakdownList.getRecords();
-            for (BadgeRecordDto record : records) {
-                Assertions.assertEquals(145, (int) record.getUserId());
-            }
-            System.out.println(records.size());
-
-            int n = records.size();
-            int half = n / 2;
-            int tq = (2 * n) / 3;
-            int expect = tq - half;
-            breakdownReqDto = new BadgeBreakdownReqDto();
-            breakdownReqDto.setUserId(145);
-            breakdownReqDto.setRangeEnd(records.get(half).getTs());
-            breakdownReqDto.setRangeStart(records.get(tq).getTs());
-            System.out.println(breakdownReqDto.getRangeStart());
-            System.out.println(breakdownReqDto.getRangeEnd());
-
-            badgeBreakdownList = statService.getBadgeBreakdownList(breakdownReqDto);
-            Assertions.assertNotNull(badgeBreakdownList);
-            Assertions.assertEquals(expect, badgeBreakdownList.getCount());
-        }
-    }
-
     @BeforeAll
     static void beforeAnyTest() throws Exception {
         dbStart();

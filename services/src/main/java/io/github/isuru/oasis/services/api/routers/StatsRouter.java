@@ -2,11 +2,9 @@ package io.github.isuru.oasis.services.api.routers;
 
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
-import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownReqDto;
-import io.github.isuru.oasis.services.dto.stats.PointBreakdownReqDto;
+import io.github.isuru.oasis.model.defs.ScopingType;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.model.defs.ScopingType;
 import io.github.isuru.oasis.services.services.IOasisApiService;
 import io.github.isuru.oasis.services.utils.OasisOptions;
 import spark.Request;
@@ -35,9 +33,6 @@ public class StatsRouter extends BaseRouters {
         get("/user/:userId/rankings", this::userRankingStat);
 
         get("/challenge/:challengeId", this::readChallengeStats);
-
-        get("/breakdown/points", this::userBreakdownPointsStat);
-        get("/breakdown/badges", this::userBreakdownBadgesStat);
     }
 
     private Object readChallengeStats(Request req, Response res) throws Exception {
@@ -107,40 +102,6 @@ public class StatsRouter extends BaseRouters {
         ScopingType scopingType = ScopingType.from(asQStr(req, "scope", ""));
         LeaderboardType period = LeaderboardType.from(asQStr(req, "period", ""));
         return getApiService().getStatService().readMyLeaderboardRankings(gameId, userId, scopingType, period);
-    }
-
-    private Object userBreakdownPointsStat(Request req, Response res) throws Exception {
-        PointBreakdownReqDto reqDto = new PointBreakdownReqDto();
-        reqDto.setUserId(asQInt(req, "userId", -1));
-        if (reqDto.getUserId() < 0) {
-            throw new InputValidationException("Parameter 'userId' is mandatory and must be a valid one!");
-        }
-        reqDto.setPointId(asQInt(req, "pointId", -1));
-        if (reqDto.getPointId() < 0) {
-            throw new InputValidationException("Parameter 'pointId' is mandatory and must be a valid one!");
-        }
-        reqDto.setOffset(asQInt(req, "offset", 0));
-        reqDto.setSize(asQInt(req, "size", 0));
-        reqDto.setRangeStart(asQLong(req, "start", 0L));
-        reqDto.setRangeEnd(asQLong(req, "end", 0L));
-        return getApiService().getStatService().getPointBreakdownList(reqDto);
-    }
-
-    private Object userBreakdownBadgesStat(Request req, Response res) throws Exception {
-        BadgeBreakdownReqDto reqDto = new BadgeBreakdownReqDto();
-        reqDto.setUserId(asQInt(req, "userId", -1));
-        if (reqDto.getUserId() < 0) {
-            throw new InputValidationException("Parameter 'userId' is mandatory and must be a valid one!");
-        }
-        reqDto.setBadgeId(asQInt(req, "badgeId", -1));
-        if (reqDto.getBadgeId() < 0) {
-            throw new InputValidationException("Parameter 'badgeId' is mandatory and must be a valid one!");
-        }
-        reqDto.setOffset(asQInt(req, "offset", 0));
-        reqDto.setSize(asQInt(req, "size", 0));
-        reqDto.setRangeStart(asQLong(req, "start", 0L));
-        reqDto.setRangeEnd(asQLong(req, "end", 0L));
-        return getApiService().getStatService().getBadgeBreakdownList(reqDto);
     }
 
 }

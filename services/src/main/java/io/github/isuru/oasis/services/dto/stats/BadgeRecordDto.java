@@ -78,4 +78,18 @@ public class BadgeRecordDto extends OasisRecordDto {
     public void setSubBadgeId(String subBadgeId) {
         this.subBadgeId = subBadgeId;
     }
+
+    @Override
+    public String toString() {
+        return "BadgeRecordDto{" +
+                "timeStart=" + timeStart +
+                ", timeEnd=" + timeEnd +
+                ", extIdStart='" + extIdStart + '\'' +
+                ", extIdEnd='" + extIdEnd + '\'' +
+                ", badgeId=" + badgeId +
+                ", subBadgeId='" + subBadgeId + '\'' +
+                ", badgeAttr=" + badgeAttr +
+                ", badgeAttrDisplayName='" + badgeAttrDisplayName + '\'' +
+                '}';
+    }
 }
