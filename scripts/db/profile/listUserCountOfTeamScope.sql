@@ -13,7 +13,7 @@ WITH currentTeams AS (
 )
 
 SELECT
-    oatu.team_scope_id AS id,
+    oat.team_scope AS id,
     COUNT(*) AS totalUsers
 
 FROM currentTeams oact
@@ -22,6 +22,6 @@ FROM currentTeams oact
 WHERE
     oat.is_active = 1
 GROUP BY
-    oatu.team_scope_id
+    oat.team_scope
 
 

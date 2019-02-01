@@ -13,9 +13,14 @@ import io.github.isuru.oasis.model.handlers.output.PointModel;
 import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
 import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
 import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
-import io.github.isuru.oasis.services.model.*;
+import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.TeamScope;
+import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.UserRole;
+import io.github.isuru.oasis.services.model.UserTeam;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,7 +28,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -40,6 +56,9 @@ public abstract class WithDataTest extends AbstractServiceTest {
 
     @Autowired
     private IGameDefService gameDefService;
+
+    @Autowired
+    private IProfileService profileService;
 
     protected Map<String, TeamScope> scopes = new HashMap<>();
     protected Map<String, TeamProfile> teams = new HashMap<>();
@@ -108,7 +127,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
         buffers.clear();
     }
 
-    void loadUserData() {
+    void loadUserData() throws Exception {
         scopes.clear();
         teams.clear();
         users.clear();
@@ -116,6 +135,9 @@ public abstract class WithDataTest extends AbstractServiceTest {
         List<TeamScope> teamScopes = new ArrayList<>();
         List<TeamProfile> teamProfiles = new ArrayList<>();
         List<UserProfile> userProfiles = new ArrayList<>();
+
+        Map<Long, Long> expectedScopeCounts = new HashMap<>();
+        Map<Long, Long> expectedTeamCounts = new HashMap<>();
 
         readLines("/dataex/scopes.csv")
                 .forEach(line -> {
@@ -155,12 +177,21 @@ public abstract class WithDataTest extends AbstractServiceTest {
                             .filter(t -> t.getName().equals(parts[0].trim()))
                             .findFirst();
                     if (userTeam.isPresent()) {
+                        TeamProfile teamProfile = userTeam.get();
+
                         UserProfileAddDto dto = addUser(parts[1].trim(),
                                 Boolean.parseBoolean(parts[2].trim()),
                                 parts[0].trim());
                         try {
-                            long u = ps.addUserProfile(dto, userTeam.get().getId(), UserRole.PLAYER);
+                            long u = ps.addUserProfile(dto, teamProfile.getId(), UserRole.PLAYER);
                             userProfiles.add(ps.readUserProfile(u));
+
+                            {
+                                Long count = expectedTeamCounts.computeIfAbsent(teamProfile.getId().longValue(),
+                                        aLong -> 1L);   // 1 with default user
+                                expectedTeamCounts.put(teamProfile.getId().longValue(), count + 1);
+                            }
+
                         } catch (Exception e) {
                             throw new RuntimeException(e.getMessage(), e);
                         }
@@ -169,6 +200,15 @@ public abstract class WithDataTest extends AbstractServiceTest {
                     }
                 });
 
+        {
+            teamProfiles.forEach(t -> {
+                Long count = expectedScopeCounts.computeIfAbsent(t.getTeamScope().longValue(), aLong -> 0L);
+                expectedScopeCounts.put(t.getTeamScope().longValue(),
+                        count + expectedTeamCounts.get(t.getId().longValue()));
+
+            });
+        }
+
         teamScopes.forEach(ts -> scopes.put(ts.getName(), ts));
         teamProfiles.forEach(t -> teams.put(t.getName(), t));
         userProfiles.forEach(u -> users.put(u.getName(), u));
@@ -176,6 +216,21 @@ public abstract class WithDataTest extends AbstractServiceTest {
         Assert.assertTrue(scopes.size() > 0);
         Assert.assertTrue(teams.size() > 0);
         Assert.assertTrue(users.size() > 0);
+
+        {
+            Map<Long, Long> countMap = new HashMap<>();
+            profileService.listUserCountInTeams(System.currentTimeMillis())
+                    .forEach(r -> countMap.put(r.getId(), r.getTotalUsers()));
+            Assertions.assertThat(countMap).containsAllEntriesOf(expectedTeamCounts);
+        }
+
+        {
+            Map<Long, Long> countMap = new HashMap<>();
+            profileService.listUserCountInTeamScopes(System.currentTimeMillis())
+                    .forEach(r -> countMap.put(r.getId(), r.getTotalUsers()));
+            Assertions.assertThat(countMap).containsAllEntriesOf(expectedScopeCounts);
+        }
+
     }
 
     int loadPoints(Instant startTime, long timeRange, long gameId) throws Exception {
