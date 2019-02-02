@@ -226,28 +226,6 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
-    public List<UserBadgeStatDto> readUserBadgesSummary(long userId, UserBadgeStatReq req) throws Exception {
-        Checks.greaterThanZero(userId, "userId");
-
-        Map<String, Object> tdata = new HashMap<>();
-        tdata.put("hasRangeStart", ServiceUtils.isValid(req.getStartTime()));
-        tdata.put("hasRangeEnd", ServiceUtils.isValid(req.getEndTime()));
-        tdata.put("hasBadgeId", ServiceUtils.isValid(req.getBadgeId()));
-
-        return ServiceUtils.toList(dao.executeQuery(
-                Q.STATS.GET_USER_BADGE_STAT,
-                Maps.create().put("userId", userId)
-                        .put("rangeStart", req.getStartTime())
-                        .put("rangeEnd", req.getEndTime())
-                        .put("badgeId", req.getBadgeId())
-                        .put("size", req.getSize())
-                        .put("offset", req.getOffset())
-                        .build(),
-                UserBadgeStatDto.class,
-                tdata));
-    }
-
-    @Override
     public List<UserMilestoneStatDto> readUserMilestones(long userId) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 

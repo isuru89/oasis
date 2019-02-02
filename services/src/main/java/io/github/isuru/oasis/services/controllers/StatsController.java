@@ -39,7 +39,7 @@ public class StatsController {
     @PostMapping("/stats/user/{userId}/badges")
     public List<UserBadgeStatDto> getUserBadgesStats(@PathVariable("userId") long userId,
                                                      @RequestBody UserBadgeStatReq req) throws Exception {
-        return statService.readUserBadgesSummary(userId, req);
+        return null;
     }
 
     @GetMapping("/stats/user/{userId}/milestones")

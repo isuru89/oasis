@@ -9,6 +9,9 @@ public class UserMilestoneStatDto {
 
     private int userId;
     private int milestoneId;
+    private String milestoneName;
+    private String milestoneDisplayName;
+
     private int currentLevel;
     private Double nextValue;
     private Double currentValue;
@@ -17,6 +20,22 @@ public class UserMilestoneStatDto {
     private Long nextValueL;
     private Long achievedTime;
     private Timestamp lastUpdatedTime;
+
+    public String getMilestoneName() {
+        return milestoneName;
+    }
+
+    public void setMilestoneName(String milestoneName) {
+        this.milestoneName = milestoneName;
+    }
+
+    public String getMilestoneDisplayName() {
+        return milestoneDisplayName;
+    }
+
+    public void setMilestoneDisplayName(String milestoneDisplayName) {
+        this.milestoneDisplayName = milestoneDisplayName;
+    }
 
     public int getUserId() {
         return userId;

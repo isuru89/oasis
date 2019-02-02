@@ -30,7 +30,6 @@ public class BufferedRecords implements Closeable {
 
     public void init(ExecutorService pool) {
         pool.submit(timer);
-        pool.shutdown();
     }
 
     public void push(ElementRecord map) {

@@ -1,6 +1,8 @@
 SELECT
     oms.user_id as userId,
     oms.milestone_id as milestoneId,
+    oad.name as milestoneName,
+    oad.display_name AS milestoneDisplayName,
     mcur.currLevel as currentLevel,
     oms.current_val as currentValue,
     oms.next_val as nextValue,
@@ -21,8 +23,10 @@ FROM OA_MILESTONE_STATE AS oms
             user_id = :userId AND is_active = 1
         GROUP BY
             user_id, milestone_id
-    ) AS mcur
-    ON oms.user_id = mcur.userId AND oms.milestone_id = mcur.milestoneId
+    ) AS mcur ON oms.user_id = mcur.userId AND oms.milestone_id = mcur.milestoneId
+    LEFT JOIN OA_DEFINITION oad ON oad.id = mcur.milestoneId
 
 WHERE
     user_id = :userId
+    AND
+    oad.is_active = 1

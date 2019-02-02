@@ -6,9 +6,12 @@ import io.github.isuru.oasis.injector.ConsumerUtils;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.events.JsonEvent;
 import io.github.isuru.oasis.model.handlers.output.BadgeModel;
+import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
+import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
 import io.github.isuru.oasis.model.handlers.output.PointModel;
 import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
 import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
@@ -49,6 +52,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
     private static final Slugify SLUGIFY = new Slugify();
 
     private static List<String> ruleOrder = new ArrayList<>();
+    private static List<String> milestoneOrder = new ArrayList<>();
     private static Map<String, List<String>> badgeRules = new LinkedHashMap<>();
 
     @Autowired
@@ -70,6 +74,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
 
     List<Long> pointRuleIds;
     List<Long> badgeIds;
+    List<Long> milestoneIds;
 
     List<Long> addPointRules(long gameId, String... rules) throws Exception {
         ruleOrder.clear();
@@ -110,6 +115,32 @@ public abstract class WithDataTest extends AbstractServiceTest {
             badgeIds.add(gameDefService.addBadgeDef(gameId, def));
         }
         return badgeIds;
+    }
+
+    List<Long> addMilestoneRules(long gameId,String... names) throws Exception {
+        milestoneIds = new ArrayList<>();
+        Random random = new Random(System.currentTimeMillis());
+
+        milestoneOrder = Arrays.asList(names);
+        for (String name : names) {
+            MilestoneDef def = new MilestoneDef();
+            def.setName(SLUGIFY.slugify(name));
+            def.setDisplayName(name);
+
+            int maxLevels = 5 + random.nextInt(10);
+            List<Integer> increment = Arrays.asList(500, 250, 750, 100);
+            Collections.shuffle(increment);
+            int incr = increment.get(0);
+            Map<Integer, Object> msMap = new HashMap<>();
+            for (int i = 0; i < maxLevels; i++) {
+                msMap.put(i+1, incr * (i+1));
+            }
+            def.setLevels(msMap);
+
+            long id = gameDefService.addMilestoneDef(gameId, def);
+            milestoneIds.add(id);
+        }
+        return milestoneIds;
     }
 
     void initPool(int size) {
@@ -330,6 +361,77 @@ public abstract class WithDataTest extends AbstractServiceTest {
         return count;
     }
 
+    int loadMilestones(Instant startTime, long timeRange, long gameId) throws Exception {
+        Collection<UserProfile> profiles = users.values();
+
+        Assert.assertTrue(milestoneOrder.size() > 0);
+
+        BufferedRecords buffer = new BufferedRecords(this::flushMilestone);
+        BufferedRecords stateBuffer = new BufferedRecords(this::flushMilestoneState);
+        buffers.add(buffer);
+        buffers.add(stateBuffer);
+        buffer.init(pool);
+        stateBuffer.init(pool);
+
+        ArrayList<String> milestoneNames = new ArrayList<>(milestoneOrder);
+
+        int count = 0;
+        for (UserProfile profile : profiles) {
+            long ts = System.currentTimeMillis();
+            Random random = new Random(ts);
+            UserTeam curTeam = ps.findCurrentTeamOfUser(profile.getId(), true, ts);
+
+            for (int i = 0; i < milestoneIds.size(); i++) {
+                long mId = milestoneIds.get(i);
+
+                if (random.nextInt(10) % 5 == 0) continue;
+                MilestoneDef def = gameDefService.readMilestoneDef(mId);
+                Map<Integer, Object> levels = def.getLevels();
+
+                int myLevel = 1 + random.nextInt(levels.size());
+                int baseVal = ((Number) levels.get(myLevel)).intValue();
+                int nextVal = ((Number) levels.getOrDefault(myLevel + 1, 100000)).intValue();
+
+                MilestoneModel model = new MilestoneModel();
+                model.setUserId(profile.getId());
+                model.setTeamId(curTeam.getTeamId().longValue());
+                model.setTeamScopeId(curTeam.getScopeId().longValue());
+                model.setGameId((int)gameId);
+                model.setLevel(myLevel);
+                model.setMilestoneId(mId);
+                model.setSourceId(1);
+                model.setTs(System.currentTimeMillis());
+                model.setEventType("so.event." + def.getName());
+                model.setEvent(toJsonEvent(model, gameId));
+
+                {
+                    count++;
+                    Map<String, Object> data = ConsumerUtils.toMilestoneDaoData(gameId, model);
+                    buffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
+                }
+
+                // update state
+                int myCurVal = baseVal + random.nextInt(nextVal - baseVal);
+                MilestoneStateModel stateModel = new MilestoneStateModel();
+                stateModel.setUserId(profile.getId());
+                stateModel.setMilestoneId(mId);
+                stateModel.setValueInt((long) myCurVal);
+                stateModel.setNextValueInt((long) nextVal);
+                {
+                    Map<String, Object> data = ConsumerUtils.toMilestoneStateDaoData(gameId, stateModel);
+                    stateBuffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
+                }
+            }
+
+        }
+
+        buffer.flushNow();
+        stateBuffer.flushNow();
+
+        Assert.assertTrue(count > 0);
+        return count;
+    }
+
     private void flushPoints(List<BufferedRecords.ElementRecord> elementRecords) {
         List<Map<String, Object>> data = elementRecords.stream().map(BufferedRecords.ElementRecord::getData)
                 .collect(Collectors.toList());
@@ -345,6 +447,26 @@ public abstract class WithDataTest extends AbstractServiceTest {
                 .collect(Collectors.toList());
         try {
             dao.executeBatchInsert("game/batch/addBadge", data);
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void flushMilestone(List<BufferedRecords.ElementRecord> elementRecords) {
+        List<Map<String, Object>> data = elementRecords.stream().map(BufferedRecords.ElementRecord::getData)
+                .collect(Collectors.toList());
+        try {
+            dao.executeBatchInsert("game/batch/addMilestone", data);
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void flushMilestoneState(List<BufferedRecords.ElementRecord> elementRecords) {
+        List<Map<String, Object>> data = elementRecords.stream().map(BufferedRecords.ElementRecord::getData)
+                .collect(Collectors.toList());
+        try {
+            dao.executeBatchInsert("game/batch/updateMilestoneState", data);
         } catch (DbException e) {
             e.printStackTrace();
         }
@@ -373,6 +495,18 @@ public abstract class WithDataTest extends AbstractServiceTest {
         jsonEvent.setFieldValue(Constants.FIELD_ID, randomId());
         jsonEvent.setFieldValue(Constants.FIELD_EVENT_TYPE,
                 "so.event." + StringUtils.substringAfterLast(String.valueOf(model.getBadgeId()), "."));
+        return jsonEvent;
+    }
+
+    private JsonEvent toJsonEvent(MilestoneModel model, long gameId) {
+        JsonEvent jsonEvent = new JsonEvent();
+        jsonEvent.setFieldValue(Constants.FIELD_GAME_ID, gameId);
+        jsonEvent.setFieldValue(Constants.FIELD_TEAM, model.getTeamId());
+        jsonEvent.setFieldValue(Constants.FIELD_SCOPE, model.getTeamScopeId());
+        jsonEvent.setFieldValue(Constants.FIELD_USER, model.getUserId());
+        jsonEvent.setFieldValue(Constants.FIELD_TIMESTAMP, model.getTs());
+        jsonEvent.setFieldValue(Constants.FIELD_ID, randomId());
+        jsonEvent.setFieldValue(Constants.FIELD_EVENT_TYPE, model.getEventType());
         return jsonEvent;
     }
 
