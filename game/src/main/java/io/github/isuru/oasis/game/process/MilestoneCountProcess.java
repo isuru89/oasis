@@ -25,6 +25,7 @@ import java.util.Objects;
 public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, MilestoneEvent> {
 
     private final ValueStateDescriptor<Long> currLevelStateDesc;
+    private final ValueStateDescriptor<Long> currLevelMarginStateDesc;
     private final ReducingStateDescriptor<Long> allCountStateDesc;
 
     private List<Long> levels;
@@ -34,8 +35,9 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
     private boolean atEnd = false;
     private Long nextLevelValue = null;
 
-    private ReducingState<Long> accCount;
+    private ReducingState<Long> totalCount;
     private ValueState<Long> currentLevel;
+    private ValueState<Long> currentLevelMargin;
 
     public MilestoneCountProcess(List<Long> levels,
                                  Milestone milestone, OutputTag<MilestoneStateEvent> outputTag) {
@@ -46,6 +48,9 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
         currLevelStateDesc =
                 new ValueStateDescriptor<>(String.format("milestone-%d-curr-level", milestone.getId()),
                         Long.class);
+        currLevelMarginStateDesc =
+                new ValueStateDescriptor<>(String.format("milestone-%d-curr-level-margin", milestone.getId()),
+                        Long.class);
         allCountStateDesc =
                 new ReducingStateDescriptor<>(String.format("milestone-%d-allcount", milestone.getId()),
                         new StreakTrigger.Sum(), LongSerializer.INSTANCE);
@@ -53,46 +58,55 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
 
     @Override
     public void processElement(Event value, Context ctx, Collector<MilestoneEvent> out) throws Exception {
-        //if (filter == null || filter.filter(value)) {
-            initDefaultState();
+        initDefaultState();
 
-            accCount.add(1L);
-            if (levels.contains(accCount.get())) {
-                int nextLevel = currentLevel.value().intValue() + 1;
-                currentLevel.update(currentLevel.value() + 1);
-                out.collect(new MilestoneEvent(value.getUser(), milestone, nextLevel, value));
+        totalCount.add(1L);
+        long currLevelMargin = currentLevelMargin.value();
+        if (levels.contains(totalCount.get())) {
+            int currLevel = currentLevel.value().intValue();
+            currLevelMargin = totalCount.get();
+            currentLevelMargin.update(currLevelMargin);
+            int nextLevel = currLevel + 1;
+            currentLevel.update(currentLevel.value() + 1);
+            out.collect(new MilestoneEvent(value.getUser(), milestone, nextLevel, value));
+            if (levels.size() > nextLevel) {
                 nextLevelValue = levels.get(nextLevel);
             }
+        }
 
-            if (!atEnd && nextLevelValue == null) {
-                if (levels.size() > currentLevel.value()) {
-                    nextLevelValue = levels.get(Integer.parseInt(currentLevel.value().toString()));
-                } else {
-                    nextLevelValue = null;
-                    atEnd = true;
-                }
+        if (!atEnd && nextLevelValue == null) {
+            if (levels.size() > currentLevel.value()) {
+                nextLevelValue = levels.get(Integer.parseInt(currentLevel.value().toString()));
+            } else {
+                nextLevelValue = null;
+                atEnd = true;
             }
+        }
 
-            // figure out how to detect next level threshold
-            // update count in db
-            if (!atEnd) {
-                ctx.output(outputTag, new MilestoneStateEvent(value.getUser(),
-                        milestone,
-                        accCount.get(),
-                        nextLevelValue));
-            }
-        //}
+        // figure out how to detect next level threshold
+        // update count in db
+        if (!atEnd) {
+            ctx.output(outputTag, new MilestoneStateEvent(value.getUser(),
+                    milestone,
+                    totalCount.get(),
+                    nextLevelValue,
+                    currLevelMargin));
+        }
     }
 
     private void initDefaultState() throws IOException {
         if (Objects.equals(currentLevel.value(), currLevelStateDesc.getDefaultValue())) {
             currentLevel.update(0L);
         }
+        if (Objects.equals(currentLevelMargin.value(), currLevelMarginStateDesc.getDefaultValue())) {
+            currentLevelMargin.update(0L);
+        }
     }
 
     @Override
     public void open(Configuration parameters) {
         currentLevel = getRuntimeContext().getState(currLevelStateDesc);
-        accCount = getRuntimeContext().getReducingState(allCountStateDesc);
+        currentLevelMargin = getRuntimeContext().getState(currLevelMarginStateDesc);
+        totalCount = getRuntimeContext().getReducingState(allCountStateDesc);
     }
 }

@@ -19,6 +19,8 @@ public class ConsumerUtils {
         map.put("valueLong", stateModel.getValueInt() == Long.MIN_VALUE ? null : stateModel.getValueInt());
         map.put("nextVal", stateModel.getNextValue());
         map.put("nextValInt", stateModel.getNextValueInt());
+        map.put("currBaseVal", stateModel.getCurrBaseValue());
+        map.put("currBaseValInt", stateModel.getCurrBaseValueInt());
         map.put("gameId", gameId);
         return map;
     }
@@ -61,6 +63,7 @@ public class ConsumerUtils {
         map.put("ts", event.getTimestamp());
         map.put("milestoneId", milestoneModel.getMilestoneId());
         map.put("level", milestoneModel.getLevel());
+        map.put("maxLevel", milestoneModel.getMaximumLevel());
         map.put("gameId", gameId);
         return map;
     }

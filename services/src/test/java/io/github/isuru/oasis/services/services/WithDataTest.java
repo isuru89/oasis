@@ -400,6 +400,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
                 model.setLevel(myLevel);
                 model.setMilestoneId(mId);
                 model.setSourceId(1);
+                model.setMaximumLevel(levels.size());
                 model.setTs(System.currentTimeMillis());
                 model.setEventType("so.event." + def.getName());
                 model.setEvent(toJsonEvent(model, gameId));
@@ -417,6 +418,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
                 stateModel.setMilestoneId(mId);
                 stateModel.setValueInt((long) myCurVal);
                 stateModel.setNextValueInt((long) nextVal);
+                stateModel.setCurrBaseValueInt((long) baseVal);
                 {
                     Map<String, Object> data = ConsumerUtils.toMilestoneStateDaoData(gameId, stateModel);
                     stateBuffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));

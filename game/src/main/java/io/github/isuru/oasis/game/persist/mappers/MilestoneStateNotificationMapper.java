@@ -14,6 +14,8 @@ public class MilestoneStateNotificationMapper extends BaseNotificationMapper<Mil
         model.setUserId(notification.getUserId());
         model.setValue(notification.getValue());
         model.setValueInt(notification.getValueInt());
+        model.setCurrBaseValue(notification.getCurrBaseValue());
+        model.setCurrBaseValueInt(notification.getCurrBaseValueInt());
         model.setNextValue(notification.getNextValue());
         model.setNextValueInt(notification.getNextValueInt());
         model.setLossUpdate(notification.isLossUpdate());

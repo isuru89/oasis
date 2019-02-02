@@ -65,11 +65,15 @@ public class StatMilestoneServiceTest extends WithDataTest {
             List<UserMilestoneStatDto> records = statService.readUserMilestones(jaime.getId());
             Assert.assertTrue(records.size() > 0);
             for (UserMilestoneStatDto dto : records) {
-                System.out.println(String.format("%d\t%s\t%s\t%d\t%d\t%d\t%s",
+                Assert.assertNotNull(dto.getMilestoneDisplayName());
+                Assert.assertNotNull(dto.getMilestoneName());
+                System.out.println(String.format("%d\t%s\t%s\t%d/%d\t%d\t%d\t%d\t%s",
                         dto.getMilestoneId(),
                         dto.getMilestoneName(),
                         dto.getMilestoneDisplayName(),
                         dto.getCurrentLevel(),
+                        dto.getMaximumLevel(),
+                        dto.getCurrentBaseValueL(),
                         dto.getCurrentValueL(),
                         dto.getNextValueL(),
                         Instant.ofEpochMilli(dto.getAchievedTime())));

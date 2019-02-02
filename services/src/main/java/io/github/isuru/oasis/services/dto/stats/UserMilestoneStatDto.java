@@ -13,13 +13,39 @@ public class UserMilestoneStatDto {
     private String milestoneDisplayName;
 
     private int currentLevel;
+    private int maximumLevel;
     private Double nextValue;
     private Double currentValue;
-
+    private Double currentBaseValue;
+    private Long currentBaseValueL;
     private Long currentValueL;
     private Long nextValueL;
     private Long achievedTime;
     private Timestamp lastUpdatedTime;
+
+    public int getMaximumLevel() {
+        return maximumLevel;
+    }
+
+    public void setMaximumLevel(int maximumLevel) {
+        this.maximumLevel = maximumLevel;
+    }
+
+    public Double getCurrentBaseValue() {
+        return currentBaseValue;
+    }
+
+    public void setCurrentBaseValue(Double currentBaseValue) {
+        this.currentBaseValue = currentBaseValue;
+    }
+
+    public Long getCurrentBaseValueL() {
+        return currentBaseValueL;
+    }
+
+    public void setCurrentBaseValueL(Long currentBaseValueL) {
+        this.currentBaseValueL = currentBaseValueL;
+    }
 
     public String getMilestoneName() {
         return milestoneName;

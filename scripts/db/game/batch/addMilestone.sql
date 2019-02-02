@@ -6,6 +6,7 @@ INSERT INTO OA_MILESTONE (
     ts,
     milestone_id,
     level,
+    max_level,
     game_id
 ) VALUES (
     :userId,
@@ -15,7 +16,9 @@ INSERT INTO OA_MILESTONE (
     :ts,
     :milestoneId,
     :level,
+    :maxLevel,
     :gameId
 )
 ON DUPLICATE KEY
-UPDATE ext_id = VALUES(ext_id)
+UPDATE ext_id = VALUES(ext_id),
+    max_level = VALUES(max_level)

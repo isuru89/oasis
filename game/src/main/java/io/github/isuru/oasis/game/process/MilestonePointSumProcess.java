@@ -77,8 +77,10 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
         }
 
         Integer currLevel = currentLevel.value();
+        double currLevelMargin;
         if (currLevel < levels.size()) {
             double margin = levels.get(currLevel);
+            currLevelMargin = margin;
             double currSum = accSum.value();
             if (currSum < margin && margin <= currSum + acc) {
                 // level changed
@@ -89,6 +91,7 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
                 double total = currSum + acc;
                 if (nextLevel < levels.size()) {
                     margin = levels.get(nextLevel);
+                    currLevelMargin = margin;
 
                     // check for subsequent levels
                     while (nextLevel < levels.size() && margin < total) {
@@ -96,6 +99,7 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
                         if (margin < total) {
                             nextLevel = nextLevel + 1;
                             currentLevel.update(nextLevel);
+                            currLevelMargin = margin;
                             out.collect(new MilestoneEvent(value.getUser(), milestone, nextLevel, value));
                         }
                     }
@@ -107,6 +111,8 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
             } else {
                 accSum.update(currSum + acc);
             }
+        } else {
+            currLevelMargin = levels.get(levels.size() - 1);
         }
 
         if (!atEnd && nextLevelValue == null) {
@@ -121,7 +127,10 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
         // update sum in db
         if (!atEnd) {
             ctx.output(outputTag, new MilestoneStateEvent(value.getUser(),
-                    milestone, accSum.value(), nextLevelValue));
+                    milestone,
+                    accSum.value(),
+                    nextLevelValue,
+                    currLevelMargin));
         }
     }
 

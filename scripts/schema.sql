@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONE (
     ts              BIGINT,
     milestone_id    INT,
     level           INT,
+    max_level       INT,
     is_active       TINYINT(1) DEFAULT 1,
     game_id         INT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -62,6 +63,8 @@ ALTER TABLE OA_MILESTONE ADD PRIMARY KEY (user_id, milestone_id, level);
 CREATE TABLE IF NOT EXISTS OA_MILESTONE_STATE (
     user_id         INT,
     milestone_id    INT,
+    curr_base_val   FLOAT(4),
+    curr_base_val_i BIGINT,
     current_val     FLOAT(4),
     current_val_i   BIGINT,
     next_val        FLOAT(4),

@@ -8,6 +8,8 @@ public class MilestoneStateModel {
     private Long userId;
     private Long milestoneId;
 
+    private Double currBaseValue;
+    private Long currBaseValueInt;
     private Double value;
     private Long valueInt;
     private Double nextValue;
@@ -16,6 +18,22 @@ public class MilestoneStateModel {
     private Boolean lossUpdate;
     private Double lossValue;
     private Long lossValueInt;
+
+    public Double getCurrBaseValue() {
+        return currBaseValue;
+    }
+
+    public void setCurrBaseValue(Double currBaseValue) {
+        this.currBaseValue = currBaseValue;
+    }
+
+    public Long getCurrBaseValueInt() {
+        return currBaseValueInt;
+    }
+
+    public void setCurrBaseValueInt(Long currBaseValueInt) {
+        this.currBaseValueInt = currBaseValueInt;
+    }
 
     public Boolean getLossUpdate() {
         return lossUpdate;

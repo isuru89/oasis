@@ -63,8 +63,10 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
         initDefaultState();
 
         Integer currLevel = currentLevel.value();
+        double currLevelMargin;
         if (currLevel < levels.size()) {
             double margin = levels.get(currLevel);
+            currLevelMargin = margin;
             double acc = asDouble(expression, value);
 
             if (milestone.isOnlyPositive() && acc < 0) {
@@ -83,6 +85,7 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
                 double total = currSum + acc;
                 if (nextLevel < levels.size()) {
                     margin = levels.get(nextLevel);
+                    currLevelMargin = margin;
 
                     // check for subsequent levels
                     while (nextLevel < levels.size() && margin < total) {
@@ -90,6 +93,7 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
                         if (margin < total) {
                             nextLevel = nextLevel + 1;
                             currentLevel.update(nextLevel);
+                            currLevelMargin = margin;
                             out.collect(new MilestoneEvent(value.getUser(), milestone, nextLevel, value));
                         }
                     }
@@ -101,6 +105,8 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
             } else {
                 accSum.update(currSum + acc);
             }
+        } else {
+            currLevelMargin = levels.get(levels.size() - 1); // max level
         }
 
         if (!atEnd && nextLevelValue == null) {
@@ -114,7 +120,11 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
 
         // update sum in db
         if (!atEnd) {
-            ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), milestone, accSum.value(), nextLevelValue));
+            ctx.output(outputTag, new MilestoneStateEvent(value.getUser(),
+                    milestone,
+                    accSum.value(),
+                    nextLevelValue,
+                    currLevelMargin));
         }
     }
 

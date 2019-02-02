@@ -21,6 +21,7 @@ public class MilestoneNotificationMapper extends BaseNotificationMapper<Mileston
         model.setEvent(extractRawEvents(notification.getEvent()));
         model.setLevel(notification.getLevel());
         model.setMilestoneId(notification.getMilestone().getId());
+        model.setMaximumLevel(notification.getMilestone().getLevels().size());
         model.setTs(event.getTimestamp());
         model.setSourceId(event.getSource());
         model.setGameId(event.getGameId());

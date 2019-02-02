@@ -14,10 +14,19 @@ public class MilestoneModel {
     private JsonEvent event;
     private String eventType;
     private Integer level;
+    private Integer maximumLevel;
     private Long milestoneId;
     private Long ts;
     private Integer sourceId;
     private Integer gameId;
+
+    public Integer getMaximumLevel() {
+        return maximumLevel;
+    }
+
+    public void setMaximumLevel(Integer maximumLevel) {
+        this.maximumLevel = maximumLevel;
+    }
 
     public Integer getGameId() {
         return gameId;

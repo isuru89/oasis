@@ -4,10 +4,13 @@ SELECT
     oad.name as milestoneName,
     oad.display_name AS milestoneDisplayName,
     mcur.currLevel as currentLevel,
+    mcur.maxLevel AS maximumLevel,
     oms.current_val as currentValue,
     oms.next_val as nextValue,
     oms.current_val_i as currentValueL,
     oms.next_val_i as nextValueL,
+    oms.curr_base_val AS currentBaseValue,
+    oms.curr_base_val_i AS currentBaseValueL,
     mcur.achievedTime as achievedTime,
     oms.updated_at as lastUpdatedTime
 
@@ -17,6 +20,7 @@ FROM OA_MILESTONE_STATE AS oms
             user_id as userId,
             milestone_id as milestoneId,
             MAX(level) as currLevel,
+            MAX(max_level) AS maxLevel,
             MAX(ts) as achievedTime
         FROM OA_MILESTONE
         WHERE

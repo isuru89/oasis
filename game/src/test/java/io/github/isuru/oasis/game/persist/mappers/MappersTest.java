@@ -48,7 +48,8 @@ public class MappersTest {
 
             MilestoneStateEvent notification = new MilestoneStateEvent(event.getUser(),
                     milestone,
-                    345.0, 1000.0);
+                    345.0, 1000.0,
+                    250.0);
 
             String content = mapper.map(notification);
             MilestoneStateModel model = toObj(content, MilestoneStateModel.class);
@@ -87,7 +88,7 @@ public class MappersTest {
 
             MilestoneStateEvent notification = new MilestoneStateEvent(event.getUser(),
                     milestone,
-                    123L, 1000L);
+                    123L, 1000L, 100L);
 
             String content = mapper.map(notification);
             MilestoneStateModel model = toObj(content, MilestoneStateModel.class);
@@ -348,6 +349,7 @@ public class MappersTest {
         Assertions.assertEquals(event.getTeamScope(), model.getTeamScopeId());
         Assertions.assertEquals(event.getTimestamp(), model.getTs().longValue());
         Assertions.assertEquals(event.getGameId(), model.getGameId());
+        Assertions.assertEquals(event.getMilestone().getLevels().size(), model.getMaximumLevel().longValue());
     }
 
     private void assertMilestoneStateOutput(MilestoneStateModel model,
@@ -358,6 +360,8 @@ public class MappersTest {
         Assertions.assertEquals(milestone.getId(), model.getMilestoneId().intValue());
         Assertions.assertEquals(notification.getValueInt(), model.getValueInt().longValue());
         Assertions.assertEquals(notification.getValue(), model.getValue().doubleValue());
+        Assertions.assertEquals(notification.getCurrBaseValue(), model.getCurrBaseValue());
+        Assertions.assertEquals(notification.getCurrBaseValueInt(), model.getCurrBaseValueInt());
         Assertions.assertEquals(notification.getLossValue(), model.getLossValue());
         Assertions.assertEquals(notification.getLossValueInt(), model.getLossValueInt());
         Assertions.assertEquals(notification.getNextValueInt(), model.getNextValueInt());

@@ -61,6 +61,7 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
         initDefaultState();
 
         Integer currLevel = currentLevel.value();
+        Long currLevelMargin;
         if (currLevel < levels.size()) {
             long acc = Long.parseLong(Utils.executeExpression(expression, value.getAllFieldValues()).toString());
 
@@ -71,6 +72,7 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
             }
 
             long margin = levels.get(currLevel);
+            currLevelMargin = margin;
             long currSum = accSum.value();
             if (currSum < margin && margin <= currSum + acc) {
                 // level changed
@@ -81,6 +83,7 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
                 long total = currSum + acc;
                 if (nextLevel < levels.size()) {
                     margin = levels.get(nextLevel);
+                    currLevelMargin = margin;
 
                     // check for subsequent levels
                     while (nextLevel < levels.size() && margin < total) {
@@ -88,6 +91,7 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
                         if (margin < total) {
                             nextLevel = nextLevel + 1;
                             currentLevel.update(nextLevel);
+                            currLevelMargin = margin;
                             out.collect(new MilestoneEvent(value.getUser(), milestone, nextLevel, value));
                         }
                     }
@@ -99,6 +103,8 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
             } else {
                 accSum.update(currSum + acc);
             }
+        } else {
+            currLevelMargin = levels.get(levels.size() - 1);
         }
 
         if (!atEnd && nextLevelValue == null) {
@@ -113,7 +119,10 @@ public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, Miles
         if (!atEnd) {
             // update sum in db;
             ctx.output(outputTag, new MilestoneStateEvent(value.getUser(),
-                    milestone, accSum.value(), nextLevelValue));
+                    milestone,
+                    accSum.value(),
+                    nextLevelValue,
+                    currLevelMargin));
         }
     }
 
