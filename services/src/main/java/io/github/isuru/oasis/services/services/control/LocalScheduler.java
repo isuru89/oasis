@@ -9,6 +9,7 @@ import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.IGameController;
 import io.github.isuru.oasis.services.services.IJobService;
+import io.github.isuru.oasis.services.services.dispatchers.DispatcherManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +37,7 @@ public class LocalScheduler implements IGameController {
     private final Map<Long, LocalRunner> runners = new ConcurrentHashMap<>();
     private final LocalChallengeProcessor challengeProcessor;
 
-
     private final IOasisDao dao;
-    private final IJobService jobService;
     private final DataCache dataCache;
     private final OasisConfigurations oasisConfigurations;
     private final Sources sources;
@@ -46,6 +45,7 @@ public class LocalScheduler implements IGameController {
     @Autowired
     public LocalScheduler(IOasisDao dao,
                           IJobService jobService,
+                          DispatcherManager dispatcherManager,
                           DataCache dataCache,
                           Sources sources,
                           OasisConfigurations oasisConfigurations) {
@@ -53,9 +53,8 @@ public class LocalScheduler implements IGameController {
         this.dataCache = dataCache;
         this.oasisConfigurations = oasisConfigurations;
         this.sources = sources;
-        this.jobService = jobService;
 
-        this.challengeProcessor = new LocalChallengeProcessor(jobService);
+        this.challengeProcessor = new LocalChallengeProcessor(jobService, dispatcherManager.getEventDispatcher());
     }
 
     @PostConstruct
@@ -76,11 +75,11 @@ public class LocalScheduler implements IGameController {
     }
 
     @Override
-    public void submitEvent(long gameId, Map<String, Object> event) throws Exception {
+    public void submitEvent(long gameId, String token, Map<String, Object> event) throws Exception {
         LocalRunner runner = runners.get(gameId);
         if (runner != null) {
             runner.submitEvent(event);
-            challengeProcessor.submitEvent(event);
+            challengeProcessor.submitEvent(token, event);
         } else {
             throw new InputValidationException("No game is running by id " + gameId + "!");
         }

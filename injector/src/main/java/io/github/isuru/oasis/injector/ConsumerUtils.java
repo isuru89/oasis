@@ -75,6 +75,7 @@ public class ConsumerUtils {
         map.put("teamScopeId", challengeModel.getTeamScopeId());
         map.put("challengeId", challengeModel.getChallengeId());
         map.put("points", challengeModel.getPoints());
+        map.put("winNo", challengeModel.getWinNo());
         map.put("wonAt", challengeModel.getWonAt());
         map.put("gameId", gameId);
         map.put("sourceId", challengeModel.getSourceId());

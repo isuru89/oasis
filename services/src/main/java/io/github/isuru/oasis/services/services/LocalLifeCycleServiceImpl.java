@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 @Service("localLifecycleService")
 public class LocalLifeCycleServiceImpl implements ILifecycleService {
 
-    private LocalScheduler gameController;
-    private IGameDefService gameDefService;
-    private OasisConfigurations configurations;
+    private final LocalScheduler gameController;
+    private final IGameDefService gameDefService;
+    private final OasisConfigurations configurations;
 
     @Autowired
     public LocalLifeCycleServiceImpl(LocalScheduler gameController, IGameDefService gameDefService,

@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS OA_CHALLENGE_WINNER (
     team_scope_id   INT,
     challenge_id    INT,
     points          FLOAT(4),
+    win_no          INT,
     won_at          BIGINT,
     game_id         INT,
     source_id       INT,

@@ -170,7 +170,7 @@ public class EventSubmitTest {
                     .build();
             eventsService.submitEvent(tokenInternal, data);
 
-            Mockito.verify(gameController).submitEvent(Mockito.eq(1L), Mockito.anyMap());
+            Mockito.verify(gameController).submitEvent(Mockito.eq(1L), Mockito.eq(tokenInternal), Mockito.anyMap());
         }
     }
 
@@ -209,7 +209,8 @@ public class EventSubmitTest {
                     .build();
             eventsService.submitEvent(tokenInternal, data);
 
-            Mockito.verify(gameController).submitEvent(Mockito.eq(1L), Mockito.anyMap());
+            Mockito.verify(gameController).submitEvent(Mockito.eq(1L), Mockito.eq(tokenInternal),
+                    Mockito.anyMap());
         }
     }
 
@@ -251,7 +252,7 @@ public class EventSubmitTest {
                     .build();
             eventsService.submitEvent(tokenInternal, data);
 
-            Mockito.verify(gameController).submitEvent(Mockito.eq(1L), Mockito.anyMap());
+            Mockito.verify(gameController).submitEvent(Mockito.eq(1L), Mockito.eq(tokenInternal), Mockito.anyMap());
         }
     }
 
@@ -295,7 +296,7 @@ public class EventSubmitTest {
                     .build();
             eventsService.submitEvent(tokenInternal, data);
 
-            Mockito.verify(gameController).submitEvent(Mockito.eq(1L), Mockito.anyMap());
+            Mockito.verify(gameController).submitEvent(Mockito.eq(1L), Mockito.eq(tokenInternal), Mockito.anyMap());
         }
     }
 

@@ -129,7 +129,7 @@ public class EventsServiceImpl implements IEventsService {
             }
         }
 
-        gameControllerManager.get().submitEvent(gid, event);
+        gameControllerManager.get().submitEvent(gid, token, event);
     }
 
     @Override

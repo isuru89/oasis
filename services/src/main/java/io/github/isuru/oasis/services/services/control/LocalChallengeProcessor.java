@@ -2,22 +2,26 @@ package io.github.isuru.oasis.services.services.control;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.isuru.oasis.game.persist.OasisSink;
+import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.events.ChallengeEvent;
 import io.github.isuru.oasis.model.events.JsonEvent;
-import io.github.isuru.oasis.model.handlers.NotificationUtils;
+import io.github.isuru.oasis.services.model.IEventDispatcher;
 import io.github.isuru.oasis.services.model.SubmittedJob;
 import io.github.isuru.oasis.services.services.IJobService;
 import io.github.isuru.oasis.services.utils.Pojos;
 import org.apache.flink.shaded.netty4.io.netty.util.internal.ConcurrentSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -26,10 +30,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author iweerarathna
  */
-@Component
 class LocalChallengeProcessor implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalChallengeProcessor.class);
+
+    private static final String FIELD_TOKEN = "source.token";
 
     private static final int TIMEOUT = 5;
 
@@ -44,9 +49,11 @@ class LocalChallengeProcessor implements Runnable {
 
     private final IJobService jobService;
 
-    @Autowired
-    LocalChallengeProcessor(IJobService jobService) {
+    private final IEventDispatcher eventDispatcher;
+
+    LocalChallengeProcessor(IJobService jobService, IEventDispatcher eventDispatcher) {
         this.jobService = jobService;
+        this.eventDispatcher = eventDispatcher;
     }
 
     void submitChallenge(ChallengeDef challengeDef, OasisSink sink) throws Exception {
@@ -96,9 +103,10 @@ class LocalChallengeProcessor implements Runnable {
         }
     }
 
-    public void submitEvent(Map<String, Object> event) {
+    public void submitEvent(String token, Map<String, Object> event) {
         JsonEvent jsonEvent = new JsonEvent();
         jsonEvent.putAll(event);
+        jsonEvent.setFieldValue(FIELD_TOKEN, token);
         events.add(jsonEvent);
     }
 
@@ -121,13 +129,16 @@ class LocalChallengeProcessor implements Runnable {
                 if (oasisSink != null) {
                     // send out a winner
                     ChallengeEvent challengeEvent = new ChallengeEvent(event, challenge);
-                    Map<String, Object> winnerInfo = NotificationUtils.mapChallenge(challengeEvent);
+                    challengeEvent.setFieldValue(ChallengeEvent.KEY_WIN_NO, result.getWinNumber());
+
+                    // send challenge winner as event
+                    Map<String, Object> winnerEvent = mapChallenge(challengeEvent);
                     try {
                         // persist checker change to db
                         byte[] dataState = Pojos.serialize(challengeChecker);
                         if (jobService.updateJobState(challengeId, dataState)) {
-                            // when success, notify sink
-                            oasisSink.createChallengeSink().invoke(mapper.writeValueAsString(winnerInfo), null);
+                            // when success, notify as an event
+                            eventDispatcher.dispatch(challenge.getGameId(), winnerEvent);
                         } else {
                             // @TODO do something when we can't save state to db
                             LOG.error("Cannot update job state in persistent storage.");
@@ -157,6 +168,21 @@ class LocalChallengeProcessor implements Runnable {
                 }
             });
         }
+    }
+
+    private static Map<String, Object> mapChallenge(ChallengeEvent value) {
+        Map<String, Object> data = new HashMap<>();
+        data.put(Constants.FIELD_TEAM, value.getTeam());
+        data.put(Constants.FIELD_SCOPE, value.getTeamScope());
+        data.put(Constants.FIELD_USER, value.getUser());
+        data.put(Constants.FIELD_ID, value.getExternalId());
+        data.put(Constants.FIELD_TIMESTAMP, value.getTimestamp());
+        data.put(Constants.FIELD_SOURCE, value.getSource());
+        data.put(Constants.FIELD_GAME_ID, value.getGameId());
+        data.put(ChallengeEvent.KEY_DEF_ID, value.getChallengeId());
+        data.put(ChallengeEvent.KEY_POINTS, value.getPoints());
+        data.put(ChallengeEvent.KEY_WIN_NO, value.getWinNo());
+        return data;
     }
 
     private SubmittedJob readJobState(ChallengeDef challengeDef) throws Exception {

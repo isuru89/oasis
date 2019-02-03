@@ -9,6 +9,7 @@ SELECT
     oacw.team_scope_id AS teamScopeId,
     oats.display_name AS teamScopeDisplayName,
     oacw.points AS pointsScored,
+    oacw.win_no AS winNo,
     oacw.won_at AS wonAt,
     oacw.game_id AS gameId
 

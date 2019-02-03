@@ -12,6 +12,7 @@ public class ChallengeEvent implements Event {
 
     public static final String KEY_DEF_ID = "defId";
     public static final String KEY_POINTS = "points";
+    public static final String KEY_WIN_NO = "winNo";
 
     private Event event;
     private ChallengeDef challengeDef;
@@ -19,6 +20,10 @@ public class ChallengeEvent implements Event {
     public ChallengeEvent(Event event, ChallengeDef challengeDef) {
         this.event = event;
         this.challengeDef = challengeDef;
+    }
+
+    public Integer getWinNo() {
+        return (Integer) getFieldValue(KEY_WIN_NO);
     }
 
     public Long getChallengeId() {

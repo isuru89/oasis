@@ -12,9 +12,9 @@ import java.util.*;
 public class ChallengeCheck implements Serializable {
 
     private static final ChallengeFilterResult CONTINUE =
-            new ChallengeFilterResult(false, true);
+            new ChallengeFilterResult(false, true, 0);
     private static final ChallengeFilterResult HALT =
-            new ChallengeFilterResult(false, false);
+            new ChallengeFilterResult(false, false, 0);
 
     private ChallengeDef def;
     private Set<String> eventNames;
@@ -77,7 +77,7 @@ public class ChallengeCheck implements Serializable {
         }
 
         boolean canContinue = def.getWinnerCount() > winners;
-        return new ChallengeFilterResult(satisfied, canContinue);
+        return new ChallengeFilterResult(satisfied, canContinue, winners);
     }
 
     private boolean interpretCondition(Object val) {
@@ -105,10 +105,16 @@ public class ChallengeCheck implements Serializable {
     static class ChallengeFilterResult {
         private final boolean satisfied;
         private final boolean isContinue;
+        private final int winNumber;
 
-        private ChallengeFilterResult(boolean satisfied, boolean isContinue) {
+        private ChallengeFilterResult(boolean satisfied, boolean isContinue, int winNumber) {
             this.satisfied = satisfied;
             this.isContinue = isContinue;
+            this.winNumber = winNumber;
+        }
+
+        int getWinNumber() {
+            return winNumber;
         }
 
         boolean isSatisfied() {

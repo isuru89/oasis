@@ -15,8 +15,17 @@ public class ChallengeWinnerDto {
     private Long teamScopeId;
     private String teamScopeDisplayName;
     private Double pointsScored;
+    private Integer winNo;
     private Long wonAt;
     private Long gameId;
+
+    public Integer getWinNo() {
+        return winNo;
+    }
+
+    public void setWinNo(Integer winNo) {
+        this.winNo = winNo;
+    }
 
     public String getUserNickname() {
         return userNickname;

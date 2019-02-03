@@ -21,6 +21,7 @@ public class ChallengeNotificationMapper extends BaseNotificationMapper<Challeng
         model.setTs(notification.getTimestamp());
         model.setSourceId(notification.getSource());
         model.setGameId(notification.getGameId());
+        model.setWinNo(notification.getWinNo());
         return model;
     }
 }

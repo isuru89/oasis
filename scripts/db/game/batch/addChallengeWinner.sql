@@ -4,6 +4,7 @@ INSERT INTO OA_CHALLENGE_WINNER (
     team_scope_id,
     challenge_id,
     points,
+    win_no,
     won_at,
     source_id,
     game_id
@@ -13,6 +14,7 @@ INSERT INTO OA_CHALLENGE_WINNER (
     :teamScopeId,
     :challengeId,
     :points,
+    :winNo,
     :wonAt,
     :sourceId,
     :gameId

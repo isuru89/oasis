@@ -9,6 +9,7 @@ public class ChallengeModel {
     private Long teamId;
     private Long teamScopeId;
 
+    private Integer winNo;
     private Long wonAt;
     private Long challengeId;
     private Double points;
@@ -16,6 +17,14 @@ public class ChallengeModel {
     private Long ts;
     private Integer sourceId;
     private Integer gameId;
+
+    public Integer getWinNo() {
+        return winNo;
+    }
+
+    public void setWinNo(Integer winNo) {
+        this.winNo = winNo;
+    }
 
     public Integer getGameId() {
         return gameId;

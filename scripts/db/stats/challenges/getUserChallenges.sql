@@ -11,6 +11,7 @@ SELECT
     oad.name AS challengeName,
     oad.display_name AS challengeDisplayName,
     oacw.points AS pointsScored,
+    oacw.win_no AS winNo,
     oacw.won_at AS wonAt,
     oacw.game_id AS gameId
 

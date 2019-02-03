@@ -1,5 +1,6 @@
 package io.github.isuru.oasis.services.services;
 
+import io.github.isuru.oasis.model.defs.BaseDef;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
@@ -7,10 +8,12 @@ import io.github.isuru.oasis.services.dto.stats.ChallengeInfoDto;
 import io.github.isuru.oasis.services.dto.stats.ChallengeWinDto;
 import io.github.isuru.oasis.services.dto.stats.ChallengeWinnerDto;
 import io.github.isuru.oasis.services.dto.stats.UserChallengeWinRes;
+import io.github.isuru.oasis.services.exception.InputValidationException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
@@ -18,8 +21,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class StatChallengeServiceTest extends WithDataTest {
 
@@ -79,8 +84,11 @@ public class StatChallengeServiceTest extends WithDataTest {
                 Assert.assertTrue(dto.getWinners().size() > 0);
                 System.out.println("Winners of challenge #" + def.getId());
                 for (ChallengeWinnerDto winner : dto.getWinners()) {
+                    Assert.assertNotNull(winner.getWinNo());
+
                     userIds.add(winner.getUserId());
-                    System.out.println(String.format("%s\t%s\t%s\t%.2f",
+                    System.out.println(String.format("(%d)\t%s\t%s\t%s\t%.2f",
+                            winner.getWinNo(),
                             winner.getUserNickname(),
                             winner.getTeamName(),
                             winner.getTeamScopeDisplayName(),
@@ -98,7 +106,10 @@ public class StatChallengeServiceTest extends WithDataTest {
 
                 Assert.assertEquals(frequency, userWins.getWins().size());
                 for (ChallengeWinDto win : userWins.getWins()) {
-                    System.out.println(String.format("%d\t%s\t%s\t%.2f",
+                    Assert.assertNotNull(win.getWinNo());
+
+                    System.out.println(String.format("(%d)\t%d\t%s\t%s\t%.2f",
+                            win.getWinNo(),
                             win.getChallengeId(),
                             win.getChallengeName(),
                             win.getChallengeDisplayName(),
@@ -108,4 +119,28 @@ public class StatChallengeServiceTest extends WithDataTest {
         }
     }
 
+    @Test
+    public void testChallengeStatsFailures() throws Exception {
+        List<Long> cIds = gameDefService.listChallenges(gameId)
+                .stream()
+                .map(BaseDef::getId)
+                .collect(Collectors.toList());
+
+        long min = cIds.stream().min(Comparator.comparingLong(o -> o)).orElse(0L);
+
+        long nonExistId = -1;
+        for (long i = min; i < min + 100; i++) {
+            if (!cIds.contains(i)) {
+                nonExistId = i;
+                break;
+            }
+        }
+
+        Assert.assertTrue(nonExistId > 0);
+        shouldFail(nonExistId);
+    }
+
+    private void shouldFail(final long challengeId) {
+        Assertions.assertThrows(InputValidationException.class, () -> statService.readChallengeStats(challengeId));
+    }
 }

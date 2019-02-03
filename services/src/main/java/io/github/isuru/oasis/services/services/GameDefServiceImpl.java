@@ -620,6 +620,9 @@ public class GameDefServiceImpl implements IGameDefService {
     }
 
     private ChallengeDef wrapperToChallenge(DefWrapper wrapper) {
+        if (wrapper == null) {
+            return null;
+        }
         return Converters.toChallengeDef(wrapper,
                 wrp -> RUtils.toObj(wrp.getContent(), ChallengeDef.class, mapper));
     }

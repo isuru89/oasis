@@ -107,7 +107,7 @@ public class MappersTest {
         {
             JsonEvent jsonEvent = randomJsonEvent();
             ChallengeEvent event = new ChallengeEvent(jsonEvent, def);
-
+            event.setFieldValue(ChallengeEvent.KEY_WIN_NO, 1);
 
             String content = mapper.map(event);
             ChallengeModel model = toObj(content, ChallengeModel.class);
@@ -298,6 +298,7 @@ public class MappersTest {
         Assertions.assertEquals(event.getTimestamp(), model.getWonAt().longValue());
         Assertions.assertEquals(challengeEvent.getExternalId(), model.getEventExtId());
         Assertions.assertEquals(event.getGameId(), model.getGameId());
+        Assertions.assertEquals(challengeEvent.getWinNo(), model.getWinNo());
     }
 
     private void assertStateOutput(OStateModel model,

@@ -498,6 +498,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
                     model.setEventExtId(randomId());
                     model.setPoints(points.get(0) * 1.0);
                     model.setGameId((int) gameId);
+                    model.setWinNo(i+1);
                     model.setSourceId(1);
                     model.setTs(System.currentTimeMillis());
                     model.setWonAt(System.currentTimeMillis());
@@ -516,6 +517,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
                 model.setEventExtId(randomId());
                 model.setPoints(points.get(random.nextInt(points.size())) * 1.0);
                 model.setGameId((int) gameId);
+                model.setWinNo(1);
                 model.setSourceId(1);
                 model.setTs(System.currentTimeMillis());
                 model.setWonAt(System.currentTimeMillis());

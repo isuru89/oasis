@@ -28,7 +28,7 @@ public class FlinkScheduler implements IGameController {
     }
 
     @Override
-    public void submitEvent(long gameId, Map<String, Object> event) throws Exception {
+    public void submitEvent(long gameId, String token, Map<String, Object> event) throws Exception {
         eventDispatcher.dispatch(gameId, event);
     }
 
