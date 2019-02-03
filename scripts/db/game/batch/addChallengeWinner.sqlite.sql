@@ -17,8 +17,8 @@ INSERT INTO OA_CHALLENGE_WINNER (
     :sourceId,
     :gameId
 )
-ON DUPLICATE KEY
-UPDATE points = VALUES(points),
-    won_at = VALUES(won_at),
-    team_id = VALUES(team_id),
-    team_scope_id = VALUES(team_scope_id)
+ON CONFLICT (user_id, challenge_id)
+DO UPDATE SET points = excluded.points,
+    won_at = excluded.won_at,
+    team_id = excluded.team_id,
+    team_scope_id = excluded.team_scope_id

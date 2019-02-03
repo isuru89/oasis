@@ -94,6 +94,20 @@ CREATE TABLE  OA_STATE (
     PRIMARY KEY (user_id, team_id, state_id)
 );
 
+CREATE TABLE  OA_CHALLENGE_WINNER (
+    user_id         INT,
+    team_id         INT,
+    team_scope_id   INT,
+    challenge_id    INT,
+    points          FLOAT(4),
+    won_at          BIGINT,
+    game_id         INT,
+    source_id       INT,
+    is_active       TINYINT(1) DEFAULT 1,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, challenge_id)
+);
+
 CREATE TABLE  OA_RACE (
     user_id         INT,
     team_id         INT,
@@ -224,19 +238,6 @@ CREATE TABLE  OA_TEAM_SCOPE_USER (
     until           BIGINT,
     is_approved     TINYINT(1) DEFAULT 1,
     approved_at     BIGINT,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE  OA_CHALLENGE_WINNER (
-    user_id         INT,
-    team_id         INT,
-    team_scope_id   INT,
-    challenge_id    INT,
-    points          FLOAT(4),
-    won_at          BIGINT,
-    game_id         INT,
-    source_id       INT,
-    is_active       TINYINT(1) DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

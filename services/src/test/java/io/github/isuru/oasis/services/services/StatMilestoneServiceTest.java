@@ -39,7 +39,7 @@ public class StatMilestoneServiceTest extends WithDataTest {
 
         loadUserData();
 
-        initPool(5);
+        initPool(3);
     }
 
     @After

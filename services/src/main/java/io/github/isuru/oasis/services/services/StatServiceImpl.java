@@ -367,6 +367,20 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
+    public UserChallengeWinRes readUserChallengeWins(long userId) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
+        UserChallengeWinRes challengeInfoDto = new UserChallengeWinRes();
+        List<ChallengeWinDto> winners = ServiceUtils.toList(dao.executeQuery(
+                Q.STATS.GET_USER_CHALLENGES,
+                Maps.create("userId", userId),
+                ChallengeWinDto.class));
+
+        challengeInfoDto.setWins(winners);
+        return challengeInfoDto;
+    }
+
+    @Override
     public void readUserGameTimeline(long userId) {
 
     }

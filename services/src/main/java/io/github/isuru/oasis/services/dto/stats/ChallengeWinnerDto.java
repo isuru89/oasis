@@ -7,6 +7,7 @@ public class ChallengeWinnerDto {
 
     private Long userId;
     private String userName;
+    private String userNickname;
     private String userEmail;
     private String userAvatar;
     private Long teamId;
@@ -16,6 +17,14 @@ public class ChallengeWinnerDto {
     private Double pointsScored;
     private Long wonAt;
     private Long gameId;
+
+    public String getUserNickname() {
+        return userNickname;
+    }
+
+    public void setUserNickname(String userNickname) {
+        this.userNickname = userNickname;
+    }
 
     public Long getUserId() {
         return userId;

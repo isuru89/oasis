@@ -6,10 +6,12 @@ import io.github.isuru.oasis.injector.ConsumerUtils;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.events.JsonEvent;
 import io.github.isuru.oasis.model.handlers.output.BadgeModel;
+import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
 import io.github.isuru.oasis.model.handlers.output.PointModel;
@@ -53,6 +55,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
 
     private static List<String> ruleOrder = new ArrayList<>();
     private static List<String> milestoneOrder = new ArrayList<>();
+    private static List<String> challengesOrder = new ArrayList<>();
     private static Map<String, List<String>> badgeRules = new LinkedHashMap<>();
 
     @Autowired
@@ -75,6 +78,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
     List<Long> pointRuleIds;
     List<Long> badgeIds;
     List<Long> milestoneIds;
+    List<Long> challengeIds;
 
     List<Long> addPointRules(long gameId, String... rules) throws Exception {
         ruleOrder.clear();
@@ -141,6 +145,35 @@ public abstract class WithDataTest extends AbstractServiceTest {
             milestoneIds.add(id);
         }
         return milestoneIds;
+    }
+
+    List<Long> addChallenges(long gameId, String... names) throws Exception {
+        challengeIds = new ArrayList<>();
+        Random random = new Random(System.currentTimeMillis());
+
+        challengesOrder = Arrays.asList(names);
+        List<UserProfile> cusers = new ArrayList<>(users.values());
+        List<TeamProfile> cteams = new ArrayList<>(teams.values());
+        List<TeamScope> cscopes = new ArrayList<>(scopes.values());
+        for (String name : names) {
+            ChallengeDef def = new ChallengeDef();
+            def.setName(SLUGIFY.slugify(name));
+            def.setDisplayName(name);
+
+            int i = random.nextInt(3);
+            if (i == 0) {
+                UserProfile up = cusers.get(random.nextInt(cusers.size()));
+                def.setForUser(up.getEmail());
+            } else if (i == 1) {
+                def.setForTeam(cteams.get(random.nextInt(cteams.size())).getName());
+            } else if (i == 2) {
+                def.setForTeamScope(cscopes.get(random.nextInt(cscopes.size())).getName());
+            }
+
+            long id = gameDefService.addChallenge(gameId, def);
+            challengeIds.add(id);
+        }
+        return challengeIds;
     }
 
     void initPool(int size) {
@@ -434,6 +467,68 @@ public abstract class WithDataTest extends AbstractServiceTest {
         return count;
     }
 
+    int loadChallenges(Instant startTime, long timeRange, long gameId) throws Exception {
+        List<ChallengeDef> challengeDefs = gameDefService.listChallenges(gameId);
+
+        Assert.assertTrue(challengeDefs.size() > 0);
+
+        BufferedRecords buffer = new BufferedRecords(this::flushChallenge);
+        buffers.add(buffer);
+        buffer.init(pool);
+
+        int count = 0;
+        ArrayList<UserProfile> profiles = new ArrayList<>(users.values());
+        List<Integer> points = Arrays.asList(100, 150, 200, 250, 500, 750, 1000);
+        for (ChallengeDef challengeDef : challengeDefs) {
+            Random random = new Random(System.currentTimeMillis());
+            int p = random.nextInt(10);
+
+            if (p % 4 == 0) {
+                int players = 2 + random.nextInt(3);
+                for (int i = 0; i < players; i++) {
+                    ChallengeModel model = new ChallengeModel();
+                    Collections.shuffle(points);
+
+                    UserProfile up = profiles.get(random.nextInt(profiles.size()));
+                    model.setUserId(up.getId());
+                    UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(up.getId());
+                    model.setTeamId(currentTeamOfUser.getTeamId().longValue());
+                    model.setTeamScopeId(currentTeamOfUser.getScopeId().longValue());
+                    model.setChallengeId(challengeDef.getId());
+                    model.setEventExtId(randomId());
+                    model.setPoints(points.get(0) * 1.0);
+                    model.setGameId((int) gameId);
+                    model.setSourceId(1);
+                    model.setTs(System.currentTimeMillis());
+                    model.setWonAt(System.currentTimeMillis());
+
+                    Map<String, Object> data = ConsumerUtils.toChallengeDaoData(gameId, model);
+                    buffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
+                }
+            } else {
+                ChallengeModel model = new ChallengeModel();
+                UserProfile up = profiles.get(random.nextInt(profiles.size()));
+                model.setUserId(up.getId());
+                UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(up.getId());
+                model.setTeamId(currentTeamOfUser.getTeamId().longValue());
+                model.setTeamScopeId(currentTeamOfUser.getScopeId().longValue());
+                model.setChallengeId(challengeDef.getId());
+                model.setEventExtId(randomId());
+                model.setPoints(points.get(random.nextInt(points.size())) * 1.0);
+                model.setGameId((int) gameId);
+                model.setSourceId(1);
+                model.setTs(System.currentTimeMillis());
+                model.setWonAt(System.currentTimeMillis());
+
+                Map<String, Object> data = ConsumerUtils.toChallengeDaoData(gameId, model);
+                buffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
+            }
+        }
+
+        buffer.flushNow();
+        return count;
+    }
+
     private void flushPoints(List<BufferedRecords.ElementRecord> elementRecords) {
         List<Map<String, Object>> data = elementRecords.stream().map(BufferedRecords.ElementRecord::getData)
                 .collect(Collectors.toList());
@@ -469,6 +564,16 @@ public abstract class WithDataTest extends AbstractServiceTest {
                 .collect(Collectors.toList());
         try {
             dao.executeBatchInsert("game/batch/updateMilestoneState", data);
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void flushChallenge(List<BufferedRecords.ElementRecord> elementRecords) {
+        List<Map<String, Object>> data = elementRecords.stream().map(BufferedRecords.ElementRecord::getData)
+                .collect(Collectors.toList());
+        try {
+            dao.executeBatchInsert("game/batch/addChallengeWinner", data);
         } catch (DbException e) {
             e.printStackTrace();
         }

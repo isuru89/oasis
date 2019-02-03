@@ -108,16 +108,16 @@ final class Q {
         private static final String PATH = "stats/";
         private static final String POINTS = PATH + "points/";
         private static final String BADGES = PATH + "badges/";
+        private static final String CHALLENGES = PATH + "challenges/";
 
         static final String GET_POINT_BREAKDOWN = POINTS + "getPointBreakdown";
         static final String GET_POINT_SUMMARY = POINTS + "getPointsSummary";
         static final String GET_BADGE_SUMMARY = BADGES + "getBadgesSummary";
         static final String GET_BADGE_BREAKDOWN = BADGES + "getBadgeBreakdown";
-        static final String GET_CHALLENGE_WINNERS = "stats/getChallengeWinners";
-        static final String GET_USER_BADGES_LIST = "stats/getUserBadgesList";
+        static final String GET_CHALLENGE_WINNERS = CHALLENGES + "getChallengeWinners";
+        static final String GET_USER_CHALLENGES = CHALLENGES + "getUserChallenges";
         static final String GET_USER_STAT_SUMMARY = "stats/getUserStatSummary";
         static final String GET_PURCHASED_ITEMS = "stats/getPurchasedItems";
-        static final String GET_USER_BADGE_STAT = "stats/getUserBadgesStat";
         static final String GET_USER_MILESTONE_STAT = "stats/getUserMilestoneStat";
         static final String GET_USER_TEAM_RANKING = "stats/getUserTeamRanking";
         static final String TEAM_WISE_SUMMARY_STATS = "stats/teamWiseSummaryStats";

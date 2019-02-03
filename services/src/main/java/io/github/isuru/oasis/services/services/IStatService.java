@@ -29,6 +29,7 @@ public interface IStatService {
     List<UserStateStatDto> readUserStateStats(long userId, long teamId) throws Exception;
 
     ChallengeInfoDto readChallengeStats(long challengeId) throws Exception;
+    UserChallengeWinRes readUserChallengeWins(long userId) throws Exception;
     void readUserGameTimeline(long userId);
 
 }
