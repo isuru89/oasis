@@ -4,16 +4,19 @@ SELECT
     oat.name as teamName,
     oat.team_scope as teamScopeId,
     oats.display_name as teamScopeName,
-    pointSummary.totalPoints,
+    pointSummary.totalPoints AS totalPoints,
+    pointSummary.totalCount AS totalCount,
     NULL as totalBadges,
     NULL as totalUniqueBadges,
-    NULL as totalChallengeWins
+    NULL as totalChallengeWins,
+    NULL as totalRaceWins
 FROM
 (
     SELECT
         oap.user_id as userId,
         oap.team_id as teamId,
-        ROUND(SUM(oap.points), 2) as totalPoints
+        ROUND(SUM(oap.points), 2) as totalPoints,
+        COUNT(oap.points) AS totalCount
     FROM OA_POINT oap
     WHERE
         oap.user_id = :userId
@@ -35,9 +38,11 @@ SELECT
     oat.team_scope as teamScopeId,
     oats.display_name as teamScopeName,
     NULL as totalPoints,
+    NULL as totalCount,
     badgeSummary.totalBadges,
     badgeSummary.totalUniqueBadges,
-    NULL as totalChallengeWins
+    NULL as totalChallengeWins,
+    NULL as totalRaceWins
 FROM
 (
     SELECT
@@ -66,9 +71,11 @@ SELECT
     oat.team_scope as teamScopeId,
     oats.display_name as teamScopeName,
     NULL as totalPoints,
+    NULL as totalCount,
     NULL as totalBadges,
     NULL as totalUniqueBadges,
-    challengeSummary.totalChallengeWins
+    challengeSummary.totalChallengeWins,
+    NULL as totalRaceWins
 FROM
 (
 SELECT
@@ -85,4 +92,36 @@ GROUP BY
     oac.team_id
 ) challengeSummary
 LEFT JOIN OA_TEAM oat ON oat.team_id = challengeSummary.teamId
+LEFT JOIN OA_TEAM_SCOPE oats ON oat.team_scope = oats.scope_id
+
+UNION ALL
+
+SELECT
+    raceSummary.userId,
+    COALESCE(raceSummary.teamId, 0) as teamId,
+    oat.name as teamName,
+    oat.team_scope as teamScopeId,
+    oats.display_name as teamScopeName,
+    NULL AS totalPoints,
+    NULL AS totalCount,
+    NULL AS totalBadges,
+    NULL AS totalUniqueBadges,
+    NULL AS totalChallengeWins,
+    raceSummary.totalRaceWins as totalRaceWins
+FROM
+(
+SELECT
+    oar.user_id AS userId,
+    oar.team_id AS teamId,
+    COUNT(DISTINCT oar.race_id) AS totalRaceWins
+FROM OA_RACE oar
+WHERE
+    oar.user_id = :userId
+    AND
+    oar.is_active = 1
+GROUP BY
+    oar.user_id,
+    oar.team_id
+) raceSummary
+LEFT JOIN OA_TEAM oat ON oat.team_id = raceSummary.teamId
 LEFT JOIN OA_TEAM_SCOPE oats ON oat.team_scope = oats.scope_id

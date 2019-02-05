@@ -20,16 +20,18 @@ public interface IStatService {
     BadgeSummaryRes getBadgeSummary(BadgeSummaryReq request) throws Exception;
     UserStatDto readUserGameStats(long userId, long since) throws Exception;
 
-    List<PurchasedItem> readUserPurchasedItems(long userId, long since) throws Exception;
     List<UserMilestoneStatDto> readUserMilestones(long userId) throws Exception;
+    ChallengeInfoDto readChallengeStats(long challengeId) throws Exception;
+    UserChallengeWinRes readUserChallengeWins(long userId) throws Exception;
+
+    List<PurchasedItem> readUserPurchasedItems(long userId, long since) throws Exception;
     UserRankingsInRangeDto readUserTeamRankings(long userId) throws Exception;
     List<UserRankRecordDto> readMyLeaderboardRankings(long gameId, long userId, ScopingType scopingType,
                                                       LeaderboardType rangeType) throws Exception;
+    UserScopeRankingsStat readMyRankings(long gameId, long userId, LeaderboardType rangeType) throws Exception;
     List<TeamHistoryRecordDto> readUserTeamHistoryStat(long userId) throws Exception;
     List<UserStateStatDto> readUserStateStats(long userId, long teamId) throws Exception;
 
-    ChallengeInfoDto readChallengeStats(long challengeId) throws Exception;
-    UserChallengeWinRes readUserChallengeWins(long userId) throws Exception;
     void readUserGameTimeline(long userId);
 
 }

@@ -302,6 +302,33 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
+    public UserScopeRankingsStat readMyRankings(long gameId, long userId, LeaderboardType rangeType) throws Exception {
+        Checks.greaterThanZero(gameId, "gameId");
+        Checks.greaterThanZero(userId, "userId");
+        Checks.nonNull(rangeType, "rangeType");
+
+        UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(userId);
+        LeaderboardDef defaultLeaderboard = dataCache.getDefaultLeaderboard();
+
+        LeaderboardRequestDto requestDto = rangeType == LeaderboardType.CUSTOM ?
+                new LeaderboardRequestDto(1, System.currentTimeMillis())
+                : new LeaderboardRequestDto(rangeType, System.currentTimeMillis());
+        requestDto.setForUser(userId);
+        requestDto.setLeaderboardDef(defaultLeaderboard);
+
+        UserScopeRankingsStat stat = new UserScopeRankingsStat();
+        stat.setUserId(userId);
+        RankingRecord globalRank = createRank(gameService.readGlobalLeaderboard(requestDto));
+        List<TeamLeaderboardRecordDto> teamRanks = gameService.readTeamLeaderboard(
+                currentTeamOfUser.getTeamId(),
+                requestDto);
+        stat.setTeam(createRank(teamRanks, ScopingType.TEAM));
+        stat.setTeamScope(createRank(teamRanks, ScopingType.TEAM_SCOPE));
+        stat.setGlobal(globalRank);
+        return stat;
+    }
+
+    @Override
     public List<TeamHistoryRecordDto> readUserTeamHistoryStat(long userId) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
@@ -392,6 +419,8 @@ public class StatServiceImpl implements IStatService {
             GlobalLeaderboardRecordDto first = recordsDto.get(0);
             RankingRecord rankingRecord = new RankingRecord();
             rankingRecord.setRank(first.getRankGlobal());
+            rankingRecord.setMyValue(first.getTotalPoints());
+            rankingRecord.setMyCount(first.getTotalCount());
             rankingRecord.setNextValue(first.getNextRankValue());
             rankingRecord.setTopValue(first.getTopRankValue());
             return rankingRecord;
@@ -405,6 +434,8 @@ public class StatServiceImpl implements IStatService {
         } else {
             TeamLeaderboardRecordDto first = recordsDto.get(0);
             RankingRecord rankingRecord = new RankingRecord();
+            rankingRecord.setMyValue(first.getTotalPoints());
+            rankingRecord.setMyCount(first.getTotalCount());
             if (scopingType == ScopingType.TEAM) {
                 rankingRecord.setRank(first.getRankInTeam());
                 rankingRecord.setNextValue(first.getNextTeamRankValue());
@@ -423,8 +454,14 @@ public class StatServiceImpl implements IStatService {
         if (curr.getTotalChallengeWins() != null && base.getTotalChallengeWins() == null) {
             base.setTotalChallengeWins(curr.getTotalChallengeWins());
         }
+        if (curr.getTotalRaceWins() != null && base.getTotalRaceWins() == null) {
+            base.setTotalRaceWins(curr.getTotalRaceWins());
+        }
         if (curr.getTotalPoints() != null && base.getTotalPoints() == null) {
             base.setTotalPoints(curr.getTotalPoints());
+        }
+        if (curr.getTotalCount() != null && base.getTotalCount() == null) {
+            base.setTotalCount(curr.getTotalCount());
         }
         if (curr.getTotalUniqueBadges() != null && base.getTotalUniqueBadges() == null) {
             base.setTotalUniqueBadges(curr.getTotalBadges());

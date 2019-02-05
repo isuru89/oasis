@@ -9,9 +9,27 @@ public class TeamHistoryRecordDto {
     private String teamScopeName;
 
     private Double totalPoints;
+    private Long totalCount;
     private Integer totalBadges;
     private Integer totalUniqueBadges;
     private Integer totalChallengeWins;
+    private Integer totalRaceWins;
+
+    public Integer getTotalRaceWins() {
+        return totalRaceWins;
+    }
+
+    public void setTotalRaceWins(Integer totalRaceWins) {
+        this.totalRaceWins = totalRaceWins;
+    }
+
+    public Long getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(Long totalCount) {
+        this.totalCount = totalCount;
+    }
 
     public Integer getUserId() {
         return userId;
