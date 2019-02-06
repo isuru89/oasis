@@ -51,7 +51,7 @@ public class ConsumerInterceptor implements Closeable {
             data.put("defId", badgeModel.getBadgeId());
             data.put("actionId", 1);
             data.put("message", null);
-            data.put("sub_message", null);
+            data.put("subMessage", null);
             data.put("causedEvent", eInfo.getValue1());
             data.put("eventType", eInfo.getValue0());
             data.put("tag", badgeModel.getTag());
@@ -72,7 +72,7 @@ public class ConsumerInterceptor implements Closeable {
             data.put("defId", pointModel.getRuleId());
             data.put("actionId", 1);
             data.put("message", null);
-            data.put("sub_message", null);
+            data.put("subMessage", null);
             data.put("causedEvent", eInfo.getValue1());
             data.put("eventType", eInfo.getValue0());
             data.put("tag", pointModel.getTag());
@@ -93,7 +93,7 @@ public class ConsumerInterceptor implements Closeable {
             data.put("defId", milestoneModel.getMilestoneId());
             data.put("actionId", 1);
             data.put("message", String.format("Reached level %d", milestoneModel.getLevel()));
-            data.put("sub_message", null);
+            data.put("subMessage", null);
             data.put("causedEvent", eInfo.getValue1());
             data.put("eventType", eInfo.getValue0());
             data.put("tag", null);
@@ -118,7 +118,7 @@ public class ConsumerInterceptor implements Closeable {
                 data.put("message", String.format("State changed from %s to %s",
                                 stateModel.getPreviousStateName(),
                                 stateModel.getCurrentStateName()));
-                data.put("sub_message", null);
+                data.put("subMessage", null);
                 data.put("causedEvent", eInfo.getValue1());
                 data.put("eventType", eInfo.getValue0());
                 data.put("tag", null);
@@ -139,7 +139,7 @@ public class ConsumerInterceptor implements Closeable {
             data.put("defId", challengeModel.getChallengeId());
             data.put("actionId", 1);
             data.put("message", null);
-            data.put("sub_message", null);
+            data.put("subMessage", null);
             data.put("causedEvent", challengeModel.getEventExtId());
             data.put("eventType", null);
             data.put("tag", null);

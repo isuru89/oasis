@@ -408,8 +408,31 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
-    public void readUserGameTimeline(long userId) {
+    public List<FeedItem> readUserGameTimeline(FeedItemReq req) throws Exception {
+        Checks.nonNull(req, "request");
 
+        Map<String, Object> templating = Maps.create()
+                .put("hasUser", ServiceUtils.isValid(req.getUserId()))
+                .put("hasTeam", ServiceUtils.isValid(req.getTeamId()))
+                .put("hasTeamScope", ServiceUtils.isValid(req.getTeamScopeId()))
+                .put("hasStartRange", ServiceUtils.isValid(req.getRangeStart()))
+                .put("hasEndRange", ServiceUtils.isValid(req.getRangeEnd()))
+                .build();
+
+        Map<String, Object> data = Maps.create()
+                .put("userId", req.getUserId())
+                .put("teamId", req.getTeamId())
+                .put("teamScopeId", req.getTeamScopeId())
+                .put("rangeStart", req.getRangeStart())
+                .put("rangeEnd", req.getRangeEnd())
+                .put("size", Commons.orDefault(req.getSize(), 50))
+                .put("offset", Commons.orDefault(req.getOffset(), 0))
+                .build();
+
+        return ServiceUtils.toList(dao.executeQuery(Q.STATS.READ_FEEDS,
+                data,
+                FeedItem.class,
+                templating));
     }
 
     private RankingRecord createRank(List<GlobalLeaderboardRecordDto> recordsDto) {

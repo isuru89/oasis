@@ -116,6 +116,8 @@ final class Q {
         static final String GET_BADGE_BREAKDOWN = BADGES + "getBadgeBreakdown";
         static final String GET_CHALLENGE_WINNERS = CHALLENGES + "getChallengeWinners";
         static final String GET_USER_CHALLENGES = CHALLENGES + "getUserChallenges";
+        static final String READ_FEEDS = PATH + "readFeeds";
+
         static final String GET_USER_STAT_SUMMARY = "stats/getUserStatSummary";
         static final String GET_PURCHASED_ITEMS = "stats/getPurchasedItems";
         static final String GET_USER_MILESTONE_STAT = "stats/getUserMilestoneStat";

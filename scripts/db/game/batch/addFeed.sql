@@ -21,6 +21,7 @@ INSERT INTO OA_FEED (
     :defId,
     :actionId,
     :message,
+    :subMessage,
     :eventType,
     :causedEvent,
     :tag,

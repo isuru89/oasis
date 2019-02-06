@@ -1,6 +1,8 @@
 package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.model.defs.LeaderboardType;
+import io.github.isuru.oasis.services.dto.game.FeedItem;
+import io.github.isuru.oasis.services.dto.game.FeedItemReq;
 import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
 import io.github.isuru.oasis.services.dto.game.UserRankingsInRangeDto;
 import io.github.isuru.oasis.services.dto.stats.*;
@@ -32,6 +34,6 @@ public interface IStatService {
     List<TeamHistoryRecordDto> readUserTeamHistoryStat(long userId) throws Exception;
     List<UserStateStatDto> readUserStateStats(long userId, long teamId) throws Exception;
 
-    void readUserGameTimeline(long userId);
+    List<FeedItem> readUserGameTimeline(FeedItemReq req) throws Exception;
 
 }
