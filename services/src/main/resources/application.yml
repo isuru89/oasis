@@ -1,2 +1,4 @@
 server:
   port: 5885
+  servlet:
+    context-path: /api

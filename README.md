@@ -40,16 +40,16 @@ events. Badges are again pre-defined before the gameplay. Set of users can form 
 and then teams can compete together.
 
 Here are the some badge rule types you can define in Oasis.
-  * An event is occurred for the first time (eg: Stackoverflow Altruist badge https://stackoverflow.com/help/badges/222/altruist)
-  * An event satisfies a certain criteria (eg: Stackoverflow Popular Question https://stackoverflow.com/help/badges/26/popular-question)
+  * An event is occurred for the first time (eg: [Stackoverflow Altruist badge](https://stackoverflow.com/help/badges/222/altruist) )
+  * An event satisfies a certain criteria (eg: [Stackoverflow Popular Question](https://stackoverflow.com/help/badges/26/popular-question) )
      * For different thresholds can award different sub-badges
-     * (eg: Stackoverflow famous question https://stackoverflow.com/help/badges/28/famous-question)
+     * (eg: [Stackoverflow Famous question](https://stackoverflow.com/help/badges/28/famous-question) )
   * Streaks:
-     * Satisfies a condition for N consecutive times. (eg: Stackoverflow https://stackoverflow.com/help/badges/71/enthusiast)
+     * Satisfies a condition for N consecutive times. (eg: [Stackoverflow Enthusiast](https://stackoverflow.com/help/badges/71/enthusiast) )
      * Satisfies a condition for N consecutive times within T time-unit.
-     * Satisfies a condition for N times within T time-unit. (eg: Stackoverflow curious badge https://stackoverflow.com/help/badges/4127/curious)
+     * Satisfies a condition for N times within T time-unit. (eg: [Stackoverflow Curious badge](https://stackoverflow.com/help/badges/4127/curious) )
   * Earn K points within a single time-unit (daily/weekly/monthly)
-     * Eg: Stackoverflow Mortarboard badge https://stackoverflow.com/help/badges/144/mortarboard
+     * Eg: [Stackoverflow Mortarboard badge](https://stackoverflow.com/help/badges/144/mortarboard)
   * Daily accumulation of an event field is higher than a threshold (T) for,
      * N consecutive days. (eg: Earn 50 reputation for 10 consecutive days)
      * N separate days (eg: Earn 200 daily reputation for 50 consecutive days)
