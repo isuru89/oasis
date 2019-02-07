@@ -362,13 +362,12 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
-    public List<UserStateStatDto> readUserStateStats(long userId, long teamId) throws Exception {
+    public List<UserStateStatDto> readUserStateStats(long userId) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
         return ServiceUtils.toList(dao.executeQuery(Q.STATS.GET_USER_STATE_VALUES,
                 Maps.create()
-                    .put("userId", userId)
-                    .put("teamId", teamId).build(),
+                    .put("userId", userId).build(),
                 UserStateStatDto.class));
     }
 

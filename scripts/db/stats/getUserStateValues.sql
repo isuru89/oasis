@@ -6,6 +6,7 @@ SELECT
     oad.name AS stateDefName,
     oad.display_name AS stateDefDisplayName,
     oas.current_state AS currentState,
+    oas.current_state_name AS currentStateName,
     oas.current_value AS currentValue,
     oas.current_points AS currentPoints,
     oas.ext_id AS extId,

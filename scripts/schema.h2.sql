@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS OA_STATE (
     team_scope_id   INT,
     state_id        INT NOT NULL,
     current_state   INT,
+    current_state_name VARCHAR(128),
     current_value   VARCHAR(1024),
     current_points  FLOAT(4),
     ext_id          VARCHAR(1024),

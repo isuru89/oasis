@@ -54,7 +54,7 @@ public class StatsController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current team of user '" + userId + "' cannot be found!");
         }
         long teamId = currentTeamOfUser.getTeamId();
-        return statService.readUserStateStats(userId, teamId);
+        return statService.readUserStateStats(userId);
     }
 
     @GetMapping("/stats/user/{userId}/point-breakdown")

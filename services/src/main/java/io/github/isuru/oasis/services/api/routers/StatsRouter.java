@@ -66,7 +66,7 @@ public class StatsRouter extends BaseRouters {
             throw new InputValidationException("Current team of user '" + userId + "' cannot be found!");
         }
         long teamId = currentTeamOfUser.getTeamId();
-        return getApiService().getStatService().readUserStateStats(userId, teamId);
+        return getApiService().getStatService().readUserStateStats(userId);
     }
 
 

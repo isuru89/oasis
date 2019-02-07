@@ -81,6 +81,7 @@ CREATE TABLE  OA_STATE (
     team_scope_id   INT,
     state_id        INT,
     current_state   INT,
+    current_state_name VARCHAR(128),
     current_value   VARCHAR(1024),
     current_points  FLOAT(4),
     is_currency     TINYINT(1) DEFAULT 1,

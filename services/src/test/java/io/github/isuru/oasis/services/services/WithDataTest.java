@@ -5,24 +5,13 @@ import io.github.isuru.oasis.injector.BufferedRecords;
 import io.github.isuru.oasis.injector.ConsumerUtils;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.db.DbException;
-import io.github.isuru.oasis.model.defs.BadgeDef;
-import io.github.isuru.oasis.model.defs.ChallengeDef;
-import io.github.isuru.oasis.model.defs.MilestoneDef;
-import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.*;
 import io.github.isuru.oasis.model.events.JsonEvent;
-import io.github.isuru.oasis.model.handlers.output.BadgeModel;
-import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
-import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
-import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
-import io.github.isuru.oasis.model.handlers.output.PointModel;
+import io.github.isuru.oasis.model.handlers.output.*;
 import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
 import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
 import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
-import io.github.isuru.oasis.services.model.TeamProfile;
-import io.github.isuru.oasis.services.model.TeamScope;
-import io.github.isuru.oasis.services.model.UserProfile;
-import io.github.isuru.oasis.services.model.UserRole;
-import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.model.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.Assertions;
@@ -33,18 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -174,6 +152,31 @@ public abstract class WithDataTest extends AbstractServiceTest {
             challengeIds.add(id);
         }
         return challengeIds;
+    }
+
+    void loadStateDefs(long gameId, List<String>... names) throws Exception {
+        Random random = new Random(System.currentTimeMillis());
+
+        for (List<String> attr : names) {
+            String name = attr.get(0);
+            StateDef state = new StateDef();
+            state.setName(SLUGIFY.slugify(name));
+            state.setDisplayName(name);
+            state.setCurrency(random.nextBoolean());
+
+            List<StateDef.State> stateList = new ArrayList<>();
+            for (int i = 1; i < attr.size(); i++) {
+                String st = attr.get(i);
+                StateDef.State ostate = new StateDef.State();
+                ostate.setName(SLUGIFY.slugify(st));
+                ostate.setId(i);
+                stateList.add(ostate);
+            }
+            state.setStates(stateList);
+            state.setDefaultState(1 + random.nextInt(attr.size() - 1));
+
+            gameDefService.addStatePlay(gameId, state);
+        }
     }
 
     void initPool(int size) {
@@ -531,6 +534,55 @@ public abstract class WithDataTest extends AbstractServiceTest {
         return count;
     }
 
+    void loadStates(long gameId) throws Exception {
+        List<StateDef> stateDefs = gameDefService.listStatePlays(gameId);
+
+        Assert.assertTrue(stateDefs.size() > 0);
+
+        BufferedRecords buffer = new BufferedRecords(this::flushState);
+        buffers.add(buffer);
+        buffer.init(pool);
+
+        ArrayList<UserProfile> profiles = new ArrayList<>(users.values());
+        for (UserProfile profile : profiles) {
+            UserTeam team = profileService.findCurrentTeamOfUser(profile.getId());
+            Random random = new Random(System.currentTimeMillis());
+
+            for (StateDef stateDef : stateDefs) {
+                if (random.nextInt(3) % 3 == 1) continue;
+
+                int size = stateDef.getStates().size();
+                StateDef.State prevState = stateDef.getStates().get(random.nextInt(size));
+                StateDef.State currState = stateDef.getStates().get(random.nextInt(size));
+
+
+                OStateModel model = new OStateModel();
+                model.setGameId((int) gameId);
+                model.setTs(System.currentTimeMillis());
+                model.setSourceId(1);
+                model.setExtId(randomId());
+                model.setCurrency(stateDef.isCurrency());
+                model.setStateId(stateDef.getId());
+                model.setUserId(profile.getId());
+                model.setPreviousState(prevState.getId());
+                model.setPreviousStateName(prevState.getName());
+                model.setCurrentStateName(currState.getName());
+                model.setCurrentState(currState.getId());
+                model.setPrevStateChangedAt(System.currentTimeMillis());
+                model.setCurrentPoints(Math.round(random.nextInt(1000)) * 1.0);
+                model.setCurrentValue(String.valueOf(random.nextInt(100)));
+                model.setTeamId((long) team.getTeamId());
+                model.setTeamScopeId((long) team.getScopeId());
+                model.setEvent(toJsonEvent(model, gameId));
+
+                Map<String, Object> data = ConsumerUtils.toStateDaoData(gameId, model);
+                buffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
+            }
+        }
+
+        buffer.flushNow();
+    }
+
     private void flushPoints(List<BufferedRecords.ElementRecord> elementRecords) {
         List<Map<String, Object>> data = elementRecords.stream().map(BufferedRecords.ElementRecord::getData)
                 .collect(Collectors.toList());
@@ -581,6 +633,19 @@ public abstract class WithDataTest extends AbstractServiceTest {
         }
     }
 
+    private void flushState(List<BufferedRecords.ElementRecord> elementRecords) {
+        List<Map<String, Object>> data = elementRecords.stream().map(BufferedRecords.ElementRecord::getData)
+                .collect(Collectors.toList());
+        try {
+            for (Map<String, Object> datum : data) {
+                dao.executeCommand("game/batch/updateState", datum);
+            }
+
+        } catch (DbException e) {
+            e.printStackTrace();
+        }
+    }
+
     private JsonEvent toJsonEvent(PointModel model, long gameId) {
         JsonEvent jsonEvent = new JsonEvent();
         jsonEvent.setFieldValue(Constants.FIELD_GAME_ID, gameId);
@@ -591,6 +656,19 @@ public abstract class WithDataTest extends AbstractServiceTest {
         jsonEvent.setFieldValue(Constants.FIELD_ID, randomId());
         jsonEvent.setFieldValue(Constants.FIELD_EVENT_TYPE,
                 "so.event." + StringUtils.substringAfterLast(model.getRuleName(), "."));
+        return jsonEvent;
+    }
+
+    private JsonEvent toJsonEvent(OStateModel model, long gameId) {
+        JsonEvent jsonEvent = new JsonEvent();
+        jsonEvent.setFieldValue(Constants.FIELD_GAME_ID, gameId);
+        jsonEvent.setFieldValue(Constants.FIELD_TEAM, model.getTeamId());
+        jsonEvent.setFieldValue(Constants.FIELD_SCOPE, model.getTeamScopeId());
+        jsonEvent.setFieldValue(Constants.FIELD_USER, model.getUserId());
+        jsonEvent.setFieldValue(Constants.FIELD_TIMESTAMP, model.getTs());
+        jsonEvent.setFieldValue(Constants.FIELD_ID, randomId());
+        jsonEvent.setFieldValue(Constants.FIELD_EVENT_TYPE,
+                "so.event.state." + String.valueOf(model.getStateId()));
         return jsonEvent;
     }
 

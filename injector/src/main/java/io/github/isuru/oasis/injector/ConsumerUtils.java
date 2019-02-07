@@ -42,6 +42,7 @@ public class ConsumerUtils {
         map.put("teamScopeId", stateModel.getTeamScopeId());
         map.put("stateId", stateModel.getStateId());
         map.put("currState", stateModel.getCurrentState());
+        map.put("currStateName", stateModel.getCurrentStateName());
         map.put("currValue", stateModel.getCurrentValue());
         map.put("currPoints", stateModel.getCurrentPoints());
         map.put("isCurrency", stateModel.isCurrency());

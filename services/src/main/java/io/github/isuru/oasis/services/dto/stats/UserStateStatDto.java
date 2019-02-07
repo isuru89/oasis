@@ -14,11 +14,20 @@ public class UserStateStatDto {
     private String stateDefDisplayName;
 
     private Integer currentState;
+    private String currentStateName;
     private String currentValue;
     private Double currentPoints;
 
     private String extId;
     private Long lastChangedAt;
+
+    public String getCurrentStateName() {
+        return currentStateName;
+    }
+
+    public void setCurrentStateName(String currentStateName) {
+        this.currentStateName = currentStateName;
+    }
 
     public Integer getUserId() {
         return userId;

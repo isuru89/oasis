@@ -27,10 +27,10 @@ INSERT INTO OA_STATE (
     :sourceId,
     :changedAt
 )
-ON DUPLICATE KEY
-UPDATE current_state = VALUES(current_state),
-    current_value = VALUES(current_value),
-    current_state_name = VALUES(current_state_name),
-    current_points = VALUES(current_points),
-    changed_at = VALUES(changed_at),
-    ext_id = VALUES(ext_id)
+ON CONFLICT (user_id, team_id, state_id)
+DO UPDATE SET current_state = excluded.current_state,
+    current_state_name = excluded.current_state_name,
+    current_value = excluded.current_value,
+    current_points = excluded.current_points,
+    changed_at = excluded.changed_at,
+    ext_id = excluded.ext_id

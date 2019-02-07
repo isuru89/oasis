@@ -32,7 +32,7 @@ public interface IStatService {
                                                       LeaderboardType rangeType) throws Exception;
     UserScopeRankingsStat readMyRankings(long gameId, long userId, LeaderboardType rangeType) throws Exception;
     List<TeamHistoryRecordDto> readUserTeamHistoryStat(long userId) throws Exception;
-    List<UserStateStatDto> readUserStateStats(long userId, long teamId) throws Exception;
+    List<UserStateStatDto> readUserStateStats(long userId) throws Exception;
 
     List<FeedItem> readUserGameTimeline(FeedItemReq req) throws Exception;
 
