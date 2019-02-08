@@ -89,12 +89,12 @@ the challenge is completed. Also a challenge can be expired by time as well.
 Or in another way, challenges can be defined to have multiple winners. For eg:
 a challenge can be defined to set award points for first 3 winners.
 
-#### Races
+### Races
 Races are point-awarded leaderboards for non-overlapping time windows. At a pre defined time range
 (daily, weekly, monthly), leaderboard winners will be awarded set of points. This will
 continue in each time window as specified in a race.
 
-#### States
+### States
 States indicates the current state of a user/team/team-scope. Based on the events, user's
 status will be calculated and from that status, some amount of net points will be awarded.
 A user can only be in one state at a time.
