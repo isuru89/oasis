@@ -25,6 +25,7 @@ public interface IStatService {
     List<UserMilestoneStatDto> readUserMilestones(long userId) throws Exception;
     ChallengeInfoDto readChallengeStats(long challengeId) throws Exception;
     UserChallengeWinRes readUserChallengeWins(long userId) throws Exception;
+    List<UserStateStatDto> readUserStateStats(long userId) throws Exception;
 
     List<PurchasedItem> readUserPurchasedItems(long userId, long since) throws Exception;
     UserRankingsInRangeDto readUserTeamRankings(long userId) throws Exception;
@@ -32,7 +33,6 @@ public interface IStatService {
                                                       LeaderboardType rangeType) throws Exception;
     UserScopeRankingsStat readMyRankings(long gameId, long userId, LeaderboardType rangeType) throws Exception;
     List<TeamHistoryRecordDto> readUserTeamHistoryStat(long userId) throws Exception;
-    List<UserStateStatDto> readUserStateStats(long userId) throws Exception;
 
     List<FeedItem> readUserGameTimeline(FeedItemReq req) throws Exception;
 

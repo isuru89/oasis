@@ -7,4 +7,5 @@ branches:
   only:
     - master
 
-script: ./mvnw clean install -DskipTests=true
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

@@ -134,10 +134,10 @@ public class TestServer {
 
     WebTestClient.ResponseSpec doLogin(String authHeader) {
         if (authHeader == null) {
-            return webClient.post().uri("/auth/login")
+            return webClient.post().uri("/api/auth/login")
                     .exchange();
         } else {
-            return webClient.post().uri("/auth/login")
+            return webClient.post().uri("/api/auth/login")
                     .header("Authorization", authHeader)
                     .exchange();
         }
@@ -145,10 +145,10 @@ public class TestServer {
 
     WebTestClient.ResponseSpec doLogout(String authHeader) {
         if (authHeader == null) {
-            return webClient.post().uri("/auth/logout")
+            return webClient.post().uri("/api/auth/logout")
                     .exchange();
         } else {
-            return webClient.post().uri("/auth/logout")
+            return webClient.post().uri("/api/auth/logout")
                     .header("Authorization", authHeader)
                     .exchange();
         }
