@@ -78,6 +78,12 @@ public abstract class BaseConsumer<T> extends DefaultConsumer implements Closeab
         flushRecords(recordList, getInsertScriptName());
     }
 
+    void flushNow() {
+        if (buffer != null) {
+            buffer.flushNow();
+        }
+    }
+
     void flushRecords(List<BufferedRecords.ElementRecord> recordList,
                       String scriptName) {
         try {

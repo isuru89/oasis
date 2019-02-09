@@ -2,10 +2,12 @@ package io.github.isuru.oasis.model.handlers.output;
 
 import io.github.isuru.oasis.model.events.JsonEvent;
 
+import java.io.Serializable;
+
 /**
  * @author iweerarathna
  */
-public class MilestoneModel {
+public class MilestoneModel implements Serializable {
 
     private Long userId;
     private Long teamId;

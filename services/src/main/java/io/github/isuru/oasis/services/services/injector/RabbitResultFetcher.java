@@ -41,6 +41,8 @@ public class RabbitResultFetcher implements ResultFetcher {
     private Connection connection;
     private Channel channel;
 
+    private ConsumerContext consumerContext;
+
     private final List<BaseConsumer> consumerList = new ArrayList<>();
 
     public RabbitResultFetcher(OasisConfigurations configurations) {
@@ -49,12 +51,12 @@ public class RabbitResultFetcher implements ResultFetcher {
 
     @Override
     public void start(IOasisDao dao) throws Exception {
-// init rabbit configurations...
+        // init rabbit configurations...
         RabbitConfigurations rabbit = configurations.getRabbit();
         initRabbitConnection();
 
         // init consumers
-        ConsumerContext consumerContext = new ConsumerContext(10);
+        consumerContext = new ConsumerContext(10);
         consumerContext.getInterceptor().init(dao);
 
         PointConsumer consumerPoints = new PointConsumer(channel, dao, consumerContext);
@@ -113,6 +115,10 @@ public class RabbitResultFetcher implements ResultFetcher {
 
     @Override
     public void close() throws IOException {
+        if (consumerContext != null) {
+            consumerContext.close();
+        }
+
         if (channel != null) {
             try {
                 channel.close();

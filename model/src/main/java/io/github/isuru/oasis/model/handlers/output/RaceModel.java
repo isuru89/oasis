@@ -1,6 +1,8 @@
 package io.github.isuru.oasis.model.handlers.output;
 
-public class RaceModel {
+import java.io.Serializable;
+
+public class RaceModel implements Serializable {
 
     private Long userId;
     private Long teamId;

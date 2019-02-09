@@ -1,9 +1,11 @@
 package io.github.isuru.oasis.model.handlers.output;
 
+import java.io.Serializable;
+
 /**
  * @author iweerarathna
  */
-public class MilestoneStateModel {
+public class MilestoneStateModel implements Serializable {
 
     private Integer gameId;
 

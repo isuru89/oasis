@@ -22,7 +22,7 @@ public class ConsumerUtils {
         map.put("userId", stateModel.getUserId());
         map.put("milestoneId", stateModel.getMilestoneId());
         map.put("valueDouble", stateModel.getValue());
-        map.put("valueLong", stateModel.getValueInt() == Long.MIN_VALUE ? null : stateModel.getValueInt());
+        map.put("valueLong", stateModel.getValueInt() == null || stateModel.getValueInt() == Long.MIN_VALUE ? null : stateModel.getValueInt());
         map.put("nextVal", stateModel.getNextValue());
         map.put("nextValInt", stateModel.getNextValueInt());
         map.put("currBaseVal", stateModel.getCurrBaseValue());

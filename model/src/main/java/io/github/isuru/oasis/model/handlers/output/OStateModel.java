@@ -2,7 +2,9 @@ package io.github.isuru.oasis.model.handlers.output;
 
 import io.github.isuru.oasis.model.events.JsonEvent;
 
-public class OStateModel {
+import java.io.Serializable;
+
+public class OStateModel implements Serializable {
 
     private Long userId;
     private Long teamId;

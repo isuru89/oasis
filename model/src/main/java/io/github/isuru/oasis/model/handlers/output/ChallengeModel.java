@@ -1,9 +1,11 @@
 package io.github.isuru.oasis.model.handlers.output;
 
+import java.io.Serializable;
+
 /**
  * @author iweerarathna
  */
-public class ChallengeModel {
+public class ChallengeModel implements Serializable {
 
     private Long userId;
     private Long teamId;

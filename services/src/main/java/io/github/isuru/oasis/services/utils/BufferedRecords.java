@@ -23,13 +23,22 @@ public class BufferedRecords implements Closeable {
     private final LinkedBlockingQueue<ElementRecord> queue = new LinkedBlockingQueue<>();
 
     private final Consumer<List<ElementRecord>> recordConsumer;
+    private boolean withTimer = true;
 
     public BufferedRecords(Consumer<List<ElementRecord>> recordConsumer) {
         this.recordConsumer = recordConsumer;
     }
 
+    public BufferedRecords(Consumer<List<ElementRecord>> recordConsumer, boolean doTimer) {
+        this(recordConsumer);
+
+        withTimer = doTimer;
+    }
+
     public void init(ExecutorService pool) {
-        pool.submit(timer);
+        if (withTimer) {
+            pool.submit(timer);
+        }
     }
 
     public void push(ElementRecord map) {

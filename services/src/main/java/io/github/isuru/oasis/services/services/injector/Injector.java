@@ -1,7 +1,6 @@
 package io.github.isuru.oasis.services.services.injector;
 
 import io.github.isuru.oasis.model.db.IOasisDao;
-import io.github.isuru.oasis.services.services.injector.consumers.BaseConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ public class Injector implements Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(Injector.class);
 
-    private final List<BaseConsumer> consumerList = new Vector<>();
+    private final List<Closeable> consumerList = new Vector<>();
 
     private final IOasisDao dao;
     private final ResultFetcherManager fetcherManager;
@@ -39,7 +38,7 @@ public class Injector implements Closeable {
     @Override
     public void close() throws IOException {
         LOG.warn("Closing injector...");
-        for (BaseConsumer consumer : consumerList) {
+        for (Closeable consumer : consumerList) {
             consumer.close();
         }
 

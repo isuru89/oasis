@@ -58,6 +58,14 @@ public class MilestoneStateConsumer extends BaseConsumer<MilestoneStateModel> {
         throw new IllegalStateException("This method should not be called at all!");
     }
 
+    @Override
+    void flushNow() {
+        super.flushNow();
+
+        stateBuffer.flushNow();
+        lossStateBuffer.flushNow();
+    }
+
     private void handleModel(MilestoneStateModel msg, long deliveryTag) {
         if (msg.getLossUpdate() != null && msg.getLossUpdate()) {
             Map<String, Object> map = ConsumerUtils.toMilestoneLossStateDaoData(msg);

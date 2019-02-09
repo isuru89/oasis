@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.services.services.injector;
+package io.github.isuru.oasis.services.services.injector.consumers;
 
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.db.DbException;
@@ -10,6 +10,8 @@ import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
 import io.github.isuru.oasis.model.handlers.output.OStateModel;
 import io.github.isuru.oasis.model.handlers.output.PointModel;
+import io.github.isuru.oasis.model.handlers.output.RaceModel;
+import io.github.isuru.oasis.services.services.injector.ConsumerContext;
 import io.github.isuru.oasis.services.utils.BufferedRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +33,13 @@ public class ConsumerInterceptor implements Consumer<Object>, Closeable {
     private final BufferedRecords buffer;
     private IOasisDao dao;
 
-    ConsumerInterceptor(ConsumerContext contextInfo) {
+    public ConsumerInterceptor(ConsumerContext contextInfo, BufferedRecords bufferRef) {
+        this.contextInfo = contextInfo;
+
+        buffer = bufferRef;
+    }
+
+    public ConsumerInterceptor(ConsumerContext contextInfo) {
         this.contextInfo = contextInfo;
 
         buffer = new BufferedRecords(this::flush);
@@ -153,10 +161,29 @@ public class ConsumerInterceptor implements Consumer<Object>, Closeable {
             data.put("ts", challengeModel.getWonAt());
 
             buffer.push(new BufferedRecords.ElementRecord(data, ts));
+        } else if (value instanceof RaceModel) {
+            // a challenge won
+            RaceModel raceModel = (RaceModel) value;
+            Map<String, Object> data = new HashMap<>();
+            data.put("gameId", raceModel.getGameId());
+            data.put("userId", raceModel.getUserId());
+            data.put("teamId", raceModel.getTeamId());
+            data.put("teamScopeId", raceModel.getTeamScopeId());
+            data.put("defKindId", OasisDefinition.RACE.getTypeId());
+            data.put("defId", raceModel.getRaceId());
+            data.put("actionId", 1);
+            data.put("message", raceModel.getRank());
+            data.put("subMessage", raceModel.getPoints());
+            data.put("causedEvent", null);
+            data.put("eventType", null);
+            data.put("tag", raceModel.getScoredPoints());
+            data.put("ts", raceModel.getRaceEndedAt());
+
+            buffer.push(new BufferedRecords.ElementRecord(data, ts));
         }
     }
 
-    private Pair<String, String> deriveCausedEvent(List<JsonEvent> events) {
+    Pair<String, String> deriveCausedEvent(List<JsonEvent> events) {
         if (events == null || events.isEmpty()) {
             return null;
         } else {
@@ -165,7 +192,7 @@ public class ConsumerInterceptor implements Consumer<Object>, Closeable {
         }
     }
 
-    private Pair<String, String> deriveCausedEvent(JsonEvent event) {
+    Pair<String, String> deriveCausedEvent(JsonEvent event) {
         if (event == null) {
             return null;
         } else {
@@ -173,14 +200,18 @@ public class ConsumerInterceptor implements Consumer<Object>, Closeable {
         }
     }
 
-    private void flush(List<BufferedRecords.ElementRecord> records) {
-        List<Map<String, Object>> maps = records.stream()
-                .map(BufferedRecords.ElementRecord::getData)
-                .collect(Collectors.toList());
-        try {
-            dao.executeBatchInsert(SCRIPT_ADD_FEED, maps);
-        } catch (DbException e) {
-            LOG.error("Error at inserting feed records!", e);
+    void flush(List<BufferedRecords.ElementRecord> records) {
+        if (records != null) {
+            List<Map<String, Object>> maps = records.stream()
+                    .map(BufferedRecords.ElementRecord::getData)
+                    .collect(Collectors.toList());
+            try {
+                if (maps.size() > 0) {
+                    dao.executeBatchInsert(SCRIPT_ADD_FEED, maps);
+                }
+            } catch (DbException e) {
+                LOG.error("Error at inserting feed records!", e);
+            }
         }
     }
 

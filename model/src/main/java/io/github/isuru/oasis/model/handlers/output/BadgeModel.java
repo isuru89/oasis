@@ -2,12 +2,13 @@ package io.github.isuru.oasis.model.handlers.output;
 
 import io.github.isuru.oasis.model.events.JsonEvent;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author iweerarathna
  */
-public class BadgeModel {
+public class BadgeModel implements Serializable {
 
     private Long userId;
     private Long teamId;
