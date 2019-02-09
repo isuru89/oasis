@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.services.services.control.sinks;
 
-import io.github.isuru.oasis.injector.ConsumerUtils;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
+import io.github.isuru.oasis.services.services.injector.consumers.ConsumerUtils;
 
 import java.util.Map;
 
@@ -18,7 +18,7 @@ public class MilestoneSink extends BaseLocalSink {
     @Override
     protected void handle(String value) throws Exception {
         MilestoneModel model = mapper.readValue(value, MilestoneModel.class);
-        Map<String, Object> data = ConsumerUtils.toMilestoneDaoData(getGameId(), model);
+        Map<String, Object> data = ConsumerUtils.toMilestoneDaoData(model);
         dao.executeCommand("game/addMilestone", data);
     }
 }

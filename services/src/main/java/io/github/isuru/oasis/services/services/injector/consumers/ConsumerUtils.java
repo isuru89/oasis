@@ -1,7 +1,13 @@
-package io.github.isuru.oasis.injector;
+package io.github.isuru.oasis.services.services.injector.consumers;
 
 import io.github.isuru.oasis.model.Event;
-import io.github.isuru.oasis.model.handlers.output.*;
+import io.github.isuru.oasis.model.handlers.output.BadgeModel;
+import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
+import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
+import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
+import io.github.isuru.oasis.model.handlers.output.OStateModel;
+import io.github.isuru.oasis.model.handlers.output.PointModel;
+import io.github.isuru.oasis.model.handlers.output.RaceModel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +17,7 @@ import java.util.Map;
  */
 public class ConsumerUtils {
 
-    public static Map<String, Object> toMilestoneStateDaoData(long gameId, MilestoneStateModel stateModel) {
+    public static Map<String, Object> toMilestoneStateDaoData(MilestoneStateModel stateModel) {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", stateModel.getUserId());
         map.put("milestoneId", stateModel.getMilestoneId());
@@ -21,21 +27,21 @@ public class ConsumerUtils {
         map.put("nextValInt", stateModel.getNextValueInt());
         map.put("currBaseVal", stateModel.getCurrBaseValue());
         map.put("currBaseValInt", stateModel.getCurrBaseValueInt());
-        map.put("gameId", gameId);
+        map.put("gameId", stateModel.getGameId());
         return map;
     }
 
-    public static Map<String, Object> toMilestoneLossStateDaoData(long gameId, MilestoneStateModel stateModel) {
+    public static Map<String, Object> toMilestoneLossStateDaoData(MilestoneStateModel stateModel) {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", stateModel.getUserId());
         map.put("milestoneId", stateModel.getMilestoneId());
         map.put("lossVal", stateModel.getLossValue());
         map.put("lossValInt", stateModel.getLossValueInt());
-        map.put("gameId", gameId);
+        map.put("gameId", stateModel.getGameId());
         return map;
     }
 
-    public static Map<String, Object> toStateDaoData(long gameId, OStateModel stateModel) {
+    public static Map<String, Object> toStateDaoData(OStateModel stateModel) {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", stateModel.getUserId());
         map.put("teamId", stateModel.getTeamId());
@@ -47,13 +53,13 @@ public class ConsumerUtils {
         map.put("currPoints", stateModel.getCurrentPoints());
         map.put("isCurrency", stateModel.isCurrency());
         map.put("extId", stateModel.getExtId());
-        map.put("gameId", gameId);
+        map.put("gameId", stateModel.getGameId());
         map.put("sourceId", stateModel.getSourceId());
         map.put("changedAt", stateModel.getPrevStateChangedAt());
         return map;
     }
 
-    public static Map<String, Object> toMilestoneDaoData(long gameId, MilestoneModel milestoneModel) {
+    public static Map<String, Object> toMilestoneDaoData(MilestoneModel milestoneModel) {
         Map<String, Object> map = new HashMap<>();
         Event event = milestoneModel.getEvent();
 
@@ -65,11 +71,11 @@ public class ConsumerUtils {
         map.put("milestoneId", milestoneModel.getMilestoneId());
         map.put("level", milestoneModel.getLevel());
         map.put("maxLevel", milestoneModel.getMaximumLevel());
-        map.put("gameId", gameId);
+        map.put("gameId", milestoneModel.getGameId());
         return map;
     }
 
-    public static Map<String, Object> toChallengeDaoData(long gameId, ChallengeModel challengeModel) {
+    public static Map<String, Object> toChallengeDaoData(ChallengeModel challengeModel) {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", challengeModel.getUserId());
         map.put("teamId", challengeModel.getTeamId());
@@ -78,12 +84,12 @@ public class ConsumerUtils {
         map.put("points", challengeModel.getPoints());
         map.put("winNo", challengeModel.getWinNo());
         map.put("wonAt", challengeModel.getWonAt());
-        map.put("gameId", gameId);
+        map.put("gameId", challengeModel.getGameId());
         map.put("sourceId", challengeModel.getSourceId());
         return map;
     }
 
-    public static Map<String, Object> toPointDaoData(long gameId, PointModel pointModel) {
+    public static Map<String, Object> toPointDaoData(PointModel pointModel) {
         Event event = pointModel.getEvents().get(0);
         Map<String, Object> map = new HashMap<>();
         map.put("userId", pointModel.getUserId());
@@ -96,13 +102,13 @@ public class ConsumerUtils {
         map.put("pointName", pointModel.getRuleName());
         map.put("points", pointModel.getAmount());
         map.put("isCurrency", pointModel.getCurrency());
-        map.put("gameId", gameId);
+        map.put("gameId", pointModel.getGameId());
         map.put("sourceId", pointModel.getSourceId());
         map.put("tag", pointModel.getTag());
         return map;
     }
 
-    public static Map<String, Object> toBadgeDaoData(long gameId, BadgeModel badgeModel) {
+    public static Map<String, Object> toBadgeDaoData(BadgeModel badgeModel) {
         Event first = badgeModel.getEvents().get(0);
         Event last = badgeModel.getEvents().get(badgeModel.getEvents().size() - 1);
 
@@ -119,13 +125,13 @@ public class ConsumerUtils {
         map.put("endExtId", last.getExternalId());
         map.put("startTime", first.getTimestamp());
         map.put("endTime", last.getTimestamp());
-        map.put("gameId", gameId);
+        map.put("gameId", badgeModel.getGameId());
         map.put("sourceId", last.getSource());
         map.put("tag", badgeModel.getTag());
         return map;
     }
 
-    public static Map<String, Object> toRaceData(long gameId, RaceModel model) {
+    public static Map<String, Object> toRaceData(RaceModel model) {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", model.getUserId());
         map.put("teamId", model.getTeamId());

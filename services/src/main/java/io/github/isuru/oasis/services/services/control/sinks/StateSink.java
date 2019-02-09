@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.services.services.control.sinks;
 
-import io.github.isuru.oasis.injector.ConsumerUtils;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.handlers.output.OStateModel;
+import io.github.isuru.oasis.services.services.injector.consumers.ConsumerUtils;
 
 import java.util.Map;
 
@@ -18,7 +18,7 @@ public class StateSink extends BaseLocalSink {
     @Override
     protected void handle(String value) throws Exception {
         OStateModel model = mapper.readValue(value, OStateModel.class);
-        Map<String, Object> data = ConsumerUtils.toStateDaoData(getGameId(), model);
+        Map<String, Object> data = ConsumerUtils.toStateDaoData(model);
         dao.executeCommand("game/updateState", data);
     }
 }

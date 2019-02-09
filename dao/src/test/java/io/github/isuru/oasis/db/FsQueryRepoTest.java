@@ -4,10 +4,10 @@ import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import io.github.isuru.oasis.model.db.DbProperties;
 import io.github.isuru.oasis.model.db.ScriptNotFoundException;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,12 +22,12 @@ public class FsQueryRepoTest {
 
     private FileSystem fs;
 
-    @BeforeEach
+    @Before
     public void beforeEach() {
         fs = Jimfs.newFileSystem(Configuration.unix());
     }
 
-    @AfterEach
+    @After
     public void afterEach() throws IOException {
         if (fs != null) {
             fs.close();
@@ -97,7 +97,7 @@ public class FsQueryRepoTest {
     }
 
     @Test
-    void testCaptureJdbcUrl() {
+    public void testCaptureJdbcUrl() {
         String url = "jdbc:h2:[file:][<path>]<databaseName>";
         FsQueryRepo repo = new FsQueryRepo();
         Assertions.assertEquals("h2", repo.captureDbName(url));

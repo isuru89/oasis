@@ -83,7 +83,7 @@ public class MetaphorServiceImpl implements IMetaphorService {
 
         dao.runTx(ctx -> {
             Iterable<Map<String, Object>> userPoints = ctx.executeQuery(
-                    Q.STATS.GET_USER_AVAILABLE_POINTS,
+                    Q.METAPHOR.GET_USER_AVAILABLE_POINTS,
                     Maps.create("userId", userBy));
             Map<String, Object> balanceMap = userPoints.iterator().next();
             float balance = ((Double) balanceMap.get("Balance")).floatValue();

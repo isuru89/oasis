@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.injector;
+package io.github.isuru.oasis.services.services.injector.consumers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.AMQP;
@@ -7,6 +7,8 @@ import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
+import io.github.isuru.oasis.services.services.injector.ConsumerContext;
+import io.github.isuru.oasis.services.utils.BufferedRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +29,7 @@ public abstract class BaseConsumer<T> extends DefaultConsumer implements Closeab
 
     protected IOasisDao dao;
     private Class<T> clz;
-    ContextInfo contextInfo;
+    ConsumerContext contextInfo;
 
     private final BufferedRecords buffer;
 
@@ -36,11 +38,11 @@ public abstract class BaseConsumer<T> extends DefaultConsumer implements Closeab
      *
      * @param channel the channel to which this consumer is attached
      */
-    BaseConsumer(Channel channel, IOasisDao dao, Class<T> clz, ContextInfo context) {
+    BaseConsumer(Channel channel, IOasisDao dao, Class<T> clz, ConsumerContext context) {
         this(channel, dao, clz, context, true);
     }
 
-    BaseConsumer(Channel channel, IOasisDao dao, Class<T> clz, ContextInfo context, boolean buffered) {
+    BaseConsumer(Channel channel, IOasisDao dao, Class<T> clz, ConsumerContext context, boolean buffered) {
         super(channel);
         this.dao = dao;
         this.clz = clz;
@@ -63,7 +65,7 @@ public abstract class BaseConsumer<T> extends DefaultConsumer implements Closeab
             BufferedRecords.ElementRecord record = new BufferedRecords.ElementRecord(serializedData,
                     envelope.getDeliveryTag());
             buffer.push(record);
-            contextInfo.getInterceptor().consume(message);
+            contextInfo.getInterceptor().accept(message);
 
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

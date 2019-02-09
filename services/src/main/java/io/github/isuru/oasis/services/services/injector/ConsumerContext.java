@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.injector;
+package io.github.isuru.oasis.services.services.injector;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -6,15 +6,13 @@ import java.util.concurrent.Executors;
 /**
  * @author iweerarathna
  */
-class ContextInfo {
-
-    private long gameId;
+public class ConsumerContext {
 
     private final ExecutorService pool;
 
     private final ConsumerInterceptor consumerInterceptor;
 
-    ContextInfo(int maxPoolSize) {
+    ConsumerContext(int maxPoolSize) {
         pool = Executors.newFixedThreadPool(maxPoolSize);
         consumerInterceptor = new ConsumerInterceptor(this);
     }
@@ -23,16 +21,8 @@ class ContextInfo {
         return consumerInterceptor;
     }
 
-    ExecutorService getPool() {
+    public ExecutorService getPool() {
         return pool;
-    }
-
-    long getGameId() {
-        return gameId;
-    }
-
-    void setGameId(long gameId) {
-        this.gameId = gameId;
     }
 
 }

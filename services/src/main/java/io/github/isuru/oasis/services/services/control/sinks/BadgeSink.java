@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.services.services.control.sinks;
 
-import io.github.isuru.oasis.injector.ConsumerUtils;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.handlers.output.BadgeModel;
+import io.github.isuru.oasis.services.services.injector.consumers.ConsumerUtils;
 
 import java.util.Map;
 
@@ -18,7 +18,7 @@ public class BadgeSink extends BaseLocalSink {
     @Override
     protected void handle(String value) throws Exception {
         BadgeModel badgeModel = mapper.readValue(value, BadgeModel.class);
-        Map<String, Object> data = ConsumerUtils.toBadgeDaoData(getGameId(), badgeModel);
+        Map<String, Object> data = ConsumerUtils.toBadgeDaoData(badgeModel);
         dao.executeCommand("game/addBadge", data);
     }
 }

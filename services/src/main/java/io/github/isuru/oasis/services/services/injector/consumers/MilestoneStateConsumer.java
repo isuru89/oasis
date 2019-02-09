@@ -1,10 +1,12 @@
-package io.github.isuru.oasis.injector;
+package io.github.isuru.oasis.services.services.injector.consumers;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Envelope;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
+import io.github.isuru.oasis.services.services.injector.ConsumerContext;
+import io.github.isuru.oasis.services.utils.BufferedRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +16,7 @@ import java.util.Map;
 /**
  * @author iweerarathna
  */
-class MilestoneStateConsumer extends BaseConsumer<MilestoneStateModel> {
+public class MilestoneStateConsumer extends BaseConsumer<MilestoneStateModel> {
 
     private static final Logger LOG = LoggerFactory.getLogger(MilestoneStateConsumer.class);
 
@@ -30,7 +32,7 @@ class MilestoneStateConsumer extends BaseConsumer<MilestoneStateModel> {
      * @param channel the channel to which this consumer is attached
      * @param dao database access object
      */
-    MilestoneStateConsumer(Channel channel, IOasisDao dao, ContextInfo contextInfo) {
+    public MilestoneStateConsumer(Channel channel, IOasisDao dao, ConsumerContext contextInfo) {
         super(channel, dao, MilestoneStateModel.class, contextInfo, false);
 
         stateBuffer = new BufferedRecords(this::flushStates);
@@ -58,10 +60,10 @@ class MilestoneStateConsumer extends BaseConsumer<MilestoneStateModel> {
 
     private void handleModel(MilestoneStateModel msg, long deliveryTag) {
         if (msg.getLossUpdate() != null && msg.getLossUpdate()) {
-            Map<String, Object> map = ConsumerUtils.toMilestoneLossStateDaoData(contextInfo.getGameId(), msg);
+            Map<String, Object> map = ConsumerUtils.toMilestoneLossStateDaoData(msg);
             lossStateBuffer.push(new BufferedRecords.ElementRecord(map, deliveryTag));
         } else {
-            Map<String, Object> map = ConsumerUtils.toMilestoneStateDaoData(contextInfo.getGameId(), msg);
+            Map<String, Object> map = ConsumerUtils.toMilestoneStateDaoData(msg);
             stateBuffer.push(new BufferedRecords.ElementRecord(map, deliveryTag));
         }
     }

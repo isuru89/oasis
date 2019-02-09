@@ -1,4 +1,4 @@
-package io.github.isuru.oasis.injector;
+package io.github.isuru.oasis.services.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +64,7 @@ public class BufferedRecords implements Closeable {
     @Override
     public void close() {
         LOG.warn("Shutdown signal received for buffer.");
+        flushNow();
         timer.doStop();
     }
 
@@ -80,7 +81,7 @@ public class BufferedRecords implements Closeable {
             return data;
         }
 
-        long getDeliveryTag() {
+        public long getDeliveryTag() {
             return deliveryTag;
         }
     }

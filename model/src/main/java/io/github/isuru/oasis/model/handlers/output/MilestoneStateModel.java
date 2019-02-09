@@ -5,6 +5,8 @@ package io.github.isuru.oasis.model.handlers.output;
  */
 public class MilestoneStateModel {
 
+    private Integer gameId;
+
     private Long userId;
     private Long milestoneId;
 
@@ -18,6 +20,14 @@ public class MilestoneStateModel {
     private Boolean lossUpdate;
     private Double lossValue;
     private Long lossValueInt;
+
+    public Integer getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(Integer gameId) {
+        this.gameId = gameId;
+    }
 
     public Double getCurrBaseValue() {
         return currBaseValue;

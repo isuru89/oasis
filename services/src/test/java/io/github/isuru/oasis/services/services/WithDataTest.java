@@ -1,17 +1,30 @@
 package io.github.isuru.oasis.services.services;
 
 import com.github.slugify.Slugify;
-import io.github.isuru.oasis.injector.BufferedRecords;
-import io.github.isuru.oasis.injector.ConsumerUtils;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.db.DbException;
-import io.github.isuru.oasis.model.defs.*;
+import io.github.isuru.oasis.model.defs.BadgeDef;
+import io.github.isuru.oasis.model.defs.ChallengeDef;
+import io.github.isuru.oasis.model.defs.MilestoneDef;
+import io.github.isuru.oasis.model.defs.PointDef;
+import io.github.isuru.oasis.model.defs.StateDef;
 import io.github.isuru.oasis.model.events.JsonEvent;
-import io.github.isuru.oasis.model.handlers.output.*;
+import io.github.isuru.oasis.model.handlers.output.BadgeModel;
+import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
+import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
+import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
+import io.github.isuru.oasis.model.handlers.output.OStateModel;
+import io.github.isuru.oasis.model.handlers.output.PointModel;
 import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
 import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
 import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
-import io.github.isuru.oasis.services.model.*;
+import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.TeamScope;
+import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.UserRole;
+import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.services.injector.consumers.ConsumerUtils;
+import io.github.isuru.oasis.services.utils.BufferedRecords;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.api.Assertions;
@@ -22,7 +35,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -337,7 +361,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
                 model.setEvents(Collections.singletonList(toJsonEvent(model, gameId)));
 
                 count++;
-                Map<String, Object> data = ConsumerUtils.toPointDaoData(gameId, model);
+                Map<String, Object> data = ConsumerUtils.toPointDaoData(model);
                 buffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
             }
         }
@@ -388,7 +412,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
                 model.setEvents(Collections.singletonList(toJsonEvent(model, gameId)));
 
                 count++;
-                Map<String, Object> data = ConsumerUtils.toBadgeDaoData(gameId, model);
+                Map<String, Object> data = ConsumerUtils.toBadgeDaoData(model);
                 buffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
             }
         }
@@ -443,7 +467,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
 
                 {
                     count++;
-                    Map<String, Object> data = ConsumerUtils.toMilestoneDaoData(gameId, model);
+                    Map<String, Object> data = ConsumerUtils.toMilestoneDaoData(model);
                     buffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
                 }
 
@@ -456,7 +480,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
                 stateModel.setNextValueInt((long) nextVal);
                 stateModel.setCurrBaseValueInt((long) baseVal);
                 {
-                    Map<String, Object> data = ConsumerUtils.toMilestoneStateDaoData(gameId, stateModel);
+                    Map<String, Object> data = ConsumerUtils.toMilestoneStateDaoData(stateModel);
                     stateBuffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
                 }
             }
@@ -506,7 +530,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
                     model.setTs(System.currentTimeMillis());
                     model.setWonAt(System.currentTimeMillis());
 
-                    Map<String, Object> data = ConsumerUtils.toChallengeDaoData(gameId, model);
+                    Map<String, Object> data = ConsumerUtils.toChallengeDaoData(model);
                     buffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
                 }
             } else {
@@ -525,7 +549,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
                 model.setTs(System.currentTimeMillis());
                 model.setWonAt(System.currentTimeMillis());
 
-                Map<String, Object> data = ConsumerUtils.toChallengeDaoData(gameId, model);
+                Map<String, Object> data = ConsumerUtils.toChallengeDaoData(model);
                 buffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
             }
         }
@@ -575,7 +599,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
                 model.setTeamScopeId((long) team.getScopeId());
                 model.setEvent(toJsonEvent(model, gameId));
 
-                Map<String, Object> data = ConsumerUtils.toStateDaoData(gameId, model);
+                Map<String, Object> data = ConsumerUtils.toStateDaoData(model);
                 buffer.push(new BufferedRecords.ElementRecord(data, System.currentTimeMillis()));
             }
         }

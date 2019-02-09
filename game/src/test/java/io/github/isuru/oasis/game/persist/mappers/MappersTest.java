@@ -63,6 +63,7 @@ public class MappersTest {
             MilestoneEvent event = randomMilestoneEvent(milestone);
 
             MilestoneStateEvent notification = new MilestoneStateEvent(event.getUser(),
+                    event.getGameId(),
                     milestone,
                     345.0, 1000.0,
                     250.0);
@@ -77,6 +78,7 @@ public class MappersTest {
             MilestoneEvent event = randomMilestoneEvent(milestone);
 
             MilestoneStateEvent notification = new MilestoneStateEvent(event.getUser(),
+                    event.getGameId(),
                     milestone,
                     1234.0);
 
@@ -90,6 +92,7 @@ public class MappersTest {
             MilestoneEvent event = randomMilestoneEvent(milestone);
 
             MilestoneStateEvent notification = new MilestoneStateEvent(event.getUser(),
+                    event.getGameId(),
                     milestone,
                     23L);
 
@@ -103,6 +106,7 @@ public class MappersTest {
             MilestoneEvent event = randomMilestoneEvent(milestone);
 
             MilestoneStateEvent notification = new MilestoneStateEvent(event.getUser(),
+                    event.getGameId(),
                     milestone,
                     123L, 1000L, 100L);
 

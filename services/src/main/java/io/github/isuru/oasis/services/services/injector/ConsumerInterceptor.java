@@ -1,11 +1,16 @@
-package io.github.isuru.oasis.injector;
+package io.github.isuru.oasis.services.services.injector;
 
 import io.github.isuru.oasis.model.collect.Pair;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.OasisDefinition;
 import io.github.isuru.oasis.model.events.JsonEvent;
-import io.github.isuru.oasis.model.handlers.output.*;
+import io.github.isuru.oasis.model.handlers.output.BadgeModel;
+import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
+import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
+import io.github.isuru.oasis.model.handlers.output.OStateModel;
+import io.github.isuru.oasis.model.handlers.output.PointModel;
+import io.github.isuru.oasis.services.utils.BufferedRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,19 +18,20 @@ import java.io.Closeable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class ConsumerInterceptor implements Closeable {
+public class ConsumerInterceptor implements Consumer<Object>, Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsumerInterceptor.class);
 
     private static final String SCRIPT_ADD_FEED = "game/batch/addFeed";
 
-    private final ContextInfo contextInfo;
+    private final ConsumerContext contextInfo;
     private final BufferedRecords buffer;
     private IOasisDao dao;
 
-    ConsumerInterceptor(ContextInfo contextInfo) {
+    ConsumerInterceptor(ConsumerContext contextInfo) {
         this.contextInfo = contextInfo;
 
         buffer = new BufferedRecords(this::flush);
@@ -36,7 +42,8 @@ public class ConsumerInterceptor implements Closeable {
         buffer.init(contextInfo.getPool());
     }
 
-    public void consume(Object value) {
+    @Override
+    public void accept(Object value) {
         long ts = System.currentTimeMillis();
         if (value instanceof BadgeModel) {
             // a badge award

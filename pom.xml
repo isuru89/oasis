@@ -24,7 +24,6 @@
         <module>dao</module>
         <module>services</module>
         <module>model</module>
-        <module>injector</module>
     </modules>
 
     <dependencies>

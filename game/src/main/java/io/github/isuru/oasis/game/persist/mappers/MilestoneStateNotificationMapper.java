@@ -22,6 +22,7 @@ public class MilestoneStateNotificationMapper extends BaseNotificationMapper<Mil
         model.setLossValue(notification.getLossValue());
         model.setLossValueInt(notification.getLossValueInt());
         model.setMilestoneId(notification.getMilestone().getId());
+        model.setGameId(notification.getGameId());
         return model;
     }
 }

@@ -18,6 +18,7 @@ public class OasisConfigurations {
     private String mode = "local";
 
     private String dispatcherImpl = "rabbit";
+    private String fetcherImpl = "rabbit";
 
     private File storageDir;
     private File gameRunTemplateLocation;
@@ -319,5 +320,13 @@ public class OasisConfigurations {
 
     public String getFlinkURL() {
         return flinkURL;
+    }
+
+    public String getFetcherImpl() {
+        return fetcherImpl;
+    }
+
+    public void setFetcherImpl(String fetcherImpl) {
+        this.fetcherImpl = fetcherImpl;
     }
 }

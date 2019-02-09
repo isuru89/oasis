@@ -14,6 +14,7 @@ import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.model.*;
 import io.github.isuru.oasis.services.services.*;
+import io.github.isuru.oasis.services.services.injector.Injector;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,9 @@ public class Bootstrapping {
     @Autowired
     private OasisConfigurations oasisConfigurations;
 
+    @Autowired
+    private Injector injector;
+
     @EventListener(ApplicationReadyEvent.class)
     public void initialize() throws Exception {
         LOG.info("-------------------------------------------------------");
@@ -71,6 +75,9 @@ public class Bootstrapping {
         // setup data cache
         LOG.info("  - Initializing cache from db...");
         dataCache.setup();
+
+        LOG.info("  - Starting injector...");
+        injector.start();
 
         LOG.info("-------------------------------------------------------");
         LOG.info("OASIS - STARTUP / Completed.");

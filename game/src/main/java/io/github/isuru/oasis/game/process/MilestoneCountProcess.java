@@ -87,6 +87,7 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
         // update count in db
         if (!atEnd) {
             ctx.output(outputTag, new MilestoneStateEvent(value.getUser(),
+                    value.getGameId(),
                     milestone,
                     totalCount.get(),
                     nextLevelValue,

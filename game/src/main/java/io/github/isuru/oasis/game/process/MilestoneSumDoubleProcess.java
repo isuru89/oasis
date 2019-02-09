@@ -71,7 +71,7 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
 
             if (milestone.isOnlyPositive() && acc < 0) {
                 accNegSum.update(accNegSum.value() + acc);
-                ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), milestone, accNegSum.value()));
+                ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), value.getGameId(), milestone, accNegSum.value()));
                 return;
             }
 
@@ -121,6 +121,7 @@ public class MilestoneSumDoubleProcess extends KeyedProcessFunction<Long, Event,
         // update sum in db
         if (!atEnd) {
             ctx.output(outputTag, new MilestoneStateEvent(value.getUser(),
+                    value.getGameId(),
                     milestone,
                     accSum.value(),
                     nextLevelValue,

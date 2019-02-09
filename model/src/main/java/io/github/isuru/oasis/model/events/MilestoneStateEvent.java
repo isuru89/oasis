@@ -10,6 +10,7 @@ import java.io.Serializable;
 public class MilestoneStateEvent implements Serializable {
 
     private final long userId;
+    private final int gameId;
     private final Milestone milestone;
     private final double value;
     private final long valueInt;
@@ -21,43 +22,47 @@ public class MilestoneStateEvent implements Serializable {
     private final Double currBaseValue;
     private final Long currBaseValueInt;
 
-    public MilestoneStateEvent(long userId, Milestone milestone, Double lossValue) {
-        this(userId, milestone,
+    public MilestoneStateEvent(long userId, int gameId, Milestone milestone, Double lossValue) {
+        this(userId, gameId, milestone,
                 0, 0L,
                 null, null,
                 null, null,
                 true, lossValue, null);
     }
 
-    public MilestoneStateEvent(long userId, Milestone milestone, Long lossValue) {
-        this(userId, milestone, 0, 0L,
+    public MilestoneStateEvent(long userId, int gameId, Milestone milestone, Long lossValue) {
+        this(userId, gameId, milestone, 0, 0L,
                 null, null,
                 null, null,
                 true, null, lossValue);
     }
 
-    public MilestoneStateEvent(long userId, Milestone milestone, double value, Double nextValue, Double currBaseValue) {
-        this(userId, milestone,
+    public MilestoneStateEvent(long userId, int gameId, Milestone milestone,
+                               double value, Double nextValue, Double currBaseValue) {
+        this(userId, gameId, milestone,
                 value, Long.MIN_VALUE,
                 nextValue, null,
                 currBaseValue, null,
                 false, null, null);
     }
 
-    public MilestoneStateEvent(long userId, Milestone milestone, long value, Long nextValue, Long currBaseValueInt) {
-        this(userId, milestone,
+    public MilestoneStateEvent(long userId, int gameId, Milestone milestone,
+                               long value, Long nextValue, Long currBaseValueInt) {
+        this(userId, gameId, milestone,
                 Double.MIN_VALUE, value,
                 null, nextValue,
                 null, currBaseValueInt,
                 false, null, null);
     }
 
-    private MilestoneStateEvent(long userId, Milestone milestone, double value, long value_i,
+    private MilestoneStateEvent(long userId, int gameId, Milestone milestone,
+                                double value, long value_i,
                                 Double nextValue, Long nextValueInt,
                                 Double currBaseValue, Long currBaseValueInt,
                                 boolean lossUpdate,
                                 Double lossValue, Long lossValueInt) {
         this.userId = userId;
+        this.gameId = gameId;
         this.milestone = milestone;
         this.value = value;
         this.valueInt = value_i;
@@ -68,6 +73,10 @@ public class MilestoneStateEvent implements Serializable {
         this.lossUpdate = lossUpdate;
         this.currBaseValue = currBaseValue;
         this.currBaseValueInt = currBaseValueInt;
+    }
+
+    public int getGameId() {
+        return gameId;
     }
 
     public Double getCurrBaseValue() {

@@ -43,6 +43,8 @@ final class Q {
         static final String SHARE_TO_ITEM = PATH + "shareToItem";
         static final String UPDATE_ITEM_AVAILABILITY = PATH + "updateItemAvail";
         static final String UPDATE_HERO = PATH + "updateHero";
+        static final String GET_USER_AVAILABLE_POINTS = PATH + "getUserAvailablePoints";
+        static final String GET_PURCHASED_ITEMS = PATH + "getPurchasedItems";
     }
 
     static class PROFILE {
@@ -119,12 +121,10 @@ final class Q {
         static final String READ_FEEDS = PATH + "readFeeds";
 
         static final String GET_USER_STAT_SUMMARY = "stats/getUserStatSummary";
-        static final String GET_PURCHASED_ITEMS = "stats/getPurchasedItems";
         static final String GET_USER_MILESTONE_STAT = "stats/getUserMilestoneStat";
         static final String GET_USER_TEAM_RANKING = "stats/getUserTeamRanking";
         static final String TEAM_WISE_SUMMARY_STATS = "stats/teamWiseSummaryStats";
         static final String GET_USER_STATE_VALUES = "stats/getUserStateValues";
-        static final String GET_USER_AVAILABLE_POINTS = "stats/getUserAvailablePoints";
     }
 
 }

@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.services.services.control.sinks;
 
-import io.github.isuru.oasis.injector.ConsumerUtils;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
+import io.github.isuru.oasis.services.services.injector.consumers.ConsumerUtils;
 
 import java.util.Map;
 
@@ -20,10 +20,10 @@ public class MilestoneStateSink extends BaseLocalSink {
         MilestoneStateModel model = mapper.readValue(value, MilestoneStateModel.class);
         Map<String, Object> data;
         if (model.getLossUpdate() != null && model.getLossUpdate()) {
-            data = ConsumerUtils.toMilestoneLossStateDaoData(getGameId(), model);
+            data = ConsumerUtils.toMilestoneLossStateDaoData(model);
             dao.executeCommand("game/updateMilestoneStateLoss", data);
         } else {
-            data = ConsumerUtils.toMilestoneStateDaoData(getGameId(), model);
+            data = ConsumerUtils.toMilestoneStateDaoData(model);
             dao.executeCommand("game/updateMilestoneState", data);
         }
     }

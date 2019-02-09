@@ -1,8 +1,8 @@
 package io.github.isuru.oasis.services.services.control.sinks;
 
-import io.github.isuru.oasis.injector.ConsumerUtils;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.handlers.output.PointModel;
+import io.github.isuru.oasis.services.services.injector.consumers.ConsumerUtils;
 
 import java.util.Map;
 
@@ -18,7 +18,7 @@ public class PointsSink extends BaseLocalSink {
     @Override
     protected void handle(String value) throws Exception {
         PointModel model = mapper.readValue(value, PointModel.class);
-        Map<String, Object> data = ConsumerUtils.toPointDaoData(getGameId(), model);
+        Map<String, Object> data = ConsumerUtils.toPointDaoData(model);
         dao.executeCommand("game/addPoint", data);
     }
 }

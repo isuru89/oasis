@@ -217,7 +217,7 @@ public class StatServiceImpl implements IStatService {
         Map<String, Object> tdata = new HashMap<>();
         tdata.put("hasSince", since > 0);
 
-        return ServiceUtils.toList(dao.executeQuery(Q.STATS.GET_PURCHASED_ITEMS,
+        return ServiceUtils.toList(dao.executeQuery(Q.METAPHOR.GET_PURCHASED_ITEMS,
                 Maps.create()
                     .put("userId", userId).put("since", since)
                     .build(),
