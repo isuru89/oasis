@@ -1,21 +1,21 @@
 package io.github.isuru.oasis.services.security;
 
 import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.UserRole;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.services.IProfileService;
-import io.github.isuru.oasis.services.model.UserRole;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-class OasisUserDetailsServiceTest {
+public class OasisUserDetailsServiceTest {
 
     @Test
-    void testLoadUserByUsername() throws Exception {
+    public void testLoadUserByUsername() throws Exception {
         IProfileService profileService = Mockito.mock(IProfileService.class);
 
         UserProfile userIsuru = createUser(1, "isuru@domain.com", "Isuru Weerarathna");

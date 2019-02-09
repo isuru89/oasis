@@ -5,18 +5,18 @@ import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
-class MainTest {
+public class MainTest {
 
     @Test
-    void testCreateSource() throws FileNotFoundException {
+    public void testCreateSource() throws FileNotFoundException {
         {
             Properties properties = new Properties();
             properties.put(ConfigKeys.KEY_SOURCE_TYPE, "file");
@@ -39,7 +39,7 @@ class MainTest {
     }
 
     @Test
-    void testDbPropertiesCreation() throws Exception {
+    public void testDbPropertiesCreation() throws Exception {
 //        File scriptsDir = deriveScriptsDir();
 //
 //        Properties properties = new Properties();
@@ -80,7 +80,7 @@ class MainTest {
     }
 
     @Test
-    void testOutputDbCreation() throws Exception {
+    public void testOutputDbCreation() throws Exception {
 //        {
 //            Properties properties = new Properties();
 //            properties.put(Constants.KEY_JDBC_INSTANCE, "testing");

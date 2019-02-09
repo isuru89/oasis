@@ -7,9 +7,9 @@ import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.events.EventNames;
 import io.github.isuru.oasis.model.events.JsonEvent;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Random;
@@ -19,7 +19,7 @@ public class EventRabbitDeserializerTest {
     private ObjectMapper mapper = new ObjectMapper();
     private Random random;
 
-    @BeforeEach
+    @Before
     public void before() {
         random = new Random(System.currentTimeMillis());
     }

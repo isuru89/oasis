@@ -1,14 +1,15 @@
 package io.github.isuru.oasis.game;
 
-import org.junit.jupiter.api.Test;
+
+import org.junit.Test;
 
 /**
  * @author iweerarathna
  */
-class ChallengeTest extends AbstractTest {
+public class ChallengeTest extends AbstractTest {
 
     @Test
-    void testChallenges() throws Exception {
+    public void testChallenges() throws Exception {
         beginTest("challenge-test");
     }
 

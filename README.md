@@ -4,7 +4,7 @@
 [![coverage](https://codecov.io/gh/isuru89/oasis/branch/master/graph/badge.svg)](https://codecov.io/gh/isuru89/oasis)
 
 # OASIS
-Open-source BPLM Gamification framework
+Open-source Gamification framework.
 
 _This project is still under development_
 
@@ -34,17 +34,19 @@ with whole other teams.
 ## Key Gamification Elements in Oasis
 
 ### Points
-A user can score points based on KPIs in the events. The point rules are pre-defined
+A player can score points based on KPIs in the events. The point rules are pre-defined
 before the gameplay. However rules can be added later, when a new application is going to be integrated
-or new events are ready to be generated.
+or new type of events are ready to be generated.
 Points are the primary element in Oasis and it drives many other elements too.
+
+By default, all points are considered as spendable in Oasis shop, but the rule 
+creator can opt to mark a particular rule as non-spendable.
 
 ### Badges
 A badge is a collectible achievement by a user based on correlating one or several
-events. Badges are again pre-defined before the gameplay. Set of users can form a team
-and then teams can compete together.
+events. Badges are again pre-defined before the gameplay. 
 
-Here are the some badge rule types you can define in Oasis.
+Here are the some badge rules you can define in Oasis.
   * An event is occurred for the first time (eg: [Stackoverflow Altruist badge](https://stackoverflow.com/help/badges/222/altruist) )
   * An event satisfies a certain criteria (eg: [Stackoverflow Popular Question](https://stackoverflow.com/help/badges/26/popular-question) )
      * For different thresholds can award different sub-badges
@@ -56,7 +58,7 @@ Here are the some badge rule types you can define in Oasis.
   * Earn K points within a single time-unit (daily/weekly/monthly)
      * Eg: [Stackoverflow Mortarboard badge](https://stackoverflow.com/help/badges/144/mortarboard)
   * Daily accumulation of an event field is higher than a threshold (T) for,
-     * N consecutive days. (eg: Earn 50 reputation for 10 consecutive days)
+     * N consecutive days. (eg: Earn 50 daily reputation for 10 consecutive days)
      * N separate days (eg: Earn 200 daily reputation for 50 consecutive days)
   * From milestone completion
   * Manually
@@ -65,6 +67,7 @@ Here are the some badge rule types you can define in Oasis.
 ### Leaderboards
 Admins or curators can define leaderboards based on points.
 Rankings of players will be calculated in three scopes.
+    
     1. Team-wise
     2. TeamScope-wise (project-wise)
     3. Global
@@ -72,8 +75,11 @@ Rankings of players will be calculated in three scopes.
 Rankings can be calculated for a particular time range and it can be specified dynamically
 when requesting for a leaderboard.
 
+Eg: a player can rank 3rd in team, 5th in team-scope and 130th in global
+leaderboards for the current week.
+
 ### Milestones
-Milestone can be created to accumulate points forever to make players play the game for longtime.
+Milestone can be created to accumulate points forever to make players play the game for a longtime.
 It indicates the progress gained by a user. Milestones can be broken down to
 levels. And completion of each level will award bonus points or badges to the users.
 
@@ -89,14 +95,15 @@ can be defined in such a way,
 Challenge can be created by a curator to motivate towards a very short term goal. Usually
 a curator can create a challenge for a certain event to come first and once it received,
 the user correlated with that event will be considered as a winner. Once a winner is declared,
-the challenge is completed. Also a challenge can be expired by time as well.
+the challenge is completed. Also a challenge can be expired by time as well. In that case,
+a challenge may ended up without a winner sometimes.
 
-Or in another way, challenges can be defined to have multiple winners. For eg:
+In another way, challenges can be defined to have multiple winners. For eg:
 a challenge can be defined to set award points for first 3 winners.
 
 ### Races
-Races are point-awarded leaderboards for non-overlapping time windows. At a pre defined time range
-(daily, weekly, monthly), leaderboard winners will be awarded set of points. This will
+Races are point-awarding leaderboards for non-overlapping time windows. At a pre defined time range
+(daily, weekly, monthly), leaderboard winners will be awarded a set of points. This will
 continue in each time window as specified in a race.
 
 ### States
@@ -107,7 +114,7 @@ A user can only be in one state at a time.
 For eg: someone can define a state (good/bad) based on total good answer ratio. As long as
 a user has positive good answer ratio, then that user will have, say 100 points, with him/her.
 Once the ratio goes down below a threshold, status will be changed to _'bad'_ and he/she will
-loose 100 points he had.
+loose 100 points he/she had.
 
 ## Why Oasis?
 
@@ -129,4 +136,8 @@ This project could not have existed thanks to these awesome open-source projects
   * [Spring-boot](https://spring.io/projects/spring-boot)
   * [Apache Flink](https://flink.apache.org/)
   * [MVEL](https://github.com/mvel/mvel)
+  
+## License
+
+Apache License - version 2.0
 

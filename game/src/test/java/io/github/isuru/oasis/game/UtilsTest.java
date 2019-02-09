@@ -10,9 +10,9 @@ import io.github.isuru.oasis.model.utils.OasisUtils;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.contrib.java.lang.system.ClearSystemProperties;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Predicate;
 
-class UtilsTest {
+public class UtilsTest {
 
     private static final long ONE_MONTH = 1000 * 3600L * 24L * 30L;
     private static final long ONE_DAY = 1000 * 3600 * 24;
@@ -34,7 +34,7 @@ class UtilsTest {
             new ClearSystemProperties(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID);
 
     @Test
-    void testTypeConv() {
+    public void testTypeConv() {
         Assert.assertEquals(0.0, Utils.asDouble(null), 0.1);
         Assert.assertEquals(1.1, Utils.asDouble(Double.parseDouble("1.1")), 0.1);
         Assert.assertEquals(2.34, Utils.asDouble("2.34"), 0.1);
@@ -49,7 +49,7 @@ class UtilsTest {
     }
 
     @Test
-    void testQueueReplace() {
+    public void testQueueReplace() {
         {
             String qName = "queue.{gid}.msg";
             System.setProperty(io.github.isuru.oasis.game.utils.Constants.ENV_OASIS_GAME_ID, "1");
@@ -77,7 +77,7 @@ class UtilsTest {
     }
 
     @Test
-    void testIsEndOfStream() {
+    public void testIsEndOfStream() {
         {
             JsonEvent event = new JsonEvent();
             event.setFieldValue(Constants.FIELD_EVENT_TYPE, EventNames.TERMINATE_GAME);
@@ -101,7 +101,7 @@ class UtilsTest {
     }
 
     @Test
-    void testHistogramCounterCts() throws Exception {
+    public void testHistogramCounterCts() throws Exception {
         Predicate<LocalDate> noHoliday = localDate -> false;
         Predicate<LocalDate> weekdaysOnly = localDate -> localDate.getDayOfWeek() == DayOfWeek.SUNDAY
                 || localDate.getDayOfWeek() == DayOfWeek.SATURDAY;
@@ -154,7 +154,7 @@ class UtilsTest {
     }
 
     @Test
-    void testHistogramCounterMiss() throws Exception {
+    public void testHistogramCounterMiss() throws Exception {
         Predicate<LocalDate> noHoliday = localDate -> false;
         Predicate<LocalDate> weekdaysOnly = localDate -> localDate.getDayOfWeek() == DayOfWeek.SUNDAY
                 || localDate.getDayOfWeek() == DayOfWeek.SATURDAY;
@@ -206,7 +206,7 @@ class UtilsTest {
 
 
     @Test
-    void testNullEmpty() {
+    public void testNullEmpty() {
         Assertions.assertTrue(Utils.isNullOrEmpty(""));
         Assertions.assertTrue(Utils.isNullOrEmpty(" "));
         Assertions.assertTrue(Utils.isNullOrEmpty("     "));
@@ -219,7 +219,7 @@ class UtilsTest {
     }
 
     @Test
-    void propTest() {
+    public void propTest() {
         {
             Properties props = new Properties();
             props.put("a.b.c", 1);
@@ -243,7 +243,7 @@ class UtilsTest {
     }
 
     @Test
-    void numTest() {
+    public void numTest() {
         double val = Utils.strNum("1");
         Assertions.assertEquals(val, 1.0);
 
@@ -284,7 +284,7 @@ class UtilsTest {
     }
 
     @Test
-    void timeStrDaysTest() {
+    public void timeStrDaysTest() {
         Time time = Utils.fromStr("1days");
         Assertions.assertEquals(time.getSize(), 1);
         Assertions.assertEquals(time.toMilliseconds(), ONE_DAY);
@@ -345,7 +345,7 @@ class UtilsTest {
     }
 
     @Test
-    void timeStrHoursTest() {
+    public void timeStrHoursTest() {
         Time time = Utils.fromStr("1hour");
         Assertions.assertEquals(time.getSize(), 1);
         Assertions.assertEquals(time.toMilliseconds(), ONE_HOUR);
@@ -380,7 +380,7 @@ class UtilsTest {
     }
 
     @Test
-    void timeStrMinutesTest() {
+    public void timeStrMinutesTest() {
         Time time = Utils.fromStr("1minute");
         Assertions.assertEquals(time.getSize(), 1);
         Assertions.assertEquals(time.toMilliseconds(), ONE_MIN);
@@ -415,7 +415,7 @@ class UtilsTest {
     }
 
     @Test
-    void timeStrSecondsTest() {
+    public void timeStrSecondsTest() {
         Time time = Utils.fromStr("1seconds");
         Assertions.assertEquals(time.getSize(), 1);
         Assertions.assertEquals(time.toMilliseconds(), ONE_SEC);
@@ -450,7 +450,7 @@ class UtilsTest {
     }
 
     @Test
-    void timeStrMonthTest() {
+    public void timeStrMonthTest() {
         Time time = Utils.fromStr("1months");
         Assertions.assertEquals(time.getSize(), 30);
         Assertions.assertEquals(time.toMilliseconds(), ONE_MONTH);
@@ -485,7 +485,7 @@ class UtilsTest {
     }
 
     @Test
-    void timeStrFails() {
+    public void timeStrFails() {
         try {
             Time time = Utils.fromStr("months");
             Assertions.fail();

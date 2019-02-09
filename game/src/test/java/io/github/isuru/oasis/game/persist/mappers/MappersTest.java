@@ -4,21 +4,37 @@ import io.github.isuru.oasis.game.parser.BadgeParser;
 import io.github.isuru.oasis.game.parser.MilestoneParser;
 import io.github.isuru.oasis.game.parser.OStateParser;
 import io.github.isuru.oasis.game.parser.PointParser;
-import io.github.isuru.oasis.model.*;
+import io.github.isuru.oasis.model.Badge;
+import io.github.isuru.oasis.model.Constants;
+import io.github.isuru.oasis.model.Event;
+import io.github.isuru.oasis.model.Milestone;
+import io.github.isuru.oasis.model.OState;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
-import io.github.isuru.oasis.model.events.*;
+import io.github.isuru.oasis.model.events.BadgeEvent;
+import io.github.isuru.oasis.model.events.ChallengeEvent;
+import io.github.isuru.oasis.model.events.JsonEvent;
+import io.github.isuru.oasis.model.events.MilestoneEvent;
+import io.github.isuru.oasis.model.events.MilestoneStateEvent;
+import io.github.isuru.oasis.model.events.PointEvent;
+import io.github.isuru.oasis.model.events.RaceEvent;
 import io.github.isuru.oasis.model.handlers.BadgeNotification;
 import io.github.isuru.oasis.model.handlers.MilestoneNotification;
 import io.github.isuru.oasis.model.handlers.OStateNotification;
 import io.github.isuru.oasis.model.handlers.PointNotification;
-import io.github.isuru.oasis.model.handlers.output.*;
+import io.github.isuru.oasis.model.handlers.output.BadgeModel;
+import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
+import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
+import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
+import io.github.isuru.oasis.model.handlers.output.OStateModel;
+import io.github.isuru.oasis.model.handlers.output.PointModel;
+import io.github.isuru.oasis.model.handlers.output.RaceModel;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +49,7 @@ public class MappersTest {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    @BeforeEach
+    @Before
     public void before() {
         random = new Random(System.currentTimeMillis());
     }

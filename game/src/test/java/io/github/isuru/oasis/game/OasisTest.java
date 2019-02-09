@@ -1,15 +1,21 @@
 package io.github.isuru.oasis.game;
 
+import io.github.isuru.oasis.game.utils.BadgeCollector;
+import io.github.isuru.oasis.game.utils.MilestoneCollector;
+import io.github.isuru.oasis.game.utils.PointCollector;
+import io.github.isuru.oasis.game.utils.RaceCollector;
+import io.github.isuru.oasis.game.utils.ResourceFileStream;
+import io.github.isuru.oasis.game.utils.StatesCollector;
+import io.github.isuru.oasis.game.utils.TestUtils;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.handlers.IOutputHandler;
-import io.github.isuru.oasis.game.utils.*;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,13 +28,13 @@ public class OasisTest {
 
     private static StreamExecutionEnvironment environment;
 
-    @BeforeAll
-    static void initEnv() {
+    @BeforeClass
+    public static void initEnv() {
         environment = TestUtils.createEnv();
     }
 
     @Test
-    void createOasis() {
+    public void createOasis() {
         Oasis oasis = new Oasis("test-name");
 
         Assertions.assertEquals(oasis.getId(), "test-name");
@@ -43,7 +49,7 @@ public class OasisTest {
     }
 
     @Test
-    void buildOasis() throws Exception {
+    public void buildOasis() throws Exception {
         IOutputHandler assertOutputs = TestUtils.getAssertConfigs(new PointCollector("t"),
                 new BadgeCollector("t"), new MilestoneCollector("t"),
                 new StatesCollector("t"), new RaceCollector("t"));
@@ -79,7 +85,7 @@ public class OasisTest {
     }
 
     @Test
-    void buildOasisWithoutAnyRule() throws Exception {
+    public void buildOasisWithoutAnyRule() throws Exception {
         try {
             Oasis oasis = new Oasis("test-1");
             OasisExecution execution = new OasisExecution()
@@ -98,7 +104,7 @@ public class OasisTest {
     }
 
     @Test
-    void buildOasisWithoutSource() throws IOException {
+    public void buildOasisWithoutSource() throws IOException {
         try {
             Oasis oasis = new Oasis("test-should-fail");
             new OasisExecution()
@@ -110,8 +116,8 @@ public class OasisTest {
         }
     }
 
-    @AfterAll
-    static void closeEnv() {
+    @AfterClass
+    public static void closeEnv() {
         environment = null;
     }
 

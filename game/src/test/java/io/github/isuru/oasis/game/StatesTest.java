@@ -1,11 +1,12 @@
 package io.github.isuru.oasis.game;
 
-import org.junit.jupiter.api.Test;
 
-class StatesTest extends AbstractTest {
+import org.junit.Test;
+
+public class StatesTest extends AbstractTest {
 
     @Test
-    void statesTest() throws Exception {
+    public void statesTest() throws Exception {
         beginTest("state-test");
     }
 

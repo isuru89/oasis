@@ -1,5 +1,6 @@
 *.iml
 .idea/
+*.class
 dependency-reduced-pom.xml
 input-light.csv
 /input.csv

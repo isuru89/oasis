@@ -3,9 +3,9 @@ package io.github.isuru.oasis.services.security;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.model.TokenInfo;
 import io.github.isuru.oasis.services.model.UserRole;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,12 +13,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.LinkedList;
 import java.util.List;
 
-class JwtTokenProviderTest {
+public class JwtTokenProviderTest {
 
     private OasisConfigurations configurations;
 
-    @BeforeEach
-    void beforeTest() {
+    @Before
+    public void beforeTest() {
         configurations = new OasisConfigurations();
         OasisConfigurations.AuthConfigs authConfigs = new OasisConfigurations.AuthConfigs();
         configurations.setAuth(authConfigs);
@@ -27,7 +27,7 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    void testGenerateToken() {
+    public void testGenerateToken() {
         JwtTokenProvider provider = new JwtTokenProvider(configurations);
 
         List<GrantedAuthority> authorities = new LinkedList<>();

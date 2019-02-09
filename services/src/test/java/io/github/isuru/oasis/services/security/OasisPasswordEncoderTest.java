@@ -1,12 +1,12 @@
 package io.github.isuru.oasis.services.security;
 
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
-class OasisPasswordEncoderTest {
+public class OasisPasswordEncoderTest {
 
     @Test
-    void testEncoder() {
+    public void testEncoder() {
         OasisPasswordEncoder encoder = new OasisPasswordEncoder();
         Assertions.assertEquals("abc", encoder.encode("abc"));
         Assertions.assertEquals("", encoder.encode(""));

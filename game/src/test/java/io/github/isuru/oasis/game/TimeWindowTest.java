@@ -4,8 +4,8 @@ import io.github.isuru.oasis.game.process.windows.MonthlyEventTimeWindow;
 import io.github.isuru.oasis.game.process.windows.OasisTimeWindowAssigner;
 import io.github.isuru.oasis.game.process.windows.WeeklyEventTimeWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
@@ -14,10 +14,10 @@ import java.util.Collection;
 /**
  * @author iweerarathna
  */
-class TimeWindowTest {
+public class TimeWindowTest {
 
     @Test
-    void testMonthlyWindow() {
+    public void testMonthlyWindow() {
         MonthlyEventTimeWindow windowAssigner = new MonthlyEventTimeWindow();
 
         TimeWindow window = collect("2018-01-01T00:00:00.00Z", windowAssigner);
@@ -55,7 +55,7 @@ class TimeWindowTest {
     }
 
     @Test
-    void testWeeklyWindow() {
+    public void testWeeklyWindow() {
         OasisTimeWindowAssigner windowAssigner = new WeeklyEventTimeWindow();
 
         TimeWindow window = collect("2018-01-01T00:00:00.00Z", windowAssigner);

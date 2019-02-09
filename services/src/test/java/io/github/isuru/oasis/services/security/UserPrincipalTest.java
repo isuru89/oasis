@@ -1,20 +1,20 @@
 package io.github.isuru.oasis.services.security;
 
 import io.github.isuru.oasis.services.model.UserProfile;
-import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.model.UserRole;
+import io.github.isuru.oasis.services.model.UserTeam;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.LinkedList;
 import java.util.List;
 
-class UserPrincipalTest {
+public class UserPrincipalTest {
 
     @Test
-    void testUserPrincipalEquality() {
+    public void testUserPrincipalEquality() {
         List<GrantedAuthority> playerAuthorities = new LinkedList<>();
         playerAuthorities.add(new SimpleGrantedAuthority(UserRole.ROLE_PLAYER));
 
@@ -48,7 +48,7 @@ class UserPrincipalTest {
     }
 
     @Test
-    void testUserPrincipal() {
+    public void testUserPrincipal() {
         List<GrantedAuthority> authorities = new LinkedList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_PLAYER"));
 

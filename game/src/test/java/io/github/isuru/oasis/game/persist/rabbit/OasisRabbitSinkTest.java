@@ -4,7 +4,7 @@ import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Properties;
 

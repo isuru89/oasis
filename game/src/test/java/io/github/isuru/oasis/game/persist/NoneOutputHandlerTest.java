@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.game.persist;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 public class NoneOutputHandlerTest {

@@ -3,20 +3,20 @@ package io.github.isuru.oasis.game;
 import io.github.isuru.oasis.game.parser.BadgeParser;
 import io.github.isuru.oasis.game.parser.MilestoneParser;
 import io.github.isuru.oasis.game.parser.PointParser;
+import io.github.isuru.oasis.game.utils.TestUtils;
 import io.github.isuru.oasis.model.Milestone;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
-import io.github.isuru.oasis.game.utils.TestUtils;
+import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
 
-class ParsingTest {
+public class ParsingTest {
 
     @Test
-    void badgeParsing() throws IOException {
+    public void badgeParsing() throws IOException {
         List<BadgeRule> rules = BadgeParser.parse(TestUtils.loadResource("badges.yml"));
         Assertions.assertEquals(8, rules.size());
 
@@ -26,7 +26,7 @@ class ParsingTest {
     }
 
     @Test
-    void pointsParsing() throws IOException {
+    public void pointsParsing() throws IOException {
         List<PointRule> rules = PointParser.parse(TestUtils.loadResource("points.yml"));
         Assertions.assertEquals(14, rules.size());
 
@@ -36,7 +36,7 @@ class ParsingTest {
     }
 
     @Test
-    void milestoneParsing() throws IOException {
+    public void milestoneParsing() throws IOException {
         List<Milestone> rules = MilestoneParser.parse(TestUtils.loadResource("milestones.yml"));
         Assertions.assertEquals(4, rules.size());
 
