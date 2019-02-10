@@ -25,15 +25,16 @@ public class DailyScheduler extends BaseScheduler {
 
     private static final Logger LOG = LoggerFactory.getLogger(DailyScheduler.class);
 
-    @Autowired
     private IGameDefService gameDefService;
-
-    @Autowired
     private IGameService gameService;
-
-    @Autowired
     private IProfileService profileService;
 
+    @Autowired
+    public DailyScheduler(IGameDefService gameDefService, IGameService gameService, IProfileService profileService) {
+        this.gameDefService = gameDefService;
+        this.gameService = gameService;
+        this.profileService = profileService;
+    }
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void runDailyAtMidnight() throws Exception {

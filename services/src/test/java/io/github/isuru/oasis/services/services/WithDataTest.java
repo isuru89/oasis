@@ -77,12 +77,12 @@ public abstract class WithDataTest extends AbstractServiceTest {
 
     private final List<BufferedRecords> buffers = new ArrayList<>();
 
-    List<Long> pointRuleIds;
+    protected List<Long> pointRuleIds;
     List<Long> badgeIds;
     List<Long> milestoneIds;
     List<Long> challengeIds;
 
-    List<Long> addPointRules(long gameId, String... rules) throws Exception {
+    protected List<Long> addPointRules(long gameId, String... rules) throws Exception {
         ruleOrder.clear();
         List<Long> ids = new ArrayList<>();
         for (String r : rules) {
@@ -203,11 +203,11 @@ public abstract class WithDataTest extends AbstractServiceTest {
         }
     }
 
-    void initPool(int size) {
+    protected void initPool(int size) {
         pool = Executors.newFixedThreadPool(size);
     }
 
-    void closePool() {
+    protected void closePool() {
         for (BufferedRecords b : buffers) {
             b.close();
         }
@@ -218,7 +218,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
         buffers.clear();
     }
 
-    void loadUserData() throws Exception {
+    protected void loadUserData() throws Exception {
         scopes.clear();
         teams.clear();
         users.clear();
@@ -324,7 +324,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
 
     }
 
-    int loadPoints(Instant startTime, long timeRange, long gameId) throws Exception {
+    protected int loadPoints(Instant startTime, long timeRange, long gameId) throws Exception {
         Collection<UserProfile> profiles = users.values();
 
         BufferedRecords buffer = new BufferedRecords(this::flushPoints);
