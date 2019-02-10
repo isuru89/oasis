@@ -3,11 +3,24 @@ package io.github.isuru.oasis.services.services;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.services.dto.game.FeedItem;
 import io.github.isuru.oasis.services.dto.game.FeedItemReq;
-import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
+import io.github.isuru.oasis.services.dto.game.UserLeaderboardRankingsDto;
 import io.github.isuru.oasis.services.dto.game.UserRankingsInRangeDto;
-import io.github.isuru.oasis.services.dto.stats.*;
-import io.github.isuru.oasis.services.model.PurchasedItem;
-import io.github.isuru.oasis.model.defs.ScopingType;
+import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownReqDto;
+import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownResDto;
+import io.github.isuru.oasis.services.dto.stats.BadgeSummaryReq;
+import io.github.isuru.oasis.services.dto.stats.BadgeSummaryRes;
+import io.github.isuru.oasis.services.dto.stats.ChallengeInfoDto;
+import io.github.isuru.oasis.services.dto.stats.MyLeaderboardReq;
+import io.github.isuru.oasis.services.dto.stats.PointBreakdownReqDto;
+import io.github.isuru.oasis.services.dto.stats.PointBreakdownResDto;
+import io.github.isuru.oasis.services.dto.stats.PointSummaryReq;
+import io.github.isuru.oasis.services.dto.stats.PointSummaryRes;
+import io.github.isuru.oasis.services.dto.stats.TeamHistoryRecordDto;
+import io.github.isuru.oasis.services.dto.stats.UserChallengeWinRes;
+import io.github.isuru.oasis.services.dto.stats.UserMilestoneStatDto;
+import io.github.isuru.oasis.services.dto.stats.UserScopeRankingsStat;
+import io.github.isuru.oasis.services.dto.stats.UserStatDto;
+import io.github.isuru.oasis.services.dto.stats.UserStateStatDto;
 
 import java.util.List;
 
@@ -27,10 +40,8 @@ public interface IStatService {
     UserChallengeWinRes readUserChallengeWins(long userId) throws Exception;
     List<UserStateStatDto> readUserStateStats(long userId) throws Exception;
 
-    List<PurchasedItem> readUserPurchasedItems(long userId, long since) throws Exception;
-    UserRankingsInRangeDto readUserTeamRankings(long userId) throws Exception;
-    List<UserRankRecordDto> readMyLeaderboardRankings(long gameId, long userId, ScopingType scopingType,
-                                                      LeaderboardType rangeType) throws Exception;
+    UserRankingsInRangeDto readUserTeamRankings(long gameId, long userId, long leaderboardId, long timestamp) throws Exception;
+    List<UserLeaderboardRankingsDto> readMyLeaderboardRankings(long gameId, long userId, MyLeaderboardReq req) throws Exception;
     UserScopeRankingsStat readMyRankings(long gameId, long userId, LeaderboardType rangeType) throws Exception;
     List<TeamHistoryRecordDto> readUserTeamHistoryStat(long userId) throws Exception;
 

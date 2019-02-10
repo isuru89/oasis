@@ -2,17 +2,33 @@ package io.github.isuru.oasis.services.controllers;
 
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
-import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
-import io.github.isuru.oasis.services.dto.game.UserRankingsInRangeDto;
-import io.github.isuru.oasis.services.dto.stats.*;
-import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.model.defs.ScopingType;
+import io.github.isuru.oasis.services.dto.game.UserLeaderboardRankingsDto;
+import io.github.isuru.oasis.services.dto.game.UserRankingsInRangeDto;
+import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownReqDto;
+import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownResDto;
+import io.github.isuru.oasis.services.dto.stats.ChallengeInfoDto;
+import io.github.isuru.oasis.services.dto.stats.MyLeaderboardReq;
+import io.github.isuru.oasis.services.dto.stats.PointBreakdownReqDto;
+import io.github.isuru.oasis.services.dto.stats.PointBreakdownResDto;
+import io.github.isuru.oasis.services.dto.stats.TeamHistoryRecordDto;
+import io.github.isuru.oasis.services.dto.stats.UserBadgeStatDto;
+import io.github.isuru.oasis.services.dto.stats.UserBadgeStatReq;
+import io.github.isuru.oasis.services.dto.stats.UserMilestoneStatDto;
+import io.github.isuru.oasis.services.dto.stats.UserStatDto;
+import io.github.isuru.oasis.services.dto.stats.UserStateStatDto;
+import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.services.IStatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -99,15 +115,18 @@ public class StatsController {
     }
 
     @GetMapping("/stats/user/{userId}/team-rankings")
-    public UserRankingsInRangeDto getUserTeamRankings(@PathVariable("userId") long userId) throws Exception {
-        return statService.readUserTeamRankings(userId);
+    public UserRankingsInRangeDto getUserTeamRankings(@PathVariable("gameId") long gameId,
+                                                      @PathVariable("userId") long userId,
+                                                      @PathVariable("leaderboardId") long leaderboardId,
+                                                      @PathVariable("ts") long ts) throws Exception {
+        return statService.readUserTeamRankings(gameId, userId, leaderboardId, ts);
     }
 
     @GetMapping("/stats/user/{userId}/rankings")
-    public List<UserRankRecordDto> getUserRankingsStat(@PathVariable("userId") long userId,
-                                                       @RequestParam(value = "gameId", defaultValue = "-1") long gameId,
-                                                       @RequestParam(value = "scope", defaultValue = "") String scope,
-                                                       @RequestParam(value = "period", defaultValue = "") String period) throws Exception {
+    public List<UserLeaderboardRankingsDto> getUserRankingsStat(@PathVariable("userId") long userId,
+                                                                @RequestParam(value = "gameId", defaultValue = "-1") long gameId,
+                                                                @RequestParam(value = "scope", defaultValue = "") String scope,
+                                                                @RequestParam(value = "period", defaultValue = "") String period) throws Exception {
         long gId = gameId;
         if (gId <= 0) {
             List<GameDef> gameDefs = gameDefService.listGames();
@@ -118,7 +137,8 @@ public class StatsController {
         }
         ScopingType scopingType = ScopingType.from(scope);
         LeaderboardType leaderboardType = LeaderboardType.from(period);
-        return statService.readMyLeaderboardRankings(gId, userId, scopingType, leaderboardType);
+        MyLeaderboardReq req = new MyLeaderboardReq(scopingType, leaderboardType, null, null);
+        return statService.readMyLeaderboardRankings(gId, userId, req);
     }
 
     @GetMapping("/stats/challenge/{challengeId}")

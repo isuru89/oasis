@@ -6,10 +6,36 @@ import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.LeaderboardType;
 import io.github.isuru.oasis.model.defs.ScopingType;
 import io.github.isuru.oasis.services.DataCache;
-import io.github.isuru.oasis.services.dto.game.*;
-import io.github.isuru.oasis.services.dto.stats.*;
+import io.github.isuru.oasis.services.dto.game.FeedItem;
+import io.github.isuru.oasis.services.dto.game.FeedItemReq;
+import io.github.isuru.oasis.services.dto.game.GlobalLeaderboardRecordDto;
+import io.github.isuru.oasis.services.dto.game.LeaderboardRequestDto;
+import io.github.isuru.oasis.services.dto.game.RankingRecord;
+import io.github.isuru.oasis.services.dto.game.TeamLeaderboardRecordDto;
+import io.github.isuru.oasis.services.dto.game.UserLeaderboardRankingsDto;
+import io.github.isuru.oasis.services.dto.game.UserRankRecordDto;
+import io.github.isuru.oasis.services.dto.game.UserRankingsInRangeDto;
+import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownReqDto;
+import io.github.isuru.oasis.services.dto.stats.BadgeBreakdownResDto;
+import io.github.isuru.oasis.services.dto.stats.BadgeRecordDto;
+import io.github.isuru.oasis.services.dto.stats.BadgeSummaryReq;
+import io.github.isuru.oasis.services.dto.stats.BadgeSummaryRes;
+import io.github.isuru.oasis.services.dto.stats.ChallengeInfoDto;
+import io.github.isuru.oasis.services.dto.stats.ChallengeWinDto;
+import io.github.isuru.oasis.services.dto.stats.ChallengeWinnerDto;
+import io.github.isuru.oasis.services.dto.stats.MyLeaderboardReq;
+import io.github.isuru.oasis.services.dto.stats.PointBreakdownReqDto;
+import io.github.isuru.oasis.services.dto.stats.PointBreakdownResDto;
+import io.github.isuru.oasis.services.dto.stats.PointRecordDto;
+import io.github.isuru.oasis.services.dto.stats.PointSummaryReq;
+import io.github.isuru.oasis.services.dto.stats.PointSummaryRes;
+import io.github.isuru.oasis.services.dto.stats.TeamHistoryRecordDto;
+import io.github.isuru.oasis.services.dto.stats.UserChallengeWinRes;
+import io.github.isuru.oasis.services.dto.stats.UserMilestoneStatDto;
+import io.github.isuru.oasis.services.dto.stats.UserScopeRankingsStat;
+import io.github.isuru.oasis.services.dto.stats.UserStatDto;
+import io.github.isuru.oasis.services.dto.stats.UserStateStatDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.model.PurchasedItem;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
@@ -18,7 +44,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.beans.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -211,21 +244,6 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
-    public List<PurchasedItem> readUserPurchasedItems(long userId, long since) throws Exception {
-        Checks.greaterThanZero(userId, "userId");
-
-        Map<String, Object> tdata = new HashMap<>();
-        tdata.put("hasSince", since > 0);
-
-        return ServiceUtils.toList(dao.executeQuery(Q.METAPHOR.GET_PURCHASED_ITEMS,
-                Maps.create()
-                    .put("userId", userId).put("since", since)
-                    .build(),
-                PurchasedItem.class,
-                tdata));
-    }
-
-    @Override
     public List<UserMilestoneStatDto> readUserMilestones(long userId) throws Exception {
         Checks.greaterThanZero(userId, "userId");
 
@@ -236,25 +254,35 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
-    public UserRankingsInRangeDto readUserTeamRankings(long userId) throws Exception {
+    public UserRankingsInRangeDto readUserTeamRankings(long gameId, long userId,
+                                                       long leaderboardId, long timestamp) throws Exception {
         Checks.greaterThanZero(userId, "userId");
+        Checks.greaterThanZero(gameId, "gameId");
 
-        LeaderboardDef defaultLeaderboard = dataCache.getDefaultLeaderboard();
+        // consider game scoped leaderboard
+        long ts = timestamp > 0 ? timestamp : System.currentTimeMillis();
+        LeaderboardDef lbDef = dataCache.getDefaultLeaderboard();
+        if (leaderboardId > 0) {
+            lbDef = gameDefService.readLeaderboardDef(leaderboardId);
+            if (lbDef == null) {
+                throw new InputValidationException("No leaderboard is found by id " + leaderboardId + "!");
+            }
+        }
         UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(userId);
 
         UserRankingsInRangeDto rankings = new UserRankingsInRangeDto();
         rankings.setUserId(userId);
 
         for (LeaderboardType type : RANGES) {
-            LeaderboardRequestDto requestDto = new LeaderboardRequestDto(type, System.currentTimeMillis());
+            LeaderboardRequestDto requestDto = new LeaderboardRequestDto(type, ts);
             requestDto.setForUser(userId);
-            requestDto.setLeaderboardDef(defaultLeaderboard);
+            requestDto.setLeaderboardDef(lbDef);
 
             List<TeamLeaderboardRecordDto> order = gameService.readTeamLeaderboard(currentTeamOfUser.getTeamId(),
                     requestDto);
             RankingRecord rank = createRank(order, ScopingType.TEAM);
             UserRankRecordDto result = new UserRankRecordDto();
-            result.setLeaderboard(defaultLeaderboard);
+            result.setLeaderboard(lbDef);
             result.setRank(rank);
 
             rankings.setWithRange(type, result);
@@ -263,15 +291,24 @@ public class StatServiceImpl implements IStatService {
     }
 
     @Override
-    public List<UserRankRecordDto> readMyLeaderboardRankings(long gameId, long userId, ScopingType scopingType,
-                                                             LeaderboardType rangeType) throws Exception {
+    public List<UserLeaderboardRankingsDto> readMyLeaderboardRankings(long gameId, long userId,
+                                                                      MyLeaderboardReq req) throws Exception {
         Checks.greaterThanZero(gameId, "gameId");
         Checks.greaterThanZero(userId, "userId");
-        Checks.nonNull(scopingType, "scopeType");
+        Checks.nonNull(req, "request");
+        Checks.nonNull(req.getScopingType(), "scopeType");
+
+        LeaderboardType rangeType = req.getRangeType();
+        Checks.nonNull(rangeType, "rangeType");
+
+        if (rangeType == LeaderboardType.CUSTOM
+            && (!ServiceUtils.isValid(req.getRangeStart()) || !ServiceUtils.isValid(req.getRangeEnd()))) {
+            throw new InputValidationException("Range start and end must specify for custom leaderboards!");
+        }
 
         UserTeam currentTeamOfUser = profileService.findCurrentTeamOfUser(userId);
         List<LeaderboardDef> leaderboardDefs = gameDefService.listLeaderboardDefs(gameId);
-        List<UserRankRecordDto> rankings = new LinkedList<>();
+        List<UserLeaderboardRankingsDto> rankings = new LinkedList<>();
 
         for (LeaderboardDef def : leaderboardDefs) {
             LeaderboardRequestDto requestDto = rangeType == LeaderboardType.CUSTOM ?
@@ -280,23 +317,27 @@ public class StatServiceImpl implements IStatService {
             requestDto.setForUser(userId);
             requestDto.setLeaderboardDef(def);
 
-            UserRankRecordDto record = new UserRankRecordDto();
-            record.setLeaderboard(def);
-            RankingRecord rank;
-            if (scopingType == ScopingType.TEAM) {
-                rank = createRank(gameService.readTeamLeaderboard(currentTeamOfUser.getTeamId(), requestDto),
-                            scopingType);
-            } else if (scopingType == ScopingType.TEAM_SCOPE) {
-                rank = createRank(gameService.readTeamScopeLeaderboard(currentTeamOfUser.getScopeId(), requestDto),
-                        scopingType);
-            } else if (scopingType == ScopingType.GLOBAL) {
-                rank = createRank(gameService.readGlobalLeaderboard(requestDto));
+            if (req.getScopingType() == ScopingType.GLOBAL) {
+                UserLeaderboardRankingsDto record = new UserLeaderboardRankingsDto();
+                record.setLeaderboardDef(def);
+                record.setUserId(userId);
+
+                RankingRecord rank = createRank(gameService.readGlobalLeaderboard(requestDto));
+                record.setGlobal(rank);
+                rankings.add(record);
             } else {
-                throw new InputValidationException("Unknown leaderboard scoping type. It must be either GLOBAL, TEAMSCOPE, or TEAM!");
+                List<TeamLeaderboardRecordDto> result = gameService.readTeamLeaderboard(currentTeamOfUser.getTeamId(), requestDto);
+                RankingRecord tRank = createRank(result, ScopingType.TEAM);
+                RankingRecord tsRank = createRank(result, ScopingType.TEAM_SCOPE);
+
+                UserLeaderboardRankingsDto record = new UserLeaderboardRankingsDto();
+                record.setLeaderboardDef(def);
+                record.setUserId(userId);
+                record.setTeam(tRank);
+                record.setTeamScope(tsRank);
+                rankings.add(record);
             }
 
-            record.setRank(rank);
-            rankings.add(record);
         }
         return rankings;
     }

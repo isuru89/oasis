@@ -658,6 +658,9 @@ public class GameDefServiceImpl implements IGameDefService {
     }
 
     private LeaderboardDef wrapperToLeaderboard(DefWrapper wrapper) {
+        if (wrapper == null) {
+            return null;
+        }
         return Converters.toLeaderboardDef(wrapper,
                 wrp -> RUtils.toObj(wrp.getContent(), LeaderboardDef.class, mapper));
     }

@@ -8,6 +8,7 @@ import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.dto.defs.HeroDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.exception.OasisGameException;
+import io.github.isuru.oasis.services.model.PurchasedItem;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
 import io.github.isuru.oasis.services.utils.Checks;
@@ -185,6 +186,21 @@ public class MetaphorServiceImpl implements IMetaphorService {
                 throw new OasisGameException("Cannot share this item! Maybe the item itself is shared to you by friend!");
             }
         });
+    }
+
+    @Override
+    public List<PurchasedItem> readUserPurchasedItems(long userId, long since) throws Exception {
+        Checks.greaterThanZero(userId, "userId");
+
+        Map<String, Object> tdata = new HashMap<>();
+        tdata.put("hasSince", since > 0);
+
+        return ServiceUtils.toList(dao.executeQuery(Q.METAPHOR.GET_PURCHASED_ITEMS,
+                Maps.create()
+                        .put("userId", userId).put("since", since)
+                        .build(),
+                PurchasedItem.class,
+                tdata));
     }
 
 

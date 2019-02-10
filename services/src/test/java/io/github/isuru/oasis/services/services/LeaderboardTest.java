@@ -68,7 +68,7 @@ public class LeaderboardTest extends WithDataTest {
     }
 
     @Test
-    public void run() throws Exception {
+    public void testLeaderboards() throws Exception {
         Instant startTime = LocalDateTime.of(2019, 1, 27, 12, 30)
                 .atZone(ZoneOffset.UTC)
                 .toInstant();

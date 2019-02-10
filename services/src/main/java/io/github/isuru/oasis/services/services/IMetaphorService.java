@@ -2,6 +2,7 @@ package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.model.ShopItem;
 import io.github.isuru.oasis.services.dto.defs.HeroDto;
+import io.github.isuru.oasis.services.model.PurchasedItem;
 
 import java.util.List;
 
@@ -24,6 +25,8 @@ public interface IMetaphorService {
     void buyItem(long userBy, long itemId) throws Exception;
     void shareItem(long userBy, long itemId, long toUser, int amount) throws Exception;
 
+
+    List<PurchasedItem> readUserPurchasedItems(long userId, long since) throws Exception;
 
     long addShopItem(long gameId, ShopItem item) throws Exception;
     List<ShopItem> listShopItems(long gameId) throws Exception;
