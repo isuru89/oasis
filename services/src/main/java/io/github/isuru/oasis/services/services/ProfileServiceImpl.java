@@ -171,17 +171,19 @@ public class ProfileServiceImpl implements IProfileService {
     }
 
     @Override
-    public List<UserCountStat> listUserCountInTeams(long atTime) throws Exception {
+    public List<UserCountStat> listUserCountInTeams(long atTime, boolean withAutoUsers) throws Exception {
         return ServiceUtils.toList(dao.executeQuery(Q.PROFILE.LIST_USER_COUNT_OF_TEAMS,
-                Maps.create("atTime", atTime),
-                UserCountStat.class));
+                Maps.create("atTime", atTime, "autoUsers", withAutoUsers),
+                UserCountStat.class,
+                Maps.create("hasAutoUsers", !withAutoUsers)));
     }
 
     @Override
-    public List<UserCountStat> listUserCountInTeamScopes(long atTime) throws Exception {
+    public List<UserCountStat> listUserCountInTeamScopes(long atTime, boolean withAutoUsers) throws Exception {
         return ServiceUtils.toList(dao.executeQuery(Q.PROFILE.LIST_USER_COUNT_OF_TEAMSCOPE,
-                Maps.create("atTime", atTime),
-                UserCountStat.class));
+                Maps.create("atTime", atTime, "autoUsers", withAutoUsers),
+                UserCountStat.class,
+                Maps.create("hasAutoUsers", !withAutoUsers)));
     }
 
     @Override

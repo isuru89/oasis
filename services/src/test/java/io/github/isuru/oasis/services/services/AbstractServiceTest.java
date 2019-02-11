@@ -24,7 +24,7 @@ abstract class AbstractServiceTest {
     @Autowired
     private Bootstrapping bootstrapping;
 
-    void resetSchema() throws Exception {
+    protected void resetSchema() throws Exception {
         if (dao.getDbType().equalsIgnoreCase("sqlite")) {
             Iterable<Map<String, Object>> maps = dao.executeRawQuery("SELECT name FROM sqlite_master WHERE type = \"table\"", null);
             for (Map<String, Object> map : maps) {

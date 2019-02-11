@@ -42,7 +42,7 @@ public abstract class AbstractSchedulerTest extends WithDataTest {
 
     }
 
-    void createRaces(long gameId) throws Exception {
+    void createRaces(long gameId, String timeWindow) throws Exception {
         {
             LeaderboardDef l1 = new LeaderboardDef();
             l1.setName("A-n-B");
@@ -53,12 +53,12 @@ public abstract class AbstractSchedulerTest extends WithDataTest {
             long lid = gameDefService.addLeaderboardDef(gameId, l1);
 
             RaceDef raceDef = new RaceDef();
-            raceDef.setName("Weekly AB Race");
+            raceDef.setName(timeWindow + " AB Race");
             raceDef.setDisplayName(raceDef.getName());
             raceDef.setLeaderboardId((int) lid);
             raceDef.setFromScope(ScopingType.TEAM_SCOPE.name());
             raceDef.setTop(3);
-            raceDef.setTimeWindow("WEEKLY");
+            raceDef.setTimeWindow(timeWindow);
             raceDef.setRankPointsExpression("1000.0");
             gameDefService.addRace(gameId, raceDef);
         }
@@ -73,12 +73,12 @@ public abstract class AbstractSchedulerTest extends WithDataTest {
             long lid = gameDefService.addLeaderboardDef(gameId, l1);
 
             RaceDef raceDef = new RaceDef();
-            raceDef.setName("Weekly DE Race");
+            raceDef.setName(timeWindow + " DE Race");
             raceDef.setDisplayName(raceDef.getName());
             raceDef.setLeaderboardId((int) lid);
             raceDef.setFromScope(ScopingType.TEAM.name());
             raceDef.setTop(2);
-            raceDef.setTimeWindow("WEEKLY");
+            raceDef.setTimeWindow(timeWindow);
             Map<Integer, Double> points = new HashMap<>();
             points.put(1, 300.0);
             points.put(2, 100.0);
@@ -86,8 +86,39 @@ public abstract class AbstractSchedulerTest extends WithDataTest {
             gameDefService.addRace(gameId, raceDef);
         }
 
-        Assert.assertEquals(3, gameDefService.listLeaderboardDefs(gameId).size());
-        Assert.assertEquals(2, gameDefService.listRaces(gameId).size());
+        {
+            LeaderboardDef l1 = new LeaderboardDef();
+            l1.setName("A-n-C-n-E");
+            l1.setDisplayName("ACE Leaderboard");
+            l1.setOrderBy("desc");
+            l1.setIncludeStatePoints(false);
+            l1.setRuleIds(Arrays.asList("so.rule.a", "so.rule.c", "so.rule.e"));
+            long lid = gameDefService.addLeaderboardDef(gameId, l1);
+
+            RaceDef raceDef = new RaceDef();
+            raceDef.setName(timeWindow + " ACE Race");
+            raceDef.setDisplayName(raceDef.getName());
+            raceDef.setLeaderboardId((int) lid);
+            raceDef.setFromScope(ScopingType.TEAM_SCOPE.name());
+            raceDef.setTop(10);
+            raceDef.setTimeWindow(timeWindow);
+            Map<Integer, Double> points = new HashMap<>();
+            points.put(1, 100.0);
+            points.put(2, 90.0);
+            points.put(3, 80.0);
+            points.put(4, 70.0);
+            points.put(5, 60.0);
+            points.put(6, 50.0);
+            points.put(7, 40.0);
+            points.put(8, 30.0);
+            points.put(9, 20.0);
+            points.put(10, 10.0);
+            raceDef.setRankPoints(points);
+            gameDefService.addRace(gameId, raceDef);
+        }
+
+        Assert.assertEquals(4, gameDefService.listLeaderboardDefs(gameId).size());
+        Assert.assertEquals(3, gameDefService.listRaces(gameId).size());
     }
 
 }

@@ -19,8 +19,12 @@ SELECT
 FROM currentTeams oact
     INNER JOIN OA_TEAM_USER oatu ON oatu.user_id = oact.user_id AND oatu.since = oact.since
     INNER JOIN OA_TEAM oat ON oat.team_id = oatu.team_id
+    INNER JOIN OA_USER oau ON oact.user_id = oau.user_id
 WHERE
     oat.is_active = 1
+    <if(hasAutoUsers)>
+        AND oau.is_auto_user = :autoUsers
+    <endif>
 GROUP BY
     oatu.team_id
 

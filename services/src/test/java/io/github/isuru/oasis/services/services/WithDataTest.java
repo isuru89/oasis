@@ -310,14 +310,14 @@ public abstract class WithDataTest extends AbstractServiceTest {
 
         {
             Map<Long, Long> countMap = new HashMap<>();
-            profileService.listUserCountInTeams(System.currentTimeMillis())
+            profileService.listUserCountInTeams(System.currentTimeMillis(), true)
                     .forEach(r -> countMap.put(r.getId(), r.getTotalUsers()));
             Assertions.assertThat(countMap).containsAllEntriesOf(expectedTeamCounts);
         }
 
         {
             Map<Long, Long> countMap = new HashMap<>();
-            profileService.listUserCountInTeamScopes(System.currentTimeMillis())
+            profileService.listUserCountInTeamScopes(System.currentTimeMillis(), true)
                     .forEach(r -> countMap.put(r.getId(), r.getTotalUsers()));
             Assertions.assertThat(countMap).containsAllEntriesOf(expectedScopeCounts);
         }

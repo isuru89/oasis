@@ -194,7 +194,8 @@ public abstract class BaseScheduler {
                 }
 
                 winnerRecord.setTeamId(row.getTeamId().intValue());
-                winnerRecord.setTeamId(row.getTeamScopeId().intValue());
+                winnerRecord.setTeamScopeId(row.getTeamScopeId().intValue());
+                winnerRecord.setRank(rank);
 
             } else {
                 Long teamId = row.getTeamId();
@@ -215,7 +216,9 @@ public abstract class BaseScheduler {
 
                 winnerRecord.setTeamId(teamId.intValue());
                 winnerRecord.setTeamScopeId(row.getTeamScopeId().intValue());
+                winnerRecord.setRank(rank);
             }
+
             winners.add(winnerRecord);
         }
         return winners;
@@ -223,7 +226,7 @@ public abstract class BaseScheduler {
 
 
     Map<Long, Long> loadTeamStatus(IProfileService profileService, long atTime) throws Exception {
-        List<UserCountStat> teamList = profileService.listUserCountInTeams(atTime);
+        List<UserCountStat> teamList = profileService.listUserCountInTeams(atTime, false);
         Map<Long, Long> teamCounts = new HashMap<>();
         for (UserCountStat statusStat : teamList) {
             teamCounts.put(statusStat.getId(), statusStat.getTotalUsers());
@@ -232,7 +235,7 @@ public abstract class BaseScheduler {
     }
 
     Map<Long, Long> loadTeamScopeStatus(IProfileService profileService, long atTime) throws Exception {
-        List<UserCountStat> teamList = profileService.listUserCountInTeamScopes(atTime);
+        List<UserCountStat> teamList = profileService.listUserCountInTeamScopes(atTime, false);
         Map<Long, Long> teamScopeCounts = new HashMap<>();
         for (UserCountStat statusStat : teamList) {
             teamScopeCounts.put(statusStat.getId(), statusStat.getTotalUsers());

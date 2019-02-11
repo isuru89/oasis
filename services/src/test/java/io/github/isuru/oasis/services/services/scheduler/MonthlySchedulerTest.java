@@ -16,10 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class DailySchedulerTest extends AbstractSchedulerTest {
+public class MonthlySchedulerTest extends AbstractSchedulerTest {
+
 
     @Autowired
-    private DailyScheduler dailyScheduler;
+    private MonthlyScheduler monthlyScheduler;
 
     @Autowired
     private IGameDefService gameDefService;
@@ -45,7 +46,7 @@ public class DailySchedulerTest extends AbstractSchedulerTest {
         initPool(5);
 
         createPoints(gameId);
-        createRaces(gameId, "DAILY");
+        createRaces(gameId, "MONTHLY");
 
         raceDefs = gameDefService.listRaces(gameId);
         Assert.assertNotNull(raceDefs);
@@ -57,10 +58,11 @@ public class DailySchedulerTest extends AbstractSchedulerTest {
         closePool();
     }
 
+
     @Test
-    public void testDailyScheduler() throws Exception {
+    public void testMonthlyScheduler() throws Exception {
         long ts = System.currentTimeMillis();
-        Map<Long, List<RaceWinRecord>> winnersByRace = dailyScheduler.runForGame(profileService, gameDefService, gameService, gameId, ts);
+        Map<Long, List<RaceWinRecord>> winnersByRace = monthlyScheduler.runForGame(profileService, gameDefService, gameService, gameId, ts);
         Assert.assertNotNull(winnersByRace);
         Assert.assertEquals(raceDefs.size(), winnersByRace.size());
 
@@ -71,7 +73,7 @@ public class DailySchedulerTest extends AbstractSchedulerTest {
             List<RaceWinRecord> raceWinRecords = winnersByRace.get(raceDef.getId());
             Assert.assertTrue(raceDef.getTop() * teamProfiles.size() >= raceWinRecords.size());
 
-            System.out.println("Winner of daily race: " + raceDef.getName());
+            System.out.println("Winner of monthly race: " + raceDef.getName());
             for (RaceWinRecord raceWinRecord : raceWinRecords) {
                 Assert.assertTrue( raceWinRecord.getRank() > 0  && raceWinRecord.getRank() <= raceDef.getTop());
                 Assert.assertTrue(raceWinRecord.getTeamId() > 0);
