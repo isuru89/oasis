@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-abstract class AbstractServiceTest {
+public abstract class AbstractServiceTest {
 
     static final boolean TRUE = true;
     static final boolean FALSE = false;

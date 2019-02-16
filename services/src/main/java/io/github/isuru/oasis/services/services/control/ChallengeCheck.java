@@ -41,6 +41,10 @@ public class ChallengeCheck implements Serializable {
             return CONTINUE;
         }
 
+        if (winners >= def.getWinnerCount()) {
+            return HALT;
+        }
+
         // check for expiration
         if (event.getTimestamp() > def.getExpireAfter()) {
             return HALT;
@@ -59,7 +63,7 @@ public class ChallengeCheck implements Serializable {
         }
 
         // check team-scope match
-        if (def.getForTeamScopeId() != null && def.getForTeamScopeId().equals(event.getTeamScope())) {
+        if (def.getForTeamScopeId() != null && !def.getForTeamScopeId().equals(event.getTeamScope())) {
             return CONTINUE;
         }
 
@@ -77,7 +81,7 @@ public class ChallengeCheck implements Serializable {
         }
 
         boolean canContinue = def.getWinnerCount() > winners;
-        return new ChallengeFilterResult(satisfied, canContinue, winners);
+        return new ChallengeFilterResult(satisfied, !satisfied || canContinue, winners);
     }
 
     private boolean interpretCondition(Object val) {
