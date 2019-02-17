@@ -17,6 +17,8 @@ public class ChallengeEvent implements Event {
     private Event event;
     private ChallengeDef challengeDef;
 
+    private Map<String, Object> data;
+
     public ChallengeEvent(Event event, ChallengeDef challengeDef) {
         this.event = event;
         this.challengeDef = challengeDef;
@@ -49,7 +51,7 @@ public class ChallengeEvent implements Event {
 
     @Override
     public void setFieldValue(String fieldName, Object value) {
-
+        event.setFieldValue(fieldName, value);
     }
 
     public Event getEvent() {

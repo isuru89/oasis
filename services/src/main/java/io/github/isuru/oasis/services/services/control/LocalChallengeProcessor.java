@@ -1,7 +1,5 @@
 package io.github.isuru.oasis.services.services.control;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.isuru.oasis.game.persist.OasisSink;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
@@ -38,13 +36,11 @@ class LocalChallengeProcessor implements Runnable {
 
     private static final int TIMEOUT = 5;
 
-    private final ObjectMapper mapper = new ObjectMapper();
-
     private final BlockingQueue<Event> events = new LinkedBlockingDeque<>();
     private final Map<Long, ChallengeDef> challengeDefMap = new ConcurrentHashMap<>();
     private final Map<Long, ChallengeCheck> challengeCheckMap = new ConcurrentHashMap<>();
-    private final Map<Long, OasisSink> sinkMap = new ConcurrentHashMap<>();
     private boolean stop = false;
+    private boolean stopped = false;
     private final Set<String> refEvents = new ConcurrentSet<>();
 
     private final IJobService jobService;
@@ -56,7 +52,7 @@ class LocalChallengeProcessor implements Runnable {
         this.eventDispatcher = eventDispatcher;
     }
 
-    void submitChallenge(ChallengeDef challengeDef, OasisSink sink) throws Exception {
+    void submitChallenge(ChallengeDef challengeDef) throws Exception {
         SubmittedJob job = readJobState(challengeDef);
         ChallengeCheck challengeCheck = Pojos.deserialize(job.getStateData());
         if (challengeCheck == null) {
@@ -65,7 +61,6 @@ class LocalChallengeProcessor implements Runnable {
 
         refEvents.addAll(challengeDef.getForEvents());
 
-        sinkMap.put(challengeDef.getId(), sink);
         challengeCheckMap.put(challengeDef.getId(), challengeCheck);
         challengeDefMap.put(challengeDef.getId(), challengeDef);
     }
@@ -75,7 +70,6 @@ class LocalChallengeProcessor implements Runnable {
 
             challengeDefMap.remove(challengeId);
             challengeCheckMap.remove(challengeId);
-            sinkMap.remove(challengeId);
         } else {
             throw new IllegalStateException("Cannot stop challenge #" + challengeId + " in db!");
         }
@@ -125,31 +119,25 @@ class LocalChallengeProcessor implements Runnable {
 
             ChallengeCheck.ChallengeFilterResult result = challengeChecker.check(event);
             if (result.isSatisfied()) {
-                OasisSink oasisSink = sinkMap.get(challengeId);
-                if (oasisSink != null) {
-                    // send out a winner
-                    ChallengeEvent challengeEvent = new ChallengeEvent(event, challenge);
-                    challengeEvent.setFieldValue(ChallengeEvent.KEY_WIN_NO, result.getWinNumber());
+                // send out a winner
+                ChallengeEvent challengeEvent = new ChallengeEvent(event, challenge);
+                challengeEvent.setFieldValue(ChallengeEvent.KEY_WIN_NO, result.getWinNumber());
 
-                    // send challenge winner as event
-                    Map<String, Object> winnerEvent = mapChallenge(challengeEvent);
-                    try {
-                        // persist checker change to db
-                        byte[] dataState = Pojos.serialize(challengeChecker);
-                        if (jobService.updateJobState(challengeId, dataState)) {
-                            // when success, notify as an event
-                            eventDispatcher.dispatch(challenge.getGameId(), winnerEvent);
-                        } else {
-                            // @TODO do something when we can't save state to db
-                            LOG.error("Cannot update job state in persistent storage.");
-                        }
-
-                    } catch (Exception e) {
-                        LOG.error("Error sending challenge winner notification!", e);
+                // send challenge winner as event
+                Map<String, Object> winnerEvent = mapChallenge(challengeEvent);
+                try {
+                    // persist checker change to db
+                    byte[] dataState = Pojos.serialize(challengeChecker);
+                    if (jobService.updateJobState(challengeId, dataState)) {
+                        // when success, notify as an event
+                        eventDispatcher.dispatch(challenge.getGameId(), winnerEvent);
+                    } else {
+                        // @TODO do something when we can't save state to db
+                        LOG.error("Cannot update job state in persistent storage.");
                     }
-                } else {
-                    LOG.warn("Challenge winner will not be notified, " +
-                            "since the game might have already stopped or completed!");
+
+                } catch (Exception e) {
+                    LOG.error("Error sending challenge winner notification!", e);
                 }
             }
 
@@ -170,7 +158,7 @@ class LocalChallengeProcessor implements Runnable {
         }
     }
 
-    private static Map<String, Object> mapChallenge(ChallengeEvent value) {
+    static Map<String, Object> mapChallenge(ChallengeEvent value) {
         Map<String, Object> data = new HashMap<>();
         data.put(Constants.FIELD_TEAM, value.getTeam());
         data.put(Constants.FIELD_SCOPE, value.getTeamScope());
@@ -224,13 +212,17 @@ class LocalChallengeProcessor implements Runnable {
                 LOG.error(e.getMessage(), e);
             }
         }
-        LOG.debug("Local challenge processor terminated. [Stop: {}]", stop);
+        LOG.warn("Local challenge processor terminated. [Stop: {}]", stop);
+        stopped = true;
     }
 
     void setStop() {
-        LOG.debug("Stopping signal sent for local challenge processor...");
+        LOG.warn("Stopping signal sent for local challenge processor...");
         events.add(new LocalEndEvent());
         stop = true;
     }
 
+    boolean isStopped() {
+        return stopped;
+    }
 }

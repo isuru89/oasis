@@ -1,6 +1,5 @@
 package io.github.isuru.oasis.services.services.control;
 
-import io.github.isuru.oasis.game.persist.OasisSink;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
@@ -106,8 +105,7 @@ public class LocalScheduler implements IGameController {
         if (gameRun == null) {
             throw new InputValidationException("Associated game of this challenge is not currently running!");
         }
-        OasisSink oasisSink = gameRun.getOasisSink();
-        challengeProcessor.submitChallenge(challengeDef, oasisSink);
+        challengeProcessor.submitChallenge(challengeDef);
     }
 
     @Override
