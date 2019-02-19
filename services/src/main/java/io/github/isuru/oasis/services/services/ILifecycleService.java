@@ -1,11 +1,13 @@
 package io.github.isuru.oasis.services.services;
 
+import java.util.concurrent.Future;
+
 /**
  * @author iweerarathna
  */
 public interface ILifecycleService {
 
-    boolean start(long gameId) throws Exception;
+    Future<?> start(long gameId) throws Exception;
 
     boolean stop(long gameId) throws Exception;
 

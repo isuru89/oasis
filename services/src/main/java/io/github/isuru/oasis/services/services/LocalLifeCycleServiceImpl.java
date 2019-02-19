@@ -9,6 +9,8 @@ import io.github.isuru.oasis.services.utils.Checks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.Future;
+
 /**
  * @author iweerarathna
  */
@@ -28,12 +30,11 @@ public class LocalLifeCycleServiceImpl implements ILifecycleService {
     }
 
     @Override
-    public boolean start(long gameId) throws Exception {
+    public Future<?> start(long gameId) throws Exception {
         Checks.greaterThanZero(gameId, "gameId");
         GameDef gameDef = gameDefService.readGame(gameId);
 
-        gameController.startGame(gameDef.getId());
-        return true;
+        return gameController.startGame(gameDef.getId());
     }
 
     @Override

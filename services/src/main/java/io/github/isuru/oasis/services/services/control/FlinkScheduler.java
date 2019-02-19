@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
  * @author iweerarathna
@@ -33,8 +34,8 @@ public class FlinkScheduler implements IGameController {
     }
 
     @Override
-    public void startGame(long gameId) throws Exception {
-
+    public Future<?> startGame(long gameId) throws Exception {
+        return null;
     }
 
     @Override

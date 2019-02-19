@@ -12,9 +12,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * @author iweerarathna
  */
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-class Sources {
+public class Sources {
 
     private Map<Long, LinkedBlockingQueue<Event>> eventMap = new ConcurrentHashMap<>();
 
@@ -28,6 +26,16 @@ class Sources {
 
     public LinkedBlockingQueue<Event> poll(long gameId) {
         return eventMap.computeIfAbsent(gameId, aLong -> new LinkedBlockingQueue<>());
+    }
+
+    public static Sources get() {
+        return Holder.INST;
+    }
+
+    private Sources() {}
+
+    private static class Holder {
+        private static final Sources INST = new Sources();
     }
 
 }

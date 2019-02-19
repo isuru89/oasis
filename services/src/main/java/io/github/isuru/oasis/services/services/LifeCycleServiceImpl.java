@@ -33,6 +33,8 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 /**
  * @author iweerarathna
@@ -54,10 +56,14 @@ public class LifeCycleServiceImpl implements ILifecycleService  {
 
 
     @Override
-    public boolean start(long gameId) throws Exception {
+    public Future<?> start(long gameId) throws Exception {
         Checks.greaterThanZero(gameId, "gameId");
 
-        return startDef(gameId, true);
+        if (startDef(gameId, true)) {
+            return new CompletableFuture<>();
+        } else {
+            return null;
+        }
     }
 
     @Override

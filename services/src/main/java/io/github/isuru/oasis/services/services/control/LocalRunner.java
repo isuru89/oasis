@@ -46,11 +46,13 @@ class LocalRunner implements Runnable {
 
         // @TODO convert OasisConfiguration object to Map and pass it here
         Configs configs = Configs.from(new Properties());
-        for (Map.Entry<String, Object> entry : localRunProps.entrySet()) {
-            configs.append(entry.getKey(), entry.getValue());
+        if (localRunProps != null) {
+            for (Map.Entry<String, Object> entry : localRunProps.entrySet()) {
+                configs.append(entry.getKey(), entry.getValue());
+            }
         }
 
-        QueueSource queueSource = new QueueSource(sources, gameId);
+        QueueSource queueSource = new QueueSource(gameId);
 
         configs.append(ConfigKeys.KEY_LOCAL_REF_SOURCE, queueSource);
         configs.append(ConfigKeys.KEY_LOCAL_REF_OUTPUT, oasisSink);
@@ -72,10 +74,6 @@ class LocalRunner implements Runnable {
         JsonEvent jsonEvent = new JsonEvent();
         jsonEvent.putAll(event);
         sources.poll(gameId).put(jsonEvent);
-    }
-
-    public long getGameId() {
-        return gameId;
     }
 
 }

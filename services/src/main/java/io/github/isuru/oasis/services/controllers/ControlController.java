@@ -21,7 +21,7 @@ public class ControlController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/game/{gameId}/start")
     public StatusResponse startGame(@PathVariable("gameId") long gameId) throws Exception {
-        return new StatusResponse(lifecycleService.start(gameId));
+        return new StatusResponse(lifecycleService.start(gameId) != null);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

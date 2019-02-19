@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * @author iweerarathna
@@ -38,19 +39,16 @@ public class LocalScheduler implements IGameController {
 
     private final DataCache dataCache;
     private final OasisConfigurations oasisConfigurations;
-    private final Sources sources;
     private final LocalSink localSink;
 
     @Autowired
     public LocalScheduler(IJobService jobService,
                           DispatcherManager dispatcherManager,
                           DataCache dataCache,
-                          Sources sources,
                           LocalSink localSink,
                           OasisConfigurations oasisConfigurations) {
         this.dataCache = dataCache;
         this.oasisConfigurations = oasisConfigurations;
-        this.sources = sources;
         this.localSink = localSink;
 
         this.challengeProcessor = new LocalChallengeProcessor(jobService, dispatcherManager.getEventDispatcher());
@@ -85,12 +83,13 @@ public class LocalScheduler implements IGameController {
     }
 
     @Override
-    public void startGame(long gameId) {
-        sources.create(gameId);
+    public Future<?> startGame(long gameId) {
+        LOG.info("Starting game: {}", gameId);
+        Sources.get().create(gameId);
 
-        LocalRunner runner = new LocalRunner(oasisConfigurations, gameId, dataCache, sources, localSink);
+        LocalRunner runner = new LocalRunner(oasisConfigurations, gameId, dataCache, Sources.get(), localSink);
         runners.put(gameId, runner);
-        pool.submit(runner);
+        return pool.submit(runner);
     }
 
     @Override
@@ -117,6 +116,7 @@ public class LocalScheduler implements IGameController {
     public void stopGame(long gameId) throws Exception {
         LocalRunner runner = runners.get(gameId);
         if (runner != null) {
+            LOG.warn("Stopping game: {}", gameId);
             runner.stop();
             stopAllChallengesOfGame(gameId);
             runners.remove(gameId);

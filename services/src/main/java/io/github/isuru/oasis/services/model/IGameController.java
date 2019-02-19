@@ -5,6 +5,7 @@ import io.github.isuru.oasis.model.defs.GameDef;
 
 import java.io.Closeable;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
  * @author iweerarathna
@@ -12,7 +13,7 @@ import java.util.Map;
 public interface IGameController extends Closeable {
 
     void submitEvent(long gameId, String token, Map<String, Object> event) throws Exception;
-    void startGame(long gameId) throws Exception;
+    Future<?> startGame(long gameId) throws Exception;
     void startChallenge(ChallengeDef challengeDef) throws Exception;
     void stopChallenge(ChallengeDef challengeDef) throws Exception;
     void stopGame(long gameId) throws Exception;
