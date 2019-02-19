@@ -9,7 +9,6 @@ import io.github.isuru.oasis.services.model.TeamProfile;
 import io.github.isuru.oasis.services.model.TeamScope;
 import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.model.UserTeam;
-import io.github.isuru.oasis.services.services.AbstractServiceTest;
 import io.github.isuru.oasis.services.services.IGameDefService;
 import io.github.isuru.oasis.services.services.IProfileService;
 import io.github.isuru.oasis.services.services.WithDataTest;
@@ -18,10 +17,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 

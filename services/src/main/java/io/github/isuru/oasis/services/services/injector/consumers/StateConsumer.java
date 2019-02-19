@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.services.services.injector.consumers;
 
-import com.rabbitmq.client.Channel;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.handlers.output.OStateModel;
 import io.github.isuru.oasis.services.services.injector.ConsumerContext;
+import io.github.isuru.oasis.services.services.injector.MsgAcknowledger;
 
 import java.util.Map;
 
@@ -14,12 +14,11 @@ public class StateConsumer extends BaseConsumer<OStateModel> {
     /**
      * Constructs a new instance and records its association to the passed-in channel.
      *
-     * @param channel the channel to which this consumer is attached
      * @param dao
      * @param context
      */
-    public StateConsumer(Channel channel, IOasisDao dao, ConsumerContext context) {
-        super(channel, dao, OStateModel.class, context);
+    public StateConsumer(IOasisDao dao, ConsumerContext context, MsgAcknowledger acknowledger) {
+        super(dao, OStateModel.class, context, acknowledger);
     }
 
     @Override

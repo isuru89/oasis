@@ -1,11 +1,9 @@
 package io.github.isuru.oasis.services.services.injector.consumers;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Envelope;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
 import io.github.isuru.oasis.services.services.injector.ConsumerContext;
+import io.github.isuru.oasis.services.services.injector.MsgAcknowledger;
 import io.github.isuru.oasis.services.utils.BufferedRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +27,10 @@ public class MilestoneStateConsumer extends BaseConsumer<MilestoneStateModel> {
     /**
      * Constructs a new instance and records its association to the passed-in channel.
      *
-     * @param channel the channel to which this consumer is attached
      * @param dao database access object
      */
-    public MilestoneStateConsumer(Channel channel, IOasisDao dao, ConsumerContext contextInfo) {
-        super(channel, dao, MilestoneStateModel.class, contextInfo, false);
+    public MilestoneStateConsumer(IOasisDao dao, ConsumerContext contextInfo, MsgAcknowledger acknowledger) {
+        super(dao, MilestoneStateModel.class, contextInfo, false, acknowledger);
 
         stateBuffer = new BufferedRecords(this::flushStates);
         lossStateBuffer = new BufferedRecords(this::flushLossStates);
@@ -42,12 +39,10 @@ public class MilestoneStateConsumer extends BaseConsumer<MilestoneStateModel> {
     }
 
     @Override
-    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
+    public void handleMessage(byte[] body, Object deliveryTag) {
         try {
-            LOG.debug("Message received from: {} [{}]", envelope.getRoutingKey(), envelope.getDeliveryTag());
             MilestoneStateModel message = MAPPER.readValue(body, MilestoneStateModel.class);
-            handleModel(message, envelope.getDeliveryTag());
-
+            handleModel(message, (long)deliveryTag);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }

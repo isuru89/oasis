@@ -1,6 +1,5 @@
 package io.github.isuru.oasis.services.services.control;
 
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.GameDef;
 import io.github.isuru.oasis.services.DataCache;
@@ -8,6 +7,7 @@ import io.github.isuru.oasis.services.configs.OasisConfigurations;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import io.github.isuru.oasis.services.model.IGameController;
 import io.github.isuru.oasis.services.services.IJobService;
+import io.github.isuru.oasis.services.services.control.sinks.LocalSink;
 import io.github.isuru.oasis.services.services.dispatchers.DispatcherManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,22 +36,22 @@ public class LocalScheduler implements IGameController {
     private final Map<Long, LocalRunner> runners = new ConcurrentHashMap<>();
     private final LocalChallengeProcessor challengeProcessor;
 
-    private final IOasisDao dao;
     private final DataCache dataCache;
     private final OasisConfigurations oasisConfigurations;
     private final Sources sources;
+    private final LocalSink localSink;
 
     @Autowired
-    public LocalScheduler(IOasisDao dao,
-                          IJobService jobService,
+    public LocalScheduler(IJobService jobService,
                           DispatcherManager dispatcherManager,
                           DataCache dataCache,
                           Sources sources,
+                          LocalSink localSink,
                           OasisConfigurations oasisConfigurations) {
-        this.dao = dao;
         this.dataCache = dataCache;
         this.oasisConfigurations = oasisConfigurations;
         this.sources = sources;
+        this.localSink = localSink;
 
         this.challengeProcessor = new LocalChallengeProcessor(jobService, dispatcherManager.getEventDispatcher());
     }
@@ -88,7 +88,7 @@ public class LocalScheduler implements IGameController {
     public void startGame(long gameId) {
         sources.create(gameId);
 
-        LocalRunner runner = new LocalRunner(oasisConfigurations, pool, dao, gameId, dataCache, sources);
+        LocalRunner runner = new LocalRunner(oasisConfigurations, gameId, dataCache, sources, localSink);
         runners.put(gameId, runner);
         pool.submit(runner);
     }
@@ -129,7 +129,7 @@ public class LocalScheduler implements IGameController {
     }
 
     @Override
-    public void resumeGame(GameDef gameDef) throws Exception {
+    public void resumeGame(GameDef gameDef) {
         startGame(gameDef.getId());
     }
 

@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.services.services.injector.consumers;
 
-import com.rabbitmq.client.Channel;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
 import io.github.isuru.oasis.services.services.injector.ConsumerContext;
+import io.github.isuru.oasis.services.services.injector.MsgAcknowledger;
 
 import java.util.Map;
 
@@ -14,8 +14,8 @@ public class ChallengeConsumer extends BaseConsumer<ChallengeModel> {
 
     private static final String GAME_ADD_CHALLENGE_WINNER = "game/batch/addChallengeWinner";
 
-    public ChallengeConsumer(Channel channel, IOasisDao dao, ConsumerContext contextInfo) {
-        super(channel, dao, ChallengeModel.class, contextInfo);
+    public ChallengeConsumer(IOasisDao dao, ConsumerContext contextInfo, MsgAcknowledger acknowledger) {
+        super(dao, ChallengeModel.class, contextInfo, acknowledger);
     }
 
     @Override

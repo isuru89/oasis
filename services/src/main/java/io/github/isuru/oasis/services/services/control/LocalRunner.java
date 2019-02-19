@@ -4,19 +4,15 @@ import io.github.isuru.oasis.game.Main;
 import io.github.isuru.oasis.game.persist.OasisSink;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
-import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.defs.OasisGameDef;
 import io.github.isuru.oasis.model.events.JsonEvent;
 import io.github.isuru.oasis.services.DataCache;
 import io.github.isuru.oasis.services.configs.OasisConfigurations;
-import io.github.isuru.oasis.services.services.control.sinks.DbSink;
-import io.github.isuru.oasis.services.services.control.sinks.LocalSinks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
 
 /**
  * @author iweerarathna
@@ -26,25 +22,19 @@ class LocalRunner implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(LocalRunner.class);
 
     private final long gameId;
-    private IOasisDao dao;
-    private LocalSinks localSinks;
-    private ExecutorService pool;
-    private DbSink oasisSink;
+    private OasisSink oasisSink;
     private DataCache dataCache;
     private Sources sources;
     private OasisConfigurations oasisConfigurations;
 
     LocalRunner(OasisConfigurations configurations,
-                ExecutorService pool,
-                IOasisDao dao,
                 long gameId,
                 DataCache dataCache,
-                Sources sources) {
+                Sources sources,
+                OasisSink oasisSink) {
         this.oasisConfigurations = configurations;
         this.gameId = gameId;
-        this.dao = dao;
-        this.pool = pool;
-        this.oasisSink = new DbSink(gameId);
+        this.oasisSink = oasisSink;
         this.dataCache = dataCache;
         this.sources = sources;
     }
@@ -61,7 +51,6 @@ class LocalRunner implements Runnable {
         }
 
         QueueSource queueSource = new QueueSource(sources, gameId);
-        localSinks = LocalSinks.applySinks(pool, oasisSink, dao, gameId);
 
         configs.append(ConfigKeys.KEY_LOCAL_REF_SOURCE, queueSource);
         configs.append(ConfigKeys.KEY_LOCAL_REF_OUTPUT, oasisSink);
@@ -76,9 +65,6 @@ class LocalRunner implements Runnable {
     }
 
     void stop() throws InterruptedException {
-        if (localSinks != null) {
-            localSinks.stop();
-        }
         sources.finish(gameId);
     }
 
@@ -92,7 +78,4 @@ class LocalRunner implements Runnable {
         return gameId;
     }
 
-    OasisSink getOasisSink() {
-        return oasisSink;
-    }
 }

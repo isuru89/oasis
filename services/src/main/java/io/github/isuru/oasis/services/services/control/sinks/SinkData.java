@@ -9,14 +9,13 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class SinkData {
 
-    private final Map<Long, Map<String, LinkedBlockingQueue<String>>> queues = new ConcurrentHashMap<>();
+    private final Map<String, LinkedBlockingQueue<String>> queues = new ConcurrentHashMap<>();
 
-    LinkedBlockingQueue<String> poll(long gameId, String qId) {
-        return queues.computeIfAbsent(gameId, aLong -> new ConcurrentHashMap<>())
-                .computeIfAbsent(qId, s -> new LinkedBlockingQueue<>());
+    public LinkedBlockingQueue<String> poll(String qId) {
+        return queues.computeIfAbsent(qId, s -> new LinkedBlockingQueue<>());
     }
 
-    static SinkData get() {
+    public static SinkData get() {
         return Holder.INST;
     }
 

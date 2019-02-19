@@ -2,11 +2,25 @@ package io.github.isuru.oasis.services.services.control.sinks;
 
 import io.github.isuru.oasis.game.persist.OasisSink;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 /**
  * @author iweerarathna
  */
-public class DbSink extends OasisSink {
+@Component
+@Scope(scopeName = ConfigurableBeanFactory.SCOPE_SINGLETON)
+public class LocalSink extends OasisSink {
+
+    public static final String SQ_BADGES = "badges";
+    public static final String SQ_POINTS = "points";
+    public static final String SQ_MILESTONES = "milestones";
+    public static final String SQ_MILESTONE_STATES = "milestone-states";
+    public static final String SQ_STATES = "states";
+    public static final String SQ_RACES = "races";
+    public static final String SQ_CHALLENGES = "challenges";
+
 
     private OutputSink badgeSink;
     private OutputSink pointsSink;
@@ -16,14 +30,14 @@ public class DbSink extends OasisSink {
     private OutputSink stateSink;
     private OutputSink raceSink;
 
-    public DbSink(long gameId) {
-        badgeSink = new OutputSink(gameId, LocalSinks.SQ_BADGES);
-        pointsSink = new OutputSink(gameId, LocalSinks.SQ_POINTS);
-        challengeSink = new OutputSink(gameId, LocalSinks.SQ_CHALLENGES);
-        milestoneSink = new OutputSink(gameId, LocalSinks.SQ_MILESTONES);
-        milestoneStateSink = new OutputSink(gameId, LocalSinks.SQ_MILESTONE_STATES);
-        stateSink = new OutputSink(gameId, LocalSinks.SQ_STATES);
-        raceSink = new OutputSink(gameId, LocalSinks.SQ_RACES);
+    public LocalSink() {
+        badgeSink = new OutputSink(SQ_BADGES);
+        pointsSink = new OutputSink(SQ_POINTS);
+        challengeSink = new OutputSink(SQ_CHALLENGES);
+        milestoneSink = new OutputSink(SQ_MILESTONES);
+        milestoneStateSink = new OutputSink(SQ_MILESTONE_STATES);
+        stateSink = new OutputSink(SQ_STATES);
+        raceSink = new OutputSink(SQ_RACES);
     }
 
     @Override
@@ -62,18 +76,16 @@ public class DbSink extends OasisSink {
     }
 
     public static class OutputSink implements SinkFunction<String> {
-        private final long gid;
         private final String name;
 
-        OutputSink(long gid, String name) {
-            this.gid = gid;
+        OutputSink(String name) {
             this.name = name;
         }
 
         @Override
         public void invoke(String value, Context context) {
             try {
-                SinkData.get().poll(gid, name).put(value);
+                SinkData.get().poll(name).put(value);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -1,9 +1,9 @@
 package io.github.isuru.oasis.services.services.injector.consumers;
 
-import com.rabbitmq.client.Channel;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.handlers.output.BadgeModel;
 import io.github.isuru.oasis.services.services.injector.ConsumerContext;
+import io.github.isuru.oasis.services.services.injector.MsgAcknowledger;
 
 import java.util.Map;
 
@@ -14,8 +14,8 @@ public class BadgeConsumer extends BaseConsumer<BadgeModel> {
 
     private static final String GAME_BATCH_ADD_BADGE = "game/batch/addBadge";
 
-    public BadgeConsumer(Channel channel, IOasisDao dao, ConsumerContext contextInfo) {
-        super(channel, dao, BadgeModel.class, contextInfo);
+    public BadgeConsumer(IOasisDao dao, ConsumerContext contextInfo, MsgAcknowledger acknowledger) {
+        super(dao, BadgeModel.class, contextInfo, acknowledger);
     }
 
     @Override

@@ -1,13 +1,11 @@
 package io.github.isuru.oasis.services.services.injector.consumers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.DefaultConsumer;
-import com.rabbitmq.client.Envelope;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.services.services.injector.ConsumerContext;
+import io.github.isuru.oasis.services.services.injector.IConsumer;
+import io.github.isuru.oasis.services.services.injector.MsgAcknowledger;
 import io.github.isuru.oasis.services.utils.BufferedRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +19,7 @@ import java.util.stream.Collectors;
 /**
  * @author iweerarathna
  */
-public abstract class BaseConsumer<T> extends DefaultConsumer implements Closeable {
+public abstract class BaseConsumer<T> implements IConsumer<T>, Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(BaseConsumer.class);
 
@@ -30,23 +28,23 @@ public abstract class BaseConsumer<T> extends DefaultConsumer implements Closeab
     protected IOasisDao dao;
     private Class<T> clz;
     ConsumerContext contextInfo;
+    protected MsgAcknowledger acknowledger;
 
     private final BufferedRecords buffer;
 
     /**
      * Constructs a new instance and records its association to the passed-in channel.
      *
-     * @param channel the channel to which this consumer is attached
      */
-    BaseConsumer(Channel channel, IOasisDao dao, Class<T> clz, ConsumerContext context) {
-        this(channel, dao, clz, context, true);
+    BaseConsumer(IOasisDao dao, Class<T> clz, ConsumerContext context, MsgAcknowledger acknowledger) {
+        this(dao, clz, context, true, acknowledger);
     }
 
-    BaseConsumer(Channel channel, IOasisDao dao, Class<T> clz, ConsumerContext context, boolean buffered) {
-        super(channel);
+    BaseConsumer(IOasisDao dao, Class<T> clz, ConsumerContext context, boolean buffered, MsgAcknowledger acknowledger) {
         this.dao = dao;
         this.clz = clz;
         this.contextInfo = context;
+        this.acknowledger = acknowledger;
 
         if (buffered) {
             this.buffer = new BufferedRecords(this::pumpRecordsToDb);
@@ -57,13 +55,12 @@ public abstract class BaseConsumer<T> extends DefaultConsumer implements Closeab
     }
 
     @Override
-    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
+    public void handleMessage(byte[] body, Object deliveryTag) {
         try {
-            LOG.debug("Message received from: {} [{}]", envelope.getRoutingKey(), envelope.getDeliveryTag());
             T message = MAPPER.readValue(body, clz);
             Map<String, Object> serializedData = handle(message);
             BufferedRecords.ElementRecord record = new BufferedRecords.ElementRecord(serializedData,
-                    envelope.getDeliveryTag());
+                    (long) deliveryTag);
             buffer.push(record);
             contextInfo.getInterceptor().accept(message);
 
@@ -96,7 +93,7 @@ public abstract class BaseConsumer<T> extends DefaultConsumer implements Closeab
                     .map(BufferedRecords.ElementRecord::getDeliveryTag)
                     .collect(Collectors.toList());
             for (long tag : tags) {
-                getChannel().basicAck(tag, false);
+                acknowledger.ack(tag);
             }
             LOG.debug("{} message ack completed for #{} messages.", clz.getSimpleName(), tags.size());
 

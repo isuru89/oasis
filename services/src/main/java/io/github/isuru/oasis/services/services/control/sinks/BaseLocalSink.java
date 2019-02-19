@@ -1,7 +1,7 @@
 package io.github.isuru.oasis.services.services.control.sinks;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.isuru.oasis.model.db.IOasisDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -11,28 +11,24 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class BaseLocalSink implements Runnable {
 
-    protected static final ObjectMapper mapper = new ObjectMapper();
+    private static final Logger LOG = LoggerFactory.getLogger(BaseLocalSink.class);
 
-    protected IOasisDao dao;
-    private final long gameId;
     private boolean cancel = false;
     private final String qName;
 
-    BaseLocalSink(IOasisDao dao, long gameId, String qName) {
-        this.dao = dao;
-        this.gameId = gameId;
+    BaseLocalSink(String qName) {
         this.qName = qName;
     }
 
     @Override
     public void run() {
         try {
-            LinkedBlockingQueue<String> queue = SinkData.get().poll(gameId, qName);
+            LinkedBlockingQueue<String> queue = SinkData.get().poll(qName);
             while (!cancel) {
                 try {
                     String item = queue.poll(5, TimeUnit.SECONDS);
                     if (item != null) {
-                        System.out.println("Notification recieved!");
+                        LOG.debug("Notification received!");
                         handle(item);
                     }
                 } catch (Exception e) {
@@ -40,7 +36,7 @@ public abstract class BaseLocalSink implements Runnable {
                 }
             }
         } finally {
-            System.out.println(String.format("Thread completed for %s in %d!", this.getClass().getSimpleName() ,gameId));
+            LOG.warn(String.format("Sink Reader completed for %s!", this.getClass().getSimpleName()));
         }
     }
 
@@ -48,9 +44,5 @@ public abstract class BaseLocalSink implements Runnable {
 
     public void stop() {
         cancel = true;
-    }
-
-    long getGameId() {
-        return gameId;
     }
 }

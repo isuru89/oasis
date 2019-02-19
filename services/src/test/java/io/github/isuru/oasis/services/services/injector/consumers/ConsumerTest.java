@@ -15,6 +15,7 @@ import io.github.isuru.oasis.model.handlers.output.OStateModel;
 import io.github.isuru.oasis.model.handlers.output.PointModel;
 import io.github.isuru.oasis.model.handlers.output.RaceModel;
 import io.github.isuru.oasis.services.services.injector.ConsumerContext;
+import io.github.isuru.oasis.services.services.injector.MsgAcknowledger;
 import io.github.isuru.oasis.services.utils.BufferedRecords;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
@@ -40,7 +41,7 @@ public class ConsumerTest {
     private ConsumerContext consumerContext;
     private BufferedRecords feedBuffer;
     private IOasisDao dao;
-    private Channel channel;
+    private MsgAcknowledger acknowledger;
     private Random random;
 
     @Before
@@ -49,7 +50,7 @@ public class ConsumerTest {
         feedBuffer = Mockito.mock(BufferedRecords.class);
         consumerContext = new ConsumerContext(2, feedBuffer);
         dao = Mockito.mock(IOasisDao.class);
-        channel = Mockito.mock(Channel.class);
+        acknowledger = Mockito.mock(MsgAcknowledger.class);
 
         consumerContext.getInterceptor().init(dao);
     }
@@ -62,7 +63,7 @@ public class ConsumerTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testBadgeConsumer() throws IOException, DbException {
-        BadgeConsumer consumer = new BadgeConsumer(channel, dao, consumerContext);
+        BadgeConsumer consumer = new BadgeConsumer(dao, consumerContext, acknowledger);
         Assert.assertEquals("game/batch/addBadge", consumer.getInsertScriptName());
 
         {
@@ -78,7 +79,7 @@ public class ConsumerTest {
             model.setTeamScopeId(jsonEvent.getTeamScope());
             model.setTs(System.currentTimeMillis());
             model.setUserId(jsonEvent.getUser());
-            consumer.handleDelivery(consumerTag, createEnvelope(1, "badge"), null, objToBytes(model));
+            consumer.handleMessage(objToBytes(model), 1L);
             consumer.flushNow();
 
             ArgumentCaptor<List<Map<String, Object>>> arg = ArgumentCaptor.forClass(List.class);
@@ -97,7 +98,7 @@ public class ConsumerTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testChallengeConsumer() throws IOException, DbException {
-        BaseConsumer consumer = new ChallengeConsumer(channel, dao, consumerContext);
+        BaseConsumer consumer = new ChallengeConsumer(dao, consumerContext, acknowledger);
         Assert.assertEquals("game/batch/addChallengeWinner", consumer.getInsertScriptName());
 
         {
@@ -114,8 +115,7 @@ public class ConsumerTest {
             model.setTeamScopeId(jsonEvent.getTeamScope());
             model.setTs(System.currentTimeMillis());
             model.setUserId(jsonEvent.getUser());
-            consumer.handleDelivery(consumerTag, createEnvelope(1, "challenge"), null,
-                    objToBytes(model));
+            consumer.handleMessage(objToBytes(model), 1L);
             consumer.flushNow();
 
             ArgumentCaptor<List<Map<String, Object>>> arg = ArgumentCaptor.forClass(List.class);
@@ -133,7 +133,7 @@ public class ConsumerTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testMilestoneConsumer() throws IOException, DbException {
-        BaseConsumer consumer = new MilestoneConsumer(channel, dao, consumerContext);
+        BaseConsumer consumer = new MilestoneConsumer(dao, consumerContext, acknowledger);
         Assert.assertEquals("game/batch/addMilestone", consumer.getInsertScriptName());
 
         {
@@ -150,8 +150,7 @@ public class ConsumerTest {
             model.setTeamScopeId(jsonEvent.getTeamScope());
             model.setTs(System.currentTimeMillis());
             model.setUserId(jsonEvent.getUser());
-            consumer.handleDelivery(consumerTag, createEnvelope(1, "milestone"), null,
-                    objToBytes(model));
+            consumer.handleMessage(objToBytes(model), 1L);
             consumer.flushNow();
 
             ArgumentCaptor<List<Map<String, Object>>> arg = ArgumentCaptor.forClass(List.class);
@@ -172,7 +171,7 @@ public class ConsumerTest {
     @Test
     public void testMilestoneStateConsumer() throws IOException, DbException {
         {
-            BaseConsumer consumer = new MilestoneStateConsumer(channel, dao, consumerContext);
+            BaseConsumer consumer = new MilestoneStateConsumer(dao, consumerContext, acknowledger);
             Assertions.assertThatThrownBy(consumer::getInsertScriptName).isInstanceOf(IllegalStateException.class);
             Assertions.assertThatThrownBy(() -> consumer.handle(null)).isInstanceOf(IllegalStateException.class);
 
@@ -185,8 +184,7 @@ public class ConsumerTest {
             model.setMilestoneId(1L);
             model.setGameId(jsonEvent.getGameId());
             model.setUserId(jsonEvent.getUser());
-            consumer.handleDelivery(consumerTag, createEnvelope(1, "milestone-state"), null,
-                    objToBytes(model));
+            consumer.handleMessage(objToBytes(model), 1L);
             consumer.flushNow();
 
             ArgumentCaptor<List<Map<String, Object>>> arg = ArgumentCaptor.forClass(List.class);
@@ -205,7 +203,7 @@ public class ConsumerTest {
     @Test
     public void testMilestoneStateLossConsumer() throws IOException, DbException {
         {
-            BaseConsumer consumer = new MilestoneStateConsumer(channel, dao, consumerContext);
+            BaseConsumer consumer = new MilestoneStateConsumer(dao, consumerContext, acknowledger);
 
             // positive state update
             MilestoneStateModel model = new MilestoneStateModel();
@@ -215,8 +213,7 @@ public class ConsumerTest {
             model.setMilestoneId(1L);
             model.setGameId(jsonEvent.getGameId());
             model.setUserId(jsonEvent.getUser());
-            consumer.handleDelivery(consumerTag, createEnvelope(1, "milestone-state"), null,
-                    objToBytes(model));
+            consumer.handleMessage(objToBytes(model), 1L);
             consumer.flushNow();
 
             ArgumentCaptor<List<Map<String, Object>>> arg = ArgumentCaptor.forClass(List.class);
@@ -234,7 +231,7 @@ public class ConsumerTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testStateConsumer() throws IOException, DbException {
-        BaseConsumer consumer = new StateConsumer(channel, dao, consumerContext);
+        BaseConsumer consumer = new StateConsumer(dao, consumerContext, acknowledger);
         Assert.assertEquals("game/updateState", consumer.getInsertScriptName());
 
         {
@@ -257,8 +254,7 @@ public class ConsumerTest {
             model.setTeamScopeId(jsonEvent.getTeamScope());
             model.setTs(System.currentTimeMillis());
             model.setUserId(jsonEvent.getUser());
-            consumer.handleDelivery(consumerTag, createEnvelope(1, "state"), null,
-                    objToBytes(model));
+            consumer.handleMessage(objToBytes(model), 1L);
             consumer.flushNow();
 
             ArgumentCaptor<List<Map<String, Object>>> arg = ArgumentCaptor.forClass(List.class);
@@ -277,7 +273,7 @@ public class ConsumerTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testStateNoChangeConsumer() throws IOException, DbException {
-        BaseConsumer consumer = new StateConsumer(channel, dao, consumerContext);
+        BaseConsumer consumer = new StateConsumer(dao, consumerContext, acknowledger);
         Assert.assertEquals("game/updateState", consumer.getInsertScriptName());
 
         {
@@ -299,8 +295,7 @@ public class ConsumerTest {
             model.setTeamScopeId(jsonEvent.getTeamScope());
             model.setTs(System.currentTimeMillis());
             model.setUserId(jsonEvent.getUser());
-            consumer.handleDelivery(consumerTag, createEnvelope(1, "state"), null,
-                    objToBytes(model));
+            consumer.handleMessage(objToBytes(model), 1L);
             consumer.flushNow();
 
             ArgumentCaptor<List<Map<String, Object>>> arg = ArgumentCaptor.forClass(List.class);
@@ -318,7 +313,7 @@ public class ConsumerTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRaceConsumer() throws IOException, DbException {
-        BaseConsumer consumer = new RaceConsumer(channel, dao, consumerContext);
+        BaseConsumer consumer = new RaceConsumer(dao, consumerContext, acknowledger);
         Assert.assertEquals("game/batch/addRaceAward", consumer.getInsertScriptName());
 
         {
@@ -337,8 +332,7 @@ public class ConsumerTest {
             model.setTeamScopeId(jsonEvent.getTeamScope());
             model.setTs(System.currentTimeMillis());
             model.setUserId(jsonEvent.getUser());
-            consumer.handleDelivery(consumerTag, createEnvelope(1, "race"), null,
-                    objToBytes(model));
+            consumer.handleMessage(objToBytes(model), 1L);
             consumer.flushNow();
 
             ArgumentCaptor<List<Map<String, Object>>> arg = ArgumentCaptor.forClass(List.class);
@@ -356,7 +350,7 @@ public class ConsumerTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testPointConsumer() throws IOException, DbException {
-        BaseConsumer consumer = new PointConsumer(channel, dao, consumerContext);
+        BaseConsumer consumer = new PointConsumer(dao, consumerContext, acknowledger);
         Assert.assertEquals("game/batch/addPoint", consumer.getInsertScriptName());
 
         {
@@ -375,8 +369,7 @@ public class ConsumerTest {
             model.setTeamScopeId(jsonEvent.getTeamScope());
             model.setTs(System.currentTimeMillis());
             model.setUserId(jsonEvent.getUser());
-            consumer.handleDelivery(consumerTag, createEnvelope(1, "point"), null,
-                    objToBytes(model));
+            consumer.handleMessage(objToBytes(model), 1L);
             consumer.flushNow();
 
             ArgumentCaptor<List<Map<String, Object>>> arg = ArgumentCaptor.forClass(List.class);

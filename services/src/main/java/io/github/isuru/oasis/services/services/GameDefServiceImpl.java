@@ -18,7 +18,11 @@ import io.github.isuru.oasis.model.defs.StateDef;
 import io.github.isuru.oasis.services.Bootstrapping;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.model.*;
+import io.github.isuru.oasis.services.model.DefinitionAttr;
+import io.github.isuru.oasis.services.model.FeatureAttr;
+import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.TeamScope;
+import io.github.isuru.oasis.services.model.UserProfile;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -26,7 +30,13 @@ import io.github.isuru.oasis.services.utils.RUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**

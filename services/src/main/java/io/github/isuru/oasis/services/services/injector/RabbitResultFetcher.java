@@ -1,8 +1,11 @@
 package io.github.isuru.oasis.services.services.injector;
 
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DefaultConsumer;
+import com.rabbitmq.client.Envelope;
 import io.github.isuru.oasis.model.configs.EnvKeys;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.model.utils.OasisUtils;
@@ -59,13 +62,15 @@ public class RabbitResultFetcher implements ResultFetcher {
         consumerContext = new ConsumerContext(10);
         consumerContext.getInterceptor().init(dao);
 
-        PointConsumer consumerPoints = new PointConsumer(channel, dao, consumerContext);
-        BadgeConsumer consumerBadges = new BadgeConsumer(channel, dao, consumerContext);
-        MilestoneConsumer consumerMilestones = new MilestoneConsumer(channel, dao, consumerContext);
-        MilestoneStateConsumer consumerMsState = new MilestoneStateConsumer(channel, dao, consumerContext);
-        ChallengeConsumer consumerChallenges = new ChallengeConsumer(channel, dao, consumerContext);
-        RaceConsumer consumerRaces = new RaceConsumer(channel, dao, consumerContext);
-        StateConsumer consumerStates = new StateConsumer(channel, dao, consumerContext);
+        RabbitAcknowledger acknowledger = new RabbitAcknowledger(channel);
+
+        PointConsumer consumerPoints = new PointConsumer(dao, consumerContext, acknowledger);
+        BadgeConsumer consumerBadges = new BadgeConsumer(dao, consumerContext, acknowledger);
+        MilestoneConsumer consumerMilestones = new MilestoneConsumer(dao, consumerContext, acknowledger);
+        MilestoneStateConsumer consumerMsState = new MilestoneStateConsumer(dao, consumerContext, acknowledger);
+        ChallengeConsumer consumerChallenges = new ChallengeConsumer(dao, consumerContext, acknowledger);
+        RaceConsumer consumerRaces = new RaceConsumer(dao, consumerContext, acknowledger);
+        StateConsumer consumerStates = new StateConsumer(dao, consumerContext, acknowledger);
 
         channel.queueDeclare(rabbit.getInjectorPointsQueue(), DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(rabbit.getInjectorBadgesQueue(), DURABLE, EXCLUSIVE, AUTO_DEL, null);
@@ -79,13 +84,13 @@ public class RabbitResultFetcher implements ResultFetcher {
                 consumerChallenges, consumerMilestones, consumerMsState,
                 consumerPoints, consumerRaces, consumerStates));
 
-        channel.basicConsume(rabbit.getInjectorPointsQueue(), AUTO_ACK, consumerPoints);
-        channel.basicConsume(rabbit.getInjectorBadgesQueue(), AUTO_ACK, consumerBadges);
-        channel.basicConsume(rabbit.getInjectorMilestonesQueue(), AUTO_ACK, consumerMilestones);
-        channel.basicConsume(rabbit.getInjectorMilestoneStatesQueue(), AUTO_ACK, consumerMsState);
-        channel.basicConsume(rabbit.getInjectorChallengesQueue(), AUTO_ACK, consumerChallenges);
-        channel.basicConsume(rabbit.getInjectorStatesQueue(), AUTO_ACK, consumerStates);
-        channel.basicConsume(rabbit.getInjectorRacesQueue(), AUTO_ACK, consumerRaces);
+        channel.basicConsume(rabbit.getInjectorPointsQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerPoints));
+        channel.basicConsume(rabbit.getInjectorBadgesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerBadges));
+        channel.basicConsume(rabbit.getInjectorMilestonesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerMilestones));
+        channel.basicConsume(rabbit.getInjectorMilestoneStatesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerMsState));
+        channel.basicConsume(rabbit.getInjectorChallengesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerChallenges));
+        channel.basicConsume(rabbit.getInjectorStatesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerStates));
+        channel.basicConsume(rabbit.getInjectorRacesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerRaces));
     }
 
     @Override
@@ -129,5 +134,41 @@ public class RabbitResultFetcher implements ResultFetcher {
         if (connection != null) {
             connection.close();
         }
+    }
+
+    private static class RabbitAcknowledger implements MsgAcknowledger {
+
+        private final Channel channel;
+
+        private RabbitAcknowledger(Channel channel) {
+            this.channel = channel;
+        }
+
+        @Override
+        public void ack(long tag) throws IOException {
+            channel.basicAck(tag, false);
+        }
+    }
+
+    private static class RabbitConsumer<T> extends DefaultConsumer {
+
+        private IConsumer<T> consumer;
+
+        /**
+         * Constructs a new instance and records its association to the passed-in channel.
+         *
+         * @param channel the channel to which this consumer is attached
+         */
+        RabbitConsumer(Channel channel, IConsumer<T> consumer) {
+            super(channel);
+            this.consumer = consumer;
+        }
+
+        @Override
+        public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) {
+            LOG.debug("Message received from: {} [{}]", envelope.getRoutingKey(), envelope.getDeliveryTag());
+            consumer.handleMessage(body, envelope.getDeliveryTag());
+        }
+
     }
 }

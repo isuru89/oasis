@@ -5,10 +5,20 @@ import io.github.isuru.oasis.model.DefaultEntities;
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.db.IOasisDao;
 import io.github.isuru.oasis.services.DataCache;
-import io.github.isuru.oasis.services.dto.crud.*;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamProfileEditDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
+import io.github.isuru.oasis.services.dto.crud.TeamScopeEditDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileAddDto;
+import io.github.isuru.oasis.services.dto.crud.UserProfileEditDto;
 import io.github.isuru.oasis.services.dto.stats.UserCountStat;
 import io.github.isuru.oasis.services.exception.InputValidationException;
-import io.github.isuru.oasis.services.model.*;
+import io.github.isuru.oasis.services.model.TeamProfile;
+import io.github.isuru.oasis.services.model.TeamScope;
+import io.github.isuru.oasis.services.model.UserProfile;
+import io.github.isuru.oasis.services.model.UserRole;
+import io.github.isuru.oasis.services.model.UserTeam;
+import io.github.isuru.oasis.services.model.UserTeamScope;
 import io.github.isuru.oasis.services.utils.Checks;
 import io.github.isuru.oasis.services.utils.Commons;
 import io.github.isuru.oasis.services.utils.Maps;
@@ -17,7 +27,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author iweerarathna
