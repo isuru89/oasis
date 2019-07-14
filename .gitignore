@@ -7,7 +7,7 @@ input-light.csv
 /input2.csv
 
 data/
-/target/
+**/target/**
 
 .classpath
 .settings/
