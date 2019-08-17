@@ -7,13 +7,13 @@ import io.github.isuru.oasis.model.defs.BadgeDef;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
-import io.github.isuru.oasis.model.defs.StateDef;
+import io.github.isuru.oasis.model.defs.RatingDef;
 import io.github.isuru.oasis.model.events.JsonEvent;
 import io.github.isuru.oasis.model.handlers.output.BadgeModel;
 import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
-import io.github.isuru.oasis.model.handlers.output.OStateModel;
+import io.github.isuru.oasis.model.handlers.output.RatingModel;
 import io.github.isuru.oasis.model.handlers.output.PointModel;
 import io.github.isuru.oasis.services.dto.crud.TeamProfileAddDto;
 import io.github.isuru.oasis.services.dto.crud.TeamScopeAddDto;
@@ -183,15 +183,15 @@ public abstract class WithDataTest extends AbstractServiceTest {
 
         for (List<String> attr : names) {
             String name = attr.get(0);
-            StateDef state = new StateDef();
+            RatingDef state = new RatingDef();
             state.setName(SLUGIFY.slugify(name));
             state.setDisplayName(name);
             state.setCurrency(random.nextBoolean());
 
-            List<StateDef.State> stateList = new ArrayList<>();
+            List<RatingDef.RatingState> stateList = new ArrayList<>();
             for (int i = 1; i < attr.size(); i++) {
                 String st = attr.get(i);
-                StateDef.State ostate = new StateDef.State();
+                RatingDef.RatingState ostate = new RatingDef.RatingState();
                 ostate.setName(SLUGIFY.slugify(st));
                 ostate.setId(i);
                 stateList.add(ostate);
@@ -199,7 +199,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
             state.setStates(stateList);
             state.setDefaultState(1 + random.nextInt(attr.size() - 1));
 
-            gameDefService.addStatePlay(gameId, state);
+            gameDefService.addRating(gameId, state);
         }
     }
 
@@ -559,7 +559,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
     }
 
     void loadStates(long gameId) throws Exception {
-        List<StateDef> stateDefs = gameDefService.listStatePlays(gameId);
+        List<RatingDef> stateDefs = gameDefService.listRatings(gameId);
 
         Assert.assertTrue(stateDefs.size() > 0);
 
@@ -572,15 +572,15 @@ public abstract class WithDataTest extends AbstractServiceTest {
             UserTeam team = profileService.findCurrentTeamOfUser(profile.getId());
             Random random = new Random(System.currentTimeMillis());
 
-            for (StateDef stateDef : stateDefs) {
+            for (RatingDef stateDef : stateDefs) {
                 if (random.nextInt(3) % 3 == 1) continue;
 
                 int size = stateDef.getStates().size();
-                StateDef.State prevState = stateDef.getStates().get(random.nextInt(size));
-                StateDef.State currState = stateDef.getStates().get(random.nextInt(size));
+                RatingDef.RatingState prevState = stateDef.getStates().get(random.nextInt(size));
+                RatingDef.RatingState currState = stateDef.getStates().get(random.nextInt(size));
 
 
-                OStateModel model = new OStateModel();
+                RatingModel model = new RatingModel();
                 model.setGameId((int) gameId);
                 model.setTs(System.currentTimeMillis());
                 model.setSourceId(1);
@@ -683,7 +683,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
         return jsonEvent;
     }
 
-    private JsonEvent toJsonEvent(OStateModel model, long gameId) {
+    private JsonEvent toJsonEvent(RatingModel model, long gameId) {
         JsonEvent jsonEvent = new JsonEvent();
         jsonEvent.setFieldValue(Constants.FIELD_GAME_ID, gameId);
         jsonEvent.setFieldValue(Constants.FIELD_TEAM, model.getTeamId());

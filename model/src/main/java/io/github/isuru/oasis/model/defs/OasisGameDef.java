@@ -14,13 +14,13 @@ public class OasisGameDef implements Serializable {
     private List<PointDef> points;
     private List<BadgeDef> badges;
     private List<MilestoneDef> milestones;
-    private List<StateDef> states;
+    private List<RatingDef> states;
 
-    public List<StateDef> getStates() {
+    public List<RatingDef> getStates() {
         return states;
     }
 
-    public void setStates(List<StateDef> states) {
+    public void setStates(List<RatingDef> states) {
         this.states = states;
     }
 

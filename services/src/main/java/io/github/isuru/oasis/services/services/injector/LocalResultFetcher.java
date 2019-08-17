@@ -10,7 +10,7 @@ import io.github.isuru.oasis.services.services.injector.consumers.MilestoneConsu
 import io.github.isuru.oasis.services.services.injector.consumers.MilestoneStateConsumer;
 import io.github.isuru.oasis.services.services.injector.consumers.PointConsumer;
 import io.github.isuru.oasis.services.services.injector.consumers.RaceConsumer;
-import io.github.isuru.oasis.services.services.injector.consumers.StateConsumer;
+import io.github.isuru.oasis.services.services.injector.consumers.RatingConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -48,18 +48,18 @@ public class LocalResultFetcher implements ResultFetcher {
         MilestoneStateConsumer consumerMsState = new MilestoneStateConsumer(dao, consumerContext, acknowledger);
         ChallengeConsumer consumerChallenges = new ChallengeConsumer(dao, consumerContext, acknowledger);
         RaceConsumer consumerRaces = new RaceConsumer(dao, consumerContext, acknowledger);
-        StateConsumer consumerStates = new StateConsumer(dao, consumerContext, acknowledger);
+        RatingConsumer consumerRatings = new RatingConsumer(dao, consumerContext, acknowledger);
 
         consumerList.addAll(Arrays.asList(consumerBadges,
                 consumerChallenges, consumerMilestones, consumerMsState,
-                consumerPoints, consumerRaces, consumerStates));
+                consumerPoints, consumerRaces, consumerRatings));
 
         readerList.add(new SinkReader<>(LocalSink.SQ_POINTS, consumerPoints));
         readerList.add(new SinkReader<>(LocalSink.SQ_BADGES, consumerBadges));
         readerList.add(new SinkReader<>(LocalSink.SQ_CHALLENGES, consumerChallenges));
         readerList.add(new SinkReader<>(LocalSink.SQ_MILESTONE_STATES, consumerMsState));
         readerList.add(new SinkReader<>(LocalSink.SQ_MILESTONES, consumerMilestones));
-        readerList.add(new SinkReader<>(LocalSink.SQ_STATES, consumerStates));
+        readerList.add(new SinkReader<>(LocalSink.SQ_RATINGS, consumerRatings));
         readerList.add(new SinkReader<>(LocalSink.SQ_RACES, consumerRaces));
 
         for (SinkReader sinkReader : readerList) {

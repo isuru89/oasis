@@ -1,26 +1,26 @@
 package io.github.isuru.oasis.game.persist.mappers;
 
 import io.github.isuru.oasis.model.Event;
-import io.github.isuru.oasis.model.OState;
-import io.github.isuru.oasis.model.handlers.OStateNotification;
-import io.github.isuru.oasis.model.handlers.output.OStateModel;
+import io.github.isuru.oasis.model.Rating;
+import io.github.isuru.oasis.model.handlers.RatingNotification;
+import io.github.isuru.oasis.model.handlers.output.RatingModel;
 
-public class StatesNotificationMapper extends BaseNotificationMapper<OStateNotification, OStateModel> {
+public class RatingNotificationMapper extends BaseNotificationMapper<RatingNotification, RatingModel> {
 
     @Override
-    OStateModel create(OStateNotification notification) {
-        OStateModel model = new OStateModel();
+    RatingModel create(RatingNotification notification) {
+        RatingModel model = new RatingModel();
         Event event = notification.getEvent();
 
         model.setUserId(notification.getUserId());
         model.setTeamId(event.getTeam());
         model.setTeamScopeId(event.getTeamScope());
-        model.setStateId(notification.getStateRef().getId());
+        model.setStateId(notification.getRatingRef().getId());
         model.setCurrentState(notification.getState().getId());
         model.setCurrentStateName(notification.getState().getName());
         model.setCurrentValue(notification.getCurrentValue());
         model.setCurrentPoints(notification.getState().getPoints());
-        model.setCurrency(notification.getStateRef().isCurrency());
+        model.setCurrency(notification.getRatingRef().isCurrency());
         model.setEvent(extractRawEvents(event));
         model.setTs(event.getTimestamp());
         model.setExtId(event.getExternalId());
@@ -28,9 +28,9 @@ public class StatesNotificationMapper extends BaseNotificationMapper<OStateNotif
         model.setGameId(event.getGameId());
         model.setPreviousState(notification.getPreviousState());
         model.setPrevStateChangedAt(notification.getPreviousChangeAt());
-        model.setPreviousStateName(notification.getStateRef().getStates().stream()
+        model.setPreviousStateName(notification.getRatingRef().getStates().stream()
                 .filter(s -> s.getId().equals(notification.getPreviousState()))
-                .map(OState.OAState::getName)
+                .map(Rating.RatingState::getName)
                 .findFirst().orElse(""));
         return model;
     }

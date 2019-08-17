@@ -8,7 +8,7 @@ import io.github.isuru.oasis.model.events.JsonEvent;
 import io.github.isuru.oasis.model.handlers.output.BadgeModel;
 import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
-import io.github.isuru.oasis.model.handlers.output.OStateModel;
+import io.github.isuru.oasis.model.handlers.output.RatingModel;
 import io.github.isuru.oasis.model.handlers.output.PointModel;
 import io.github.isuru.oasis.model.handlers.output.RaceModel;
 import io.github.isuru.oasis.services.services.injector.ConsumerContext;
@@ -116,8 +116,8 @@ public class ConsumerInterceptor implements Consumer<Object>, Closeable {
 
             buffer.push(new BufferedRecords.ElementRecord(data, ts));
 
-        } else if (value instanceof OStateModel) {
-            OStateModel stateModel = (OStateModel) value;
+        } else if (value instanceof RatingModel) {
+            RatingModel stateModel = (RatingModel) value;
 
             if (!stateModel.getPreviousState().equals(stateModel.getCurrentState())) {
                 Pair<String, String> eInfo = deriveCausedEvent(stateModel.getEvent());
@@ -127,7 +127,7 @@ public class ConsumerInterceptor implements Consumer<Object>, Closeable {
                 data.put("userId", stateModel.getUserId());
                 data.put("teamId", stateModel.getTeamId());
                 data.put("teamScopeId", stateModel.getTeamScopeId());
-                data.put("defKindId", OasisDefinition.STATE.getTypeId());
+                data.put("defKindId", OasisDefinition.RATING.getTypeId());
                 data.put("defId", stateModel.getStateId());
                 data.put("actionId", 1);
                 data.put("message", String.format("State changed from %s to %s",

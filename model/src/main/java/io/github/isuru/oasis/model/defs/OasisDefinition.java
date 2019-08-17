@@ -11,7 +11,7 @@ public enum OasisDefinition {
     BADGE(6),
     MILESTONE(7),
     LEADERBOARD(8),
-    STATE(9),
+    RATING(9),
     CHALLENGE(10),
     RACE(11);
 

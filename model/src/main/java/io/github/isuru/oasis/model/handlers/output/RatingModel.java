@@ -4,7 +4,7 @@ import io.github.isuru.oasis.model.events.JsonEvent;
 
 import java.io.Serializable;
 
-public class OStateModel implements Serializable {
+public class RatingModel implements Serializable {
 
     private Long userId;
     private Long teamId;

@@ -2,13 +2,13 @@ package io.github.isuru.oasis.game.persist.mappers;
 
 import io.github.isuru.oasis.game.parser.BadgeParser;
 import io.github.isuru.oasis.game.parser.MilestoneParser;
-import io.github.isuru.oasis.game.parser.OStateParser;
+import io.github.isuru.oasis.game.parser.RatingsParser;
 import io.github.isuru.oasis.game.parser.PointParser;
 import io.github.isuru.oasis.model.Badge;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.Milestone;
-import io.github.isuru.oasis.model.OState;
+import io.github.isuru.oasis.model.Rating;
 import io.github.isuru.oasis.model.defs.ChallengeDef;
 import io.github.isuru.oasis.model.events.BadgeEvent;
 import io.github.isuru.oasis.model.events.ChallengeEvent;
@@ -19,13 +19,13 @@ import io.github.isuru.oasis.model.events.PointEvent;
 import io.github.isuru.oasis.model.events.RaceEvent;
 import io.github.isuru.oasis.model.handlers.BadgeNotification;
 import io.github.isuru.oasis.model.handlers.MilestoneNotification;
-import io.github.isuru.oasis.model.handlers.OStateNotification;
+import io.github.isuru.oasis.model.handlers.RatingNotification;
 import io.github.isuru.oasis.model.handlers.PointNotification;
 import io.github.isuru.oasis.model.handlers.output.BadgeModel;
 import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
-import io.github.isuru.oasis.model.handlers.output.OStateModel;
+import io.github.isuru.oasis.model.handlers.output.RatingModel;
 import io.github.isuru.oasis.model.handlers.output.PointModel;
 import io.github.isuru.oasis.model.handlers.output.RaceModel;
 import io.github.isuru.oasis.model.rules.BadgeRule;
@@ -159,24 +159,24 @@ public class MappersTest {
 
     @Test
     public void testStateNotifier() throws Exception {
-        MapFunction<OStateNotification, String> mapper = new StatesNotificationMapper();
-        OState state = readState("/state-test/rules/states.yml", 0);
+        MapFunction<RatingNotification, String> mapper = new RatingNotificationMapper();
+        Rating state = readState("/state-test/rules/states.yml", 0);
 
         {
             JsonEvent event = randomJsonEvent();
 
-            OStateNotification notification = new OStateNotification();
+            RatingNotification notification = new RatingNotification();
             notification.setUserId(event.getUser());
             notification.setTs(event.getTimestamp());
             notification.setEvent(event);
-            notification.setStateRef(state);
+            notification.setRatingRef(state);
             notification.setState(state.getStates().stream().skip(1).findFirst().get());
             notification.setCurrentValue("123");
             notification.setPreviousState(0);
             notification.setPreviousChangeAt(System.currentTimeMillis() - 16000);
 
             String content = mapper.map(notification);
-            OStateModel model = toObj(content, OStateModel.class);
+            RatingModel model = toObj(content, RatingModel.class);
 
             assertStateOutput(model, event, notification);
         }
@@ -321,14 +321,14 @@ public class MappersTest {
         Assertions.assertEquals(challengeEvent.getWinNo(), model.getWinNo());
     }
 
-    private void assertStateOutput(OStateModel model,
+    private void assertStateOutput(RatingModel model,
                                    Event event,
-                                   OStateNotification notification) {
+                                   RatingNotification notification) {
         Assertions.assertEquals(notification.getCurrentValue(), model.getCurrentValue());
         Assertions.assertEquals(notification.getState().getPoints(), model.getCurrentPoints());
         Assertions.assertEquals(notification.getState().getId(), model.getCurrentState());
         Assertions.assertEquals(event.getSource(), model.getSourceId());
-        Assertions.assertEquals(notification.getStateRef().getId(), model.getStateId().longValue());
+        Assertions.assertEquals(notification.getRatingRef().getId(), model.getStateId().longValue());
         Assertions.assertEquals(event.getTeam(), model.getTeamId());
         Assertions.assertEquals(event.getTeamScope(), model.getTeamScopeId());
         Assertions.assertEquals(event.getTimestamp(), model.getTs().longValue());
@@ -463,9 +463,9 @@ public class MappersTest {
         }
     }
 
-    private OState readState(String resPath, int index) throws IOException {
+    private Rating readState(String resPath, int index) throws IOException {
         try (InputStream stream = MappersTest.class.getResourceAsStream(resPath)) {
-            List<OState> parsed = OStateParser.parse(stream);
+            List<Rating> parsed = RatingsParser.parse(stream);
             return parsed.get(index);
         }
     }

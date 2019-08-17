@@ -1,7 +1,6 @@
 package io.github.isuru.oasis.services.services.injector.consumers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Envelope;
 import io.github.isuru.oasis.model.Constants;
 import io.github.isuru.oasis.model.db.DbException;
@@ -11,7 +10,7 @@ import io.github.isuru.oasis.model.handlers.output.BadgeModel;
 import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
-import io.github.isuru.oasis.model.handlers.output.OStateModel;
+import io.github.isuru.oasis.model.handlers.output.RatingModel;
 import io.github.isuru.oasis.model.handlers.output.PointModel;
 import io.github.isuru.oasis.model.handlers.output.RaceModel;
 import io.github.isuru.oasis.services.services.injector.ConsumerContext;
@@ -231,11 +230,11 @@ public class ConsumerTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testStateConsumer() throws IOException, DbException {
-        BaseConsumer consumer = new StateConsumer(dao, consumerContext, acknowledger);
+        BaseConsumer consumer = new RatingConsumer(dao, consumerContext, acknowledger);
         Assert.assertEquals("game/updateState", consumer.getInsertScriptName());
 
         {
-            OStateModel model = new OStateModel();
+            RatingModel model = new RatingModel();
             JsonEvent jsonEvent = randomJsonEvent(random);
             model.setCurrentPoints(1200.0);
             model.setCurrentState(2);
@@ -273,11 +272,11 @@ public class ConsumerTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testStateNoChangeConsumer() throws IOException, DbException {
-        BaseConsumer consumer = new StateConsumer(dao, consumerContext, acknowledger);
+        BaseConsumer consumer = new RatingConsumer(dao, consumerContext, acknowledger);
         Assert.assertEquals("game/updateState", consumer.getInsertScriptName());
 
         {
-            OStateModel model = new OStateModel();
+            RatingModel model = new RatingModel();
             JsonEvent jsonEvent = randomJsonEvent(random);
             model.setCurrentPoints(1200.0);
             model.setCurrentState(1);

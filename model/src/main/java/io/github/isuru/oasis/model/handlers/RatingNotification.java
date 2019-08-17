@@ -1,18 +1,18 @@
 package io.github.isuru.oasis.model.handlers;
 
 import io.github.isuru.oasis.model.Event;
-import io.github.isuru.oasis.model.OState;
+import io.github.isuru.oasis.model.Rating;
 
 import java.io.Serializable;
 
-public class OStateNotification implements Serializable {
+public class RatingNotification implements Serializable {
 
     private Long userId;
-    private OState stateRef;
+    private Rating ratingRef;
     private Event event;
     private Integer previousState;
     private long previousChangeAt;
-    private OState.OAState state;
+    private Rating.RatingState state;
     private String currentValue;
     private Long ts;
 
@@ -40,12 +40,12 @@ public class OStateNotification implements Serializable {
         this.userId = userId;
     }
 
-    public OState getStateRef() {
-        return stateRef;
+    public Rating getRatingRef() {
+        return ratingRef;
     }
 
-    public void setStateRef(OState stateRef) {
-        this.stateRef = stateRef;
+    public void setRatingRef(Rating ratingRef) {
+        this.ratingRef = ratingRef;
     }
 
     public Event getEvent() {
@@ -56,11 +56,11 @@ public class OStateNotification implements Serializable {
         this.event = event;
     }
 
-    public OState.OAState getState() {
+    public Rating.RatingState getState() {
         return state;
     }
 
-    public void setState(OState.OAState state) {
+    public void setState(Rating.RatingState state) {
         this.state = state;
     }
 

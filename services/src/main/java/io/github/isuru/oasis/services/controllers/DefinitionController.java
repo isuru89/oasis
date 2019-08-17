@@ -79,9 +79,9 @@ public class DefinitionController {
         return new DefinitionAddResponse("challenge", gameDefService.addChallenge(gameId, challengeDef));
     }
 
-    @PostMapping("/game/{id}/state")
-    public DefinitionAddResponse addState(@PathVariable("id") long gameId, @RequestBody StateDef stateDef) throws Exception {
-        return new DefinitionAddResponse("state", gameDefService.addStatePlay(gameId, stateDef));
+    @PostMapping("/game/{id}/rating")
+    public DefinitionAddResponse addRating(@PathVariable("id") long gameId, @RequestBody RatingDef stateDef) throws Exception {
+        return new DefinitionAddResponse("rating", gameDefService.addRating(gameId, stateDef));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,9 +123,9 @@ public class DefinitionController {
         return gameDefService.listChallenges(gameId);
     }
 
-    @GetMapping("/game/{id}/state/all")
-    public List<StateDef> listStateDefs(@PathVariable("id") long gameId) throws Exception {
-        return gameDefService.listStatePlays(gameId);
+    @GetMapping("/game/{id}/rating/all")
+    public List<RatingDef> listRatingDefs(@PathVariable("id") long gameId) throws Exception {
+        return gameDefService.listRatings(gameId);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -168,9 +168,9 @@ public class DefinitionController {
         return gameDefService.readChallenge(challengeId);
     }
 
-    @GetMapping("/game/{id}/state/{stateId}")
-    public StateDef readStateDef(@PathVariable("stateId") long stateId) throws Exception {
-        return gameDefService.readStatePlay(stateId);
+    @GetMapping("/game/{id}/rating/{ratingId}")
+    public RatingDef readRatingDef(@PathVariable("ratingId") long ratingId) throws Exception {
+        return gameDefService.readRating(ratingId);
     }
 
 
@@ -214,8 +214,8 @@ public class DefinitionController {
         return new DeleteResponse("challenge", gameDefService.disableChallenge(challengeId));
     }
 
-    @DeleteMapping("/game/{id}/state/{stateId}")
-    public DeleteResponse deleteStateDef(@PathVariable("stateId") long stateId) throws Exception {
-        return new DeleteResponse("state", gameDefService.disableStatePlay(stateId));
+    @DeleteMapping("/game/{id}/rating/{ratingId}")
+    public DeleteResponse deleteRatingDef(@PathVariable("ratingId") long ratingId) throws Exception {
+        return new DeleteResponse("rating", gameDefService.disableRating(ratingId));
     }
 }

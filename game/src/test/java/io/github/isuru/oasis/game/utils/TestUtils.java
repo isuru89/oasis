@@ -3,7 +3,7 @@ package io.github.isuru.oasis.game.utils;
 import io.github.isuru.oasis.game.parser.*;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
-import io.github.isuru.oasis.model.OState;
+import io.github.isuru.oasis.model.Rating;
 import io.github.isuru.oasis.model.handlers.*;
 import io.github.isuru.oasis.model.rules.BadgeRule;
 import io.github.isuru.oasis.model.rules.PointRule;
@@ -258,7 +258,7 @@ public class TestUtils {
         return MilestoneParser.parse(TestUtils.loadResource(resourceId));
     }
 
-    public static List<OState> getStateRules(String resourceId) throws IOException {
-        return OStateParser.parse(TestUtils.loadResource(resourceId));
+    public static List<Rating> getStateRules(String resourceId) throws IOException {
+        return RatingsParser.parse(TestUtils.loadResource(resourceId));
     }
 }

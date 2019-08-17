@@ -106,12 +106,12 @@ Races are point-awarding leaderboards for non-overlapping time windows. At a pre
 (daily, weekly, monthly), leaderboard winners will be awarded a set of points. This will
 continue in each time window as specified in a race.
 
-### States
-States indicates the current state of a user/team/team-scope. Based on the events, user's
+### Ratings
+Ratings indicates the current state of a user/team/team-scope. Based on the events, user's
 status will be calculated and from that status, some amount of net points will be awarded.
 A user can only be in one state at a time.
 
-For eg: someone can define a state (good/bad) based on total good answer ratio. As long as
+For eg: someone can define a rating (good/bad) based on total good answer ratio. As long as
 a user has positive good answer ratio, then that user will have, say 100 points, with him/her.
 Once the ratio goes down below a threshold, status will be changed to _'bad'_ and he/she will
 loose 100 points he/she had.

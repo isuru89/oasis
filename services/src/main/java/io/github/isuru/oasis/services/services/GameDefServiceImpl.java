@@ -14,7 +14,7 @@ import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.OasisDefinition;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.defs.RaceDef;
-import io.github.isuru.oasis.model.defs.StateDef;
+import io.github.isuru.oasis.model.defs.RatingDef;
 import io.github.isuru.oasis.services.Bootstrapping;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.exception.InputValidationException;
@@ -537,40 +537,40 @@ public class GameDefServiceImpl implements IGameDefService {
     }
 
     @Override
-    public long addStatePlay(long gameId, StateDef stateDef) throws Exception {
+    public long addRating(long gameId, RatingDef ratingDef) throws Exception {
         Checks.greaterThanZero(gameId, "gameId");
-        Checks.nonNullOrEmpty(stateDef.getName(), "name");
-        Checks.nonNullOrEmpty(stateDef.getDisplayName(), "displayName");
+        Checks.nonNullOrEmpty(ratingDef.getName(), "name");
+        Checks.nonNullOrEmpty(ratingDef.getDisplayName(), "displayName");
 
         DefWrapper wrapper = new DefWrapper();
-        wrapper.setKind(OasisDefinition.STATE.getTypeId());
-        wrapper.setName(stateDef.getName());
-        wrapper.setDisplayName(stateDef.getDisplayName());
-        wrapper.setContent(RUtils.toStr(stateDef, mapper));
+        wrapper.setKind(OasisDefinition.RATING.getTypeId());
+        wrapper.setName(ratingDef.getName());
+        wrapper.setDisplayName(ratingDef.getDisplayName());
+        wrapper.setContent(RUtils.toStr(ratingDef, mapper));
         wrapper.setGameId(gameId);
 
         return dao.getDefinitionDao().addDefinition(wrapper);
     }
 
     @Override
-    public StateDef readStatePlay(long id) throws Exception {
+    public RatingDef readRating(long id) throws Exception {
         Checks.greaterThanZero(id, "id");
 
-        return wrapperToStatePlay(dao.getDefinitionDao().readDefinition(id));
+        return wrapperToRating(dao.getDefinitionDao().readDefinition(id));
     }
 
     @Override
-    public List<StateDef> listStatePlays(long gameId) throws Exception {
+    public List<RatingDef> listRatings(long gameId) throws Exception {
         Checks.greaterThanZero(gameId, "gameId");
 
-        return dao.getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.STATE.getTypeId())
+        return dao.getDefinitionDao().listDefinitionsOfGame(gameId, OasisDefinition.RATING.getTypeId())
                 .stream()
-                .map(this::wrapperToStatePlay)
+                .map(this::wrapperToRating)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public boolean disableStatePlay(long id) throws Exception {
+    public boolean disableRating(long id) throws Exception {
         Checks.greaterThanZero(id, "id");
 
         return dao.getDefinitionDao().disableDefinition(id);
@@ -637,9 +637,9 @@ public class GameDefServiceImpl implements IGameDefService {
                 wrp -> RUtils.toObj(wrp.getContent(), ChallengeDef.class, mapper));
     }
 
-    private StateDef wrapperToStatePlay(DefWrapper wrapper) {
-        return Converters.toStateDef(wrapper,
-                wrp -> RUtils.toObj(wrp.getContent(), StateDef.class, mapper));
+    private RatingDef wrapperToRating(DefWrapper wrapper) {
+        return Converters.toRatingDef(wrapper,
+                wrp -> RUtils.toObj(wrp.getContent(), RatingDef.class, mapper));
     }
 
     private RaceDef wrapperToRace(DefWrapper wrapper) {

@@ -5,7 +5,7 @@ import io.github.isuru.oasis.model.handlers.output.BadgeModel;
 import io.github.isuru.oasis.model.handlers.output.ChallengeModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneModel;
 import io.github.isuru.oasis.model.handlers.output.MilestoneStateModel;
-import io.github.isuru.oasis.model.handlers.output.OStateModel;
+import io.github.isuru.oasis.model.handlers.output.RatingModel;
 import io.github.isuru.oasis.model.handlers.output.PointModel;
 import io.github.isuru.oasis.model.handlers.output.RaceModel;
 
@@ -41,7 +41,7 @@ public class ConsumerUtils {
         return map;
     }
 
-    public static Map<String, Object> toStateDaoData(OStateModel stateModel) {
+    public static Map<String, Object> toStateDaoData(RatingModel stateModel) {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", stateModel.getUserId());
         map.put("teamId", stateModel.getTeamId());

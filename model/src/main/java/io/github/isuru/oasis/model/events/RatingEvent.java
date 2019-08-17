@@ -1,29 +1,29 @@
 package io.github.isuru.oasis.model.events;
 
 import io.github.isuru.oasis.model.Event;
-import io.github.isuru.oasis.model.OState;
+import io.github.isuru.oasis.model.Rating;
 
 import java.io.Serializable;
 
-public class OStateEvent implements Serializable {
+public class RatingEvent implements Serializable {
 
     private Long userId;
-    private OState stateRef;
+    private Rating ratingRef;
     private Event event;
     private Integer prevStateId;
-    private OState.OAState state;
+    private Rating.RatingState state;
     private String currentValue;
     private Long ts;
     private long prevChangedAt;
 
-    public OStateEvent() {
+    public RatingEvent() {
     }
 
-    public OStateEvent(Long userId, OState stateRef, Event event,
-                       Integer prevStateId, OState.OAState state, String currentValue,
+    public RatingEvent(Long userId, Rating ratingRef, Event event,
+                       Integer prevStateId, Rating.RatingState state, String currentValue,
                        long prevChangedAt) {
         this.userId = userId;
-        this.stateRef = stateRef;
+        this.ratingRef = ratingRef;
         this.event = event;
         this.state = state;
         this.prevStateId = prevStateId;
@@ -52,12 +52,12 @@ public class OStateEvent implements Serializable {
         this.userId = userId;
     }
 
-    public OState getStateRef() {
-        return stateRef;
+    public Rating getRatingRef() {
+        return ratingRef;
     }
 
-    public void setStateRef(OState stateRef) {
-        this.stateRef = stateRef;
+    public void setRatingRef(Rating ratingRef) {
+        this.ratingRef = ratingRef;
     }
 
     public Event getEvent() {
@@ -68,11 +68,11 @@ public class OStateEvent implements Serializable {
         this.event = event;
     }
 
-    public OState.OAState getState() {
+    public Rating.RatingState getState() {
         return state;
     }
 
-    public void setState(OState.OAState state) {
+    public void setState(Rating.RatingState state) {
         this.state = state;
     }
 

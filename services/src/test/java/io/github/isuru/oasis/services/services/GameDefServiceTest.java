@@ -199,7 +199,7 @@ public class GameDefServiceTest extends BaseDefServiceTest {
             Assertions.assertThat(ds.listKpiCalculations(gameId)).hasSize(0);
             Assertions.assertThat(ds.listBadgeDefs(gameId)).hasSize(0);
             Assertions.assertThat(ds.listLeaderboardDefs(gameId)).hasSize(1);
-            Assertions.assertThat(ds.listStatePlays(gameId)).hasSize(0);
+            Assertions.assertThat(ds.listRatings(gameId)).hasSize(0);
             Assertions.assertThat(ds.listChallenges(gameId)).hasSize(0);
         }
 
@@ -245,7 +245,7 @@ public class GameDefServiceTest extends BaseDefServiceTest {
             Assertions.assertThat(ds.listKpiCalculations(gameId)).hasSize(0);
             Assertions.assertThat(ds.listBadgeDefs(gameId)).hasSize(0);
             Assertions.assertThat(ds.listLeaderboardDefs(gameId)).hasSize(1);
-            Assertions.assertThat(ds.listStatePlays(gameId)).hasSize(0);
+            Assertions.assertThat(ds.listRatings(gameId)).hasSize(0);
             Assertions.assertThat(ds.listChallenges(gameId)).hasSize(0);
         }
     }

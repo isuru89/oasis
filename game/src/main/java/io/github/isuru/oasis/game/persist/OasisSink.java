@@ -14,6 +14,6 @@ public abstract class OasisSink {
 
     public abstract SinkFunction<String> createChallengeSink();
     public abstract SinkFunction<String> createRaceSink();
-    public abstract SinkFunction<String> createStatesSink();
+    public abstract SinkFunction<String> createRatingSink();
 
 }

@@ -10,7 +10,7 @@ import io.github.isuru.oasis.game.process.sinks.*;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
-import io.github.isuru.oasis.model.OState;
+import io.github.isuru.oasis.model.Rating;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.events.*;
@@ -57,7 +57,7 @@ public class OasisExecution {
     private List<PointRule> pointRules;
     private List<Milestone> milestones;
     private List<BadgeRule> badgeRules;
-    private List<OState> statesList;
+    private List<Rating> ratingList;
 
     private DataStream<Event> inputSource;
 
@@ -127,13 +127,13 @@ public class OasisExecution {
         KeyedStream<PointEvent, Long> userPointStream = pointStream.keyBy(new EventUserSelector<>());
 
         // create states stream
-        DataStream<OStateEvent> statesStream = null;
-        if (statesList != null) {
-            for (OState oState : statesList) {
-                DataStream<OStateEvent> thisStream = StatesOperator.createStateStream(oState, inputSource, oasis);
-                statesStream = statesStream == null
+        DataStream<RatingEvent> ratingsStream = null;
+        if (ratingList != null) {
+            for (Rating rating : ratingList) {
+                DataStream<RatingEvent> thisStream = RatingsOperator.createStateStream(rating, inputSource, oasis);
+                ratingsStream = ratingsStream == null
                         ? thisStream
-                        : statesStream.union(thisStream);
+                        : ratingsStream.union(thisStream);
             }
         }
 
@@ -237,9 +237,9 @@ public class OasisExecution {
                     .uid(String.format("badge-notifier-%s", oasisId));
         }
 
-        DataStream<OStateNotification> statesNotyStream = null;
-        if (statesStream != null) {
-            statesNotyStream = statesStream.map(new StatesNotifier())
+        DataStream<RatingNotification> ratingNotyStream = null;
+        if (ratingsStream != null) {
+            ratingNotyStream = ratingsStream.map(new RatingNotifier())
                     .uid(String.format("states-notitifer-%s", oasisId));
         }
 
@@ -292,7 +292,7 @@ public class OasisExecution {
                 milestoneNotyStream,
                 milestoneStateEventDataStream,
                 badgeNotyStream,
-                statesNotyStream,
+                ratingNotyStream,
                 cStream,
                 rStream,
                 oasisId);
@@ -335,7 +335,7 @@ public class OasisExecution {
                              DataStream<MilestoneNotification> milestoneNotyStream,
                              DataStream<MilestoneStateEvent> milestoneStateEventDataStream,
                              DataStream<BadgeNotification> badgeNotyStream,
-                             DataStream<OStateNotification> statesNotyStream,
+                             DataStream<RatingNotification> ratingsNotyStream,
                              DataStream<ChallengeEvent> challengeEventStream,
                              DataStream<RaceEvent> raceEventStream,
                              String oasisId) {
@@ -366,9 +366,9 @@ public class OasisExecution {
                         .uid(String.format("badge-sink-%s", oasisId));
             }
 
-            if (statesNotyStream != null) {
-                statesNotyStream
-                        .addSink(new OasisStatesSink(outputHandler.getStatesHandler()))
+            if (ratingsNotyStream != null) {
+                ratingsNotyStream
+                        .addSink(new OasisRatingSink(outputHandler.getStatesHandler()))
                         .uid(String.format("states-sink-%s", oasisId));
             }
 
@@ -413,10 +413,10 @@ public class OasisExecution {
                         .uid(String.format("badge-sink-%s", oasisId));
             }
 
-            if (statesNotyStream != null) {
-                statesNotyStream
-                        .map(new StatesNotificationMapper())
-                        .addSink(oasisSink.createStatesSink())
+            if (ratingsNotyStream != null) {
+                ratingsNotyStream
+                        .map(new RatingNotificationMapper())
+                        .addSink(oasisSink.createRatingSink())
                         .uid(String.format("states-sink-%s", oasisId));
             }
 
@@ -473,8 +473,8 @@ public class OasisExecution {
         return this;
     }
 
-    public OasisExecution setStates(List<OState> states) {
-        this.statesList = states;
+    public OasisExecution setStates(List<Rating> states) {
+        this.ratingList = states;
         return this;
     }
 

@@ -10,8 +10,8 @@ public class Converters {
         return def;
     }
 
-    public static StateDef toStateDef(DefWrapper wrapper, Function<DefWrapper, StateDef> creator) {
-        StateDef def = creator.apply(wrapper);
+    public static RatingDef toRatingDef(DefWrapper wrapper, Function<DefWrapper, RatingDef> creator) {
+        RatingDef def = creator.apply(wrapper);
         def.setId(wrapper.getId());
         def.setName(wrapper.getName());
         def.setDisplayName(wrapper.getDisplayName());

@@ -74,7 +74,7 @@ public class NoneOutputHandler implements IOutputHandler {
         }
 
         @Override
-        public void handleStateChange(OStateNotification stateNotification) {
+        public void handleStateChange(RatingNotification stateNotification) {
 
         }
 

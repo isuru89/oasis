@@ -8,7 +8,7 @@ import io.github.isuru.oasis.model.defs.LeaderboardDef;
 import io.github.isuru.oasis.model.defs.MilestoneDef;
 import io.github.isuru.oasis.model.defs.PointDef;
 import io.github.isuru.oasis.model.defs.RaceDef;
-import io.github.isuru.oasis.model.defs.StateDef;
+import io.github.isuru.oasis.model.defs.RatingDef;
 import io.github.isuru.oasis.services.dto.defs.GameOptionsDto;
 import io.github.isuru.oasis.services.model.FeatureAttr;
 
@@ -61,10 +61,10 @@ public interface IGameDefService {
     List<ChallengeDef> listChallenges(long gameId) throws Exception;
     boolean disableChallenge(long id) throws Exception;
 
-    long addStatePlay(long gameId, StateDef stateDef) throws Exception;
-    StateDef readStatePlay(long id) throws Exception;
-    List<StateDef> listStatePlays(long gameId) throws Exception;
-    boolean disableStatePlay(long id) throws Exception;
+    long addRating(long gameId, RatingDef ratingDef) throws Exception;
+    RatingDef readRating(long id) throws Exception;
+    List<RatingDef> listRatings(long gameId) throws Exception;
+    boolean disableRating(long id) throws Exception;
 
     long addRace(long gameId, RaceDef raceDef) throws Exception;
     RaceDef readRace(long id) throws Exception;

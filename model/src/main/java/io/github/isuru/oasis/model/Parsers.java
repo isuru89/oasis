@@ -229,8 +229,8 @@ public class Parsers {
         return milestone;
     }
 
-    public static OState parse(StateDef def) {
-        OState oState = new OState();
+    public static Rating parse(RatingDef def) {
+        Rating oState = new Rating();
         oState.setId(def.getId());
         oState.setName(def.getName());
         oState.setDisplayName(def.getDisplayName());
@@ -247,11 +247,11 @@ public class Parsers {
             throw new IllegalArgumentException("State 'stateValueExpression' has not been set!");
         }
 
-        List<OState.OAState> oaStateList = new ArrayList<>();
+        List<Rating.RatingState> oaStateList = new ArrayList<>();
         boolean defStateFound = false;
-        for (StateDef.State state : def.getStates()) {
+        for (RatingDef.RatingState state : def.getStates()) {
             defStateFound = defStateFound || Integer.compare(state.getId(), oState.getDefaultState()) == 0;
-            OState.OAState oaState = new OState.OAState();
+            Rating.RatingState oaState = new Rating.RatingState();
             oaState.setId(state.getId());
             oaState.setName(state.getName());
             oaState.setPoints(state.getPoints());
@@ -267,7 +267,7 @@ public class Parsers {
         }
 
         oState.setStates(oaStateList.stream()
-                .sorted(Comparator.comparingInt(OState.OAState::getId))
+                .sorted(Comparator.comparingInt(Rating.RatingState::getId))
                 .collect(Collectors.toList()));
         return oState;
     }

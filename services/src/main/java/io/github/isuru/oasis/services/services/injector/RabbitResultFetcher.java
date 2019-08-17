@@ -18,7 +18,7 @@ import io.github.isuru.oasis.services.services.injector.consumers.MilestoneConsu
 import io.github.isuru.oasis.services.services.injector.consumers.MilestoneStateConsumer;
 import io.github.isuru.oasis.services.services.injector.consumers.PointConsumer;
 import io.github.isuru.oasis.services.services.injector.consumers.RaceConsumer;
-import io.github.isuru.oasis.services.services.injector.consumers.StateConsumer;
+import io.github.isuru.oasis.services.services.injector.consumers.RatingConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -70,7 +70,7 @@ public class RabbitResultFetcher implements ResultFetcher {
         MilestoneStateConsumer consumerMsState = new MilestoneStateConsumer(dao, consumerContext, acknowledger);
         ChallengeConsumer consumerChallenges = new ChallengeConsumer(dao, consumerContext, acknowledger);
         RaceConsumer consumerRaces = new RaceConsumer(dao, consumerContext, acknowledger);
-        StateConsumer consumerStates = new StateConsumer(dao, consumerContext, acknowledger);
+        RatingConsumer consumerRatings = new RatingConsumer(dao, consumerContext, acknowledger);
 
         channel.queueDeclare(rabbit.getInjectorPointsQueue(), DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(rabbit.getInjectorBadgesQueue(), DURABLE, EXCLUSIVE, AUTO_DEL, null);
@@ -78,18 +78,18 @@ public class RabbitResultFetcher implements ResultFetcher {
         channel.queueDeclare(rabbit.getInjectorMilestonesQueue(), DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(rabbit.getInjectorMilestoneStatesQueue(), DURABLE, EXCLUSIVE, AUTO_DEL, null);
         channel.queueDeclare(rabbit.getInjectorRacesQueue(), DURABLE, EXCLUSIVE, AUTO_DEL, null);
-        channel.queueDeclare(rabbit.getInjectorStatesQueue(), DURABLE, EXCLUSIVE, AUTO_DEL, null);
+        channel.queueDeclare(rabbit.getInjectorRatingsQueue(), DURABLE, EXCLUSIVE, AUTO_DEL, null);
 
         consumerList.addAll(Arrays.asList(consumerBadges,
                 consumerChallenges, consumerMilestones, consumerMsState,
-                consumerPoints, consumerRaces, consumerStates));
+                consumerPoints, consumerRaces, consumerRatings));
 
         channel.basicConsume(rabbit.getInjectorPointsQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerPoints));
         channel.basicConsume(rabbit.getInjectorBadgesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerBadges));
         channel.basicConsume(rabbit.getInjectorMilestonesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerMilestones));
         channel.basicConsume(rabbit.getInjectorMilestoneStatesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerMsState));
         channel.basicConsume(rabbit.getInjectorChallengesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerChallenges));
-        channel.basicConsume(rabbit.getInjectorStatesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerStates));
+        channel.basicConsume(rabbit.getInjectorRatingsQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerRatings));
         channel.basicConsume(rabbit.getInjectorRacesQueue(), AUTO_ACK, new RabbitConsumer<>(channel, consumerRaces));
     }
 

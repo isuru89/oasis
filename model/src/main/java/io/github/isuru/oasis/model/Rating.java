@@ -3,7 +3,7 @@ package io.github.isuru.oasis.model;
 import java.io.Serializable;
 import java.util.List;
 
-public class OState implements Serializable {
+public class Rating implements Serializable {
 
     private long id;
     private String name;
@@ -15,9 +15,9 @@ public class OState implements Serializable {
     private Serializable stateValueExpression;
     private boolean currency;
 
-    private List<OAState> states;
+    private List<RatingState> states;
 
-    public static class OAState implements Serializable {
+    public static class RatingState implements Serializable {
         private Integer id;
         private String name;
         private Serializable condition;
@@ -80,11 +80,11 @@ public class OState implements Serializable {
         this.stateValueExpression = stateValueExpression;
     }
 
-    public List<OAState> getStates() {
+    public List<RatingState> getStates() {
         return states;
     }
 
-    public void setStates(List<OAState> states) {
+    public void setStates(List<RatingState> states) {
         this.states = states;
     }
 

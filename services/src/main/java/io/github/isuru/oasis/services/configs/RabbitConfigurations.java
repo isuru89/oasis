@@ -31,7 +31,7 @@ public class RabbitConfigurations {
     private String injectorMilestonesQueue = ConfigKeys.DEF_RABBIT_Q_MILESTONES_SINK;
     private String injectorMilestoneStatesQueue = ConfigKeys.DEF_RABBIT_Q_MILESTONESTATE_SINK;
     private String injectorChallengesQueue = ConfigKeys.DEF_RABBIT_Q_CHALLENGES_SINK;
-    private String injectorStatesQueue = ConfigKeys.DEF_RABBIT_Q_STATES_SINK;
+    private String injectorRatingsQueue = ConfigKeys.DEF_RABBIT_Q_RATINGS_SINK;
     private String injectorRacesQueue = ConfigKeys.DEF_RABBIT_Q_RACES_SINK;
 
     public String getHost() {
@@ -154,12 +154,12 @@ public class RabbitConfigurations {
         this.injectorChallengesQueue = injectorChallengesQueue;
     }
 
-    public String getInjectorStatesQueue() {
-        return injectorStatesQueue;
+    public String getInjectorRatingsQueue() {
+        return injectorRatingsQueue;
     }
 
-    public void setInjectorStatesQueue(String injectorStatesQueue) {
-        this.injectorStatesQueue = injectorStatesQueue;
+    public void setInjectorRatingsQueue(String injectorRatingsQueue) {
+        this.injectorRatingsQueue = injectorRatingsQueue;
     }
 
     public String getInjectorRacesQueue() {

@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author iweerarathna
  */
-public class StateDef extends BaseDef {
+public class RatingDef extends BaseDef {
 
     private String event;
     private String condition;
@@ -13,9 +13,9 @@ public class StateDef extends BaseDef {
     private String stateValueExpression;
     private boolean currency = true;
 
-    private List<State> states;
+    private List<RatingState> states;
 
-    public static class State {
+    public static class RatingState {
         private Integer id;
         private String name;
         private String condition;
@@ -78,11 +78,11 @@ public class StateDef extends BaseDef {
         this.stateValueExpression = stateValueExpression;
     }
 
-    public List<State> getStates() {
+    public List<RatingState> getStates() {
         return states;
     }
 
-    public void setStates(List<State> states) {
+    public void setStates(List<RatingState> states) {
         this.states = states;
     }
 

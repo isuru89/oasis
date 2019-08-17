@@ -2,7 +2,7 @@ package io.github.isuru.oasis.services.services;
 
 import io.github.isuru.oasis.model.db.DbException;
 import io.github.isuru.oasis.model.defs.GameDef;
-import io.github.isuru.oasis.model.defs.StateDef;
+import io.github.isuru.oasis.model.defs.RatingDef;
 import io.github.isuru.oasis.services.exception.InputValidationException;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -24,33 +24,33 @@ public class StateDefServiceTest extends BaseDefServiceTest {
         {
             // invalid or insufficient parameters
             Assertions.assertThatThrownBy(
-                    () -> ds.addStatePlay(0L, create(null, null)))
+                    () -> ds.addRating(0L, create(null, null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addStatePlay(-1L, create(null, null)))
+                    () -> ds.addRating(-1L, create(null, null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addStatePlay(9999L, create(null, null)))
-                    .isInstanceOf(InputValidationException.class);
-
-            Assertions.assertThatThrownBy(
-                    () -> ds.addStatePlay(gameId, create("", null)))
-                    .isInstanceOf(InputValidationException.class);
-            Assertions.assertThatThrownBy(
-                    () -> ds.addStatePlay(gameId, create(null, null)))
-                    .isInstanceOf(InputValidationException.class);
-            Assertions.assertThatThrownBy(
-                    () -> ds.addStatePlay(gameId, create("  ", null)))
+                    () -> ds.addRating(9999L, create(null, null)))
                     .isInstanceOf(InputValidationException.class);
 
             Assertions.assertThatThrownBy(
-                    () -> ds.addStatePlay(gameId, create("scholar", "")))
+                    () -> ds.addRating(gameId, create("", null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addStatePlay(gameId, create("scholar", null)))
+                    () -> ds.addRating(gameId, create(null, null)))
                     .isInstanceOf(InputValidationException.class);
             Assertions.assertThatThrownBy(
-                    () -> ds.addStatePlay(gameId, create("scholar", "\t ")))
+                    () -> ds.addRating(gameId, create("  ", null)))
+                    .isInstanceOf(InputValidationException.class);
+
+            Assertions.assertThatThrownBy(
+                    () -> ds.addRating(gameId, create("scholar", "")))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ds.addRating(gameId, create("scholar", null)))
+                    .isInstanceOf(InputValidationException.class);
+            Assertions.assertThatThrownBy(
+                    () -> ds.addRating(gameId, create("scholar", "\t ")))
                     .isInstanceOf(InputValidationException.class);
         }
     }
@@ -61,11 +61,11 @@ public class StateDefServiceTest extends BaseDefServiceTest {
         long gameId = savedGame.getId();
         int size = getTotalCount(gameId);
 
-        StateDef def = create("Q&A-Ratio", "Question-Answer Ratio");
+        RatingDef def = create("Q&A-Ratio", "Question-Answer Ratio");
         {
             long defId = addAssert(gameId, def);
 
-            StateDef addedDef = readAssert(defId);
+            RatingDef addedDef = readAssert(defId);
             Assert.assertEquals(defId, addedDef.getId().longValue());
             Assert.assertEquals(def.getName(), addedDef.getName());
             Assert.assertEquals(def.getDisplayName(), addedDef.getDisplayName());
@@ -76,7 +76,7 @@ public class StateDefServiceTest extends BaseDefServiceTest {
 
         {
             // add kpi with same name in to the same game should throw an error
-            Assertions.assertThatThrownBy(() -> ds.addStatePlay(gameId, clone(def)))
+            Assertions.assertThatThrownBy(() -> ds.addRating(gameId, clone(def)))
                     .isInstanceOf(DbException.class);
         }
 
@@ -84,7 +84,7 @@ public class StateDefServiceTest extends BaseDefServiceTest {
             size = getTotalCount(gameId);
 
             // with description and display name
-            StateDef cloned = clone(def);
+            RatingDef cloned = clone(def);
             cloned.setName("reputation-new");
             cloned.setDisplayName("Total Reputation - Updated");
             cloned.setDescription("Sum of reputation a user has gathered forever.");
@@ -101,7 +101,7 @@ public class StateDefServiceTest extends BaseDefServiceTest {
             GameDef gameNew = createSavedGame("so-updated", "Updated Stackoverflow");
             int sizeNew = getTotalCount(gameNew.getId());
 
-            StateDef clone = clone(def);
+            RatingDef clone = clone(def);
             long otherId = addAssert(gameNew.getId(), clone);
             readAssert(otherId, clone);
             checkTotalCount(gameNew.getId(), sizeNew + 1);
@@ -117,29 +117,29 @@ public class StateDefServiceTest extends BaseDefServiceTest {
     public void testStateDisable() throws Exception {
         {
             // invalid disable params
-            Assertions.assertThatThrownBy(() -> ds.disableStatePlay(0L))
+            Assertions.assertThatThrownBy(() -> ds.disableRating(0L))
                     .isInstanceOf(InputValidationException.class);
-            Assertions.assertThatThrownBy(() -> ds.disableStatePlay(-1L))
+            Assertions.assertThatThrownBy(() -> ds.disableRating(-1L))
                     .isInstanceOf(InputValidationException.class);
 
             // non existing
-            Assert.assertFalse(ds.disableStatePlay(9999L));
+            Assert.assertFalse(ds.disableRating(9999L));
         }
 
         GameDef savedGame = createSavedGame("so", "Stackoverflow");
         long gameId = savedGame.getId();
         int defSize = getTotalCount(gameId);
 
-        StateDef def1 = create("votes", "Total Votes");
-        StateDef def2 = create("stars", "Total Stars");
+        RatingDef def1 = create("votes", "Total Votes");
+        RatingDef def2 = create("stars", "Total Stars");
 
-        StateDef addedDef1 = readAssert(addAssert(gameId, def1), def1);
-        StateDef addedDef2 = readAssert(addAssert(gameId, def2), def2);
+        RatingDef addedDef1 = readAssert(addAssert(gameId, def1), def1);
+        RatingDef addedDef2 = readAssert(addAssert(gameId, def2), def2);
         checkTotalCount(gameId, defSize + 2);
 
         {
             // disable def-1
-            Assert.assertTrue(ds.disableStatePlay(addedDef1.getId()));
+            Assert.assertTrue(ds.disableRating(addedDef1.getId()));
 
             // listing should not return disabled ones...
             checkTotalCount(gameId, defSize + 1);
@@ -150,7 +150,7 @@ public class StateDefServiceTest extends BaseDefServiceTest {
 
         {
             // disable def-2
-            Assert.assertTrue(ds.disableStatePlay(addedDef2.getId()));
+            Assert.assertTrue(ds.disableRating(addedDef2.getId()));
 
             // listing should not return disabled ones...
             checkTotalCount(gameId, defSize);
@@ -161,34 +161,34 @@ public class StateDefServiceTest extends BaseDefServiceTest {
 
         {
             // after disabling, user should be able to add new with a same name again
-            StateDef clone = clone(def1);
+            RatingDef clone = clone(def1);
             readAssert(addAssert(gameId, clone), clone);
         }
     }
 
     private int getTotalCount(long gameId) throws Exception {
-        return ds.listStatePlays(gameId).size();
+        return ds.listRatings(gameId).size();
     }
 
     private void checkTotalCount(long gameId, int expected) throws Exception {
         Assertions.assertThat(getTotalCount(gameId)).isEqualTo(expected);
     }
 
-    private long addAssert(long gameId, StateDef def) throws Exception {
-        long l = ds.addStatePlay(gameId, def);
+    private long addAssert(long gameId, RatingDef def) throws Exception {
+        long l = ds.addRating(gameId, def);
         Assert.assertTrue(l > 0);
         return l;
     }
 
-    private StateDef readAssert(long id) throws Exception {
-        StateDef def = ds.readStatePlay(id);
+    private RatingDef readAssert(long id) throws Exception {
+        RatingDef def = ds.readRating(id);
         Assert.assertNotNull(def);
         Assert.assertEquals(id, def.getId().longValue());
         return def;
     }
 
-    private StateDef readAssert(long id, StateDef check) throws Exception {
-        StateDef addedDef = ds.readStatePlay(id);
+    private RatingDef readAssert(long id, RatingDef check) throws Exception {
+        RatingDef addedDef = ds.readRating(id);
         Assert.assertNotNull(addedDef);
         Assert.assertEquals(id, addedDef.getId().longValue());
         Assert.assertEquals(check.getName(), addedDef.getName());
@@ -196,16 +196,16 @@ public class StateDefServiceTest extends BaseDefServiceTest {
         return addedDef;
     }
 
-    private StateDef clone(StateDef other) {
-        StateDef def = new StateDef();
+    private RatingDef clone(RatingDef other) {
+        RatingDef def = new RatingDef();
         def.setName(other.getName());
         def.setDisplayName(other.getDisplayName());
         def.setDescription(other.getDescription());
         return def;
     }
 
-    private StateDef create(String name, String displayName) {
-        StateDef def = new StateDef();
+    private RatingDef create(String name, String displayName) {
+        RatingDef def = new RatingDef();
         def.setName(name);
         def.setDisplayName(displayName);
         return def;

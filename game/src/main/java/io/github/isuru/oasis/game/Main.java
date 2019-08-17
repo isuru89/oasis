@@ -12,7 +12,7 @@ import io.github.isuru.oasis.game.utils.Utils;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
 import io.github.isuru.oasis.model.Milestone;
-import io.github.isuru.oasis.model.OState;
+import io.github.isuru.oasis.model.Rating;
 import io.github.isuru.oasis.model.configs.ConfigKeys;
 import io.github.isuru.oasis.model.configs.Configs;
 import io.github.isuru.oasis.model.defs.GameDef;
@@ -50,7 +50,7 @@ public class Main {
             List<PointRule> pointRules = PointParser.parse(oasisGameDef.getPoints());
             List<Milestone> milestones = MilestoneParser.parse(oasisGameDef.getMilestones());
             List<BadgeRule> badges = BadgeParser.parse(oasisGameDef.getBadges());
-            List<OState> states = OStateParser.parse(oasisGameDef.getStates());
+            List<Rating> ratings = RatingsParser.parse(oasisGameDef.getStates());
 
             OasisExecution execution = new OasisExecution()
                     .havingGameProperties(gameProperties)
@@ -58,7 +58,7 @@ public class Main {
                     .fieldTransformer(kpis)
                     .setPointRules(pointRules)
                     .setMilestones(milestones)
-                    .setStates(states)
+                    .setStates(ratings)
                     .setBadgeRules(badges);
 
             execution = createOutputHandler(gameProperties, execution)
