@@ -181,7 +181,7 @@ public class TestUtils {
         }
     }
 
-    public static List<Tuple6<Long, Integer, String, Integer, String, Integer>> parseStatesOutput(String file) throws IOException {
+    public static List<Tuple6<Long, Integer, String, Integer, String, Integer>> parseRatingsOutput(String file) throws IOException {
         try (InputStream inputStream = TestUtils.loadResource(file)) {
             LineIterator lineIterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8);
             List<Tuple6<Long, Integer, String, Integer, String, Integer>> list = new LinkedList<>();
@@ -227,19 +227,19 @@ public class TestUtils {
     public static IOutputHandler getAssertConfigs(IPointHandler pointHandler,
                                                   IBadgeHandler badgeHandler,
                                                   IMilestoneHandler milestoneHandler,
-                                                  IStatesHandler statesHandler,
+                                                  IRatingsHandler ratingsHandler,
                                                   IRaceHandler raceHandler) {
-        return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler, statesHandler, raceHandler);
+        return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler, ratingsHandler, raceHandler);
     }
 
     public static IOutputHandler getAssertConfigs(IPointHandler pointHandler,
                                                   IBadgeHandler badgeHandler,
                                                   IMilestoneHandler milestoneHandler,
                                                   IChallengeHandler challengeHandler,
-                                                  IStatesHandler statesHandler,
+                                                  IRatingsHandler ratingsHandler,
                                                   IRaceHandler raceHandler) {
         return new AssertOutputHandler(badgeHandler, milestoneHandler, pointHandler, challengeHandler,
-                statesHandler, raceHandler);
+                ratingsHandler, raceHandler);
     }
 
     public static List<FieldCalculator> getFields(String resourceId) throws IOException {
@@ -258,7 +258,7 @@ public class TestUtils {
         return MilestoneParser.parse(TestUtils.loadResource(resourceId));
     }
 
-    public static List<Rating> getStateRules(String resourceId) throws IOException {
+    public static List<Rating> getRatingRules(String resourceId) throws IOException {
         return RatingsParser.parse(TestUtils.loadResource(resourceId));
     }
 }

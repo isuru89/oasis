@@ -130,7 +130,7 @@ public class OasisExecution {
         DataStream<RatingEvent> ratingsStream = null;
         if (ratingList != null) {
             for (Rating rating : ratingList) {
-                DataStream<RatingEvent> thisStream = RatingsOperator.createStateStream(rating, inputSource, oasis);
+                DataStream<RatingEvent> thisStream = RatingsOperator.createRatingStream(rating, inputSource, oasis);
                 ratingsStream = ratingsStream == null
                         ? thisStream
                         : ratingsStream.union(thisStream);
@@ -368,7 +368,7 @@ public class OasisExecution {
 
             if (ratingsNotyStream != null) {
                 ratingsNotyStream
-                        .addSink(new OasisRatingSink(outputHandler.getStatesHandler()))
+                        .addSink(new OasisRatingSink(outputHandler.getRatingsHandler()))
                         .uid(String.format("states-sink-%s", oasisId));
             }
 
@@ -473,8 +473,8 @@ public class OasisExecution {
         return this;
     }
 
-    public OasisExecution setStates(List<Rating> states) {
-        this.ratingList = states;
+    public OasisExecution setRatings(List<Rating> ratings) {
+        this.ratingList = ratings;
         return this;
     }
 

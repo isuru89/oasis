@@ -1,4 +1,4 @@
-states:
+ratings:
   - event: bug
     id: 701
     name: bug-density-rate

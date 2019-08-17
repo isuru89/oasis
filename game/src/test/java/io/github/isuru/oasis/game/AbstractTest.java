@@ -45,7 +45,7 @@ abstract class AbstractTest {
                 new BadgeCollector(id),
                 new MilestoneCollector(id),
                 new ChallengeSink(id),
-                new StatesCollector(id),
+                new RatingsCollector(id),
                 new RaceCollector(id));
 
         Oasis oasis = new Oasis(id);
@@ -55,12 +55,12 @@ abstract class AbstractTest {
         String rulesBadges = ruleLoc + "/badges.yml";
         String rulesMilestones = ruleLoc + "/milestones.yml";
         String rulesFields = ruleLoc + "/fields.yml";
-        String rulesStates = ruleLoc + "/states.yml";
+        String rulesRatings = ruleLoc + "/ratings.yml";
 
         String outputPoints = id + "/output-points.csv";
         String outputBadges = id + "/output-badges.csv";
         String outputMilestones = id + "/output-milestones.csv";
-        String outputStates = id + "/output-states.csv";
+        String outputRatings = id + "/output-ratings.csv";
         String outputChallenges = id + "/output-challenges.csv";
         String outputRaces = id + "/output-races.csv";
 
@@ -85,8 +85,8 @@ abstract class AbstractTest {
         if (TestUtils.isResourceExist(rulesMilestones)) {
             execution = execution.setMilestones(TestUtils.getMilestoneRules(rulesMilestones));
         }
-        if (TestUtils.isResourceExist(rulesStates)) {
-            execution = execution.setStates(TestUtils.getStateRules(rulesStates));
+        if (TestUtils.isResourceExist(rulesRatings)) {
+            execution = execution.setRatings(TestUtils.getRatingRules(rulesRatings));
         }
 
         execution = execution.outputHandler(assertOutput)
@@ -151,14 +151,14 @@ abstract class AbstractTest {
             assertBadges(actual, expected);
         }
 
-        if (TestUtils.isResourceExist(outputStates)) {
-            List<Tuple6<Long, Integer, String, Integer, String, Integer>> expected = TestUtils.parseStatesOutput(outputStates);
-            List<Tuple6<Long, Integer, String, Integer, String, Integer>> actual = Memo.getStates(id);
+        if (TestUtils.isResourceExist(outputRatings)) {
+            List<Tuple6<Long, Integer, String, Integer, String, Integer>> expected = TestUtils.parseRatingsOutput(outputRatings);
+            List<Tuple6<Long, Integer, String, Integer, String, Integer>> actual = Memo.getRatings(id);
             Assertions.assertNotNull(expected);
             Assertions.assertNotNull(actual);
-            Assertions.assertEquals(expected.size(), actual.size(), "Expected states are not equal!");
+            Assertions.assertEquals(expected.size(), actual.size(), "Expected ratings are not equal!");
 
-            assertStates(actual, expected);
+            assertRatings(actual, expected);
         }
 
         return oasis;
@@ -218,8 +218,8 @@ abstract class AbstractTest {
         }
     }
 
-    private void assertStates(List<Tuple6<Long, Integer, String, Integer, String, Integer>> actual,
-                              List<Tuple6<Long, Integer, String, Integer, String, Integer>> expected) {
+    private void assertRatings(List<Tuple6<Long, Integer, String, Integer, String, Integer>> actual,
+                               List<Tuple6<Long, Integer, String, Integer, String, Integer>> expected) {
         List<Tuple6<Long, Integer, String, Integer, String, Integer>> dupActual = new LinkedList<>(actual);
         for (Tuple6<Long, Integer, String, Integer, String, Integer> row : expected) {
 
@@ -234,10 +234,10 @@ abstract class AbstractTest {
             }
 
             if (!foundFlag) {
-                Assertions.fail("Expected state row " + row + " is not found!");
+                Assertions.fail("Expected rating row " + row + " is not found!");
             } else {
                 dupActual.remove(found);
-                System.out.println("\tFound state: " + row);
+                System.out.println("\tFound rating: " + row);
             }
         }
     }

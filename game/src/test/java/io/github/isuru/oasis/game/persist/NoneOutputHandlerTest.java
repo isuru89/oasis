@@ -16,7 +16,7 @@ public class NoneOutputHandlerTest {
             Assertions.assertThat(outputHandler.getChallengeHandler()).isInstanceOf(NoneOutputHandler.NoneHandler.class);
             Assertions.assertThat(outputHandler.getMilestoneHandler()).isInstanceOf(NoneOutputHandler.NoneHandler.class);
             Assertions.assertThat(outputHandler.getPointsHandler()).isInstanceOf(NoneOutputHandler.NoneHandler.class);
-            Assertions.assertThat(outputHandler.getStatesHandler()).isInstanceOf(NoneOutputHandler.NoneHandler.class);
+            Assertions.assertThat(outputHandler.getRatingsHandler()).isInstanceOf(NoneOutputHandler.NoneHandler.class);
 
             outputHandler.getBadgeHandler().badgeReceived(null);
             outputHandler.getChallengeHandler().addChallengeWinner(null);
@@ -25,7 +25,7 @@ public class NoneOutputHandlerTest {
             outputHandler.getMilestoneHandler().addMilestoneCurrState(null, null, 0.0, 0.0);
             outputHandler.getMilestoneHandler().milestoneReached(null);
             outputHandler.getPointsHandler().pointsScored(null);
-            outputHandler.getStatesHandler().handleStateChange(null);
+            outputHandler.getRatingsHandler().handleRatingChange(null);
 
             Mockito.verify(mock).addChallengeWinner(null);
             Mockito.verify(mock).badgeReceived(null);
@@ -33,7 +33,7 @@ public class NoneOutputHandlerTest {
             Mockito.verify(mock).addMilestoneCurrState(null, null, 0.0, 0.0);
             Mockito.verify(mock).milestoneReached(null);
             Mockito.verify(mock).pointsScored(null);
-            Mockito.verify(mock).handleStateChange(null);
+            Mockito.verify(mock).handleRatingChange(null);
         }
 
         {
@@ -43,7 +43,7 @@ public class NoneOutputHandlerTest {
             Assertions.assertThat(outputHandler.getChallengeHandler()).isInstanceOf(NoneOutputHandler.NoneHandler.class);
             Assertions.assertThat(outputHandler.getMilestoneHandler()).isInstanceOf(NoneOutputHandler.NoneHandler.class);
             Assertions.assertThat(outputHandler.getPointsHandler()).isInstanceOf(NoneOutputHandler.NoneHandler.class);
-            Assertions.assertThat(outputHandler.getStatesHandler()).isInstanceOf(NoneOutputHandler.NoneHandler.class);
+            Assertions.assertThat(outputHandler.getRatingsHandler()).isInstanceOf(NoneOutputHandler.NoneHandler.class);
 
             outputHandler.getBadgeHandler().badgeReceived(null);
             outputHandler.getMilestoneHandler().milestoneReached(null);
@@ -52,7 +52,7 @@ public class NoneOutputHandlerTest {
                     .addMilestoneCurrState(null, null, 0, 0L);
             outputHandler.getMilestoneHandler().addMilestoneCurrState(null, null, 0.0, 0.0);
             outputHandler.getPointsHandler().pointsScored(null);
-            outputHandler.getStatesHandler().handleStateChange(null);
+            outputHandler.getRatingsHandler().handleRatingChange(null);
         }
     }
 

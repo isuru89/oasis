@@ -158,9 +158,9 @@ public class MappersTest {
     }
 
     @Test
-    public void testStateNotifier() throws Exception {
+    public void testRatingsNotifier() throws Exception {
         MapFunction<RatingNotification, String> mapper = new RatingNotificationMapper();
-        Rating state = readState("/state-test/rules/states.yml", 0);
+        Rating rating = readRating("/rating-test/rules/ratings.yml", 0);
 
         {
             JsonEvent event = randomJsonEvent();
@@ -169,8 +169,8 @@ public class MappersTest {
             notification.setUserId(event.getUser());
             notification.setTs(event.getTimestamp());
             notification.setEvent(event);
-            notification.setRatingRef(state);
-            notification.setState(state.getStates().stream().skip(1).findFirst().get());
+            notification.setRatingRef(rating);
+            notification.setState(rating.getStates().stream().skip(1).findFirst().get());
             notification.setCurrentValue("123");
             notification.setPreviousState(0);
             notification.setPreviousChangeAt(System.currentTimeMillis() - 16000);
@@ -178,7 +178,7 @@ public class MappersTest {
             String content = mapper.map(notification);
             RatingModel model = toObj(content, RatingModel.class);
 
-            assertStateOutput(model, event, notification);
+            assertRatingOutput(model, event, notification);
         }
     }
 
@@ -321,9 +321,9 @@ public class MappersTest {
         Assertions.assertEquals(challengeEvent.getWinNo(), model.getWinNo());
     }
 
-    private void assertStateOutput(RatingModel model,
-                                   Event event,
-                                   RatingNotification notification) {
+    private void assertRatingOutput(RatingModel model,
+                                    Event event,
+                                    RatingNotification notification) {
         Assertions.assertEquals(notification.getCurrentValue(), model.getCurrentValue());
         Assertions.assertEquals(notification.getState().getPoints(), model.getCurrentPoints());
         Assertions.assertEquals(notification.getState().getId(), model.getCurrentState());
@@ -463,7 +463,7 @@ public class MappersTest {
         }
     }
 
-    private Rating readState(String resPath, int index) throws IOException {
+    private Rating readRating(String resPath, int index) throws IOException {
         try (InputStream stream = MappersTest.class.getResourceAsStream(resPath)) {
             List<Rating> parsed = RatingsParser.parse(stream);
             return parsed.get(index);

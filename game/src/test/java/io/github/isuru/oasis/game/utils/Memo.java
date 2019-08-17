@@ -22,7 +22,7 @@ public class Memo {
     private static final Map<String, List<Tuple4<Long, Integer, Event, Milestone>>> milestoneMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple4<Long, String, Long, Double>>> challengeMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple4<Long, Long, Double, String>>> raceMap = new ConcurrentHashMap<>();
-    private static final Map<String, List<Tuple6<Long, Integer, String, Integer, String, Integer>>> statesMap = new ConcurrentHashMap<>();
+    private static final Map<String, List<Tuple6<Long, Integer, String, Integer, String, Integer>>> ratingsMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, PointRule>>> pointsErrorMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, BadgeRule>>> badgesErrorMap = new ConcurrentHashMap<>();
     private static final Map<String, List<Tuple3<Throwable, Event, Milestone>>> milestoneErrorMap = new ConcurrentHashMap<>();
@@ -87,15 +87,15 @@ public class Memo {
     }
 
     //
-    // STATES EVENTS
+    // RATINGS EVENTS
     //
 
-    public static void addState(String id, Tuple6<Long, Integer, String, Integer, String, Integer> record) {
-        statesMap.computeIfAbsent(id, s -> new ArrayList<>()).add(record);
+    public static void addRating(String id, Tuple6<Long, Integer, String, Integer, String, Integer> record) {
+        ratingsMap.computeIfAbsent(id, s -> new ArrayList<>()).add(record);
     }
 
-    public static List<Tuple6<Long, Integer, String, Integer, String, Integer>> getStates(String id) {
-        return statesMap.get(id);
+    public static List<Tuple6<Long, Integer, String, Integer, String, Integer>> getRatings(String id) {
+        return ratingsMap.get(id);
     }
 
     //

@@ -5,7 +5,7 @@ import io.github.isuru.oasis.game.utils.MilestoneCollector;
 import io.github.isuru.oasis.game.utils.PointCollector;
 import io.github.isuru.oasis.game.utils.RaceCollector;
 import io.github.isuru.oasis.game.utils.ResourceFileStream;
-import io.github.isuru.oasis.game.utils.StatesCollector;
+import io.github.isuru.oasis.game.utils.RatingsCollector;
 import io.github.isuru.oasis.game.utils.TestUtils;
 import io.github.isuru.oasis.model.Event;
 import io.github.isuru.oasis.model.FieldCalculator;
@@ -52,7 +52,7 @@ public class OasisTest {
     public void buildOasis() throws Exception {
         IOutputHandler assertOutputs = TestUtils.getAssertConfigs(new PointCollector("t"),
                 new BadgeCollector("t"), new MilestoneCollector("t"),
-                new StatesCollector("t"), new RaceCollector("t"));
+                new RatingsCollector("t"), new RaceCollector("t"));
         Oasis oasis = new Oasis("test-1");
 
         List<FieldCalculator> fields = TestUtils.getFields("fields.yml");

@@ -58,7 +58,7 @@ public class Main {
                     .fieldTransformer(kpis)
                     .setPointRules(pointRules)
                     .setMilestones(milestones)
-                    .setStates(ratings)
+                    .setRatings(ratings)
                     .setBadgeRules(badges);
 
             execution = createOutputHandler(gameProperties, execution)

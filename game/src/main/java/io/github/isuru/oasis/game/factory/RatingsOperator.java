@@ -12,9 +12,9 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 
 public class RatingsOperator {
 
-    public static DataStream<RatingEvent> createStateStream(Rating rating,
-                                                            DataStream<Event> eventDataStream,
-                                                            Oasis oasis) {
+    public static DataStream<RatingEvent> createRatingStream(Rating rating,
+                                                             DataStream<Event> eventDataStream,
+                                                             Oasis oasis) {
         FilterFunction<Event> filter;
         if (rating.getCondition() != null) {
             filter = new FilterFunction<Event>() {

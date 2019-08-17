@@ -8,26 +8,26 @@ public class AssertOutputHandler implements IOutputHandler {
     private IMilestoneHandler milestoneCollector;
     private IPointHandler pointCollector;
     private IChallengeHandler challengeCollector;
-    private IStatesHandler statesCollector;
+    private IRatingsHandler ratingCollector;
     private IRaceHandler raceHandler;
 
     AssertOutputHandler(IBadgeHandler badgeCollector, IMilestoneHandler milestoneCollector, IPointHandler pointCollector,
-                        IStatesHandler statesHandler, IRaceHandler raceHandler) {
+                        IRatingsHandler ratingsHandler, IRaceHandler raceHandler) {
         this.badgeCollector = badgeCollector;
         this.milestoneCollector = milestoneCollector;
         this.pointCollector = pointCollector;
-        this.statesCollector = statesHandler;
+        this.ratingCollector = ratingsHandler;
         this.raceHandler = raceHandler;
     }
 
     public AssertOutputHandler(IBadgeHandler badgeCollector, IMilestoneHandler milestoneCollector,
                                IPointHandler pointCollector, IChallengeHandler challengeCollector,
-                               IStatesHandler statesHandler, IRaceHandler raceHandler) {
+                               IRatingsHandler ratingsHandler, IRaceHandler raceHandler) {
         this.badgeCollector = badgeCollector;
         this.milestoneCollector = milestoneCollector;
         this.pointCollector = pointCollector;
         this.challengeCollector = challengeCollector;
-        this.statesCollector = statesHandler;
+        this.ratingCollector = ratingsHandler;
         this.raceHandler = raceHandler;
     }
 
@@ -57,7 +57,7 @@ public class AssertOutputHandler implements IOutputHandler {
     }
 
     @Override
-    public IStatesHandler getStatesHandler() {
-        return statesCollector;
+    public IRatingsHandler getRatingsHandler() {
+        return ratingCollector;
     }
 }
