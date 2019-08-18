@@ -9,9 +9,9 @@ public class UserStateStatDto {
     private Integer teamId;
     private Integer teamScopeId;
 
-    private Integer stateId;
-    private String stateDefName;
-    private String stateDefDisplayName;
+    private Integer ratingId;
+    private String ratingDefName;
+    private String ratingDefDisplayName;
 
     private Integer currentState;
     private String currentStateName;
@@ -53,28 +53,28 @@ public class UserStateStatDto {
         this.teamScopeId = teamScopeId;
     }
 
-    public Integer getStateId() {
-        return stateId;
+    public Integer getRatingId() {
+        return ratingId;
     }
 
-    public void setStateId(Integer stateId) {
-        this.stateId = stateId;
+    public void setRatingId(Integer ratingId) {
+        this.ratingId = ratingId;
     }
 
-    public String getStateDefName() {
-        return stateDefName;
+    public String getRatingDefName() {
+        return ratingDefName;
     }
 
-    public void setStateDefName(String stateDefName) {
-        this.stateDefName = stateDefName;
+    public void setRatingDefName(String ratingDefName) {
+        this.ratingDefName = ratingDefName;
     }
 
-    public String getStateDefDisplayName() {
-        return stateDefDisplayName;
+    public String getRatingDefDisplayName() {
+        return ratingDefDisplayName;
     }
 
-    public void setStateDefDisplayName(String stateDefDisplayName) {
-        this.stateDefDisplayName = stateDefDisplayName;
+    public void setRatingDefDisplayName(String ratingDefDisplayName) {
+        this.ratingDefDisplayName = ratingDefDisplayName;
     }
 
     public Integer getCurrentState() {

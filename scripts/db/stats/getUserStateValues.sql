@@ -2,9 +2,9 @@ SELECT
     oas.user_id AS userId,
     oas.team_id AS teamId,
     oas.team_scope_id AS teamScopeId,
-    oas.state_id as stateId,
-    oad.name AS stateDefName,
-    oad.display_name AS stateDefDisplayName,
+    oas.rating_id as ratingId,
+    oad.name AS ratingDefName,
+    oad.display_name AS ratingDefDisplayName,
     oas.current_state AS currentState,
     oas.current_state_name AS currentStateName,
     oas.current_value AS currentValue,
@@ -12,8 +12,8 @@ SELECT
     oas.ext_id AS extId,
     oas.changed_at AS lastChangedAt
 
-FROM OA_STATE oas
-    INNER JOIN OA_DEFINITION oad ON oas.state_id = oad.id
+FROM OA_RATING oas
+    INNER JOIN OA_DEFINITION oad ON oas.rating_id = oad.id
 
 WHERE
     oas.user_id = :userId

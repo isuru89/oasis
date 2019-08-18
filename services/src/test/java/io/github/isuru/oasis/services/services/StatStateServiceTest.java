@@ -61,7 +61,7 @@ public class StatStateServiceTest extends WithDataTest {
         loadStates(gameId);
 
         {
-            for (Map<String, Object> row : dao.executeRawQuery("SELECT * FROM OA_STATE", null)) {
+            for (Map<String, Object> row : dao.executeRawQuery("SELECT * FROM OA_RATING", null)) {
                 System.out.println(row);
             }
         }
@@ -74,15 +74,15 @@ public class StatStateServiceTest extends WithDataTest {
                 Assert.assertNotNull(stats);
                 for (UserStateStatDto stat : stats) {
                     Assert.assertNotNull(stat.getCurrentStateName());
-                    Assert.assertNotNull(stat.getStateDefDisplayName());
+                    Assert.assertNotNull(stat.getRatingDefDisplayName());
                     Assert.assertNotNull(stat.getCurrentPoints());
                     Assert.assertNotNull(stat.getCurrentValue());
 
                     System.out.println(String.format("%d\t%d\t%s\t%s\t%d\t[%s]\t%.2f\t%s\t%s",
                             stat.getTeamId(),
                             stat.getTeamScopeId(),
-                            stat.getStateDefName(),
-                            stat.getStateDefDisplayName(),
+                            stat.getRatingDefName(),
+                            stat.getRatingDefDisplayName(),
                             stat.getCurrentState(),
                             stat.getCurrentStateName(),
                             stat.getCurrentPoints(),

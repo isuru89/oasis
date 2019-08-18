@@ -328,7 +328,7 @@ public class MappersTest {
         Assertions.assertEquals(notification.getState().getPoints(), model.getCurrentPoints());
         Assertions.assertEquals(notification.getState().getId(), model.getCurrentState());
         Assertions.assertEquals(event.getSource(), model.getSourceId());
-        Assertions.assertEquals(notification.getRatingRef().getId(), model.getStateId().longValue());
+        Assertions.assertEquals(notification.getRatingRef().getId(), model.getRatingId().longValue());
         Assertions.assertEquals(event.getTeam(), model.getTeamId());
         Assertions.assertEquals(event.getTeamScope(), model.getTeamScopeId());
         Assertions.assertEquals(event.getTimestamp(), model.getTs().longValue());

@@ -15,7 +15,7 @@ public class RatingNotificationMapper extends BaseNotificationMapper<RatingNotif
         model.setUserId(notification.getUserId());
         model.setTeamId(event.getTeam());
         model.setTeamScopeId(event.getTeamScope());
-        model.setStateId(notification.getRatingRef().getId());
+        model.setRatingId(notification.getRatingRef().getId());
         model.setCurrentState(notification.getState().getId());
         model.setCurrentStateName(notification.getState().getName());
         model.setCurrentValue(notification.getCurrentValue());

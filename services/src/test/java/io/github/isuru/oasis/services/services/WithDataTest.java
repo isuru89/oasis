@@ -586,7 +586,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
                 model.setSourceId(1);
                 model.setExtId(randomId());
                 model.setCurrency(stateDef.isCurrency());
-                model.setStateId(stateDef.getId());
+                model.setRatingId(stateDef.getId());
                 model.setUserId(profile.getId());
                 model.setPreviousState(prevState.getId());
                 model.setPreviousStateName(prevState.getName());
@@ -692,7 +692,7 @@ public abstract class WithDataTest extends AbstractServiceTest {
         jsonEvent.setFieldValue(Constants.FIELD_TIMESTAMP, model.getTs());
         jsonEvent.setFieldValue(Constants.FIELD_ID, randomId());
         jsonEvent.setFieldValue(Constants.FIELD_EVENT_TYPE,
-                "so.event.state." + String.valueOf(model.getStateId()));
+                "so.event.state." + String.valueOf(model.getRatingId()));
         return jsonEvent;
     }
 

@@ -78,11 +78,11 @@ CREATE TABLE IF NOT EXISTS OA_MILESTONE_STATE (
 
 ALTER TABLE OA_MILESTONE_STATE ADD PRIMARY KEY (user_id, milestone_id);
 
-CREATE TABLE IF NOT EXISTS OA_STATE (
+CREATE TABLE IF NOT EXISTS OA_RATING (
     user_id         INT,
     team_id         INT,
     team_scope_id   INT,
-    state_id        INT,
+    rating_id        INT,
     current_state   INT,
     current_state_name VARCHAR(128),
     current_value   VARCHAR(1024),
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS OA_STATE (
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-ALTER TABLE OA_STATE ADD PRIMARY KEY (user_id, team_id, state_id);
+ALTER TABLE OA_RATING ADD PRIMARY KEY (user_id, team_id, rating_id);
 
 CREATE TABLE IF NOT EXISTS OA_CHALLENGE_WINNER (
     user_id         INT,

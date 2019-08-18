@@ -52,7 +52,7 @@ FROM
                     user_id,
                     COUNT(current_points) AS totalCount,
                     ROUND(<aggType>(current_points), 2) AS totalPoints
-                FROM OA_STATE
+                FROM OA_RATING
                 WHERE
                     is_active = 1
                     <if(hasTimeRange)>

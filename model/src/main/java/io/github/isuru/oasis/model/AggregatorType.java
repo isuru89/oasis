@@ -17,7 +17,7 @@ public enum AggregatorType {
     }
 
     // whether this aggregation type can handle multiple heterogeneous tables at once
-    // for eg: for now OA_POINT, and OA_STATE
+    // for eg: for now OA_POINT, and OA_RATING
     private final boolean multiAggregatable;
 
     public static AggregatorType from(String text) {

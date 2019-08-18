@@ -46,7 +46,7 @@ public class ConsumerUtils {
         map.put("userId", stateModel.getUserId());
         map.put("teamId", stateModel.getTeamId());
         map.put("teamScopeId", stateModel.getTeamScopeId());
-        map.put("stateId", stateModel.getStateId());
+        map.put("ratingId", stateModel.getRatingId());
         map.put("currState", stateModel.getCurrentState());
         map.put("currStateName", stateModel.getCurrentStateName());
         map.put("currValue", stateModel.getCurrentValue());

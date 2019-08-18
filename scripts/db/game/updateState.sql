@@ -1,8 +1,8 @@
-INSERT INTO OA_STATE (
+INSERT INTO OA_RATING (
     user_id,
     team_id,
     team_scope_id,
-    state_id,
+    rating_id,
     current_state,
     current_value,
     current_points,
@@ -15,7 +15,7 @@ INSERT INTO OA_STATE (
     :userId,
     :teamId,
     :teamScopeId,
-    :stateId,
+    :ratingId,
     :currState,
     :currValue,
     :currPoints,

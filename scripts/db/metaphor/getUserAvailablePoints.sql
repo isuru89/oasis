@@ -12,7 +12,7 @@ SELECT (
     +
 
     (SELECT COALESCE(ROUND(SUM(current_points), 2), 0)
-        FROM OA_STATE
+        FROM OA_RATING
         WHERE
             user_id = :userId
             AND

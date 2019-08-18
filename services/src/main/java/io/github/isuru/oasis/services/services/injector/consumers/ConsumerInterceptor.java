@@ -128,7 +128,7 @@ public class ConsumerInterceptor implements Consumer<Object>, Closeable {
                 data.put("teamId", stateModel.getTeamId());
                 data.put("teamScopeId", stateModel.getTeamScopeId());
                 data.put("defKindId", OasisDefinition.RATING.getTypeId());
-                data.put("defId", stateModel.getStateId());
+                data.put("defId", stateModel.getRatingId());
                 data.put("actionId", 1);
                 data.put("message", String.format("State changed from %s to %s",
                                 stateModel.getPreviousStateName(),

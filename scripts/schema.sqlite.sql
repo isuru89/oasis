@@ -75,11 +75,11 @@ CREATE TABLE  OA_MILESTONE_STATE (
     PRIMARY KEY (user_id, milestone_id)
 );
 
-CREATE TABLE  OA_STATE (
+CREATE TABLE  OA_RATING (
     user_id         INT,
     team_id         INT,
     team_scope_id   INT,
-    state_id        INT,
+    rating_id       INT,
     current_state   INT,
     current_state_name VARCHAR(128),
     current_value   VARCHAR(1024),
@@ -92,7 +92,7 @@ CREATE TABLE  OA_STATE (
     changed_at      BIGINT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, team_id, state_id)
+    PRIMARY KEY (user_id, team_id, rating_id)
 );
 
 CREATE TABLE  OA_CHALLENGE_WINNER (

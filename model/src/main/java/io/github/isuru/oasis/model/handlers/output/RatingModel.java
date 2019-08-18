@@ -9,7 +9,7 @@ public class RatingModel implements Serializable {
     private Long userId;
     private Long teamId;
     private Long teamScopeId;
-    private Long stateId;
+    private Long ratingId;
 
     private Integer previousState;
     private Integer currentState;
@@ -129,12 +129,12 @@ public class RatingModel implements Serializable {
         this.userId = userId;
     }
 
-    public Long getStateId() {
-        return stateId;
+    public Long getRatingId() {
+        return ratingId;
     }
 
-    public void setStateId(Long stateId) {
-        this.stateId = stateId;
+    public void setRatingId(Long ratingId) {
+        this.ratingId = ratingId;
     }
 
     public Integer getCurrentState() {
