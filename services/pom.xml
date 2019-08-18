@@ -3,13 +3,24 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+    <modules>
+        <module>events-api</module>
+        <module>stats-api</module>
+        <module>narrative-api</module>
+        <module>commons</module>
+        <module>profile-api</module>
+        <module>admin-api</module>
+        <module>elements-api</module>
+    </modules>
 
     <parent>
-        <groupId>io.github.isuru</groupId>
+        <groupId>io.github.isuru.oasis</groupId>
         <artifactId>oasis-parent</artifactId>
         <version>0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+
 
     <artifactId>oasis-services</artifactId>
 
@@ -69,17 +80,17 @@
             <version>2.3.0</version>
         </dependency>
         <dependency>
-            <groupId>io.github.isuru</groupId>
+            <groupId>io.github.isuru.oasis</groupId>
             <artifactId>oasis-dao</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.isuru</groupId>
+            <groupId>io.github.isuru.oasis</groupId>
             <artifactId>oasis</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.isuru</groupId>
+            <groupId>io.github.isuru.oasis</groupId>
             <artifactId>oasis-model</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -151,7 +162,7 @@
             <id>dev</id>
             <dependencies>
                 <dependency>
-                    <groupId>io.github.isuru</groupId>
+                    <groupId>io.github.isuru.oasis</groupId>
                     <artifactId>oasis</artifactId>
                     <version>${project.version}</version>
                 </dependency>
