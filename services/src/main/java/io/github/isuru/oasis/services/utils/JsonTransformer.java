@@ -3,21 +3,19 @@ package io.github.isuru.oasis.services.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import spark.ResponseTransformer;
 
 import java.util.Map;
 
 /**
  * @author iweerarathna
  */
-public class JsonTransformer implements ResponseTransformer {
+public class JsonTransformer {
 
     private static final TypeReference<Map<String, Object>> TYPE_REFERENCE =
             new TypeReference<Map<String, Object>>() {};
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @Override
     public String render(Object model) throws Exception {
         return mapper.writeValueAsString(model);
     }
