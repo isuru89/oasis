@@ -19,57 +19,55 @@
 
 package io.github.oasis.services.admin;
 
-import io.github.oasis.services.admin.controller.AdminController;
-import io.github.oasis.services.admin.controller.ExternalAppController;
-import io.github.oasis.services.admin.controller.GameController;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.github.oasis.services.common.internal.events.game.GamePausedEvent;
+import io.github.oasis.services.common.internal.events.game.GameRestartedEvent;
+import io.github.oasis.services.common.internal.events.game.GameStartedEvent;
+import io.github.oasis.services.common.internal.events.game.GameStoppedEvent;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Isuru Weerarathna
  */
-@Configuration
-public class OasisAdminConfiguration {
+@Service
+public class AdminAggregate {
 
-    @Autowired
     private ApplicationEventPublisher publisher;
 
-    /////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////
-    //
-    // CONTROLLERS
-    //
-    /////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////
-
-    @Bean
-    public AdminController getAdminController() {
-        return new AdminController();
-    }
-
-    @Bean
-    public ExternalAppController getExternalAppController() {
-        return new ExternalAppController();
-    }
-
-    @Bean
-    public GameController getGameController() {
-        return new GameController();
+    public AdminAggregate(ApplicationEventPublisher publisher) {
+        this.publisher = publisher;
     }
 
     /////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////
     //
-    // AGGREGATES
+    //  GAME - ACTIONS
     //
-    /////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
 
-    @Bean
-    public AdminAggregate getAdminAggregate() {
-        return new AdminAggregate(publisher);
+    public void startGame(int gameId) {
+        System.out.println("Started");
+        publisher.publishEvent(new GameStartedEvent(gameId));
     }
+
+    public void stopGame(int gameId) {
+        System.out.println("Stopped");
+        publisher.publishEvent(new GameStoppedEvent(gameId));
+    }
+
+    public void pauseGame(int gameId) {
+        System.out.println("Game Paused");
+        publisher.publishEvent(new GamePausedEvent(gameId));
+    }
+
+    public void restartGame(int gameId) {
+        System.out.println("Game restarted");
+        publisher.publishEvent(new GameRestartedEvent(gameId));
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
+    //
+    //  EXTERNAL APPLICATION - ACTIONS
+    //
+    /////////////////////////////////////////////////////////////////////////////
 
 }

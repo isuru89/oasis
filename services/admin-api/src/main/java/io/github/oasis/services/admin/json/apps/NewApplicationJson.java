@@ -17,23 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.json;
+package io.github.oasis.services.admin.json.apps;
 
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UpdateApplicationJson {
+public class NewApplicationJson {
+
+    private String name;
 
     private List<String> eventTypes;
-    private List<Integer> gameIds;
+    private List<Integer> mappedGameIds;
+
+    public String getName() {
+        return name;
+    }
 
     public List<String> getEventTypes() {
         return eventTypes;
     }
 
-    public List<Integer> getGameIds() {
-        return gameIds;
+    public List<Integer> getMappedGameIds() {
+        return mappedGameIds;
     }
 }

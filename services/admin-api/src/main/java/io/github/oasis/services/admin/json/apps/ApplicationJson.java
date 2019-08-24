@@ -17,14 +17,34 @@
  * under the License.
  */
 
-package io.github.oasis.services.common.security;
+package io.github.oasis.services.admin.json.apps;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class AllowedRoles {
+public class ApplicationJson {
 
-    public static final String ONLY_ADMIN = "hasRole('ROLE_ADMIN')";
-    public static final String ADMIN_OR_CURATOR = "hasAnyRole('ROLE_ADMIN', 'ROLE_CURATOR')";
+    private String id;
+    private String name;
 
+    private List<String> eventTypes;
+    private List<Integer> mappedGameIds;
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<String> getEventTypes() {
+        return eventTypes;
+    }
+
+    public List<Integer> getMappedGameIds() {
+        return mappedGameIds;
+    }
 }

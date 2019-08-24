@@ -19,17 +19,28 @@
 
 package io.github.oasis.services.admin.controller;
 
-import io.github.oasis.services.admin.json.NewApplicationJson;
-import io.github.oasis.services.admin.json.UpdateApplicationJson;
+import io.github.oasis.services.admin.json.StatusJson;
+import io.github.oasis.services.admin.json.apps.ApplicationAddedJson;
+import io.github.oasis.services.admin.json.apps.ApplicationJson;
+import io.github.oasis.services.admin.json.apps.NewApplicationJson;
+import io.github.oasis.services.admin.json.apps.UpdateApplicationJson;
 import io.github.oasis.services.common.security.AllowedRoles;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 import static io.github.oasis.services.admin.internal.EndPoints.APPS.APP;
+import static io.github.oasis.services.admin.internal.EndPoints.APPS.APP_ID;
 import static io.github.oasis.services.admin.internal.EndPoints.APPS.DEACTIVATE;
+import static io.github.oasis.services.admin.internal.EndPoints.APPS.DOWNLOAD_KEY;
+import static io.github.oasis.services.admin.internal.EndPoints.APPS.LIST_ALL;
 import static io.github.oasis.services.admin.internal.EndPoints.APPS.REGISTER;
 import static io.github.oasis.services.admin.internal.EndPoints.APPS.UPDATE;
 
@@ -45,20 +56,33 @@ public class ExternalAppController {
 
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
     @PostMapping(REGISTER)
-    public void registerApp(@RequestBody NewApplicationJson newApplication) {
-        System.out.println("?>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    public ApplicationAddedJson registerApp(@RequestBody NewApplicationJson newApplication) {
+        return null;
+    }
+
+    @PreAuthorize(AllowedRoles.ONLY_ADMIN)
+    @GetMapping(LIST_ALL)
+    public List<ApplicationJson> listAllApps() {
+        return null;
+    }
+
+    @PreAuthorize(AllowedRoles.ONLY_ADMIN)
+    @PostMapping(value = DOWNLOAD_KEY, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public void downloadAppKey(@PathVariable(APP_ID) String appId) {
+
     }
 
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
     @PostMapping(DEACTIVATE)
-    public void deactivateApp() {
-
+    public StatusJson deactivateApp(@PathVariable(APP_ID) String appId) {
+        return StatusJson.FAILED;
     }
 
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
     @PostMapping(UPDATE)
-    public void updateApp(@RequestBody UpdateApplicationJson updateApplication) {
-
+    public StatusJson updateApp(@PathVariable(APP_ID) String appId,
+                                @RequestBody UpdateApplicationJson updateApplication) {
+        return StatusJson.FAILED;
     }
 
 }

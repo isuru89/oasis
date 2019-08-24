@@ -26,12 +26,27 @@ public final class EndPoints {
 
     public static final String PREFIX = "/admin";
 
+    public static class GAME {
+        public static final String GAME = PREFIX + "/game";
+
+        public static final String GAME_ID = "id";
+
+        public static final String START        = GAME + "/:" + GAME_ID + "/start";
+        public static final String PAUSE        = GAME + "/:" + GAME_ID + "/pause";
+        public static final String STOP         = GAME + "/:" + GAME_ID + "/stop";
+        public static final String RESTART      = GAME + "/:" + GAME_ID + "/restart";
+    }
+
     public static class APPS {
         public static final String APP = PREFIX + "/app";
 
-        public static final String REGISTER = APP + "/register";
-        public static final String DEACTIVATE = APP + "/deactivate";
-        public static final String UPDATE = APP + "/update";
+        public static final String APP_ID = "id";
+
+        public static final String REGISTER         = APP + "/register";
+        public static final String LIST_ALL         = APP + "/all";
+        public static final String DEACTIVATE       = APP + "/:" + APP_ID + "/deactivate";
+        public static final String UPDATE           = APP + "/:" + APP_ID + "/update";
+        public static final String DOWNLOAD_KEY     = APP + "/:" + APP_ID + "/download-key";
 
     }
 

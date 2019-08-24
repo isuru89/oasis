@@ -19,30 +19,106 @@
 
 package io.github.oasis.services.admin;
 
-import org.junit.Before;
-import org.junit.Test;
+
+import io.github.oasis.services.admin.controller.AdminController;
+import io.github.oasis.services.common.internal.events.game.GameStartedEvent;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.verification.VerificationMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * @author Isuru Weerarathna
  */
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = OasisAdminConfiguration.class)
 @DisplayName("External Applications")
 public class ExternalApplicationTest {
 
-    @Before
+    private static final VerificationMode SINGLE = Mockito.times(1);
+
+    @MockBean
+    private ApplicationEventPublisher publisher;
+
+    private AdminAggregate adminAggregate;
+
+    @Autowired
+    private AdminController adminController;
+
+    @BeforeEach
     public void beforeEach() {
+        MockitoAnnotations.initMocks(this);
+        adminAggregate = new AdminAggregate(publisher);
     }
 
     @DisplayName("Only Admin can add external applications")
     @Test
-    public void testAddApplicationsByAdmin() throws Exception {
-//        NewApplicationJson applicationJson = new NewApplicationJson();
-//        appController.registerApp(applicationJson);
+    public void testAddApplicationsByAdmin() {
+        System.out.println(adminAggregate);
+        adminAggregate.startGame(100);
+
+        Mockito.verify(publisher, SINGLE).publishEvent(Mockito.any(GameStartedEvent.class));
+    }
+
+    @DisplayName("When no applications exist, should return empty")
+    @Test
+    public void testListApps() {
+
+    }
+
+    @DisplayName("Application secret key can only be downloaded once forever")
+    @Test
+    public void testDownloadKeys() {
+
     }
 
     @DisplayName("At least one event type must be mapped with an application")
     @Test
-    public void testAddApplications() {
+    public void testAddApplicationsWithEventTypes() {
+
+    }
+
+    @DisplayName("Application can optionally restricted to subset of games")
+    @Test
+    public void testAddApplicationsForSubSetOfGames() {
+
+    }
+
+    @DisplayName("Application name is mandatory")
+    @Test
+    public void testAddApplicationsWithoutName() {
+
+    }
+
+    @DisplayName("Application event types can be updated while game is running")
+    @Test
+    public void testUpdateEventTypes() {
+
+    }
+
+    @DisplayName("Application can restrict to a game while that game is running")
+    @Test
+    public void testUpdateAppRestrictToGames() {
+
+    }
+
+    @DisplayName("Non existing applications cannot be deleted")
+    @Test
+    public void testTryDeleteApp() {
+
+    }
+
+    @DisplayName("Existing application can be deleted only by admin")
+    @Test
+    public void testDeleteAppByAdmin() {
 
     }
 

@@ -17,14 +17,26 @@
  * under the License.
  */
 
-package io.github.oasis.services.common.security;
+package io.github.oasis.services.admin.json;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class AllowedRoles {
+public class StatusJson {
 
-    public static final String ONLY_ADMIN = "hasRole('ROLE_ADMIN')";
-    public static final String ADMIN_OR_CURATOR = "hasAnyRole('ROLE_ADMIN', 'ROLE_CURATOR')";
+    public static final StatusJson FAILED = new StatusJson(false);
+    public static final StatusJson SUCCESS = new StatusJson(true);
 
+    private boolean success = false;
+
+    public StatusJson() {
+    }
+
+    private StatusJson(boolean success) {
+        this.success = success;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
 }

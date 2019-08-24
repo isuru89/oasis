@@ -17,14 +17,13 @@
  * under the License.
  */
 
-package io.github.oasis.services.common.security;
+package io.github.oasis.services.common.internal.events.game;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class AllowedRoles {
-
-    public static final String ONLY_ADMIN = "hasRole('ROLE_ADMIN')";
-    public static final String ADMIN_OR_CURATOR = "hasAnyRole('ROLE_ADMIN', 'ROLE_CURATOR')";
-
+public class GamePausedEvent extends GameStatusChangedEvent {
+    public GamePausedEvent(int gameId) {
+        super(gameId);
+    }
 }

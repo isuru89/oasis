@@ -17,10 +17,13 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.json;
+package io.github.oasis.services.common.internal.events.game;
 
 /**
  * @author Isuru Weerarathna
  */
-public class NewApplicationJson {
+public class GameRestartedEvent extends GameStatusChangedEvent {
+    public GameRestartedEvent(int gameId) {
+        super(gameId);
+    }
 }

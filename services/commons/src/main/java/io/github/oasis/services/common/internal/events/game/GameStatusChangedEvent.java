@@ -17,14 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.services.common.security;
+package io.github.oasis.services.common.internal.events.game;
+
+import io.github.oasis.services.common.internal.events.BaseEvent;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class AllowedRoles {
+public abstract class GameStatusChangedEvent extends BaseEvent {
 
-    public static final String ONLY_ADMIN = "hasRole('ROLE_ADMIN')";
-    public static final String ADMIN_OR_CURATOR = "hasAnyRole('ROLE_ADMIN', 'ROLE_CURATOR')";
+    private int gameId;
 
+    public GameStatusChangedEvent(int gameId) {
+        this.gameId = gameId;
+    }
+
+    public int getGameId() {
+        return gameId;
+    }
 }
