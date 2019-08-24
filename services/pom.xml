@@ -15,7 +15,7 @@
     </modules>
 
     <parent>
-        <groupId>io.github.isuru.oasis</groupId>
+        <groupId>io.github.oasis</groupId>
         <artifactId>oasis-parent</artifactId>
         <version>0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -80,17 +80,17 @@
             <version>2.3.0</version>
         </dependency>
         <dependency>
-            <groupId>io.github.isuru.oasis</groupId>
+            <groupId>io.github.oasis</groupId>
             <artifactId>oasis-dao</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.isuru.oasis</groupId>
+            <groupId>io.github.oasis</groupId>
             <artifactId>oasis</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.isuru.oasis</groupId>
+            <groupId>io.github.oasis</groupId>
             <artifactId>oasis-model</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -162,7 +162,7 @@
             <id>dev</id>
             <dependencies>
                 <dependency>
-                    <groupId>io.github.isuru.oasis</groupId>
+                    <groupId>io.github.oasis</groupId>
                     <artifactId>oasis</artifactId>
                     <version>${project.version}</version>
                 </dependency>
@@ -193,7 +193,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>false</addClasspath>
-                            <mainClass>io.github.isuru.oasis.services.OasisServer</mainClass>
+                            <mainClass>io.github.oasis.services.OasisServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

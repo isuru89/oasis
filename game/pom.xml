@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.github.isuru.oasis</groupId>
+        <groupId>io.github.oasis</groupId>
         <artifactId>oasis-parent</artifactId>
         <version>0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -20,7 +20,7 @@
             <version>1.5.0</version>
         </dependency>
         <dependency>
-            <groupId>io.github.isuru.oasis</groupId>
+            <groupId>io.github.oasis</groupId>
             <artifactId>oasis-model</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -122,7 +122,7 @@
                             </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>io.github.isuru.oasis.game.Main</mainClass>
+                                    <mainClass>io.github.oasis.game.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
