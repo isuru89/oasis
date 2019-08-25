@@ -17,34 +17,18 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.domain;
+package io.github.oasis.services.admin.utils;
+
+import org.mockito.Mockito;
+import org.mockito.verification.VerificationMode;
 
 /**
  * @author Isuru Weerarathna
  */
-public enum GameState {
+public final class TestUtils {
 
-    CREATED,
-    RUNNING,
-    PAUSED,
-    STOPPED,
-    DELETED;
+    public static final VerificationMode SINGLE = Mockito.times(1);
+    public static final VerificationMode NONE = Mockito.times(0);
 
-
-    public static boolean canDeactivateState(GameState gameState) {
-        return gameState == CREATED || gameState == STOPPED || gameState == DELETED;
-    }
-
-    public static boolean canPauseableState(GameState gameState) {
-        return gameState == CREATED || gameState == RUNNING;
-    }
-
-    public static boolean canStoppableState(GameState gameState) {
-        return gameState == CREATED || gameState == RUNNING || gameState == PAUSED;
-    }
-
-    public static boolean canStartableState(GameState gameState) {
-        return gameState == CREATED || gameState == PAUSED || gameState == STOPPED;
-    }
 
 }

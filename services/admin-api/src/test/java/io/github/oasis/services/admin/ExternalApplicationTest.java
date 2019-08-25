@@ -22,6 +22,7 @@ package io.github.oasis.services.admin;
 
 import io.github.oasis.services.admin.controller.AdminController;
 import io.github.oasis.services.admin.domain.ExternalAppService;
+import io.github.oasis.services.admin.domain.GameStateService;
 import io.github.oasis.services.admin.internal.ApplicationKey;
 import io.github.oasis.services.admin.internal.dao.IExternalAppDao;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundException;
@@ -44,7 +45,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.verification.VerificationMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -54,6 +54,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.github.oasis.services.admin.utils.TestUtils.NONE;
+import static io.github.oasis.services.admin.utils.TestUtils.SINGLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -68,8 +70,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("External Applications")
 public class ExternalApplicationTest {
 
-    private static final VerificationMode SINGLE = Mockito.times(1);
-    private static final VerificationMode NONE = Mockito.times(0);
 
     @MockBean
     private IExternalAppDao dao;
@@ -79,6 +79,9 @@ public class ExternalApplicationTest {
 
     @InjectMocks
     private ExternalAppService externalAppService;
+
+    @InjectMocks
+    private GameStateService gameStateService;
 
     private AdminAggregate adminAggregate;
 
@@ -91,7 +94,7 @@ public class ExternalApplicationTest {
     @BeforeEach
     public void beforeEach() {
         MockitoAnnotations.initMocks(this);
-        adminAggregate = new AdminAggregate(publisher, externalAppService);
+        adminAggregate = new AdminAggregate(publisher, externalAppService, gameStateService);
     }
 
     @DisplayName("Only Admin can add external applications")

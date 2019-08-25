@@ -20,6 +20,7 @@
 package io.github.oasis.services.admin;
 
 import io.github.oasis.services.admin.domain.ExternalAppService;
+import io.github.oasis.services.admin.domain.GameStateService;
 import io.github.oasis.services.admin.internal.ApplicationKey;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppAlreadyExistException;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundException;
@@ -31,6 +32,7 @@ import io.github.oasis.services.admin.json.apps.UpdateApplicationJson;
 import io.github.oasis.services.common.internal.events.admin.ExternalAppEvent;
 import io.github.oasis.services.common.internal.events.admin.ExternalAppEventType;
 import io.github.oasis.services.common.internal.events.game.GamePausedEvent;
+import io.github.oasis.services.common.internal.events.game.GameRemovedEvent;
 import io.github.oasis.services.common.internal.events.game.GameRestartedEvent;
 import io.github.oasis.services.common.internal.events.game.GameStartedEvent;
 import io.github.oasis.services.common.internal.events.game.GameStoppedEvent;
@@ -47,10 +49,14 @@ public class AdminAggregate {
 
     private ApplicationEventPublisher publisher;
     private ExternalAppService externalAppService;
+    private GameStateService gameStateService;
 
-    public AdminAggregate(ApplicationEventPublisher publisher, ExternalAppService externalAppService) {
+    public AdminAggregate(ApplicationEventPublisher publisher,
+                          ExternalAppService externalAppService,
+                          GameStateService gameStateService) {
         this.publisher = publisher;
         this.externalAppService = externalAppService;
+        this.gameStateService = gameStateService;
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -60,23 +66,28 @@ public class AdminAggregate {
     /////////////////////////////////////////////////////////////////////////////
 
     public void startGame(int gameId) {
-        System.out.println("Started");
+        gameStateService.startGame(gameId);
         publisher.publishEvent(new GameStartedEvent(gameId));
     }
 
     public void stopGame(int gameId) {
-        System.out.println("Stopped");
+        gameStateService.stopGame(gameId);
         publisher.publishEvent(new GameStoppedEvent(gameId));
     }
 
     public void pauseGame(int gameId) {
-        System.out.println("Game Paused");
+        gameStateService.pauseGame(gameId);
         publisher.publishEvent(new GamePausedEvent(gameId));
     }
 
     public void restartGame(int gameId) {
-        System.out.println("Game restarted");
+        gameStateService.startGame(gameId);
         publisher.publishEvent(new GameRestartedEvent(gameId));
+    }
+
+    public void removeGame(int gameId) {
+        gameStateService.deleteGame(gameId);
+        publisher.publishEvent(new GameRemovedEvent(gameId));
     }
 
     /////////////////////////////////////////////////////////////////////////////

@@ -17,34 +17,15 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.domain;
+package io.github.oasis.services.admin.internal.exceptions;
+
+import io.github.oasis.services.common.OasisServiceException;
 
 /**
  * @author Isuru Weerarathna
  */
-public enum GameState {
-
-    CREATED,
-    RUNNING,
-    PAUSED,
-    STOPPED,
-    DELETED;
-
-
-    public static boolean canDeactivateState(GameState gameState) {
-        return gameState == CREATED || gameState == STOPPED || gameState == DELETED;
+public class GameStateChangeException extends OasisServiceException {
+    public GameStateChangeException(int errorCode, String message) {
+        super(errorCode, message);
     }
-
-    public static boolean canPauseableState(GameState gameState) {
-        return gameState == CREATED || gameState == RUNNING;
-    }
-
-    public static boolean canStoppableState(GameState gameState) {
-        return gameState == CREATED || gameState == RUNNING || gameState == PAUSED;
-    }
-
-    public static boolean canStartableState(GameState gameState) {
-        return gameState == CREATED || gameState == PAUSED || gameState == STOPPED;
-    }
-
 }

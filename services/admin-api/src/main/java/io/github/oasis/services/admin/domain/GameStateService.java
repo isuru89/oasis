@@ -19,32 +19,34 @@
 
 package io.github.oasis.services.admin.domain;
 
+import io.github.oasis.services.admin.internal.dao.IGameDao;
+import org.springframework.stereotype.Component;
+
 /**
  * @author Isuru Weerarathna
  */
-public enum GameState {
+@Component
+public class GameStateService {
 
-    CREATED,
-    RUNNING,
-    PAUSED,
-    STOPPED,
-    DELETED;
+    private IGameDao gameDao;
 
-
-    public static boolean canDeactivateState(GameState gameState) {
-        return gameState == CREATED || gameState == STOPPED || gameState == DELETED;
+    public GameStateService(IGameDao gameDao) {
+        this.gameDao = gameDao;
     }
 
-    public static boolean canPauseableState(GameState gameState) {
-        return gameState == CREATED || gameState == RUNNING;
+    public void startGame(int gameId) {
+        gameDao.startGame(gameId);
     }
 
-    public static boolean canStoppableState(GameState gameState) {
-        return gameState == CREATED || gameState == RUNNING || gameState == PAUSED;
+    public void stopGame(int gameId) {
+        gameDao.stopGame(gameId);
     }
 
-    public static boolean canStartableState(GameState gameState) {
-        return gameState == CREATED || gameState == PAUSED || gameState == STOPPED;
+    public void pauseGame(int gameId) {
+        gameDao.pauseGame(gameId);
     }
 
+    public void deleteGame(int gameId) {
+        gameDao.deactivateGame(gameId);
+    }
 }

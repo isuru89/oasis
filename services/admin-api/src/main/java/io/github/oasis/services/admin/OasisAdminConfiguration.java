@@ -23,6 +23,7 @@ import io.github.oasis.services.admin.controller.AdminController;
 import io.github.oasis.services.admin.controller.ExternalAppController;
 import io.github.oasis.services.admin.controller.GameController;
 import io.github.oasis.services.admin.domain.ExternalAppService;
+import io.github.oasis.services.admin.domain.GameStateService;
 import io.github.oasis.services.admin.internal.dao.IExternalAppDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -46,6 +47,9 @@ public class OasisAdminConfiguration {
 
     @Autowired
     private IExternalAppDao externalAppDao;
+
+    @Autowired
+    private GameStateService gameStateService;
 
     /////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
@@ -85,7 +89,7 @@ public class OasisAdminConfiguration {
 
     @Bean
     public AdminAggregate getAdminAggregate() {
-        return new AdminAggregate(publisher, externalAppService);
+        return new AdminAggregate(publisher, externalAppService, gameStateService);
     }
 
 }

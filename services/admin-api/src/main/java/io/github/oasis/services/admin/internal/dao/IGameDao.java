@@ -20,11 +20,14 @@
 package io.github.oasis.services.admin.internal.dao;
 
 import io.github.oasis.services.admin.domain.GameState;
+import io.github.oasis.services.admin.internal.ErrorCodes;
+import io.github.oasis.services.admin.internal.exceptions.GameStateChangeException;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.jdbi.v3.sqlobject.transaction.Transaction;
 
+import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -35,23 +38,63 @@ public interface IGameDao {
     @SqlUpdate("UPDATE OA_GAME_DEF SET is_active = false WHERE game_id = :id")
     int deactivateGame(@Bind("id") int gameId);
 
-    int pauseGame(@Bind("id") int gameId);
+    @SqlUpdate("INSERT INTO OA_GAME_STATE" +
+            " (game_id, prev_state, current_state, changed_at)" +
+            " VALUES" +
+            " (:id, :prevState, :currState, :changedAt)")
+    void insertGameStateChangedRecord(@Bind("id") int gameId,
+                                      @Bind("prevState") GameState prevState,
+                                      @Bind("currState") GameState currState,
+                                      @Bind("changedAt") Instant changedAt);
 
-    int stopGame(@Bind("id") int gameId);
+    @Transaction
+    default void pauseGame(@Bind("id") int gameId) {
+        GameState currentState = readCurrentGameState(gameId).orElse(GameState.CREATED);
 
-    int startGame(@Bind("id") int gameId);
+        if (GameState.canPauseableState(currentState)) {
+            insertGameStateChangedRecord(gameId, currentState, GameState.PAUSED, Instant.now());
+        } else {
+            throw new GameStateChangeException(ErrorCodes.GAME_CANNOT_PAUSE,
+                    "Game is currently in '%s' state. Cannot be paused!");
+        }
+    }
+
+    @Transaction
+    default void stopGame(@Bind("id") int gameId) {
+        GameState currentState = readCurrentGameState(gameId).orElse(GameState.CREATED);
+
+        if (GameState.canStoppableState(currentState)) {
+            insertGameStateChangedRecord(gameId, currentState, GameState.STOPPED, Instant.now());
+        } else {
+            throw new GameStateChangeException(ErrorCodes.GAME_CANNOT_STOP,
+                    "Game is currently in '%s' state. Cannot be stopped!");
+        }
+    }
+
+    @Transaction
+    default void startGame(@Bind("id") int gameId) {
+        GameState currentState = readCurrentGameState(gameId).orElse(GameState.CREATED);
+
+        if (GameState.canStartableState(currentState)) {
+            insertGameStateChangedRecord(gameId, currentState, GameState.RUNNING, Instant.now());
+        } else {
+            throw new GameStateChangeException(ErrorCodes.GAME_CANNOT_START,
+                    "Game is currently in '%s' state. Cannot be started!");
+        }
+    }
 
     @SqlQuery("SELECT current_state FROM OA_GAME_STATE WHERE game_id = :id ORDER BY changed_at DESC LIMIT 1")
     Optional<GameState> readCurrentGameState(@Bind("id") int gameId);
 
     @Transaction
-    default void removeGame(@Bind("id") int gameId) {
+    default void removeGame(@Bind("id") int gameId) throws GameStateChangeException {
         GameState currentState = readCurrentGameState(gameId).orElse(GameState.CREATED);
 
-        if (GameState.canDeactivateState(currentState)) {
-            deactivateGame(gameId);
+        if (GameState.canDeactivateState(currentState) && deactivateGame(gameId) > 0) {
+            insertGameStateChangedRecord(gameId, currentState, GameState.DELETED, Instant.now());
         } else {
-
+            throw new GameStateChangeException(ErrorCodes.GAME_ALREADY_REMOVED,
+                    "Given game is already removed!");
         }
     }
 

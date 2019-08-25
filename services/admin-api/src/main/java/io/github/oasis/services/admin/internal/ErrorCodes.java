@@ -30,4 +30,7 @@ public final class ErrorCodes {
     public static final int KEY_ALREADY_DOWNLOADED = 40004;
 
     public static final int GAME_ALREADY_REMOVED = 30001;
+    public static final int GAME_CANNOT_START = 30002;
+    public static final int GAME_CANNOT_PAUSE = 30003;
+    public static final int GAME_CANNOT_STOP = 30004;
 }
