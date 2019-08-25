@@ -19,9 +19,15 @@
 
 package io.github.oasis.services.admin.internal.dao;
 
+import io.github.oasis.services.admin.internal.ApplicationKey;
 import io.github.oasis.services.admin.internal.dto.ExtAppRecord;
+import io.github.oasis.services.admin.internal.dto.ExtAppUpdateResult;
 import io.github.oasis.services.admin.internal.dto.NewAppDto;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppAlreadyExistException;
+import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundException;
+import io.github.oasis.services.admin.internal.exceptions.KeyAlreadyDownloadedException;
+import io.github.oasis.services.admin.json.apps.UpdateApplicationJson;
+import io.github.oasis.services.common.Validation;
 import org.jdbi.v3.core.result.LinkedHashMapRowReducer;
 import org.jdbi.v3.core.result.RowView;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
@@ -38,6 +44,8 @@ import org.jdbi.v3.sqlobject.transaction.Transaction;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Dao responsible for dealing with external application
@@ -66,33 +74,105 @@ public interface IExternalAppDao {
     @RegisterBeanMapper(value = ExtAppRecord.GameDef.class, prefix = "g")
     @RegisterBeanMapper(value = ExtAppRecord.EventType.class, prefix = "et")
     @UseRowReducer(AppGameReducer.class)
-    List<ExtAppRecord> getAllExternalApps();
+    List<ExtAppRecord> getAllRegisteredApps();
 
-    @SqlQuery("SELECT game_id FROM OA_GAME_DEF")
+    @SqlQuery("SELECT game_id FROM OA_GAME_DEF WHERE is_active = true")
     List<Integer> readAllGameIds();
 
     @SqlBatch("INSERT INTO OA_EXT_APP_EVENT (app_id, event_type) VALUES (:appId, :eventType)")
-    void insertEventMappingsForApp(@Bind("appId") int appId,
-                                   @Bind("eventType") List<String> eventTypes);
+    void insertEventMappingsForApp(@Bind("appId") int appId, @Bind("eventType") List<String> eventTypes);
+
+    @SqlBatch("DELETE FROM OA_EXT_APP_EVENT WHERE app_id = :appId AND event_type = :eventType")
+    void removeEventMappingsForApp(@Bind("appId") int appId, @Bind("eventType") List<String> eventType);
 
     @SqlBatch("INSERT INTO OA_EXT_APP_GAME (app_id, game_id) VALUES (:appId, :gameId)")
-    void insertGameMappingForApp(@Bind("appId") int appId,
-                                 @Bind("gameId") List<Integer> gameIds);
+    void insertGameMappingsForApp(@Bind("appId") int appId, @Bind("gameId") List<Integer> gameIds);
+
+    @SqlBatch("DELETE FROM OA_EXT_APP_GAME WHERE app_id = :appId AND game_id = :gameId")
+    void removeGameMappingsForApp(@Bind("appId") int appId, @Bind("gameId") List<Integer> gameId);
+
+    @SqlQuery
+    Optional<ExtAppRecord> readApplication(@Bind("appId") int appId);
+
+    @SqlUpdate("UPDATE OA_EXT_APP SET is_downloaded = true WHERE app_id = :appId")
+    int markKeyAsDownloaded(@Bind("appId") int appId);
+
+    @SqlUpdate("UPDATE OA_EXT_APP SET is_active = false WHERE app_id = :appId")
+    int deactivateApplication(@Bind("appId") int appId);
 
     @Transaction
-    default int addApplication(NewAppDto dto) throws ExtAppAlreadyExistException {
-        Optional<String> externalAppByName = findExternalAppByName(dto.getName());
+    default ExtAppUpdateResult updateApplication(int appId, UpdateApplicationJson updateData) {
+        ExtAppRecord appRecord = readApplication(appId).orElseThrow(
+                () -> new ExtAppNotFoundException("No registered app is found by given id!"));
+
+        ExtAppUpdateResult.ExtAppUpdateResultBuilder builder = new ExtAppUpdateResult.ExtAppUpdateResultBuilder();
+        if (updateData.hasEventTypes()) {
+            Set<String> existingEvents = appRecord.getEventTypes().stream()
+                    .map(ExtAppRecord.EventType::getEventType)
+                    .collect(Collectors.toSet());
+            List<String> removedEvents = updateData.removedEvents(existingEvents);
+            if (Validation.isNonEmpty(removedEvents)) {
+                removeEventMappingsForApp(appId, removedEvents);
+            }
+
+            List<String> newlyAddedEvents = updateData.newlyAddedEvents(existingEvents);
+            if (Validation.isNonEmpty(newlyAddedEvents)) {
+                insertEventMappingsForApp(appId, newlyAddedEvents);
+            }
+
+            builder.addedEventTypes(newlyAddedEvents).removedEventTypes(removedEvents);
+        }
+
+        if (updateData.hasGameIds()) {
+            Set<Integer> existingGames = appRecord.getMappedGames().stream()
+                    .map(ExtAppRecord.GameDef::getId)
+                    .collect(Collectors.toSet());
+            List<Integer> removedGames = updateData.removedGames(existingGames);
+            if (Validation.isNonEmpty(removedGames)) {
+                removeGameMappingsForApp(appId, removedGames);
+            }
+
+            List<Integer> newlyAddedGames = updateData.newlyAddedGames(existingGames);
+            if (Validation.isNonEmpty(newlyAddedGames)) {
+                insertGameMappingsForApp(appId, newlyAddedGames);
+            }
+
+            builder.addedGameIds(newlyAddedGames).removedGameIds(removedGames);
+        }
+
+        return builder.create();
+    }
+
+    @Transaction
+    default ApplicationKey readApplicationKey(int appId) throws ExtAppNotFoundException {
+        Optional<ExtAppRecord> appOpt = readApplication(appId);
+        if (appOpt.isPresent()) {
+            ExtAppRecord app = appOpt.get();
+            if (!app.isDownloaded() && markKeyAsDownloaded(appId) > 0) {
+                return ApplicationKey.from(app);
+            } else {
+                throw new KeyAlreadyDownloadedException("Key has been already downloaded for the app!");
+            }
+        } else {
+            throw new ExtAppNotFoundException(
+                    String.format("No registered app is found by given id! [%d]", appId));
+        }
+    }
+
+    @Transaction
+    default int addApplication(NewAppDto newApp) throws ExtAppAlreadyExistException {
+        Optional<String> externalAppByName = findExternalAppByName(newApp.getName());
         if (externalAppByName.isPresent()) {
             throw new ExtAppAlreadyExistException(
-                    String.format("An application by name '%s' already exist!", dto.getName()));
+                    String.format("An application by name '%s' already exist!", newApp.getName()));
         }
-        int appId = insertExternalApp(dto);
+        int appId = insertExternalApp(newApp);
 
-        List<Integer> gameIds = readAllGameIds();
-        insertGameMappingForApp(appId, gameIds);
+        List<Integer> gameIds = newApp.forAllGames() ? readAllGameIds() : newApp.getGameIds();
+        insertGameMappingsForApp(appId, gameIds);
 
-        if (dto.hasEvents()) {
-            insertEventMappingsForApp(appId, dto.getEventTypes());
+        if (newApp.hasEvents()) {
+            insertEventMappingsForApp(appId, newApp.getEventTypes());
         }
 
         return appId;

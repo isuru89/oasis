@@ -19,10 +19,16 @@
 
 package io.github.oasis.services.admin.domain;
 
+import io.github.oasis.services.admin.internal.ApplicationKey;
 import io.github.oasis.services.admin.internal.dao.IExternalAppDao;
+import io.github.oasis.services.admin.internal.dto.ExtAppUpdateResult;
 import io.github.oasis.services.admin.internal.dto.NewAppDto;
+import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundException;
+import io.github.oasis.services.admin.json.apps.AppUpdateResultJson;
 import io.github.oasis.services.admin.json.apps.ApplicationAddedJson;
+import io.github.oasis.services.admin.json.apps.ApplicationJson;
 import io.github.oasis.services.admin.json.apps.NewApplicationJson;
+import io.github.oasis.services.admin.json.apps.UpdateApplicationJson;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -30,6 +36,8 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -46,14 +54,34 @@ public class ExternalAppService {
         this.externalAppDao = externalAppDao;
     }
 
+    public void deactivateApplication(int appId) throws ExtAppNotFoundException {
+        if (!isSuccessfulOperation(externalAppDao.deactivateApplication(appId))) {
+            throw new ExtAppNotFoundException("App is not found by given id!");
+        }
+    }
+
+    public List<ApplicationJson> getAllRegisteredApplications() {
+        return externalAppDao.getAllRegisteredApps()
+                .stream()
+                .map(ApplicationJson::from)
+                .collect(Collectors.toList());
+    }
+
+    public ApplicationKey readApplicationSecretKey(int appId) {
+        return externalAppDao.readApplicationKey(appId);
+    }
+
+    public AppUpdateResultJson updateApplication(int appId, UpdateApplicationJson updateData) {
+        ExtAppUpdateResult updateResult = externalAppDao.updateApplication(appId, updateData);
+        return AppUpdateResultJson.from(updateResult);
+    }
+
     public ApplicationAddedJson addApplication(NewApplicationJson newApplication) {
         NewAppDto appDto = NewAppDto.from(newApplication);
         assignKeys(appDto);
 
         String token = appDto.getToken();
         int id = externalAppDao.addApplication(appDto);
-
-        
 
         return new ApplicationAddedJson(id, token);
     }
@@ -71,4 +99,7 @@ public class ExternalAppService {
         }
     }
 
+    boolean isSuccessfulOperation(int result) {
+        return result > 0;
+    }
 }

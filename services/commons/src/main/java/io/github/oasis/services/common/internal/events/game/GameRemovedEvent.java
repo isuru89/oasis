@@ -17,16 +17,13 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.internal.exceptions;
-
-import io.github.oasis.services.admin.internal.ErrorCodes;
-import io.github.oasis.services.common.OasisServiceException;
+package io.github.oasis.services.common.internal.events.game;
 
 /**
  * @author Isuru Weerarathna
  */
-public class ExtAppNotFoundException extends OasisServiceException {
-    public ExtAppNotFoundException(String message) {
-        super(ErrorCodes.NON_EXIST_APP, message);
+public class GameRemovedEvent extends GameStatusChangedEvent {
+    public GameRemovedEvent(int gameId) {
+        super(gameId);
     }
 }

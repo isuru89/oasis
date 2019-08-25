@@ -23,6 +23,7 @@ import io.github.oasis.services.admin.domain.ExternalAppService;
 import io.github.oasis.services.admin.internal.ApplicationKey;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppAlreadyExistException;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundException;
+import io.github.oasis.services.admin.json.apps.AppUpdateResultJson;
 import io.github.oasis.services.admin.json.apps.ApplicationAddedJson;
 import io.github.oasis.services.admin.json.apps.ApplicationJson;
 import io.github.oasis.services.admin.json.apps.NewApplicationJson;
@@ -84,23 +85,31 @@ public class AdminAggregate {
     //
     /////////////////////////////////////////////////////////////////////////////
 
-    public ApplicationKey readApplicationKey(String appId) throws ExtAppNotFoundException {
-        return null;
+    public ApplicationKey readApplicationKey(int appId) throws ExtAppNotFoundException {
+        return externalAppService.readApplicationSecretKey(appId);
     }
 
     public List<ApplicationJson> readAllApps() {
-        return null;
+        return externalAppService.getAllRegisteredApplications();
     }
 
-    public void deactivateApp(String appId) throws ExtAppNotFoundException {
-
+    public void deactivateApp(int appId) throws ExtAppNotFoundException {
+        externalAppService.deactivateApplication(appId);
+        publisher.publishEvent(new ExternalAppEvent(appId, ExternalAppEventType.DEACTIVATED));
     }
 
-    public void updateApp(String appId, UpdateApplicationJson freshData) throws ExtAppNotFoundException {
-
+    public AppUpdateResultJson updateApp(int appId, UpdateApplicationJson freshData) throws ExtAppNotFoundException {
+        if (freshData.hasSomethingToUpdate()) {
+            AppUpdateResultJson updateResult = externalAppService.updateApplication(appId, freshData);
+            publisher.publishEvent(new ExternalAppEvent(appId, ExternalAppEventType.MODIFIED));
+            return updateResult;
+        }
+        return AppUpdateResultJson.EMPTY;
     }
 
     public ApplicationAddedJson registerNewApp(NewApplicationJson newApplicationData) throws ExtAppAlreadyExistException {
+        newApplicationData.validate();
+
         ApplicationAddedJson addedApp = externalAppService.addApplication(newApplicationData);
         publisher.publishEvent(new ExternalAppEvent(addedApp.getId(), ExternalAppEventType.CREATED));
         return addedApp;

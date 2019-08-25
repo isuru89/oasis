@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS OA_EXT_APP (
     key_public      BLOB,
     is_internal     TINYINT(1) DEFAULT 0,
     is_downloaded   TINYINT(1) DEFAULT 0,
+    is_active       TINYINT DEFAULT 1,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -22,5 +23,15 @@ CREATE TABLE IF NOT EXISTS OA_EXT_APP_GAME (
 CREATE TABLE IF NOT EXISTS OA_GAME_DEF (
     game_id         INT PRIMARY KEY AUTO_INCREMENT,
     name            VARCHAR(64),
-    description     VARCHAR(1024)
+    description     VARCHAR(1024),
+
+    is_active       TINYINT DEFAULT 1
 );
+
+CREATE TABLE IF NOT EXISTS OA_GAME_STATE (
+    game_id         INT PRIMARY KEY AUTO_INCREMENT,
+    prev_state      VARCHAR(12),
+    current_state   VARCHAR(12),
+    changed_at      BIGINT
+);
+

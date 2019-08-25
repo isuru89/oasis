@@ -93,7 +93,7 @@ public class ExtAppDaoTest {
 //
 //        int appId = externalAppDao.addApplication(dto);
 
-        List<ExtAppRecord> allExternalApps = externalAppDao.getAllExternalApps();
+        List<ExtAppRecord> allExternalApps = externalAppDao.getAllRegisteredApps();
         Assertions.assertEquals(1, allExternalApps.size());
 
         System.out.println(allExternalApps);

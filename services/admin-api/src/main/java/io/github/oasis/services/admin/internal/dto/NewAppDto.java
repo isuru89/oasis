@@ -54,6 +54,10 @@ public class NewAppDto {
         return dto;
     }
 
+    public boolean forAllGames() {
+        return gameIds == null || gameIds.isEmpty();
+    }
+
     public boolean hasEvents() {
         return eventTypes != null && !eventTypes.isEmpty();
     }

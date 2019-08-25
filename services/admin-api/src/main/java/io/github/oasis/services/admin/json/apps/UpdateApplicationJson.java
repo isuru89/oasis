@@ -19,7 +19,13 @@
 
 package io.github.oasis.services.admin.json.apps;
 
+import io.github.oasis.services.common.Validation;
+import org.apache.commons.collections4.SetUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
@@ -28,6 +34,42 @@ public class UpdateApplicationJson {
 
     private List<String> eventTypes;
     private List<Integer> gameIds;
+
+    public List<String> newlyAddedEvents(Set<String> storedEvents) {
+        return new ArrayList<>(SetUtils.difference(new HashSet<>(eventTypes), storedEvents));
+    }
+
+    public List<String> removedEvents(Set<String> storedEvents) {
+        return new ArrayList<>(SetUtils.difference(storedEvents, new HashSet<>(eventTypes)));
+    }
+
+    public List<Integer> newlyAddedGames(Set<Integer> mappedGames) {
+        return new ArrayList<>(SetUtils.difference(new HashSet<>(gameIds), mappedGames));
+    }
+
+    public List<Integer> removedGames(Set<Integer> mappedGames) {
+        return new ArrayList<>(SetUtils.difference(mappedGames, new HashSet<>(gameIds)));
+    }
+
+    public boolean hasEventTypes() {
+        return !Validation.isEmpty(eventTypes);
+    }
+
+    public boolean hasGameIds() {
+        return !Validation.isEmpty(gameIds);
+    }
+
+    public boolean hasSomethingToUpdate() {
+        return hasEventTypes() || hasGameIds();
+    }
+
+    public void setEventTypes(List<String> eventTypes) {
+        this.eventTypes = eventTypes;
+    }
+
+    public void setGameIds(List<Integer> gameIds) {
+        this.gameIds = gameIds;
+    }
 
     public List<String> getEventTypes() {
         return eventTypes;

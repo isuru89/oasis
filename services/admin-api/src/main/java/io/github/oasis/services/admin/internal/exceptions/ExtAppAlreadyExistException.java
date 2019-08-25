@@ -29,8 +29,4 @@ public class ExtAppAlreadyExistException extends OasisServiceException {
     public ExtAppAlreadyExistException(String message) {
         super(ErrorCodes.ALREADY_EXIST_APP, message);
     }
-
-    public ExtAppAlreadyExistException(String message, Throwable cause) {
-        super(ErrorCodes.ALREADY_EXIST_APP, message, cause);
-    }
 }

@@ -19,24 +19,30 @@
 
 package io.github.oasis.services.admin.internal;
 
+import io.github.oasis.services.admin.internal.dto.ExtAppRecord;
+
 /**
  * @author Isuru Weerarathna
  */
 public class ApplicationKey {
 
-    private final String id;
+    private final int id;
     private final byte[] data;
 
-    public ApplicationKey(String id, byte[] data) {
+    private ApplicationKey(int id, byte[] data) {
         this.id = id;
         this.data = data;
+    }
+
+    public static ApplicationKey from(ExtAppRecord appRecord) {
+        return new ApplicationKey(appRecord.getId(), appRecord.getKeySecret());
     }
 
     public byte[] getData() {
         return data;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 }

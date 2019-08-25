@@ -20,13 +20,13 @@
 package io.github.oasis.services.admin.internal.exceptions;
 
 import io.github.oasis.services.admin.internal.ErrorCodes;
-import io.github.oasis.services.common.OasisServiceException;
+import io.github.oasis.services.common.OasisValidationException;
 
 /**
  * @author Isuru Weerarathna
  */
-public class ExtAppNotFoundException extends OasisServiceException {
-    public ExtAppNotFoundException(String message) {
-        super(ErrorCodes.NON_EXIST_APP, message);
+public class KeyAlreadyDownloadedException extends OasisValidationException {
+    public KeyAlreadyDownloadedException(String message) {
+        super(ErrorCodes.KEY_ALREADY_DOWNLOADED, message);
     }
 }

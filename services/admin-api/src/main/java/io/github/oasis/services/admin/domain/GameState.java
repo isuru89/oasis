@@ -17,16 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.internal.exceptions;
-
-import io.github.oasis.services.admin.internal.ErrorCodes;
-import io.github.oasis.services.common.OasisServiceException;
+package io.github.oasis.services.admin.domain;
 
 /**
  * @author Isuru Weerarathna
  */
-public class ExtAppNotFoundException extends OasisServiceException {
-    public ExtAppNotFoundException(String message) {
-        super(ErrorCodes.NON_EXIST_APP, message);
+public enum GameState {
+
+    CREATED,
+    RUNNING,
+    PAUSED,
+    STOPPED,
+    DELETED;
+
+
+    public static boolean canDeactivateState(GameState gameState) {
+        return gameState == CREATED || gameState == STOPPED || gameState == DELETED;
     }
+
 }

@@ -19,20 +19,56 @@
 
 package io.github.oasis.services.admin.json.apps;
 
+import io.github.oasis.services.admin.internal.dto.ExtAppRecord;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
  */
 public class ApplicationJson {
 
-    private String id;
+    private int id;
     private String name;
+    private String token;
 
     private List<String> eventTypes;
-    private List<Integer> mappedGameIds;
+    private List<ExtAppRecord.GameDef> mappedGameIds;
 
-    public String getId() {
+    private boolean internal = false;
+    private boolean downloaded = true;
+
+    public static ApplicationJson from(ExtAppRecord record) {
+        ApplicationJson json = new ApplicationJson();
+        json.id = record.getId();
+        json.name = record.getName();
+        json.token = record.getToken();
+        json.downloaded = record.isDownloaded();
+        json.internal = record.isInternal();
+
+        json.eventTypes = record.getEventTypes().stream()
+                .map(ExtAppRecord.EventType::getEventType)
+                .collect(Collectors.toList());
+        json.mappedGameIds = new ArrayList<>(record.getMappedGames());
+
+        return json;
+    }
+
+    public boolean isInternal() {
+        return internal;
+    }
+
+    public boolean isDownloaded() {
+        return downloaded;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public int getId() {
         return id;
     }
 
@@ -44,7 +80,7 @@ public class ApplicationJson {
         return eventTypes;
     }
 
-    public List<Integer> getMappedGameIds() {
+    public List<ExtAppRecord.GameDef> getMappedGameIds() {
         return mappedGameIds;
     }
 }

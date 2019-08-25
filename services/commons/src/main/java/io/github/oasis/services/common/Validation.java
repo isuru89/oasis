@@ -17,16 +17,21 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.internal.exceptions;
+package io.github.oasis.services.common;
 
-import io.github.oasis.services.admin.internal.ErrorCodes;
-import io.github.oasis.services.common.OasisServiceException;
+import java.util.Collection;
 
 /**
  * @author Isuru Weerarathna
  */
-public class ExtAppNotFoundException extends OasisServiceException {
-    public ExtAppNotFoundException(String message) {
-        super(ErrorCodes.NON_EXIST_APP, message);
+public final class Validation {
+
+    public static boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
     }
+
+    public static boolean isNonEmpty(Collection<?> collection) {
+        return collection != null && !collection.isEmpty();
+    }
+
 }

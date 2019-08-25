@@ -27,6 +27,7 @@ public final class ErrorCodes {
     public static final int NON_EXIST_APP = 40001;
     public static final int ALREADY_EXIST_APP = 40002;
     public static final int INVALID_APP_DETAILS = 40003;
+    public static final int KEY_ALREADY_DOWNLOADED = 40004;
 
-
+    public static final int GAME_ALREADY_REMOVED = 30001;
 }

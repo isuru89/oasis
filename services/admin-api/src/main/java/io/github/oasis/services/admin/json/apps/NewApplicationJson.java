@@ -19,6 +19,11 @@
 
 package io.github.oasis.services.admin.json.apps;
 
+import io.github.oasis.services.admin.internal.ErrorCodes;
+import io.github.oasis.services.common.OasisValidationException;
+import io.github.oasis.services.common.Validation;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 
 /**
@@ -31,6 +36,21 @@ public class NewApplicationJson {
     private List<String> eventTypes;
     private List<Integer> mappedGameIds;
     private boolean forAllGames;
+
+    public void validate() throws OasisValidationException {
+        if (StringUtils.isEmpty(name)) {
+            throw new OasisValidationException(ErrorCodes.INVALID_APP_DETAILS,
+                    "Application name is mandatory!");
+        }
+        if (Validation.isEmpty(eventTypes)) {
+            throw new OasisValidationException(ErrorCodes.INVALID_APP_DETAILS,
+                    "At least one event type must be provided with the new app!");
+        }
+        if (!forAllGames && Validation.isEmpty(mappedGameIds)) {
+            throw new OasisValidationException(ErrorCodes.INVALID_APP_DETAILS,
+                    "At least one game is must be specified when the app is not for all games!");
+        }
+    }
 
     public boolean isForAllGames() {
         return forAllGames;
