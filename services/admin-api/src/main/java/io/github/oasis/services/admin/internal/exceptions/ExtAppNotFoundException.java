@@ -17,32 +17,21 @@
  * under the License.
  */
 
-package io.github.oasis.db;
+package io.github.oasis.services.admin.internal.exceptions;
 
-import io.github.oasis.db.jdbi.JdbiOasisDao;
-import io.github.oasis.model.db.DbProperties;
-import io.github.oasis.model.db.IOasisDao;
-import io.github.oasis.model.db.IQueryRepo;
-import io.github.oasis.model.db.OasisDbPool;
+import io.github.oasis.services.admin.internal.ErrorCodes;
+import io.github.oasis.services.common.OasisServiceException;
 
 /**
- * @author iweerarathna
+ * @author Isuru Weerarathna
  */
-public class OasisDbFactory {
+public class ExtAppNotFoundException extends OasisServiceException {
 
-    public static IOasisDao create(DbProperties dbProperties) throws Exception {
-        if (dbProperties.getDaoName() == null || dbProperties.getDaoName().isEmpty()) {
-            throw new IllegalArgumentException("DB connection must have a name!");
-        }
-
-        IQueryRepo repo = new FsQueryRepo();
-        repo.init(dbProperties);
-
-        JdbiOasisDao oasisDao = new JdbiOasisDao(repo);
-        oasisDao.init(dbProperties);
-
-        return OasisDbPool.put(dbProperties.getDaoName(), oasisDao);
+    public ExtAppNotFoundException(String message) {
+        super(ErrorCodes.NON_EXIST_APP, message);
     }
 
-
+    public ExtAppNotFoundException(String message, Throwable cause) {
+        super(ErrorCodes.NON_EXIST_APP, message, cause);
+    }
 }

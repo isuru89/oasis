@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.admin.controller;
 
+import io.github.oasis.services.admin.AdminAggregate;
 import io.github.oasis.services.admin.json.StatusJson;
 import io.github.oasis.services.admin.json.apps.ApplicationAddedJson;
 import io.github.oasis.services.admin.json.apps.ApplicationJson;
@@ -31,18 +32,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.oasis.services.admin.internal.EndPoints.APPS.APP;
 import static io.github.oasis.services.admin.internal.EndPoints.APPS.APP_ID;
-import static io.github.oasis.services.admin.internal.EndPoints.APPS.DEACTIVATE;
-import static io.github.oasis.services.admin.internal.EndPoints.APPS.DOWNLOAD_KEY;
-import static io.github.oasis.services.admin.internal.EndPoints.APPS.LIST_ALL;
-import static io.github.oasis.services.admin.internal.EndPoints.APPS.REGISTER;
-import static io.github.oasis.services.admin.internal.EndPoints.APPS.UPDATE;
+import static io.github.oasis.services.admin.internal.EndPoints.APPS;
 
 /**
  * The controller class responsible for handling all external
@@ -51,35 +47,41 @@ import static io.github.oasis.services.admin.internal.EndPoints.APPS.UPDATE;
  * @author Isuru Weerarathna
  */
 @RestController
-@RequestMapping(APP)
 public class ExternalAppController {
 
+    private AdminAggregate adminAggregate;
+
+    public ExternalAppController(AdminAggregate adminAggregate) {
+        this.adminAggregate = adminAggregate;
+    }
+
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
-    @PostMapping(REGISTER)
+    @PostMapping(APPS.REGISTER)
     public ApplicationAddedJson registerApp(@RequestBody NewApplicationJson newApplication) {
-        return null;
+        System.out.println("Registering app");
+        return adminAggregate.registerNewApp(newApplication);
     }
 
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
-    @GetMapping(LIST_ALL)
+    @GetMapping(APPS.LIST_ALL)
     public List<ApplicationJson> listAllApps() {
-        return null;
+        return new ArrayList<>();
     }
 
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
-    @PostMapping(value = DOWNLOAD_KEY, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @PostMapping(value = APPS.DOWNLOAD_KEY, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public void downloadAppKey(@PathVariable(APP_ID) String appId) {
 
     }
 
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
-    @PostMapping(DEACTIVATE)
+    @PostMapping(APPS.DEACTIVATE)
     public StatusJson deactivateApp(@PathVariable(APP_ID) String appId) {
         return StatusJson.FAILED;
     }
 
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
-    @PostMapping(UPDATE)
+    @PostMapping(APPS.UPDATE)
     public StatusJson updateApp(@PathVariable(APP_ID) String appId,
                                 @RequestBody UpdateApplicationJson updateApplication) {
         return StatusJson.FAILED;

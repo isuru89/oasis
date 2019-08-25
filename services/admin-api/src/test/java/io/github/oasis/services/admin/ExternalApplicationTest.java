@@ -21,6 +21,7 @@ package io.github.oasis.services.admin;
 
 
 import io.github.oasis.services.admin.controller.AdminController;
+import io.github.oasis.services.admin.domain.ExternalAppService;
 import io.github.oasis.services.common.internal.events.game.GameStartedEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,6 +49,9 @@ public class ExternalApplicationTest {
     @MockBean
     private ApplicationEventPublisher publisher;
 
+    @Autowired
+    private ExternalAppService externalAppService;
+
     private AdminAggregate adminAggregate;
 
     @Autowired
@@ -56,7 +60,7 @@ public class ExternalApplicationTest {
     @BeforeEach
     public void beforeEach() {
         MockitoAnnotations.initMocks(this);
-        adminAggregate = new AdminAggregate(publisher);
+        adminAggregate = new AdminAggregate(publisher, externalAppService);
     }
 
     @DisplayName("Only Admin can add external applications")

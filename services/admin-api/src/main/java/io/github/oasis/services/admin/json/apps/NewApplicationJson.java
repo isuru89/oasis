@@ -30,6 +30,27 @@ public class NewApplicationJson {
 
     private List<String> eventTypes;
     private List<Integer> mappedGameIds;
+    private boolean forAllGames;
+
+    public boolean isForAllGames() {
+        return forAllGames;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEventTypes(List<String> eventTypes) {
+        this.eventTypes = eventTypes;
+    }
+
+    public void setMappedGameIds(List<Integer> mappedGameIds) {
+        this.mappedGameIds = mappedGameIds;
+    }
+
+    public void setForAllGames(boolean forAllGames) {
+        this.forAllGames = forAllGames;
+    }
 
     public String getName() {
         return name;

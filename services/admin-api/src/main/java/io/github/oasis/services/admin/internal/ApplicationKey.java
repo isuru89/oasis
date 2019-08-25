@@ -17,32 +17,26 @@
  * under the License.
  */
 
-package io.github.oasis.db;
-
-import io.github.oasis.db.jdbi.JdbiOasisDao;
-import io.github.oasis.model.db.DbProperties;
-import io.github.oasis.model.db.IOasisDao;
-import io.github.oasis.model.db.IQueryRepo;
-import io.github.oasis.model.db.OasisDbPool;
+package io.github.oasis.services.admin.internal;
 
 /**
- * @author iweerarathna
+ * @author Isuru Weerarathna
  */
-public class OasisDbFactory {
+public class ApplicationKey {
 
-    public static IOasisDao create(DbProperties dbProperties) throws Exception {
-        if (dbProperties.getDaoName() == null || dbProperties.getDaoName().isEmpty()) {
-            throw new IllegalArgumentException("DB connection must have a name!");
-        }
+    private final String id;
+    private final byte[] data;
 
-        IQueryRepo repo = new FsQueryRepo();
-        repo.init(dbProperties);
-
-        JdbiOasisDao oasisDao = new JdbiOasisDao(repo);
-        oasisDao.init(dbProperties);
-
-        return OasisDbPool.put(dbProperties.getDaoName(), oasisDao);
+    public ApplicationKey(String id, byte[] data) {
+        this.id = id;
+        this.data = data;
     }
 
+    public byte[] getData() {
+        return data;
+    }
 
+    public String getId() {
+        return id;
+    }
 }

@@ -23,43 +23,37 @@ import io.github.oasis.services.common.security.AllowedRoles;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static io.github.oasis.services.admin.internal.EndPoints.GAME.GAME;
+import static io.github.oasis.services.admin.internal.EndPoints.GAME;
 import static io.github.oasis.services.admin.internal.EndPoints.GAME.GAME_ID;
-import static io.github.oasis.services.admin.internal.EndPoints.GAME.PAUSE;
-import static io.github.oasis.services.admin.internal.EndPoints.GAME.RESTART;
-import static io.github.oasis.services.admin.internal.EndPoints.GAME.START;
-import static io.github.oasis.services.admin.internal.EndPoints.GAME.STOP;
 
 /**
  * @author Isuru Weerarathna
  */
 @RestController
-@RequestMapping(GAME)
 public class GameController {
 
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
-    @PostMapping(START)
+    @PostMapping(GAME.START)
     public void startGame(@PathVariable(GAME_ID) int gameId) {
 
     }
 
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
-    @PostMapping(STOP)
+    @PostMapping(GAME.STOP)
     public void stopGame(@PathVariable(GAME_ID) int gameId) {
 
     }
 
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
-    @PostMapping(PAUSE)
+    @PostMapping(GAME.PAUSE)
     public void pauseGame(@PathVariable(GAME_ID) int gameId) {
 
     }
 
     @PreAuthorize(AllowedRoles.ONLY_ADMIN)
-    @PostMapping(RESTART)
+    @PostMapping(GAME.RESTART)
     public void restartGame(@PathVariable(GAME_ID) int gameId) {
 
     }

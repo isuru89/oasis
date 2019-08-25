@@ -24,9 +24,19 @@ package io.github.oasis.services.admin.json.apps;
  */
 public class ApplicationAddedJson {
 
-    private String id;
+    private int id;
+    private String token;
 
-    public String getId() {
+    public ApplicationAddedJson(int id, String token) {
+        this.id = id;
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public int getId() {
         return id;
     }
 }

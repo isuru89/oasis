@@ -22,6 +22,7 @@ package io.github.oasis.services.admin;
 import io.github.oasis.services.admin.controller.AdminController;
 import io.github.oasis.services.admin.controller.ExternalAppController;
 import io.github.oasis.services.admin.controller.GameController;
+import io.github.oasis.services.admin.domain.ExternalAppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +36,12 @@ public class OasisAdminConfiguration {
 
     @Autowired
     private ApplicationEventPublisher publisher;
+
+    @Autowired
+    private AdminAggregate adminAggregate;
+
+    @Autowired
+    private ExternalAppService externalAppService;
 
     /////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
@@ -51,7 +58,7 @@ public class OasisAdminConfiguration {
 
     @Bean
     public ExternalAppController getExternalAppController() {
-        return new ExternalAppController();
+        return new ExternalAppController(adminAggregate);
     }
 
     @Bean
@@ -69,7 +76,7 @@ public class OasisAdminConfiguration {
 
     @Bean
     public AdminAggregate getAdminAggregate() {
-        return new AdminAggregate(publisher);
+        return new AdminAggregate(publisher, externalAppService);
     }
 
 }

@@ -24,10 +24,10 @@ package io.github.oasis.services.admin.internal;
  */
 public final class EndPoints {
 
-    public static final String PREFIX = "/admin";
+    private static final String PREFIX = "/admin";
 
     public static class GAME {
-        public static final String GAME = PREFIX + "/game";
+        private static final String GAME = PREFIX + "/game";
 
         public static final String GAME_ID = "id";
 
@@ -38,7 +38,7 @@ public final class EndPoints {
     }
 
     public static class APPS {
-        public static final String APP = PREFIX + "/app";
+        private static final String APP = PREFIX + "/app";
 
         public static final String APP_ID = "id";
 

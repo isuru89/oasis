@@ -20,6 +20,7 @@
 package io.github.oasis.services.events;
 
 import io.github.oasis.services.admin.OasisAdminConfiguration;
+import io.github.oasis.services.common.CommonExceptionMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
@@ -28,7 +29,10 @@ import org.springframework.context.annotation.Import;
  * @author Isuru Weerarathna
  */
 @SpringBootApplication
-@Import(OasisAdminConfiguration.class)
+@Import({
+    OasisAdminConfiguration.class,
+    CommonExceptionMapper.class
+})
 public class EventsApi {
 
     public static void main(String[] args) {

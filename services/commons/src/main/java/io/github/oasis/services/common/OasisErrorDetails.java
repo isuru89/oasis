@@ -17,32 +17,38 @@
  * under the License.
  */
 
-package io.github.oasis.db;
-
-import io.github.oasis.db.jdbi.JdbiOasisDao;
-import io.github.oasis.model.db.DbProperties;
-import io.github.oasis.model.db.IOasisDao;
-import io.github.oasis.model.db.IQueryRepo;
-import io.github.oasis.model.db.OasisDbPool;
+package io.github.oasis.services.common;
 
 /**
- * @author iweerarathna
+ * @author Isuru Weerarathna
  */
-public class OasisDbFactory {
+public class OasisErrorDetails {
 
-    public static IOasisDao create(DbProperties dbProperties) throws Exception {
-        if (dbProperties.getDaoName() == null || dbProperties.getDaoName().isEmpty()) {
-            throw new IllegalArgumentException("DB connection must have a name!");
-        }
+    private final long timestamp;
+    private final String message;
+    private final int errorCode;
+    private final String path;
 
-        IQueryRepo repo = new FsQueryRepo();
-        repo.init(dbProperties);
-
-        JdbiOasisDao oasisDao = new JdbiOasisDao(repo);
-        oasisDao.init(dbProperties);
-
-        return OasisDbPool.put(dbProperties.getDaoName(), oasisDao);
+    public OasisErrorDetails(String message, int errorCode, String path) {
+        this.path = path;
+        this.timestamp = System.currentTimeMillis();
+        this.message = message;
+        this.errorCode = errorCode;
     }
 
+    public String getPath() {
+        return path;
+    }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
 }

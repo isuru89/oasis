@@ -17,27 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.controller;
+package io.github.oasis.services.common;
 
-import io.github.oasis.services.common.OasisServiceException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Isuru Weerarathna
  */
+@ControllerAdvice
 @RestController
-@RequestMapping("/v2/echo")
-public class AdminController {
+public class ErrorMapper extends ResponseEntityExceptionHandler {
 
-    @GetMapping("/hello")
-    public String getEcho() {
-        return "Hello admin";
+    @ExceptionHandler(OasisServiceException.class)
+    public ResponseEntity<OasisErrorDetails> handleOasisServerException(OasisServiceException ex, HttpServletRequest request) {
+        OasisErrorDetails errorDetails = new OasisErrorDetails(ex.getMessage(),
+                ex.getErrorCode(),
+                request.getServletPath());
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @GetMapping("/error")
-    public String getError() {
-        throw new OasisServiceException(30021, "This is a sample error!");
-    }
 }

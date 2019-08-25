@@ -17,32 +17,20 @@
  * under the License.
  */
 
-package io.github.oasis.db;
+package io.github.oasis.services.common;
 
-import io.github.oasis.db.jdbi.JdbiOasisDao;
-import io.github.oasis.model.db.DbProperties;
-import io.github.oasis.model.db.IOasisDao;
-import io.github.oasis.model.db.IQueryRepo;
-import io.github.oasis.model.db.OasisDbPool;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * @author iweerarathna
+ * @author Isuru Weerarathna
  */
-public class OasisDbFactory {
+@Configuration
+public class CommonExceptionMapper {
 
-    public static IOasisDao create(DbProperties dbProperties) throws Exception {
-        if (dbProperties.getDaoName() == null || dbProperties.getDaoName().isEmpty()) {
-            throw new IllegalArgumentException("DB connection must have a name!");
-        }
-
-        IQueryRepo repo = new FsQueryRepo();
-        repo.init(dbProperties);
-
-        JdbiOasisDao oasisDao = new JdbiOasisDao(repo);
-        oasisDao.init(dbProperties);
-
-        return OasisDbPool.put(dbProperties.getDaoName(), oasisDao);
+    @Bean
+    public ErrorMapper getErrorMapper() {
+        return new ErrorMapper();
     }
-
 
 }

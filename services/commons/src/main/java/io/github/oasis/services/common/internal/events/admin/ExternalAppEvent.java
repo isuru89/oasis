@@ -26,18 +26,18 @@ import io.github.oasis.services.common.internal.events.BaseEvent;
  */
 public class ExternalAppEvent extends BaseEvent {
 
-    private String id;
+    private int id;
     private ExternalAppEventType type;
 
     public ExternalAppEvent() {
     }
 
-    public ExternalAppEvent(String id, ExternalAppEventType type) {
+    public ExternalAppEvent(int id, ExternalAppEventType type) {
         this.id = id;
         this.type = type;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 

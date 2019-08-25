@@ -19,12 +19,24 @@
 
 package io.github.oasis.services.admin;
 
+import io.github.oasis.services.admin.domain.ExternalAppService;
+import io.github.oasis.services.admin.internal.ApplicationKey;
+import io.github.oasis.services.admin.internal.exceptions.ExtAppAlreadyExistException;
+import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundException;
+import io.github.oasis.services.admin.json.apps.ApplicationAddedJson;
+import io.github.oasis.services.admin.json.apps.ApplicationJson;
+import io.github.oasis.services.admin.json.apps.NewApplicationJson;
+import io.github.oasis.services.admin.json.apps.UpdateApplicationJson;
+import io.github.oasis.services.common.internal.events.admin.ExternalAppEvent;
+import io.github.oasis.services.common.internal.events.admin.ExternalAppEventType;
 import io.github.oasis.services.common.internal.events.game.GamePausedEvent;
 import io.github.oasis.services.common.internal.events.game.GameRestartedEvent;
 import io.github.oasis.services.common.internal.events.game.GameStartedEvent;
 import io.github.oasis.services.common.internal.events.game.GameStoppedEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -33,9 +45,11 @@ import org.springframework.stereotype.Service;
 public class AdminAggregate {
 
     private ApplicationEventPublisher publisher;
+    private ExternalAppService externalAppService;
 
-    public AdminAggregate(ApplicationEventPublisher publisher) {
+    public AdminAggregate(ApplicationEventPublisher publisher, ExternalAppService externalAppService) {
         this.publisher = publisher;
+        this.externalAppService = externalAppService;
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -70,4 +84,25 @@ public class AdminAggregate {
     //
     /////////////////////////////////////////////////////////////////////////////
 
+    public ApplicationKey readApplicationKey(String appId) throws ExtAppNotFoundException {
+        return null;
+    }
+
+    public List<ApplicationJson> readAllApps() {
+        return null;
+    }
+
+    public void deactivateApp(String appId) throws ExtAppNotFoundException {
+
+    }
+
+    public void updateApp(String appId, UpdateApplicationJson freshData) throws ExtAppNotFoundException {
+
+    }
+
+    public ApplicationAddedJson registerNewApp(NewApplicationJson newApplicationData) throws ExtAppAlreadyExistException {
+        ApplicationAddedJson addedApp = externalAppService.addApplication(newApplicationData);
+        publisher.publishEvent(new ExternalAppEvent(addedApp.getId(), ExternalAppEventType.CREATED));
+        return addedApp;
+    }
 }
