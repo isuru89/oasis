@@ -6,6 +6,7 @@ SELECT
     oea.token a_token,
     oea.is_internal a_internal,
     oea.is_downloaded a_downloaded,
+    oea.for_all_games a_forAllGames,
     oeae.app_id et_id,
     oeae.event_type et_eventType,
     ogd.game_id g_id,

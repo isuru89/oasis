@@ -37,10 +37,19 @@ public class ExtAppRecord {
 
     private boolean internal;
     private boolean downloaded;
+    private boolean forAllGames;
 
     private Set<EventType> eventTypes = new HashSet<>();
 
     private Set<GameDef> mappedGames = new HashSet<>();
+
+    public boolean isForAllGames() {
+        return forAllGames;
+    }
+
+    public void setForAllGames(boolean forAllGames) {
+        this.forAllGames = forAllGames;
+    }
 
     public Set<GameDef> getMappedGames() {
         return mappedGames;

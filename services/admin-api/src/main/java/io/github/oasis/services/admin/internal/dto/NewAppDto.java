@@ -37,6 +37,7 @@ public class NewAppDto {
     private byte[] keyPublic;
 
     private boolean internal = false;
+    private boolean forAllGames = false;
 
     private List<String> eventTypes;
     private List<Integer> gameIds;
@@ -50,12 +51,13 @@ public class NewAppDto {
         dto.token = UUID.randomUUID().toString().replace("-", "");
         dto.eventTypes = newApplicationJson.getEventTypes();
         dto.gameIds = newApplicationJson.getMappedGameIds();
+        dto.forAllGames = newApplicationJson.isForAllGames();
         dto.internal = false;
         return dto;
     }
 
-    public boolean forAllGames() {
-        return gameIds == null || gameIds.isEmpty();
+    public boolean isForAllGames() {
+        return forAllGames;
     }
 
     public boolean hasEvents() {

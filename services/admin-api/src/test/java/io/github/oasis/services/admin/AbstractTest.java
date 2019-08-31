@@ -39,7 +39,7 @@ import java.util.Map;
 public abstract class AbstractTest {
 
     @Autowired
-    private Jdbi jdbi;
+    protected Jdbi jdbi;
 
     protected void runBeforeEach() {
         cleanTables();

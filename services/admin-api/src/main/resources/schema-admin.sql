@@ -4,9 +4,10 @@ CREATE TABLE IF NOT EXISTS OA_EXT_APP (
     token           CHAR(32),
     key_secret      BLOB,
     key_public      BLOB,
-    is_internal     TINYINT(1) DEFAULT 0,
-    is_downloaded   TINYINT(1) DEFAULT 0,
+    is_internal     TINYINT DEFAULT 0,
+    is_downloaded   TINYINT DEFAULT 0,
     is_active       TINYINT DEFAULT 1,
+    for_all_games   TINYINT DEFAULT 0,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -56,16 +56,13 @@ import java.util.stream.Collectors;
 public interface IExternalAppDao {
 
     @SqlUpdate("INSERT INTO OA_EXT_APP" +
-            " (name, token, key_secret, key_public, is_internal)" +
+            " (name, token, key_secret, key_public, is_internal, for_all_games)" +
             " VALUES " +
-            " (:name, :token, :keySecret, :keyPublic, :internal)")
+            " (:name, :token, :keySecret, :keyPublic, :internal, :forAllGames)")
     @GetGeneratedKeys("app_id")
     int insertExternalApp(@BindBean NewAppDto appDto);
 
-    @SqlQuery("SELECT token" +
-            " FROM OA_EXT_APP" +
-            " WHERE name = :name" +
-            " LIMIT 1")
+    @SqlQuery("SELECT token FROM OA_EXT_APP WHERE name = :name LIMIT 1")
     Optional<String> findExternalAppByName(@Bind("name") String name);
 
     @UseClasspathSqlLocator
@@ -173,7 +170,8 @@ public interface IExternalAppDao {
         }
         int appId = insertExternalApp(newApp);
 
-        List<Integer> gameIds = newApp.forAllGames() ? readAllGameIds() : newApp.getGameIds();
+        List<Integer> gameIds = newApp.isForAllGames() ? readAllGameIds() : newApp.getGameIds();
+        System.out.println(gameIds);
         insertGameMappingsForApp(appId, gameIds);
 
         if (newApp.hasEvents()) {

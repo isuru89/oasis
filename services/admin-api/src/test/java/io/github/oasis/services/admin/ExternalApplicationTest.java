@@ -27,6 +27,7 @@ import io.github.oasis.services.admin.internal.ApplicationKey;
 import io.github.oasis.services.admin.internal.dao.IExternalAppDao;
 import io.github.oasis.services.admin.internal.dao.IGameCreationDao;
 import io.github.oasis.services.admin.internal.dao.IGameStateDao;
+import io.github.oasis.services.admin.internal.dto.NewGameDto;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundException;
 import io.github.oasis.services.admin.internal.exceptions.KeyAlreadyDownloadedException;
 import io.github.oasis.services.admin.json.apps.AppUpdateResultJson;
@@ -34,6 +35,7 @@ import io.github.oasis.services.admin.json.apps.ApplicationAddedJson;
 import io.github.oasis.services.admin.json.apps.ApplicationJson;
 import io.github.oasis.services.admin.json.apps.NewApplicationJson;
 import io.github.oasis.services.admin.json.apps.UpdateApplicationJson;
+import io.github.oasis.services.admin.json.game.GameJson;
 import io.github.oasis.services.common.OasisValidationException;
 import io.github.oasis.services.common.internal.events.admin.ExternalAppEvent;
 import io.github.oasis.services.common.internal.events.admin.ExternalAppEventType;
@@ -50,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -104,6 +107,7 @@ public class ExternalApplicationTest extends AbstractTest {
 
         List<ApplicationJson> allApps = adminAggregate.readAllApps();
         assertEquals(1, allApps.size());
+        verifyNewApp(allApps.get(0), app);
     }
 
     @DisplayName("When no applications exist, should return empty")
@@ -126,16 +130,19 @@ public class ExternalApplicationTest extends AbstractTest {
 
         assertAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
 
-        ApplicationJson storedApp = readTheOnlyApp();
-        assertFalse(storedApp.isDownloaded());
-        assertFalse(storedApp.isInternal());
+        {
+            // download key
+            ApplicationJson storedApp = readTheOnlyApp();
+            assertFalse(storedApp.isDownloaded());
+            assertFalse(storedApp.isInternal());
 
-        ApplicationKey key = adminAggregate.readApplicationKey(addedApp.getId());
-        assertEquals(storedApp.getId(), key.getId());
-        assertTrue(key.getData().length > 0, "Should get the secret key for the new apps!");
+            ApplicationKey key = adminAggregate.readApplicationKey(addedApp.getId());
+            assertEquals(storedApp.getId(), key.getId());
+            assertTrue(key.getData().length > 0, "Should get the secret key for the new apps!");
+        }
 
         ApplicationJson downloadedApp = readTheOnlyApp();
-        assertTrue(storedApp.isDownloaded());
+        assertTrue(downloadedApp.isDownloaded());
 
         assertThrows(KeyAlreadyDownloadedException.class,
                 () -> adminAggregate.readApplicationKey(downloadedApp.getId()));
@@ -164,9 +171,9 @@ public class ExternalApplicationTest extends AbstractTest {
         assertNoAppEventFired();
     }
 
-    @DisplayName("Application can optionally restricted to subset of games")
+    @DisplayName("When all are non-existing game ids, should not be attached with application")
     @Test
-    public void testAddApplicationsForSubSetOfGames() {
+    public void testAddForSubSetOfGamesWithNonExistingIds() {
         NewApplicationJson app = new NewApplicationJson();
         app.setName("testing-123");
         app.setForAllGames(false);
@@ -180,8 +187,49 @@ public class ExternalApplicationTest extends AbstractTest {
         List<ApplicationJson> registeredApps = adminAggregate.readAllApps();
         assertEquals(1, registeredApps.size());
         ApplicationJson storedApp = registeredApps.get(0);
-        assertEquals(3, storedApp.getMappedGameIds().size());
-        assertEquals(4, storedApp.getEventTypes().size());
+        verifyNewApp(storedApp, app);
+    }
+
+    @DisplayName("When some of are non-existing game ids, should return only for existing games")
+    @Test
+    public void testAddForSubSetOfGamesWithSomeNonExistingIds() {
+        List<Integer> addedGameIds = addGames(100, 101, 102);
+        List<Integer> suppliedGameIds = new ArrayList<>(addedGameIds);
+        suppliedGameIds.add(999);
+        NewApplicationJson app = new NewApplicationJson();
+        app.setName("testing-123");
+        app.setForAllGames(false);
+        app.setMappedGameIds(suppliedGameIds);
+        app.setEventTypes(Arrays.asList("e1", "e2", "e3", "e4"));
+        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        assertAddedApp(addedApp);
+
+        assertAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
+
+        List<ApplicationJson> registeredApps = adminAggregate.readAllApps();
+        assertEquals(1, registeredApps.size());
+        ApplicationJson storedApp = registeredApps.get(0);
+        verifyNewApp(storedApp, app, 3);
+    }
+
+    @DisplayName("Application can optionally restricted to subset of games")
+    @Test
+    public void testAddApplicationsForSubSetOfGames() {
+        List<Integer> gameIds = addGames(100, 101, 102);
+        NewApplicationJson app = new NewApplicationJson();
+        app.setName("testing-123");
+        app.setForAllGames(false);
+        app.setMappedGameIds(gameIds);
+        app.setEventTypes(Arrays.asList("e1", "e2", "e3", "e4"));
+        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        assertAddedApp(addedApp);
+
+        assertAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
+
+        List<ApplicationJson> registeredApps = adminAggregate.readAllApps();
+        assertEquals(1, registeredApps.size());
+        ApplicationJson storedApp = registeredApps.get(0);
+        verifyNewApp(storedApp, app, 3);
     }
 
     @DisplayName("Application name is mandatory")
@@ -236,11 +284,12 @@ public class ExternalApplicationTest extends AbstractTest {
     @DisplayName("Application can restrict to a game while that game is running")
     @Test
     public void testUpdateAppRestrictToGames() {
+        List<Integer> addedGameIds = addGames(101, 102, 105, 107, 103, 109, 110, 111);
         NewApplicationJson app = new NewApplicationJson();
         app.setName("testing-123");
         app.setEventTypes(Arrays.asList("e1", "e2", "e3"));
         app.setForAllGames(false);
-        app.setMappedGameIds(Arrays.asList(101, 102, 105, 107));
+        app.setMappedGameIds(addedGameIds.subList(0, 4));
         ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
         assertAddedApp(addedApp);
 
@@ -249,7 +298,7 @@ public class ExternalApplicationTest extends AbstractTest {
         {
             // add for new three games
             UpdateApplicationJson updateJson = new UpdateApplicationJson();
-            updateJson.setGameIds(Arrays.asList(103, 109, 110));
+            updateJson.setGameIds(addedGameIds.subList(0, 7));
             AppUpdateResultJson updateResult = adminAggregate.updateApp(addedApp.getId(), updateJson);
             assertAppUpdate(updateResult, 0, 0, 3, 0);
 
@@ -261,7 +310,7 @@ public class ExternalApplicationTest extends AbstractTest {
         {
             // remove from another two games
             UpdateApplicationJson updateJson = new UpdateApplicationJson();
-            updateJson.setGameIds(Arrays.asList(105, 107, 103, 109, 110));
+            updateJson.setGameIds(addedGameIds.subList(0, 5));
             AppUpdateResultJson updateResult = adminAggregate.updateApp(addedApp.getId(), updateJson);
             assertAppUpdate(updateResult, 0, 0, 0, 2);
 
@@ -297,10 +346,33 @@ public class ExternalApplicationTest extends AbstractTest {
         assertAppEventFired(addedApp.getId(), ExternalAppEventType.DEACTIVATED);
     }
 
+    List<Integer> addGames(int... ids) {
+        List<Integer> addedIds = new ArrayList<>(ids.length);
+        for (int id : ids) {
+            NewGameDto dto = new NewGameDto(String.format("game-%d", id), String.format("description-%d", id));
+            GameJson game = adminAggregate.createGame(dto);
+            addedIds.add(game.getId());
+        }
+        assertEquals(ids.length, adminAggregate.listAllGames().size());
+        Mockito.clearInvocations(publisher);
+        return addedIds;
+    }
+
     ApplicationJson readTheOnlyApp() {
         List<ApplicationJson> apps = adminAggregate.readAllApps();
         assertEquals(1, apps.size(), "Must have a single registered app!");
         return apps.get(0);
+    }
+
+    void verifyNewApp(ApplicationJson output, NewApplicationJson input) {
+        verifyNewApp(output, input, 0);
+    }
+
+    void verifyNewApp(ApplicationJson output, NewApplicationJson input, int expectedGameCount) {
+        assertEquals(input.getName(), output.getName());
+        assertEquals(input.isForAllGames(), output.isForAllGames());
+        assertEquals(input.getEventTypes().size(), output.getEventTypes().size());
+        assertEquals(expectedGameCount, output.getMappedGameIds().size());
     }
 
     void assertAppUpdate(AppUpdateResultJson updateResult,
@@ -323,15 +395,7 @@ public class ExternalApplicationTest extends AbstractTest {
     }
 
     void assertAddedApp(ApplicationAddedJson added) {
-        assertAddedApp(added, -1);
-    }
-
-    void assertAddedApp(ApplicationAddedJson added, int withId) {
-        if (withId < 0) {
-            assertTrue(added.getId() > 0, "The new application must have an id!");
-        } else {
-            assertEquals(withId, added.getId(), "New application is mismatches!");
-        }
+        assertTrue(added.getId() > 0, "The new application must have an id!");
         assertEquals(32, added.getToken().length(), "The application token must be 32 length UUID!");
     }
 

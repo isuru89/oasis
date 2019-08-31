@@ -37,7 +37,6 @@ import io.github.oasis.services.common.internal.events.admin.ExternalAppEventTyp
 import io.github.oasis.services.common.internal.events.game.GameCreatedEvent;
 import io.github.oasis.services.common.internal.events.game.GamePausedEvent;
 import io.github.oasis.services.common.internal.events.game.GameRemovedEvent;
-import io.github.oasis.services.common.internal.events.game.GameRestartedEvent;
 import io.github.oasis.services.common.internal.events.game.GameStartedEvent;
 import io.github.oasis.services.common.internal.events.game.GameStoppedEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -99,11 +98,6 @@ public class AdminAggregate {
         publisher.publishEvent(new GamePausedEvent(gameId));
     }
 
-    public void restartGame(int gameId) {
-        gameStateService.startGame(gameId);
-        publisher.publishEvent(new GameRestartedEvent(gameId));
-    }
-
     public void removeGame(int gameId) {
         gameStateService.deleteGame(gameId);
         publisher.publishEvent(new GameRemovedEvent(gameId));
@@ -114,6 +108,10 @@ public class AdminAggregate {
     //  EXTERNAL APPLICATION - ACTIONS
     //
     /////////////////////////////////////////////////////////////////////////////
+
+    public void attachApplicationsToGame(int gameId) {
+
+    }
 
     public ApplicationKey readApplicationKey(int appId) throws ExtAppNotFoundException {
         return externalAppService.readApplicationSecretKey(appId);

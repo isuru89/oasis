@@ -34,6 +34,8 @@ public class ApplicationJson {
     private String name;
     private String token;
 
+    private boolean forAllGames = false;
+
     private List<String> eventTypes;
     private List<ExtAppRecord.GameDef> mappedGameIds;
 
@@ -47,6 +49,7 @@ public class ApplicationJson {
         json.token = record.getToken();
         json.downloaded = record.isDownloaded();
         json.internal = record.isInternal();
+        json.forAllGames = record.isForAllGames();
 
         json.eventTypes = record.getEventTypes().stream()
                 .map(ExtAppRecord.EventType::getEventType)
@@ -54,6 +57,10 @@ public class ApplicationJson {
         json.mappedGameIds = new ArrayList<>(record.getMappedGames());
 
         return json;
+    }
+
+    public boolean isForAllGames() {
+        return forAllGames;
     }
 
     public boolean isInternal() {
