@@ -33,4 +33,8 @@ public final class ErrorCodes {
     public static final int GAME_CANNOT_START = 30002;
     public static final int GAME_CANNOT_PAUSE = 30003;
     public static final int GAME_CANNOT_STOP = 30004;
+
+    public static final int GAME_CANNOT_CREATE = 30100;
+    public static final int INVALID_GAME_DETAILS = 30101;
+
 }

@@ -19,14 +19,11 @@
 
 package io.github.oasis.services.admin;
 
-import io.github.oasis.services.admin.controller.AdminController;
-import io.github.oasis.services.admin.controller.ExternalAppController;
-import io.github.oasis.services.admin.controller.GameController;
-import io.github.oasis.services.admin.domain.ExternalAppService;
-import io.github.oasis.services.admin.domain.GameStateService;
 import io.github.oasis.services.admin.internal.dao.IExternalAppDao;
+import io.github.oasis.services.admin.internal.dao.IGameCreationDao;
+import io.github.oasis.services.admin.internal.dao.IGameStateDao;
+import org.jdbi.v3.core.Jdbi;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -37,59 +34,28 @@ import org.springframework.context.annotation.Configuration;
 public class OasisAdminConfiguration {
 
     @Autowired
-    private ApplicationEventPublisher publisher;
-
-    @Autowired
-    private AdminAggregate adminAggregate;
-
-    @Autowired
-    private ExternalAppService externalAppService;
-
-    @Autowired
-    private IExternalAppDao externalAppDao;
-
-    @Autowired
-    private GameStateService gameStateService;
+    private Jdbi jdbi;
 
     /////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
     //
-    // CONTROLLERS
+    // DAOs
     //
     /////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
 
     @Bean
-    public AdminController getAdminController() {
-        return new AdminController();
+    public IExternalAppDao getExternalAppDao() {
+        return jdbi.onDemand(IExternalAppDao.class);
     }
 
     @Bean
-    public ExternalAppController getExternalAppController() {
-        return new ExternalAppController(adminAggregate);
+    public IGameCreationDao getGameCreationDao() {
+        return jdbi.onDemand(IGameCreationDao.class);
     }
 
     @Bean
-    public GameController getGameController() {
-        return new GameController();
+    public IGameStateDao getGameStateDao() {
+        return jdbi.onDemand(IGameStateDao.class);
     }
-
-    @Bean
-    public ExternalAppService getExternalAppService() {
-        return new ExternalAppService(externalAppDao);
-    }
-
-    /////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////
-    //
-    // AGGREGATES
-    //
-    /////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////
-
-    @Bean
-    public AdminAggregate getAdminAggregate() {
-        return new AdminAggregate(publisher, externalAppService, gameStateService);
-    }
-
 }

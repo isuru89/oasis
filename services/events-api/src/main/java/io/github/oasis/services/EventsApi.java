@@ -17,28 +17,19 @@
  * under the License.
  */
 
-package io.github.oasis.services.events;
+package io.github.oasis.services;
 
-import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.sqlobject.SqlObjectPlugin;
-import org.springframework.boot.jdbc.DataSourceBuilder;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import javax.sql.DataSource;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @author Isuru Weerarathna
  */
-@Configuration
-public class EventsModuleConfiguration {
+@SpringBootApplication
+public class EventsApi {
 
-    @Bean
-    public Jdbi createJdbi() {
-        DataSource dataSource = DataSourceBuilder.create().build();
-        Jdbi jdbi = Jdbi.create(dataSource);
-        jdbi.installPlugin(new SqlObjectPlugin());
-        return jdbi;
+    public static void main(String[] args) {
+        SpringApplication.run(EventsApi.class, args);
     }
 
 }

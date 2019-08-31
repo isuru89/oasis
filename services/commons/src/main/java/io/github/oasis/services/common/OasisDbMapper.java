@@ -17,28 +17,21 @@
  * under the License.
  */
 
-package io.github.oasis.services.events;
+package io.github.oasis.services.common;
 
-import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.sqlobject.SqlObjectPlugin;
-import org.springframework.boot.jdbc.DataSourceBuilder;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.jdbi.v3.core.config.ConfigRegistry;
+import org.jdbi.v3.core.mapper.ColumnMapper;
+import org.jdbi.v3.core.mapper.ColumnMapperFactory;
 
-import javax.sql.DataSource;
+import java.lang.reflect.Type;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
  */
-@Configuration
-public class EventsModuleConfiguration {
-
-    @Bean
-    public Jdbi createJdbi() {
-        DataSource dataSource = DataSourceBuilder.create().build();
-        Jdbi jdbi = Jdbi.create(dataSource);
-        jdbi.installPlugin(new SqlObjectPlugin());
-        return jdbi;
+public class OasisDbMapper implements ColumnMapperFactory {
+    @Override
+    public Optional<ColumnMapper<?>> build(Type type, ConfigRegistry config) {
+        return Optional.empty();
     }
-
 }

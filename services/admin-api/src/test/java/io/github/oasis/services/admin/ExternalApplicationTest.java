@@ -20,11 +20,13 @@
 package io.github.oasis.services.admin;
 
 
-import io.github.oasis.services.admin.controller.AdminController;
 import io.github.oasis.services.admin.domain.ExternalAppService;
+import io.github.oasis.services.admin.domain.Game;
 import io.github.oasis.services.admin.domain.GameStateService;
 import io.github.oasis.services.admin.internal.ApplicationKey;
 import io.github.oasis.services.admin.internal.dao.IExternalAppDao;
+import io.github.oasis.services.admin.internal.dao.IGameCreationDao;
+import io.github.oasis.services.admin.internal.dao.IGameStateDao;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundException;
 import io.github.oasis.services.admin.internal.exceptions.KeyAlreadyDownloadedException;
 import io.github.oasis.services.admin.json.apps.AppUpdateResultJson;
@@ -35,21 +37,18 @@ import io.github.oasis.services.admin.json.apps.UpdateApplicationJson;
 import io.github.oasis.services.common.OasisValidationException;
 import io.github.oasis.services.common.internal.events.admin.ExternalAppEvent;
 import io.github.oasis.services.common.internal.events.admin.ExternalAppEventType;
+import io.github.oasis.services.common.internal.events.game.GameCreatedEvent;
 import org.apache.commons.collections4.ListUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Arrays;
 import java.util.List;
@@ -65,28 +64,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Isuru Weerarathna
  */
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = OasisAdminConfiguration.class)
 @DisplayName("External Applications")
-public class ExternalApplicationTest {
+public class ExternalApplicationTest extends AbstractTest {
 
+    @Autowired private IExternalAppDao externalAppDao;
+    @Autowired private IGameStateDao gameDao;
+    @Autowired private IGameCreationDao gameCreationDao;
 
-    @MockBean
-    private IExternalAppDao dao;
-
-    @MockBean
-    private ApplicationEventPublisher publisher;
-
-    @InjectMocks
-    private ExternalAppService externalAppService;
-
-    @InjectMocks
-    private GameStateService gameStateService;
+    @MockBean private ApplicationEventPublisher publisher;
 
     private AdminAggregate adminAggregate;
 
-    @Autowired
-    private AdminController adminController;
+    @Captor private ArgumentCaptor<GameCreatedEvent> createdEventArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<ExternalAppEvent> extAppCapture;
@@ -94,10 +83,15 @@ public class ExternalApplicationTest {
     @BeforeEach
     public void beforeEach() {
         MockitoAnnotations.initMocks(this);
-        adminAggregate = new AdminAggregate(publisher, externalAppService, gameStateService);
+        ExternalAppService externalAppService = new ExternalAppService(externalAppDao);
+        GameStateService gameStateService = new GameStateService(gameDao);
+        Game game = new Game(gameCreationDao);
+        adminAggregate = new AdminAggregate(publisher, externalAppService, gameStateService, game);
+
+        super.runBeforeEach();
     }
 
-    @DisplayName("Only Admin can add external applications")
+    @DisplayName("Should be able to add applications even yet to define a game")
     @Test
     public void testAddApplicationsByAdmin() {
         NewApplicationJson app = new NewApplicationJson();
@@ -280,8 +274,7 @@ public class ExternalApplicationTest {
     @DisplayName("Non existing applications cannot be deleted")
     @Test
     public void testTryDeleteApp() {
-        Mockito.when(dao.deactivateApplication(5)).thenReturn(0);
-        assertThrows(ExtAppNotFoundException.class, () -> adminAggregate.deactivateApp(5));
+        assertThrows(ExtAppNotFoundException.class, () -> adminAggregate.deactivateApp(Integer.MAX_VALUE - 1));
 
         assertNoAppEventFired();
     }
@@ -289,16 +282,13 @@ public class ExternalApplicationTest {
     @DisplayName("Existing application can be deleted only by admin")
     @Test
     public void testDeleteAppByAdmin() {
-        int appId = 10;
         NewApplicationJson app = new NewApplicationJson();
         app.setName("test-345");
         app.setForAllGames(true);
         app.setEventTypes(Arrays.asList("e1", "e2"));
 
-        Mockito.when(dao.addApplication(Mockito.any())).thenReturn(appId);
-        Mockito.when(dao.deactivateApplication(appId)).thenReturn(1);
         ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
-        assertAddedApp(addedApp, appId);
+        assertAddedApp(addedApp);
 
         assertAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
 

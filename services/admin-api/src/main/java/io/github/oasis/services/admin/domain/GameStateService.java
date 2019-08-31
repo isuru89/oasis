@@ -19,7 +19,7 @@
 
 package io.github.oasis.services.admin.domain;
 
-import io.github.oasis.services.admin.internal.dao.IGameDao;
+import io.github.oasis.services.admin.internal.dao.IGameStateDao;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,9 +28,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class GameStateService {
 
-    private IGameDao gameDao;
+    private IGameStateDao gameDao;
 
-    public GameStateService(IGameDao gameDao) {
+    public GameStateService(IGameStateDao gameDao) {
         this.gameDao = gameDao;
     }
 
@@ -47,6 +47,6 @@ public class GameStateService {
     }
 
     public void deleteGame(int gameId) {
-        gameDao.deactivateGame(gameId);
+        gameDao.removeGame(gameId);
     }
 }

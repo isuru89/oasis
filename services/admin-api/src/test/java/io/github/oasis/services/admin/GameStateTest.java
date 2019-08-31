@@ -20,9 +20,16 @@
 package io.github.oasis.services.admin;
 
 import io.github.oasis.services.admin.domain.ExternalAppService;
+import io.github.oasis.services.admin.domain.Game;
 import io.github.oasis.services.admin.domain.GameState;
 import io.github.oasis.services.admin.domain.GameStateService;
 import io.github.oasis.services.admin.internal.dao.IExternalAppDao;
+import io.github.oasis.services.admin.internal.dao.IGameCreationDao;
+import io.github.oasis.services.admin.internal.dao.IGameStateDao;
+import io.github.oasis.services.admin.internal.dto.NewGameDto;
+import io.github.oasis.services.admin.internal.exceptions.GameStateChangeException;
+import io.github.oasis.services.admin.json.game.GameJson;
+import io.github.oasis.services.common.internal.events.game.GameCreatedEvent;
 import io.github.oasis.services.common.internal.events.game.GamePausedEvent;
 import io.github.oasis.services.common.internal.events.game.GameRemovedEvent;
 import io.github.oasis.services.common.internal.events.game.GameRestartedEvent;
@@ -32,41 +39,36 @@ import io.github.oasis.services.common.internal.events.game.GameStoppedEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.List;
 
 import static io.github.oasis.services.admin.utils.TestUtils.NONE;
 import static io.github.oasis.services.admin.utils.TestUtils.SINGLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
+ * @TODO fill remaining tests
+ *
  * @author Isuru Weerarathna
  */
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = OasisAdminConfiguration.class)
 @DisplayName("Game State Changes")
-public class GameStateTest {
+public class GameStateTest extends AbstractTest {
 
-    @MockBean
-    private IExternalAppDao dao;
+    @Autowired private IExternalAppDao externalAppDao;
+    @Autowired private IGameStateDao gameDao;
+    @Autowired private IGameCreationDao gameCreationDao;
 
     @MockBean
     private ApplicationEventPublisher publisher;
-
-    @InjectMocks
-    private ExternalAppService externalAppService;
-
-    @InjectMocks
-    private GameStateService gameStateService;
 
     private AdminAggregate admin;
 
@@ -75,69 +77,150 @@ public class GameStateTest {
     @Captor private ArgumentCaptor<GamePausedEvent> pausedEventArgumentCaptor;
     @Captor private ArgumentCaptor<GameRestartedEvent> restartedEventArgumentCaptor;
     @Captor private ArgumentCaptor<GameRemovedEvent> removedEventArgumentCaptor;
+    @Captor private ArgumentCaptor<GameCreatedEvent> createdEventArgumentCaptor;
 
     @BeforeEach
     public void beforeEach() {
         MockitoAnnotations.initMocks(this);
-        admin = new AdminAggregate(publisher, externalAppService, gameStateService);
+        ExternalAppService externalAppService = new ExternalAppService(externalAppDao);
+        GameStateService gameStateService = new GameStateService(gameDao);
+        Game game = new Game(gameCreationDao);
+        admin = new AdminAggregate(publisher, externalAppService, gameStateService, game);
+
+        super.runBeforeEach();
     }
 
-    @DisplayName("Admin should be able to start a created game")
+    @DisplayName("should be able to start a freshly created game")
     @Test
     public void testGameCanStart() {
+        int gameId = createGameDef("test-start-game");
+        verifyOnlyOneGameExistsWithId(gameId, GameState.CREATED);
 
+        admin.startGame(gameId);
+        verifyGameEventFired(GameState.RUNNING, gameId);
+        verifyOnlyOneGameExistsWithId(gameId, GameState.RUNNING);
     }
 
-    @DisplayName("Admin should not be able to start a running or deleted game")
+    @DisplayName("should be able to start a paused game")
     @Test
-    public void testGameCannotStart() {
+    public void testGameCanStartPaused() {
+        int gameId = createGameDef("test-start-game");
+        admin.startGame(gameId);
+        verifyGameEventFired(GameState.RUNNING, gameId);
+
+        admin.pauseGame(gameId);
+        verifyGameEventFired(GameState.PAUSED, gameId);
+
+        admin.startGame(gameId);
+        verifyGameEventFired(GameState.RUNNING, gameId);
+
+        verifyOnlyOneGameExistsWithId(gameId, GameState.RUNNING);
+    }
+
+    @DisplayName("should be able to start a stopped game")
+    @Test
+    public void testGameCanStartStopped() {
+        int gameId = createGameDef("test-start-game");
+        admin.startGame(gameId);
+        verifyGameEventFired(GameState.RUNNING, gameId);
+
+        admin.stopGame(gameId);
+        verifyGameEventFired(GameState.STOPPED, gameId);
+
+        admin.startGame(gameId);
+        verifyGameEventFired(GameState.RUNNING, gameId);
+
+        verifyOnlyOneGameExistsWithId(gameId, GameState.RUNNING);
+    }
+
+    @DisplayName("should not be able to start a running game")
+    @Test
+    public void testGameCannotStartRunning() {
+        int gameId = createGameDef("test-start-game");
+        admin.startGame(gameId);
+        verifyGameEventFired(GameState.RUNNING, gameId);
+
+        assertThrows(GameStateChangeException.class, () -> admin.startGame(gameId));
         verifyNoGameEventFired();
     }
 
-    @DisplayName("Admin should be able to pause a created or running game")
+    @DisplayName("should not be able to delete a running game")
     @Test
-    public void testGameCanPause() {
+    public void testGameCannotDeleteRunning() {
+        int gameId = createGameDef("test-delete-game");
+        admin.startGame(gameId);
+        verifyGameEventFired(GameState.RUNNING, gameId);
 
+        assertThrows(GameStateChangeException.class, () -> admin.removeGame(gameId));
+        verifyNoGameEventFired();
     }
 
-    @DisplayName("Admin should not be able to pause a stopped or deleted game")
+    @DisplayName("should not be able to start a deleted game")
+    @Test
+    public void testGameCannotStartDeleted() {
+        int gameId = createGameDef("test-start-game");
+        admin.removeGame(gameId);
+        verifyGameEventFired(GameState.DELETED, gameId);
+
+        assertThrows(GameStateChangeException.class, () -> admin.startGame(gameId));
+        verifyNoGameEventFired();
+    }
+
+    @DisplayName("should not be able to pause a stopped game")
     @Test
     public void testGameCannotPause() {
+        int gameId = createGameDef("test-pause-game");
+
+        admin.stopGame(gameId);
+        verifyGameEventFired(GameState.STOPPED, gameId);
+
+        assertThrows(GameStateChangeException.class, () -> admin.pauseGame(gameId));
         verifyNoGameEventFired();
     }
 
-    @DisplayName("Admin should be able to stop a created, running or paused game")
+    @DisplayName("should not be able to pause a deleted game")
     @Test
-    public void testGameCanStop() {
+    public void testGameCannotPauseDeleted() {
+        int gameId = createGameDef("test-pause-game");
+        admin.removeGame(gameId);
+        verifyGameEventFired(GameState.DELETED, gameId);
 
-    }
-
-    @DisplayName("Admin should not be able to stop a stopped or deleted game")
-    @Test
-    public void testGameCannotStop() {
+        assertThrows(GameStateChangeException.class, () -> admin.pauseGame(gameId));
         verifyNoGameEventFired();
     }
 
-    @DisplayName("Admin should be able to restart a created, paused or stopped game")
+    @DisplayName("should not be able to stop a deleted game")
     @Test
-    public void testGameCanRestart() {
-        int gameId = createGameDef("game-test-restart");
-        admin.restartGame(gameId);
+    public void testGameCannotStopDeleted() {
+        int gameId = createGameDef("test-stop-game");
+        admin.removeGame(gameId);
+        verifyGameEventFired(GameState.DELETED, gameId);
 
-        verifyGameEventFired(GameState.RUNNING, true, gameId);
-    }
-
-    @DisplayName("Admin should not be able to restart a running or deleted game")
-    @Test
-    public void testGameCannotRestart() {
-        int gameId = createGameDef("game-test-no-restart");
-        admin.restartGame(gameId);
-
+        assertThrows(GameStateChangeException.class, () -> admin.stopGame(gameId));
         verifyNoGameEventFired();
     }
 
     int createGameDef(String name) {
-        return 0;
+        NewGameDto dto = new NewGameDto(name, name);
+        int id = admin.createGame(dto).getId();
+        verifyGameCreatedEventFired(id);
+        return id;
+    }
+
+    private void verifyGameCreatedEventFired(int withGameId) {
+        Mockito.verify(publisher, SINGLE).publishEvent(createdEventArgumentCaptor.capture());
+        assertEquals(withGameId,
+                createdEventArgumentCaptor.getValue().getGameId(),
+                "Fired event has a different ID than created one!");
+        Mockito.clearInvocations(publisher);
+    }
+
+    private void verifyOnlyOneGameExistsWithId(int gameId, GameState state) {
+        List<GameJson> allGames = admin.listAllGames();
+        assertEquals(1, allGames.size(), "Only one game should be in the db!");
+        GameJson onlyGame = allGames.get(0);
+        assertEquals(gameId, onlyGame.getId(), "The game id is different with the db record!");
+        assertEquals(state, onlyGame.getCurrentState(), "The game state is different with db record!");
     }
 
     void verifyNoGameEventFired() {
@@ -170,6 +253,10 @@ public class GameStateTest {
         } else if (expectedState == GameState.DELETED) {
             Mockito.verify(publisher, SINGLE).publishEvent(removedEventArgumentCaptor.capture());
             GameRemovedEvent event = removedEventArgumentCaptor.getValue();
+            assertEquals(gameId, event.getGameId());
+        } else if (expectedState == GameState.CREATED) {
+            Mockito.verify(publisher, SINGLE).publishEvent(createdEventArgumentCaptor.capture());
+            GameCreatedEvent event = createdEventArgumentCaptor.getValue();
             assertEquals(gameId, event.getGameId());
         } else {
             fail("Unknown verification for game state!");

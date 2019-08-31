@@ -12,6 +12,6 @@ SELECT
     ogd.name g_name,
     ogd.description g_description
 FROM OA_EXT_APP oea
-INNER JOIN OA_EXT_APP_GAME oeag ON oea.app_id = oeag.app_id
 INNER JOIN OA_EXT_APP_EVENT oeae ON oea.app_id = oeae.app_id
-INNER JOIN OA_GAME_DEF ogd ON oeag.game_id = ogd.game_id
+LEFT JOIN OA_EXT_APP_GAME oeag ON oea.app_id = oeag.app_id
+LEFT JOIN OA_GAME_DEF ogd ON oeag.game_id = ogd.game_id

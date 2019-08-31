@@ -34,4 +34,12 @@ public final class Validation {
         return collection != null && !collection.isEmpty();
     }
 
+    public static boolean isEmpty(String text) {
+        return text == null || text.trim().isEmpty();
+    }
+
+    public static boolean hasMinLength(String text, int minLength) {
+        return !isEmpty(text) && text.length() > minLength;
+    }
+
 }

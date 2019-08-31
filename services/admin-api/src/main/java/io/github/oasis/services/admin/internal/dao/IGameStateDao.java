@@ -22,6 +22,7 @@ package io.github.oasis.services.admin.internal.dao;
 import io.github.oasis.services.admin.domain.GameState;
 import io.github.oasis.services.admin.internal.ErrorCodes;
 import io.github.oasis.services.admin.internal.exceptions.GameStateChangeException;
+import org.jdbi.v3.core.enums.EnumByName;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -33,10 +34,12 @@ import java.util.Optional;
 /**
  * @author Isuru Weerarathna
  */
-public interface IGameDao {
+@EnumByName
+public interface IGameStateDao {
 
-    @SqlUpdate("UPDATE OA_GAME_DEF SET is_active = false WHERE game_id = :id")
-    int deactivateGame(@Bind("id") int gameId);
+    @SqlUpdate("UPDATE OA_GAME_DEF SET is_active = false, current_state = :state WHERE game_id = :id")
+    int deactivateGame(@Bind("id") int gameId,
+                       @Bind("state") GameState state);
 
     @SqlUpdate("INSERT INTO OA_GAME_STATE" +
             " (game_id, prev_state, current_state, changed_at)" +
@@ -48,11 +51,12 @@ public interface IGameDao {
                                       @Bind("changedAt") Instant changedAt);
 
     @Transaction
-    default void pauseGame(@Bind("id") int gameId) {
+    default void pauseGame(int gameId) {
         GameState currentState = readCurrentGameState(gameId).orElse(GameState.CREATED);
 
         if (GameState.canPauseableState(currentState)) {
             insertGameStateChangedRecord(gameId, currentState, GameState.PAUSED, Instant.now());
+            updateCurrentGameState(gameId, GameState.PAUSED);
         } else {
             throw new GameStateChangeException(ErrorCodes.GAME_CANNOT_PAUSE,
                     "Game is currently in '%s' state. Cannot be paused!");
@@ -60,11 +64,12 @@ public interface IGameDao {
     }
 
     @Transaction
-    default void stopGame(@Bind("id") int gameId) {
+    default void stopGame(int gameId) {
         GameState currentState = readCurrentGameState(gameId).orElse(GameState.CREATED);
 
         if (GameState.canStoppableState(currentState)) {
             insertGameStateChangedRecord(gameId, currentState, GameState.STOPPED, Instant.now());
+            updateCurrentGameState(gameId, GameState.STOPPED);
         } else {
             throw new GameStateChangeException(ErrorCodes.GAME_CANNOT_STOP,
                     "Game is currently in '%s' state. Cannot be stopped!");
@@ -72,11 +77,12 @@ public interface IGameDao {
     }
 
     @Transaction
-    default void startGame(@Bind("id") int gameId) {
+    default void startGame(int gameId) {
         GameState currentState = readCurrentGameState(gameId).orElse(GameState.CREATED);
 
         if (GameState.canStartableState(currentState)) {
             insertGameStateChangedRecord(gameId, currentState, GameState.RUNNING, Instant.now());
+            updateCurrentGameState(gameId, GameState.RUNNING);
         } else {
             throw new GameStateChangeException(ErrorCodes.GAME_CANNOT_START,
                     "Game is currently in '%s' state. Cannot be started!");
@@ -86,11 +92,14 @@ public interface IGameDao {
     @SqlQuery("SELECT current_state FROM OA_GAME_STATE WHERE game_id = :id ORDER BY changed_at DESC LIMIT 1")
     Optional<GameState> readCurrentGameState(@Bind("id") int gameId);
 
+    @SqlUpdate("UPDATE OA_GAME_DEF SET current_state = :state WHERE game_id = :id")
+    void updateCurrentGameState(@Bind("id") int gameId, @Bind("state") GameState state);
+
     @Transaction
-    default void removeGame(@Bind("id") int gameId) throws GameStateChangeException {
+    default void removeGame(int gameId) throws GameStateChangeException {
         GameState currentState = readCurrentGameState(gameId).orElse(GameState.CREATED);
 
-        if (GameState.canDeactivateState(currentState) && deactivateGame(gameId) > 0) {
+        if (GameState.canDeactivateState(currentState) && deactivateGame(gameId, GameState.DELETED) > 0) {
             insertGameStateChangedRecord(gameId, currentState, GameState.DELETED, Instant.now());
         } else {
             throw new GameStateChangeException(ErrorCodes.GAME_ALREADY_REMOVED,

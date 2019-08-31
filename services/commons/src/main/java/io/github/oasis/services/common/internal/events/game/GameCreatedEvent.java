@@ -17,28 +17,26 @@
  * under the License.
  */
 
-package io.github.oasis.services.events;
+package io.github.oasis.services.common.internal.events.game;
 
-import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.sqlobject.SqlObjectPlugin;
-import org.springframework.boot.jdbc.DataSourceBuilder;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import javax.sql.DataSource;
+import io.github.oasis.services.common.internal.events.BaseEvent;
 
 /**
  * @author Isuru Weerarathna
  */
-@Configuration
-public class EventsModuleConfiguration {
+public class GameCreatedEvent extends BaseEvent {
 
-    @Bean
-    public Jdbi createJdbi() {
-        DataSource dataSource = DataSourceBuilder.create().build();
-        Jdbi jdbi = Jdbi.create(dataSource);
-        jdbi.installPlugin(new SqlObjectPlugin());
-        return jdbi;
+    private int gameId;
+
+    public GameCreatedEvent(int gameId) {
+        this.gameId = gameId;
     }
 
+    public int getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(int gameId) {
+        this.gameId = gameId;
+    }
 }

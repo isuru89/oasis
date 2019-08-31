@@ -17,26 +17,34 @@
  * under the License.
  */
 
-package io.github.oasis.services.events;
+package io.github.oasis.services.admin.domain;
 
-import io.github.oasis.services.admin.OasisAdminConfiguration;
-import io.github.oasis.services.common.CommonExceptionMapper;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Import;
+import io.github.oasis.services.admin.internal.dao.IGameCreationDao;
+import io.github.oasis.services.admin.internal.dto.NewGameDto;
+import io.github.oasis.services.admin.json.game.GameJson;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@SpringBootApplication
-@Import({
-    OasisAdminConfiguration.class,
-    CommonExceptionMapper.class
-})
-public class EventsApi {
+@Component
+public class Game {
 
-    public static void main(String[] args) {
-        SpringApplication.run(EventsApi.class, args);
+    private IGameCreationDao gameCreationDao;
+
+    public Game(IGameCreationDao gameCreationDao) {
+        this.gameCreationDao = gameCreationDao;
+    }
+
+    public GameJson createGame(NewGameDto game) {
+        int gameId = gameCreationDao.insertGame(game);
+        return GameJson.from(gameId, game, GameState.CREATED);
+    }
+
+    public List<GameJson> readAllGames() {
+        return gameCreationDao.readAllGames();
     }
 
 }

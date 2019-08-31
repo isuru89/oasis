@@ -20,8 +20,10 @@
 package io.github.oasis.services.admin;
 
 import io.github.oasis.services.admin.domain.ExternalAppService;
+import io.github.oasis.services.admin.domain.Game;
 import io.github.oasis.services.admin.domain.GameStateService;
 import io.github.oasis.services.admin.internal.ApplicationKey;
+import io.github.oasis.services.admin.internal.dto.NewGameDto;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppAlreadyExistException;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundException;
 import io.github.oasis.services.admin.json.apps.AppUpdateResultJson;
@@ -29,8 +31,10 @@ import io.github.oasis.services.admin.json.apps.ApplicationAddedJson;
 import io.github.oasis.services.admin.json.apps.ApplicationJson;
 import io.github.oasis.services.admin.json.apps.NewApplicationJson;
 import io.github.oasis.services.admin.json.apps.UpdateApplicationJson;
+import io.github.oasis.services.admin.json.game.GameJson;
 import io.github.oasis.services.common.internal.events.admin.ExternalAppEvent;
 import io.github.oasis.services.common.internal.events.admin.ExternalAppEventType;
+import io.github.oasis.services.common.internal.events.game.GameCreatedEvent;
 import io.github.oasis.services.common.internal.events.game.GamePausedEvent;
 import io.github.oasis.services.common.internal.events.game.GameRemovedEvent;
 import io.github.oasis.services.common.internal.events.game.GameRestartedEvent;
@@ -50,13 +54,16 @@ public class AdminAggregate {
     private ApplicationEventPublisher publisher;
     private ExternalAppService externalAppService;
     private GameStateService gameStateService;
+    private Game game;
 
     public AdminAggregate(ApplicationEventPublisher publisher,
                           ExternalAppService externalAppService,
-                          GameStateService gameStateService) {
+                          GameStateService gameStateService,
+                          Game gameService) {
         this.publisher = publisher;
         this.externalAppService = externalAppService;
         this.gameStateService = gameStateService;
+        this.game = gameService;
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -64,6 +71,18 @@ public class AdminAggregate {
     //  GAME - ACTIONS
     //
     /////////////////////////////////////////////////////////////////////////////
+
+    public GameJson createGame(NewGameDto game) {
+        game.validate();
+
+        GameJson gameJson = this.game.createGame(game);
+        publisher.publishEvent(new GameCreatedEvent(gameJson.getId()));
+        return gameJson;
+    }
+
+    public List<GameJson> listAllGames() {
+        return game.readAllGames();
+    }
 
     public void startGame(int gameId) {
         gameStateService.startGame(gameId);

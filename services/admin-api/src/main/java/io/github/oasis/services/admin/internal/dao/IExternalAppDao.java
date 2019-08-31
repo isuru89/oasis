@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
  *
  * @author Isuru Weerarathna
  */
-@UseClasspathSqlLocator
 public interface IExternalAppDao {
 
     @SqlUpdate("INSERT INTO OA_EXT_APP" +
@@ -69,6 +68,7 @@ public interface IExternalAppDao {
             " LIMIT 1")
     Optional<String> findExternalAppByName(@Bind("name") String name);
 
+    @UseClasspathSqlLocator
     @SqlQuery
     @RegisterBeanMapper(value = ExtAppRecord.class, prefix = "a")
     @RegisterBeanMapper(value = ExtAppRecord.GameDef.class, prefix = "g")
@@ -91,7 +91,12 @@ public interface IExternalAppDao {
     @SqlBatch("DELETE FROM OA_EXT_APP_GAME WHERE app_id = :appId AND game_id = :gameId")
     void removeGameMappingsForApp(@Bind("appId") int appId, @Bind("gameId") List<Integer> gameId);
 
+    @UseClasspathSqlLocator
+    @RegisterBeanMapper(value = ExtAppRecord.class, prefix = "a")
+    @RegisterBeanMapper(value = ExtAppRecord.GameDef.class, prefix = "g")
+    @RegisterBeanMapper(value = ExtAppRecord.EventType.class, prefix = "et")
     @SqlQuery
+    @UseRowReducer(AppGameReducer.class)
     Optional<ExtAppRecord> readApplication(@Bind("appId") int appId);
 
     @SqlUpdate("UPDATE OA_EXT_APP SET is_downloaded = true WHERE app_id = :appId")
