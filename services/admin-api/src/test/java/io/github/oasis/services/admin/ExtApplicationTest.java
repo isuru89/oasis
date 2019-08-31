@@ -23,6 +23,7 @@ package io.github.oasis.services.admin;
 import io.github.oasis.services.admin.domain.ExternalAppService;
 import io.github.oasis.services.admin.domain.Game;
 import io.github.oasis.services.admin.domain.GameStateService;
+import io.github.oasis.services.admin.handlers.GameCreateHandler;
 import io.github.oasis.services.admin.internal.ApplicationKey;
 import io.github.oasis.services.admin.internal.dao.IExternalAppDao;
 import io.github.oasis.services.admin.internal.dao.IGameCreationDao;
@@ -68,7 +69,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Isuru Weerarathna
  */
 @DisplayName("External Applications")
-public class ExternalApplicationTest extends AbstractTest {
+public class ExtApplicationTest extends AbstractTest {
 
     @Autowired private IExternalAppDao externalAppDao;
     @Autowired private IGameStateDao gameDao;
@@ -281,6 +282,35 @@ public class ExternalApplicationTest extends AbstractTest {
 
     }
 
+    @DisplayName("should attach new games for existing applications specified for all games")
+    @Test
+    public void testAttachGamesForApps() {
+        addGames(101, 102, 105);
+        NewApplicationJson app = new NewApplicationJson();
+        app.setName("testing-123");
+        app.setEventTypes(Arrays.asList("e1", "e2", "e3"));
+        app.setForAllGames(true);
+        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        assertAddedApp(addedApp);
+
+        assertAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
+
+        {
+            ApplicationJson storedApp = readTheOnlyApp();
+            verifyNewApp(storedApp, app, 3);
+        }
+
+        GameCreateHandler handler = new GameCreateHandler(adminAggregate);
+        GameCreatedEvent createdEvent = addGame("newly-added-game");
+        handler.onGameCreatedEvent(createdEvent);
+
+        // now the app should have 4 games mapped
+        {
+            ApplicationJson storedApp = readTheOnlyApp();
+            verifyNewApp(storedApp, app, 4);
+        }
+    }
+
     @DisplayName("Application can restrict to a game while that game is running")
     @Test
     public void testUpdateAppRestrictToGames() {
@@ -344,6 +374,15 @@ public class ExternalApplicationTest extends AbstractTest {
         adminAggregate.deactivateApp(addedApp.getId());
 
         assertAppEventFired(addedApp.getId(), ExternalAppEventType.DEACTIVATED);
+    }
+
+    GameCreatedEvent addGame(String name) {
+        NewGameDto dto = new NewGameDto(name, name);
+        adminAggregate.createGame(dto);
+        Mockito.verify(publisher, SINGLE).publishEvent(createdEventArgumentCaptor.capture());
+        GameCreatedEvent event = createdEventArgumentCaptor.getValue();
+        Mockito.clearInvocations(publisher);
+        return event;
     }
 
     List<Integer> addGames(int... ids) {

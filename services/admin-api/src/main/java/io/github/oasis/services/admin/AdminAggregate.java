@@ -109,8 +109,8 @@ public class AdminAggregate {
     //
     /////////////////////////////////////////////////////////////////////////////
 
-    public void attachApplicationsToGame(int gameId) {
-
+    public void attachAllGameApplicationsToNewGame(int gameId) {
+        externalAppService.attachAllGameApplicationsToNewGame(gameId);
     }
 
     public ApplicationKey readApplicationKey(int appId) throws ExtAppNotFoundException {

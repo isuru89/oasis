@@ -19,7 +19,7 @@
 
 package io.github.oasis.services.admin.handlers;
 
-import io.github.oasis.services.admin.internal.dao.IExternalAppDao;
+import io.github.oasis.services.admin.AdminAggregate;
 import io.github.oasis.services.common.internal.events.game.GameCreatedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -30,10 +30,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class GameCreateHandler {
 
-    private IExternalAppDao externalAppDao;
+    private AdminAggregate adminAggregate;
+
+    public GameCreateHandler(AdminAggregate adminAggregate) {
+        this.adminAggregate = adminAggregate;
+    }
 
     @EventListener
     public void onGameCreatedEvent(GameCreatedEvent event) {
-        System.out.println("Game is created.");
+        adminAggregate.attachAllGameApplicationsToNewGame(event.getGameId());
     }
 }

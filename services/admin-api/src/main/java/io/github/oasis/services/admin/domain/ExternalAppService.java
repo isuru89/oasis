@@ -86,6 +86,10 @@ public class ExternalAppService {
         return new ApplicationAddedJson(id, token);
     }
 
+    public void attachAllGameApplicationsToNewGame(int gameId) {
+        externalAppDao.attachAppsToNewGame(gameId);
+    }
+
     public NewAppDto assignKeys(NewAppDto appDto) {
         try {
             final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(RSA);

@@ -85,6 +85,9 @@ public interface IExternalAppDao {
     @SqlBatch("INSERT INTO OA_EXT_APP_GAME (app_id, game_id) VALUES (:appId, :gameId)")
     void insertGameMappingsForApp(@Bind("appId") int appId, @Bind("gameId") List<Integer> gameIds);
 
+    @SqlBatch("INSERT INTO OA_EXT_APP_GAME (app_id, game_id) VALUES (:appId, :gameId)")
+    void insertAppMappingsForGame(@Bind("gameId") int gameId, @Bind("appId") List<Integer> appIds);
+
     @SqlBatch("DELETE FROM OA_EXT_APP_GAME WHERE app_id = :appId AND game_id = :gameId")
     void removeGameMappingsForApp(@Bind("appId") int appId, @Bind("gameId") List<Integer> gameId);
 
@@ -101,6 +104,15 @@ public interface IExternalAppDao {
 
     @SqlUpdate("UPDATE OA_EXT_APP SET is_active = false WHERE app_id = :appId")
     int deactivateApplication(@Bind("appId") int appId);
+
+    @Transaction
+    default void attachAppsToNewGame(int gameId) {
+        List<Integer> appIds = getAllRegisteredApps().stream()
+                .filter(ExtAppRecord::isForAllGames)
+                .map(ExtAppRecord::getId)
+                .collect(Collectors.toList());
+        insertAppMappingsForGame(gameId, appIds);
+    }
 
     @Transaction
     default ExtAppUpdateResult updateApplication(int appId, UpdateApplicationJson updateData) {
