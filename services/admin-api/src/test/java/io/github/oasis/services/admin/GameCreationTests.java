@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Isuru Weerarathna
  */
 @DisplayName("New Game Creation")
-class GameCreationTest extends AbstractTest {
+public class GameCreationTests extends AbstractTest {
 
     @Autowired private IExternalAppDao externalAppDao;
     @Autowired private IGameStateDao gameDao;

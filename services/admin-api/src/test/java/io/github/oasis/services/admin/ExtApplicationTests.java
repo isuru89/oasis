@@ -71,7 +71,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Isuru Weerarathna
  */
 @DisplayName("External Applications")
-class ExtApplicationTest extends AbstractTest {
+public class ExtApplicationTests extends AbstractTest {
 
     @Autowired private IExternalAppDao externalAppDao;
     @Autowired private IGameStateDao gameDao;

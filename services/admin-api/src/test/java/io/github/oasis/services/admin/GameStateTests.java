@@ -61,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Isuru Weerarathna
  */
 @DisplayName("Game State Changes")
-class GameStateTest extends AbstractTest {
+public class GameStateTests extends AbstractTest {
 
     @Autowired private IExternalAppDao externalAppDao;
     @Autowired private IGameStateDao gameDao;
