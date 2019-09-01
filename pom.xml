@@ -132,6 +132,12 @@
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <configuration>
+                            <destFile>
+                                ${project.build.directory}/coverage-reports/jacoco.exec
+                            </destFile>
+                            <propertyName>jacocoArgLine</propertyName>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>report</id>
@@ -139,6 +145,10 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco.exec</dataFile>
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -174,7 +184,9 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.0.0-M3</version>
                     <configuration>
-                        <argLine>${argLine}</argLine>
+                        <useSystemClassLoader>true</useSystemClassLoader>
+                        <forkMode>once</forkMode>
+                        <argLine>${jacocoArgLine}</argLine>
                     </configuration>
                 </plugin>
             </plugins>
