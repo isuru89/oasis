@@ -31,6 +31,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -60,14 +61,18 @@ public class TestConfiguration {
     }
 
     private void createSchema(Jdbi jdbi) throws IOException {
-        ClassLoader clsLoader = Thread.currentThread().getContextClassLoader();
-        String scriptContent = IOUtils.resourceToString("schema-admin.sqlite.sql",
-                StandardCharsets.UTF_8,
-                clsLoader);
+        String scriptContent = readSchemaResource();
         String[] commands = scriptContent.split(";");
         for (String cmd : commands) {
             System.out.println(cmd);
             jdbi.useHandle(h -> h.createScript(cmd).execute());
+        }
+    }
+
+    private String readSchemaResource() throws IOException {
+        ClassLoader clsLoader = Thread.currentThread().getContextClassLoader();
+        try (InputStream is = clsLoader.getResourceAsStream("schema-admin.sqlite.sql")) {
+            return String.join("", IOUtils.readLines(is, StandardCharsets.UTF_8.name()));
         }
     }
 
