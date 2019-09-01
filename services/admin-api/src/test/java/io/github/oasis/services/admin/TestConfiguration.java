@@ -40,8 +40,7 @@ import java.nio.charset.StandardCharsets;
 @TestPropertySource("classpath:application.yml")
 public class TestConfiguration {
 
-    @Autowired
-    private Environment env;
+    @Autowired private Environment env;
 
     private DataSource createDataSource() {
         HikariDataSource dataSource = new HikariDataSource();
@@ -66,8 +65,7 @@ public class TestConfiguration {
                 StandardCharsets.UTF_8,
                 clsLoader);
         String[] commands = scriptContent.split(";");
-        for (int i = 0; i < commands.length; i++) {
-            String cmd = commands[i];
+        for (String cmd : commands) {
             System.out.println(cmd);
             jdbi.useHandle(h -> h.createScript(cmd).execute());
         }

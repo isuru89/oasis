@@ -26,6 +26,7 @@ public enum ExternalAppEventType {
 
     CREATED,
     MODIFIED,
-    DEACTIVATED
+    DEACTIVATED,
+    KEY_RESET
 
 }

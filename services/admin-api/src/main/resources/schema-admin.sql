@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS OA_EXT_APP (
     is_downloaded   TINYINT DEFAULT 0,
     is_active       TINYINT DEFAULT 1,
     for_all_games   TINYINT DEFAULT 0,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at      BIGINT,
+    key_reset_at    BIGINT
 );
 
 CREATE TABLE IF NOT EXISTS OA_EXT_APP_EVENT (

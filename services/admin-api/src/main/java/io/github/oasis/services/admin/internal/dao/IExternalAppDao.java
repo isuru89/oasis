@@ -23,6 +23,7 @@ import io.github.oasis.services.admin.internal.ApplicationKey;
 import io.github.oasis.services.admin.internal.dto.ExtAppRecord;
 import io.github.oasis.services.admin.internal.dto.ExtAppUpdateResult;
 import io.github.oasis.services.admin.internal.dto.NewAppDto;
+import io.github.oasis.services.admin.internal.dto.ResetKeyDto;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppAlreadyExistException;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundException;
 import io.github.oasis.services.admin.internal.exceptions.KeyAlreadyDownloadedException;
@@ -56,9 +57,9 @@ import java.util.stream.Collectors;
 public interface IExternalAppDao {
 
     @SqlUpdate("INSERT INTO OA_EXT_APP" +
-            " (name, token, key_secret, key_public, is_internal, for_all_games)" +
+            " (name, token, key_secret, key_public, is_internal, for_all_games, created_at)" +
             " VALUES " +
-            " (:name, :token, :keySecret, :keyPublic, :internal, :forAllGames)")
+            " (:name, :token, :keySecret, :keyPublic, :internal, :forAllGames, :createdAt)")
     @GetGeneratedKeys("app_id")
     int insertExternalApp(@BindBean NewAppDto appDto);
 
@@ -98,6 +99,12 @@ public interface IExternalAppDao {
     @SqlQuery
     @UseRowReducer(AppGameReducer.class)
     Optional<ExtAppRecord> readApplication(@Bind("appId") int appId);
+
+    @SqlUpdate("UPDATE OA_EXT_APP" +
+            " SET key_secret = :secretKey, key_public = :publicKey, key_reset_at = :keyResetAt," +
+            "     is_downloaded = false" +
+            " WHERE app_id = :appId")
+    int resetKeysOfApp(@Bind("appId") int appId, @BindBean ResetKeyDto resetKey);
 
     @SqlUpdate("UPDATE OA_EXT_APP SET is_downloaded = true WHERE app_id = :appId")
     int markKeyAsDownloaded(@Bind("appId") int appId);

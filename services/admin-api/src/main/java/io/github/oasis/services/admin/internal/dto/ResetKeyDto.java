@@ -17,25 +17,41 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.internal;
+package io.github.oasis.services.admin.internal.dto;
+
+import java.security.KeyPair;
+import java.time.Instant;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class ErrorCodes {
+public class ResetKeyDto {
 
-    public static final int NON_EXIST_APP = 40001;
-    public static final int ALREADY_EXIST_APP = 40002;
-    public static final int INVALID_APP_DETAILS = 40003;
-    public static final int KEY_ALREADY_DOWNLOADED = 40004;
-    public static final int KEY_CANNOT_RESET = 40005;
+    private byte[] secretKey;
+    private byte[] publicKey;
 
-    public static final int GAME_ALREADY_REMOVED = 30001;
-    public static final int GAME_CANNOT_START = 30002;
-    public static final int GAME_CANNOT_PAUSE = 30003;
-    public static final int GAME_CANNOT_STOP = 30004;
+    private final Instant keyResetAt;
 
-    public static final int GAME_CANNOT_CREATE = 30100;
-    public static final int INVALID_GAME_DETAILS = 30101;
+    public static ResetKeyDto assignKeys(KeyPair keyPair) {
+        ResetKeyDto dto = new ResetKeyDto();
+        dto.secretKey = keyPair.getPrivate().getEncoded();
+        dto.publicKey = keyPair.getPublic().getEncoded();
+        return dto;
+    }
 
+    public ResetKeyDto() {
+        keyResetAt = Instant.now();
+    }
+
+    public byte[] getSecretKey() {
+        return secretKey;
+    }
+
+    public byte[] getPublicKey() {
+        return publicKey;
+    }
+
+    public Instant getKeyResetAt() {
+        return keyResetAt;
+    }
 }

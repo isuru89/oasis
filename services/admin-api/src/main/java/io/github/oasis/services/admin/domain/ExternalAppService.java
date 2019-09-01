@@ -20,15 +20,19 @@
 package io.github.oasis.services.admin.domain;
 
 import io.github.oasis.services.admin.internal.ApplicationKey;
+import io.github.oasis.services.admin.internal.ErrorCodes;
 import io.github.oasis.services.admin.internal.dao.IExternalAppDao;
+import io.github.oasis.services.admin.internal.dto.ExtAppRecord;
 import io.github.oasis.services.admin.internal.dto.ExtAppUpdateResult;
 import io.github.oasis.services.admin.internal.dto.NewAppDto;
+import io.github.oasis.services.admin.internal.dto.ResetKeyDto;
 import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundException;
 import io.github.oasis.services.admin.json.apps.AppUpdateResultJson;
 import io.github.oasis.services.admin.json.apps.ApplicationAddedJson;
 import io.github.oasis.services.admin.json.apps.ApplicationJson;
 import io.github.oasis.services.admin.json.apps.NewApplicationJson;
 import io.github.oasis.services.admin.json.apps.UpdateApplicationJson;
+import io.github.oasis.services.common.OasisServiceException;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -52,6 +56,17 @@ public class ExternalAppService {
 
     public ExternalAppService(IExternalAppDao externalAppDao) {
         this.externalAppDao = externalAppDao;
+    }
+
+    public void resetKey(int appId) throws OasisServiceException {
+        ExtAppRecord appRecord = externalAppDao.readApplication(appId)
+                .orElseThrow(() -> new ExtAppNotFoundException("No app is found by id " + appId + "!"));
+        KeyPair newKeyPair = generateRandomRSAKeyPair(appRecord.getName());
+        ResetKeyDto resetKey = ResetKeyDto.assignKeys(newKeyPair);
+        if (!isSuccessfulOperation(externalAppDao.resetKeysOfApp(appId, resetKey))) {
+            throw new OasisServiceException(ErrorCodes.KEY_CANNOT_RESET,
+                    String.format("The keys for application %s cannot reset. Try again later.", appRecord.getName()));
+        }
     }
 
     public void deactivateApplication(int appId) throws ExtAppNotFoundException {
@@ -91,13 +106,17 @@ public class ExternalAppService {
     }
 
     public NewAppDto assignKeys(NewAppDto appDto) {
-        try {
-            final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(RSA);
-            SecureRandom secureRandom = new SecureRandom(appDto.getName().getBytes(StandardCharsets.UTF_8));
-            keyGen.initialize(RSA_KEY_SIZE, secureRandom);
-            KeyPair keyPair = keyGen.generateKeyPair();
-            return appDto.assignKeys(keyPair);
+        KeyPair keyPair = generateRandomRSAKeyPair(appDto.getName());
+        return appDto.assignKeys(keyPair);
+    }
 
+    KeyPair generateRandomRSAKeyPair(String appName) {
+        try {
+            String seed = String.format("%s-%d", appName, System.currentTimeMillis());
+            final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(RSA);
+            SecureRandom secureRandom = new SecureRandom(seed.getBytes(StandardCharsets.UTF_8));
+            keyGen.initialize(RSA_KEY_SIZE, secureRandom);
+            return keyGen.generateKeyPair();
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("Failed to generate keys for the external application!");
         }

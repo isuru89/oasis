@@ -42,6 +42,9 @@ public class ApplicationJson {
     private boolean internal = false;
     private boolean downloaded = true;
 
+    private long createdAt;
+    private Long keyResetAt;
+
     public static ApplicationJson from(ExtAppRecord record) {
         ApplicationJson json = new ApplicationJson();
         json.id = record.getId();
@@ -55,8 +58,17 @@ public class ApplicationJson {
                 .map(ExtAppRecord.EventType::getEventType)
                 .collect(Collectors.toList());
         json.mappedGameIds = new ArrayList<>(record.getMappedGames());
-
+        json.createdAt = record.getCreatedAt();
+        json.keyResetAt = record.getKeyResetAt();
         return json;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public Long getKeyResetAt() {
+        return keyResetAt;
     }
 
     public boolean isForAllGames() {

@@ -22,6 +22,7 @@ package io.github.oasis.services.admin.internal.dto;
 import io.github.oasis.services.admin.json.apps.NewApplicationJson;
 
 import java.security.KeyPair;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,6 +43,8 @@ public class NewAppDto {
     private List<String> eventTypes;
     private List<Integer> gameIds;
 
+    private Instant createdAt;
+
     public NewAppDto() {
     }
 
@@ -53,6 +56,7 @@ public class NewAppDto {
         dto.gameIds = newApplicationJson.getMappedGameIds();
         dto.forAllGames = newApplicationJson.isForAllGames();
         dto.internal = false;
+        dto.createdAt = Instant.now();
         return dto;
     }
 
@@ -68,6 +72,10 @@ public class NewAppDto {
         this.keySecret = keyPair.getPrivate().getEncoded();
         this.keyPublic = keyPair.getPublic().getEncoded();
         return this;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
     public List<String> getEventTypes() {

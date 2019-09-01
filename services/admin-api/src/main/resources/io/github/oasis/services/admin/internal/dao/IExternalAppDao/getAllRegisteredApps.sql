@@ -7,6 +7,8 @@ SELECT
     a.is_internal a_internal,
     a.is_downloaded a_downloaded,
     a.for_all_games a_forAllGames,
+    a.created_at a_createdAt,
+    a.key_reset_at a_keyResetAt,
     oeae.app_id et_id,
     oeae.event_type et_eventType,
     ogd.game_id g_id,

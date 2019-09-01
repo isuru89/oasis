@@ -109,6 +109,11 @@ public class AdminAggregate {
     //
     /////////////////////////////////////////////////////////////////////////////
 
+    public void resetApplicationKey(int appId) {
+        externalAppService.resetKey(appId);
+        publisher.publishEvent(new ExternalAppEvent(appId, ExternalAppEventType.KEY_RESET));
+    }
+
     public void attachAllGameApplicationsToNewGame(int gameId) {
         externalAppService.attachAllGameApplicationsToNewGame(gameId);
     }

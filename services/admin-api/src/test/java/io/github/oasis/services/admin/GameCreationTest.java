@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Isuru Weerarathna
  */
 @DisplayName("New Game Creation")
-public class GameCreationTest extends AbstractTest {
+class GameCreationTest extends AbstractTest {
 
     @Autowired private IExternalAppDao externalAppDao;
     @Autowired private IGameStateDao gameDao;
@@ -67,7 +67,7 @@ public class GameCreationTest extends AbstractTest {
     private ArgumentCaptor<GameCreatedEvent> gameCreatedEventArgumentCaptor;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         MockitoAnnotations.initMocks(this);
         ExternalAppService externalAppService = new ExternalAppService(externalAppDao);
         GameStateService gameStateService = new GameStateService(gameDao);
@@ -79,7 +79,7 @@ public class GameCreationTest extends AbstractTest {
 
     @DisplayName("Admin should be able to create games")
     @Test
-    public void testGameCreation() {
+    void testGameCreation() {
         NewGameDto gameDto = new NewGameDto("game-test", "this game is for testing");
         GameJson createdGame = admin.createGame(gameDto);
         assertNewGame(gameDto, createdGame);
@@ -90,7 +90,7 @@ public class GameCreationTest extends AbstractTest {
 
     @DisplayName("Game name is mandatory")
     @Test
-    public void testNameConstraints() {
+    void testNameConstraints() {
         assertThrows(OasisValidationException.class,
                 () -> admin.createGame(new NewGameDto(null, "this game is for testing")));
         verifyNoGameCreatedEventFired();
@@ -104,7 +104,7 @@ public class GameCreationTest extends AbstractTest {
 
     @DisplayName("Game description is optional")
     @Test
-    public void testDescriptionConstraints() {
+    void testDescriptionConstraints() {
         NewGameDto gameDto = new NewGameDto("game-test", null);
         GameJson createdGame = admin.createGame(gameDto);
         assertNewGame(gameDto, createdGame);

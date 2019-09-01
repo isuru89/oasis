@@ -61,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Isuru Weerarathna
  */
 @DisplayName("Game State Changes")
-public class GameStateTest extends AbstractTest {
+class GameStateTest extends AbstractTest {
 
     @Autowired private IExternalAppDao externalAppDao;
     @Autowired private IGameStateDao gameDao;
@@ -80,7 +80,7 @@ public class GameStateTest extends AbstractTest {
     @Captor private ArgumentCaptor<GameCreatedEvent> createdEventArgumentCaptor;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         MockitoAnnotations.initMocks(this);
         ExternalAppService externalAppService = new ExternalAppService(externalAppDao);
         GameStateService gameStateService = new GameStateService(gameDao);
@@ -92,7 +92,7 @@ public class GameStateTest extends AbstractTest {
 
     @DisplayName("should be able to start a freshly created game")
     @Test
-    public void testGameCanStart() {
+    void testGameCanStart() {
         int gameId = createGameDef("test-start-game");
         verifyOnlyOneGameExistsWithId(gameId, GameState.CREATED);
 
@@ -103,7 +103,7 @@ public class GameStateTest extends AbstractTest {
 
     @DisplayName("should be able to start a paused game")
     @Test
-    public void testGameCanStartPaused() {
+    void testGameCanStartPaused() {
         int gameId = createGameDef("test-start-game");
         admin.startGame(gameId);
         verifyGameEventFired(GameState.RUNNING, gameId);
@@ -119,7 +119,7 @@ public class GameStateTest extends AbstractTest {
 
     @DisplayName("should be able to start a stopped game")
     @Test
-    public void testGameCanStartStopped() {
+    void testGameCanStartStopped() {
         int gameId = createGameDef("test-start-game");
         admin.startGame(gameId);
         verifyGameEventFired(GameState.RUNNING, gameId);
@@ -135,7 +135,7 @@ public class GameStateTest extends AbstractTest {
 
     @DisplayName("should not be able to start a running game")
     @Test
-    public void testGameCannotStartRunning() {
+    void testGameCannotStartRunning() {
         int gameId = createGameDef("test-start-game");
         admin.startGame(gameId);
         verifyGameEventFired(GameState.RUNNING, gameId);
@@ -146,7 +146,7 @@ public class GameStateTest extends AbstractTest {
 
     @DisplayName("should not be able to delete a running game")
     @Test
-    public void testGameCannotDeleteRunning() {
+    void testGameCannotDeleteRunning() {
         int gameId = createGameDef("test-delete-game");
         admin.startGame(gameId);
         verifyGameEventFired(GameState.RUNNING, gameId);
@@ -157,7 +157,7 @@ public class GameStateTest extends AbstractTest {
 
     @DisplayName("should not be able to start a deleted game")
     @Test
-    public void testGameCannotStartDeleted() {
+    void testGameCannotStartDeleted() {
         int gameId = createGameDef("test-start-game");
         admin.removeGame(gameId);
         verifyGameEventFired(GameState.DELETED, gameId);
@@ -168,7 +168,7 @@ public class GameStateTest extends AbstractTest {
 
     @DisplayName("should not be able to pause a stopped game")
     @Test
-    public void testGameCannotPause() {
+    void testGameCannotPause() {
         int gameId = createGameDef("test-pause-game");
 
         admin.stopGame(gameId);
@@ -180,7 +180,7 @@ public class GameStateTest extends AbstractTest {
 
     @DisplayName("should not be able to pause a deleted game")
     @Test
-    public void testGameCannotPauseDeleted() {
+    void testGameCannotPauseDeleted() {
         int gameId = createGameDef("test-pause-game");
         admin.removeGame(gameId);
         verifyGameEventFired(GameState.DELETED, gameId);
@@ -191,7 +191,7 @@ public class GameStateTest extends AbstractTest {
 
     @DisplayName("should not be able to stop a deleted game")
     @Test
-    public void testGameCannotStopDeleted() {
+    void testGameCannotStopDeleted() {
         int gameId = createGameDef("test-stop-game");
         admin.removeGame(gameId);
         verifyGameEventFired(GameState.DELETED, gameId);

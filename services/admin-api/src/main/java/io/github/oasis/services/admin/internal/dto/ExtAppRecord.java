@@ -40,8 +40,10 @@ public class ExtAppRecord {
     private boolean forAllGames;
 
     private Set<EventType> eventTypes = new HashSet<>();
-
     private Set<GameDef> mappedGames = new HashSet<>();
+
+    private long createdAt;
+    private Long keyResetAt;
 
     public boolean isForAllGames() {
         return forAllGames;
@@ -49,6 +51,22 @@ public class ExtAppRecord {
 
     public void setForAllGames(boolean forAllGames) {
         this.forAllGames = forAllGames;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Long getKeyResetAt() {
+        return keyResetAt;
+    }
+
+    public void setKeyResetAt(Long keyResetAt) {
+        this.keyResetAt = keyResetAt;
     }
 
     public Set<GameDef> getMappedGames() {

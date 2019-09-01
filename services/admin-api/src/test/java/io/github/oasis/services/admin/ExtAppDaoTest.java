@@ -38,9 +38,8 @@ import java.util.Properties;
 /**
  * @author Isuru Weerarathna
  */
-public class ExtAppDaoTest {
+class ExtAppDaoTest {
 
-    private static Jdbi jdbi;
     private static DataSource dataSource;
     private static IExternalAppDao externalAppDao;
 
@@ -68,7 +67,7 @@ public class ExtAppDaoTest {
         }
 
         dataSource = new HikariDataSource(config);
-        jdbi = Jdbi.create(dataSource);
+        Jdbi jdbi = Jdbi.create(dataSource);
         jdbi.installPlugin(new SqlObjectPlugin());
 
         externalAppDao = jdbi.onDemand(IExternalAppDao.class);
