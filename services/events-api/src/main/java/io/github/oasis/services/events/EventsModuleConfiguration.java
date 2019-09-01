@@ -19,11 +19,13 @@
 
 package io.github.oasis.services.events;
 
+import com.zaxxer.hikari.HikariDataSource;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
-import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 import javax.sql.DataSource;
 
@@ -33,12 +35,22 @@ import javax.sql.DataSource;
 @Configuration
 public class EventsModuleConfiguration {
 
+    @Autowired private Environment env;
+
     @Bean
     public Jdbi createJdbi() {
-        DataSource dataSource = DataSourceBuilder.create().build();
+        DataSource dataSource = createDataSource();
         Jdbi jdbi = Jdbi.create(dataSource);
         jdbi.installPlugin(new SqlObjectPlugin());
         return jdbi;
+    }
+
+    private DataSource createDataSource() {
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setJdbcUrl(env.getRequiredProperty("url"));
+        dataSource.setUsername(env.getRequiredProperty("username"));
+        dataSource.setPassword(env.getRequiredProperty("password"));
+        return dataSource;
     }
 
 }

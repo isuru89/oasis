@@ -79,7 +79,7 @@ class ExtApplicationTest extends AbstractTest {
 
     @MockBean private ApplicationEventPublisher publisher;
 
-    private AdminAggregate adminAggregate;
+    private AdminAggregate admin;
 
     @Captor private ArgumentCaptor<GameCreatedEvent> createdEventArgumentCaptor;
 
@@ -92,7 +92,7 @@ class ExtApplicationTest extends AbstractTest {
         ExternalAppService externalAppService = new ExternalAppService(externalAppDao);
         GameStateService gameStateService = new GameStateService(gameDao);
         Game game = new Game(gameCreationDao);
-        adminAggregate = new AdminAggregate(publisher, externalAppService, gameStateService, game);
+        admin = new AdminAggregate(publisher, externalAppService, gameStateService, game);
 
         super.runBeforeEach();
     }
@@ -104,11 +104,11 @@ class ExtApplicationTest extends AbstractTest {
         app.setName("test-1");
         app.setForAllGames(true);
         app.setEventTypes(Arrays.asList("e1", "e2"));
-        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        ApplicationAddedJson addedApp = admin.registerNewApp(app);
 
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
 
-        List<ApplicationJson> allApps = adminAggregate.readAllApps();
+        List<ApplicationJson> allApps = admin.readAllApps();
         assertEquals(1, allApps.size());
         verifyNewApp(allApps.get(0), app);
     }
@@ -116,7 +116,7 @@ class ExtApplicationTest extends AbstractTest {
     @DisplayName("When no applications exist, should return empty")
     @Test
     void testListApps() {
-        List<ApplicationJson> allApps = adminAggregate.readAllApps();
+        List<ApplicationJson> allApps = admin.readAllApps();
         assertNotNull(allApps);
         assertEquals(0, allApps.size());
     }
@@ -128,7 +128,7 @@ class ExtApplicationTest extends AbstractTest {
         app.setName("testing-123");
         app.setEventTypes(Arrays.asList("e1", "e2", "e3"));
         app.setForAllGames(true);
-        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        ApplicationAddedJson addedApp = admin.registerNewApp(app);
         assertAddedApp(addedApp);
 
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
@@ -139,7 +139,7 @@ class ExtApplicationTest extends AbstractTest {
             assertFalse(storedApp.isDownloaded());
             assertFalse(storedApp.isInternal());
 
-            ApplicationKey key = adminAggregate.readApplicationKey(addedApp.getId());
+            ApplicationKey key = admin.readApplicationKey(addedApp.getId());
             assertEquals(storedApp.getId(), key.getId());
             assertTrue(key.getData().length > 0, "Should get the secret key for the new apps!");
         }
@@ -148,7 +148,7 @@ class ExtApplicationTest extends AbstractTest {
         assertTrue(downloadedApp.isDownloaded());
 
         assertThrows(KeyAlreadyDownloadedException.class,
-                () -> adminAggregate.readApplicationKey(downloadedApp.getId()));
+                () -> admin.readApplicationKey(downloadedApp.getId()));
     }
 
     @DisplayName("At least one event type must be mapped with an application")
@@ -157,7 +157,7 @@ class ExtApplicationTest extends AbstractTest {
         NewApplicationJson app = new NewApplicationJson();
         app.setName("testing-123");
         app.setForAllGames(true);
-        assertThrows(OasisValidationException.class, () -> adminAggregate.registerNewApp(app));
+        assertThrows(OasisValidationException.class, () -> admin.registerNewApp(app));
 
         verifyNoAppEventFired();
     }
@@ -169,7 +169,7 @@ class ExtApplicationTest extends AbstractTest {
         app.setName("testing-123");
         app.setEventTypes(Arrays.asList("e1", "e2", "e3"));
         app.setForAllGames(false);
-        assertThrows(OasisValidationException.class, () -> adminAggregate.registerNewApp(app));
+        assertThrows(OasisValidationException.class, () -> admin.registerNewApp(app));
 
         verifyNoAppEventFired();
     }
@@ -182,12 +182,12 @@ class ExtApplicationTest extends AbstractTest {
         app.setForAllGames(false);
         app.setMappedGameIds(Arrays.asList(100, 101, 102));
         app.setEventTypes(Arrays.asList("e1", "e2", "e3", "e4"));
-        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        ApplicationAddedJson addedApp = admin.registerNewApp(app);
         assertAddedApp(addedApp);
 
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
 
-        List<ApplicationJson> registeredApps = adminAggregate.readAllApps();
+        List<ApplicationJson> registeredApps = admin.readAllApps();
         assertEquals(1, registeredApps.size());
         ApplicationJson storedApp = registeredApps.get(0);
         verifyNewApp(storedApp, app);
@@ -204,12 +204,12 @@ class ExtApplicationTest extends AbstractTest {
         app.setForAllGames(false);
         app.setMappedGameIds(suppliedGameIds);
         app.setEventTypes(Arrays.asList("e1", "e2", "e3", "e4"));
-        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        ApplicationAddedJson addedApp = admin.registerNewApp(app);
         assertAddedApp(addedApp);
 
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
 
-        List<ApplicationJson> registeredApps = adminAggregate.readAllApps();
+        List<ApplicationJson> registeredApps = admin.readAllApps();
         assertEquals(1, registeredApps.size());
         ApplicationJson storedApp = registeredApps.get(0);
         verifyNewApp(storedApp, app, 3);
@@ -224,12 +224,12 @@ class ExtApplicationTest extends AbstractTest {
         app.setForAllGames(false);
         app.setMappedGameIds(gameIds);
         app.setEventTypes(Arrays.asList("e1", "e2", "e3", "e4"));
-        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        ApplicationAddedJson addedApp = admin.registerNewApp(app);
         assertAddedApp(addedApp);
 
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
 
-        List<ApplicationJson> registeredApps = adminAggregate.readAllApps();
+        List<ApplicationJson> registeredApps = admin.readAllApps();
         assertEquals(1, registeredApps.size());
         ApplicationJson storedApp = registeredApps.get(0);
         verifyNewApp(storedApp, app, 3);
@@ -241,7 +241,7 @@ class ExtApplicationTest extends AbstractTest {
         NewApplicationJson app = new NewApplicationJson();
         app.setForAllGames(true);
         app.setEventTypes(Arrays.asList("e1", "e2"));
-        assertThrows(OasisValidationException.class, () -> adminAggregate.registerNewApp(app));
+        assertThrows(OasisValidationException.class, () -> admin.registerNewApp(app));
 
         verifyNoAppEventFired();
     }
@@ -253,7 +253,7 @@ class ExtApplicationTest extends AbstractTest {
         app.setName("testing-123");
         app.setEventTypes(Arrays.asList("e1", "e2", "e3"));
         app.setForAllGames(true);
-        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        ApplicationAddedJson addedApp = admin.registerNewApp(app);
         assertAddedApp(addedApp);
 
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
@@ -262,7 +262,7 @@ class ExtApplicationTest extends AbstractTest {
             // add two event types
             UpdateApplicationJson updateJson = new UpdateApplicationJson();
             updateJson.setEventTypes(ListUtils.union(Arrays.asList("e5", "e6"), app.getEventTypes()));
-            AppUpdateResultJson updateResult = adminAggregate.updateApp(addedApp.getId(), updateJson);
+            AppUpdateResultJson updateResult = admin.updateApp(addedApp.getId(), updateJson);
             assertAppUpdate(updateResult, 2, 0, 0, 0);
 
             verifyAppEventFired(addedApp.getId(), ExternalAppEventType.MODIFIED);
@@ -274,7 +274,7 @@ class ExtApplicationTest extends AbstractTest {
             // remove event type
             UpdateApplicationJson updateJson = new UpdateApplicationJson();
             updateJson.setEventTypes(Arrays.asList("e1", "e3", "e5", "e6"));
-            AppUpdateResultJson updateResult = adminAggregate.updateApp(addedApp.getId(), updateJson);
+            AppUpdateResultJson updateResult = admin.updateApp(addedApp.getId(), updateJson);
             assertAppUpdate(updateResult, 0, 1, 0, 0);
 
             verifyAppEventFired(addedApp.getId(), ExternalAppEventType.MODIFIED);
@@ -292,7 +292,7 @@ class ExtApplicationTest extends AbstractTest {
         app.setName("testing-123");
         app.setEventTypes(Arrays.asList("e1", "e2", "e3"));
         app.setForAllGames(true);
-        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        ApplicationAddedJson addedApp = admin.registerNewApp(app);
         assertAddedApp(addedApp);
 
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
@@ -302,7 +302,7 @@ class ExtApplicationTest extends AbstractTest {
             verifyNewApp(storedApp, app, 3);
         }
 
-        GameCreateHandler handler = new GameCreateHandler(adminAggregate);
+        GameCreateHandler handler = new GameCreateHandler(admin);
         GameCreatedEvent createdEvent = addGame("newly-added-game");
         handler.onGameCreatedEvent(createdEvent);
 
@@ -322,7 +322,7 @@ class ExtApplicationTest extends AbstractTest {
         app.setEventTypes(Arrays.asList("e1", "e2", "e3"));
         app.setForAllGames(false);
         app.setMappedGameIds(addedGameIds.subList(0, 4));
-        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        ApplicationAddedJson addedApp = admin.registerNewApp(app);
         assertAddedApp(addedApp);
 
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
@@ -331,7 +331,7 @@ class ExtApplicationTest extends AbstractTest {
             // add for new three games
             UpdateApplicationJson updateJson = new UpdateApplicationJson();
             updateJson.setGameIds(addedGameIds.subList(0, 7));
-            AppUpdateResultJson updateResult = adminAggregate.updateApp(addedApp.getId(), updateJson);
+            AppUpdateResultJson updateResult = admin.updateApp(addedApp.getId(), updateJson);
             assertAppUpdate(updateResult, 0, 0, 3, 0);
 
             verifyAppEventFired(addedApp.getId(), ExternalAppEventType.MODIFIED);
@@ -343,7 +343,7 @@ class ExtApplicationTest extends AbstractTest {
             // remove from another two games
             UpdateApplicationJson updateJson = new UpdateApplicationJson();
             updateJson.setGameIds(addedGameIds.subList(0, 5));
-            AppUpdateResultJson updateResult = adminAggregate.updateApp(addedApp.getId(), updateJson);
+            AppUpdateResultJson updateResult = admin.updateApp(addedApp.getId(), updateJson);
             assertAppUpdate(updateResult, 0, 0, 0, 2);
 
             verifyAppEventFired(addedApp.getId(), ExternalAppEventType.MODIFIED);
@@ -355,7 +355,7 @@ class ExtApplicationTest extends AbstractTest {
     @DisplayName("Non existing applications cannot be deleted")
     @Test
     void testTryDeleteApp() {
-        assertThrows(ExtAppNotFoundException.class, () -> adminAggregate.deactivateApp(Integer.MAX_VALUE - 1));
+        assertThrows(ExtAppNotFoundException.class, () -> admin.deactivateApp(Integer.MAX_VALUE - 1));
 
         verifyNoAppEventFired();
     }
@@ -368,12 +368,12 @@ class ExtApplicationTest extends AbstractTest {
         app.setForAllGames(true);
         app.setEventTypes(Arrays.asList("e1", "e2"));
 
-        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        ApplicationAddedJson addedApp = admin.registerNewApp(app);
         assertAddedApp(addedApp);
 
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
 
-        adminAggregate.deactivateApp(addedApp.getId());
+        admin.deactivateApp(addedApp.getId());
 
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.DEACTIVATED);
     }
@@ -386,11 +386,11 @@ class ExtApplicationTest extends AbstractTest {
         app.setName("test-345");
         app.setForAllGames(true);
         app.setEventTypes(Arrays.asList("e1", "e2"));
-        ApplicationAddedJson addedApp = adminAggregate.registerNewApp(app);
+        ApplicationAddedJson addedApp = admin.registerNewApp(app);
         assertAddedApp(addedApp);
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.CREATED);
 
-        ApplicationKey keyBefore = adminAggregate.readApplicationKey(addedApp.getId());
+        ApplicationKey keyBefore = admin.readApplicationKey(addedApp.getId());
         assertNotNull(keyBefore.getData());
         ApplicationJson appBeforeReset = readTheOnlyApp();
         assertTrue(appBeforeReset.isDownloaded());
@@ -398,7 +398,7 @@ class ExtApplicationTest extends AbstractTest {
 
         // reset key now
         // should be downloaded set to false
-        adminAggregate.resetApplicationKey(addedApp.getId());
+        admin.resetApplicationKey(addedApp.getId());
         verifyAppEventFired(addedApp.getId(), ExternalAppEventType.KEY_RESET);
 
         ApplicationJson appAfterReset = readTheOnlyApp();
@@ -406,14 +406,14 @@ class ExtApplicationTest extends AbstractTest {
         assertNotNull(appAfterReset.getKeyResetAt());
         assertTrue(appAfterReset.getKeyResetAt() > appAfterReset.getCreatedAt(),
                 "key reset time must be after created time!");
-        ApplicationKey keyAfter = adminAggregate.readApplicationKey(appAfterReset.getId());
+        ApplicationKey keyAfter = admin.readApplicationKey(appAfterReset.getId());
         assertNotNull(keyAfter.getData());
         assertNotEquals(keyBefore.getData(), keyAfter.getData(), "After reset keys must be different!");
     }
 
     GameCreatedEvent addGame(String name) {
         NewGameDto dto = new NewGameDto(name, name);
-        adminAggregate.createGame(dto);
+        admin.createGame(dto);
         Mockito.verify(publisher, SINGLE).publishEvent(createdEventArgumentCaptor.capture());
         GameCreatedEvent event = createdEventArgumentCaptor.getValue();
         Mockito.clearInvocations(publisher);
@@ -424,16 +424,16 @@ class ExtApplicationTest extends AbstractTest {
         List<Integer> addedIds = new ArrayList<>(ids.length);
         for (int id : ids) {
             NewGameDto dto = new NewGameDto(String.format("game-%d", id), String.format("description-%d", id));
-            GameJson game = adminAggregate.createGame(dto);
+            GameJson game = admin.createGame(dto);
             addedIds.add(game.getId());
         }
-        assertEquals(ids.length, adminAggregate.listAllGames().size());
+        assertEquals(ids.length, admin.listAllGames().size());
         Mockito.clearInvocations(publisher);
         return addedIds;
     }
 
     ApplicationJson readTheOnlyApp() {
-        List<ApplicationJson> apps = adminAggregate.readAllApps();
+        List<ApplicationJson> apps = admin.readAllApps();
         assertEquals(1, apps.size(), "Must have a single registered app!");
         return apps.get(0);
     }

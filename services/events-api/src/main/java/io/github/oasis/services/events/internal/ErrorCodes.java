@@ -17,24 +17,17 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.internal;
+package io.github.oasis.services.events.internal;
 
 /**
  * @author Isuru Weerarathna
  */
 public final class ErrorCodes {
 
-    public static final int NON_EXIST_APP = 40001;
-    public static final int ALREADY_EXIST_APP = 40002;
-    public static final int INVALID_APP_DETAILS = 40003;
-    public static final int KEY_ALREADY_DOWNLOADED = 40004;
-    public static final int KEY_CANNOT_RESET = 40005;
+    public static final int MISSING_MANDATORY_FIELDS = 60001;
+    public static final int NO_USER_FOUND = 60002;
+    public static final int ILLEGAL_EVENT_TYPE = 60003;
+    public static final int INVALID_DATA_FIELDS = 60004;
 
-    public static final int GAME_ALREADY_REMOVED = 40101;
-    public static final int GAME_CANNOT_START = 40102;
-    public static final int GAME_CANNOT_PAUSE = 40103;
-    public static final int GAME_CANNOT_STOP = 40104;
-    public static final int GAME_CANNOT_CREATE = 40105;
-    public static final int INVALID_GAME_DETAILS = 40106;
 
 }

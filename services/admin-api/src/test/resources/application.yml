@@ -8,7 +8,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driverClassName: org.sqlite.JDBC
-    jdbcUrl: jdbc:sqlite:memory:myDb
+    jdbcUrl: jdbc:sqlite:memory:oasis
     username: root
     password: root
     hikari:

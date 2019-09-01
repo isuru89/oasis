@@ -17,24 +17,27 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.internal;
+package io.github.oasis.services.events.json;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class ErrorCodes {
+public class EventResponse {
 
-    public static final int NON_EXIST_APP = 40001;
-    public static final int ALREADY_EXIST_APP = 40002;
-    public static final int INVALID_APP_DETAILS = 40003;
-    public static final int KEY_ALREADY_DOWNLOADED = 40004;
-    public static final int KEY_CANNOT_RESET = 40005;
+    private String eventId;
 
-    public static final int GAME_ALREADY_REMOVED = 40101;
-    public static final int GAME_CANNOT_START = 40102;
-    public static final int GAME_CANNOT_PAUSE = 40103;
-    public static final int GAME_CANNOT_STOP = 40104;
-    public static final int GAME_CANNOT_CREATE = 40105;
-    public static final int INVALID_GAME_DETAILS = 40106;
+    public EventResponse() {
+    }
 
+    public EventResponse(String eventId) {
+        this.eventId = eventId;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
 }

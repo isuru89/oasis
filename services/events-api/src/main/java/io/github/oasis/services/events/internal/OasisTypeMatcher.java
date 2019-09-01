@@ -17,24 +17,26 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.internal;
+package io.github.oasis.services.events.internal;
+
+import io.github.oasis.services.events.json.NewEvent;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class ErrorCodes {
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+public class OasisTypeMatcher implements InvalidEventTypeMatcher {
 
-    public static final int NON_EXIST_APP = 40001;
-    public static final int ALREADY_EXIST_APP = 40002;
-    public static final int INVALID_APP_DETAILS = 40003;
-    public static final int KEY_ALREADY_DOWNLOADED = 40004;
-    public static final int KEY_CANNOT_RESET = 40005;
+    private final AntPathMatcher matcher = new AntPathMatcher(".");
+    private static final String OASIS_EVENT_PATTERN = "oasis.**";
 
-    public static final int GAME_ALREADY_REMOVED = 40101;
-    public static final int GAME_CANNOT_START = 40102;
-    public static final int GAME_CANNOT_PAUSE = 40103;
-    public static final int GAME_CANNOT_STOP = 40104;
-    public static final int GAME_CANNOT_CREATE = 40105;
-    public static final int INVALID_GAME_DETAILS = 40106;
-
+    @Override
+    public boolean valid(NewEvent event) {
+        return !matcher.matchStart(OASIS_EVENT_PATTERN, event.getEventType().toLowerCase());
+    }
 }
