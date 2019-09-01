@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.github.isuru</groupId>
+        <groupId>io.github.oasis</groupId>
         <artifactId>oasis-parent</artifactId>
         <version>0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -15,14 +15,19 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.isuru</groupId>
+            <groupId>io.github.oasis</groupId>
             <artifactId>oasis-model</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jdbi</groupId>
             <artifactId>jdbi3-core</artifactId>
-            <version>3.3.0</version>
+            <version>${jdbi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jdbi</groupId>
+            <artifactId>jdbi3-sqlobject</artifactId>
+            <version>${jdbi.version}</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -32,12 +37,12 @@
         <dependency>
             <groupId>org.jdbi</groupId>
             <artifactId>jdbi3-stringtemplate4</artifactId>
-            <version>3.3.0</version>
+            <version>${jdbi.version}</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.13</version>
+            <version>8.0.17</version>
         </dependency>
         <!--<dependency>-->
             <!--<groupId>org.mariadb.jdbc</groupId>-->

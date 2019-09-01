@@ -3,13 +3,24 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+    <modules>
+        <module>events-api</module>
+        <module>stats-api</module>
+        <module>narrative-api</module>
+        <module>commons</module>
+        <module>profile-api</module>
+        <module>admin-api</module>
+        <module>elements-api</module>
+    </modules>
 
     <parent>
-        <groupId>io.github.isuru</groupId>
+        <groupId>io.github.oasis</groupId>
         <artifactId>oasis-parent</artifactId>
         <version>0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+
 
     <artifactId>oasis-services</artifactId>
 
@@ -34,10 +45,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.springframework.boot</groupId>-->
-            <!--<artifactId>spring-boot-starter-data-jpa</artifactId>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.17</version>
+        </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
@@ -69,17 +86,17 @@
             <version>2.3.0</version>
         </dependency>
         <dependency>
-            <groupId>io.github.isuru</groupId>
+            <groupId>io.github.oasis</groupId>
             <artifactId>oasis-dao</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.isuru</groupId>
+            <groupId>io.github.oasis</groupId>
             <artifactId>oasis</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.isuru</groupId>
+            <groupId>io.github.oasis</groupId>
             <artifactId>oasis-model</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -151,7 +168,7 @@
             <id>dev</id>
             <dependencies>
                 <dependency>
-                    <groupId>io.github.isuru</groupId>
+                    <groupId>io.github.oasis</groupId>
                     <artifactId>oasis</artifactId>
                     <version>${project.version}</version>
                 </dependency>
@@ -172,21 +189,21 @@
     <build>
         <finalName>oasis-service</finalName>
 
-        <plugins>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>false</addClasspath>
-                            <mainClass>io.github.isuru.oasis.services.OasisServer</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-        </plugins>
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <artifactId>maven-dependency-plugin</artifactId>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <artifactId>maven-jar-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <archive>-->
+<!--                        <manifest>-->
+<!--                            <addClasspath>false</addClasspath>-->
+<!--                            <mainClass>io.github.oasis.services.OasisServer</mainClass>-->
+<!--                        </manifest>-->
+<!--                    </archive>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
     </build>
 </project>

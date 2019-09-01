@@ -1,0 +1,18 @@
+spring:
+  profiles:
+    active: test
+
+  devtools:
+    restart: true
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driverClassName: org.sqlite.JDBC
+    jdbcUrl: jdbc:sqlite:memory:oasis
+    username: root
+    password: root
+    hikari:
+      poolName: Hikari
+      auto-commit: false
+
+
