@@ -19,16 +19,26 @@
 
 package io.github.oasis.services.events;
 
+import com.google.common.collect.Sets;
 import io.github.oasis.services.common.OasisServiceException;
+import io.github.oasis.services.events.domain.EventSourceRef;
+import io.github.oasis.services.events.domain.UserId;
 import io.github.oasis.services.events.internal.ErrorCodes;
+import io.github.oasis.services.events.internal.IUserMapper;
 import io.github.oasis.services.events.json.EventResponse;
 import io.github.oasis.services.events.json.NewEvent;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,6 +58,24 @@ class EventSubmitTest extends AbstractTest {
 
     @Autowired private EventsAggregate events;
 
+    @MockBean private IUserMapper userMapper;
+
+    private EventSourceRef appTestSourceRef;
+
+    @BeforeEach
+    void setupEventSources() {
+        MockitoAnnotations.initMocks(this);
+
+        EventSourceRef sourceRef = new EventSourceRef();
+        sourceRef.setId(100);
+        sourceRef.setAllowedEventTypes(Sets.newHashSet(APP_TEST_EVENT));
+        sourceRef.setMappedGames(Sets.newHashSet(101, 102));
+        appTestSourceRef = sourceRef;
+
+        Mockito.when(userMapper.map(Mockito.any(NewEvent.class)))
+                .then((Answer<Optional<UserId>>) invocation -> Optional.of(new UserId(500)));
+    }
+
     @DisplayName("should not be able to submit events other than the app registered for")
     @Test
     void testOnlyApplicationSpecificAllowedEvents() {
@@ -65,7 +93,7 @@ class EventSubmitTest extends AbstractTest {
     void testCanSubmitWithoutId() {
         NewEvent event = create(APP_TEST_EVENT, USER_JOHN);
         event.setId(null);
-        EventResponse eventResponse = events.submitEvent(event);
+        EventResponse eventResponse = events.submitEvent(event, appTestSourceRef);
         assertNotNull(eventResponse.getEventId());
     }
 
@@ -75,13 +103,13 @@ class EventSubmitTest extends AbstractTest {
         assertSubmissionFail(() -> {
             NewEvent event = create(APP_TEST_EVENT, USER_JOHN);
             event.setTs(0);
-            events.submitEvent(event);
+            events.submitEvent(event, appTestSourceRef);
         }, ErrorCodes.MISSING_MANDATORY_FIELDS);
 
         assertSubmissionFail(() -> {
             NewEvent event = create(APP_TEST_EVENT, USER_JOHN);
             event.setTs(-1);
-            events.submitEvent(event);
+            events.submitEvent(event, appTestSourceRef);
         }, ErrorCodes.MISSING_MANDATORY_FIELDS);
     }
 
@@ -90,17 +118,17 @@ class EventSubmitTest extends AbstractTest {
     void testNoSubmitWithoutUser() {
         assertSubmissionFail(() -> {
             NewEvent event = create(APP_TEST_EVENT, null);
-            events.submitEvent(event);
+            events.submitEvent(event, appTestSourceRef);
         }, ErrorCodes.MISSING_MANDATORY_FIELDS);
 
         assertSubmissionFail(() -> {
             NewEvent event = create(APP_TEST_EVENT, "");
-            events.submitEvent(event);
+            events.submitEvent(event, appTestSourceRef);
         }, ErrorCodes.MISSING_MANDATORY_FIELDS);
 
         assertSubmissionFail(() -> {
             NewEvent event = create(APP_TEST_EVENT, "  ");
-            events.submitEvent(event);
+            events.submitEvent(event, appTestSourceRef);
         }, ErrorCodes.MISSING_MANDATORY_FIELDS);
     }
 
@@ -109,17 +137,17 @@ class EventSubmitTest extends AbstractTest {
     void testNoSubmitWithoutType() {
         assertSubmissionFail(() -> {
             NewEvent event = create(null, USER_ALICE);
-            events.submitEvent(event);
+            events.submitEvent(event, appTestSourceRef);
         }, ErrorCodes.MISSING_MANDATORY_FIELDS);
 
         assertSubmissionFail(() -> {
             NewEvent event = create("", USER_ALICE);
-            events.submitEvent(event);
+            events.submitEvent(event, appTestSourceRef);
         }, ErrorCodes.MISSING_MANDATORY_FIELDS);
 
         assertSubmissionFail(() -> {
             NewEvent event = create("  ", USER_ALICE);
-            events.submitEvent(event);
+            events.submitEvent(event, appTestSourceRef);
         }, ErrorCodes.MISSING_MANDATORY_FIELDS);
     }
 
@@ -128,12 +156,12 @@ class EventSubmitTest extends AbstractTest {
     void testRestrictedEventTypes() {
         assertSubmissionFail(() -> {
             NewEvent event = create("oasis.hack.event", USER_ALICE);
-            events.submitEvent(event);
+            events.submitEvent(event, appTestSourceRef);
         }, ErrorCodes.ILLEGAL_EVENT_TYPE);
 
         assertSubmissionFail(() -> {
             NewEvent event = create("oasis.event", USER_JOHN);
-            events.submitEvent(event);
+            events.submitEvent(event, appTestSourceRef);
         }, ErrorCodes.ILLEGAL_EVENT_TYPE);
     }
 

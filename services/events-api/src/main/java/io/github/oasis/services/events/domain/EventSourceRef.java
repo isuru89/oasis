@@ -17,18 +17,44 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.internal;
+package io.github.oasis.services.events.domain;
+
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class ErrorCodes {
+public class EventSourceRef {
 
-    public static final int MISSING_MANDATORY_FIELDS = 60001;
-    public static final int NO_USER_FOUND = 60002;
-    public static final int ILLEGAL_EVENT_TYPE = 60003;
-    public static final int INVALID_DATA_FIELDS = 60004;
-    public static final int UNMAPPED_EVENT_TYPE = 60005;
+    private int id;
+    private Set<Integer> mappedGames;
+    private Set<String> allowedEventTypes;
 
+    public boolean isEventAllowed(String event) {
+        return allowedEventTypes.contains(event);
+    }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Set<Integer> getMappedGames() {
+        return mappedGames;
+    }
+
+    public void setMappedGames(Set<Integer> mappedGames) {
+        this.mappedGames = mappedGames;
+    }
+
+    public Set<String> getAllowedEventTypes() {
+        return allowedEventTypes;
+    }
+
+    public void setAllowedEventTypes(Set<String> allowedEventTypes) {
+        this.allowedEventTypes = allowedEventTypes;
+    }
 }

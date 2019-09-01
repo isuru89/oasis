@@ -17,18 +17,31 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.internal;
+package io.github.oasis.services.events.domain;
+
+import io.github.oasis.services.events.internal.ErrorCodes;
+import io.github.oasis.services.events.internal.IUserMapper;
+import io.github.oasis.services.events.internal.exceptions.EventSubmissionException;
+import io.github.oasis.services.events.json.NewEvent;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class ErrorCodes {
+public class UserId {
 
-    public static final int MISSING_MANDATORY_FIELDS = 60001;
-    public static final int NO_USER_FOUND = 60002;
-    public static final int ILLEGAL_EVENT_TYPE = 60003;
-    public static final int INVALID_DATA_FIELDS = 60004;
-    public static final int UNMAPPED_EVENT_TYPE = 60005;
+    private final int id;
 
+    public UserId(int id) {
+        this.id = id;
+    }
 
+    public static UserId mapFor(NewEvent newEvent, IUserMapper userMapper) {
+        return userMapper.map(newEvent)
+                .orElseThrow(() -> new EventSubmissionException(ErrorCodes.NO_USER_FOUND,
+                        "Cannot find a user as indicated in the event!"));
+    }
+
+    public int getId() {
+        return id;
+    }
 }

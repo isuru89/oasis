@@ -19,43 +19,93 @@
 
 package io.github.oasis.services.events.internal.dto;
 
+import io.github.oasis.services.common.Validation;
+import io.github.oasis.services.events.domain.UserId;
 import io.github.oasis.services.events.internal.ErrorCodes;
 import io.github.oasis.services.events.internal.exceptions.EventSubmissionException;
-import org.apache.commons.lang3.StringUtils;
+import io.github.oasis.services.events.json.NewEvent;
 
 import java.util.HashMap;
+import java.util.Map;
+
+import static io.github.oasis.model.Event.EVENT_TYPE;
+import static io.github.oasis.model.Event.GAME;
+import static io.github.oasis.model.Event.ID;
+import static io.github.oasis.model.Event.SOURCE;
+import static io.github.oasis.model.Event.TIMESTAMP;
+import static io.github.oasis.model.Event.USER;
 
 /**
  * @author Isuru Weerarathna
  */
 public class GameEventDto extends HashMap<String, Object> {
 
-    public GameEventDto addId(String id) {
-        put("id", id);
-        return this;
-    }
-
-    public GameEventDto addTs(long ts) {
-        put("ts", ts);
-        return this;
-    }
-
-    public GameEventDto addEventType(String type) {
-        put("type", type);
-        return this;
-    }
-
-    public GameEventDto addUser(Long userId) {
-        put("user", userId);
-        return this;
-    }
-
-    public GameEventDto addDataField(String key, Object value) throws EventSubmissionException {
-        if (StringUtils.equalsAny(key, "id", "ts", "type", "user")) {
-            throw new EventSubmissionException(ErrorCodes.INVALID_DATA_FIELDS,
-                    "Not allowed reserved fields [id, ts, eventType, user] in data!");
+    public static GameEventDto from(NewEvent event) {
+        GameEventDto dto = new GameEventDto()
+                .addId(event.getId())
+                .addEventType(event.getEventType())
+                .addTs(event.getTs());
+        if (Validation.isNonEmpty(event.getData())) {
+            dto.addAllDataFields(event.getData());
         }
-        put(key, value);
+        return dto;
+    }
+
+    public GameEventDto cloneEventForGame(int gameId) {
+        GameEventDto cloned = new GameEventDto();
+        cloned.putAll(this);
+        cloned.addGame(gameId);
+        return cloned;
+    }
+
+    public String getId() {
+        return (String) get(ID);
+    }
+
+    public int getUser() {
+        return (Integer) get(USER);
+    }
+
+    public boolean hasId() {
+        return containsKey(ID) && get(ID) != null;
+    }
+
+    public GameEventDto addId(String id) {
+        put(ID, id);
+        return this;
+    }
+
+    private GameEventDto addTs(long ts) {
+        put(TIMESTAMP, ts);
+        return this;
+    }
+
+    private GameEventDto addEventType(String type) {
+        put(EVENT_TYPE, type);
+        return this;
+    }
+
+    public GameEventDto addUser(UserId userId) {
+        put(USER, userId.getId());
+        return this;
+    }
+
+    public GameEventDto addEventSource(int extAppId) {
+        put(SOURCE, extAppId);
+        return this;
+    }
+
+    public GameEventDto addGame(int gameId) {
+        put(GAME, gameId);
+        return this;
+    }
+
+    private GameEventDto addAllDataFields(Map<? extends String, ?> other) throws EventSubmissionException {
+        if (other.keySet().stream().anyMatch(key -> key.startsWith("_"))) {
+            throw new EventSubmissionException(ErrorCodes.INVALID_DATA_FIELDS,
+                    "No field in data cannot start with reserved '_'!");
+        }
+        super.putAll(other);
         return this;
     }
 

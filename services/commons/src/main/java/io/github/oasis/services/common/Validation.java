@@ -20,6 +20,7 @@
 package io.github.oasis.services.common;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -32,6 +33,10 @@ public final class Validation {
 
     public static boolean isNonEmpty(Collection<?> collection) {
         return collection != null && !collection.isEmpty();
+    }
+
+    public static boolean isNonEmpty(Map<?, ?> map) {
+        return map != null && !map.isEmpty();
     }
 
     public static boolean isEmpty(String text) {

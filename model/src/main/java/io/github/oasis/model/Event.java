@@ -24,6 +24,13 @@ import java.util.Map;
 
 public interface Event extends Serializable {
 
+    String ID = "_id";
+    String USER = "_user";
+    String TIMESTAMP = "_ts";
+    String EVENT_TYPE = "_type";
+    String SOURCE = "_source";
+    String GAME = "_gameId";
+
     Map<String, Object> getAllFieldValues();
 
     void setFieldValue(String fieldName, Object value);

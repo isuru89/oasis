@@ -17,18 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.internal;
+package io.github.oasis.services.events.json;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class ErrorCodes {
+public class NewEvents {
 
-    public static final int MISSING_MANDATORY_FIELDS = 60001;
-    public static final int NO_USER_FOUND = 60002;
-    public static final int ILLEGAL_EVENT_TYPE = 60003;
-    public static final int INVALID_DATA_FIELDS = 60004;
-    public static final int UNMAPPED_EVENT_TYPE = 60005;
+    private List<NewEvent> events;
 
+    public List<NewEvent> getEvents() {
+        return events;
+    }
 
+    public void setEvents(List<NewEvent> events) {
+        this.events = events;
+    }
 }

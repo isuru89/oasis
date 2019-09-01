@@ -19,46 +19,34 @@
 
 package io.github.oasis.services.events.json;
 
+import io.github.oasis.services.events.internal.exceptions.EventSubmissionException;
+
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
-public class EventResponse implements Serializable {
+public class BatchEventResponse implements Serializable {
 
-    private String eventId;
+    private Map<String, EventResponse> successResponses;
+    private Map<String, ErrorResponse> errorResponses;
 
-    private int userId;
-    private int mappedGameCount;
+    public BatchEventResponse addSuccessResponse(String eventId, EventResponse response) {
+        successResponses.put(eventId, response);
+        return this;
+    };
 
-    public EventResponse() {
+    public BatchEventResponse addFailureResponse(String eventId, EventSubmissionException ex) {
+        errorResponses.put(eventId, new ErrorResponse(ex.getMessage()));
+        return this;
     }
 
-    public int getUserId() {
-        return userId;
-    }
+    public static class ErrorResponse {
+        private String message;
 
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public int getMappedGameCount() {
-        return mappedGameCount;
-    }
-
-    public void setMappedGameCount(int mappedGameCount) {
-        this.mappedGameCount = mappedGameCount;
-    }
-
-    public EventResponse(String eventId) {
-        this.eventId = eventId;
-    }
-
-    public String getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
+        public ErrorResponse(String message) {
+            this.message = message;
+        }
     }
 }

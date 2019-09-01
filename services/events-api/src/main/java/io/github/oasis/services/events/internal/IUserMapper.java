@@ -19,16 +19,18 @@
 
 package io.github.oasis.services.events.internal;
 
+import io.github.oasis.services.events.domain.UserId;
+import io.github.oasis.services.events.json.NewEvent;
+
+import java.util.Optional;
+
 /**
+ * Interface to map a user as indicated by the input event.
+ *
  * @author Isuru Weerarathna
  */
-public final class ErrorCodes {
+public interface IUserMapper {
 
-    public static final int MISSING_MANDATORY_FIELDS = 60001;
-    public static final int NO_USER_FOUND = 60002;
-    public static final int ILLEGAL_EVENT_TYPE = 60003;
-    public static final int INVALID_DATA_FIELDS = 60004;
-    public static final int UNMAPPED_EVENT_TYPE = 60005;
-
+    Optional<UserId> map(NewEvent event);
 
 }
