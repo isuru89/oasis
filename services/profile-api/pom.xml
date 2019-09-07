@@ -11,5 +11,12 @@
 
     <artifactId>profile-api</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.github.oasis</groupId>
+            <artifactId>services-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>

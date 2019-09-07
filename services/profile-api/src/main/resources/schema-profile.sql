@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS OA_TEAM (
 
 CREATE TABLE IF NOT EXISTS OA_USER_TEAM (
     user_id         INT,
-    team_id         INT
+    team_id         INT,
+    joined_at       BIGINT
 );
 
 ALTER TABLE OA_USER ADD UNIQUE (email);
