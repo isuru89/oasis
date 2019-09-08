@@ -22,6 +22,7 @@ package io.github.oasis.services.profile.internal.dao;
 import io.github.oasis.services.profile.internal.ErrorCodes;
 import io.github.oasis.services.profile.internal.dto.EditTeamDto;
 import io.github.oasis.services.profile.internal.dto.NewTeamDto;
+import io.github.oasis.services.profile.internal.dto.NewUserDto;
 import io.github.oasis.services.profile.internal.dto.TeamRecord;
 import io.github.oasis.services.profile.internal.dto.UserRecord;
 import io.github.oasis.services.profile.internal.exceptions.TeamNotFoundException;
@@ -29,6 +30,7 @@ import io.github.oasis.services.profile.internal.exceptions.TeamUpdateException;
 import org.jdbi.v3.core.JdbiException;
 import org.jdbi.v3.core.result.LinkedHashMapRowReducer;
 import org.jdbi.v3.core.result.RowView;
+import org.jdbi.v3.sqlobject.CreateSqlObject;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -49,6 +51,8 @@ import java.util.Optional;
  */
 public interface ITeamDao {
 
+    @CreateSqlObject
+    IUserDao users();
 
     @SqlUpdate("INSERT INTO OA_TEAM" +
             " (name, motto, avatar_ref, created_at)" +
@@ -57,9 +61,14 @@ public interface ITeamDao {
     @GetGeneratedKeys("team_id")
     int addTeam(@BindBean NewTeamDto newTeam);
 
-    default int insertTeam(NewTeamDto newTeam) throws TeamUpdateException {
+    @Transaction
+    default int insertTeam(NewTeamDto newTeam, NewUserDto teamUser) throws TeamUpdateException {
         try {
-            return addTeam(newTeam);
+            int teamId = addTeam(newTeam);
+            IUserDao users = users();
+            int userId = users.addUser(teamUser);
+            addUserToTeam(userId, teamId, teamUser.getCreatedAt());
+            return teamId;
         } catch (JdbiException e) {
             throw new TeamUpdateException(ErrorCodes.TEAM_NAME_EXISTS,
                     "Team is already exist by name '" + newTeam.getName() + "'!");
@@ -114,6 +123,7 @@ public interface ITeamDao {
             "         oat.team_id t_id," +
             "         oat.name t_name," +
             "         oat.motto t_motto," +
+            "         oat.is_active t_active," +
             "         oat.avatar_ref t_avatar" +
             " FROM OA_TEAM oat" +
             "   INNER JOIN OA_USER_TEAM oaut ON oat.team_id = oaut.team_id" +
@@ -128,7 +138,7 @@ public interface ITeamDao {
     TeamRecord listTeamUsers(@Bind("teamId") int teamId);
 
     @SqlUpdate("INSERT INTO OA_USER_TEAM" +
-            " (user_id, team_id, :joined_at)" +
+            " (user_id, team_id, joined_at)" +
             " VALUES " +
             " (:userId, :teamId, :joinedAt)")
     int addUserToTeam(@Bind("userId") int userId,

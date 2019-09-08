@@ -57,7 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Isuru Weerarathna
  */
 @DisplayName("Team Management")
-public class TeamManagementTest extends AbstractTest {
+class TeamManagementTest extends AbstractTest {
 
     @Autowired private ITeamDao teamDao;
     @Autowired private IUserDao userDao;
@@ -118,11 +118,11 @@ public class TeamManagementTest extends AbstractTest {
 
         // create team with same name but with diff case
         assertThrows(TeamUpdateException.class,
-                () -> createTeam("Team1", "Never Look Down 2"));
+                () -> profile.addTeam(createTeam("team1", "Never Look Down 2")));
         assertThrows(TeamUpdateException.class,
-                () -> createTeam(" TEam1 ", "Never Look Down 3"));
+                () -> profile.addTeam(createTeam(" TEam1 ", "Never Look Down 3")));
         assertThrows(TeamUpdateException.class,
-                () -> createTeam("TEAM1", "Never Look Down 4"));
+                () -> profile.addTeam(createTeam("TEAM1", "Never Look Down 4")));
         verifyNoTeamCreatedEventFired();
     }
 

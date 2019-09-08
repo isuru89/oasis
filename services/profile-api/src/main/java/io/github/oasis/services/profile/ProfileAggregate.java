@@ -74,8 +74,8 @@ public class ProfileAggregate {
         return newUserJson;
     }
 
-    public void editUser(int userId, EditUserDto editUserInfo) {
-        user.editUser(userId, editUserInfo);
+    public UserJson editUser(int userId, EditUserDto editUserInfo) {
+        return UserJson.from(user.editUser(userId, editUserInfo));
     }
 
     public void deactivateUser(int userId) {

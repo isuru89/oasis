@@ -54,12 +54,14 @@ public interface IUserDao {
             " nickname, avatar_ref avatar, user_status status, gender, is_active active," +
             " is_auto_user autoUser, created_at createdAt " +
             " FROM OA_USER WHERE email = :email")
+    @RegisterBeanMapper(UserRecord.class)
     Optional<UserRecord> readUserByEmail(@Bind("email") String email);
 
     @SqlQuery("SELECT user_id id, email, first_name firstName, last_name lastName," +
             " nickname, avatar_ref avatar, user_status status, gender, is_active active," +
             " is_auto_user autoUser, created_at createdAt " +
             " FROM OA_USER WHERE user_id = :userId")
+    @RegisterBeanMapper(UserRecord.class)
     Optional<UserRecord> readUserById(@Bind("userId") int userId);
 
     @SqlUpdate("UPDATE OA_USER" +
@@ -70,14 +72,15 @@ public interface IUserDao {
     void updateUser(@Bind("userId") int userId, @BindBean UserRecord userRecord);
 
     @Transaction
-    default void editUser(int userId, EditUserDto editUserInfo) throws UserNotFoundException {
+    default UserRecord editUser(int userId, EditUserDto editUserInfo) throws UserNotFoundException {
         UserRecord userRecord = readUserById(userId)
                 .orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
 
         updateUser(userId, userRecord.mergeChanges(editUserInfo));
+        return readUserById(userId).orElse(null);
     }
 
-    @SqlUpdate("UPDATE OA_USER SET is_active = false, status = 9 WHERE user_id = :userId")
+    @SqlUpdate("UPDATE OA_USER SET is_active = false, user_status = 9 WHERE user_id = :userId")
     void deactivateUser(@Bind("userId") int userId);
 
     @SqlQuery("SELECT oau.user_id u_id," +
@@ -110,7 +113,7 @@ public interface IUserDao {
             " SET user_status = :status" +
             " WHERE user_id = :userId")
     void updateUserStatus(@Bind("userId") int userId,
-                          @Bind("userId") int status);
+                          @Bind("status") int status);
 
     class UserReducer implements LinkedHashMapRowReducer<Integer, UserRecord> {
 

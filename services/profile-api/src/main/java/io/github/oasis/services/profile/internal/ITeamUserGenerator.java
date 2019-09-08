@@ -17,34 +17,16 @@
  * under the License.
  */
 
-package io.github.oasis.services.profile.domain;
+package io.github.oasis.services.profile.internal;
+
+import io.github.oasis.services.profile.internal.dto.NewTeamDto;
+import io.github.oasis.services.profile.internal.dto.NewUserDto;
 
 /**
  * @author Isuru Weerarathna
  */
-public enum Gender {
+public interface ITeamUserGenerator {
 
-    MALE(1),
-    FEMALE(2),
-    UNSPECIFIED(3),
-    UNKNOWN(0);
+    NewUserDto createTeamUser(NewTeamDto newTeamInfo);
 
-    private final int id;
-
-    Gender(int id) {
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public static Gender from(int genderId) {
-        for (Gender gender : Gender.values()) {
-            if (genderId == gender.id) {
-                return gender;
-            }
-        }
-        return UNKNOWN;
-    }
 }

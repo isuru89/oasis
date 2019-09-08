@@ -25,6 +25,7 @@ import io.github.oasis.services.profile.internal.dto.NewUserDto;
 import io.github.oasis.services.profile.internal.dto.UserRecord;
 import io.github.oasis.services.profile.internal.exceptions.UserNotFoundException;
 import io.github.oasis.services.profile.json.NewUserJson;
+import org.apache.commons.validator.routines.EmailValidator;
 
 import java.util.Optional;
 
@@ -33,6 +34,8 @@ import java.util.Optional;
  */
 public class User {
 
+    private static final EmailValidator EMAIL_VALIDATOR = EmailValidator.getInstance();
+
     private IUserDao user;
 
     public User(IUserDao user) {
@@ -40,12 +43,14 @@ public class User {
     }
 
     public NewUserJson addUser(NewUserDto newUser) {
+        newUser.validate(EMAIL_VALIDATOR);
+
         int newUserId = user.addUser(newUser);
         return NewUserJson.from(newUserId);
     }
 
-    public void editUser(int userId, EditUserDto editUser) {
-        user.editUser(userId, editUser);
+    public UserRecord editUser(int userId, EditUserDto editUser) {
+        return user.editUser(userId, editUser);
     }
 
     public void deleteUser(int userId) {

@@ -26,9 +26,11 @@ public class ErrorCodes {
 
     public static final int NO_TEAM             = 300001;
     public static final int TEAM_NAME_EXISTS    = 300002;
+    public static final int INVALID_NEW_TEAM    = 300003;
 
     public static final int NO_USER             = 300010;
     public static final int USER_EXISTS         = 300011;
+    public static final int INVALID_NEW_USER    = 300012;
 
 
 }

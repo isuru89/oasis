@@ -47,10 +47,10 @@ public class UserRecord {
     private Set<TeamRecord> teams;
 
     public UserRecord mergeChanges(EditUserDto editUser) {
-        this.nickname = Utils.firstNonNull(nickname, editUser.getNickname());
-        this.firstName = Utils.firstNonNull(firstName, editUser.getFirstName());
-        this.lastName = Utils.firstNonNull(lastName, editUser.getLastName());
-        this.avatar = Utils.firstNonNull(avatar, editUser.getAvatar());
+        this.nickname = Utils.firstNonNull(editUser.getNickname(), nickname);
+        this.firstName = Utils.firstNonNull(editUser.getFirstName(), firstName);
+        this.lastName = Utils.firstNonNull(editUser.getLastName(), lastName);
+        this.avatar = Utils.firstNonNull(editUser.getAvatar(), avatar);
         this.gender = Utils.compareAndGetLatest(gender, editUser.getGender());
         return this;
     }

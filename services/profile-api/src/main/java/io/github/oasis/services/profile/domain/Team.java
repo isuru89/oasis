@@ -19,9 +19,12 @@
 
 package io.github.oasis.services.profile.domain;
 
+import io.github.oasis.services.profile.internal.ITeamUserGenerator;
+import io.github.oasis.services.profile.internal.OasisTeamUserGenerator;
 import io.github.oasis.services.profile.internal.dao.ITeamDao;
 import io.github.oasis.services.profile.internal.dto.EditTeamDto;
 import io.github.oasis.services.profile.internal.dto.NewTeamDto;
+import io.github.oasis.services.profile.internal.dto.NewUserDto;
 import io.github.oasis.services.profile.internal.dto.TeamRecord;
 import io.github.oasis.services.profile.internal.exceptions.TeamNotFoundException;
 import io.github.oasis.services.profile.internal.exceptions.TeamUpdateException;
@@ -38,13 +41,17 @@ import java.util.Optional;
 public class Team {
 
     private ITeamDao team;
+    private ITeamUserGenerator teamUserGenerator;
 
     public Team(ITeamDao team) {
         this.team = team;
     }
 
     public NewTeamJson addTeam(NewTeamDto newTeam) throws TeamUpdateException {
-        int newTeamId = team.insertTeam(newTeam);
+        newTeam.validate().fixName();
+
+        NewUserDto teamUser = OasisTeamUserGenerator.INSTANCE.createTeamUser(newTeam);
+        int newTeamId = team.insertTeam(newTeam, teamUser);
         return new NewTeamJson(newTeamId);
     }
 

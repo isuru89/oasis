@@ -19,6 +19,11 @@
 
 package io.github.oasis.services.profile.internal.dto;
 
+import io.github.oasis.services.common.OasisValidationException;
+import io.github.oasis.services.common.Validation;
+import io.github.oasis.services.profile.internal.ErrorCodes;
+import org.apache.commons.validator.routines.EmailValidator;
+
 import java.time.Instant;
 
 /**
@@ -42,6 +47,19 @@ public class NewUserDto {
 
     public NewUserDto() {
         createdAt = Instant.now();
+    }
+
+    public void validate(EmailValidator emailValidator) {
+        if (Validation.isEmpty(email)) {
+            throw new OasisValidationException(ErrorCodes.INVALID_NEW_USER, "User email cannot be empty!");
+        }
+        if (Validation.isEmpty(nickname)) {
+            throw new OasisValidationException(ErrorCodes.INVALID_NEW_USER, "User nickname cannot be empty!");
+        }
+        if (!emailValidator.isValid(email)) {
+            throw new OasisValidationException(ErrorCodes.INVALID_NEW_USER,
+                    "Invalid email address for new user!");
+        }
     }
 
     public boolean isAutoUser() {

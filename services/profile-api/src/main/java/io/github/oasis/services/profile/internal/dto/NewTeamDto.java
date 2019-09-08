@@ -19,6 +19,10 @@
 
 package io.github.oasis.services.profile.internal.dto;
 
+import io.github.oasis.services.common.OasisValidationException;
+import io.github.oasis.services.common.Validation;
+import io.github.oasis.services.profile.internal.ErrorCodes;
+
 import java.time.Instant;
 
 /**
@@ -33,6 +37,27 @@ public class NewTeamDto {
 
     public NewTeamDto() {
         createdAt = Instant.now();
+    }
+
+    public NewTeamDto validate() {
+        if (Validation.isEmpty(name)) {
+            throw new OasisValidationException(ErrorCodes.INVALID_NEW_TEAM,
+                    "Team name cannot be empty!");
+        }
+        return this;
+    }
+
+    public NewUserDto createAssociatedUser() {
+        NewUserDto teamUser = new NewUserDto();
+        teamUser.setAutoUser(true);
+        teamUser.setAvatar(avatar);
+        teamUser.setCreatedAt(createdAt);
+        teamUser.setEmail("team@");
+        return teamUser;
+    }
+
+    public void fixName() {
+        this.name = this.name.trim();
     }
 
     public String getName() {
@@ -61,9 +86,5 @@ public class NewTeamDto {
 
     public Instant getCreatedAt() {
         return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
     }
 }
