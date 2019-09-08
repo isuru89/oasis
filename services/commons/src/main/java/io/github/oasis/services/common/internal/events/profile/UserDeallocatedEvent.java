@@ -26,6 +26,11 @@ public class UserDeallocatedEvent extends UserEvent {
 
     private int teamId;
 
+    public UserDeallocatedEvent(int userId, int teamId) {
+        super(userId);
+        this.teamId = teamId;
+    }
+
     public int getTeamId() {
         return teamId;
     }

@@ -17,25 +17,20 @@
  * under the License.
  */
 
-package io.github.oasis.services.common.internal.events.profile;
+package io.github.oasis.services.profile.json;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserAllocatedEvent extends UserEvent {
+public class NewTeamJson {
 
-    private int teamId;
+    private int id;
 
-    public UserAllocatedEvent(int userId, int teamId) {
-        super(userId);
-        this.teamId = teamId;
+    public NewTeamJson(int id) {
+        this.id = id;
     }
 
-    public int getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(int teamId) {
-        this.teamId = teamId;
+    public int getId() {
+        return id;
     }
 }

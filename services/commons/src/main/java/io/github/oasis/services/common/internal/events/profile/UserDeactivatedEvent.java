@@ -23,4 +23,10 @@ package io.github.oasis.services.common.internal.events.profile;
  * @author Isuru Weerarathna
  */
 public class UserDeactivatedEvent extends UserEvent {
+    public UserDeactivatedEvent() {
+    }
+
+    public UserDeactivatedEvent(int userId) {
+        super(userId);
+    }
 }

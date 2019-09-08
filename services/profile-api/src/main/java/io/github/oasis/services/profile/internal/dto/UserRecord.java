@@ -41,7 +41,8 @@ public class UserRecord {
     private int status;
     private int gender;
 
-    private boolean active;
+    private boolean autoUser = false;
+    private boolean active = true;
 
     private Set<TeamRecord> teams;
 
@@ -50,7 +51,7 @@ public class UserRecord {
         this.firstName = Utils.firstNonNull(firstName, editUser.getFirstName());
         this.lastName = Utils.firstNonNull(lastName, editUser.getLastName());
         this.avatar = Utils.firstNonNull(avatar, editUser.getAvatar());
-        this.gender = Utils.firstNonNull(gender, editUser.getGender());
+        this.gender = Utils.compareAndGetLatest(gender, editUser.getGender());
         return this;
     }
 
@@ -59,6 +60,14 @@ public class UserRecord {
             teams = new HashSet<>();
         }
         teams.add(teamRecord);
+    }
+
+    public boolean isAutoUser() {
+        return autoUser;
+    }
+
+    public void setAutoUser(boolean autoUser) {
+        this.autoUser = autoUser;
     }
 
     public boolean isActive() {

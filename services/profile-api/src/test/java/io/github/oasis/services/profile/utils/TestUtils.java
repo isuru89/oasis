@@ -17,25 +17,20 @@
  * under the License.
  */
 
-package io.github.oasis.services.common.internal.events.profile;
+package io.github.oasis.services.profile.utils;
+
+import org.mockito.Mockito;
+import org.mockito.verification.VerificationMode;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserAllocatedEvent extends UserEvent {
+public class TestUtils {
 
-    private int teamId;
+    public static final VerificationMode SINGLE = Mockito.times(1);
+    public static final VerificationMode NONE = Mockito.times(1);
 
-    public UserAllocatedEvent(int userId, int teamId) {
-        super(userId);
-        this.teamId = teamId;
-    }
-
-    public int getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(int teamId) {
-        this.teamId = teamId;
+    public static VerificationMode times(int n) {
+        return Mockito.times(n);
     }
 }

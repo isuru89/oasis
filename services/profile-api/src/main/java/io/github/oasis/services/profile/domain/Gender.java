@@ -17,25 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.services.common.internal.events.profile;
+package io.github.oasis.services.profile.domain;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserAllocatedEvent extends UserEvent {
+public enum Gender {
 
-    private int teamId;
+    MALE(1),
+    FEMALE(2),
+    UNKNOWN(0);
 
-    public UserAllocatedEvent(int userId, int teamId) {
-        super(userId);
-        this.teamId = teamId;
+    private final int uid;
+
+    Gender(int uid) {
+        this.uid = uid;
     }
 
-    public int getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(int teamId) {
-        this.teamId = teamId;
+    public static Gender from(int genderId) {
+        for (Gender gender : Gender.values()) {
+            if (genderId == gender.uid) {
+                return gender;
+            }
+        }
+        return UNKNOWN;
     }
 }

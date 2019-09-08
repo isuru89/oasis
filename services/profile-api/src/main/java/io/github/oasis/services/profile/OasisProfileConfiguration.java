@@ -19,6 +19,11 @@
 
 package io.github.oasis.services.profile;
 
+import io.github.oasis.services.profile.internal.dao.ITeamDao;
+import io.github.oasis.services.profile.internal.dao.IUserDao;
+import org.jdbi.v3.core.Jdbi;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -26,4 +31,17 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class OasisProfileConfiguration {
+
+    @Autowired private Jdbi jdbi;
+
+    @Bean
+    public ITeamDao getTeamDao() {
+        return jdbi.onDemand(ITeamDao.class);
+    }
+
+    @Bean
+    public IUserDao getUserDao() {
+        return jdbi.onDemand(IUserDao.class);
+    }
+
 }

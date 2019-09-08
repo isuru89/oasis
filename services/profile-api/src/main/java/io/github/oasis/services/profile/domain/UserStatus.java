@@ -17,25 +17,33 @@
  * under the License.
  */
 
-package io.github.oasis.services.common.internal.events.profile;
+package io.github.oasis.services.profile.domain;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserAllocatedEvent extends UserEvent {
+public enum UserStatus {
 
-    private int teamId;
+    PENDING(1),
+    VERIFIED(2),
+    DEACTIVATED(9);
 
-    public UserAllocatedEvent(int userId, int teamId) {
-        super(userId);
-        this.teamId = teamId;
+    private final int id;
+
+    UserStatus(int status) {
+        this.id = status;
     }
 
-    public int getTeamId() {
-        return teamId;
+    public int getId() {
+        return id;
     }
 
-    public void setTeamId(int teamId) {
-        this.teamId = teamId;
+    public static UserStatus from(int statusId) {
+        for (UserStatus status : UserStatus.values()) {
+            if (statusId == status.id) {
+                return status;
+            }
+        }
+        return PENDING;
     }
 }

@@ -28,6 +28,13 @@ public class UserEvent extends BaseEvent {
 
     private int userId;
 
+    UserEvent() {
+    }
+
+    public UserEvent(int userId) {
+        this.userId = userId;
+    }
+
     public int getUserId() {
         return userId;
     }

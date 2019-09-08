@@ -28,6 +28,13 @@ public class TeamEvent extends BaseEvent {
 
     private int teamId;
 
+    TeamEvent() {
+    }
+
+    public TeamEvent(int teamId) {
+        this.teamId = teamId;
+    }
+
     public int getTeamId() {
         return teamId;
     }

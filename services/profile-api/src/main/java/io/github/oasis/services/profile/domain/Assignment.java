@@ -17,25 +17,35 @@
  * under the License.
  */
 
-package io.github.oasis.services.common.internal.events.profile;
+package io.github.oasis.services.profile.domain;
+
+import io.github.oasis.services.profile.internal.dao.ITeamDao;
+import org.springframework.stereotype.Component;
+
+import java.time.Instant;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserAllocatedEvent extends UserEvent {
+@Component
+public class Assignment {
 
-    private int teamId;
+    private ITeamDao team;
 
-    public UserAllocatedEvent(int userId, int teamId) {
-        super(userId);
-        this.teamId = teamId;
+    public Assignment(ITeamDao team) {
+        this.team = team;
     }
 
-    public int getTeamId() {
-        return teamId;
+    public boolean assignToTeam(int userId, int teamId) {
+        return isSuccessful(team.addUserToTeam(userId, teamId, Instant.now()));
     }
 
-    public void setTeamId(int teamId) {
-        this.teamId = teamId;
+    public boolean removeFromTeam(int userId, int teamId) {
+        return isSuccessful(team.removeUserFromTeam(userId, teamId));
     }
+
+    private boolean isSuccessful(int result) {
+        return result > 0;
+    }
+
 }

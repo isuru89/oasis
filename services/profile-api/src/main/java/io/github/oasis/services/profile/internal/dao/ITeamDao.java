@@ -26,11 +26,13 @@ import io.github.oasis.services.profile.internal.dto.TeamRecord;
 import io.github.oasis.services.profile.internal.dto.UserRecord;
 import io.github.oasis.services.profile.internal.exceptions.TeamNotFoundException;
 import io.github.oasis.services.profile.internal.exceptions.TeamUpdateException;
+import org.jdbi.v3.core.JdbiException;
 import org.jdbi.v3.core.result.LinkedHashMapRowReducer;
 import org.jdbi.v3.core.result.RowView;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.customizer.BindList;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -47,6 +49,7 @@ import java.util.Optional;
  */
 public interface ITeamDao {
 
+
     @SqlUpdate("INSERT INTO OA_TEAM" +
             " (name, motto, avatar_ref, created_at)" +
             " VALUES" +
@@ -54,19 +57,28 @@ public interface ITeamDao {
     @GetGeneratedKeys("team_id")
     int addTeam(@BindBean NewTeamDto newTeam);
 
+    default int insertTeam(NewTeamDto newTeam) throws TeamUpdateException {
+        try {
+            return addTeam(newTeam);
+        } catch (JdbiException e) {
+            throw new TeamUpdateException(ErrorCodes.TEAM_NAME_EXISTS,
+                    "Team is already exist by name '" + newTeam.getName() + "'!");
+        }
+    }
+
     @SqlUpdate("UPDATE OA_TEAM" +
-            " SET " +
+            " SET name = :name, motto = :motto, avatar_ref = :avatar" +
             " WHERE team_id = :teamId")
-    void updateTeam(@Bind("teamId") int teamId,
+    int updateTeam(@Bind("teamId") int teamId,
                     @BindBean TeamRecord updatedTeam);
 
     @Transaction
-    default void editTeam(int teamId, EditTeamDto editTeamInfo) throws TeamNotFoundException, TeamUpdateException {
+    default int editTeam(int teamId, EditTeamDto editTeamInfo) throws TeamNotFoundException, TeamUpdateException {
         TeamRecord teamRecord = readTeamById(teamId)
                 .orElseThrow(() -> new TeamNotFoundException(String.valueOf(teamId)));
 
         try {
-            updateTeam(teamId, teamRecord.mergeChanges(editTeamInfo));
+            return updateTeam(teamId, teamRecord.mergeChanges(editTeamInfo));
         } catch (Exception e) {
             throw new TeamUpdateException(ErrorCodes.TEAM_NAME_EXISTS,
                     "There is a team already by name '" + editTeamInfo.getName() + "'!", e);
@@ -76,17 +88,20 @@ public interface ITeamDao {
     @SqlQuery("SELECT team_id id, name, motto, avatar_ref avatar, is_active active " +
             " FROM OA_TEAM" +
             " WHERE team_id = :teamId")
+    @RegisterBeanMapper(TeamRecord.class)
     Optional<TeamRecord> readTeamById(@Bind("teamId") int teamId);
 
     @SqlQuery("SELECT team_id id, name, motto, avatar_ref avatar, is_active active " +
             " FROM OA_TEAM" +
             " WHERE name = :teamName")
+    @RegisterBeanMapper(TeamRecord.class)
     Optional<TeamRecord> readTeamByName(@Bind("teamName") String teamName);
 
     @SqlQuery("SELECT team_id id, name, motto, avatar_ref avatar, is_active active " +
             " FROM OA_TEAM" +
-            " WHERE team_id IN :teamId")
-    List<TeamRecord> readTeams(@Bind("teamIds") List<Integer> teamIds);
+            " WHERE team_id IN (<teamIds>)")
+    @RegisterBeanMapper(TeamRecord.class)
+    List<TeamRecord> readTeams(@BindList("teamIds") List<Integer> teamIds);
 
     @SqlQuery("SELECT oau.user_id u_id," +
             "         oau.email u_email," +

@@ -40,9 +40,9 @@ public class TeamRecord {
     private Set<UserRecord> users;
 
     public TeamRecord mergeChanges(EditTeamDto editTeam) {
-        this.name = Utils.firstNonNull(name, editTeam.getName());
-        this.motto = Utils.firstNonNull(motto, editTeam.getMotto());
-        this.avatar = Utils.firstNonNull(avatar, editTeam.getAvatar());
+        this.name = Utils.firstNonNull(editTeam.getName(), name);
+        this.motto = Utils.firstNonNull(editTeam.getMotto(), motto);
+        this.avatar = Utils.firstNonNull(editTeam.getAvatar(), avatar);
         return this;
     }
 

@@ -52,13 +52,13 @@ public interface IUserDao {
 
     @SqlQuery("SELECT user_id id, email, first_name firstName, last_name lastName," +
             " nickname, avatar_ref avatar, user_status status, gender, is_active active," +
-            " created_at createdAt " +
+            " is_auto_user autoUser, created_at createdAt " +
             " FROM OA_USER WHERE email = :email")
     Optional<UserRecord> readUserByEmail(@Bind("email") String email);
 
     @SqlQuery("SELECT user_id id, email, first_name firstName, last_name lastName," +
             " nickname, avatar_ref avatar, user_status status, gender, is_active active," +
-            " created_at createdAt " +
+            " is_auto_user autoUser, created_at createdAt " +
             " FROM OA_USER WHERE user_id = :userId")
     Optional<UserRecord> readUserById(@Bind("userId") int userId);
 
@@ -67,7 +67,7 @@ public interface IUserDao {
             "   first_name = :firstName, last_name = :lastName, nickname = :nickname," +
             "   avatar_ref = :avatar, gender = :gender" +
             " WHERE user_id = :userId")
-    void updateUser(@Bind("userId") int userId, UserRecord userRecord);
+    void updateUser(@Bind("userId") int userId, @BindBean UserRecord userRecord);
 
     @Transaction
     default void editUser(int userId, EditUserDto editUserInfo) throws UserNotFoundException {
@@ -77,7 +77,7 @@ public interface IUserDao {
         updateUser(userId, userRecord.mergeChanges(editUserInfo));
     }
 
-    @SqlUpdate("UPDATE OA_USER SET is_active = false WHERE user_id = :userId")
+    @SqlUpdate("UPDATE OA_USER SET is_active = false, status = 9 WHERE user_id = :userId")
     void deactivateUser(@Bind("userId") int userId);
 
     @SqlQuery("SELECT oau.user_id u_id," +
@@ -88,6 +88,8 @@ public interface IUserDao {
             "         oau.avatar_ref u_avatar," +
             "         oau.user_status u_status," +
             "         oau.gender u_gender," +
+            "         oau.is_active u_active," +
+            "         oau.is_auto_user u_autoUser," +
             "         oat.team_id t_id," +
             "         oat.name t_name," +
             "         oat.motto t_motto," +
@@ -102,7 +104,7 @@ public interface IUserDao {
     @RegisterBeanMapper(value = UserRecord.class, prefix = "u")
     @RegisterBeanMapper(value = TeamRecord.class, prefix = "t")
     @UseRowReducer(UserReducer.class)
-    void readTeamsOfUser(@Bind("userId") int userId);
+    UserRecord readTeamsOfUser(@Bind("userId") int userId);
 
     @SqlUpdate("UPDATE OA_USER" +
             " SET user_status = :status" +

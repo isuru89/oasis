@@ -23,4 +23,11 @@ package io.github.oasis.services.common.internal.events.profile;
  * @author Isuru Weerarathna
  */
 public class UserCreatedEvent extends UserEvent {
+
+    public UserCreatedEvent() {
+    }
+
+    public UserCreatedEvent(int userId) {
+        super(userId);
+    }
 }
