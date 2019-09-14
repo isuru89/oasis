@@ -20,6 +20,7 @@
 package io.github.oasis.services.admin.json.apps;
 
 import io.github.oasis.services.common.Validation;
+import lombok.Data;
 import org.apache.commons.collections4.SetUtils;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import java.util.Set;
 /**
  * @author Isuru Weerarathna
  */
+@Data
 public class UpdateApplicationJson {
 
     private List<String> eventTypes;
@@ -63,19 +65,4 @@ public class UpdateApplicationJson {
         return hasEventTypes() || hasGameIds();
     }
 
-    public void setEventTypes(List<String> eventTypes) {
-        this.eventTypes = eventTypes;
-    }
-
-    public void setGameIds(List<Integer> gameIds) {
-        this.gameIds = gameIds;
-    }
-
-    public List<String> getEventTypes() {
-        return eventTypes;
-    }
-
-    public List<Integer> getGameIds() {
-        return gameIds;
-    }
 }

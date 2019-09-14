@@ -43,6 +43,10 @@ public final class Validation {
         return text == null || text.trim().isEmpty();
     }
 
+    public static boolean nonEmpty(String text) {
+        return text != null && !text.trim().isEmpty();
+    }
+
     public static boolean hasMinLength(String text, int minLength) {
         return !isEmpty(text) && text.length() > minLength;
     }

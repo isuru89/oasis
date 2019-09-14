@@ -21,9 +21,9 @@ package io.github.oasis.services.admin.internal.dao;
 
 import io.github.oasis.services.admin.internal.dto.NewGameDto;
 import io.github.oasis.services.admin.json.game.GameJson;
+import io.github.oasis.services.common.annotations.UseOasisSqlLocator;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
-import org.jdbi.v3.sqlobject.locator.UseClasspathSqlLocator;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
@@ -35,6 +35,7 @@ import java.util.List;
  *
  * @author Isuru Weerarathna
  */
+@UseOasisSqlLocator("/admin/game")
 public interface IGameCreationDao {
 
     @SqlUpdate("INSERT INTO OA_GAME_DEF (name, description, current_state)" +
@@ -43,7 +44,6 @@ public interface IGameCreationDao {
     @GetGeneratedKeys("game_id")
     int insertGame(@BindBean NewGameDto game);
 
-    @UseClasspathSqlLocator
     @SqlQuery
     @RegisterBeanMapper(GameJson.class)
     List<GameJson> readAllGames();

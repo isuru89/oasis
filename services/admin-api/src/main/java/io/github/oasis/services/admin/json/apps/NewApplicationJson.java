@@ -22,6 +22,7 @@ package io.github.oasis.services.admin.json.apps;
 import io.github.oasis.services.admin.internal.ErrorCodes;
 import io.github.oasis.services.common.OasisValidationException;
 import io.github.oasis.services.common.Validation;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
+@Data
 public class NewApplicationJson {
 
     private String name;
@@ -50,37 +52,5 @@ public class NewApplicationJson {
             throw new OasisValidationException(ErrorCodes.INVALID_APP_DETAILS,
                     "At least one game is must be specified when the app is not for all games!");
         }
-    }
-
-    public boolean isForAllGames() {
-        return forAllGames;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEventTypes(List<String> eventTypes) {
-        this.eventTypes = eventTypes;
-    }
-
-    public void setMappedGameIds(List<Integer> mappedGameIds) {
-        this.mappedGameIds = mappedGameIds;
-    }
-
-    public void setForAllGames(boolean forAllGames) {
-        this.forAllGames = forAllGames;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public List<String> getEventTypes() {
-        return eventTypes;
-    }
-
-    public List<Integer> getMappedGameIds() {
-        return mappedGameIds;
     }
 }

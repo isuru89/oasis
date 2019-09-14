@@ -17,33 +17,35 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.json.apps;
+package io.github.oasis.services.common.configs;
 
-import io.github.oasis.services.admin.internal.dto.ExtAppUpdateResult;
-import lombok.Getter;
-
-import java.util.List;
+import org.jdbi.v3.core.config.JdbiConfig;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-public class AppUpdateResultJson {
+public class SqlLocationConfigs implements JdbiConfig<SqlLocationConfigs> {
 
-    public static final AppUpdateResultJson EMPTY = new AppUpdateResultJson();
+    private String sqlScriptPath;
 
-    private List<String> addedEventTypes;
-    private List<String> removedEventTypes;
-    private List<Integer> mappedGameIds;
-    private List<Integer> unmappedGameIds;
-
-    public static AppUpdateResultJson from(ExtAppUpdateResult result) {
-        AppUpdateResultJson json = new AppUpdateResultJson();
-        json.addedEventTypes = result.getAddedEventTypes();
-        json.mappedGameIds = result.getAddedGameIds();
-        json.removedEventTypes = result.getRemovedEventTypes();
-        json.unmappedGameIds = result.getRemovedGameIds();
-        return json;
+    public SqlLocationConfigs() {
+        this.sqlScriptPath = "oasis/db/scripts";
     }
 
+    private SqlLocationConfigs(SqlLocationConfigs other) {
+        this.sqlScriptPath = other.sqlScriptPath;
+    }
+
+    public String getSqlScriptPath() {
+        return sqlScriptPath;
+    }
+
+    public void setSqlScriptPath(String sqlScriptPath) {
+        this.sqlScriptPath = sqlScriptPath;
+    }
+
+    @Override
+    public SqlLocationConfigs createCopy() {
+        return new SqlLocationConfigs(this);
+    }
 }

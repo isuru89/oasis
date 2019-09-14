@@ -29,12 +29,12 @@ import io.github.oasis.services.admin.internal.exceptions.ExtAppNotFoundExceptio
 import io.github.oasis.services.admin.internal.exceptions.KeyAlreadyDownloadedException;
 import io.github.oasis.services.admin.json.apps.UpdateApplicationJson;
 import io.github.oasis.services.common.Validation;
+import io.github.oasis.services.common.annotations.UseOasisSqlLocator;
 import org.jdbi.v3.core.result.LinkedHashMapRowReducer;
 import org.jdbi.v3.core.result.RowView;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
-import org.jdbi.v3.sqlobject.locator.UseClasspathSqlLocator;
 import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlBatch;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
@@ -54,6 +54,7 @@ import java.util.stream.Collectors;
  *
  * @author Isuru Weerarathna
  */
+@UseOasisSqlLocator("/admin/app")
 public interface IExternalAppDao {
 
     @SqlUpdate("INSERT INTO OA_EXT_APP" +
@@ -66,7 +67,6 @@ public interface IExternalAppDao {
     @SqlQuery("SELECT token FROM OA_EXT_APP WHERE name = :name LIMIT 1")
     Optional<String> findExternalAppByName(@Bind("name") String name);
 
-    @UseClasspathSqlLocator
     @SqlQuery
     @RegisterBeanMapper(value = ExtAppRecord.class, prefix = "a")
     @RegisterBeanMapper(value = ExtAppRecord.GameDef.class, prefix = "g")
@@ -92,7 +92,6 @@ public interface IExternalAppDao {
     @SqlBatch("DELETE FROM OA_EXT_APP_GAME WHERE app_id = :appId AND game_id = :gameId")
     void removeGameMappingsForApp(@Bind("appId") int appId, @Bind("gameId") List<Integer> gameId);
 
-    @UseClasspathSqlLocator
     @RegisterBeanMapper(value = ExtAppRecord.class, prefix = "a")
     @RegisterBeanMapper(value = ExtAppRecord.GameDef.class, prefix = "g")
     @RegisterBeanMapper(value = ExtAppRecord.EventType.class, prefix = "et")

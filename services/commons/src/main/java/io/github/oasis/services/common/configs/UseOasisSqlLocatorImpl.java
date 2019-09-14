@@ -17,33 +17,27 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.json.apps;
+package io.github.oasis.services.common.configs;
 
-import io.github.oasis.services.admin.internal.dto.ExtAppUpdateResult;
-import lombok.Getter;
+import org.jdbi.v3.core.config.ConfigRegistry;
+import org.jdbi.v3.sqlobject.SqlObjects;
+import org.jdbi.v3.sqlobject.config.Configurer;
 
-import java.util.List;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-public class AppUpdateResultJson {
+public class UseOasisSqlLocatorImpl implements Configurer {
 
-    public static final AppUpdateResultJson EMPTY = new AppUpdateResultJson();
-
-    private List<String> addedEventTypes;
-    private List<String> removedEventTypes;
-    private List<Integer> mappedGameIds;
-    private List<Integer> unmappedGameIds;
-
-    public static AppUpdateResultJson from(ExtAppUpdateResult result) {
-        AppUpdateResultJson json = new AppUpdateResultJson();
-        json.addedEventTypes = result.getAddedEventTypes();
-        json.mappedGameIds = result.getAddedGameIds();
-        json.removedEventTypes = result.getRemovedEventTypes();
-        json.unmappedGameIds = result.getRemovedGameIds();
-        return json;
+    @Override
+    public void configureForType(ConfigRegistry registry, Annotation annotation, Class<?> sqlObjectType) {
+        registry.get(SqlObjects.class).setSqlLocator(new OasisSqlLocator());
     }
 
+    @Override
+    public void configureForMethod(ConfigRegistry registry, Annotation annotation, Class<?> sqlObjectType, Method method) {
+        configureForType(registry, annotation, sqlObjectType);
+    }
 }

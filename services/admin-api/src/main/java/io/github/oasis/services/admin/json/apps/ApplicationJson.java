@@ -20,6 +20,7 @@
 package io.github.oasis.services.admin.json.apps;
 
 import io.github.oasis.services.admin.internal.dto.ExtAppRecord;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 /**
  * @author Isuru Weerarathna
  */
+@Getter
 public class ApplicationJson {
 
     private int id;
@@ -61,45 +63,5 @@ public class ApplicationJson {
         json.createdAt = record.getCreatedAt();
         json.keyResetAt = record.getKeyResetAt();
         return json;
-    }
-
-    public long getCreatedAt() {
-        return createdAt;
-    }
-
-    public Long getKeyResetAt() {
-        return keyResetAt;
-    }
-
-    public boolean isForAllGames() {
-        return forAllGames;
-    }
-
-    public boolean isInternal() {
-        return internal;
-    }
-
-    public boolean isDownloaded() {
-        return downloaded;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public List<String> getEventTypes() {
-        return eventTypes;
-    }
-
-    public List<ExtAppRecord.GameDef> getMappedGameIds() {
-        return mappedGameIds;
     }
 }

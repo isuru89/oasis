@@ -19,9 +19,12 @@
 
 package io.github.oasis.services.admin.json.apps;
 
+import lombok.Getter;
+
 /**
  * @author Isuru Weerarathna
  */
+@Getter
 public class ApplicationAddedJson {
 
     private int id;
@@ -32,11 +35,4 @@ public class ApplicationAddedJson {
         this.token = token;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public int getId() {
-        return id;
-    }
 }

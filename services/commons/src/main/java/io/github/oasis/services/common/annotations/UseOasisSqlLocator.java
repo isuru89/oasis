@@ -17,30 +17,24 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.json.game;
+package io.github.oasis.services.common.annotations;
 
-import io.github.oasis.services.admin.domain.GameState;
-import io.github.oasis.services.admin.internal.dto.NewGameDto;
-import lombok.Data;
+import io.github.oasis.services.common.configs.UseOasisSqlLocatorImpl;
+import org.jdbi.v3.sqlobject.config.ConfiguringAnnotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Isuru Weerarathna
  */
-@Data
-public class GameJson {
+@ConfiguringAnnotation(UseOasisSqlLocatorImpl.class)
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface UseOasisSqlLocator {
 
-    private int id;
-    private String name;
-    private String description;
+    String value() default "";
 
-    private GameState currentState;
-
-    public static GameJson from(int id, NewGameDto gameDto, GameState state) {
-        GameJson json = new GameJson();
-        json.setId(id);
-        json.setName(gameDto.getName());
-        json.setDescription(gameDto.getDescription());
-        json.setCurrentState(state);
-        return json;
-    }
 }
