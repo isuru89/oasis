@@ -16,7 +16,7 @@
         <scala.binary.version>2.11</scala.binary.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <jackson.version>2.9.9</jackson.version>
+        <jackson.version>2.10.0.pr2</jackson.version>
         <jdbi.version>3.9.1</jdbi.version>
     </properties>
 
