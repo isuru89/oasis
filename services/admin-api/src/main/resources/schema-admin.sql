@@ -26,12 +26,11 @@ CREATE TABLE IF NOT EXISTS OA_GAME_DEF (
     game_id         INT PRIMARY KEY AUTO_INCREMENT,
     name            VARCHAR(64),
     description     VARCHAR(1024),
-
     current_state   VARCHAR(12),
     is_active       TINYINT DEFAULT 1
 );
 
-CREATE TABLE IF NOT EXISTS OA_GAME_STATE (
+CREATE TABLE IF NOT EXISTS OA_GAME_STATE_LOG (
     game_id         INT,
     prev_state      VARCHAR(12),
     current_state   VARCHAR(12),

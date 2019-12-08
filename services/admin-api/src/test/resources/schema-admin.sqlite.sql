@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS OA_GAME_DEF (
     is_active       TINYINT DEFAULT 1
 );
 
-CREATE TABLE IF NOT EXISTS OA_GAME_STATE (
+CREATE TABLE IF NOT EXISTS OA_GAME_STATE_LOG (
     game_id         INTEGER,
     prev_state      VARCHAR(12),
     current_state   VARCHAR(12),

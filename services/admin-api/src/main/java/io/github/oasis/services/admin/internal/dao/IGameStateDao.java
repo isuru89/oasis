@@ -41,7 +41,7 @@ public interface IGameStateDao {
     int deactivateGame(@Bind("id") int gameId,
                        @Bind("state") GameState state);
 
-    @SqlUpdate("INSERT INTO OA_GAME_STATE" +
+    @SqlUpdate("INSERT INTO OA_GAME_STATE_LOG" +
             " (game_id, prev_state, current_state, changed_at)" +
             " VALUES" +
             " (:id, :prevState, :currState, :changedAt)")
@@ -89,7 +89,7 @@ public interface IGameStateDao {
         }
     }
 
-    @SqlQuery("SELECT current_state FROM OA_GAME_STATE WHERE game_id = :id ORDER BY changed_at DESC LIMIT 1")
+    @SqlQuery("SELECT current_state FROM OA_GAME_DEF WHERE game_id = :id")
     Optional<GameState> readCurrentGameState(@Bind("id") int gameId);
 
     @SqlUpdate("UPDATE OA_GAME_DEF SET current_state = :state WHERE game_id = :id")
