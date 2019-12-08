@@ -17,33 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.services.admin.domain;
+package io.github.oasis.services.admin.json.game;
 
-import io.github.oasis.services.admin.internal.dao.IGameCreationDao;
-import io.github.oasis.services.admin.internal.dto.NewGameDto;
-import io.github.oasis.services.admin.json.game.GameJson;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
+import io.github.oasis.services.admin.domain.GameState;
+import io.github.oasis.services.admin.internal.dto.GameStateHistoryRecord;
+import lombok.Data;
 
 /**
  * @author Isuru Weerarathna
  */
-@Component
-public class Game {
+@Data
+public class GameStateChangelogJson {
 
-    private IGameCreationDao gameCreationDao;
+    private int gameId;
+    private GameState previousState;
+    private GameState currentState;
+    private Long changedAt;
 
-    public Game(IGameCreationDao gameCreationDao) {
-        this.gameCreationDao = gameCreationDao;
-    }
-
-    public GameJson createGame(NewGameDto game) {
-        int gameId = gameCreationDao.insertGame(game);
-        return GameJson.from(gameId, game, GameState.CREATED);
-    }
-
-    public List<GameJson> readAllGames() {
-        return gameCreationDao.readAllGames();
+    public static GameStateChangelogJson from(GameStateHistoryRecord record) {
+        GameStateChangelogJson json = new GameStateChangelogJson();
+        json.setGameId(record.getGameId());
+        json.setChangedAt(record.getChangedAt().toEpochMilli());
+        json.setCurrentState(record.getCurrentState());
+        json.setPreviousState(record.getPreviousState());
+        return json;
     }
 }

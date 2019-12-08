@@ -29,6 +29,7 @@ import io.github.oasis.services.admin.internal.dao.IGameStateDao;
 import io.github.oasis.services.admin.internal.dto.NewGameDto;
 import io.github.oasis.services.admin.internal.exceptions.GameStateChangeException;
 import io.github.oasis.services.admin.json.game.GameJson;
+import io.github.oasis.services.admin.json.game.GameStateChangelogJson;
 import io.github.oasis.services.common.internal.events.game.GameCreatedEvent;
 import io.github.oasis.services.common.internal.events.game.GamePausedEvent;
 import io.github.oasis.services.common.internal.events.game.GameRemovedEvent;
@@ -36,6 +37,7 @@ import io.github.oasis.services.common.internal.events.game.GameRestartedEvent;
 import io.github.oasis.services.common.internal.events.game.GameStartedEvent;
 import io.github.oasis.services.common.internal.events.game.GameStatusChangedEvent;
 import io.github.oasis.services.common.internal.events.game.GameStoppedEvent;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,7 +49,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.oasis.services.admin.utils.TestUtils.NONE;
 import static io.github.oasis.services.admin.utils.TestUtils.SINGLE;
@@ -131,6 +135,7 @@ public class GameStateTests extends AbstractTest {
         verifyGameEventFired(GameState.RUNNING, gameId);
 
         verifyOnlyOneGameExistsWithId(gameId, GameState.RUNNING);
+        verifyGameStateHistory(gameId, GameState.CREATED, GameState.RUNNING, GameState.STOPPED, GameState.RUNNING);
     }
 
     @DisplayName("should not be able to start a running game")
@@ -205,6 +210,20 @@ public class GameStateTests extends AbstractTest {
         int id = admin.createGame(dto).getId();
         verifyGameCreatedEventFired(id);
         return id;
+    }
+
+    private void verifyGameStateHistory(int gameId, GameState... states) {
+        List<GameStateChangelogJson> changelog = admin.readGameStateChangelog(gameId)
+                .stream()
+                .sorted(Comparator.comparingLong(GameStateChangelogJson::getChangedAt))
+                .collect(Collectors.toList());
+        for (int i = 0; i < changelog.size(); i++) {
+            GameStateChangelogJson change = changelog.get(i);
+            if (change.getPreviousState() != states[i]) {
+                Assertions.fail(String.format("Unexpected game state (%s != %s)", states[i], change.getPreviousState()));
+            }
+        }
+        assertEquals(changelog.get(changelog.size() - 1).getCurrentState(), states[states.length - 1]);
     }
 
     private void verifyGameCreatedEventFired(int withGameId) {

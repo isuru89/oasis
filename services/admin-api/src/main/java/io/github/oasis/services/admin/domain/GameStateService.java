@@ -20,7 +20,11 @@
 package io.github.oasis.services.admin.domain;
 
 import io.github.oasis.services.admin.internal.dao.IGameStateDao;
+import io.github.oasis.services.admin.json.game.GameStateChangelogJson;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -48,5 +52,12 @@ public class GameStateService {
 
     public void deleteGame(int gameId) {
         gameDao.removeGame(gameId);
+    }
+
+    public List<GameStateChangelogJson> readGameStateChangelog(int gameId) {
+        return gameDao.readGameStateHistory(gameId)
+                .stream()
+                .map(GameStateChangelogJson::from)
+                .collect(Collectors.toList());
     }
 }

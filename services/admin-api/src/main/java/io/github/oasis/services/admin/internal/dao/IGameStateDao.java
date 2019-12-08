@@ -21,14 +21,17 @@ package io.github.oasis.services.admin.internal.dao;
 
 import io.github.oasis.services.admin.domain.GameState;
 import io.github.oasis.services.admin.internal.ErrorCodes;
+import io.github.oasis.services.admin.internal.dto.GameStateHistoryRecord;
 import io.github.oasis.services.admin.internal.exceptions.GameStateChangeException;
 import org.jdbi.v3.core.enums.EnumByName;
+import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.jdbi.v3.sqlobject.transaction.Transaction;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -36,6 +39,15 @@ import java.util.Optional;
  */
 @EnumByName
 public interface IGameStateDao {
+
+    @SqlQuery("SELECT " +
+            "game_id AS gameId, " +
+            "prev_state AS previousState, " +
+            "current_state AS currentState, " +
+            "changed_at AS changedAt " +
+            "FROM OA_GAME_STATE_LOG WHERE game_id = :id")
+    @RegisterBeanMapper(GameStateHistoryRecord.class)
+    List<GameStateHistoryRecord> readGameStateHistory(@Bind("id") int gameId);
 
     @SqlUpdate("UPDATE OA_GAME_DEF SET is_active = false, current_state = :state WHERE game_id = :id")
     int deactivateGame(@Bind("id") int gameId,

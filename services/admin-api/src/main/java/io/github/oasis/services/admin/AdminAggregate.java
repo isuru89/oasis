@@ -32,6 +32,7 @@ import io.github.oasis.services.admin.json.apps.ApplicationJson;
 import io.github.oasis.services.admin.json.apps.NewApplicationJson;
 import io.github.oasis.services.admin.json.apps.UpdateApplicationJson;
 import io.github.oasis.services.admin.json.game.GameJson;
+import io.github.oasis.services.admin.json.game.GameStateChangelogJson;
 import io.github.oasis.services.common.internal.events.admin.ExternalAppEvent;
 import io.github.oasis.services.common.internal.events.admin.ExternalAppEventType;
 import io.github.oasis.services.common.internal.events.game.GameCreatedEvent;
@@ -81,6 +82,10 @@ public class AdminAggregate {
 
     public List<GameJson> listAllGames() {
         return game.readAllGames();
+    }
+
+    public List<GameStateChangelogJson> readGameStateChangelog(int gameId) {
+        return gameStateService.readGameStateChangelog(gameId);
     }
 
     public void startGame(int gameId) {
