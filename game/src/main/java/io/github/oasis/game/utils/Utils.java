@@ -46,6 +46,10 @@ public class Utils {
         }
     }
 
+    public static <T> T orDefault(T v1, T v2) {
+        return firstNonNull(v1, v2);
+    }
+
     public static boolean eventEquals(Event against, String eventType) {
         return eventType.equals(against.getEventType());
     }
