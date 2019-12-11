@@ -86,6 +86,14 @@ public class Utils {
         return (Boolean) result;
     }
 
+    public static boolean evaluateConditionSafe(Serializable expression, Map<String, Object> variables) {
+        Object result = executeExpression(expression, variables);
+        if (result == null) {
+            return false;
+        }
+        return (Boolean) result;
+    }
+
     public static Object executeExpression(Serializable expression, Map<String, Object> variables) {
         return MVEL.executeExpression(expression, variables);
     }

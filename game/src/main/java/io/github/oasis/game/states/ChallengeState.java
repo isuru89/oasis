@@ -17,7 +17,7 @@ public class ChallengeState implements Serializable {
         return winners >= def.getWinnerCount();
     }
 
-    public int getWinning() {
+    public int incrementAndGetWinningNumber() {
         return winners++;
     }
 

@@ -20,8 +20,8 @@
 package io.github.oasis.model.defs;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author iweerarathna
@@ -34,7 +34,7 @@ public class ChallengeDef extends BaseDef implements Serializable {
 
     private double points;
 
-    private Collection<String> forEvents;
+    private Set<String> forEvents;
     private Long forTeamId;
     private String forTeam;
     private Long forUserId;
@@ -44,6 +44,26 @@ public class ChallengeDef extends BaseDef implements Serializable {
     private List<String> conditions;
 
     private Long gameId;
+
+    public boolean amongTargetedTeam(long teamId) {
+        return forTeamId == null || forTeamId == teamId;
+    }
+
+    public boolean amongTargetedUser(long userId) {
+        return forUserId == null || forUserId == userId;
+    }
+
+    public boolean matchesWithEvent(String eventType) {
+        return forEvents.contains(eventType);
+    }
+
+    public boolean inRange(long timestamp) {
+        if (startAt != null) {
+            return timestamp >= startAt && timestamp < expireAfter;
+        } else {
+            return timestamp < expireAfter;
+        }
+    }
 
     public Long getGameId() {
         return gameId;
@@ -133,11 +153,11 @@ public class ChallengeDef extends BaseDef implements Serializable {
         this.points = points;
     }
 
-    public Collection<String> getForEvents() {
+    public Set<String> getForEvents() {
         return forEvents;
     }
 
-    public void setForEvents(Collection<String> forEvents) {
+    public void setForEvents(Set<String> forEvents) {
         this.forEvents = forEvents;
     }
 

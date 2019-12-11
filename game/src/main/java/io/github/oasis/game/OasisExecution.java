@@ -50,6 +50,7 @@ import io.github.oasis.game.process.sinks.OasisMilestoneStateSink;
 import io.github.oasis.game.process.sinks.OasisPointsSink;
 import io.github.oasis.game.process.sinks.OasisRaceSink;
 import io.github.oasis.game.process.sinks.OasisRatingSink;
+import io.github.oasis.model.DefinitionUpdateEvent;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.FieldCalculator;
 import io.github.oasis.model.Milestone;
@@ -75,11 +76,14 @@ import io.github.oasis.model.rules.BadgeRule;
 import io.github.oasis.model.rules.PointRule;
 import org.apache.commons.io.FileUtils;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.runtime.state.StateBackend;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
+import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
@@ -106,6 +110,7 @@ public class OasisExecution {
 
     private OasisSink oasisSink;
     private SourceFunction<Event> eventSource;
+    private SourceFunction<DefinitionUpdateEvent> definitionUpdates;
     private MapFunction<Event, Event> fieldInjector;
 
     private List<PointRule> pointRules;
@@ -116,6 +121,9 @@ public class OasisExecution {
     private DataStream<Event> inputSource;
 
     private IOutputHandler outputHandler;
+
+    private static MapStateDescriptor<Long, DefinitionUpdateEvent> definitionUpdateEventDescriptor =
+            new MapStateDescriptor<>("oasis.source.definition", Types.LONG, Types.POJO(DefinitionUpdateEvent.class));
 
     static void appendCheckpointStatus(StreamExecutionEnvironment env, Configs gameProperties) throws IOException {
         if (gameProperties.has(ConfigKeys.KEY_CHECKPOINT_ENABLED) &&
@@ -155,6 +163,8 @@ public class OasisExecution {
         String rawSrcStr = String.format("raw-%s", oasisId);
 
         DataStreamSource<Event> rawSource = env.addSource(eventSource);
+        BroadcastStream<DefinitionUpdateEvent> definitionUpdateBroadcastStream = env.addSource(definitionUpdates)
+                .broadcast(definitionUpdateEventDescriptor);
         if (fieldInjector != null) {
             inputSource = rawSource.uid(rawSrcStr)
                     .map(fieldInjector)
@@ -251,7 +261,7 @@ public class OasisExecution {
             OutputTag<PointNotification> outputTag = new OutputTag<>("oasis-challenge-point-tag",
                             TypeInformation.of(PointNotification.class));
             ChallengeOperator.ChallengePipelineResponse challengePipeline =
-                    ChallengeOperator.createChallengePipeline(inputSource, outputTag, challengePointRule.get());
+                    ChallengeOperator.createChallengePipeline(inputSource, definitionUpdateBroadcastStream, outputTag);
             cStream = challengePipeline.getChallengeEventDataStream();
             challengePointStream = challengePipeline.getPointNotificationStream();
         }
