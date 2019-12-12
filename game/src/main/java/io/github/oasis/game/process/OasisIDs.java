@@ -26,4 +26,5 @@ public final class OasisIDs {
 
     public static final String CHALLENGE_PROCESSOR_ID = "oasis.id.process.challenge";
 
+    public static final String CHALLENGE_BROADCAST_STATE_ID = "oasis.states.broadcast.challenges";
 }

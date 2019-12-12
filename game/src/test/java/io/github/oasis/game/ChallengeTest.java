@@ -29,18 +29,19 @@ import io.github.oasis.model.DefinitionUpdateEvent;
 import io.github.oasis.model.DefinitionUpdateType;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.defs.ChallengeDef;
+import io.github.oasis.model.events.ChallengeEvent;
 import io.github.oasis.model.events.JsonEvent;
-import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.shaded.guava18.com.google.common.collect.Sets;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.BroadcastStream;
-import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.junit.Test;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.UUID;
 
 /**
  * @author iweerarathna
@@ -49,20 +50,25 @@ public class ChallengeTest extends AbstractTest {
 
     @Test
     public void testChallenges() throws Exception {
-        LocalStreamEnvironment env = StreamExecutionEnvironment.createLocalEnvironment(1);
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironment();
+        env.setParallelism(1);
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         ManualDataSource eventSource = new ManualDataSource();
         ManualRuleSource rulesSource = new ManualRuleSource();
 
-        KeyedStream<Event, Long> dataStream = env.addSource(eventSource)
-                .assignTimestampsAndWatermarks(new EventTimestampSelector<>())
-                .keyBy((KeySelector<Event, Long>) Event::getUser);
-        BroadcastStream<DefinitionUpdateEvent> ruleStream = env.addSource(rulesSource)
+        SingleOutputStreamOperator<Event> dataStream = env.addSource(eventSource).uid("source-events")
+                .assignTimestampsAndWatermarks(new EventTimestampSelector<>());
+        BroadcastStream<DefinitionUpdateEvent> ruleStream = env.addSource(rulesSource).uid("source-rules")
                 .broadcast(ChallengeProcess.BROADCAST_CHALLENGES_DESCRIPTOR);
 
         dataStream.connect(ruleStream)
                 .process(new ChallengeProcess())
-                .print();
+                .addSink(new SinkFunction<ChallengeEvent>() {
+                    @Override
+                    public void invoke(ChallengeEvent value, Context context) throws Exception {
+                        System.out.println("****" + value.getPoints() + " , " + value.getWinNo());
+                    }
+                });
 
         Thread runner = new Thread(() -> {
             try {
@@ -81,9 +87,15 @@ public class ChallengeTest extends AbstractTest {
         rulesSource.emit(u1);
         rulesSource.emit(u2);
 
-        eventSource.emit(createEvent("test.event2", 1, 10, 10));
+        eventSource.emit(createEvent("test.event2", 1, 10, 10), 2000);
+
+        rulesSource.emit(DefinitionUpdateEvent.create(DefinitionUpdateType.DELETED, c2), 3000);
+
+
+        eventSource.emit(createEvent("test.event2", 2, 10, 20), 5000);
 
         eventSource.cancel();
+        rulesSource.cancel();;
 
         runner.join();
     }
@@ -95,6 +107,7 @@ public class ChallengeTest extends AbstractTest {
         json.setFieldValue(Constants.FIELD_TIMESTAMP, Instant.now().toEpochMilli());
         json.setFieldValue(Constants.FIELD_USER, userId);
         json.setFieldValue(Constants.FIELD_TEAM, teamId);
+        json.setFieldValue(Constants.FIELD_ID, UUID.randomUUID().toString());
         json.setFieldValue("score", score);
         return json;
     }

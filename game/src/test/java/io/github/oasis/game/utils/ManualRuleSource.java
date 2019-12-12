@@ -22,8 +22,10 @@ package io.github.oasis.game.utils;
 import io.github.oasis.model.DefinitionUpdateEvent;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
+import java.io.Serializable;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * @author Isuru Weerarathna
@@ -32,26 +34,53 @@ public class ManualRuleSource implements SourceFunction<DefinitionUpdateEvent> {
 
     private static final CloseEvent CLOSE_EVENT = new CloseEvent();
 
-    private Queue<DefinitionUpdateEvent> queue = new ArrayBlockingQueue<>(10);
+    private BlockingQueue<EventWrapper> queue = new ArrayBlockingQueue<>(10);
 
     public ManualRuleSource emit(DefinitionUpdateEvent event) {
-        queue.offer(event);
+        queue.offer(new EventWrapper(event, 0));
+        return this;
+    }
+
+    public ManualRuleSource emit(DefinitionUpdateEvent event, long sleepTime) {
+        queue.offer(new EventWrapper(event, sleepTime));
         return this;
     }
 
     @Override
     public void run(SourceContext<DefinitionUpdateEvent> ctx) {
-        while (queue.peek() != null) {
-            DefinitionUpdateEvent event = queue.poll();
-            if (event == CLOSE_EVENT) break;
+        try {
+            while (true) {
+                EventWrapper event = queue.take();
+                if (event.updateEvent instanceof CloseEvent) {
+                    System.out.println("Closing Rule source.");
+                    break;
+                }
 
-            ctx.collect(event);
+                if (event.sleep > 0) {
+                    System.out.println("Sleeping rule for " + event.sleep + "ms");
+                    Thread.sleep(event.sleep);
+                }
+                System.out.println("Emiting Rule: " + event.updateEvent.getType() + " " + event.updateEvent.getBaseDef());
+                ctx.collect(event.updateEvent);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public void cancel() {
-        queue.offer(CLOSE_EVENT);
+        queue.offer(new EventWrapper(CLOSE_EVENT, 0));
+    }
+
+    private static class EventWrapper implements Serializable {
+        private DefinitionUpdateEvent updateEvent;
+        private long sleep;
+
+        private EventWrapper(DefinitionUpdateEvent updateEvent, long sleep) {
+            this.updateEvent = updateEvent;
+            this.sleep = sleep;
+        }
     }
 
     private static class CloseEvent extends DefinitionUpdateEvent {

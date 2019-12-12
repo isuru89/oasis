@@ -27,32 +27,40 @@ import io.github.oasis.model.Event;
 import io.github.oasis.model.defs.BaseDef;
 import io.github.oasis.model.defs.ChallengeDef;
 import io.github.oasis.model.events.ChallengeEvent;
+import org.apache.flink.api.common.state.ListState;
+import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.runtime.state.FunctionInitializationContext;
+import org.apache.flink.runtime.state.FunctionSnapshotContext;
+import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
+import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction;
 import org.apache.flink.streaming.api.functions.co.KeyedBroadcastProcessFunction;
 import org.apache.flink.util.Collector;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class ChallengeProcess extends KeyedBroadcastProcessFunction<Long, Event, DefinitionUpdateEvent, ChallengeEvent> {
+public class ChallengeProcess extends BroadcastProcessFunction<Event, DefinitionUpdateEvent, ChallengeEvent>
+                                implements CheckpointedFunction {
 
     public static final MapStateDescriptor<Long, BaseDef> BROADCAST_CHALLENGES_DESCRIPTOR = new MapStateDescriptor<>(
-            "oasis.states.broadcast.challenges",
+            OasisIDs.CHALLENGE_BROADCAST_STATE_ID,
             Types.LONG,
             Types.GENERIC(BaseDef.class)
     );
 
-    private final MapStateDescriptor<Long, ChallengeState> challengeStateValueDescriptor = new
-            MapStateDescriptor<>("oasis.processor.challenges", Types.LONG, Types.GENERIC(ChallengeState.class));
+    private final ListStateDescriptor<ChallengeState> challengeStateListStateDescriptor = new
+            ListStateDescriptor<>("oasis.processor.challenges", Types.GENERIC(ChallengeState.class));
 
-    private MapState<Long, ChallengeState> challengeStates;
+    private ListState<ChallengeState> challengeStateListState;
+    private Map<Long, ChallengeState> challengeStates;
 
-    @Override
-    public void open(Configuration parameters) {
-        challengeStates = getRuntimeContext().getMapState(challengeStateValueDescriptor);
+    public ChallengeProcess() {
+        this.challengeStates = new HashMap<>();
     }
 
     @Override
@@ -62,7 +70,6 @@ public class ChallengeProcess extends KeyedBroadcastProcessFunction<Long, Event,
             long id = challengeDefEntry.getKey();
             ChallengeDef challengeDefinition = (ChallengeDef) challengeDefEntry.getValue();
 
-            System.out.println("CHECK " + id + " with " + challengeDefinition.getName());
             ChallengeState challengeState = Utils.orDefault(this.challengeStates.get(id), new ChallengeState());
             if (challengeState.allowNoMoreWinners(challengeDefinition)) {
                 clearChallengeState(id);
@@ -79,7 +86,7 @@ public class ChallengeProcess extends KeyedBroadcastProcessFunction<Long, Event,
         }
     }
 
-    private void clearChallengeState(long id) throws Exception {
+    private void clearChallengeState(long id) {
         challengeStates.remove(id);
     }
 
@@ -95,7 +102,6 @@ public class ChallengeProcess extends KeyedBroadcastProcessFunction<Long, Event,
                     .map(Utils::compileExpression)
                     .anyMatch(expr -> Utils.evaluateConditionSafe(expr, contextVariables));
         }
-        System.out.println("FALSE");
         return false;
     }
 
@@ -108,10 +114,11 @@ public class ChallengeProcess extends KeyedBroadcastProcessFunction<Long, Event,
             Iterator<Map.Entry<Long, BaseDef>> challenges = ctx.getBroadcastState(BROADCAST_CHALLENGES_DESCRIPTOR).iterator();
             challenges.forEachRemaining(entry -> {
                 ChallengeDef challenge = (ChallengeDef) entry.getValue();
-                if (!challenge.inRange(wm)) {
+                if (wm != Long.MIN_VALUE && !challenge.inRange(wm)) {
                     challenges.remove();
                 }
             });
+
 
             System.out.println(">>>>> " + value.getId() + " , " + updateEvent.getType());
             if (updateEvent.getType() == DefinitionUpdateType.DELETED) {
@@ -119,6 +126,22 @@ public class ChallengeProcess extends KeyedBroadcastProcessFunction<Long, Event,
             } else {
                 ctx.getBroadcastState(BROADCAST_CHALLENGES_DESCRIPTOR).put(value.getId(), value);
             }
+        }
+    }
+
+    @Override
+    public void snapshotState(FunctionSnapshotContext context) throws Exception {
+        challengeStateListState.clear();
+        for (Map.Entry<Long, ChallengeState> entry : challengeStates.entrySet()) {
+            challengeStateListState.add(entry.getValue());
+        }
+    }
+
+    @Override
+    public void initializeState(FunctionInitializationContext context) throws Exception {
+       challengeStateListState = context.getOperatorStateStore().getUnionListState(challengeStateListStateDescriptor);
+        for (ChallengeState challengeState : challengeStateListState.get()) {
+            challengeStates.put(challengeState.getChallengeId(), challengeState);
         }
     }
 }
