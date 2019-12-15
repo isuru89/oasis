@@ -19,7 +19,7 @@
 
 package io.github.oasis.game.process;
 
-import io.github.oasis.game.states.MilestoneState;
+import io.github.oasis.game.states.MilestoneCountState;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.Milestone;
 import io.github.oasis.model.events.MilestoneEvent;
@@ -41,29 +41,30 @@ import java.util.Optional;
  */
 public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, MilestoneEvent> {
 
-    private final ValueStateDescriptor<MilestoneState> milestoneStateValueStateDescriptor;
+    private final ValueStateDescriptor<MilestoneCountState> milestoneStateValueStateDescriptor;
 
     private Milestone milestone;
     private OutputTag<MilestoneStateEvent> outputTag;
 
-    private ValueState<MilestoneState> milestoneStateValueState;
+    private ValueState<MilestoneCountState> milestoneStateValueState;
 
     public MilestoneCountProcess(Milestone milestone, OutputTag<MilestoneStateEvent> outputTag) {
         this.milestone = milestone;
         this.outputTag = outputTag;
 
         milestoneStateValueStateDescriptor = new ValueStateDescriptor<>(
-                "oasis.milestone.count.process", Types.GENERIC(MilestoneState.class));
+                OasisIDs.getStateId(milestone),
+                Types.GENERIC(MilestoneCountState.class));
     }
 
     @Override
     public void processElement(Event value, Context ctx, Collector<MilestoneEvent> out) throws Exception {
-        MilestoneState milestoneState = initDefaultState();
+        MilestoneCountState milestoneState = initDefaultState();
         if (milestoneState.isAllLevelsReached()) {
             return;
         }
 
-        MilestoneState state = milestoneState.incrementCountAndGet();
+        MilestoneCountState state = milestoneState.incrementCountAndGet();
         Optional<Milestone.Level> currentLevel = milestone.findLevelForValue(state.getTotalCount());
         if (currentLevel.isPresent()) {
             Milestone.Level level = currentLevel.get();
@@ -84,9 +85,9 @@ public class MilestoneCountProcess extends KeyedProcessFunction<Long, Event, Mil
         }
     }
 
-    private MilestoneState initDefaultState() throws IOException {
+    private MilestoneCountState initDefaultState() throws IOException {
         if (Objects.isNull(milestoneStateValueState.value())) {
-            milestoneStateValueState.update(MilestoneState.from(milestone));
+            milestoneStateValueState.update(MilestoneCountState.from(milestone));
         }
         return milestoneStateValueState.value();
     }

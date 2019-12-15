@@ -46,7 +46,7 @@ public class ChallengeProcess extends KeyedBroadcastProcessFunction<Long, Event,
     );
 
     private final MapStateDescriptor<Long, ChallengeState> challengeStateValueDescriptor = new
-            MapStateDescriptor<>("oasis.processor.challenges", Types.LONG, Types.GENERIC(ChallengeState.class));
+            MapStateDescriptor<>(OasisIDs.STATE_CHALLENGE_ID, Types.LONG, Types.GENERIC(ChallengeState.class));
 
     private MapState<Long, ChallengeState> challengeStates;
 

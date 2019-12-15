@@ -50,6 +50,15 @@ public class MilestoneStateEvent implements Serializable {
                 true, lossValue, null);
     }
 
+    public static MilestoneStateEvent lossEvent(Event event, Milestone milestone, double lossValue) {
+        return new MilestoneStateEvent(
+                event.getUser(),
+                event.getGameId(),
+                milestone,
+                lossValue
+        );
+    }
+
     public MilestoneStateEvent(long userId, int gameId, Milestone milestone, Long lossValue) {
         this(userId, gameId, milestone, 0, 0L,
                 null, null,
@@ -64,6 +73,20 @@ public class MilestoneStateEvent implements Serializable {
                 nextValue, null,
                 currBaseValue, null,
                 false, null, null);
+    }
+
+    public static MilestoneStateEvent summing(Event event, Milestone milestone,
+                                       double currentSum,
+                                       double nextLevelSum,
+                                       double currentLevelTargetSum) {
+        return new MilestoneStateEvent(
+                event.getUser(),
+                event.getGameId(),
+                milestone,
+                currentSum,
+                nextLevelSum,
+                currentLevelTargetSum
+        );
     }
 
     public MilestoneStateEvent(long userId, int gameId, Milestone milestone,

@@ -23,7 +23,6 @@ import io.github.oasis.game.Oasis;
 import io.github.oasis.game.process.EventUserSelector;
 import io.github.oasis.game.process.MilestoneCountProcess;
 import io.github.oasis.game.process.MilestonePointSumProcess;
-import io.github.oasis.game.process.MilestoneSumDoubleProcess;
 import io.github.oasis.game.process.MilestoneSumProcess;
 import io.github.oasis.game.utils.Utils;
 import io.github.oasis.model.AggregatorType;
@@ -37,9 +36,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.util.OutputTag;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author iweerarathna
@@ -78,27 +74,13 @@ public class MilestoneOperator {
                         .process(new MilestoneCountProcess(milestone, stateOutputTag));
 
         } else {
-            if (milestone.isRealValues() || milestone.getFrom() != null) {
-                List<Double> levels = milestone.getLevels().stream()
-                        .map(l -> l.getNumber().doubleValue())
-                        .collect(Collectors.toList());
-                if (milestone.isFromPoints()) {
-                    stream = userPointStream.process(new MilestonePointSumProcess(levels, milestone, stateOutputTag));
-                    usedPointStream = true;
-                } else {
-                    stream = eventDataStream.filter(filterFunction)
-                            .keyBy(new EventUserSelector<>())
-                            .process(new MilestoneSumDoubleProcess(levels, milestone.getAccumulatorExpr(),
-                                    milestone, stateOutputTag));
-                }
+            if (milestone.isFromPoints()) {
+                stream = userPointStream.process(new MilestonePointSumProcess(milestone, stateOutputTag));
+                usedPointStream = true;
             } else {
-                List<Long> levels = milestone.getLevels().stream()
-                        .map(l -> l.getNumber().longValue())
-                        .collect(Collectors.toList());
                 stream = eventDataStream.filter(filterFunction)
                             .keyBy(new EventUserSelector<>())
-                            .process(new MilestoneSumProcess(levels,
-                                milestone.getAccumulatorExpr(), milestone, stateOutputTag));
+                            .process(new MilestoneSumProcess(milestone.getAccumulatorExpr(), milestone, stateOutputTag));
             }
         }
 

@@ -17,21 +17,34 @@
  * under the License.
  */
 
-package io.github.oasis.game.process;
+package io.github.oasis.game.states;
 
 import io.github.oasis.model.Milestone;
+import lombok.Getter;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class OasisIDs {
+@Getter
+public class BaseMilestoneState implements Serializable {
 
-    public static final String CHALLENGE_PROCESSOR_ID = "oasis.id.process.challenge";
+    protected long milestoneId;
 
-    public static final String STATE_CHALLENGE_ID = "oasis.state.challenges";
-    private static final String STATE_MILESTONE_FORMAT = "oasis.state.milestone.%d";
+    protected int currentLevel;
+    protected int nextLevel;
 
-    public static String getStateId(Milestone milestone) {
-        return String.format(STATE_MILESTONE_FORMAT, milestone.getId());
+    public boolean isAllLevelsReached() {
+        return nextLevel < 0;
+    }
+
+    public boolean hasLevelChanged(Milestone.Level derivedLevel) {
+        return derivedLevel.getLevel() != currentLevel;
+    }
+
+    void updateLevelTo(Milestone.Level derivedLevelRef, Milestone.Level nextLevelRef) {
+        currentLevel = derivedLevelRef.getLevel();
+        nextLevel = nextLevelRef == null ? -1 : nextLevelRef.getLevel();
     }
 }
