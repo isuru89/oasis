@@ -19,7 +19,6 @@
 
 package io.github.oasis.game.process;
 
-import io.github.oasis.game.utils.Utils;
 import io.github.oasis.model.Milestone;
 import io.github.oasis.model.events.MilestoneEvent;
 import io.github.oasis.model.events.MilestoneStateEvent;
@@ -40,6 +39,8 @@ import java.util.Objects;
  * @author iweerarathna
  */
 public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEvent, MilestoneEvent> {
+
+    private static final double DEFAULT_POINT_VALUE = 0.0;
 
     private final ValueStateDescriptor<Integer> currLevelStateDesc;
     private final ValueStateDescriptor<Double> stateDesc;
@@ -75,22 +76,20 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
 
     @Override
     public void processElement(PointEvent value, Context ctx, Collector<MilestoneEvent> out) throws Exception {
-        double acc;
-        if (Utils.isNullOrEmpty(milestone.getPointIds())) {
-            acc = value.getTotalScore();
+        double accumulatedSum;
+        if (milestone.hasPointReferenceIds()) {
+            accumulatedSum = milestone.getPointIds().stream()
+                    .filter(value::containsPoint)
+                    .mapToDouble(pid -> value.getPointsForRefId(pid, DEFAULT_POINT_VALUE))
+                    .sum();
         } else {
-            acc = 0;
-            for (String pid : milestone.getPointIds()) {
-                if (value.containsPoint(pid)) {
-                    acc += value.getPointScore(pid).getValue0();
-                }
-            }
+            accumulatedSum = value.getTotalScore();
         }
 
         initDefaultState();
 
-        if (milestone.isOnlyPositive() && acc < 0) {
-            accNegSum.update(accNegSum.value() + acc);
+        if (milestone.isOnlyPositive() && accumulatedSum < 0) {
+            accNegSum.update(accNegSum.value() + accumulatedSum);
             ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), value.getGameId(), milestone, accNegSum.value()));
             return;
         }
@@ -101,13 +100,13 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
             double margin = levels.get(currLevel);
             currLevelMargin = margin;
             double currSum = accSum.value();
-            if (currSum < margin && margin <= currSum + acc) {
+            if (currSum < margin && margin <= currSum + accumulatedSum) {
                 // level changed
                 int nextLevel = currLevel + 1;
                 currentLevel.update(nextLevel);
                 out.collect(new MilestoneEvent(value.getUser(), milestone, nextLevel, value));
 
-                double total = currSum + acc;
+                double total = currSum + accumulatedSum;
                 if (nextLevel < levels.size()) {
                     margin = levels.get(nextLevel);
                     currLevelMargin = margin;
@@ -128,7 +127,7 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
                 atEnd = levels.size() >= nextLevel;
 
             } else {
-                accSum.update(currSum + acc);
+                accSum.update(currSum + accumulatedSum);
             }
         } else {
             currLevelMargin = levels.get(levels.size() - 1);

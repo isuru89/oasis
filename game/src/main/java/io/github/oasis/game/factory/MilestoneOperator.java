@@ -73,12 +73,9 @@ public class MilestoneOperator {
         boolean usedPointStream = false;
         SingleOutputStreamOperator<MilestoneEvent> stream;
         if (milestone.getAggregator() == AggregatorType.COUNT) {
-            List<Long> levels = milestone.getLevels().stream()
-                    .map(l -> l.getNumber().longValue())
-                    .collect(Collectors.toList());
             stream = eventDataStream.filter(filterFunction)
                         .keyBy(new EventUserSelector<>())
-                        .process(new MilestoneCountProcess(levels, milestone, stateOutputTag));
+                        .process(new MilestoneCountProcess(milestone, stateOutputTag));
 
         } else {
             if (milestone.isRealValues() || milestone.getFrom() != null) {

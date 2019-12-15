@@ -19,6 +19,7 @@
 
 package io.github.oasis.model.events;
 
+import io.github.oasis.model.Event;
 import io.github.oasis.model.Milestone;
 
 import java.io.Serializable;
@@ -72,6 +73,26 @@ public class MilestoneStateEvent implements Serializable {
                 null, nextValue,
                 null, currBaseValueInt,
                 false, null, null);
+    }
+
+    public MilestoneStateEvent(long userId, int gameId, Milestone milestone,
+                               long value, int nextValue, long currBaseValueInt) {
+        this(userId, gameId, milestone,
+                Double.MIN_VALUE, value,
+                null, (long) nextValue,
+                null, currBaseValueInt,
+                false, null, null);
+    }
+
+    public static MilestoneStateEvent counting(Event event, Milestone milestone,
+                                               long currentCount, long nextLevelTarget, long currentLevelTargetWas) {
+        return new MilestoneStateEvent(
+                event.getUser(),
+                event.getGameId(),
+                milestone,
+                currentCount,
+                nextLevelTarget,
+                currentLevelTargetWas);
     }
 
     private MilestoneStateEvent(long userId, int gameId, Milestone milestone,

@@ -41,6 +41,14 @@ public class MilestoneEvent implements Event {
         this.user = userId;
     }
 
+    public static MilestoneEvent reachedEvent(Event event, Milestone milestone, int level) {
+        return new MilestoneEvent(
+                event.getUser(),
+                milestone,
+                level,
+                event);
+    }
+
     public Event getCausedEvent() {
         return causedEvent;
     }

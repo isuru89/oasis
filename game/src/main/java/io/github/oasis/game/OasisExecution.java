@@ -163,8 +163,8 @@ public class OasisExecution {
         String rawSrcStr = String.format("raw-%s", oasisId);
 
         DataStreamSource<Event> rawSource = env.addSource(eventSource);
-        BroadcastStream<DefinitionUpdateEvent> definitionUpdateBroadcastStream = env.addSource(definitionUpdates)
-                .broadcast(definitionUpdateEventDescriptor);
+        BroadcastStream<DefinitionUpdateEvent> definitionUpdateBroadcastStream = definitionUpdates != null ? env.addSource(definitionUpdates)
+                .broadcast(definitionUpdateEventDescriptor) : null;
         if (fieldInjector != null) {
             inputSource = rawSource.uid(rawSrcStr)
                     .map(fieldInjector)
