@@ -20,6 +20,7 @@
 package io.github.oasis.game.process;
 
 import io.github.oasis.model.Milestone;
+import io.github.oasis.model.Rating;
 
 /**
  * @author Isuru Weerarathna
@@ -30,8 +31,13 @@ public final class OasisIDs {
 
     public static final String STATE_CHALLENGE_ID = "oasis.state.challenges";
     private static final String STATE_MILESTONE_FORMAT = "oasis.state.milestone.%d";
+    private static final String STATE_RATING_FORMAT = "oasis.state.rating.%d";
 
     public static String getStateId(Milestone milestone) {
         return String.format(STATE_MILESTONE_FORMAT, milestone.getId());
+    }
+
+    public static String getStateId(Rating rating) {
+        return String.format(STATE_RATING_FORMAT, rating.getId());
     }
 }

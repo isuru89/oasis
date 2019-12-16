@@ -38,7 +38,7 @@ public class RatingEvent implements Serializable {
     public RatingEvent() {
     }
 
-    public RatingEvent(Long userId, Rating ratingRef, Event event,
+    private RatingEvent(Long userId, Rating ratingRef, Event event,
                        Integer prevStateId, Rating.RatingState state, String currentValue,
                        long prevChangedAt) {
         this.userId = userId;
@@ -49,6 +49,23 @@ public class RatingEvent implements Serializable {
         this.currentValue = currentValue;
         this.ts = event.getTimestamp();
         this.prevChangedAt = prevChangedAt;
+    }
+
+    public static RatingEvent ratingChanged(Event event,
+                                            Rating ratingRef,
+                                            Rating.RatingState currentRating,
+                                            String currentRatingValue,
+                                            int previousRating,
+                                            long changedAt) {
+        return new RatingEvent(
+          event.getUser(),
+                ratingRef,
+                event,
+                previousRating,
+                currentRating,
+                currentRatingValue,
+                changedAt
+        );
     }
 
     public long getPrevChangedAt() {
