@@ -23,8 +23,10 @@ import io.github.oasis.model.Event;
 import io.github.oasis.model.events.JsonEvent;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
+import java.io.Serializable;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * @author Isuru Weerarathna
@@ -33,26 +35,53 @@ public class ManualDataSource implements SourceFunction<Event> {
 
     private static final CloseEvent CLOSE_EVENT = new CloseEvent();
 
-    private Queue<Event> queue = new ArrayBlockingQueue<>(10);
+    private BlockingQueue<EventWrapper> queue = new ArrayBlockingQueue<>(10);
 
     public ManualDataSource emit(Event event) {
-        queue.offer(event);
+        queue.offer(new EventWrapper(event, 0));
+        return this;
+    }
+
+    public ManualDataSource emit(Event event, int sleep) {
+        queue.offer(new EventWrapper(event, sleep));
         return this;
     }
 
     @Override
     public void run(SourceContext<Event> ctx) {
-        while (queue.peek() != null) {
-            Event event = queue.poll();
-            if (event == CLOSE_EVENT) break;
+        try {
+            while (true) {
+                EventWrapper event = queue.take();
+                if (event.event instanceof CloseEvent) {
+                    System.out.println("Closing Event source.");
+                    break;
+                }
 
-            ctx.collect(event);
+                if (event.sleep > 0) {
+                    System.out.println("Sleeping event for " + event.sleep + "ms");
+                    Thread.sleep(event.sleep);
+                }
+                System.out.println("Publishing event " + event.event.getExternalId());
+                ctx.collect(event.event);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     public void cancel() {
-        queue.offer(CLOSE_EVENT);
+        queue.offer(new EventWrapper(CLOSE_EVENT, 0));
+    }
+
+    private static class EventWrapper implements Serializable {
+        private int sleep;
+        private Event event;
+
+        private EventWrapper(Event event, int sleep) {
+            this.sleep = sleep;
+            this.event = event;
+        }
     }
 
     private static class CloseEvent extends JsonEvent {
