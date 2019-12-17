@@ -19,23 +19,32 @@
 
 package io.github.oasis.model.rules;
 
+import io.github.oasis.model.Event;
+import io.github.oasis.model.defs.BaseDef;
+
 import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author iweerarathna
  */
-public class PointRule implements Serializable {
+public class PointRule extends BaseDef implements Serializable {
 
-    private long id;
     private String forEvent;
     private String source;
-    private String name;
     private Serializable conditionExpression;
     private double amount;
     private boolean currency;
     private Serializable amountExpression;
     private List<AdditionalPointReward> additionalPoints;
+
+    public boolean isSelfAggregatedRule() {
+        return "POINTS".equalsIgnoreCase(source);
+    }
+
+    public boolean canApplyForEvent(Event event) {
+        return event.getEventType().equals(forEvent);
+    }
 
     public static class AdditionalPointReward implements Serializable {
         private String toUser;
@@ -116,22 +125,6 @@ public class PointRule implements Serializable {
         this.forEvent = forEvent;
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public Serializable getConditionExpression() {
         return conditionExpression;
     }
@@ -150,6 +143,6 @@ public class PointRule implements Serializable {
 
     @Override
     public String toString() {
-        return "PointRule=" + id;
+        return "PointRule=" + getId();
     }
 }

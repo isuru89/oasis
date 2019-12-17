@@ -369,7 +369,7 @@ public class MappersTest {
         Assertions.assertEquals(event.getEventType(), model.getEventType());
         Assertions.assertEquals(rule.getName(), model.getRuleName());
         Assertions.assertEquals(notification.getTag(), model.getTag());
-        Assertions.assertEquals(rule.getId(), model.getRuleId().longValue());
+        Assertions.assertEquals(rule.getId(), model.getRuleId());
         Assertions.assertEquals(event.getSource(), model.getSourceId());
         Assertions.assertEquals(event.getTeam(), model.getTeamId());
         Assertions.assertEquals(event.getTeamScope(), model.getTeamScopeId());

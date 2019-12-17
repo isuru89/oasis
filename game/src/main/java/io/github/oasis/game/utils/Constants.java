@@ -24,6 +24,8 @@ package io.github.oasis.game.utils;
  */
 public final class Constants {
 
+    public static final String VARIABLE_TOTAL_POINTS = "$TOTAL";
+
     public static final String ENV_OASIS_GAME_ID = "OASIS_GAME_ID";
 
 }

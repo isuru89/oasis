@@ -37,12 +37,7 @@ import io.github.oasis.game.persist.mappers.MilestoneStateNotificationMapper;
 import io.github.oasis.game.persist.mappers.PointNotificationMapper;
 import io.github.oasis.game.persist.mappers.RaceNotificationMapper;
 import io.github.oasis.game.persist.mappers.RatingNotificationMapper;
-import io.github.oasis.game.process.EventTimestampSelector;
-import io.github.oasis.game.process.EventUserSelector;
-import io.github.oasis.game.process.FieldInjector;
-import io.github.oasis.game.process.PointErrorSplitter;
-import io.github.oasis.game.process.PointsFromBadgeMapper;
-import io.github.oasis.game.process.PointsFromMilestoneMapper;
+import io.github.oasis.game.process.*;
 import io.github.oasis.game.process.sinks.OasisBadgesSink;
 import io.github.oasis.game.process.sinks.OasisChallengeSink;
 import io.github.oasis.game.process.sinks.OasisMilestoneSink;
@@ -50,13 +45,10 @@ import io.github.oasis.game.process.sinks.OasisMilestoneStateSink;
 import io.github.oasis.game.process.sinks.OasisPointsSink;
 import io.github.oasis.game.process.sinks.OasisRaceSink;
 import io.github.oasis.game.process.sinks.OasisRatingSink;
-import io.github.oasis.model.DefinitionUpdateEvent;
-import io.github.oasis.model.Event;
-import io.github.oasis.model.FieldCalculator;
-import io.github.oasis.model.Milestone;
-import io.github.oasis.model.Rating;
+import io.github.oasis.model.*;
 import io.github.oasis.model.configs.ConfigKeys;
 import io.github.oasis.model.configs.Configs;
+import io.github.oasis.model.defs.BaseDef;
 import io.github.oasis.model.events.BadgeEvent;
 import io.github.oasis.model.events.ChallengeEvent;
 import io.github.oasis.model.events.EventNames;
@@ -122,8 +114,8 @@ public class OasisExecution {
 
     private IOutputHandler outputHandler;
 
-    private static MapStateDescriptor<Long, DefinitionUpdateEvent> definitionUpdateEventDescriptor =
-            new MapStateDescriptor<>("oasis.source.definition", Types.LONG, Types.POJO(DefinitionUpdateEvent.class));
+    private static MapStateDescriptor<Long, BaseDef> definitionUpdateEventDescriptor =
+            new MapStateDescriptor<>("oasis.source.definition", Types.LONG, Types.POJO(BaseDef.class));
 
     static void appendCheckpointStatus(StreamExecutionEnvironment env, Configs gameProperties) throws IOException {
         if (gameProperties.has(ConfigKeys.KEY_CHECKPOINT_ENABLED) &&
@@ -178,12 +170,18 @@ public class OasisExecution {
         KeyedStream<Event, Long> userStream = inputSource.keyBy(new EventUserSelector<>());
 
         //  create point operator
-        PointsOperator<Event> pointsOperator = new PointsOperator<>(pointRules);
-
+        BroadcastStream<DefinitionUpdateEvent> broadcast = env.addSource(definitionUpdates)
+                .broadcast(PointProcessor.BROADCAST_POINT_RULES_DESCRIPTOR);
         SplitStream<PointEvent> pointSplitStream = userStream
-                .flatMap(pointsOperator)
-                .uid(String.format("points-processor-%s", oasisId))
+                .connect(broadcast)
+                .process(new PointProcessor())
                 .split(new PointErrorSplitter());
+        //PointsOperator<Event> pointsOperator = new PointsOperator<>(pointRules);
+
+//        SplitStream<PointEvent> pointSplitStream = userStream
+//                .flatMap(pointsOperator)
+//                .uid(String.format("points-processor-%s", oasisId))
+//                .split(new PointErrorSplitter());
 
         DataStream<PointEvent> pointStream = pointSplitStream.select(PointErrorSplitter.NAME_POINT);
         DataStream<PointEvent> errorStream = pointSplitStream.select(PointErrorSplitter.NAME_ERROR);
@@ -381,6 +379,11 @@ public class OasisExecution {
         //
         //errorStream
 
+        return this;
+    }
+
+    public OasisExecution usingDefinitionUpdates(SourceFunction<DefinitionUpdateEvent> updateEventSource) {
+        this.definitionUpdates = updateEventSource;
         return this;
     }
 

@@ -149,6 +149,10 @@ public class Utils {
         return false;
     }
 
+    public static boolean isValidId(Long id) {
+        return id != null && id > 0;
+    }
+
     public static double asDouble(Object val) {
         if (val == null) {
             return 0.0;

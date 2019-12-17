@@ -39,6 +39,12 @@ public class PointEvent implements Event {
         refEvent = event;
     }
 
+    public static PointEvent create(Event event, Map<String, Pair<Double, PointRule>> pointEvents) {
+        PointEvent pointEvent = new PointEvent(event);
+        pointEvent.setPointEvents(pointEvents);
+        return pointEvent;
+    }
+
     public double getPointsForRefId(String pointRefId, double defaultValue) {
         Double val = getPointScore(pointRefId).getValue0();
         return val == null ? defaultValue : val;

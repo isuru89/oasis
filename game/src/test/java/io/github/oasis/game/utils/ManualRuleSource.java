@@ -20,8 +20,11 @@
 package io.github.oasis.game.utils;
 
 import io.github.oasis.model.DefinitionUpdateEvent;
+import io.github.oasis.model.DefinitionUpdateType;
+import io.github.oasis.model.defs.BaseDef;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
+import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -52,6 +55,12 @@ public class ManualRuleSource implements SourceFunction<DefinitionUpdateEvent> {
     @Override
     public void cancel() {
         queue.offer(CLOSE_EVENT);
+    }
+
+    public static ManualRuleSource createFromCollection(Collection<? extends BaseDef> initialDefinitions) {
+        ManualRuleSource source = new ManualRuleSource();
+        initialDefinitions.forEach(def -> source.emit(DefinitionUpdateEvent.create(DefinitionUpdateType.CREATED, def)));
+        return source;
     }
 
     private static class CloseEvent extends DefinitionUpdateEvent {
