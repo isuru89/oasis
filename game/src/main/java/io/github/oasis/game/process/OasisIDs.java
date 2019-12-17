@@ -29,6 +29,8 @@ public final class OasisIDs {
 
     public static final String CHALLENGE_PROCESSOR_ID = "oasis.id.process.challenge";
 
+    public static final String CHALLENGE_BROADCAST_STATE_ID = "oasis.state.broadcast.challenge";
+
     public static final String STATE_CHALLENGE_ID = "oasis.state.challenges";
     private static final String STATE_MILESTONE_FORMAT = "oasis.state.milestone.%d";
     private static final String STATE_RATING_FORMAT = "oasis.state.rating.%d";

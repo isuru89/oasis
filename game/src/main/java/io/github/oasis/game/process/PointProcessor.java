@@ -100,17 +100,17 @@ public class PointProcessor extends KeyedBroadcastProcessFunction<Long, Event, D
             Map<String, Object> vars = new HashMap<>(event.getAllFieldValues());
             vars.put(Constants.VARIABLE_TOTAL_POINTS, totalPoints);
 
-            for (PointRule rule : selfAggregatedRules) {
-                if (Utils.eventEquals(event, rule.getForEvent())) {
-                    try {
-                        executeRuleConditionAndValue(rule, vars)
-                                .ifPresent(p -> points.put(rule.getName(), Pair.of(p, rule)));
+            selfAggregatedRules.stream()
+                    .filter(pointRule -> Utils.eventEquals(event, pointRule.getForEvent()))
+                    .forEach(rule -> {
+                        try {
+                            executeRuleConditionAndValue(rule, vars)
+                                    .ifPresent(p -> points.put(rule.getName(), Pair.of(p, rule)));
 
-                    } catch (Throwable t) {
-                        out.collect(new ErrorPointEvent(t.getMessage(), t, event, rule));
-                    }
-                }
-            }
+                        } catch (Throwable t) {
+                            out.collect(new ErrorPointEvent(t.getMessage(), t, event, rule));
+                        }
+                    });
         }
     }
 

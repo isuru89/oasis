@@ -59,6 +59,8 @@ abstract class AbstractTest {
 
     private Oasis beginTestExec(String id, String... inputs) throws Exception {
         List<SourceFunction> sourceFunctions = new ArrayList<>();
+        ManualRuleSource ruleSource = null;
+        List<PointRule> pointRules = null;
         IOutputHandler assertOutput = TestUtils.getAssertConfigs(new PointCollector(id),
                 new BadgeCollector(id),
                 new MilestoneCollector(id),
@@ -95,11 +97,10 @@ abstract class AbstractTest {
             execution = execution.fieldTransformer(TestUtils.getFields(rulesFields));
         }
         if (TestUtils.isResourceExist(rulesPoints)) {
-            List<PointRule> pointRules = TestUtils.getPointRules(rulesPoints);
-            ManualRuleSource fromCollection = ManualRuleSource.createFromCollection(pointRules);
+            pointRules = TestUtils.getPointRules(rulesPoints);
+            ruleSource = new ManualRuleSource();
             execution = execution.setPointRules(pointRules)
-                .usingDefinitionUpdates(fromCollection);
-            sourceFunctions.add(fromCollection);
+                .usingDefinitionUpdates(ruleSource);
         }
         if (TestUtils.isResourceExist(rulesBadges)) {
             execution = execution.setBadgeRules(TestUtils.getBadgeRules(rulesBadges));
@@ -111,9 +112,34 @@ abstract class AbstractTest {
             execution = execution.setRatings(TestUtils.getRatingRules(rulesRatings));
         }
 
-        execution = execution.outputHandler(assertOutput)
+        OasisExecution executionRef = execution.outputHandler(assertOutput)
                 .build(oasis, TestUtils.createEnv());
-        execution.start();
+
+        Thread thread = new Thread(() -> {
+            try {
+                executionRef.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
+
+
+
+        if (ruleSource != null) {
+            if (pointRules != null) {
+                ruleSource.pumpAll(pointRules);
+            }
+        }
+
+
+
+        rfs.begin();
+
+        if (ruleSource != null) ruleSource.cancel();
+
+        thread.join();
+
 
         // assertions
         //

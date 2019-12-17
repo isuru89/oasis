@@ -20,12 +20,17 @@
 package io.github.oasis.game.utils;
 
 import io.github.oasis.model.DefinitionUpdateEvent;
+import io.github.oasis.model.DefinitionUpdateType;
+import io.github.oasis.model.defs.BaseDef;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
+import static io.github.oasis.model.DefinitionUpdateEvent.create;
 
 /**
  * @author Isuru Weerarathna
@@ -71,6 +76,10 @@ public class ManualRuleSource implements SourceFunction<DefinitionUpdateEvent> {
     @Override
     public void cancel() {
         queue.offer(new EventWrapper(CLOSE_EVENT, 0));
+    }
+
+    public void pumpAll(Collection<? extends BaseDef> definitions) {
+        definitions.forEach(def -> this.emit(create(DefinitionUpdateType.CREATED, def)));
     }
 
     private static class EventWrapper implements Serializable {
