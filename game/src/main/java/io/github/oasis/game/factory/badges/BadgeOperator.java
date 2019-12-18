@@ -168,7 +168,7 @@ public class BadgeOperator {
         FilterFunction<PointEvent> filterFunction = new FilterFunction<PointEvent>() {
             @Override
             public boolean filter(PointEvent value) {
-                return value.containsPoint(badgeRule.getPointsId());
+                return value.containsScoring(badgeRule.getPointsId());
             }
         };
 

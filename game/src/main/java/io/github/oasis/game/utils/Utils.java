@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +38,10 @@ public class Utils {
 
     private static final Pattern TIME_PATTERN = Pattern.compile("([0-9]+)\\s*([a-zA-Z]+)");
     private static final Pattern NUMBER_PATTERN = Pattern.compile("([0-9\\\\.]+)\\s*([kKmMbB]?)");
+
+    public static <K, V> Map<K,V> getCloneOfMap(Map<K, V> original) {
+        return new HashMap<>(original);
+    }
 
     public static <T> T firstNonNull(T v1, T v2) {
         if (v1 != null) {

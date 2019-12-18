@@ -26,12 +26,12 @@ public class PointsTest extends AbstractTest {
 
     @Test
     public void pointsTest() throws Exception {
-        beginTest("points-test1");
+        beginTest("points-test1", 1000);
     }
 
     @Test
     public void selfPointsTest() throws Exception {
-        beginTest("points-test2");
+        beginTest("points-test2", 1000);
     }
 
 }

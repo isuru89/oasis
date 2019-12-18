@@ -23,7 +23,6 @@ import io.github.oasis.game.factory.ChallengeOperator;
 import io.github.oasis.game.factory.MilestoneNotifier;
 import io.github.oasis.game.factory.MilestoneOperator;
 import io.github.oasis.game.factory.PointsNotifier;
-import io.github.oasis.game.factory.PointsOperator;
 import io.github.oasis.game.factory.RaceOperator;
 import io.github.oasis.game.factory.RatingNotifier;
 import io.github.oasis.game.factory.RatingsOperator;
@@ -176,12 +175,6 @@ public class OasisExecution {
                 .connect(broadcast)
                 .process(new PointProcessor())
                 .split(new PointErrorSplitter());
-        //PointsOperator<Event> pointsOperator = new PointsOperator<>(pointRules);
-
-//        SplitStream<PointEvent> pointSplitStream = userStream
-//                .flatMap(pointsOperator)
-//                .uid(String.format("points-processor-%s", oasisId))
-//                .split(new PointErrorSplitter());
 
         DataStream<PointEvent> pointStream = pointSplitStream.select(PointErrorSplitter.NAME_POINT);
         DataStream<PointEvent> errorStream = pointSplitStream.select(PointErrorSplitter.NAME_ERROR);

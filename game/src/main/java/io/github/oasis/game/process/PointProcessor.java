@@ -21,25 +21,20 @@
 
 package io.github.oasis.game.process;
 
-import io.github.oasis.game.factory.PointsOperator;
 import io.github.oasis.game.utils.Constants;
 import io.github.oasis.game.utils.Utils;
 import io.github.oasis.model.DefinitionUpdateEvent;
 import io.github.oasis.model.DefinitionUpdateType;
 import io.github.oasis.model.Event;
-import io.github.oasis.model.collect.Pair;
 import io.github.oasis.model.defs.BaseDef;
 import io.github.oasis.model.events.ErrorPointEvent;
 import io.github.oasis.model.events.PointEvent;
 import io.github.oasis.model.rules.PointRule;
-import lombok.Builder;
-import org.apache.flink.api.common.functions.RichFlatMapFunction;
-import org.apache.flink.api.common.state.MapState;
+import io.github.oasis.model.rules.Scoring;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.streaming.api.functions.co.KeyedBroadcastProcessFunction;
 import org.apache.flink.util.Collector;
-import org.mvel2.MVEL;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -49,7 +44,7 @@ public class PointProcessor extends KeyedBroadcastProcessFunction<Long, Event, D
 
     public static final MapStateDescriptor<Long, BaseDef> BROADCAST_POINT_RULES_DESCRIPTOR =
             new MapStateDescriptor<>(
-                    "oasis.states.broadcast.points",
+                    OasisIDs.POINTS_BROADCAST_STATE_ID,
                     Types.LONG,
                     Types.GENERIC(BaseDef.class)
             );
@@ -57,9 +52,10 @@ public class PointProcessor extends KeyedBroadcastProcessFunction<Long, Event, D
     @Override
     public void processElement(Event event, ReadOnlyContext ctx, Collector<PointEvent> out) throws Exception {
         Iterable<Map.Entry<Long, BaseDef>> entries = ctx.getBroadcastState(BROADCAST_POINT_RULES_DESCRIPTOR).immutableEntries();
-        Map<String, Pair<Double, PointRule>> scoredPoints = new HashMap<>();
+        Map<String, Scoring> scoredPoints = new HashMap<>();
         List<PointRule> selfAggregatedRules = new ArrayList<>();
         double totalPoints = 0;
+        Map<String, Object> eventVariables = Utils.getCloneOfMap(event.getAllFieldValues());
 
         for (Map.Entry<Long, BaseDef> entry : entries) {
             PointRule rule = (PointRule) entry.getValue();
@@ -70,14 +66,14 @@ public class PointProcessor extends KeyedBroadcastProcessFunction<Long, Event, D
 
             if (rule.canApplyForEvent(event)) {
                 try {
-                    Optional<Double> amountResult = executeRuleConditionAndValue(rule, event.getAllFieldValues());
+                    Optional<Double> amountResult = executeRuleConditionAndValue(rule, eventVariables);
                     if (amountResult.isPresent()) {
-                        double d = amountResult.get();
-                        scoredPoints.put(rule.getName(), Pair.of(d, rule));
+                        double amount = amountResult.get();
+                        scoredPoints.put(rule.getName(), Scoring.create(amount, rule));
 
                         // calculate points for other users other than main user of this event belongs to
-                        calculateRedirectedPoints(event, rule, out);
-                        totalPoints += d;
+                        calculateRedirectedPoints(event, rule, eventVariables, out);
+                        totalPoints += amount;
                     }
                 } catch (Throwable t) {
                     out.collect(new ErrorPointEvent(t.getMessage(), t, event, rule));
@@ -85,27 +81,28 @@ public class PointProcessor extends KeyedBroadcastProcessFunction<Long, Event, D
             }
         }
 
-        evalSelfRules(event, selfAggregatedRules, scoredPoints, totalPoints, out);
+        evaluateSelfRules(event, selfAggregatedRules, scoredPoints, totalPoints, out);
 
-        PointEvent pe = PointEvent.create(event, scoredPoints);
-        out.collect(pe);
+        out.collect(PointEvent.create(event, scoredPoints));
     }
 
-    private void evalSelfRules(Event event,
-                               List<PointRule> selfAggregatedRules,
-                               Map<String, Pair<Double, PointRule>> points,
-                               double totalPoints,
-                               Collector<PointEvent> out) {
+    private void evaluateSelfRules(Event event,
+                                   List<PointRule> selfAggregatedRules,
+                                   Map<String, Scoring> scoringMap,
+                                   double totalPoints,
+                                   Collector<PointEvent> out) {
         if (Utils.isNonEmpty(selfAggregatedRules)) {
-            Map<String, Object> vars = new HashMap<>(event.getAllFieldValues());
-            vars.put(Constants.VARIABLE_TOTAL_POINTS, totalPoints);
+            Map<String, Object> eventVariables = Utils.getCloneOfMap(event.getAllFieldValues());
+            eventVariables.put(Constants.VARIABLE_TOTAL_POINTS, totalPoints);
 
             selfAggregatedRules.stream()
                     .filter(pointRule -> Utils.eventEquals(event, pointRule.getForEvent()))
                     .forEach(rule -> {
                         try {
-                            executeRuleConditionAndValue(rule, vars)
-                                    .ifPresent(p -> points.put(rule.getName(), Pair.of(p, rule)));
+                            executeRuleConditionAndValue(rule, eventVariables)
+                                    .ifPresent(scoredPoints -> scoringMap.put(
+                                            rule.getName(),
+                                            Scoring.create(scoredPoints, rule)));
 
                         } catch (Throwable t) {
                             out.collect(new ErrorPointEvent(t.getMessage(), t, event, rule));
@@ -114,17 +111,19 @@ public class PointProcessor extends KeyedBroadcastProcessFunction<Long, Event, D
         }
     }
 
-    private synchronized void calculateRedirectedPoints(Event event, PointRule rule, Collector<PointEvent> out) {
+    private synchronized void calculateRedirectedPoints(Event event, PointRule rule,
+                                                        Map<String, Object> eventVariables,
+                                                        Collector<PointEvent> out) {
         if (Utils.isNonEmpty(rule.getAdditionalPoints())) {
             for (PointRule.AdditionalPointReward reward : rule.getAdditionalPoints()) {
                 Long userId = event.getUserId(reward.getToUser());
                 if (Utils.isValidId(userId)) {
-                    Double amount = evaluateAmount(reward.getAmount(), event.getAllFieldValues());
+                    Double amount = evaluateAmount(reward.getAmount(), eventVariables);
 
                     PointEvent pointEvent = new RedirectedPointEvent(event, reward.getToUser());
-                    Map<String, Pair<Double, PointRule>> scoredPoints = new HashMap<>();
-                    scoredPoints.put(reward.getName(), Pair.of(amount, rule));
-                    pointEvent.setPointEvents(scoredPoints);
+                    Map<String, Scoring> scoredPoints = new HashMap<>();
+                    scoredPoints.put(reward.getName(), Scoring.create(amount, rule));
+                    pointEvent.replacePointScoring(scoredPoints);
                     out.collect(pointEvent);
                 }
             }
@@ -132,8 +131,8 @@ public class PointProcessor extends KeyedBroadcastProcessFunction<Long, Event, D
     }
 
     private Optional<Double> executeRuleConditionAndValue(PointRule rule, Map<String, Object> variables) throws IOException {
-        boolean status = Utils.evaluateCondition(rule.getConditionExpression(), variables);
-        if (status) {
+        boolean satisfiesCondition = Utils.evaluateCondition(rule.getConditionExpression(), variables);
+        if (satisfiesCondition) {
             double p;
             if (Objects.nonNull(rule.getAmountExpression())) {
                 p = evaluateAmount(rule.getAmountExpression(), variables);
@@ -171,7 +170,7 @@ public class PointProcessor extends KeyedBroadcastProcessFunction<Long, Event, D
         }
     }
 
-    public static class RedirectedPointEvent extends PointEvent {
+    public static class RedirectedPointEvent extends PointEvent implements Serializable {
 
         private String ownUserField;
 

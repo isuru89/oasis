@@ -69,8 +69,8 @@ public class MilestonePointSumProcess extends KeyedProcessFunction<Long, PointEv
         double accumulatedSum;
         if (milestone.hasPointReferenceIds()) {
             accumulatedSum = milestone.getPointIds().stream()
-                    .filter(value::containsPoint)
-                    .mapToDouble(pid -> value.getPointsForRefId(pid, DEFAULT_POINT_VALUE))
+                    .filter(value::containsScoring)
+                    .mapToDouble(pid -> value.getScoreForPointRule(pid, DEFAULT_POINT_VALUE))
                     .sum();
         } else {
             accumulatedSum = value.getTotalScore();

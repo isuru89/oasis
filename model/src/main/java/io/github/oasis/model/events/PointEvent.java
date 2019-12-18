@@ -20,8 +20,7 @@
 package io.github.oasis.model.events;
 
 import io.github.oasis.model.Event;
-import io.github.oasis.model.collect.Pair;
-import io.github.oasis.model.rules.PointRule;
+import io.github.oasis.model.rules.Scoring;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +30,7 @@ import java.util.Map;
  */
 public class PointEvent implements Event {
 
-    private final Map<String, Pair<Double, PointRule>> receivedPoints = new HashMap<>();
+    private final Map<String, Scoring> receivedPoints = new HashMap<>();
     private double totalScore = 0.0;
     private Event refEvent;
 
@@ -39,24 +38,24 @@ public class PointEvent implements Event {
         refEvent = event;
     }
 
-    public static PointEvent create(Event event, Map<String, Pair<Double, PointRule>> pointEvents) {
+    public static PointEvent create(Event event, Map<String, Scoring> pointScores) {
         PointEvent pointEvent = new PointEvent(event);
-        pointEvent.setPointEvents(pointEvents);
+        pointEvent.replacePointScoring(pointScores);
         return pointEvent;
     }
 
-    public double getPointsForRefId(String pointRefId, double defaultValue) {
-        Double val = getPointScore(pointRefId).getValue0();
-        return val == null ? defaultValue : val;
+    public double getScoreForPointRule(String pointRefId, double defaultValue) {
+        return containsScoring(pointRefId) ? getPointScore(pointRefId).getScore() : defaultValue;
     }
 
-    public Map<String, Pair<Double, PointRule>> getReceivedPoints() {
+    public Map<String, Scoring> getScores() {
         return receivedPoints;
     }
 
-    public void setPointEvents(Map<String, Pair<Double, PointRule>> pointEvents) {
-        for (Map.Entry<String, Pair<Double, PointRule>> entry : pointEvents.entrySet()) {
-            totalScore += entry.getValue().getValue0();
+    public void replacePointScoring(Map<String, Scoring> pointScores) {
+        totalScore = 0.0;
+        for (Map.Entry<String, Scoring> entry : pointScores.entrySet()) {
+            totalScore += entry.getValue().getScore();
             receivedPoints.put(entry.getKey(), entry.getValue());
         }
     }
@@ -65,11 +64,11 @@ public class PointEvent implements Event {
         return totalScore;
     }
 
-    public Pair<Double, PointRule> getPointScore(String pointId) {
-        return getReceivedPoints().get(pointId);
+    public Scoring getPointScore(String pointId) {
+        return getScores().get(pointId);
     }
 
-    public boolean containsPoint(String pointEventId) {
+    public boolean containsScoring(String pointEventId) {
         return receivedPoints.containsKey(pointEventId);
     }
 

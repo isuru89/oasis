@@ -41,11 +41,15 @@ import java.util.stream.Stream;
 abstract class AbstractTest {
 
     void beginTest(String id) throws Exception {
+        beginTest(id, 0);
+    }
+
+    void beginTest(String id, long initialSourceDelay) throws Exception {
         Oasis oasis = null;
         try {
             FileUtils.deleteQuietly(new File("./data/" + id));
             Memo.clearAll(id);
-            oasis = beginTestExec(id);
+            oasis = beginTestExec(id, initialSourceDelay);
         } finally {
             Memo.clearAll(id);
             if (oasis != null) {
@@ -57,8 +61,7 @@ abstract class AbstractTest {
         }
     }
 
-    private Oasis beginTestExec(String id, String... inputs) throws Exception {
-        List<SourceFunction> sourceFunctions = new ArrayList<>();
+    private Oasis beginTestExec(String id, long initialDelay, String... inputs) throws Exception {
         ManualRuleSource ruleSource = null;
         List<PointRule> pointRules = null;
         IOutputHandler assertOutput = TestUtils.getAssertConfigs(new PointCollector(id),
@@ -87,9 +90,9 @@ abstract class AbstractTest {
         ResourceFileStream rfs;
         OasisExecution execution = new OasisExecution();
         if (inputs == null || inputs.length == 0) {
-            rfs = new ResourceFileStream(Collections.singletonList(id + "/input.csv"));
+            rfs = new DelayedResourceFileStream(Collections.singletonList(id + "/input.csv"), initialDelay);
         } else {
-            rfs = new ResourceFileStream(Stream.of(inputs).map(s -> id + "/" + s).collect(Collectors.toList()));
+            rfs = new DelayedResourceFileStream(Stream.of(inputs).map(s -> id + "/" + s).collect(Collectors.toList()), initialDelay);
         }
         execution = execution.withSource(rfs);
 
