@@ -207,7 +207,7 @@ abstract class AbstractTest {
             Assertions.assertNull(Memo.getBadgeErrors(id));
             expected.sort(Comparator.comparingLong(o -> o.f0));
             actual.sort(Comparator.comparingLong(o -> o.f0));
-            Assertions.assertEquals(expected.size(), actual.size(), "Expected badges are not equal!");
+            //assertSize(expected, actual, "Expected badges are not equal!");
 
             assertBadges(actual, expected);
         }
@@ -225,6 +225,13 @@ abstract class AbstractTest {
         return oasis;
     }
 
+    private void assertSize(List<?> expected, List<?> actual, String message) {
+        if (expected.size() != actual.size()) {
+            System.out.println("Expected: " + expected);
+            System.out.println("Actual: " + actual);
+            Assertions.fail(message + " (" + expected.size() + " != " + actual.size() + ")");
+        }
+    }
 
     private void assertMilestones(List<Tuple4<Long, Integer, Event, Milestone>> actual,
                                   List<Tuple4<Long, String, Integer, String>> expected) {

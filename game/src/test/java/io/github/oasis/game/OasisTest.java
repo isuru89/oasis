@@ -20,11 +20,12 @@
 package io.github.oasis.game;
 
 import io.github.oasis.game.utils.BadgeCollector;
+import io.github.oasis.game.utils.DelayedResourceFileStream;
+import io.github.oasis.game.utils.ManualRuleSource;
 import io.github.oasis.game.utils.MilestoneCollector;
 import io.github.oasis.game.utils.PointCollector;
 import io.github.oasis.game.utils.RaceCollector;
 import io.github.oasis.game.utils.RatingsCollector;
-import io.github.oasis.game.utils.ResourceFileStream;
 import io.github.oasis.game.utils.TestUtils;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.defs.FieldDef;
@@ -75,13 +76,12 @@ public class OasisTest {
         Oasis oasis = new Oasis("test-1");
 
         List<FieldDef> fields = TestUtils.getFields("fields.yml");
+        DelayedResourceFileStream drfs = new DelayedResourceFileStream("subs.csv", false, 1000);
+        ManualRuleSource ruleSource = new ManualRuleSource(drfs);
 
         OasisExecution execution = new OasisExecution()
-                .withSource(new ResourceFileStream("subs.csv", false))
-                .fieldTransformer(fields)
-                //.setBadgeRules(TestUtils.getBadgeRules("badges.yml"))
-                //.setMilestones(TestUtils.getMilestoneRules("milestones.yml"))
-                //.setPointRules(TestUtils.getPointRules("points.yml"))
+                .withSource(drfs)
+                .usingDefinitionUpdates(ruleSource)
                 .outputHandler(assertOutputs)
                 .build(oasis, TestUtils.createEnv());
 
@@ -99,27 +99,20 @@ public class OasisTest {
             }
         });
 
-        execution.start();
+        Thread thread = new Thread(() -> {
+            try {
+                execution.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
 
-    }
+        ruleSource.pumpAll(fields);
+        drfs.begin();
+        ruleSource.cancel();
 
-    @Test
-    public void buildOasisWithoutAnyRule() throws Exception {
-        try {
-            Oasis oasis = new Oasis("test-1");
-            OasisExecution execution = new OasisExecution()
-                    .withSource(new ResourceFileStream("subs.csv", false))
-                    .build(oasis);
-
-            Assertions.assertNotNull(execution);
-
-            execution.start();
-        } finally {
-//            if (DbPool.get("default") != null) {
-//                DbPool.get("default").shutdown();
-//            }
-            //FileUtils.deleteQuietly(configs.getDataDir());
-        }
+        thread.join();
     }
 
     @Test

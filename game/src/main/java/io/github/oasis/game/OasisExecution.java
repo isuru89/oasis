@@ -97,6 +97,7 @@ import org.apache.flink.util.OutputTag;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -166,18 +167,16 @@ public class OasisExecution {
 
         DataStreamSource<Event> rawSource = env.addSource(eventSource);
 
-        BroadcastStream<DefinitionUpdateEvent> broadcast = env.addSource(definitionUpdates)
-                .broadcast(DefinitionUpdateState.BROADCAST_DEF_UPDATE_DESCRIPTOR);
-        if (Objects.nonNull(broadcast)) {
-            inputSource = rawSource.uid(rawSrcStr)
-                    .connect(broadcast)
-                    .process(new FieldInjector<>())
-                    .uid(String.format("kpi-events-%s", oasisId))
-                    .assignTimestampsAndWatermarks(new EventTimestampSelector<>());
-        } else {
-            inputSource = rawSource.uid(rawSrcStr)
-                    .assignTimestampsAndWatermarks(new EventTimestampSelector<>());
-        }
+        BroadcastStream<DefinitionUpdateEvent> broadcast = Objects.nonNull(definitionUpdates)
+            ? env.addSource(definitionUpdates).broadcast(DefinitionUpdateState.BROADCAST_DEF_UPDATE_DESCRIPTOR)
+            : env.fromCollection(Collections.singletonList(new DefinitionUpdateEvent())).broadcast(DefinitionUpdateState.BROADCAST_DEF_UPDATE_DESCRIPTOR);
+
+        inputSource = rawSource.uid(rawSrcStr)
+                .connect(broadcast)
+                .process(new FieldInjector<>())
+                .uid(String.format("kpi-events-%s", oasisId))
+                .assignTimestampsAndWatermarks(new EventTimestampSelector<>());
+
 
         KeyedStream<Event, Long> userStream = inputSource.keyBy(new EventUserSelector<>());
 

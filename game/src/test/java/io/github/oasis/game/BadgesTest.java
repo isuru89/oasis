@@ -29,17 +29,17 @@ public class BadgesTest extends AbstractTest {
 
     @Test
     public void testBadges() throws Exception {
-        beginTest("badge-test1");
+        beginTest("badge-test1", 2000);
     }
 
     @Test
     public void testTimeBadges() throws Exception {
-        beginTest("badge-time-test");
+        beginTest("badge-time-test", 1000);
     }
 
     @Test
     public void testBadgesFromPoints() throws Exception {
-        beginTest("badge-test-points");
+        beginTest("badge-test-points", 1000);
     }
 
     @Test
