@@ -27,7 +27,7 @@ import io.github.oasis.game.utils.RatingsCollector;
 import io.github.oasis.game.utils.ResourceFileStream;
 import io.github.oasis.game.utils.TestUtils;
 import io.github.oasis.model.Event;
-import io.github.oasis.model.FieldCalculator;
+import io.github.oasis.model.defs.FieldDef;
 import io.github.oasis.model.handlers.IOutputHandler;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -74,7 +74,7 @@ public class OasisTest {
                 new RatingsCollector("t"), new RaceCollector("t"));
         Oasis oasis = new Oasis("test-1");
 
-        List<FieldCalculator> fields = TestUtils.getFields("fields.yml");
+        List<FieldDef> fields = TestUtils.getFields("fields.yml");
 
         OasisExecution execution = new OasisExecution()
                 .withSource(new ResourceFileStream("subs.csv", false))
@@ -86,7 +86,7 @@ public class OasisTest {
                 .build(oasis, TestUtils.createEnv());
 
         // check field injections exists...
-        Set<String> fieldNames = fields.stream().map(FieldCalculator::getFieldName).collect(Collectors.toSet());
+        Set<String> fieldNames = fields.stream().map(FieldDef::getFieldName).collect(Collectors.toSet());
         execution.getInputSource().filter(new FilterFunction<Event>() {
             @Override
             public boolean filter(Event value) throws Exception {

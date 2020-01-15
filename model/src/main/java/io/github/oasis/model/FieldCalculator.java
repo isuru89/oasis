@@ -19,6 +19,8 @@
 
 package io.github.oasis.model;
 
+import io.github.oasis.model.defs.FieldDef;
+
 import java.io.Serializable;
 
 /**
@@ -30,7 +32,17 @@ public class FieldCalculator implements Serializable {
     private int priority;
     private String forEvent;
     private String fieldName;
-    private Serializable expression;
+    private String expression;
+
+    public static FieldDef convertToDef(FieldCalculator calculator) {
+        FieldDef def = new FieldDef();
+        def.setId(calculator.id);
+        def.setExpression(calculator.expression);
+        def.setFieldName(calculator.fieldName);
+        def.setForEvent(calculator.forEvent);
+        def.setPriority(calculator.priority);
+        return def;
+    }
 
     public int getPriority() {
         return priority;
@@ -68,7 +80,7 @@ public class FieldCalculator implements Serializable {
         return expression;
     }
 
-    public void setExpression(Serializable expression) {
+    public void setExpression(String expression) {
         this.expression = expression;
     }
 }

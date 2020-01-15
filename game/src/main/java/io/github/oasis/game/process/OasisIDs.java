@@ -30,6 +30,7 @@ public final class OasisIDs {
     public static final String CHALLENGE_PROCESSOR_ID = "oasis.id.process.challenge";
 
     public static final String CHALLENGE_BROADCAST_STATE_ID = "oasis.state.broadcast.challenges";
+    public static final String FIELDS_BROADCAST_STATE_ID = "oasis.state.broadcast.fields";
     public static final String POINTS_BROADCAST_STATE_ID = "oasis.state.broadcast.points";
 
     public static final String STATE_CHALLENGE_ID = "oasis.state.challenges";

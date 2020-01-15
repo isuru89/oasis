@@ -38,6 +38,7 @@ import io.github.oasis.model.Milestone;
 import io.github.oasis.model.Rating;
 import io.github.oasis.model.configs.ConfigKeys;
 import io.github.oasis.model.configs.Configs;
+import io.github.oasis.model.defs.FieldDef;
 import io.github.oasis.model.defs.GameDef;
 import io.github.oasis.model.defs.OasisGameDef;
 import io.github.oasis.model.handlers.IOutputHandler;
@@ -54,6 +55,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -73,7 +75,9 @@ public class Main {
             Oasis oasis = new Oasis(gameDef.getName());
 
             SourceFunction<Event> source = createSource(gameProperties);
-            List<FieldCalculator> kpis = KpiParser.parse(oasisGameDef.getKpis());
+            List<FieldDef> kpis = KpiParser.parse(oasisGameDef.getKpis()).stream()
+                    .map(FieldCalculator::convertToDef)
+                    .collect(Collectors.toList());
             List<PointRule> pointRules = PointParser.parse(oasisGameDef.getPoints());
             List<Milestone> milestones = MilestoneParser.parse(oasisGameDef.getMilestones());
             List<BadgeRule> badges = BadgeParser.parse(oasisGameDef.getBadges());

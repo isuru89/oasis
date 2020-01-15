@@ -26,7 +26,6 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -41,6 +40,12 @@ public class ManualRuleSource implements SourceFunction<DefinitionUpdateEvent> {
 
     private BlockingQueue<EventWrapper> queue = new ArrayBlockingQueue<>(10);
 
+    private ITestLockable lockable;
+
+    public ManualRuleSource(ITestLockable lockable) {
+        this.lockable = lockable;
+    }
+
     public ManualRuleSource emit(DefinitionUpdateEvent event) {
         queue.offer(new EventWrapper(event, 0));
         return this;
@@ -54,6 +59,7 @@ public class ManualRuleSource implements SourceFunction<DefinitionUpdateEvent> {
     @Override
     public void run(SourceContext<DefinitionUpdateEvent> ctx) {
         try {
+            lockable.lock();
             while (true) {
                 EventWrapper event = queue.take();
                 if (event.updateEvent instanceof CloseEvent) {
@@ -65,11 +71,13 @@ public class ManualRuleSource implements SourceFunction<DefinitionUpdateEvent> {
                     System.out.println("Sleeping rule for " + event.sleep + "ms");
                     Thread.sleep(event.sleep);
                 }
-                System.out.println("Emiting Rule: " + event.updateEvent.getType() + " " + event.updateEvent.getBaseDef());
+                System.out.println("Emitting Rule: " + event.updateEvent.getType() + " " + event.updateEvent.getBaseDef());
                 ctx.collect(event.updateEvent);
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            lockable.signal();
         }
     }
 

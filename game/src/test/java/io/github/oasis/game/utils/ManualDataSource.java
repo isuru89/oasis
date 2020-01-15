@@ -24,14 +24,13 @@ import io.github.oasis.model.events.JsonEvent;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
 import java.io.Serializable;
-import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 /**
  * @author Isuru Weerarathna
  */
-public class ManualDataSource implements SourceFunction<Event> {
+public class ManualDataSource implements SourceFunction<Event>, ITestLockable {
 
     private static final CloseEvent CLOSE_EVENT = new CloseEvent();
 
@@ -72,6 +71,16 @@ public class ManualDataSource implements SourceFunction<Event> {
     @Override
     public void cancel() {
         queue.offer(new EventWrapper(CLOSE_EVENT, 0));
+    }
+
+    @Override
+    public void lock() throws InterruptedException {
+
+    }
+
+    @Override
+    public void signal() {
+
     }
 
     private static class EventWrapper implements Serializable {

@@ -54,7 +54,7 @@ public class ChallengeTest extends AbstractTest {
         env.setParallelism(1);
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         ManualDataSource eventSource = new ManualDataSource();
-        ManualRuleSource rulesSource = new ManualRuleSource();
+        ManualRuleSource rulesSource = new ManualRuleSource(eventSource);
 
         SingleOutputStreamOperator<Event> dataStream = env.addSource(eventSource).uid("source-events")
                 .assignTimestampsAndWatermarks(new EventTimestampSelector<>());

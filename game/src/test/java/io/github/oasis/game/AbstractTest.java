@@ -19,10 +19,21 @@
 
 package io.github.oasis.game;
 
-import io.github.oasis.game.utils.*;
+import io.github.oasis.game.utils.BadgeCollector;
+import io.github.oasis.game.utils.ChallengeSink;
+import io.github.oasis.game.utils.DelayedResourceFileStream;
+import io.github.oasis.game.utils.ManualRuleSource;
+import io.github.oasis.game.utils.Memo;
+import io.github.oasis.game.utils.MilestoneCollector;
+import io.github.oasis.game.utils.PointCollector;
+import io.github.oasis.game.utils.RaceCollector;
+import io.github.oasis.game.utils.RatingsCollector;
+import io.github.oasis.game.utils.TestUtils;
+import io.github.oasis.game.utils.Utils;
 import io.github.oasis.model.Badge;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.Milestone;
+import io.github.oasis.model.defs.FieldDef;
 import io.github.oasis.model.handlers.IOutputHandler;
 import io.github.oasis.model.rules.BadgeRule;
 import io.github.oasis.model.rules.PointRule;
@@ -30,11 +41,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.tuple.Tuple6;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,8 +75,8 @@ abstract class AbstractTest {
     }
 
     private Oasis beginTestExec(String id, long initialDelay, String... inputs) throws Exception {
-        ManualRuleSource ruleSource = null;
         List<PointRule> pointRules = null;
+        List<FieldDef> fieldsDefList = null;
         IOutputHandler assertOutput = TestUtils.getAssertConfigs(new PointCollector(id),
                 new BadgeCollector(id),
                 new MilestoneCollector(id),
@@ -87,23 +100,22 @@ abstract class AbstractTest {
         String outputChallenges = id + "/output-challenges.csv";
         String outputRaces = id + "/output-races.csv";
 
-        ResourceFileStream rfs;
+        DelayedResourceFileStream rfs;
         OasisExecution execution = new OasisExecution();
         if (inputs == null || inputs.length == 0) {
             rfs = new DelayedResourceFileStream(Collections.singletonList(id + "/input.csv"), initialDelay);
         } else {
             rfs = new DelayedResourceFileStream(Stream.of(inputs).map(s -> id + "/" + s).collect(Collectors.toList()), initialDelay);
         }
+        ManualRuleSource ruleSource = new ManualRuleSource(rfs);
         execution = execution.withSource(rfs);
 
         if (TestUtils.isResourceExist(rulesFields)) {
-            execution = execution.fieldTransformer(TestUtils.getFields(rulesFields));
+            fieldsDefList = TestUtils.getFields(rulesFields);
         }
         if (TestUtils.isResourceExist(rulesPoints)) {
             pointRules = TestUtils.getPointRules(rulesPoints);
-            ruleSource = new ManualRuleSource();
-            execution = execution.setPointRules(pointRules)
-                .usingDefinitionUpdates(ruleSource);
+            execution = execution.setPointRules(pointRules);
         }
         if (TestUtils.isResourceExist(rulesBadges)) {
             execution = execution.setBadgeRules(TestUtils.getBadgeRules(rulesBadges));
@@ -115,7 +127,9 @@ abstract class AbstractTest {
             execution = execution.setRatings(TestUtils.getRatingRules(rulesRatings));
         }
 
-        OasisExecution executionRef = execution.outputHandler(assertOutput)
+        OasisExecution executionRef = execution
+                .usingDefinitionUpdates(ruleSource)
+                .outputHandler(assertOutput)
                 .build(oasis, TestUtils.createEnv());
 
         Thread thread = new Thread(() -> {
@@ -127,19 +141,15 @@ abstract class AbstractTest {
         });
         thread.start();
 
-
-
-        if (ruleSource != null) {
-            if (pointRules != null) {
-                ruleSource.pumpAll(pointRules);
-            }
+        if (fieldsDefList != null) {
+            ruleSource.pumpAll(fieldsDefList);
+        }
+        if (pointRules != null) {
+            ruleSource.pumpAll(pointRules);
         }
 
-
-
         rfs.begin();
-
-        if (ruleSource != null) ruleSource.cancel();
+        ruleSource.cancel();
 
         thread.join();
 

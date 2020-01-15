@@ -31,27 +31,25 @@ import io.github.oasis.model.events.ErrorPointEvent;
 import io.github.oasis.model.events.PointEvent;
 import io.github.oasis.model.rules.PointRule;
 import io.github.oasis.model.rules.Scoring;
-import org.apache.flink.api.common.state.MapStateDescriptor;
-import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.streaming.api.functions.co.KeyedBroadcastProcessFunction;
 import org.apache.flink.util.Collector;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import static io.github.oasis.game.states.DefinitionUpdateState.BROADCAST_DEF_UPDATE_DESCRIPTOR;
 
 public class PointProcessor extends KeyedBroadcastProcessFunction<Long, Event, DefinitionUpdateEvent, PointEvent> {
 
-    public static final MapStateDescriptor<Long, BaseDef> BROADCAST_POINT_RULES_DESCRIPTOR =
-            new MapStateDescriptor<>(
-                    OasisIDs.POINTS_BROADCAST_STATE_ID,
-                    Types.LONG,
-                    Types.GENERIC(BaseDef.class)
-            );
-
     @Override
     public void processElement(Event event, ReadOnlyContext ctx, Collector<PointEvent> out) throws Exception {
-        Iterable<Map.Entry<Long, BaseDef>> entries = ctx.getBroadcastState(BROADCAST_POINT_RULES_DESCRIPTOR).immutableEntries();
+        Iterable<Map.Entry<Long, BaseDef>> entries = ctx.getBroadcastState(BROADCAST_DEF_UPDATE_DESCRIPTOR).immutableEntries();
         Map<String, Scoring> scoredPoints = new HashMap<>();
         List<PointRule> selfAggregatedRules = new ArrayList<>();
         double totalPoints = 0;
@@ -163,9 +161,9 @@ public class PointProcessor extends KeyedBroadcastProcessFunction<Long, Event, D
             PointRule rule = (PointRule) updateEvent.getBaseDef();
 
             if (updateEvent.getType() == DefinitionUpdateType.DELETED) {
-                ctx.getBroadcastState(BROADCAST_POINT_RULES_DESCRIPTOR).remove(rule.getId());
+                ctx.getBroadcastState(BROADCAST_DEF_UPDATE_DESCRIPTOR).remove(rule.getId());
             } else {
-                ctx.getBroadcastState(BROADCAST_POINT_RULES_DESCRIPTOR).put(rule.getId(), rule);
+                ctx.getBroadcastState(BROADCAST_DEF_UPDATE_DESCRIPTOR).put(rule.getId(), rule);
             }
         }
     }

@@ -24,8 +24,11 @@ package io.github.oasis.game.utils;
 import io.github.oasis.model.Event;
 
 import java.util.Collection;
+import java.util.concurrent.Semaphore;
 
-public class DelayedResourceFileStream extends ResourceFileStream {
+public class DelayedResourceFileStream extends ResourceFileStream implements ITestLockable {
+
+    private Semaphore lock = new Semaphore(1);
 
     private final long initialDelay;
 
@@ -39,9 +42,22 @@ public class DelayedResourceFileStream extends ResourceFileStream {
         this.initialDelay = initialDelay;
     }
 
+    public void lock() throws InterruptedException {
+        lock.acquire();
+    }
+
+    public void signal() {
+        lock.release();
+    }
+
     @Override
     public void run(SourceContext<Event> ctx) throws Exception {
-        Thread.sleep(initialDelay);
-        super.run(ctx);
+        try {
+            lock.acquire();
+            Thread.sleep(initialDelay);
+            super.run(ctx);
+        } finally {
+            lock.release();
+        }
     }
 }

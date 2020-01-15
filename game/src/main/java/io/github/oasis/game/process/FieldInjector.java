@@ -20,40 +20,54 @@
 package io.github.oasis.game.process;
 
 import io.github.oasis.game.utils.Utils;
+import io.github.oasis.model.DefinitionUpdateEvent;
+import io.github.oasis.model.DefinitionUpdateType;
 import io.github.oasis.model.Event;
-import io.github.oasis.model.FieldCalculator;
-import org.apache.flink.api.common.functions.MapFunction;
+import io.github.oasis.model.defs.BaseDef;
+import io.github.oasis.model.defs.FieldDef;
+import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction;
+import org.apache.flink.util.Collector;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.io.Serializable;
 import java.util.Map;
+
+import static io.github.oasis.game.states.DefinitionUpdateState.BROADCAST_DEF_UPDATE_DESCRIPTOR;
 
 /**
  * @author iweerarathna
  */
-public class FieldInjector<E extends Event> implements MapFunction<E, E> {
+public class FieldInjector<E extends Event> extends BroadcastProcessFunction<Event, DefinitionUpdateEvent, Event> {
 
-    private final List<FieldCalculator> fieldCalculatorList;
+    @Override
+    public void processElement(Event event, ReadOnlyContext ctx, Collector<Event> out) throws Exception {
+        Iterable<Map.Entry<Long, BaseDef>> entries = ctx.getBroadcastState(BROADCAST_DEF_UPDATE_DESCRIPTOR).immutableEntries();
+        for (Map.Entry<Long, BaseDef> fieldDefEntry : entries) {
+            FieldDef definition = (FieldDef) fieldDefEntry.getValue();
 
-    public FieldInjector(List<FieldCalculator> fieldCalculatorList) {
-        this.fieldCalculatorList = Utils.isNonEmpty(fieldCalculatorList) ?
-                fieldCalculatorList : new LinkedList<>();
+            if (definition.matchesWithEvent(event.getEventType())) {
+                Object evaluated = evaluate(definition.getExecutableExpression(), event.getAllFieldValues());
+                event.setFieldValue(definition.getFieldName(), evaluated);
+            }
+        }
+        out.collect(event);
+    }
+
+    private static Object evaluate(Serializable expression, Map<String, Object> vars) {
+        return Utils.executeExpression(expression, vars);
     }
 
     @Override
-    public E map(E value) {
-        if (Utils.isNonEmpty(fieldCalculatorList)) {
-            for (FieldCalculator fc : fieldCalculatorList) {
-                if (Utils.eventEquals(value, fc.getForEvent())) {
-                    Object evaluated = evaluate(fc, value.getAllFieldValues());
-                    value.setFieldValue(fc.getFieldName(), evaluated);
-                }
+    public void processBroadcastElement(DefinitionUpdateEvent updateEvent, Context ctx, Collector<Event> out) throws Exception {
+        if (updateEvent.getBaseDef() instanceof FieldDef) {
+            FieldDef definition = (FieldDef) updateEvent.getBaseDef();
+            System.out.println(">>>>>>>>>>>>" + "Field Def Update event " + definition.getId());
+            definition.setExecutableExpression(Utils.compileExpression(definition.getExpression()));
+
+            if (updateEvent.getType() == DefinitionUpdateType.DELETED) {
+                ctx.getBroadcastState(BROADCAST_DEF_UPDATE_DESCRIPTOR).remove(definition.getId());
+            } else {
+                ctx.getBroadcastState(BROADCAST_DEF_UPDATE_DESCRIPTOR).put(definition.getId(), definition);
             }
         }
-        return value;
-    }
-
-    private static Object evaluate(FieldCalculator fieldCalculator, Map<String, Object> vars) {
-        return Utils.executeExpression(fieldCalculator.getExpression(), vars);
     }
 }
