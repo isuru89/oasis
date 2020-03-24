@@ -25,6 +25,7 @@
         <module>dao</module>
         <module>services</module>
         <module>model</module>
+        <module>engine</module>
     </modules>
 
     <dependencies>
