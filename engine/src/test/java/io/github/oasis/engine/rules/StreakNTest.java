@@ -23,7 +23,8 @@ import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,8 +36,10 @@ import java.util.function.Consumer;
 /**
  * @author Isuru Weerarathna
  */
-public class GameTest extends AbstractRuleTest {
+@DisplayName("Streaks")
+public class StreakNTest extends AbstractRuleTest {
 
+    @DisplayName("Single streak: not enough elements")
     @Test
     public void testNotEnoughStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -57,6 +60,7 @@ public class GameTest extends AbstractRuleTest {
         Assert.assertEquals(0, signals.size());
     }
 
+    @DisplayName("Single streak: not satisfied elements")
     @Test
     public void testNoStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -79,6 +83,7 @@ public class GameTest extends AbstractRuleTest {
         Assert.assertEquals(0, signals.size());
     }
 
+    @DisplayName("Single streak")
     @Test
     public void testOrderedStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -102,6 +107,7 @@ public class GameTest extends AbstractRuleTest {
         assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 105, e1.getExternalId(), e3.getExternalId()));
     }
 
+    @DisplayName("Single streak: Out-of-order break")
     @Test
     public void testOutOfOrderMisMatchStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -128,6 +134,7 @@ public class GameTest extends AbstractRuleTest {
         assertSignal(signals, new BadgeRemoveSignal(options.getId(), 3, 100, 105, e1.getExternalId(), e3.getExternalId()));
     }
 
+    @DisplayName("Single streak: Out-of-order falls after outside streak")
     @Test
     public void testOutOfOrderMisMatchNotAffectedStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -152,6 +159,7 @@ public class GameTest extends AbstractRuleTest {
         assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 105, e1.getExternalId(), e3.getExternalId()));
     }
 
+    @DisplayName("Single streak: Out-of-order falls before outside streak")
     @Test
     public void testOutOfOrderMisMatchNotAffectedBeforeAllStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -171,6 +179,7 @@ public class GameTest extends AbstractRuleTest {
         assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 105, e1.getExternalId(), e3.getExternalId()));
     }
 
+    @DisplayName("Single streak: Out-of-order creates new streak")
     @Test
     public void testOutOfOrderMatchStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -189,6 +198,7 @@ public class GameTest extends AbstractRuleTest {
         assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 104, e1.getExternalId(), e2.getExternalId()));
     }
 
+    @DisplayName("Single streak: Out-of-order modifies existing streak end time")
     @Test
     public void testStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -214,6 +224,7 @@ public class GameTest extends AbstractRuleTest {
     // MULTI STREAK TESTS
     // ---------------------------------------
 
+    @DisplayName("Multi streaks")
     @Test
     public void testMultiStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -236,6 +247,7 @@ public class GameTest extends AbstractRuleTest {
         assertSignal(signals, new BadgeSignal(options.getId(), 5, 100, 107, e1.getExternalId(), e5.getExternalId()));
     }
 
+    @DisplayName("Multi streaks: Out-of-order creates multiple streaks")
     @Test
     public void testOutOfOrderMultiStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -259,6 +271,7 @@ public class GameTest extends AbstractRuleTest {
         assertSignal(signals, new BadgeSignal(options.getId(), 5, 100, 106, e1.getExternalId(), e4.getExternalId()));
     }
 
+    @DisplayName("Multi streaks: Out-of-order breaks the latest streak")
     @Test
     public void testOutOfOrderBreakMultiStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -285,6 +298,7 @@ public class GameTest extends AbstractRuleTest {
         assertSignal(signals, new BadgeSignal(options.getId(), 3, 104, 106, e2.getExternalId(), e4.getExternalId()));
     }
 
+    @DisplayName("Multi streaks: Out-of-order breaks the only streak")
     @Test
     public void testOutOfOrderBreakAllMultiStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);

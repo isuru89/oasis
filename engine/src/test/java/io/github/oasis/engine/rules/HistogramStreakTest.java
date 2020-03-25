@@ -23,7 +23,8 @@ import io.github.oasis.engine.rules.signals.HistogramBadgeRemovalSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -36,121 +37,12 @@ import java.util.function.Consumer;
 /**
  * @author Isuru Weerarathna
  */
+@DisplayName("Histogram Streaks")
 public class HistogramStreakTest extends AbstractRuleTest {
 
     private static long FIFTY = 50;
 
-    @Test
-    public void testNCHistogramStreakNHavingC() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(144, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(156, "a", 57);
-        TEvent e4 = TEvent.createKeyValue(187, "a", 88);
-        TEvent e6 = TEvent.createKeyValue(205, "a", 26);
-        TEvent e7 = TEvent.createKeyValue(235, "a", 96);
-        TEvent e8 = TEvent.createKeyValue(265, "a", 11);
-
-        List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Collections.singletonList(3), FIFTY, 80, signalsRef::add, false);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
-        submitOrder(streakN, e1, e2, e3, e4, e6, e7, e8);
-
-        Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
-        Assert.assertEquals(1, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 200, e7.getExternalId()));
-    }
-
-    @Test
-    public void testNCHistogramStreakNHavingNC() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(144, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(156, "a", 57);
-        TEvent e4 = TEvent.createKeyValue(187, "a", 11);
-        TEvent e6 = TEvent.createKeyValue(205, "a", 26);
-        TEvent e7 = TEvent.createKeyValue(235, "a", 96);
-        TEvent e8 = TEvent.createKeyValue(265, "a", 80);
-
-        List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Collections.singletonList(3), FIFTY, 80, signalsRef::add, false);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
-        submitOrder(streakN, e1, e2, e3, e4, e6, e7, e8);
-
-        Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
-        Assert.assertEquals(1, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 250, e8.getExternalId()));
-    }
-
-    @Test
-    public void testNCHistogramStreakNOutOfOrder() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(144, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(156, "a", 57);
-        TEvent e4 = TEvent.createKeyValue(187, "a", 11);
-        TEvent e5 = TEvent.createKeyValue(205, "a", 26);
-        TEvent e6 = TEvent.createKeyValue(235, "a", 96);
-        TEvent e7 = TEvent.createKeyValue(265, "a", 80);
-        TEvent e8 = TEvent.createKeyValue(172, "a", 20);
-
-        List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Collections.singletonList(3), FIFTY, 80, signalsRef::add, false);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
-        submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8);
-
-        Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
-        Assert.assertEquals(1, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 250, e8.getExternalId()));
-    }
-
-    @Test
-    public void testNCHistogramStreakNHavingHoles() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(144, "a", 63);
-        TEvent e6 = TEvent.createKeyValue(205, "a", 26);
-        TEvent e7 = TEvent.createKeyValue(235, "a", 96);
-        TEvent e8 = TEvent.createKeyValue(265, "a", 80);
-
-        List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Collections.singletonList(3), FIFTY, 80, signalsRef::add, false);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
-        submitOrder(streakN, e1, e2, e6, e7, e8);
-
-        Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
-        Assert.assertEquals(1, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 250, e8.getExternalId()));
-    }
-
-    @Test
-    public void testNCHistogramMultiStreakN() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(144, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(205, "a", 26);
-        TEvent e4 = TEvent.createKeyValue(235, "a", 96);
-        TEvent e5 = TEvent.createKeyValue(265, "a", 80);
-        TEvent e6 = TEvent.createKeyValue(311, "a", 92);
-        TEvent e7 = TEvent.createKeyValue(350, "a", 84);
-        TEvent e8 = TEvent.createKeyValue(419, "a", 84);
-
-        List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Arrays.asList(3, 5), FIFTY, 80, signalsRef::add, false);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
-        submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8);
-
-        Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
-        Assert.assertEquals(2, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 250, e5.getExternalId()));
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 5, 100, 350, e7.getExternalId()));
-    }
-
+    @DisplayName("Single streak")
     @Test
     public void testHistogramStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -173,6 +65,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
         assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 200, e7.getExternalId()));
     }
 
+    @DisplayName("Multiple streaks")
     @Test
     public void testHistogramMultiStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -197,6 +90,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
         assertSignal(signals, new HistogramBadgeSignal(options.getId(), 5, 100, 300, e8.getExternalId()));
     }
 
+    @DisplayName("Multiple streaks: Breaks all in multiple streaks and creates a new streak/badge")
     @Test
     public void testBreakHistogramMultiStreakNOutOfOrder() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -225,6 +119,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
         assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 200, 300, e8.getExternalId()));
     }
 
+    @DisplayName("Multiple streaks: Breaks the latest streak in multiple streaks")
     @Test
     public void testBreakHistogramMultiStreakNOutOfOrderLower() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -251,15 +146,16 @@ public class HistogramStreakTest extends AbstractRuleTest {
         assertSignal(signals, new HistogramBadgeRemovalSignal(options.getId(), 5, 100, 300));
     }
 
+    @DisplayName("Multiple streaks: Out-of-order breaks the latest streak in multiple streaks")
     @Test
     public void testBreakHistogramMultiStreakNWithHoles() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(144, "a", 63);
+        TEvent e2 = TEvent.createKeyValue(144, "a", 63); // --
         TEvent e3 = TEvent.createKeyValue(156, "a", 57);
-        TEvent e4 = TEvent.createKeyValue(187, "a", 88);
+        TEvent e4 = TEvent.createKeyValue(187, "a", 88); // --
         TEvent e5 = TEvent.createKeyValue(205, "a", 26);
-        TEvent e6 = TEvent.createKeyValue(235, "a", 96);
-        TEvent e7 = TEvent.createKeyValue(265, "a", 91);
+        TEvent e6 = TEvent.createKeyValue(235, "a", 96); // --
+        TEvent e7 = TEvent.createKeyValue(265, "a", 91); // --
         TEvent e9 = TEvent.createKeyValue(170, "a", -88);
 
         List<Signal> signalsRef = new ArrayList<>();
@@ -275,6 +171,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
         assertSignal(signals, new HistogramBadgeRemovalSignal(options.getId(), 3, 100, 200));
     }
 
+    @DisplayName("Single streak: No streaks available yet")
     @Test
     public void testNoHistogramStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -296,6 +193,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
         Assert.assertEquals(0, signals.size());
     }
 
+    @DisplayName("Single streak: No streaks due to non-existence buckets")
     @Test
     public void testNoHistogramStreakNWithHole() {
         TEvent e1 = TEvent.createKeyValue(100, "a", 75);
@@ -315,6 +213,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
         Assert.assertEquals(0, signals.size());
     }
 
+    @DisplayName("Multiple streaks: Out-of-order breaks the latest streak in multiple streaks")
     @Test
     public void testHistogramStreakNOutOfOrder() {
         TEvent e1 = TEvent.createKeyValue(110, "a", 75);
@@ -337,6 +236,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
         assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 200, e7.getExternalId()));
     }
 
+    @DisplayName("Single streak: Out-of-order breaks the only single streak")
     @Test
     public void testBreakHistogramStreakNOutOfOrder() {
         TEvent e1 = TEvent.createKeyValue(110, "a", 75);
@@ -361,14 +261,10 @@ public class HistogramStreakTest extends AbstractRuleTest {
     }
 
     private HistogramStreakNRule createOptions(List<Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
-        return createOptions(streaks, timeunit, threshold, consumer, true);
-    }
-
-    private HistogramStreakNRule createOptions(List<Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer, boolean consecutive) {
         HistogramStreakNRule options = new HistogramStreakNRule();
         options.setId("abc");
         options.setStreaks(streaks);
-        options.setConsecutive(consecutive);
+        options.setConsecutive(true);
         options.setThreshold(BigDecimal.valueOf(threshold));
         options.setTimeUnit(timeunit);
         options.setConsumer(consumer);

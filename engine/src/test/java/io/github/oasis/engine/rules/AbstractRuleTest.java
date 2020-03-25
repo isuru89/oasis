@@ -23,11 +23,11 @@ import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.model.Event;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -47,19 +47,19 @@ public abstract class AbstractRuleTest {
 
     protected static JedisPool pool;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeAll() {
         JedisPoolConfig config = new JedisPoolConfig();
         config.setMaxTotal(5);
         pool = new JedisPool(config, "localhost");
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterAll() {
         pool.close();
     }
 
-    @Before
+    @BeforeEach
     public void beforeEach() {
         try (Jedis jedis = pool.getResource()) {
             Set<String> keys = jedis.keys("*");
@@ -70,7 +70,7 @@ public abstract class AbstractRuleTest {
         }
     }
 
-    @After
+    @AfterEach
     public void afterEach() {
         try (Jedis jedis = pool.getResource()) {
             Map<String, String> keys = jedis.hgetAll(ID.getUserBadgesMetaKey(1, 0L));

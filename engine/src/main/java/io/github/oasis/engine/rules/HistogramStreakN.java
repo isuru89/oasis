@@ -149,6 +149,9 @@ public class HistogramStreakN implements BadgeHandler {
                     String[] parts = first.get(0).split(":");
                     long ts = Long.parseLong(parts[0]);
                     long lastTs = event.getTimestamp();
+                    if (first.size() > 1 && first.get(1) != null) {
+                        lastTs = Long.parseLong(first.get(1).split(":")[0]);
+                    }
                     lastTs = lastTs - (lastTs % rule.getTimeUnit());
                     jedis.hset(metaBadgesInfoKey, lastHitSubKey, event.getTimestamp() + ":" + event.getExternalId());
                     return Collections.singletonList(new HistogramBadgeRemovalSignal(rule.getId(),
