@@ -49,7 +49,7 @@ public class FirstEvent implements BadgeHandler {
                 long ts = event.getTimestamp();
                 String id = event.getExternalId();
                 String subKey = options.getEventName();
-                String value = ts + ":" + id;
+                String value = ts + ":" + id + ":" + System.currentTimeMillis();
                 if (isFirstOne(jedis.hsetnx(key, subKey, value))) {
                     return Collections.singletonList(new BadgeSignal(options.getId(),
                             1,
