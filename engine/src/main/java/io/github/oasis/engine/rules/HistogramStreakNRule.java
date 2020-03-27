@@ -37,10 +37,10 @@ public class HistogramStreakNRule extends BadgeRule {
     private List<Integer> streaks;
     private long timeUnit;
     private Consumer<Signal> consumer;
-    private Function<Event, Double> valueResolver;
+    protected Function<Event, Double> valueResolver;
 
     private boolean consecutive;
-    private BigDecimal threshold;
+    protected BigDecimal threshold;
 
     public Function<Event, Double> getValueResolver() {
         return valueResolver;

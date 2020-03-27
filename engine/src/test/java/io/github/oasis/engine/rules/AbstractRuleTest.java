@@ -101,4 +101,15 @@ public abstract class AbstractRuleTest {
         Assertions.assertTrue(signal.isPresent(), "Provided badge has different attributes! " + badgeSignal.toString());
     }
 
+    void assertStrict(Collection<Signal> signals, BadgeSignal... badgeSignals) {
+        if (badgeSignals == null) {
+            Assertions.assertTrue(signals.isEmpty(), "No badges excepted but found many!");
+            return;
+        }
+        Assertions.assertEquals(badgeSignals.length, signals.size(), "Expected number of badges are different!");
+        for (BadgeSignal badgeSignal : badgeSignals) {
+            assertSignal(signals, badgeSignal);
+        }
+    }
+
 }

@@ -60,9 +60,8 @@ public class HistogramStreakTest extends AbstractRuleTest {
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        Assert.assertEquals(1, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 200, e7.getExternalId()));
+        assertStrict(signals,
+                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e7.getExternalId()));
     }
 
     @DisplayName("Multiple streaks")
@@ -84,10 +83,9 @@ public class HistogramStreakTest extends AbstractRuleTest {
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        Assert.assertEquals(2, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()));
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 5, 100, 300, e8.getExternalId()));
+        assertStrict(signals,
+                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(options.getId(), 5, 100, 300, e8.getExternalId()));
     }
 
     @DisplayName("Multiple streaks: Breaks all in multiple streaks and creates a new streak/badge")
@@ -110,13 +108,12 @@ public class HistogramStreakTest extends AbstractRuleTest {
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        Assert.assertEquals(5, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()));
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 5, 100, 300, e8.getExternalId()));
-        assertSignal(signals, new HistogramBadgeRemovalSignal(options.getId(), 3, 100, 200));
-        assertSignal(signals, new HistogramBadgeRemovalSignal(options.getId(), 5, 100, 300));
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 200, 300, e8.getExternalId()));
+        assertStrict(signals,
+                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(options.getId(), 5, 100, 300, e8.getExternalId()),
+                new HistogramBadgeRemovalSignal(options.getId(), 3, 100, 200),
+                new HistogramBadgeRemovalSignal(options.getId(), 5, 100, 300),
+                new HistogramBadgeSignal(options.getId(), 3, 200, 300, e8.getExternalId()));
     }
 
     @DisplayName("Multiple streaks: Breaks the latest streak in multiple streaks")
@@ -139,11 +136,10 @@ public class HistogramStreakTest extends AbstractRuleTest {
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        Assert.assertEquals(3, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()));
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 5, 100, 300, e8.getExternalId()));
-        assertSignal(signals, new HistogramBadgeRemovalSignal(options.getId(), 5, 100, 300));
+        assertStrict(signals,
+                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(options.getId(), 5, 100, 300, e8.getExternalId()),
+                new HistogramBadgeRemovalSignal(options.getId(), 5, 100, 300));
     }
 
     @DisplayName("Multiple streaks: Out-of-order breaks the latest streak in multiple streaks")
@@ -165,10 +161,9 @@ public class HistogramStreakTest extends AbstractRuleTest {
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        Assert.assertEquals(2, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()));
-        assertSignal(signals, new HistogramBadgeRemovalSignal(options.getId(), 3, 100, 200));
+        assertStrict(signals,
+                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()),
+                new HistogramBadgeRemovalSignal(options.getId(), 3, 100, 200));
     }
 
     @DisplayName("Single streak: No streaks available yet")
@@ -232,8 +227,8 @@ public class HistogramStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         Assert.assertEquals(1, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 200, e7.getExternalId()));
+        assertStrict(signals,
+                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e7.getExternalId()));
     }
 
     @DisplayName("Single streak: Out-of-order breaks the only single streak")
@@ -254,10 +249,9 @@ public class HistogramStreakTest extends AbstractRuleTest {
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        Assert.assertEquals(2, signals.size());
-
-        assertSignal(signals, new HistogramBadgeSignal(options.getId(), 3, 100, 200, e5.getExternalId()));
-        assertSignal(signals, new HistogramBadgeRemovalSignal(options.getId(), 3, 100, 200));
+        assertStrict(signals,
+                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e5.getExternalId()),
+                new HistogramBadgeRemovalSignal(options.getId(), 3, 100, 200));
     }
 
     private HistogramStreakNRule createOptions(List<Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
