@@ -25,6 +25,15 @@ package io.github.oasis.engine.rules;
 public class TemporalStreakNRule extends StreakNRule {
 
     private long timeUnit;
+    private boolean consecutive = true;
+
+    public boolean isConsecutive() {
+        return consecutive;
+    }
+
+    public void setConsecutive(boolean consecutive) {
+        this.consecutive = consecutive;
+    }
 
     public long getTimeUnit() {
         return timeUnit;

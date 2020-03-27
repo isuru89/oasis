@@ -29,8 +29,12 @@ import redis.clients.jedis.Tuple;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * @author Isuru Weerarathna
@@ -63,6 +67,144 @@ public class TemporalStreakN extends StreakN {
         }
         return Integer.parseInt(val);
     }
+
+    @Override
+    public void accept(Event event) {
+        TemporalStreakNRule rule = (TemporalStreakNRule) options;
+        if (rule.isConsecutive()) {
+            super.accept(event);
+        } else {
+            nonConsecutiveAccept(event, rule);
+        }
+    }
+
+    private void nonConsecutiveAccept(Event event, TemporalStreakNRule rule) {
+        String key = getKey();
+        long value = (long) event.getFieldValue("value");
+        long ts = event.getTimestamp();
+        System.out.println("Processed: " + value);
+        try (Jedis jedis = pool.getResource()) {
+            if (rule.getCondition().test(value)) {
+                String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+                String lastOffering = jedis.hget(badgeMetaKey, rule.getId() + ":lasttime");  // <timestamp>:<streak>:<id>
+                long lastTimeOffered = 0L;
+                if (lastOffering != null) {
+                    lastTimeOffered = getLongValue(lastOffering.split(":")[0], 0L);
+                }
+                if (ts <= lastTimeOffered) {
+                    return;
+                }
+
+                jedis.zadd(key, ts, ts + ":" + event.getExternalId());
+                long start = Math.max(ts - rule.getTimeUnit(), 0);
+                Set<Tuple> zrange = jedis.zrangeByScoreWithScores(key, start, ts + rule.getTimeUnit());
+                countFold(zrange, event, lastOffering, rule, jedis).forEach(b -> {
+                    beforeBatchEmit(b, event, rule, jedis);
+                    rule.getCollector().accept(b);
+                });
+            }
+        }
+    }
+
+    private List<BadgeSignal> countFold(Set<Tuple> tuplesAll, Event event, String lastOffering, TemporalStreakNRule rule, Jedis jedis) {
+        List<BadgeSignal> signals = new ArrayList<>();
+        int lastStreak = 0;
+        long lastTs = 0L;
+        long firstTs = 0L;
+        String prevBadgeFirstId = null;
+        if (lastOffering != null) {
+            String[] parts = lastOffering.split(":");
+            lastTs = getLongValue(parts[0], 0L) + 1;
+            lastStreak = getIntValue(parts[1], 0);
+            firstTs = getLongValue(parts[2], 0L);
+            prevBadgeFirstId = parts[3];
+        }
+
+        // not enough entries for new badges
+        if (lastStreak == 0 && tuplesAll.size() < rule.getMinStreak()) {
+            return signals;
+        }
+
+        NavigableMap<Long, Integer> countMap = new TreeMap<>();
+        Map<Long, Tuple> tupleMap = new HashMap<>();
+        countMap.put(0L, 0);
+        countMap.put(firstTs, 0);
+        countMap.put(lastTs, lastStreak);
+        tupleMap.put(firstTs, new Tuple(lastTs + ":" + prevBadgeFirstId, firstTs * 1.0));
+        List<Integer> streakList = rule.getStreaks();
+        int size = 0;
+        for (Tuple tuple : tuplesAll) {
+            long ts = (long) tuple.getScore();
+            tupleMap.put(ts, tuple);
+            countMap.put(ts, ++size);
+        }
+
+        long marker = lastTs;
+        List<Tuple> tuples = new ArrayList<>(tuplesAll);
+        for (int i = 0; i < tuples.size(); i++) {
+            Tuple tuple = tuples.get(i);
+            long ts = (long) tuple.getScore();
+            if (ts <= marker) {
+                continue;
+            }
+            long start = Math.max(lastStreak == rule.getMaxStreak() ? marker : firstTs, ts - rule.getTimeUnit());
+
+            Map.Entry<Long, Integer> prevEntry = countMap.ceilingEntry(start);
+            int currStreak = countMap.ceilingEntry(ts).getValue() - prevEntry.getValue() + 1;
+            int streakIndex = streakList.indexOf(currStreak);
+            if (streakIndex >= 0) {
+                String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+                long badgeStartTs = prevEntry.getKey();
+                Tuple startTuple = tupleMap.get(prevEntry.getKey());
+                String firstId;
+                if (startTuple == null) {
+                    firstId = prevBadgeFirstId;
+                } else {
+                    firstId = startTuple.getElement().split(":")[1];
+                }
+                signals.add(new BadgeSignal(rule.getId(),
+                        currStreak,
+                        badgeStartTs,
+                        ts,
+                        firstId,
+                        tuple.getElement().split(":")[1]));
+                jedis.hset(badgeMetaKey, rule.getId() + ":lasttime", ts + ":" + currStreak + ":" + badgeStartTs + ":" + firstId);
+
+                // no more streaks to find
+                if (streakIndex == streakList.size() - 1) {
+                    continue;
+                }
+
+                // a streak found... let's find further streaks
+                for (int j = streakIndex + 1; j < streakList.size(); j++) {
+                    int nextStreak = streakList.get(j);
+                    int furtherReqElements = nextStreak - currStreak;
+                    if (i + furtherReqElements > tuples.size() - 1) {
+                        break;
+                    }
+
+                    Tuple elementAtNextStreak = tuples.get(i + furtherReqElements);
+                    long ets = (long) elementAtNextStreak.getScore();
+                    if (ets - badgeStartTs > rule.getTimeUnit()) {
+                        // TODO adjust time
+                        break;
+                    }
+
+                    // within time frame
+                    signals.add(new BadgeSignal(rule.getId(),
+                            nextStreak,
+                            badgeStartTs,
+                            ets,
+                            firstId,
+                            elementAtNextStreak.getElement().split(":")[0]));
+                    jedis.hset(badgeMetaKey, rule.getId() + ":lasttime", ets + ":" + nextStreak + ":" + badgeStartTs + ":" + firstId);
+                    marker = ets;
+                }
+            }
+        }
+        return signals;
+    }
+
 
     @Override
     public List<BadgeSignal> fold(Set<Tuple> tuples, Event event, StreakNRule optionsRef) {

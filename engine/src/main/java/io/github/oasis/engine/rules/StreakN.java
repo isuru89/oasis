@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 public class StreakN implements Consumer<Event> {
 
     protected final JedisPool pool;
-    private StreakNRule options;
+    protected StreakNRule options;
 
     public StreakN(JedisPool pool, StreakNRule options) {
         this.pool = pool;

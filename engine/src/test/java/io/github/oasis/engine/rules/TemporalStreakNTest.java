@@ -37,7 +37,7 @@ import java.util.function.Consumer;
  * @author Isuru Weerarathna
  */
 @DisplayName("Time based Streaks")
-public class ConstrainedStreakNTest extends AbstractRuleTest {
+public class TemporalStreakNTest extends AbstractRuleTest {
 
     @DisplayName("Single streak: multiple consecutive badges")
     @Test

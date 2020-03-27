@@ -23,9 +23,9 @@ import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.model.Event;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import redis.clients.jedis.Jedis;
@@ -96,9 +96,9 @@ public abstract class AbstractRuleTest {
     }
 
     void assertSignal(Collection<Signal> signals, BadgeSignal badgeSignal) {
-        Assert.assertTrue("Badge not found!\n Expected: " + badgeSignal.toString(), signals.contains(badgeSignal));
+        Assertions.assertTrue(signals.contains(badgeSignal), "Badge not found!\n Expected: " + badgeSignal.toString());
         Optional<Signal> signal = signals.stream().filter(s -> s.compareTo(badgeSignal) == 0).findFirst();
-        Assert.assertTrue(signal.isPresent());
+        Assertions.assertTrue(signal.isPresent(), "Provided badge has different attributes! " + badgeSignal.toString());
     }
 
 }
