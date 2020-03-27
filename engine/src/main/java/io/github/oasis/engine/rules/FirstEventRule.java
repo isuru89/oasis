@@ -19,6 +19,12 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.model.Event;
+
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -26,9 +32,27 @@ package io.github.oasis.engine.rules;
 public class FirstEventRule extends BadgeRule {
 
     private final String eventName;
+    private Predicate<Event> condition;
+    private Consumer<Signal> collector;
 
     public FirstEventRule(String eventName) {
         this.eventName = eventName;
+    }
+
+    public Predicate<Event> getCondition() {
+        return condition;
+    }
+
+    public Consumer<Signal> getCollector() {
+        return collector;
+    }
+
+    public void setCollector(Consumer<Signal> collector) {
+        this.collector = collector;
+    }
+
+    public void setCondition(Predicate<Event> condition) {
+        this.condition = condition;
     }
 
     public String getEventName() {

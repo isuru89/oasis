@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.model.Event;
 import redis.clients.jedis.Jedis;
@@ -42,24 +43,42 @@ public class FirstEvent implements BadgeHandler {
 
     @Override
     public List<BadgeSignal> handle(Event event) {
-        String key = "u" + event.getUser() + ":firstevent";
+        String key = ID.getUserFirstEventsKey(event.getGameId(), event.getUser());
         try (Jedis jedis = pool.getResource()) {
-            String subKey = options.getEventName() + ":" + event.getGameId();
-            if (isFirstOne(jedis.hsetnx(key, subKey, event.getTimestamp() + ":" + event.getExternalId()))) {
-                return Collections.singletonList(new BadgeSignal(options.getId(), 1,
-                        event.getTimestamp(), event.getTimestamp(),
-                        event.getExternalId(), event.getExternalId()));
+            if (isConditionSatisfied(event, options)) {
+                long ts = event.getTimestamp();
+                String id = event.getExternalId();
+                String subKey = options.getEventName();
+                String value = ts + ":" + id;
+                if (isFirstOne(jedis.hsetnx(key, subKey, value))) {
+                    return Collections.singletonList(new BadgeSignal(options.getId(),
+                            1,
+                            ts, ts,
+                            id, id));
+                }
             }
         }
         return null;
     }
 
+    private boolean isConditionSatisfied(Event event, FirstEventRule rule) {
+        return eventMatches(event.getEventType(), rule.getEventName())
+                && (rule.getCondition() == null || rule.getCondition().test(event));
+    }
+
+    private boolean eventMatches(String eventType, String pattern) {
+        return pattern.equals(eventType);
+    }
+
     private boolean isFirstOne(Long value) {
-        return value == null || value == 0;
+        return value != null && value == 1;
     }
 
     @Override
     public void accept(Event event) {
-        handle(event);
+        List<BadgeSignal> signals = handle(event);
+        if (signals != null) {
+            signals.forEach(s -> options.getCollector().accept(s));
+        }
     }
 }

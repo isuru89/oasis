@@ -24,6 +24,10 @@ package io.github.oasis.engine.model;
  */
 public final class ID {
 
+    public static String getUserFirstEventsKey(int gameId, long userId) {
+        return String.format("u%d:g%d:firstevents", userId, gameId);
+    }
+
     public static String getBadgeHistogramKey(int gameId, long userId, String badgeId) {
         return String.format("u%d:g%d:badges:h:%s", userId, gameId, badgeId);
     }
