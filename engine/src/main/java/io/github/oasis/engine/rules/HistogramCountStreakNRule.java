@@ -30,8 +30,6 @@ import java.util.function.Predicate;
  */
 public class HistogramCountStreakNRule extends HistogramStreakNRule {
 
-    private Predicate<Event> condition;
-
     public HistogramCountStreakNRule() {
         super.threshold = BigDecimal.ONE;
     }

@@ -171,35 +171,35 @@ public class TemporalStreakN extends StreakN {
                 jedis.hset(badgeMetaKey, rule.getId() + ":lasttime", ts + ":" + currStreak + ":" + badgeStartTs + ":" + firstId);
 
                 // no more streaks to find
-                if (streakIndex == streakList.size() - 1) {
-                    continue;
-                }
-
-                // a streak found... let's find further streaks
-                for (int j = streakIndex + 1; j < streakList.size(); j++) {
-                    int nextStreak = streakList.get(j);
-                    int furtherReqElements = nextStreak - currStreak;
-                    if (i + furtherReqElements > tuples.size() - 1) {
-                        break;
-                    }
-
-                    Tuple elementAtNextStreak = tuples.get(i + furtherReqElements);
-                    long ets = (long) elementAtNextStreak.getScore();
-                    if (ets - badgeStartTs > rule.getTimeUnit()) {
-                        // TODO adjust time
-                        break;
-                    }
-
-                    // within time frame
-                    signals.add(new BadgeSignal(rule.getId(),
-                            nextStreak,
-                            badgeStartTs,
-                            ets,
-                            firstId,
-                            elementAtNextStreak.getElement().split(":")[0]));
-                    jedis.hset(badgeMetaKey, rule.getId() + ":lasttime", ets + ":" + nextStreak + ":" + badgeStartTs + ":" + firstId);
-                    marker = ets;
-                }
+//                if (streakIndex == streakList.size() - 1) {
+//                    continue;
+//                }
+//
+//                // a streak found... let's find further streaks
+//                for (int j = streakIndex + 1; j < streakList.size(); j++) {
+//                    int nextStreak = streakList.get(j);
+//                    int furtherReqElements = nextStreak - currStreak;
+//                    if (i + furtherReqElements > tuples.size() - 1) {
+//                        break;
+//                    }
+//
+//                    Tuple elementAtNextStreak = tuples.get(i + furtherReqElements);
+//                    long ets = (long) elementAtNextStreak.getScore();
+//                    if (ets - badgeStartTs > rule.getTimeUnit()) {
+//                        // TODO adjust time
+//                        break;
+//                    }
+//
+//                    // within time frame
+//                    signals.add(new BadgeSignal(rule.getId(),
+//                            nextStreak,
+//                            badgeStartTs,
+//                            ets,
+//                            firstId,
+//                            elementAtNextStreak.getElement().split(":")[0]));
+//                    jedis.hset(badgeMetaKey, rule.getId() + ":lasttime", ets + ":" + nextStreak + ":" + badgeStartTs + ":" + firstId);
+//                    marker = ets;
+//                }
             }
         }
         return signals;
