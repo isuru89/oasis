@@ -276,16 +276,16 @@ public class HistogramStreakN implements BadgeHandler {
     protected void beforeBatchEmit(BadgeSignal signal, Event event, HistogramStreakNRule options, Jedis jedis) {
         jedis.zadd(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), options.getId()),
                 signal.getStartTime(),
-                String.format("%d:%s:%d:%d", signal.getEndTime(), options.getId(), signal.getStartTime(), signal.getStreak()));
+                String.format("%d:%s:%d:%d", signal.getEndTime(), options.getId(), signal.getStartTime(), signal.getAttribute()));
         String userBadgesMeta = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
         String value = jedis.hget(userBadgesMeta, options.getId());
         if (value == null) {
             jedis.hset(userBadgesMeta, options.getId(), String.valueOf(signal.getEndTime()));
-            jedis.hset(userBadgesMeta, options.getId() + ".streak", String.valueOf(signal.getStreak()));
+            jedis.hset(userBadgesMeta, options.getId() + ".streak", String.valueOf(signal.getAttribute()));
         } else {
             long val = Long.parseLong(value);
             if (signal.getEndTime() >= val) {
-                jedis.hset(userBadgesMeta, options.getId() + ".streak", String.valueOf(signal.getStreak()));
+                jedis.hset(userBadgesMeta, options.getId() + ".streak", String.valueOf(signal.getAttribute()));
             }
             jedis.hset(userBadgesMeta, options.getId(), String.valueOf(Math.max(signal.getEndTime(), val)));
         }

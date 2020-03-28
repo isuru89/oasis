@@ -26,7 +26,7 @@ import java.util.Comparator;
  */
 public class HistogramBadgeRemovalSignal extends BadgeRemoveSignal {
     public HistogramBadgeRemovalSignal(BadgeSignal prevBadge) {
-        this(prevBadge.getRuleId(), prevBadge.getStreak(), prevBadge.getStartTime(), prevBadge.getEndTime());
+        this(prevBadge.getRuleId(), prevBadge.getAttribute(), prevBadge.getStartTime(), prevBadge.getEndTime());
     }
 
     public HistogramBadgeRemovalSignal(String ruleId, int streak, long st, long et) {
@@ -38,7 +38,7 @@ public class HistogramBadgeRemovalSignal extends BadgeRemoveSignal {
         return Comparator
                 .comparingLong(BadgeSignal::getStartTime)
                 .thenComparing(BadgeSignal::getEndTime)
-                .thenComparing(BadgeSignal::getStreak)
+                .thenComparing(BadgeSignal::getAttribute)
                 .thenComparing(BadgeSignal::getRuleId)
                 .compare(this, (BadgeSignal) o);
     }

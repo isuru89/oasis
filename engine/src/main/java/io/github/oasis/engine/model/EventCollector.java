@@ -17,28 +17,18 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules.signals;
+package io.github.oasis.engine.model;
 
-import lombok.ToString;
-
-import java.util.Comparator;
+import io.github.oasis.engine.rules.signals.BadgeSignal;
+import io.github.oasis.engine.rules.signals.Signal;
 
 /**
  * @author Isuru Weerarathna
  */
-@ToString(callSuper = true)
-public class HistogramBadgeSignal extends StreakBadgeSignal {
-    public HistogramBadgeSignal(String ruleId, int streak, long st, long et, String eid) {
-        super(ruleId, streak, st, et, null, eid);
-    }
+public interface EventCollector {
 
-    @Override
-    public int compareTo(Signal o) {
-        return Comparator
-                .comparingLong(BadgeSignal::getStartTime)
-                .thenComparing(BadgeSignal::getAttribute)
-                .thenComparing(BadgeSignal::getRuleId)
-                .thenComparingLong(BadgeSignal::getEndTime)
-                .compare(this, (BadgeSignal) o);
-    }
+    void publishBadge(BadgeSignal badgeSignal);
+
+    void publishPoint(Signal pointSignal);
+
 }

@@ -36,7 +36,7 @@ public class BadgeRemoveSignal extends BadgeSignal {
 
     public BadgeRemoveSignal(BadgeSignal prevBadge) {
         super(prevBadge.getRuleId(),
-                prevBadge.getStreak(),
+                prevBadge.getAttribute(),
                 prevBadge.getStartTime(),
                 prevBadge.getEndTime(),
                 prevBadge.getStartId(),

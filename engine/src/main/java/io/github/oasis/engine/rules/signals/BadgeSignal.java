@@ -34,15 +34,15 @@ public class BadgeSignal extends Signal {
     private long endTime;
     private String startId;
     private String endId;
-    private int streak;
+    private int attribute;
 
     public BadgeSignal(String ruleId,
-                int streak,
+                int attributeId,
                 long st, long et,
                 String sid, String eid) {
         super(ruleId);
 
-        this.streak = streak;
+        this.attribute = attributeId;
         startTime = st;
         endTime = et;
         startId = sid;
@@ -57,8 +57,8 @@ public class BadgeSignal extends Signal {
         return endTime;
     }
 
-    public int getStreak() {
-        return streak;
+    public int getAttribute() {
+        return attribute;
     }
 
     public String getStartId() {
@@ -70,7 +70,7 @@ public class BadgeSignal extends Signal {
     }
 
     public String getUniqueId() {
-        return getRuleId() + ":" + streak + ":" + startTime;
+        return getRuleId() + ":" + attribute + ":" + startTime;
     }
 
     @Override
@@ -83,14 +83,14 @@ public class BadgeSignal extends Signal {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRuleId(), startTime, streak);
+        return Objects.hash(getRuleId(), startTime, attribute);
     }
 
     @Override
     public int compareTo(Signal o) {
         return Comparator
                 .comparingLong(BadgeSignal::getStartTime)
-                .thenComparing(BadgeSignal::getStreak)
+                .thenComparing(BadgeSignal::getAttribute)
                 .thenComparing(BadgeSignal::getRuleId)
                 .thenComparingLong(BadgeSignal::getEndTime)
                 .thenComparing(BadgeSignal::getStartId)
