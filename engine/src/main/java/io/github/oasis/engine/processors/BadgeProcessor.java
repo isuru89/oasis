@@ -17,10 +17,11 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.processors;
 
-import io.github.oasis.engine.model.EventFilter;
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.rules.AbstractRule;
+import io.github.oasis.engine.rules.BadgeRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.model.Event;
 import redis.clients.jedis.Jedis;
@@ -29,21 +30,9 @@ import redis.clients.jedis.JedisPool;
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeProcessor extends AbstractProcessor {
-    public BadgeProcessor(JedisPool pool) {
-        super(pool);
-    }
-
-    boolean isMatchEvent(Event event, BadgeRule badgeRule) {
-        return badgeRule.getForEvent().equals(event.getEventType());
-    }
-
-    boolean unableToProcess(Event event, BadgeRule rule) {
-        EventFilter condition = rule.getCondition();
-        if (condition == null) {
-            return false;
-        }
-        return !condition.matches(event, rule);
+public abstract class BadgeProcessor<R extends BadgeRule> extends AbstractProcessor<R, BadgeSignal> {
+    public BadgeProcessor(JedisPool pool, R rule) {
+        super(pool, rule);
     }
 
     protected String getMetaStreakKey(AbstractRule rule) {
@@ -54,7 +43,8 @@ public class BadgeProcessor extends AbstractProcessor {
         return rule.getId();
     }
 
-    protected void beforeBatchEmit(BadgeSignal signal, Event event, AbstractRule rule, Jedis jedis) {
+    @Override
+    protected void beforeEmit(BadgeSignal signal, Event event, R rule, Jedis jedis) {
         jedis.zadd(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), rule.getId()),
                 signal.getStartTime(),
                 String.format("%d:%s:%d:%d", signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getAttribute()));

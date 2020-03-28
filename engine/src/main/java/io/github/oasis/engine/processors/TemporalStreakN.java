@@ -17,9 +17,11 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.rules.StreakNRule;
+import io.github.oasis.engine.rules.TemporalStreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.StreakBadgeSignal;

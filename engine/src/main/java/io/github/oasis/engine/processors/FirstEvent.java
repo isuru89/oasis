@@ -17,9 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.rules.FirstEventRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.model.Event;
 import redis.clients.jedis.Jedis;
@@ -27,51 +28,30 @@ import redis.clients.jedis.JedisPool;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static io.github.oasis.engine.utils.Numbers.isFirstOne;
 
 /**
  * @author Isuru Weerarathna
  */
-public class FirstEvent extends BadgeProcessor implements Consumer<Event> {
+public class FirstEvent extends BadgeProcessor<FirstEventRule> {
 
-    private final FirstEventRule rule;
-
-    public FirstEvent(JedisPool pool, FirstEventRule firstEventOptions) {
-        super(pool);
-        this.rule = firstEventOptions;
+    public FirstEvent(JedisPool pool, FirstEventRule rule) {
+        super(pool, rule);
     }
 
     @Override
-    public void accept(Event event) {
-        if (!isMatchEvent(event, rule)) {
-            return;
-        }
-
-        if (unableToProcess(event, rule)) {
-            return;
-        }
-
-        List<BadgeSignal> signals = handle(event);
-        if (signals != null) {
-            signals.forEach(s -> rule.getCollector().accept(s));
-        }
-    }
-
-    public List<BadgeSignal> handle(Event event) {
+    public List<BadgeSignal> process(Event event, FirstEventRule rule, Jedis jedis) {
         String key = ID.getUserFirstEventsKey(event.getGameId(), event.getUser());
-        try (Jedis jedis = pool.getResource()) {
-            long ts = event.getTimestamp();
-            String id = event.getExternalId();
-            String subKey = rule.getEventName();
-            String value = ts + ":" + id + ":" + System.currentTimeMillis();
-            if (isFirstOne(jedis.hsetnx(key, subKey, value))) {
-                return Collections.singletonList(new BadgeSignal(rule.getId(),
-                        1,
-                        ts, ts,
-                        id, id));
-            }
+        long ts = event.getTimestamp();
+        String id = event.getExternalId();
+        String subKey = rule.getEventName();
+        String value = ts + ":" + id + ":" + System.currentTimeMillis();
+        if (isFirstOne(jedis.hsetnx(key, subKey, value))) {
+            return Collections.singletonList(new BadgeSignal(rule.getId(),
+                    1,
+                    ts, ts,
+                    id, id));
         }
         return null;
     }

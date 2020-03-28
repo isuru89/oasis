@@ -17,16 +17,21 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
-
-import redis.clients.jedis.JedisPool;
+package io.github.oasis.engine.model;
 
 /**
  * @author Isuru Weerarathna
  */
-public class MilestoneCounter extends AbstractProcessor {
+public class SingleEventTypeMatcher implements EventTypeMatcher {
 
-    public MilestoneCounter(JedisPool pool) {
-        super(pool);
+    private final String against;
+
+    public SingleEventTypeMatcher(String against) {
+        this.against = against;
+    }
+
+    @Override
+    public boolean matches(String eventType) {
+        return against.equals(eventType);
     }
 }

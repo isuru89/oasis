@@ -17,18 +17,16 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.model;
 
-import redis.clients.jedis.JedisPool;
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public class AbstractProcessor {
+@FunctionalInterface
+public interface EventTypeMatcher extends Serializable {
 
-    protected final JedisPool pool;
+    boolean matches(String eventType);
 
-    public AbstractProcessor(JedisPool pool) {
-        this.pool = pool;
-    }
 }

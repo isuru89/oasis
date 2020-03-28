@@ -19,16 +19,21 @@
 
 package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.rules.signals.BadgeSignal;
-import io.github.oasis.engine.rules.signals.Signal;
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface EventCollector {
+public class AnyOfEventTypeMatcher implements EventTypeMatcher {
 
-    void publishBadge(BadgeSignal badgeSignal);
+    private final Set<String> against;
 
-    void publishPoint(Signal pointSignal);
+    public AnyOfEventTypeMatcher(Set<String> against) {
+        this.against = against;
+    }
 
+    @Override
+    public boolean matches(String eventType) {
+        return against.contains(eventType);
+    }
 }

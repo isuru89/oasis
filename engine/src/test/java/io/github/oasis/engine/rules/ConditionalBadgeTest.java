@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.processors.ConditionalBadgeProcessor;
 import io.github.oasis.engine.rules.signals.ConditionalBadge;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.model.Event;
@@ -56,6 +57,24 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         List<Signal> signals = new ArrayList<>();
         ConditionalBadgeRule rule = createRule(signals);
         Assertions.assertTrue(rule.getConditions().isEmpty());
+        ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, rule);
+        submitOrder(processor, e1, e2, e3);
+
+        System.out.println(signals);
+        Assertions.assertEquals(0, signals.size());
+    }
+
+    @DisplayName("Single condition: No event condition met")
+    @Test
+    public void testSingleConditionBadgeNoEventCondMet() {
+        TEvent e1 = TEvent.createKeyValue(110, EVT_1, 14);
+        TEvent e2 = TEvent.createKeyValue(144, EVT_1, 62);
+        TEvent e3 = TEvent.createKeyValue(125, EVT_1, 11);
+
+        List<Signal> signals = new ArrayList<>();
+        ConditionalBadgeRule rule = createRule(signals, aCond(1, ATTR_50, this::greater50));
+        rule.setCondition(((event, rule1) -> (long)event.getFieldValue("value") >= 75));
+        Assertions.assertEquals(1, rule.getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, rule);
         submitOrder(processor, e1, e2, e3);
 

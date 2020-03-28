@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.processors.TemporalBadgeProcessor;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.rules.signals.TemporalBadge;
 import org.junit.jupiter.api.Assertions;

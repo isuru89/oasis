@@ -17,9 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.rules.StreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
@@ -36,7 +37,6 @@ import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static io.github.oasis.engine.utils.Numbers.asInt;
@@ -44,42 +44,24 @@ import static io.github.oasis.engine.utils.Numbers.asLong;
 import static io.github.oasis.engine.utils.Numbers.isZero;
 
 /**
- * Awards badges when a condition is satisfied continuously for a number of time.
+ * Awards badges when a condition is satisfied continuously for a number of times.
  * There is no time constraint here.
  *
  * @author Isuru Weerarathna
  */
-public class StreakN extends BadgeProcessor implements Consumer<Event> {
+public class StreakN extends BadgeProcessor<StreakNRule> {
 
     public static final String COLON = ":";
-    protected StreakNRule rule;
 
     public StreakN(JedisPool pool, StreakNRule rule) {
-        super(pool);
-        this.rule = rule;
+        super(pool, rule);
     }
 
     @Override
-    public void accept(Event event) {
-        if (!isMatchEvent(event, rule)) {
-            return;
-        }
-
-        try (Jedis jedis = pool.getResource()) {
-            List<BadgeSignal> signals = process(event, rule, jedis);
-            if (signals != null) {
-                signals.forEach(badgeSignal -> {
-                    beforeBatchEmit(badgeSignal, event, rule, jedis);
-                    rule.getCollector().accept(badgeSignal);
-                });
-            }
-        }
-    }
-
     public List<BadgeSignal> process(Event event, StreakNRule rule, Jedis jedis) {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         long ts = event.getTimestamp();
-        if (this.rule.getCriteria().test(event)) {
+        if (rule.getCriteria().test(event)) {
             String member = ts + ":1:" + event.getExternalId();
             jedis.zadd(key, ts, member);
             long rank = jedis.zrank(key, member);
@@ -122,7 +104,7 @@ public class StreakN extends BadgeProcessor implements Consumer<Event> {
         LinkedHashSet<Tuple> futureTuples = tuples.stream()
                 .filter(t -> asLong(t.getElement().split(COLON)[0]) > ts)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        fold(futureTuples, event, rule).forEach(s -> rule.getCollector().accept(s));
+        signals.addAll(fold(futureTuples, event, rule));
         return signals;
     }
 

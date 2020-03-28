@@ -19,12 +19,10 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -36,7 +34,6 @@ public class HistogramStreakNRule extends BadgeRule {
     private int minStreak = Integer.MAX_VALUE;
     private List<Integer> streaks;
     private long timeUnit;
-    private Consumer<Signal> consumer;
     protected Function<Event, Double> valueResolver;
 
     private boolean consecutive;
@@ -52,14 +49,6 @@ public class HistogramStreakNRule extends BadgeRule {
 
     public void setValueResolver(Function<Event, Double> valueResolver) {
         this.valueResolver = valueResolver;
-    }
-
-    public Consumer<Signal> getConsumer() {
-        return consumer;
-    }
-
-    public void setConsumer(Consumer<Signal> consumer) {
-        this.consumer = consumer;
     }
 
     public int getMaxStreak() {

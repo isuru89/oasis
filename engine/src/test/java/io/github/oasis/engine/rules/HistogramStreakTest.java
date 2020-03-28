@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.processors.HistogramStreakN;
 import io.github.oasis.engine.rules.signals.HistogramBadgeRemovalSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
@@ -285,7 +286,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
         options.setConsecutive(true);
         options.setThreshold(BigDecimal.valueOf(threshold));
         options.setTimeUnit(timeunit);
-        options.setConsumer(consumer);
+        options.setCollector(consumer);
         options.setValueResolver(event -> Double.parseDouble(event.getFieldValue("value").toString()));
         return options;
     }

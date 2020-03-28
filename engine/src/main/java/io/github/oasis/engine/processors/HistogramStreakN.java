@@ -17,9 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.rules.HistogramStreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeRemovalSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeSignal;
@@ -38,7 +39,6 @@ import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static io.github.oasis.engine.utils.Constants.COLON;
@@ -53,33 +53,14 @@ import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
 /**
  * @author Isuru Weerarathna
  */
-public class HistogramStreakN extends BadgeProcessor implements Consumer<Event> {
-
-    private HistogramStreakNRule rule;
+public class HistogramStreakN extends BadgeProcessor<HistogramStreakNRule> {
 
     public HistogramStreakN(JedisPool pool, HistogramStreakNRule rule) {
-        super(pool);
-        this.rule = rule;
+        super(pool, rule);
     }
 
     @Override
-    public void accept(Event event) {
-        if (!isMatchEvent(event, rule)) {
-            return;
-        }
-
-        try (Jedis jedis = pool.getResource()) {
-            List<BadgeSignal> signals = process(event, rule, jedis);
-            if (signals != null) {
-                signals.forEach(s -> {
-                    beforeBatchEmit(s, event, rule, jedis);
-                    rule.getConsumer().accept(s);
-                });
-            }
-        }
-    }
-
-    private List<BadgeSignal> process(Event event, HistogramStreakNRule rule, Jedis jedis) {
+    public List<BadgeSignal> process(Event event, HistogramStreakNRule rule, Jedis jedis) {
         String badgeKey = ID.getBadgeHistogramKey(event.getGameId(), event.getUser(), rule.getId());
         long timestamp = event.getTimestamp() - (event.getTimestamp() % rule.getTimeUnit());
         BigDecimal value = evaluateForValue(event).setScale(SCALE, BigDecimal.ROUND_HALF_UP);
@@ -171,17 +152,17 @@ public class HistogramStreakN extends BadgeProcessor implements Consumer<Event> 
         return null;
     }
 
-    public List<BadgeSignal> unfold(Set<Tuple> tuples, Event event, long ts, HistogramStreakNRule options) {
+    public List<BadgeSignal> unfold(Set<Tuple> tuples, Event event, long ts, HistogramStreakNRule rule) {
         List<BadgeSignal> signals = new ArrayList<>();
         LinkedHashSet<Tuple> filteredTuples = tuples.stream().map(t -> {
             String[] parts = t.getElement().split(COLON);
             if (Long.parseLong(parts[0]) != ts) {
                 return t;
             } else {
-                return new Tuple(parts[0] + COLON + options.getThreshold().toString(), t.getScore());
+                return new Tuple(parts[0] + COLON + rule.getThreshold().toString(), t.getScore());
             }
         }).collect(Collectors.toCollection(LinkedHashSet::new));
-        List<BadgeSignal> badgesAwarded = fold(filteredTuples, event, options, true);
+        List<BadgeSignal> badgesAwarded = fold(filteredTuples, event, rule, true);
         if (badgesAwarded.isEmpty()) {
             return signals;
         }
@@ -202,7 +183,7 @@ public class HistogramStreakN extends BadgeProcessor implements Consumer<Event> 
             String[] parts = t.getElement().split(COLON);
             return Long.parseLong(parts[0]) > ts;
         }).collect(Collectors.toCollection(LinkedHashSet::new));
-        fold(futureTuples, event, options, false).forEach(s -> options.getConsumer().accept(s));
+        signals.addAll(fold(futureTuples, event, rule, false));
         return signals;
     }
 

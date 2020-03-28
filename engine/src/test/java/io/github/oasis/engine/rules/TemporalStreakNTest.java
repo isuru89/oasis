@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.processors.StreakN;
+import io.github.oasis.engine.processors.TemporalStreakN;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.rules.signals.StreakBadgeSignal;

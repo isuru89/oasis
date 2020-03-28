@@ -17,9 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.rules.ConditionalBadgeRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.ConditionalBadge;
 import io.github.oasis.model.Event;
@@ -29,23 +30,31 @@ import redis.clients.jedis.JedisPool;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static io.github.oasis.engine.utils.Numbers.asLong;
 
 /**
+ * Awards a badge based on a different range of criteria satisfied for the event.
+ * This badge is independent of time units.
+ * <p>
+ * For e.g:   Award,<br>
+ *     <ul>
+ *       <li>bronze badge <= if score > 50 </li>
+ *       <li>silver badge <= if score > 75 </li>
+ *       <li>gold badge <= if score > 90 </li>
+ *     </ul>
+ * </p>
+ *
  * @author Isuru Weerarathna
  */
-public class ConditionalBadgeProcessor extends BadgeProcessor implements Consumer<Event> {
-
-    private ConditionalBadgeRule rule;
+public class ConditionalBadgeProcessor extends BadgeProcessor<ConditionalBadgeRule> {
 
     public ConditionalBadgeProcessor(JedisPool pool, ConditionalBadgeRule rule) {
-        super(pool);
-        this.rule = rule;
+        super(pool, rule);
     }
 
-    private List<BadgeSignal> handle(Event event, Jedis jedis) {
+    @Override
+    public List<BadgeSignal> process(Event event, ConditionalBadgeRule rule, Jedis jedis) {
         List<ConditionalBadgeRule.Condition> conditions = rule.getConditions();
         if (conditions.isEmpty()) {
             return null;
@@ -71,20 +80,4 @@ public class ConditionalBadgeProcessor extends BadgeProcessor implements Consume
         return null;
     }
 
-    @Override
-    public void accept(Event event) {
-        if (!isMatchEvent(event, rule)) {
-            return;
-        }
-
-        try (Jedis jedis = pool.getResource()) {
-            List<BadgeSignal> signals = handle(event, jedis);
-            if (signals != null) {
-                signals.forEach(signal -> {
-                    beforeBatchEmit(signal, event, rule, jedis);
-                    rule.getCollector().accept(signal);
-                });
-            }
-        }
-    }
 }

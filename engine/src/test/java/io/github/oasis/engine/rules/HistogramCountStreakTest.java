@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.processors.HistogramStreakN;
 import io.github.oasis.engine.rules.signals.HistogramBadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 import org.junit.Assert;
@@ -296,7 +297,7 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         options.setConsecutive(true);
         options.setThreshold(BigDecimal.valueOf(threshold));
         options.setTimeUnit(timeunit);
-        options.setConsumer(consumer);
+        options.setCollector(consumer);
         options.setCondition(event -> (long) event.getFieldValue("value") >= 50);
         return options;
     }

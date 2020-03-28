@@ -17,9 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.rules.TemporalBadgeRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.TemporalBadge;
@@ -31,7 +32,6 @@ import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static io.github.oasis.engine.utils.Constants.SCALE;
@@ -45,41 +45,19 @@ import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
  *
  * @author Isuru Weerarathna
  */
-public class TemporalBadgeProcessor extends BadgeProcessor implements Consumer<Event> {
-
-    private TemporalBadgeRule rule;
+public class TemporalBadgeProcessor extends BadgeProcessor<TemporalBadgeRule> {
 
     public TemporalBadgeProcessor(JedisPool pool, TemporalBadgeRule rule) {
-        super(pool);
-        this.rule = rule;
+        super(pool, rule);
     }
 
     @Override
-    public void accept(Event event) {
-        if (!isMatchEvent(event, rule)) {
-            return;
-        }
-
-        if (unableToProcess(event, rule)) {
-            return;
-        }
-
-        if (!isCriteriaSatisfied(event, rule)) {
-            return;
-        }
-
-        try (Jedis jedis = pool.getResource()) {
-            List<BadgeSignal> badges = createBadges(event, rule, jedis);
-            if (badges != null) {
-                badges.forEach(badgeSignal -> {
-                    beforeBatchEmit(badgeSignal, event, rule, jedis);
-                    rule.getCollector().accept(badgeSignal);
-                });
-            }
-        }
+    public boolean isDenied(Event event) {
+        return super.isDenied(event) || !isCriteriaSatisfied(event, rule);
     }
 
-    private List<BadgeSignal> createBadges(Event event, TemporalBadgeRule rule, Jedis jedis) {
+    @Override
+    public List<BadgeSignal> process(Event event, TemporalBadgeRule rule, Jedis jedis) {
         BigDecimal value = resolveValueOfEvent(event, rule);
         String badgeKey = ID.getUserTemporalBadgeKey(event.getGameId(), event.getUser(), rule.getId());
         long ts = event.getTimestamp();
