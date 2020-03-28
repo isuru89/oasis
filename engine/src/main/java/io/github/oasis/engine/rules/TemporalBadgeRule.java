@@ -37,7 +37,7 @@ public class TemporalBadgeRule extends BadgeRule {
 
     private long timeUnit;
     private Predicate<Event> condition;
-    private Function<Event, BigDecimal> valueResolver;
+    protected Function<Event, BigDecimal> valueResolver;
     private Consumer<Signal> collector;
     private List<Threshold> thresholds;
 
