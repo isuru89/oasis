@@ -39,6 +39,10 @@ public class StreakNRule extends BadgeRule {
     private long retainTime;
     private Consumer<Signal> collector;
 
+    public StreakNRule(String id) {
+        super(id);
+    }
+
     public Consumer<Signal> getCollector() {
         return collector;
     }

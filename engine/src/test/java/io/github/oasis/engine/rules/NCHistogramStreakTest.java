@@ -210,8 +210,7 @@ public class NCHistogramStreakTest extends AbstractRuleTest {
     }
 
     private HistogramStreakNRule createOptions(List<Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
-        HistogramStreakNRule options = new HistogramStreakNRule();
-        options.setId("abc");
+        HistogramStreakNRule options = new HistogramStreakNRule("test.histogram.streak");
         options.setStreaks(streaks);
         options.setConsecutive(false);
         options.setThreshold(BigDecimal.valueOf(threshold));

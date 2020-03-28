@@ -20,8 +20,8 @@
 package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
-import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,16 +39,18 @@ import java.util.function.Consumer;
 @DisplayName("Time based Streaks")
 public class TemporalStreakNTest extends AbstractRuleTest {
 
+    public static final String EVENT_TYPE = "event.a";
+
     @DisplayName("Single streak: multiple consecutive badges")
     @Test
     public void testStreakNWithinTUnit() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 50);
-        TEvent e4 = TEvent.createKeyValue(130, "a", 81);
-        TEvent e5 = TEvent.createKeyValue(150, "a", 77);
-        TEvent e6 = TEvent.createKeyValue(160, "a", 87);
-        TEvent e7 = TEvent.createKeyValue(170, "a", 11);
+        TEvent e1 = TEvent.createKeyValue(100, EVENT_TYPE, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVENT_TYPE, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVENT_TYPE, 50);
+        TEvent e4 = TEvent.createKeyValue(130, EVENT_TYPE, 81);
+        TEvent e5 = TEvent.createKeyValue(150, EVENT_TYPE, 77);
+        TEvent e6 = TEvent.createKeyValue(160, EVENT_TYPE, 87);
+        TEvent e7 = TEvent.createKeyValue(170, EVENT_TYPE, 11);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
@@ -60,19 +62,19 @@ public class TemporalStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(2, signals.size());
 
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 130, 160, e4.getExternalId(), e6.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 130, 160, e4.getExternalId(), e6.getExternalId()));
     }
 
     @DisplayName("Multi streaks: multiple badges")
     @Test
     public void testMultiStreakNWithinTUnit() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 50);
-        TEvent e4 = TEvent.createKeyValue(130, "a", 81);
-        TEvent e5 = TEvent.createKeyValue(150, "a", 77);
-        TEvent e6 = TEvent.createKeyValue(160, "a", 87);
+        TEvent e1 = TEvent.createKeyValue(100, EVENT_TYPE, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVENT_TYPE, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVENT_TYPE, 50);
+        TEvent e4 = TEvent.createKeyValue(130, EVENT_TYPE, 81);
+        TEvent e5 = TEvent.createKeyValue(150, EVENT_TYPE, 77);
+        TEvent e6 = TEvent.createKeyValue(160, EVENT_TYPE, 87);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Arrays.asList(3, 5), 60, signalsRef::add);
@@ -84,19 +86,19 @@ public class TemporalStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(2, signals.size());
 
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
-        assertSignal(signals, new BadgeSignal(options.getId(), 5, 100, 150, e1.getExternalId(), e5.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 5, 100, 150, e1.getExternalId(), e5.getExternalId()));
     }
 
     @DisplayName("Multi streaks: Out-of-order event breaks latest streak")
     @Test
     public void testOutOfOrderBreakMultiStreakNWithinTUnit() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 50);
-        TEvent e4 = TEvent.createKeyValue(130, "a", 81);
-        TEvent e5 = TEvent.createKeyValue(150, "a", 77);
-        TEvent e6 = TEvent.createKeyValue(125, "a", 12);
+        TEvent e1 = TEvent.createKeyValue(100, EVENT_TYPE, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVENT_TYPE, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVENT_TYPE, 50);
+        TEvent e4 = TEvent.createKeyValue(130, EVENT_TYPE, 81);
+        TEvent e5 = TEvent.createKeyValue(150, EVENT_TYPE, 77);
+        TEvent e6 = TEvent.createKeyValue(125, EVENT_TYPE, 12);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Arrays.asList(3, 5), 60, signalsRef::add);
@@ -108,19 +110,19 @@ public class TemporalStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(3, signals.size());
 
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
-        assertSignal(signals, new BadgeSignal(options.getId(), 5, 100, 150, e1.getExternalId(), e5.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 5, 100, 150, e1.getExternalId(), e5.getExternalId()));
         assertSignal(signals, new BadgeRemoveSignal(options.getId(), 5, 100, 150, e1.getExternalId(), e5.getExternalId()));
     }
 
     @DisplayName("Single streak: not within given time unit")
     @Test
     public void testStreakNNotWithinTUnit() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(122, "a", 50);
-        TEvent e4 = TEvent.createKeyValue(135, "a", 81);
-        TEvent e5 = TEvent.createKeyValue(140, "a", 21);
+        TEvent e1 = TEvent.createKeyValue(100, EVENT_TYPE, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVENT_TYPE, 63);
+        TEvent e3 = TEvent.createKeyValue(122, EVENT_TYPE, 50);
+        TEvent e4 = TEvent.createKeyValue(135, EVENT_TYPE, 81);
+        TEvent e5 = TEvent.createKeyValue(140, EVENT_TYPE, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 20, signalsRef::add);
@@ -136,11 +138,11 @@ public class TemporalStreakNTest extends AbstractRuleTest {
     @DisplayName("Single streak: Out-of-order event creates a new streak")
     @Test
     public void testOutOfOrderStreakNWithinTUnit() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 35);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 50);
-        TEvent e4 = TEvent.createKeyValue(115, "a", 88);
-        TEvent e5 = TEvent.createKeyValue(140, "a", 21);
+        TEvent e1 = TEvent.createKeyValue(100, EVENT_TYPE, 35);
+        TEvent e2 = TEvent.createKeyValue(110, EVENT_TYPE, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVENT_TYPE, 50);
+        TEvent e4 = TEvent.createKeyValue(115, EVENT_TYPE, 88);
+        TEvent e5 = TEvent.createKeyValue(140, EVENT_TYPE, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
@@ -152,17 +154,17 @@ public class TemporalStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 110, 120, e2.getExternalId(), e3.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 110, 120, e2.getExternalId(), e3.getExternalId()));
     }
 
     @DisplayName("Single streak: Out-of-order event but not within time unit")
     @Test
     public void testOutOfOrderStreakNNotWithinTUnit() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 35);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(150, "a", 50);
-        TEvent e4 = TEvent.createKeyValue(120, "a", 88);
-        TEvent e5 = TEvent.createKeyValue(160, "a", 21);
+        TEvent e1 = TEvent.createKeyValue(100, EVENT_TYPE, 35);
+        TEvent e2 = TEvent.createKeyValue(110, EVENT_TYPE, 63);
+        TEvent e3 = TEvent.createKeyValue(150, EVENT_TYPE, 50);
+        TEvent e4 = TEvent.createKeyValue(120, EVENT_TYPE, 88);
+        TEvent e5 = TEvent.createKeyValue(160, EVENT_TYPE, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
@@ -178,11 +180,11 @@ public class TemporalStreakNTest extends AbstractRuleTest {
     @DisplayName("Single streak: Out-of-order event breaks streak within time unit")
     @Test
     public void testOutOfOrderBreakStreakNWithinTUnit() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 35);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 50);
-        TEvent e4 = TEvent.createKeyValue(130, "a", 88);
-        TEvent e5 = TEvent.createKeyValue(115, "a", 21);
+        TEvent e1 = TEvent.createKeyValue(100, EVENT_TYPE, 35);
+        TEvent e2 = TEvent.createKeyValue(110, EVENT_TYPE, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVENT_TYPE, 50);
+        TEvent e4 = TEvent.createKeyValue(130, EVENT_TYPE, 88);
+        TEvent e5 = TEvent.createKeyValue(115, EVENT_TYPE, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
@@ -194,18 +196,18 @@ public class TemporalStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(2, signals.size());
 
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 110, 130, e2.getExternalId(), e4.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 110, 130, e2.getExternalId(), e4.getExternalId()));
         assertSignal(signals, new BadgeRemoveSignal(options.getId(), 3, 110, 130, e2.getExternalId(), e4.getExternalId()));
     }
 
     @DisplayName("Single streak: Out-of-order event cannot break the streak not within time unit")
     @Test
     public void testOutOfOrderBreakStreakNNotWithinTUnit() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 35);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 50);
-        TEvent e4 = TEvent.createKeyValue(140, "a", 88);
-        TEvent e5 = TEvent.createKeyValue(105, "a", 21);
+        TEvent e1 = TEvent.createKeyValue(100, EVENT_TYPE, 35);
+        TEvent e2 = TEvent.createKeyValue(110, EVENT_TYPE, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVENT_TYPE, 50);
+        TEvent e4 = TEvent.createKeyValue(140, EVENT_TYPE, 88);
+        TEvent e5 = TEvent.createKeyValue(105, EVENT_TYPE, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
@@ -217,12 +219,11 @@ public class TemporalStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 110, 140, e2.getExternalId(), e4.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 110, 140, e2.getExternalId(), e4.getExternalId()));
     }
 
     private TemporalStreakNRule createStreakNOptions(List<Integer> streaks, long timeUnit, Consumer<Signal> consumer) {
-        TemporalStreakNRule options = new TemporalStreakNRule();
-        options.setId("abc");
+        TemporalStreakNRule options = new TemporalStreakNRule("test.temporal.streak");
         options.setStreaks(streaks);
         options.setCondition(val -> val >= 50);
         options.setRetainTime(100);

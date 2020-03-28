@@ -19,8 +19,8 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ public class TemporalNCStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
     }
 
     @DisplayName("Single streak: Out-of-order unsatisfying event does not affect")
@@ -76,7 +76,7 @@ public class TemporalNCStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
     }
 
     @DisplayName("Single streak: Out-of-order satisfying event creates a badge")
@@ -97,7 +97,7 @@ public class TemporalNCStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 111, e1.getExternalId(), e4.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 100, 111, e1.getExternalId(), e4.getExternalId()));
     }
 
     @DisplayName("Single streak: badge due to non-consecutive events")
@@ -118,7 +118,7 @@ public class TemporalNCStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 130, e1.getExternalId(), e4.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 100, 130, e1.getExternalId(), e4.getExternalId()));
     }
 
     @DisplayName("Single streak: not within time unit")
@@ -161,13 +161,12 @@ public class TemporalNCStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(2, signals.size());
 
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
-        assertSignal(signals, new BadgeSignal(options.getId(), 3, 130, 160, e4.getExternalId(), e6.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 100, 120, e1.getExternalId(), e3.getExternalId()));
+        assertSignal(signals, new StreakBadgeSignal(options.getId(), 3, 130, 160, e4.getExternalId(), e6.getExternalId()));
     }
 
     private TemporalStreakNRule createStreakNOptions(List<Integer> streaks, long timeUnit, Consumer<Signal> consumer) {
-        TemporalStreakNRule options = new TemporalStreakNRule();
-        options.setId("abc");
+        TemporalStreakNRule options = new TemporalStreakNRule("test.histogram.streak");
         options.setStreaks(streaks);
         options.setConsecutive(false);
         options.setCondition(val -> val >= 50);

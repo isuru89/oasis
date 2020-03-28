@@ -362,8 +362,7 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
     }
 
     private ConditionalBadgeRule createRule(Collection<Signal> collector, int maxTimes, ConditionalBadgeRule.Condition... conditions) {
-        ConditionalBadgeRule rule = new ConditionalBadgeRule();
-        rule.setId("test.cond.badge");
+        ConditionalBadgeRule rule = new ConditionalBadgeRule("test.cond.badge");
         rule.setForEvent(EVT_1);
         rule.setCollector(collector::add);
         rule.setMaxAwardTimes(maxTimes);

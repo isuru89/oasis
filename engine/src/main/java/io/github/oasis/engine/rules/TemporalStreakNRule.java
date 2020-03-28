@@ -27,6 +27,10 @@ public class TemporalStreakNRule extends StreakNRule {
     private long timeUnit;
     private boolean consecutive = true;
 
+    public TemporalStreakNRule(String id) {
+        super(id);
+    }
+
     public boolean isConsecutive() {
         return consecutive;
     }

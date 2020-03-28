@@ -26,16 +26,25 @@ import java.io.Serializable;
  */
 public class AbstractRule implements Serializable {
 
-    private String id;
+    private final String id;
     private String name;
     private String description;
+    private String forEvent;
+
+    public AbstractRule(String id) {
+        this.id = id;
+    }
+
+    public String getForEvent() {
+        return forEvent;
+    }
+
+    public void setForEvent(String forEvent) {
+        this.forEvent = forEvent;
+    }
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {

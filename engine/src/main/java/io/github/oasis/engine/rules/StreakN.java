@@ -22,6 +22,7 @@ package io.github.oasis.engine.rules;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
+import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
 import io.github.oasis.model.Event;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -133,7 +134,7 @@ public class StreakN implements Consumer<Event> {
             int now = options.getStreakMap().floor(len).intValue();
             if (prev < now) {
                 String[] startParts = start.getElement().split(":");
-                BadgeSignal signal = new BadgeSignal(options.getId(),
+                BadgeSignal signal = new StreakBadgeSignal(options.getId(),
                         now,
                         Long.parseLong(startParts[0]),
                         Long.parseLong(parts[0]),

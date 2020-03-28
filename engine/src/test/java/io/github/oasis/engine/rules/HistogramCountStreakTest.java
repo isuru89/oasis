@@ -47,8 +47,7 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
     @DisplayName("Rule should be able to create")
     @Test
     public void shouldNotBeAbleToSetValueResolver() {
-        HistogramCountStreakNRule options = new HistogramCountStreakNRule();
-        options.setId("abc");
+        HistogramCountStreakNRule options = new HistogramCountStreakNRule("test.histogram.count");
         options.setStreaks(Arrays.asList(3,5));
         options.setConsecutive(true);
         options.setTimeUnit(FIFTY);
@@ -274,8 +273,7 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
     }
 
     private HistogramStreakNRule createOptions(List<Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
-        HistogramCountStreakNRule options = new HistogramCountStreakNRule();
-        options.setId("abc");
+        HistogramCountStreakNRule options = new HistogramCountStreakNRule("test.histogram.count.streak");
         options.setStreaks(streaks);
         options.setConsecutive(true);
         options.setThreshold(BigDecimal.valueOf(threshold));

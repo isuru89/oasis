@@ -22,6 +22,7 @@ package io.github.oasis.engine.rules;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
+import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
 import io.github.oasis.model.Event;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -162,7 +163,7 @@ public class TemporalStreakN extends StreakN {
                 } else {
                     firstId = startTuple.getElement().split(":")[1];
                 }
-                signals.add(new BadgeSignal(rule.getId(),
+                signals.add(new StreakBadgeSignal(rule.getId(),
                         currStreak,
                         badgeStartTs,
                         ts,
@@ -240,7 +241,7 @@ public class TemporalStreakN extends StreakN {
                     if (lastBadgeStreak == streak && startTs <= lastBadgeTs) {
                         continue;
                     }
-                    signals.add(new BadgeSignal(
+                    signals.add(new StreakBadgeSignal(
                             options.getId(),
                             streak,
                             startTs,

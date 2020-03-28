@@ -35,7 +35,9 @@ public class FirstEventRule extends BadgeRule {
     private Predicate<Event> condition;
     private Consumer<Signal> collector;
 
-    public FirstEventRule(String eventName) {
+    public FirstEventRule(String id, String eventName) {
+        super(id);
+
         this.eventName = eventName;
     }
 

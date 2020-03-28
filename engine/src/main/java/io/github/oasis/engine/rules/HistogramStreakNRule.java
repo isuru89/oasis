@@ -42,6 +42,10 @@ public class HistogramStreakNRule extends BadgeRule {
     private boolean consecutive;
     protected BigDecimal threshold;
 
+    public HistogramStreakNRule(String id) {
+        super(id);
+    }
+
     public Function<Event, Double> getValueResolver() {
         return valueResolver;
     }

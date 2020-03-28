@@ -37,6 +37,10 @@ public class ConditionalBadgeRule extends BadgeRule {
     private List<Condition> conditions;
     private Consumer<Signal> collector;
 
+    public ConditionalBadgeRule(String id) {
+        super(id);
+    }
+
     public int getMaxAwardTimes() {
         return maxAwardTimes;
     }

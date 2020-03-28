@@ -30,7 +30,9 @@ import java.util.function.Predicate;
  */
 public class HistogramCountStreakNRule extends HistogramStreakNRule {
 
-    public HistogramCountStreakNRule() {
+    public HistogramCountStreakNRule(String id) {
+        super(id);
+
         super.threshold = BigDecimal.ONE;
     }
 

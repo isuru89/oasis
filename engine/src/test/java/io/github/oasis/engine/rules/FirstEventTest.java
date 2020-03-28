@@ -229,8 +229,7 @@ public class FirstEventTest extends AbstractRuleTest {
     }
 
     private FirstEventRule createRule(String forEvent, List<Signal> collectTo, Predicate<Event> predicate) {
-        FirstEventRule rule = new FirstEventRule(forEvent);
-        rule.setId("test.event");
+        FirstEventRule rule = new FirstEventRule("test.event", forEvent);
         rule.setCondition(predicate);
         rule.setCollector(collectTo::add);
         return rule;

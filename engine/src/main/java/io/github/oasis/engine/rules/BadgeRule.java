@@ -24,13 +24,7 @@ package io.github.oasis.engine.rules;
  */
 public class BadgeRule extends AbstractRule {
 
-    private String forEvent;
-
-    public String getForEvent() {
-        return forEvent;
-    }
-
-    public void setForEvent(String forEvent) {
-        this.forEvent = forEvent;
+    public BadgeRule(String id) {
+        super(id);
     }
 }
