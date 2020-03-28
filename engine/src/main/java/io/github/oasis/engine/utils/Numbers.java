@@ -17,31 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.engine.utils;
+
+import java.math.BigDecimal;
 
 /**
  * @author Isuru Weerarathna
  */
-public final class ID {
+public final class Numbers {
 
-    public static String getUserFirstEventsKey(int gameId, long userId) {
-        return String.format("u%d:g%d:firstevents", userId, gameId);
+    public static boolean isIncreasedOrEqual(BigDecimal prev, BigDecimal now) {
+        return now.compareTo(prev) >= 0;
     }
 
-    public static String getBadgeHistogramKey(int gameId, long userId, String badgeId) {
-        return String.format("u%d:g%d:badges:h:%s", userId, gameId, badgeId);
+    public static boolean isCrossedUp(BigDecimal prev, BigDecimal now, BigDecimal threshold) {
+        return now.compareTo(threshold) >= 0 && prev.compareTo(threshold) < 0;
     }
 
-    public static String getUserBadgeSpecKey(int gameId, long userId, String badgeId) {
-        return String.format("u%d:g%d:badges:%s", userId, gameId, badgeId);
+    public static boolean isCrossedDown(BigDecimal prev, BigDecimal now, BigDecimal threshold) {
+        return now.compareTo(threshold) < 0 && prev.compareTo(threshold) >= 0;
     }
 
-    public static String getUserTemporalBadgeKey(int gameId, long userId, String badgeId) {
-        return String.format("u%d:g%d:%s:temporal", userId, gameId, badgeId);
-    }
-
-    public static String getUserBadgesMetaKey(int gameId, long userId) {
-        return String.format("u%d:g%d:bgmeta", gameId, userId);
+    public static BigDecimal asDecimal(Double val) {
+        return val == null ? BigDecimal.ZERO : BigDecimal.valueOf(val);
     }
 
 }
