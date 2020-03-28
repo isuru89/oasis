@@ -33,29 +33,35 @@ public class BadgeProcessor extends AbstractProcessor {
         super(pool);
     }
 
-    long asLong(Long value) {
-        return value == null ? 0L : value;
-    }
-
     boolean isMatchEvent(Event event, BadgeRule badgeRule) {
         return badgeRule.getForEvent().equals(event.getEventType());
     }
 
-    protected void beforeBatchEmit(BadgeSignal signal, Event event, AbstractRule options, Jedis jedis) {
-        jedis.zadd(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), options.getId()),
+    protected String getMetaStreakKey(AbstractRule rule) {
+        return rule.getId() + ".streak";
+    }
+
+    protected String getMetaEndTimeKey(AbstractRule rule) {
+        return rule.getId();
+    }
+
+    protected void beforeBatchEmit(BadgeSignal signal, Event event, AbstractRule rule, Jedis jedis) {
+        jedis.zadd(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), rule.getId()),
                 signal.getStartTime(),
-                String.format("%d:%s:%d:%d", signal.getEndTime(), options.getId(), signal.getStartTime(), signal.getAttribute()));
+                String.format("%d:%s:%d:%d", signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getAttribute()));
         String userBadgesMeta = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-        String value = jedis.hget(userBadgesMeta, options.getId());
+        String value = jedis.hget(userBadgesMeta, rule.getId());
+        String streakKey = getMetaStreakKey(rule);
+        String endTimeKey = getMetaEndTimeKey(rule);
         if (value == null) {
-            jedis.hset(userBadgesMeta, options.getId(), String.valueOf(signal.getEndTime()));
-            jedis.hset(userBadgesMeta, options.getId() + ".streak", String.valueOf(signal.getAttribute()));
+            jedis.hset(userBadgesMeta, endTimeKey, String.valueOf(signal.getEndTime()));
+            jedis.hset(userBadgesMeta, streakKey, String.valueOf(signal.getAttribute()));
         } else {
             long val = Long.parseLong(value);
             if (signal.getEndTime() >= val) {
-                jedis.hset(userBadgesMeta, options.getId() + ".streak", String.valueOf(signal.getAttribute()));
+                jedis.hset(userBadgesMeta, streakKey, String.valueOf(signal.getAttribute()));
             }
-            jedis.hset(userBadgesMeta, options.getId(), String.valueOf(Math.max(signal.getEndTime(), val)));
+            jedis.hset(userBadgesMeta, endTimeKey, String.valueOf(Math.max(signal.getEndTime(), val)));
         }
     }
 

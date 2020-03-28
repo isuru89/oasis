@@ -26,20 +26,54 @@ import java.math.BigDecimal;
  */
 public final class Numbers {
 
+    private static final String ZERO = "0";
+
+    public static boolean isZero(String value) {
+        return ZERO.equals(value);
+    }
+
+    public static boolean isFirstOne(Long value) {
+        return value != null && value == 1;
+    }
+
     public static boolean isIncreasedOrEqual(BigDecimal prev, BigDecimal now) {
         return now.compareTo(prev) >= 0;
     }
 
-    public static boolean isCrossedUp(BigDecimal prev, BigDecimal now, BigDecimal threshold) {
+    public static boolean isThresholdCrossedUp(BigDecimal prev, BigDecimal now, BigDecimal threshold) {
         return now.compareTo(threshold) >= 0 && prev.compareTo(threshold) < 0;
     }
 
-    public static boolean isCrossedDown(BigDecimal prev, BigDecimal now, BigDecimal threshold) {
+    public static boolean isThresholdCrossedDown(BigDecimal prev, BigDecimal now, BigDecimal threshold) {
         return now.compareTo(threshold) < 0 && prev.compareTo(threshold) >= 0;
+    }
+
+    public static int asInt(String value) {
+        return value == null ? 0 : Integer.parseInt(value);
+    }
+
+    public static int asInt(Integer value) {
+        return value == null ? 0 : value;
+    }
+
+    public static long asLong(String value) {
+        return value == null ? 0 : Long.parseLong(value);
+    }
+
+    public static long asLong(Long value) {
+        return value == null ? 0 : value;
+    }
+
+    public static BigDecimal addToScale(BigDecimal num1, BigDecimal num2, int scale) {
+        return num1.add(num2).setScale(scale, BigDecimal.ROUND_HALF_UP);
     }
 
     public static BigDecimal asDecimal(Double val) {
         return val == null ? BigDecimal.ZERO : BigDecimal.valueOf(val);
+    }
+
+    public static BigDecimal asDecimal(String val) {
+        return val == null ? BigDecimal.ZERO : new BigDecimal(val);
     }
 
 }

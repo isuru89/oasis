@@ -37,12 +37,17 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
+import static io.github.oasis.engine.utils.Numbers.asInt;
+import static io.github.oasis.engine.utils.Numbers.asLong;
+
 /**
+ * Awards a badge when a condition fulfilled for a N number of times within a time unit T.
+ *
  * @author Isuru Weerarathna
  */
 public class TemporalStreakN extends StreakN {
-    public TemporalStreakN(JedisPool pool, TemporalStreakNRule options) {
-        super(pool, options);
+    public TemporalStreakN(JedisPool pool, TemporalStreakNRule rule) {
+        super(pool, rule);
     }
 
     private long captureTsFromTuple(Tuple tuple) {
@@ -55,56 +60,36 @@ public class TemporalStreakN extends StreakN {
         return parts[2];
     }
 
-    private long getLongValue(String val, long defaultValue) {
-        if (val == null) {
-            return defaultValue;
-        }
-        return Long.parseLong(val);
-    }
-
-    private int getIntValue(String val, int defaultValue) {
-        if (val == null) {
-            return defaultValue;
-        }
-        return Integer.parseInt(val);
-    }
-
     @Override
-    public void accept(Event event) {
-        TemporalStreakNRule rule = (TemporalStreakNRule) options;
+    public List<BadgeSignal> process(Event event, StreakNRule ruleRef, Jedis jedis) {
+        TemporalStreakNRule rule = (TemporalStreakNRule) ruleRef;
         if (rule.isConsecutive()) {
-            super.accept(event);
+            return super.process(event, rule, jedis);
         } else {
-            nonConsecutiveAccept(event, rule);
+            return nonConsecutiveAccept(event, rule, jedis);
         }
     }
 
-    private void nonConsecutiveAccept(Event event, TemporalStreakNRule rule) {
-        String key = getKey();
-        long value = (long) event.getFieldValue("value");
+    private List<BadgeSignal> nonConsecutiveAccept(Event event, TemporalStreakNRule rule, Jedis jedis) {
+        String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         long ts = event.getTimestamp();
-        System.out.println("Processed: " + value);
-        try (Jedis jedis = pool.getResource()) {
-            if (rule.getCondition().test(value)) {
-                String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-                String lastOffering = jedis.hget(badgeMetaKey, rule.getId() + ":lasttime");  // <timestamp>:<streak>:<id>
-                long lastTimeOffered = 0L;
-                if (lastOffering != null) {
-                    lastTimeOffered = getLongValue(lastOffering.split(":")[0], 0L);
-                }
-                if (ts <= lastTimeOffered) {
-                    return;
-                }
-
-                jedis.zadd(key, ts, ts + ":" + event.getExternalId());
-                long start = Math.max(ts - rule.getTimeUnit(), 0);
-                Set<Tuple> zrange = jedis.zrangeByScoreWithScores(key, start, ts + rule.getTimeUnit());
-                countFold(zrange, event, lastOffering, rule, jedis).forEach(b -> {
-                    beforeBatchEmit(b, event, rule, jedis);
-                    rule.getCollector().accept(b);
-                });
+        if (rule.getCondition().test(event)) {
+            String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+            String lastOffering = jedis.hget(badgeMetaKey, rule.getId() + ":lasttime");  // <timestamp>:<streak>:<id>
+            long lastTimeOffered = 0L;
+            if (lastOffering != null) {
+                lastTimeOffered = asLong(lastOffering.split(":")[0]);
             }
+            if (ts <= lastTimeOffered) {
+                return null;
+            }
+
+            jedis.zadd(key, ts, ts + ":" + event.getExternalId());
+            long start = Math.max(ts - rule.getTimeUnit(), 0);
+            Set<Tuple> tupleRange = jedis.zrangeByScoreWithScores(key, start, ts + rule.getTimeUnit());
+            return countFold(tupleRange, event, lastOffering, rule, jedis);
         }
+        return null;
     }
 
     private List<BadgeSignal> countFold(Set<Tuple> tuplesAll, Event event, String lastOffering, TemporalStreakNRule rule, Jedis jedis) {
@@ -115,9 +100,9 @@ public class TemporalStreakN extends StreakN {
         String prevBadgeFirstId = null;
         if (lastOffering != null) {
             String[] parts = lastOffering.split(":");
-            lastTs = getLongValue(parts[0], 0L) + 1;
-            lastStreak = getIntValue(parts[1], 0);
-            firstTs = getLongValue(parts[2], 0L);
+            lastTs = asLong(parts[0]) + 1;
+            lastStreak = asInt(parts[1]);
+            firstTs = asLong(parts[2]);
             prevBadgeFirstId = parts[3];
         }
 
@@ -220,10 +205,9 @@ public class TemporalStreakN extends StreakN {
         int lastBadgeStreak = 0;
         try (Jedis jedis = pool.getResource()) {
             String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-            List<String> badgeInfos = jedis.hmget(badgeMetaKey, options.getId(), options.getId() + ".streak");
-            lastBadgeTs = getLongValue(badgeInfos.get(0), 0L);
-            lastBadgeStreak = getIntValue(badgeInfos.get(1), 0);
-            System.out.println(">>> Last Badge end " + lastBadgeTs + ",   streak: " + lastBadgeStreak);
+            List<String> badgeInfos = jedis.hmget(badgeMetaKey, getMetaEndTimeKey(rule), getMetaStreakKey(rule));
+            lastBadgeTs = asLong(badgeInfos.get(0));
+            lastBadgeStreak = asInt(badgeInfos.get(1));
         }
 
         List<Integer> streaks = options.getStreaks();
@@ -256,8 +240,8 @@ public class TemporalStreakN extends StreakN {
     }
 
     @Override
-    public List<BadgeSignal> unfold(Set<Tuple> tuples, Event event, long ts, StreakNRule optionsRef) {
-        TemporalStreakNRule options = (TemporalStreakNRule) optionsRef;
+    public List<BadgeSignal> unfold(Set<Tuple> tuples, Event event, long ts, StreakNRule rule) {
+        TemporalStreakNRule options = (TemporalStreakNRule) rule;
         List<BadgeSignal> signals = new ArrayList<>();
         try (Jedis jedis = pool.getResource()) {
             long startTs = Math.max(0, ts - options.getTimeUnit());
@@ -279,7 +263,7 @@ public class TemporalStreakN extends StreakN {
                 }).forEach(signals::add);
             }
         }
-        signals.addAll(fold(tuples, event, optionsRef));
+        signals.addAll(fold(tuples, event, rule));
         return signals;
     }
 

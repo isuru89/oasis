@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import static io.github.oasis.engine.utils.Numbers.asLong;
+
 /**
  * @author Isuru Weerarathna
  */

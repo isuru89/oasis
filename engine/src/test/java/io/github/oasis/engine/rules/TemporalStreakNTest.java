@@ -40,6 +40,28 @@ import java.util.function.Consumer;
 public class TemporalStreakNTest extends AbstractRuleTest {
 
     public static final String EVENT_TYPE = "event.a";
+    public static final String EVENT_B = "event.b";
+
+    @DisplayName("Multi streaks: No matching event types")
+    @Test
+    public void testMultiStreakNWithinTUnitNoEventTypes() {
+        TEvent e1 = TEvent.createKeyValue(100, EVENT_B, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVENT_B, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVENT_B, 50);
+        TEvent e4 = TEvent.createKeyValue(130, EVENT_B, 81);
+        TEvent e5 = TEvent.createKeyValue(150, EVENT_B, 77);
+        TEvent e6 = TEvent.createKeyValue(160, EVENT_B, 87);
+
+        List<Signal> signalsRef = new ArrayList<>();
+        TemporalStreakNRule options = createStreakNOptions(Arrays.asList(3, 5), 60, signalsRef::add);
+        Assertions.assertEquals(5, options.getMaxStreak());
+        StreakN streakN = new TemporalStreakN(pool, options);
+        submitOrder(streakN, e1, e2, e3, e4, e5, e6);
+
+        Set<Signal> signals = mergeSignals(signalsRef);
+        System.out.println(signals);
+        Assertions.assertEquals(0, signals.size());
+    }
 
     @DisplayName("Single streak: multiple consecutive badges")
     @Test
@@ -224,8 +246,9 @@ public class TemporalStreakNTest extends AbstractRuleTest {
 
     private TemporalStreakNRule createStreakNOptions(List<Integer> streaks, long timeUnit, Consumer<Signal> consumer) {
         TemporalStreakNRule options = new TemporalStreakNRule("test.temporal.streak");
+        options.setForEvent(EVENT_TYPE);
         options.setStreaks(streaks);
-        options.setCondition(val -> val >= 50);
+        options.setCondition(event -> (long) event.getFieldValue("value") >= 50);
         options.setRetainTime(100);
         options.setCollector(consumer);
         options.setTimeUnit(timeUnit);

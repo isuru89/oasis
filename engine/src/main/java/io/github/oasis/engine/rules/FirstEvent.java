@@ -28,6 +28,8 @@ import redis.clients.jedis.JedisPool;
 import java.util.Collections;
 import java.util.List;
 
+import static io.github.oasis.engine.utils.Numbers.isFirstOne;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -68,10 +70,6 @@ public class FirstEvent implements BadgeHandler {
 
     private boolean eventMatches(String eventType, String pattern) {
         return pattern.equals(eventType);
-    }
-
-    private boolean isFirstOne(Long value) {
-        return value != null && value == 1;
     }
 
     @Override

@@ -75,7 +75,7 @@ public abstract class AbstractRuleTest {
         try (Jedis jedis = pool.getResource()) {
             Map<String, String> keys = jedis.hgetAll(ID.getUserBadgesMetaKey(1, 0L));
             System.out.println("Badges: " + keys);
-            String badgesKey = ID.getUserBadgeSpecKey(1, 0, "abc");
+//            String badgesKey = ID.getUserBadgeSpecKey(1, 0, "abc");
             //System.out.println(jedis.zrangeWithScores(badgesKey, 0, -1));
         }
     }

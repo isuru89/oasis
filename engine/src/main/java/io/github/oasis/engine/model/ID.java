@@ -36,6 +36,10 @@ public final class ID {
         return String.format("u%d:g%d:badges:%s", userId, gameId, badgeId);
     }
 
+    public static String getUserBadgeStreakKey(int gameId, long userId, String badgeId) {
+        return String.format("u%d:g%d:%s:streak", userId, gameId, badgeId);
+    }
+
     public static String getUserTemporalBadgeKey(int gameId, long userId, String badgeId) {
         return String.format("u%d:g%d:%s:temporal", userId, gameId, badgeId);
     }

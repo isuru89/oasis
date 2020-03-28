@@ -39,58 +39,70 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static io.github.oasis.engine.utils.Numbers.asInt;
+import static io.github.oasis.engine.utils.Numbers.asLong;
+import static io.github.oasis.engine.utils.Numbers.isZero;
+
 /**
+ * Awards badges when a condition is satisfied continuously for a number of time.
+ * There is no time constraint here.
+ *
  * @author Isuru Weerarathna
  */
-public class StreakN implements Consumer<Event> {
+public class StreakN extends BadgeProcessor implements Consumer<Event> {
 
-    protected final JedisPool pool;
-    protected StreakNRule options;
+    public static final String COLON = ":";
+    protected StreakNRule rule;
 
-    public StreakN(JedisPool pool, StreakNRule options) {
-        this.pool = pool;
-        this.options = options;
+    public StreakN(JedisPool pool, StreakNRule rule) {
+        super(pool);
+        this.rule = rule;
     }
 
     @Override
     public void accept(Event event) {
-        String key = getKey();
-        long value = (long) event.getFieldValue("value");
-        long ts = event.getTimestamp();
-        System.out.println("Processed: " + value);
+        if (!isMatchEvent(event, rule)) {
+            return;
+        }
+
         try (Jedis jedis = pool.getResource()) {
-            if (this.options.getCondition().test(value)) {
-                jedis.zadd(key, ts, ts + ":1:" + event.getExternalId());
-                long rank = jedis.zrank(key, ts  + ":1:" + event.getExternalId());
-                long start = Math.max(0, rank - options.getMaxStreak());
-                Set<Tuple> zrange = jedis.zrangeWithScores(key, start, rank + options.getMaxStreak());
-                System.out.println(zrange);
-                fold(zrange, event, options).forEach(b -> {
-                    beforeBatchEmit(b, event, options, jedis);
-                    options.getCollector().accept(b);
-                });
-            } else {
-                jedis.zadd(key, ts, ts + ":0:" + event.getExternalId());
-                jedis.zremrangeByScore(key, 0, ts - options.getRetainTime());
-                long rank = jedis.zrank(key, ts + ":0:" + event.getExternalId());
-                long start = Math.max(0, rank - options.getMaxStreak());
-                Set<Tuple> zrange = jedis.zrangeWithScores(key, start, rank + options.getMaxStreak());
-                System.out.println(zrange);
-                unfold(zrange, event, ts, options).forEach(b -> {
-                    beforeBatchEmit(b, event, options, jedis);
-                    options.getCollector().accept(b);
+            List<BadgeSignal> signals = process(event, rule, jedis);
+            if (signals != null) {
+                signals.forEach(badgeSignal -> {
+                    beforeBatchEmit(badgeSignal, event, rule, jedis);
+                    rule.getCollector().accept(badgeSignal);
                 });
             }
         }
     }
 
-    public List<BadgeSignal> unfold(Set<Tuple> tuples, Event event, long ts, StreakNRule options) {
+    public List<BadgeSignal> process(Event event, StreakNRule rule, Jedis jedis) {
+        String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
+        long ts = event.getTimestamp();
+        if (this.rule.getCondition().test(event)) {
+            String member = ts + ":1:" + event.getExternalId();
+            jedis.zadd(key, ts, member);
+            long rank = jedis.zrank(key, member);
+            long start = Math.max(0, rank - rule.getMaxStreak());
+            Set<Tuple> tupleRange = jedis.zrangeWithScores(key, start, rank + rule.getMaxStreak());
+            return fold(tupleRange, event, rule);
+        } else {
+            String member = ts + ":0:" + event.getExternalId();
+            jedis.zadd(key, ts, member);
+            jedis.zremrangeByScore(key, 0, ts - rule.getRetainTime());
+            long rank = jedis.zrank(key, member);
+            long start = Math.max(0, rank - rule.getMaxStreak());
+            Set<Tuple> tupleRange = jedis.zrangeWithScores(key, start, rank + rule.getMaxStreak());
+            return unfold(tupleRange, event, ts, rule);
+        }
+    }
+
+    public List<BadgeSignal> unfold(Set<Tuple> tuples, Event event, long ts, StreakNRule rule) {
         List<BadgeSignal> signals = new ArrayList<>();
-        LinkedHashSet<Tuple> filteredTuples = tuples.stream().filter(t -> {
-            String[] parts = t.getElement().split(":");
-            return Long.parseLong(parts[0]) != ts;
-        }).collect(Collectors.toCollection(LinkedHashSet::new));
-        List<BadgeSignal> badgesAwarded = fold(filteredTuples, event, options);
+        LinkedHashSet<Tuple> filteredTuples = tuples.stream()
+                .filter(t -> asLong(t.getElement().split(COLON)[0]) != ts)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        List<BadgeSignal> badgesAwarded = fold(filteredTuples, event, rule);
         if (badgesAwarded.isEmpty()) {
             return signals;
         }
@@ -107,11 +119,10 @@ public class StreakN implements Consumer<Event> {
             }
         }
 
-        LinkedHashSet<Tuple> futureTuples = tuples.stream().filter(t -> {
-            String[] parts = t.getElement().split(":");
-            return Long.parseLong(parts[0]) > ts;
-        }).collect(Collectors.toCollection(LinkedHashSet::new));
-        fold(futureTuples, event, options).forEach(s -> options.getCollector().accept(s));
+        LinkedHashSet<Tuple> futureTuples = tuples.stream()
+                .filter(t -> asLong(t.getElement().split(COLON)[0]) > ts)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        fold(futureTuples, event, rule).forEach(s -> rule.getCollector().accept(s));
         return signals;
     }
 
@@ -120,9 +131,9 @@ public class StreakN implements Consumer<Event> {
         int len = 0;
         List<BadgeSignal> signals = new ArrayList<>();
         for (Tuple tuple : tuples) {
-            int prev = options.getStreakMap().floor(len).intValue();
-            String[] parts = tuple.getElement().split(":");
-            if ("0".equals(parts[1])) {
+            int prev = asInt(options.getStreakMap().floor(len));
+            String[] parts = tuple.getElement().split(COLON);
+            if (isZero(parts[1])) {
                 start = null;
                 len = 0;
             } else {
@@ -131,9 +142,9 @@ public class StreakN implements Consumer<Event> {
                 }
                 len++;
             }
-            int now = options.getStreakMap().floor(len).intValue();
-            if (prev < now) {
-                String[] startParts = start.getElement().split(":");
+            int now = asInt(options.getStreakMap().floor(len));
+            if (prev < now && start != null) {
+                String[] startParts = start.getElement().split(COLON);
                 BadgeSignal signal = new StreakBadgeSignal(options.getId(),
                         now,
                         Long.parseLong(startParts[0]),
@@ -146,25 +157,4 @@ public class StreakN implements Consumer<Event> {
         return signals;
     }
 
-    public String getKey() {
-        return "streak.0";
-    }
-
-    protected void beforeBatchEmit(BadgeSignal signal, Event event, StreakNRule options, Jedis jedis) {
-        jedis.zadd(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), options.getId()),
-                signal.getStartTime(),
-                String.format("%d:%s:%d:%d", signal.getEndTime(), options.getId(), signal.getStartTime(), signal.getAttribute()));
-        String userBadgesMeta = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-        String value = jedis.hget(userBadgesMeta, options.getId());
-        if (value == null) {
-            jedis.hset(userBadgesMeta, options.getId(), String.valueOf(signal.getEndTime()));
-            jedis.hset(userBadgesMeta, options.getId() + ".streak", String.valueOf(signal.getAttribute()));
-        } else {
-            long val = Long.parseLong(value);
-            if (signal.getEndTime() >= val) {
-                jedis.hset(userBadgesMeta, options.getId() + ".streak", String.valueOf(signal.getAttribute()));
-            }
-            jedis.hset(userBadgesMeta, options.getId(), String.valueOf(Math.max(signal.getEndTime(), val)));
-        }
-    }
 }

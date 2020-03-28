@@ -26,4 +26,6 @@ public final class Constants {
 
     public static final int SCALE = 2;
 
+    public static final String COLON = ":";
+
 }

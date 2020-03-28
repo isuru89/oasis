@@ -20,6 +20,7 @@
 package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.model.Event;
 
 import java.util.List;
 import java.util.TreeSet;
@@ -35,7 +36,7 @@ public class StreakNRule extends BadgeRule {
     private int minStreak = Integer.MAX_VALUE;
     private TreeSet<Integer> streakMap;
     private List<Integer> streaks;
-    private Predicate<Long> condition;
+    private Predicate<Event> condition;
     private long retainTime;
     private Consumer<Signal> collector;
 
@@ -74,7 +75,7 @@ public class StreakNRule extends BadgeRule {
         return minStreak;
     }
 
-    public void setCondition(Predicate<Long> condition) {
+    public void setCondition(Predicate<Event> condition) {
         this.condition = condition;
     }
 
@@ -90,7 +91,7 @@ public class StreakNRule extends BadgeRule {
         return streaks;
     }
 
-    public Predicate<Long> getCondition() {
+    public Predicate<Event> getCondition() {
         return condition;
     }
 }

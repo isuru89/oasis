@@ -62,12 +62,8 @@ public class ConditionalBadgeRule extends BadgeRule {
     }
 
     public void setConditions(List<Condition> conditions) {
-        if (conditions != null) {
-            this.conditions = new LinkedList<>(conditions);
-            Collections.sort(this.conditions);
-        } else {
-            this.conditions = new LinkedList<>();
-        }
+        this.conditions = new LinkedList<>(conditions);
+        Collections.sort(this.conditions);
     }
 
     public static class Condition implements Comparable<Condition> {

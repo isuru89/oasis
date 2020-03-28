@@ -37,13 +37,35 @@ import java.util.function.Consumer;
 @DisplayName("Time based non-consecutive Single Streak")
 public class TemporalNCStreakNTest extends AbstractRuleTest {
 
+    private static final String EVT_A = "a";
+    private static final String EVT_B = "b";
+
+    @DisplayName("Single streak: No matching event types")
+    @Test
+    public void testStreakNInTUnitNoEventType() {
+        TEvent e1 = TEvent.createKeyValue(100, EVT_B, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVT_B, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVT_B, 50); // --
+        TEvent e4 = TEvent.createKeyValue(130, EVT_B, 81);
+
+        List<Signal> signalsRef = new ArrayList<>();
+        TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
+        Assertions.assertEquals(3, options.getMaxStreak());
+        StreakN streakN = new TemporalStreakN(pool, options);
+        submitOrder(streakN, e1, e2, e3, e4);
+
+        Set<Signal> signals = mergeSignals(signalsRef);
+        System.out.println(signals);
+        Assertions.assertEquals(0, signals.size());
+    }
+
     @DisplayName("Single streak: badge due to consecutive events")
     @Test
     public void testStreakNInTUnit() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 50); // --
-        TEvent e4 = TEvent.createKeyValue(130, "a", 81);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVT_A, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVT_A, 50); // --
+        TEvent e4 = TEvent.createKeyValue(130, EVT_A, 81);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
@@ -61,10 +83,10 @@ public class TemporalNCStreakNTest extends AbstractRuleTest {
     @DisplayName("Single streak: Out-of-order unsatisfying event does not affect")
     @Test
     public void testOutOfOrderNInTNoBreak() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 50); // --
-        TEvent e4 = TEvent.createKeyValue(111, "a", 1);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVT_A, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVT_A, 50); // --
+        TEvent e4 = TEvent.createKeyValue(111, EVT_A, 1);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
@@ -82,10 +104,10 @@ public class TemporalNCStreakNTest extends AbstractRuleTest {
     @DisplayName("Single streak: Out-of-order satisfying event creates a badge")
     @Test
     public void testOutOfOrderNInTCreate() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 10);
-        TEvent e4 = TEvent.createKeyValue(111, "a", 91); // --
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVT_A, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVT_A, 10);
+        TEvent e4 = TEvent.createKeyValue(111, EVT_A, 91); // --
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
@@ -103,10 +125,10 @@ public class TemporalNCStreakNTest extends AbstractRuleTest {
     @DisplayName("Single streak: badge due to non-consecutive events")
     @Test
     public void testNInT() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 11);
-        TEvent e4 = TEvent.createKeyValue(130, "a", 50); // --
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVT_A, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVT_A, 11);
+        TEvent e4 = TEvent.createKeyValue(130, EVT_A, 50); // --
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
@@ -124,10 +146,10 @@ public class TemporalNCStreakNTest extends AbstractRuleTest {
     @DisplayName("Single streak: not within time unit")
     @Test
     public void testNNotInT() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 11);
-        TEvent e4 = TEvent.createKeyValue(131, "a", 50);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVT_A, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVT_A, 11);
+        TEvent e4 = TEvent.createKeyValue(131, EVT_A, 50);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
@@ -143,13 +165,13 @@ public class TemporalNCStreakNTest extends AbstractRuleTest {
     @DisplayName("Single streak: multiple consecutive badges")
     @Test
     public void testNInTManyConsecutive() {
-        TEvent e1 = TEvent.createKeyValue(100, "a", 75);
-        TEvent e2 = TEvent.createKeyValue(110, "a", 63);
-        TEvent e3 = TEvent.createKeyValue(120, "a", 50); // --
-        TEvent e4 = TEvent.createKeyValue(130, "a", 81);
-        TEvent e5 = TEvent.createKeyValue(150, "a", 77);
-        TEvent e6 = TEvent.createKeyValue(160, "a", 87); // --
-        TEvent e7 = TEvent.createKeyValue(170, "a", 11);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVT_A, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVT_A, 50); // --
+        TEvent e4 = TEvent.createKeyValue(130, EVT_A, 81);
+        TEvent e5 = TEvent.createKeyValue(150, EVT_A, 77);
+        TEvent e6 = TEvent.createKeyValue(160, EVT_A, 87); // --
+        TEvent e7 = TEvent.createKeyValue(170, EVT_A, 11);
 
         List<Signal> signalsRef = new ArrayList<>();
         TemporalStreakNRule options = createStreakNOptions(Collections.singletonList(3), 30, signalsRef::add);
@@ -167,9 +189,10 @@ public class TemporalNCStreakNTest extends AbstractRuleTest {
 
     private TemporalStreakNRule createStreakNOptions(List<Integer> streaks, long timeUnit, Consumer<Signal> consumer) {
         TemporalStreakNRule options = new TemporalStreakNRule("test.histogram.streak");
+        options.setForEvent(EVT_A);
         options.setStreaks(streaks);
         options.setConsecutive(false);
-        options.setCondition(val -> val >= 50);
+        options.setCondition(event -> (long) event.getFieldValue("value") >= 50);
         options.setRetainTime(100);
         options.setCollector(consumer);
         options.setTimeUnit(timeUnit);

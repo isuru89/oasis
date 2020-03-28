@@ -38,59 +38,66 @@ import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static io.github.oasis.engine.utils.Constants.COLON;
+import static io.github.oasis.engine.utils.Constants.SCALE;
+import static io.github.oasis.engine.utils.Numbers.addToScale;
+import static io.github.oasis.engine.utils.Numbers.asDecimal;
+import static io.github.oasis.engine.utils.Numbers.asInt;
+import static io.github.oasis.engine.utils.Numbers.asLong;
+import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedDown;
+import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
 
 /**
  * @author Isuru Weerarathna
  */
-public class HistogramStreakN implements BadgeHandler {
+public class HistogramStreakN extends BadgeProcessor implements Consumer<Event> {
 
-    private JedisPool pool;
     private HistogramStreakNRule rule;
 
     public HistogramStreakN(JedisPool pool, HistogramStreakNRule rule) {
+        super(pool);
         this.rule = rule;
-        this.pool = pool;
     }
 
     @Override
     public void accept(Event event) {
-        handle(event);
-    }
+        if (!isMatchEvent(event, rule)) {
+            return;
+        }
 
-    @Override
-    public List<BadgeSignal> handle(Event event) {
         try (Jedis jedis = pool.getResource()) {
-            List<BadgeSignal> signals = alternativeProcess(event, jedis);
+            List<BadgeSignal> signals = process(event, rule, jedis);
             if (signals != null) {
                 signals.forEach(s -> {
                     beforeBatchEmit(s, event, rule, jedis);
                     rule.getConsumer().accept(s);
                 });
             }
-            return signals;
         }
     }
 
-    private List<BadgeSignal> alternativeProcess(Event event, Jedis jedis) {
+    private List<BadgeSignal> process(Event event, HistogramStreakNRule rule, Jedis jedis) {
         String badgeKey = ID.getBadgeHistogramKey(event.getGameId(), event.getUser(), rule.getId());
         long timestamp = event.getTimestamp() - (event.getTimestamp() % rule.getTimeUnit());
-        BigDecimal value = evaluateForValue(event).setScale(0, BigDecimal.ROUND_HALF_UP);
-        Set<Tuple> zrange = jedis.zrangeByScoreWithScores(badgeKey, timestamp, timestamp);
+        BigDecimal value = evaluateForValue(event).setScale(SCALE, BigDecimal.ROUND_HALF_UP);
+        Set<Tuple> tupleRange = jedis.zrangeByScoreWithScores(badgeKey, timestamp, timestamp);
         BigDecimal prev = BigDecimal.ZERO;
         String prevMember = null;
-        if (!zrange.isEmpty()) {
-            Tuple existingTuple = zrange.iterator().next();
-            String[] parts = existingTuple.getElement().split(":");
-            prev = new BigDecimal(parts[1]);
+        if (!tupleRange.isEmpty()) {
+            Tuple existingTuple = tupleRange.iterator().next();
+            String[] parts = existingTuple.getElement().split(COLON);
+            prev = asDecimal(parts[1]);
             prevMember = existingTuple.getElement();
         }
-        BigDecimal incr = prev.add(value).setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal updatedValue = addToScale(prev, value, SCALE);
         if (prevMember != null) {
             jedis.zrem(badgeKey, prevMember);
         }
-        jedis.zadd(badgeKey, timestamp, timestamp + ":" + incr.toString());
-        if (isThresholdCrossedUp(prev, incr, rule.getThreshold())) {
+        jedis.zadd(badgeKey, timestamp, timestamp + COLON + updatedValue.toString());
+        if (isThresholdCrossedUp(prev, updatedValue, rule.getThreshold())) {
             Set<Tuple> seq = jedis.zrangeByScoreWithScores(badgeKey,
                     timestamp - rule.getTimeUnit() * rule.getMaxStreak(),
                     timestamp + rule.getTimeUnit() * rule.getMaxStreak());
@@ -108,14 +115,14 @@ public class HistogramStreakN implements BadgeHandler {
                     jedis.hdel(metaBadgesInfoKey, firstSubKey);
                 }
                 int total = jedis.hincrBy(metaBadgesInfoKey, totalSubKey, 1).intValue();
-                jedis.hsetnx(metaBadgesInfoKey, firstSubKey, event.getTimestamp() + ":" + event.getExternalId());
+                jedis.hsetnx(metaBadgesInfoKey, firstSubKey, event.getTimestamp() + COLON + event.getExternalId());
                 if (rule.containsStreakMargin(total)) {
                     List<String> first = jedis.hmget(metaBadgesInfoKey, firstSubKey, lastHitSubKey);
-                    String[] parts = first.get(0).split(":");
+                    String[] parts = first.get(0).split(COLON);
                     long ts = Long.parseLong(parts[0]);
                     long lastTs = event.getTimestamp();
                     lastTs = lastTs - (lastTs % rule.getTimeUnit());
-                    jedis.hset(metaBadgesInfoKey, lastHitSubKey, event.getTimestamp() + ":" + event.getExternalId());
+                    jedis.hset(metaBadgesInfoKey, lastHitSubKey, event.getTimestamp() + COLON + event.getExternalId());
                     return Collections.singletonList(new HistogramBadgeSignal(rule.getId(),
                             total,
                             ts - (ts % rule.getTimeUnit()),
@@ -124,7 +131,7 @@ public class HistogramStreakN implements BadgeHandler {
                 }
             }
 
-        } else if (isThresholdCrossedDown(prev, incr, rule.getThreshold())) {
+        } else if (isThresholdCrossedDown(prev, updatedValue, rule.getThreshold())) {
             Set<Tuple> seq = jedis.zrangeByScoreWithScores(badgeKey,
                     timestamp - rule.getTimeUnit() * rule.getMaxStreak(),
                     timestamp + rule.getTimeUnit() * rule.getMaxStreak());
@@ -146,14 +153,14 @@ public class HistogramStreakN implements BadgeHandler {
                 }
                 if (rule.containsStreakMargin(total + 1)) {
                     List<String> first = jedis.hmget(metaBadgesInfoKey, firstSubKey, lastHitSubKey);
-                    String[] parts = first.get(0).split(":");
+                    String[] parts = first.get(0).split(COLON);
                     long ts = Long.parseLong(parts[0]);
                     long lastTs = event.getTimestamp();
                     if (first.size() > 1 && first.get(1) != null) {
-                        lastTs = Long.parseLong(first.get(1).split(":")[0]);
+                        lastTs = Long.parseLong(first.get(1).split(COLON)[0]);
                     }
                     lastTs = lastTs - (lastTs % rule.getTimeUnit());
-                    jedis.hset(metaBadgesInfoKey, lastHitSubKey, event.getTimestamp() + ":" + event.getExternalId());
+                    jedis.hset(metaBadgesInfoKey, lastHitSubKey, event.getTimestamp() + COLON + event.getExternalId());
                     return Collections.singletonList(new HistogramBadgeRemovalSignal(rule.getId(),
                             total + 1,
                             ts - (ts % rule.getTimeUnit()),
@@ -167,11 +174,11 @@ public class HistogramStreakN implements BadgeHandler {
     public List<BadgeSignal> unfold(Set<Tuple> tuples, Event event, long ts, HistogramStreakNRule options) {
         List<BadgeSignal> signals = new ArrayList<>();
         LinkedHashSet<Tuple> filteredTuples = tuples.stream().map(t -> {
-            String[] parts = t.getElement().split(":");
+            String[] parts = t.getElement().split(COLON);
             if (Long.parseLong(parts[0]) != ts) {
                 return t;
             } else {
-                return new Tuple(parts[0] + ":" + options.getThreshold().toString(), t.getScore());
+                return new Tuple(parts[0] + COLON + options.getThreshold().toString(), t.getScore());
             }
         }).collect(Collectors.toCollection(LinkedHashSet::new));
         List<BadgeSignal> badgesAwarded = fold(filteredTuples, event, options, true);
@@ -192,16 +199,16 @@ public class HistogramStreakN implements BadgeHandler {
         }
 
         LinkedHashSet<Tuple> futureTuples = tuples.stream().filter(t -> {
-            String[] parts = t.getElement().split(":");
+            String[] parts = t.getElement().split(COLON);
             return Long.parseLong(parts[0]) > ts;
         }).collect(Collectors.toCollection(LinkedHashSet::new));
         fold(futureTuples, event, options, false).forEach(s -> options.getConsumer().accept(s));
         return signals;
     }
 
-    public List<BadgeSignal> fold(Set<Tuple> tuples, Event event, HistogramStreakNRule options, boolean skipOldCheck) {
+    public List<BadgeSignal> fold(Set<Tuple> tuples, Event event, HistogramStreakNRule rule, boolean skipOldCheck) {
         List<BadgeSignal> signals = new ArrayList<>();
-        List<List<Tuple>> partitions = splitPartitions(tuples, options);
+        List<List<Tuple>> partitions = splitPartitions(tuples, rule);
         if (partitions.isEmpty()) {
             return signals;
         }
@@ -210,13 +217,12 @@ public class HistogramStreakN implements BadgeHandler {
         int lastBadgeStreak = 0;
         try (Jedis jedis = pool.getResource()) {
             String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-            List<String> badgeInfos = jedis.hmget(badgeMetaKey, options.getId(), options.getId() + ".streak");
-            lastBadgeTs = getLongValue(badgeInfos.get(0), 0L);
-            lastBadgeStreak = getIntValue(badgeInfos.get(1), 0);
-            System.out.println(">>> Last Badge end " + lastBadgeTs + ",   streak: " + lastBadgeStreak);
+            List<String> badgeInfos = jedis.hmget(badgeMetaKey, getMetaEndTimeKey(rule), getMetaStreakKey(rule));
+            lastBadgeTs = asLong(badgeInfos.get(0));
+            lastBadgeStreak = asInt(badgeInfos.get(1));
         }
 
-        List<Integer> streaks = options.getStreaks();
+        List<Integer> streaks = rule.getStreaks();
         partitionStart: for (List<Tuple> partition : partitions) {
             int n = partition.size();
             Tuple firstTuple = partition.get(0);
@@ -225,14 +231,14 @@ public class HistogramStreakN implements BadgeHandler {
                 if (n >= streak) {
                     Tuple tupleAtStreak = partition.get(streak - 1);
                     long ts = Math.round(tupleAtStreak.getScore());
-                    if (ts - startTs >= options.getTimeUnit() * streak) {
+                    if (ts - startTs >= rule.getTimeUnit() * streak) {
                         continue partitionStart;
                     }
                     if (!skipOldCheck && lastBadgeStreak == streak && startTs <= lastBadgeTs) {
                         continue;
                     }
                     signals.add(new HistogramBadgeSignal(
-                            options.getId(),
+                            rule.getId(),
                             streak,
                             startTs,
                             ts,
@@ -249,7 +255,7 @@ public class HistogramStreakN implements BadgeHandler {
         List<List<Tuple>> partitions = new ArrayList<>();
         for (Tuple tuple : tuples) {
             String[] parts = tuple.getElement().split(":");
-            BigDecimal metric = zeroIfNull(parts[1]);
+            BigDecimal metric = asDecimal(parts[1]);
             if (metric.compareTo(options.getThreshold()) >= 0) {
                 currentPartition.add(tuple);
             } else {
@@ -265,60 +271,8 @@ public class HistogramStreakN implements BadgeHandler {
         return partitions;
     }
 
-    private boolean isThresholdCrossedUp(BigDecimal prevValue, BigDecimal currValue, BigDecimal threshold) {
-        return prevValue.compareTo(threshold) < 0 && currValue.compareTo(threshold) >= 0;
-    }
-
-    private boolean isThresholdCrossedDown(BigDecimal prevValue, BigDecimal currValue, BigDecimal threshold) {
-        return prevValue.compareTo(threshold) >= 0 && currValue.compareTo(threshold) < 0;
-    }
-
-    protected void beforeBatchEmit(BadgeSignal signal, Event event, HistogramStreakNRule options, Jedis jedis) {
-        jedis.zadd(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), options.getId()),
-                signal.getStartTime(),
-                String.format("%d:%s:%d:%d", signal.getEndTime(), options.getId(), signal.getStartTime(), signal.getAttribute()));
-        String userBadgesMeta = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-        String value = jedis.hget(userBadgesMeta, options.getId());
-        if (value == null) {
-            jedis.hset(userBadgesMeta, options.getId(), String.valueOf(signal.getEndTime()));
-            jedis.hset(userBadgesMeta, options.getId() + ".streak", String.valueOf(signal.getAttribute()));
-        } else {
-            long val = Long.parseLong(value);
-            if (signal.getEndTime() >= val) {
-                jedis.hset(userBadgesMeta, options.getId() + ".streak", String.valueOf(signal.getAttribute()));
-            }
-            jedis.hset(userBadgesMeta, options.getId(), String.valueOf(Math.max(signal.getEndTime(), val)));
-        }
-    }
-
-    private static int asInt(String value) {
-        return value == null ? 0 : Integer.parseInt(value);
-    }
-
     private BigDecimal evaluateForValue(Event event) {
         return BigDecimal.valueOf(rule.getValueResolver().apply(event));
-    }
-
-    private static BigDecimal zeroIfNull(Double value) {
-        return value == null ? BigDecimal.ZERO : new BigDecimal(value).setScale(2, BigDecimal.ROUND_HALF_UP);
-    }
-
-    private static BigDecimal zeroIfNull(String value) {
-        return value == null ? BigDecimal.ZERO : new BigDecimal(value);
-    }
-
-    private long getLongValue(String val, long defaultValue) {
-        if (val == null) {
-            return defaultValue;
-        }
-        return Long.parseLong(val);
-    }
-
-    private int getIntValue(String val, int defaultValue) {
-        if (val == null) {
-            return defaultValue;
-        }
-        return Integer.parseInt(val);
     }
 
 }

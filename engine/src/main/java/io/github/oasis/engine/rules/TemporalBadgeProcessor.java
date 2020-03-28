@@ -37,9 +37,9 @@ import java.util.stream.Collectors;
 
 import static io.github.oasis.engine.utils.Constants.SCALE;
 import static io.github.oasis.engine.utils.Numbers.asDecimal;
-import static io.github.oasis.engine.utils.Numbers.isCrossedDown;
-import static io.github.oasis.engine.utils.Numbers.isCrossedUp;
 import static io.github.oasis.engine.utils.Numbers.isIncreasedOrEqual;
+import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedDown;
+import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
 
 /**
  * Satisfy condition N times within a time unit. (daily, weekly, monthly)
@@ -114,9 +114,9 @@ public class TemporalBadgeProcessor extends BadgeProcessor implements Consumer<E
     private Optional<List<TemporalBadgeRule.Threshold>> getCrossedThreshold(BigDecimal prev, BigDecimal now, TemporalBadgeRule rule) {
         List<TemporalBadgeRule.Threshold> thresholds = new LinkedList<>();
         for (TemporalBadgeRule.Threshold threshold : rule.getThresholds()) {
-            if (isCrossedUp(prev, now, threshold.getValue())) {
+            if (isThresholdCrossedUp(prev, now, threshold.getValue())) {
                 thresholds.add(threshold);
-            } else if (isCrossedDown(prev, now, threshold.getValue())) {
+            } else if (isThresholdCrossedDown(prev, now, threshold.getValue())) {
                 thresholds.add(threshold);
             }
         }
