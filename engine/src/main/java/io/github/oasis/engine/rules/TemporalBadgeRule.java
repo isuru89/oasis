@@ -36,7 +36,7 @@ import java.util.function.Predicate;
 public class TemporalBadgeRule extends BadgeRule {
 
     private long timeUnit;
-    private Predicate<Event> condition;
+    private Predicate<Event> criteria;
     protected Function<Event, BigDecimal> valueResolver;
     private Consumer<Signal> collector;
     private List<Threshold> thresholds;
@@ -45,12 +45,12 @@ public class TemporalBadgeRule extends BadgeRule {
         super(id);
     }
 
-    public Predicate<Event> getCondition() {
-        return condition;
+    public Predicate<Event> getCriteria() {
+        return criteria;
     }
 
-    public void setCondition(Predicate<Event> condition) {
-        this.condition = condition;
+    public void setCriteria(Predicate<Event> criteria) {
+        this.criteria = criteria;
     }
 
     public Consumer<Signal> getCollector() {

@@ -27,56 +27,53 @@ import redis.clients.jedis.JedisPool;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static io.github.oasis.engine.utils.Numbers.isFirstOne;
 
 /**
  * @author Isuru Weerarathna
  */
-public class FirstEvent implements BadgeHandler {
+public class FirstEvent extends BadgeProcessor implements Consumer<Event> {
 
-    private final JedisPool pool;
-    private final FirstEventRule options;
+    private final FirstEventRule rule;
 
     public FirstEvent(JedisPool pool, FirstEventRule firstEventOptions) {
-        this.pool = pool;
-        this.options = firstEventOptions;
+        super(pool);
+        this.rule = firstEventOptions;
     }
 
     @Override
+    public void accept(Event event) {
+        if (!isMatchEvent(event, rule)) {
+            return;
+        }
+
+        if (unableToProcess(event, rule)) {
+            return;
+        }
+
+        List<BadgeSignal> signals = handle(event);
+        if (signals != null) {
+            signals.forEach(s -> rule.getCollector().accept(s));
+        }
+    }
+
     public List<BadgeSignal> handle(Event event) {
         String key = ID.getUserFirstEventsKey(event.getGameId(), event.getUser());
         try (Jedis jedis = pool.getResource()) {
-            if (isConditionSatisfied(event, options)) {
-                long ts = event.getTimestamp();
-                String id = event.getExternalId();
-                String subKey = options.getEventName();
-                String value = ts + ":" + id + ":" + System.currentTimeMillis();
-                if (isFirstOne(jedis.hsetnx(key, subKey, value))) {
-                    return Collections.singletonList(new BadgeSignal(options.getId(),
-                            1,
-                            ts, ts,
-                            id, id));
-                }
+            long ts = event.getTimestamp();
+            String id = event.getExternalId();
+            String subKey = rule.getEventName();
+            String value = ts + ":" + id + ":" + System.currentTimeMillis();
+            if (isFirstOne(jedis.hsetnx(key, subKey, value))) {
+                return Collections.singletonList(new BadgeSignal(rule.getId(),
+                        1,
+                        ts, ts,
+                        id, id));
             }
         }
         return null;
     }
 
-    private boolean isConditionSatisfied(Event event, FirstEventRule rule) {
-        return eventMatches(event.getEventType(), rule.getEventName())
-                && (rule.getCondition() == null || rule.getCondition().test(event));
-    }
-
-    private boolean eventMatches(String eventType, String pattern) {
-        return pattern.equals(eventType);
-    }
-
-    @Override
-    public void accept(Event event) {
-        List<BadgeSignal> signals = handle(event);
-        if (signals != null) {
-            signals.forEach(s -> options.getCollector().accept(s));
-        }
-    }
 }

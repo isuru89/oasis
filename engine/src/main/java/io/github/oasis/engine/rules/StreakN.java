@@ -79,7 +79,7 @@ public class StreakN extends BadgeProcessor implements Consumer<Event> {
     public List<BadgeSignal> process(Event event, StreakNRule rule, Jedis jedis) {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         long ts = event.getTimestamp();
-        if (this.rule.getCondition().test(event)) {
+        if (this.rule.getCriteria().test(event)) {
             String member = ts + ":1:" + event.getExternalId();
             jedis.zadd(key, ts, member);
             long rank = jedis.zrank(key, member);

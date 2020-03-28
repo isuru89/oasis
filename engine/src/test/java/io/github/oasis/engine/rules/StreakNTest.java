@@ -313,7 +313,7 @@ public class StreakNTest extends AbstractRuleTest {
         StreakNRule options = new StreakNRule("abc");
         options.setForEvent(EVT_A);
         options.setStreaks(streaks);
-        options.setCondition(event -> (long) event.getFieldValue("value") >= 50);
+        options.setCriteria(event -> (long) event.getFieldValue("value") >= 50);
         options.setRetainTime(10);
         options.setCollector(consumer);
         return options;

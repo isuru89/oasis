@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.model.EventFilter;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.model.Event;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * @author Isuru Weerarathna
@@ -224,12 +224,13 @@ public class FirstEventTest extends AbstractRuleTest {
         assertSignal(signals, new BadgeSignal(options.getId(), 1, 144, 144, e2.getExternalId(), e2.getExternalId()));
     }
 
-    private boolean eventGreaterThan50(Event e) {
+    private boolean eventGreaterThan50(Event e, AbstractRule rule) {
         return (long) e.getFieldValue("value") >= 50;
     }
 
-    private FirstEventRule createRule(String forEvent, List<Signal> collectTo, Predicate<Event> predicate) {
+    private FirstEventRule createRule(String forEvent, List<Signal> collectTo, EventFilter predicate) {
         FirstEventRule rule = new FirstEventRule("test.event", forEvent);
+        rule.setForEvent(EVT_1);
         rule.setCondition(predicate);
         rule.setCollector(collectTo::add);
         return rule;

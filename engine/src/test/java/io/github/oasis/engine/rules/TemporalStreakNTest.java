@@ -248,7 +248,7 @@ public class TemporalStreakNTest extends AbstractRuleTest {
         TemporalStreakNRule options = new TemporalStreakNRule("test.temporal.streak");
         options.setForEvent(EVENT_TYPE);
         options.setStreaks(streaks);
-        options.setCondition(event -> (long) event.getFieldValue("value") >= 50);
+        options.setCriteria(event -> (long) event.getFieldValue("value") >= 50);
         options.setRetainTime(100);
         options.setCollector(consumer);
         options.setTimeUnit(timeUnit);

@@ -297,7 +297,7 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         options.setForEvent(EVT_A);
         options.setStreaks(streaks);
         options.setConsecutive(false);
-        options.setCondition(event -> (long) event.getFieldValue("value") >= 50);
+        options.setCriteria(event -> (long) event.getFieldValue("value") >= 50);
         options.setRetainTime(100);
         options.setCollector(consumer);
         options.setTimeUnit(timeUnit);

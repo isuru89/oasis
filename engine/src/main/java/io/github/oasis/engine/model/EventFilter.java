@@ -17,37 +17,26 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.rules.signals.Signal;
-
-import java.util.function.Consumer;
+import io.github.oasis.engine.rules.AbstractRule;
+import io.github.oasis.model.Event;
 
 /**
+ * Interface used to filter out events before send it processing.
+ *
  * @author Isuru Weerarathna
  */
+@FunctionalInterface
+public interface EventFilter {
 
-public class FirstEventRule extends BadgeRule {
-
-    private final String eventName;
-    private Consumer<Signal> collector;
-
-    public FirstEventRule(String id, String eventName) {
-        super(id);
-
-        this.eventName = eventName;
-    }
-
-    public Consumer<Signal> getCollector() {
-        return collector;
-    }
-
-    public void setCollector(Consumer<Signal> collector) {
-        this.collector = collector;
-    }
-
-    public String getEventName() {
-        return eventName;
-    }
+    /**
+     * Checks whether given event can be processed.
+     *
+     * @param event event instance.
+     * @param rule rule which executes against.
+     * @return true if this event can be sent for processing.
+     */
+    boolean matches(Event event, AbstractRule rule);
 
 }

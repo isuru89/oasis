@@ -34,8 +34,8 @@ public class TemporalCountBadgeRule extends TemporalBadgeRule {
     }
 
     @Override
-    public void setCondition(Predicate<Event> condition) {
-        super.setCondition(condition);
+    public void setCriteria(Predicate<Event> criteria) {
+        super.setCriteria(criteria);
         super.valueResolver = event -> BigDecimal.ONE;
     }
 

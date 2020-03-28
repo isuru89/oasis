@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.model.EventFilter;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.model.Event;
@@ -35,6 +36,14 @@ public class BadgeProcessor extends AbstractProcessor {
 
     boolean isMatchEvent(Event event, BadgeRule badgeRule) {
         return badgeRule.getForEvent().equals(event.getEventType());
+    }
+
+    boolean unableToProcess(Event event, BadgeRule rule) {
+        EventFilter condition = rule.getCondition();
+        if (condition == null) {
+            return false;
+        }
+        return !condition.matches(event, rule);
     }
 
     protected String getMetaStreakKey(AbstractRule rule) {

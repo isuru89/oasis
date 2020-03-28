@@ -73,7 +73,7 @@ public class TemporalStreakN extends StreakN {
     private List<BadgeSignal> nonConsecutiveAccept(Event event, TemporalStreakNRule rule, Jedis jedis) {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         long ts = event.getTimestamp();
-        if (rule.getCondition().test(event)) {
+        if (rule.getCriteria().test(event)) {
             String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
             String lastOffering = jedis.hget(badgeMetaKey, rule.getId() + ":lasttime");  // <timestamp>:<streak>:<id>
             long lastTimeOffered = 0L;

@@ -32,7 +32,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static io.github.oasis.engine.utils.Constants.SCALE;
@@ -42,7 +41,7 @@ import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedDown;
 import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
 
 /**
- * Satisfy condition N times within a time unit. (daily, weekly, monthly)
+ * Satisfy condition N times within a tumbling time unit. (daily, weekly, monthly)
  *
  * @author Isuru Weerarathna
  */
@@ -61,7 +60,11 @@ public class TemporalBadgeProcessor extends BadgeProcessor implements Consumer<E
             return;
         }
 
-        if (!isConditionSatisfied(event, rule.getCondition())) {
+        if (unableToProcess(event, rule)) {
+            return;
+        }
+
+        if (!isCriteriaSatisfied(event, rule)) {
             return;
         }
 
@@ -127,7 +130,7 @@ public class TemporalBadgeProcessor extends BadgeProcessor implements Consumer<E
         return rule.getValueResolver().apply(event).setScale(SCALE, BigDecimal.ROUND_HALF_UP);
     }
 
-    private boolean isConditionSatisfied(Event event, Predicate<Event> condition) {
-        return condition == null || condition.test(event);
+    private boolean isCriteriaSatisfied(Event event, TemporalBadgeRule rule) {
+        return rule.getCriteria() == null || rule.getCriteria().test(event);
     }
 }

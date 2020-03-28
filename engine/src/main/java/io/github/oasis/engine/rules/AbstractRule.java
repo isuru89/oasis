@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.model.EventFilter;
+
 import java.io.Serializable;
 
 /**
@@ -30,9 +32,18 @@ public class AbstractRule implements Serializable {
     private String name;
     private String description;
     private String forEvent;
+    private EventFilter condition;
 
     public AbstractRule(String id) {
         this.id = id;
+    }
+
+    public EventFilter getCondition() {
+        return condition;
+    }
+
+    public void setCondition(EventFilter condition) {
+        this.condition = condition;
     }
 
     public String getForEvent() {
