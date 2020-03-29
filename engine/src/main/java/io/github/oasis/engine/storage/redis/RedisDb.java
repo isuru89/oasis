@@ -17,15 +17,38 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.engine.storage.redis;
 
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.storage.DbContext;
+import redis.clients.jedis.JedisPool;
+
+import java.io.IOException;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface SignalCollector {
+public class RedisDb implements Db {
 
-    void collect(Signal signal);
+    private JedisPool pool;
 
+    private RedisDb(JedisPool pool) {
+        this.pool = pool;
+    }
+
+    public static RedisDb create(JedisPool pool) {
+        return new RedisDb(pool);
+    }
+
+    @Override
+    public DbContext createContext() {
+        return new RedisContext(pool.getResource());
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (pool != null) {
+            pool.close();
+        }
+    }
 }

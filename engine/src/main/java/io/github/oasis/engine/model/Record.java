@@ -19,13 +19,24 @@
 
 package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.rules.signals.Signal;
-
 /**
  * @author Isuru Weerarathna
  */
-public interface SignalCollector {
+public class Record {
 
-    void collect(Signal signal);
+    private final String member;
+    private final double score;
 
+    public Record(String member, double score) {
+        this.member = member;
+        this.score = score;
+    }
+
+    public String getMember() {
+        return member;
+    }
+
+    public double getScore() {
+        return score;
+    }
 }

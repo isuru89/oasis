@@ -17,15 +17,15 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.engine.storage;
 
-import io.github.oasis.engine.rules.signals.Signal;
+import java.io.Closeable;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface SignalCollector {
+public interface Db extends Closeable {
 
-    void collect(Signal signal);
+    DbContext createContext();
 
 }

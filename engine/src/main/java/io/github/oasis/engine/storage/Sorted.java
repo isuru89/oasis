@@ -17,15 +17,32 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.engine.storage;
 
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.model.Record;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface SignalCollector {
+public interface Sorted {
 
-    void collect(Signal signal);
+    void add(String member, long value);
 
+    void add(String number, double value);
+
+    List<Record> getRangeByScoreWithScores(long from, long to);
+    List<Record> getRangeByScoreWithScores(BigDecimal from, BigDecimal to);
+    List<Record> getRangeByRankWithScores(long from, long to);
+
+    void removeRangeByScore(long from, long to);
+
+    long getRank(String member);
+
+    Optional<String> getMemberByScore(long score);
+
+    void remove(String member);
 }

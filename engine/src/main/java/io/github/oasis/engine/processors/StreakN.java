@@ -20,22 +20,22 @@
 package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.Record;
 import io.github.oasis.engine.rules.StreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
+import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.storage.DbContext;
+import io.github.oasis.engine.storage.Sorted;
 import io.github.oasis.model.Event;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Tuple;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Objects;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -53,38 +53,39 @@ public class StreakN extends BadgeProcessor<StreakNRule> {
 
     public static final String COLON = ":";
 
-    public StreakN(JedisPool pool, StreakNRule rule) {
+    public StreakN(Db pool, StreakNRule rule) {
         super(pool, rule);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, StreakNRule rule, Jedis jedis) {
+    public List<BadgeSignal> process(Event event, StreakNRule rule, DbContext db) {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
+        Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
         if (rule.getCriteria().test(event)) {
             String member = ts + ":1:" + event.getExternalId();
-            jedis.zadd(key, ts, member);
-            long rank = jedis.zrank(key, member);
+            sortedRange.add(member, ts);
+            long rank = sortedRange.getRank(member);
             long start = Math.max(0, rank - rule.getMaxStreak());
-            Set<Tuple> tupleRange = jedis.zrangeWithScores(key, start, rank + rule.getMaxStreak());
-            return fold(tupleRange, event, rule);
+            List<Record> tupleRange = sortedRange.getRangeByRankWithScores(start, rank + rule.getMaxStreak());
+            return fold(tupleRange, event, rule, db);
         } else {
             String member = ts + ":0:" + event.getExternalId();
-            jedis.zadd(key, ts, member);
-            jedis.zremrangeByScore(key, 0, ts - rule.getRetainTime());
-            long rank = jedis.zrank(key, member);
+            sortedRange.add(member, ts);
+            sortedRange.removeRangeByScore(0, ts - rule.getRetainTime());
+            long rank = sortedRange.getRank(member);
             long start = Math.max(0, rank - rule.getMaxStreak());
-            Set<Tuple> tupleRange = jedis.zrangeWithScores(key, start, rank + rule.getMaxStreak());
-            return unfold(tupleRange, event, ts, rule);
+            List<Record> tupleRange = sortedRange.getRangeByRankWithScores(start, rank + rule.getMaxStreak());
+            return unfold(tupleRange, event, ts, rule, db);
         }
     }
 
-    public List<BadgeSignal> unfold(Set<Tuple> tuples, Event event, long ts, StreakNRule rule) {
+    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, StreakNRule rule, DbContext db) {
         List<BadgeSignal> signals = new ArrayList<>();
-        LinkedHashSet<Tuple> filteredTuples = tuples.stream()
-                .filter(t -> asLong(t.getElement().split(COLON)[0]) != ts)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        List<BadgeSignal> badgesAwarded = fold(filteredTuples, event, rule);
+        List<Record> filteredTuples = tuples.stream()
+                .filter(t -> asLong(t.getMember().split(COLON)[0]) != ts)
+                .collect(Collectors.toCollection(LinkedList::new));
+        List<BadgeSignal> badgesAwarded = fold(filteredTuples, event, rule, db);
         if (badgesAwarded.isEmpty()) {
             return signals;
         }
@@ -101,20 +102,20 @@ public class StreakN extends BadgeProcessor<StreakNRule> {
             }
         }
 
-        LinkedHashSet<Tuple> futureTuples = tuples.stream()
-                .filter(t -> asLong(t.getElement().split(COLON)[0]) > ts)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        signals.addAll(fold(futureTuples, event, rule));
+        List<Record> futureTuples = tuples.stream()
+                .filter(t -> asLong(t.getMember().split(COLON)[0]) > ts)
+                .collect(Collectors.toCollection(LinkedList::new));
+        signals.addAll(fold(futureTuples, event, rule, db));
         return signals;
     }
 
-    public List<BadgeSignal> fold(Set<Tuple> tuples, Event event, StreakNRule options) {
-        Tuple start = null;
+    public List<BadgeSignal> fold(List<Record> tuples, Event event, StreakNRule options, DbContext db) {
+        Record start = null;
         int len = 0;
         List<BadgeSignal> signals = new ArrayList<>();
-        for (Tuple tuple : tuples) {
+        for (Record tuple : tuples) {
             int prev = asInt(options.getStreakMap().floor(len));
-            String[] parts = tuple.getElement().split(COLON);
+            String[] parts = tuple.getMember().split(COLON);
             if (isZero(parts[1])) {
                 start = null;
                 len = 0;
@@ -126,7 +127,7 @@ public class StreakN extends BadgeProcessor<StreakNRule> {
             }
             int now = asInt(options.getStreakMap().floor(len));
             if (prev < now && start != null) {
-                String[] startParts = start.getElement().split(COLON);
+                String[] startParts = start.getMember().split(COLON);
                 BadgeSignal signal = new StreakBadgeSignal(options.getId(),
                         now,
                         Long.parseLong(startParts[0]),

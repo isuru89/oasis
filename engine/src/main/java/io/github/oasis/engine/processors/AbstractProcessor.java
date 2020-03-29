@@ -22,9 +22,9 @@ package io.github.oasis.engine.processors;
 import io.github.oasis.engine.model.EventFilter;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.storage.DbContext;
 import io.github.oasis.model.Event;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -34,11 +34,11 @@ import java.util.function.Consumer;
  */
 public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal> implements Consumer<Event> {
 
-    protected final JedisPool pool;
+    protected final Db dbPool;
     protected final R rule;
 
-    public AbstractProcessor(JedisPool pool, R rule) {
-        this.pool = pool;
+    public AbstractProcessor(Db dbPool, R rule) {
+        this.dbPool = dbPool;
         this.rule = rule;
     }
 
@@ -52,15 +52,17 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
             return;
         }
 
-        try (Jedis jedis = pool.getResource()) {
-            List<S> signals = process(event, rule, jedis);
+        try (DbContext db = dbPool.createContext()) {
+            List<S> signals = process(event, rule, db);
             if (signals != null) {
                 signals.forEach(signal -> {
-                    beforeEmit(signal, event, rule, jedis);
+                    beforeEmit(signal, event, rule, db);
                     rule.getCollector().accept(signal);
                 });
             }
-            afterEmitAll(signals, event, rule, jedis);
+            afterEmitAll(signals, event, rule, db);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -70,9 +72,9 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
      * @param signal signal to be sent.
      * @param event event triggered this.
      * @param rule rule reference.
-     * @param jedis jedis context.
+     * @param db db context.
      */
-    protected abstract void beforeEmit(S signal, Event event, R rule, Jedis jedis);
+    protected abstract void beforeEmit(S signal, Event event, R rule, DbContext db);
 
     /**
      * Calls after all of signals are sent to the collector.
@@ -80,9 +82,9 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
      * @param signals list of signals generated.
      * @param event event caused to trigger.
      * @param rule rule reference.
-     * @param jedis jedis context.
+     * @param db db context.
      */
-    protected void afterEmitAll(List<S> signals, Event event, R rule, Jedis jedis) {
+    protected void afterEmitAll(List<S> signals, Event event, R rule, DbContext db) {
         // do nothing.
     }
 
@@ -91,10 +93,10 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
      *
      * @param event event to process.
      * @param rule rule reference.
-     * @param jedis jedis context.
+     * @param db db context.
      * @return list of signals to notify.
      */
-    public abstract List<S> process(Event event, R rule, Jedis jedis);
+    public abstract List<S> process(Event event, R rule, DbContext db);
 
     private boolean isMatchEvent(Event event, AbstractRule rule) {
         return rule.getEventTypeMatcher().matches(event.getEventType());

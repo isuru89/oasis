@@ -73,10 +73,6 @@ public class AbstractRule implements Serializable {
         return eventTypeMatcher;
     }
 
-    public void setEventTypeMatcher(EventTypeMatcher eventTypeMatcher) {
-        this.eventTypeMatcher = eventTypeMatcher;
-    }
-
     public String getId() {
         return id;
     }

@@ -23,15 +23,16 @@ import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.BadgeRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
+import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.storage.DbContext;
+import io.github.oasis.engine.storage.Mapped;
 import io.github.oasis.model.Event;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 /**
  * @author Isuru Weerarathna
  */
 public abstract class BadgeProcessor<R extends BadgeRule> extends AbstractProcessor<R, BadgeSignal> {
-    public BadgeProcessor(JedisPool pool, R rule) {
+    public BadgeProcessor(Db pool, R rule) {
         super(pool, rule);
     }
 
@@ -44,23 +45,24 @@ public abstract class BadgeProcessor<R extends BadgeRule> extends AbstractProces
     }
 
     @Override
-    protected void beforeEmit(BadgeSignal signal, Event event, R rule, Jedis jedis) {
-        jedis.zadd(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), rule.getId()),
-                signal.getStartTime(),
-                String.format("%d:%s:%d:%d", signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getAttribute()));
+    protected void beforeEmit(BadgeSignal signal, Event event, R rule, DbContext db) {
+        db.addToSorted(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), rule.getId()),
+                String.format("%d:%s:%d:%d", signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getAttribute()),
+                signal.getStartTime());
         String userBadgesMeta = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-        String value = jedis.hget(userBadgesMeta, rule.getId());
+        Mapped map = db.MAP(userBadgesMeta);
+        String value = map.getValue(rule.getId());
         String streakKey = getMetaStreakKey(rule);
         String endTimeKey = getMetaEndTimeKey(rule);
         if (value == null) {
-            jedis.hset(userBadgesMeta, endTimeKey, String.valueOf(signal.getEndTime()));
-            jedis.hset(userBadgesMeta, streakKey, String.valueOf(signal.getAttribute()));
+            map.setValue(endTimeKey, signal.getEndTime());
+            map.setValue(streakKey, signal.getAttribute());
         } else {
             long val = Long.parseLong(value);
             if (signal.getEndTime() >= val) {
-                jedis.hset(userBadgesMeta, streakKey, String.valueOf(signal.getAttribute()));
+                map.setValue(streakKey, signal.getAttribute());
             }
-            jedis.hset(userBadgesMeta, endTimeKey, String.valueOf(Math.max(signal.getEndTime(), val)));
+            map.setValue(endTimeKey, Math.max(signal.getEndTime(), val));
         }
     }
 

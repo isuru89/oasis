@@ -20,15 +20,16 @@
 package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.Record;
 import io.github.oasis.engine.rules.StreakNRule;
 import io.github.oasis.engine.rules.TemporalStreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
+import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.storage.DbContext;
+import io.github.oasis.engine.storage.Sorted;
 import io.github.oasis.model.Event;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Tuple;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -36,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.Set;
 import java.util.TreeMap;
 
 import static io.github.oasis.engine.utils.Numbers.asInt;
@@ -48,36 +48,37 @@ import static io.github.oasis.engine.utils.Numbers.asLong;
  * @author Isuru Weerarathna
  */
 public class TemporalStreakN extends StreakN {
-    public TemporalStreakN(JedisPool pool, TemporalStreakNRule rule) {
+    public TemporalStreakN(Db pool, TemporalStreakNRule rule) {
         super(pool, rule);
     }
 
-    private long captureTsFromTuple(Tuple tuple) {
-        String[] parts = tuple.getElement().split(":");
+    private long captureTsFromTuple(Record tuple) {
+        String[] parts = tuple.getMember().split(":");
         return Long.parseLong(parts[0]);
     }
 
-    private String captureEventIdFromTuple(Tuple tuple) {
-        String[] parts = tuple.getElement().split(":");
+    private String captureEventIdFromTuple(Record tuple) {
+        String[] parts = tuple.getMember().split(":");
         return parts[2];
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, StreakNRule ruleRef, Jedis jedis) {
+    public List<BadgeSignal> process(Event event, StreakNRule ruleRef, DbContext db) {
         TemporalStreakNRule rule = (TemporalStreakNRule) ruleRef;
         if (rule.isConsecutive()) {
-            return super.process(event, rule, jedis);
+            return super.process(event, rule, db);
         } else {
-            return nonConsecutiveAccept(event, rule, jedis);
+            return nonConsecutiveAccept(event, rule, db);
         }
     }
 
-    private List<BadgeSignal> nonConsecutiveAccept(Event event, TemporalStreakNRule rule, Jedis jedis) {
+    private List<BadgeSignal> nonConsecutiveAccept(Event event, TemporalStreakNRule rule, DbContext db) {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
+        Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
         if (rule.getCriteria().test(event)) {
             String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-            String lastOffering = jedis.hget(badgeMetaKey, rule.getId() + ":lasttime");  // <timestamp>:<streak>:<id>
+            String lastOffering = db.getValueFromMap(badgeMetaKey, rule.getId() + ":lasttime");  // <timestamp>:<streak>:<id>
             long lastTimeOffered = 0L;
             if (lastOffering != null) {
                 lastTimeOffered = asLong(lastOffering.split(":")[0]);
@@ -86,15 +87,15 @@ public class TemporalStreakN extends StreakN {
                 return null;
             }
 
-            jedis.zadd(key, ts, ts + ":" + event.getExternalId());
+            sortedRange.add(ts + ":" + event.getExternalId(), ts);
             long start = Math.max(ts - rule.getTimeUnit(), 0);
-            Set<Tuple> tupleRange = jedis.zrangeByScoreWithScores(key, start, ts + rule.getTimeUnit());
-            return countFold(tupleRange, event, lastOffering, rule, jedis);
+            List<Record> tupleRange = sortedRange.getRangeByScoreWithScores(start, ts + rule.getTimeUnit());
+            return countFold(tupleRange, event, lastOffering, rule, db);
         }
         return null;
     }
 
-    private List<BadgeSignal> countFold(Set<Tuple> tuplesAll, Event event, String lastOffering, TemporalStreakNRule rule, Jedis jedis) {
+    private List<BadgeSignal> countFold(List<Record> tuplesAll, Event event, String lastOffering, TemporalStreakNRule rule, DbContext db) {
         List<BadgeSignal> signals = new ArrayList<>();
         int lastStreak = 0;
         long lastTs = 0L;
@@ -114,23 +115,23 @@ public class TemporalStreakN extends StreakN {
         }
 
         NavigableMap<Long, Integer> countMap = new TreeMap<>();
-        Map<Long, Tuple> tupleMap = new HashMap<>();
+        Map<Long, Record> tupleMap = new HashMap<>();
         countMap.put(0L, 0);
         countMap.put(firstTs, 0);
         countMap.put(lastTs, lastStreak);
-        tupleMap.put(firstTs, new Tuple(lastTs + ":" + prevBadgeFirstId, firstTs * 1.0));
+        tupleMap.put(firstTs, new Record(lastTs + ":" + prevBadgeFirstId, firstTs * 1.0));
         List<Integer> streakList = rule.getStreaks();
         int size = 0;
-        for (Tuple tuple : tuplesAll) {
-            long ts = (long) tuple.getScore();
-            tupleMap.put(ts, tuple);
+        for (Record record : tuplesAll) {
+            long ts = (long) record.getScore();
+            tupleMap.put(ts, record);
             countMap.put(ts, ++size);
         }
 
         long marker = lastTs;
-        List<Tuple> tuples = new ArrayList<>(tuplesAll);
+        List<Record> tuples = new ArrayList<>(tuplesAll);
         for (int i = 0; i < tuples.size(); i++) {
-            Tuple tuple = tuples.get(i);
+            Record tuple = tuples.get(i);
             long ts = (long) tuple.getScore();
             if (ts <= marker) {
                 continue;
@@ -143,20 +144,20 @@ public class TemporalStreakN extends StreakN {
             if (streakIndex >= 0) {
                 String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
                 long badgeStartTs = prevEntry.getKey();
-                Tuple startTuple = tupleMap.get(prevEntry.getKey());
+                Record startTuple = tupleMap.get(prevEntry.getKey());
                 String firstId;
                 if (startTuple == null) {
                     firstId = prevBadgeFirstId;
                 } else {
-                    firstId = startTuple.getElement().split(":")[1];
+                    firstId = startTuple.getMember().split(":")[1];
                 }
                 signals.add(new StreakBadgeSignal(rule.getId(),
                         currStreak,
                         badgeStartTs,
                         ts,
                         firstId,
-                        tuple.getElement().split(":")[1]));
-                jedis.hset(badgeMetaKey, rule.getId() + ":lasttime", ts + ":" + currStreak + ":" + badgeStartTs + ":" + firstId);
+                        tuple.getMember().split(":")[1]));
+                db.setValueInMap(badgeMetaKey, rule.getId() + ":lasttime", ts + ":" + currStreak + ":" + badgeStartTs + ":" + firstId);
 
                 // no more streaks to find
 //                if (streakIndex == streakList.size() - 1) {
@@ -195,31 +196,29 @@ public class TemporalStreakN extends StreakN {
 
 
     @Override
-    public List<BadgeSignal> fold(Set<Tuple> tuples, Event event, StreakNRule optionsRef) {
+    public List<BadgeSignal> fold(List<Record> tuples, Event event, StreakNRule optionsRef, DbContext db) {
         List<BadgeSignal> signals = new ArrayList<>();
         TemporalStreakNRule options = (TemporalStreakNRule) optionsRef;
-        List<List<Tuple>> partitions = splitPartitions(tuples, options);
+        List<List<Record>> partitions = splitPartitions(tuples, options);
         if (partitions.isEmpty()) {
             return signals;
         }
 
         long lastBadgeTs = 0L;
         int lastBadgeStreak = 0;
-        try (Jedis jedis = pool.getResource()) {
-            String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-            List<String> badgeInfos = jedis.hmget(badgeMetaKey, getMetaEndTimeKey(rule), getMetaStreakKey(rule));
-            lastBadgeTs = asLong(badgeInfos.get(0));
-            lastBadgeStreak = asInt(badgeInfos.get(1));
-        }
+        String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+        List<String> badgeInfos = db.getValuesFromMap(badgeMetaKey, getMetaEndTimeKey(rule), getMetaStreakKey(rule));
+        lastBadgeTs = asLong(badgeInfos.get(0));
+        lastBadgeStreak = asInt(badgeInfos.get(1));
 
         List<Integer> streaks = options.getStreaks();
-        partitionStart: for (List<Tuple> partition : partitions) {
+        partitionStart: for (List<Record> partition : partitions) {
             int n = partition.size();
-            Tuple firstTuple = partition.get(0);
+            Record firstTuple = partition.get(0);
             long startTs = captureTsFromTuple(firstTuple);
             for (int streak : streaks) {
                 if (n >= streak) {
-                    Tuple tupleAtStreak = partition.get(streak - 1);
+                    Record tupleAtStreak = partition.get(streak - 1);
                     long ts = captureTsFromTuple(tupleAtStreak);
                     if (ts - startTs > options.getTimeUnit()) {
                         continue partitionStart;
@@ -242,38 +241,36 @@ public class TemporalStreakN extends StreakN {
     }
 
     @Override
-    public List<BadgeSignal> unfold(Set<Tuple> tuples, Event event, long ts, StreakNRule rule) {
+    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, StreakNRule rule, DbContext db) {
         TemporalStreakNRule options = (TemporalStreakNRule) rule;
         List<BadgeSignal> signals = new ArrayList<>();
-        try (Jedis jedis = pool.getResource()) {
-            long startTs = Math.max(0, ts - options.getTimeUnit());
-            String badgeSpecKey = ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), options.getId());
-            Set<Tuple> badgesInRange = jedis.zrangeByScoreWithScores(String.format(badgeSpecKey, event.getUser(), options.getId()), startTs, ts);
-            if (!badgesInRange.isEmpty()) {
-                badgesInRange.stream().filter(t -> {
-                    String[] parts = t.getElement().split(":");
-                    long badgeEndTs = Long.parseLong(parts[0]);
-                    if (badgeEndTs < ts) {
-                        return false;
-                    }
-                    return parts[1].equals(options.getId());
-                }).map(t -> {
-                    String[] parts = t.getElement().split(":");
-                    return new BadgeRemoveSignal(options.getId(),
-                            Integer.parseInt(parts[3]),
-                            BigDecimal.valueOf(t.getScore()).longValue());
-                }).forEach(signals::add);
-            }
+        long startTs = Math.max(0, ts - options.getTimeUnit());
+        String badgeSpecKey = ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), options.getId());
+        List<Record> badgesInRange = db.SORTED(badgeSpecKey).getRangeByScoreWithScores(startTs, ts);
+        if (!badgesInRange.isEmpty()) {
+            badgesInRange.stream().filter(t -> {
+                String[] parts = t.getMember().split(":");
+                long badgeEndTs = Long.parseLong(parts[0]);
+                if (badgeEndTs < ts) {
+                    return false;
+                }
+                return parts[1].equals(options.getId());
+            }).map(t -> {
+                String[] parts = t.getMember().split(":");
+                return new BadgeRemoveSignal(options.getId(),
+                        Integer.parseInt(parts[3]),
+                        BigDecimal.valueOf(t.getScore()).longValue());
+            }).forEach(signals::add);
         }
-        signals.addAll(fold(tuples, event, rule));
+        signals.addAll(fold(tuples, event, rule, db));
         return signals;
     }
 
-    public List<List<Tuple>> splitPartitions(Set<Tuple> tuples, TemporalStreakNRule options) {
-        List<Tuple> currentPartition = new ArrayList<>();
-        List<List<Tuple>> partitions = new ArrayList<>();
-        for (Tuple tuple : tuples) {
-            String[] parts = tuple.getElement().split(":");
+    public List<List<Record>> splitPartitions(List<Record> tuples, TemporalStreakNRule options) {
+        List<Record> currentPartition = new ArrayList<>();
+        List<List<Record>> partitions = new ArrayList<>();
+        for (Record tuple : tuples) {
+            String[] parts = tuple.getMember().split(":");
             if ("1".equals(parts[1])) {
                 currentPartition.add(tuple);
             } else {

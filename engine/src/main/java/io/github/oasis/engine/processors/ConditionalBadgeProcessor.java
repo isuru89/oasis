@@ -23,15 +23,14 @@ import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.ConditionalBadgeRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.ConditionalBadge;
+import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.storage.DbContext;
+import io.github.oasis.engine.storage.Mapped;
 import io.github.oasis.model.Event;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import static io.github.oasis.engine.utils.Numbers.asLong;
 
 /**
  * Awards a badge based on a different range of criteria satisfied for the event.
@@ -49,12 +48,12 @@ import static io.github.oasis.engine.utils.Numbers.asLong;
  */
 public class ConditionalBadgeProcessor extends BadgeProcessor<ConditionalBadgeRule> {
 
-    public ConditionalBadgeProcessor(JedisPool pool, ConditionalBadgeRule rule) {
+    public ConditionalBadgeProcessor(Db pool, ConditionalBadgeRule rule) {
         super(pool, rule);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, ConditionalBadgeRule rule, Jedis jedis) {
+    public List<BadgeSignal> process(Event event, ConditionalBadgeRule rule, DbContext db) {
         List<ConditionalBadgeRule.Condition> conditions = rule.getConditions();
         if (conditions.isEmpty()) {
             return null;
@@ -67,14 +66,16 @@ public class ConditionalBadgeProcessor extends BadgeProcessor<ConditionalBadgeRu
             ConditionalBadgeRule.Condition condition = first.get();
             int attrId = condition.getAttribute();
             String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-            long count = asLong(jedis.hincrBy(badgeMetaKey, rule.getId() + ":attr:" + attrId, 1));
+            String attrKey = rule.getId() + ":attr:" + attrId;
+            Mapped map = db.MAP(badgeMetaKey);
+            long count = map.incrementBy(attrKey, 1);
             if (rule.getMaxAwardTimes() >= count) {
                 return Collections.singletonList(new ConditionalBadge(rule.getId(),
                         attrId,
                         event.getTimestamp(),
                         event.getExternalId()));
             } else {
-                jedis.hincrBy(badgeMetaKey, rule.getId() + ":attr:" + attrId, -1);
+                map.incrementBy(attrKey, -1);
             }
         }
         return null;

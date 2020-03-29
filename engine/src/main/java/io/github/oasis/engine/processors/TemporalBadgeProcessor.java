@@ -24,9 +24,10 @@ import io.github.oasis.engine.rules.TemporalBadgeRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.TemporalBadge;
+import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.storage.DbContext;
+import io.github.oasis.engine.storage.Mapped;
 import io.github.oasis.model.Event;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import java.math.BigDecimal;
 import java.util.LinkedList;
@@ -35,7 +36,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.github.oasis.engine.utils.Constants.SCALE;
-import static io.github.oasis.engine.utils.Numbers.asDecimal;
 import static io.github.oasis.engine.utils.Numbers.isIncreasedOrEqual;
 import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedDown;
 import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
@@ -47,7 +47,7 @@ import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
  */
 public class TemporalBadgeProcessor extends BadgeProcessor<TemporalBadgeRule> {
 
-    public TemporalBadgeProcessor(JedisPool pool, TemporalBadgeRule rule) {
+    public TemporalBadgeProcessor(Db pool, TemporalBadgeRule rule) {
         super(pool, rule);
     }
 
@@ -57,13 +57,14 @@ public class TemporalBadgeProcessor extends BadgeProcessor<TemporalBadgeRule> {
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, TemporalBadgeRule rule, Jedis jedis) {
+    public List<BadgeSignal> process(Event event, TemporalBadgeRule rule, DbContext db) {
         BigDecimal value = resolveValueOfEvent(event, rule);
         String badgeKey = ID.getUserTemporalBadgeKey(event.getGameId(), event.getUser(), rule.getId());
+        Mapped map = db.MAP(badgeKey);
         long ts = event.getTimestamp();
         long tsUnit = ts - (ts % rule.getTimeUnit());
         String subKey = String.valueOf(tsUnit);
-        BigDecimal updatedVal = asDecimal(jedis.hincrByFloat(badgeKey, subKey, value.doubleValue()));
+        BigDecimal updatedVal = map.incrementByDecimal(subKey, value);
         BigDecimal prevValue = updatedVal.subtract(value).setScale(SCALE, BigDecimal.ROUND_HALF_UP);
         boolean increased = isIncreasedOrEqual(prevValue, updatedVal);
         Optional<List<TemporalBadgeRule.Threshold>> crossedThreshold = getCrossedThreshold(prevValue, updatedVal, rule);

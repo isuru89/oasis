@@ -17,15 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.engine.storage;
 
-import io.github.oasis.engine.rules.signals.Signal;
+import java.io.Closeable;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface SignalCollector {
+public interface DbContext extends Closeable {
 
-    void collect(Signal signal);
+    Set<String> allKeys(String pattern);
+    void removeKey(String key);
+
+    void setValueInMap(String contextKey, String field, String value);
+    String getValueFromMap(String contextKey, String key);
+    void addToSorted(String contextKey, String member, long value);
+    boolean setIfNotExistsInMap(String contextKey, String key, String value);
+    List<String> getValuesFromMap(String contextKey, String... keys);
+
+    Sorted SORTED(String contextKey);
+
+    Mapped MAP(String contextKey);
 
 }

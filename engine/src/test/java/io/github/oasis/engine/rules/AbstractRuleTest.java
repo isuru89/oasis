@@ -22,16 +22,19 @@ package io.github.oasis.engine.rules;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.storage.DbContext;
+import io.github.oasis.engine.storage.redis.RedisDb;
 import io.github.oasis.model.Event;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -45,36 +48,41 @@ import java.util.function.Consumer;
  */
 public abstract class AbstractRuleTest {
 
-    protected static JedisPool pool;
+    protected static Db pool;
 
     @BeforeAll
     public static void beforeAll() {
         JedisPoolConfig config = new JedisPoolConfig();
         config.setMaxTotal(5);
-        pool = new JedisPool(config, "localhost");
+        JedisPool poolRedis = new JedisPool(config, "localhost");
+        pool = RedisDb.create(poolRedis);
     }
 
     @AfterAll
-    public static void afterAll() {
+    public static void afterAll() throws IOException {
         pool.close();
     }
 
     @BeforeEach
     public void beforeEach() {
-        try (Jedis jedis = pool.getResource()) {
-            Set<String> keys = jedis.keys("*");
+        try (DbContext db = pool.createContext()) {
+            Set<String> keys = db.allKeys("*");
             System.out.println("Cleaning keys " + keys);
             for (String k : keys) {
-                jedis.del(k);
+                db.removeKey(k);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     @AfterEach
     public void afterEach() {
-        try (Jedis jedis = pool.getResource()) {
-            Map<String, String> keys = jedis.hgetAll(ID.getUserBadgesMetaKey(1, 0L));
+        try (DbContext db = pool.createContext()) {
+            Map<String, String> keys = db.MAP(ID.getUserBadgesMetaKey(1, 0L)).getAll();
             System.out.println("Badges: " + keys);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

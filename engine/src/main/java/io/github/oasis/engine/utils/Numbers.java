@@ -52,6 +52,10 @@ public final class Numbers {
         return value == null ? 0 : Integer.parseInt(value);
     }
 
+    public static int asInt(Long value) {
+        return value == null ? 0 : value.intValue();
+    }
+
     public static int asInt(Integer value) {
         return value == null ? 0 : value;
     }

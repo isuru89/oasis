@@ -22,38 +22,40 @@ package io.github.oasis.engine.processors;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.FirstEventRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
+import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.storage.DbContext;
 import io.github.oasis.model.Event;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import java.util.Collections;
 import java.util.List;
-
-import static io.github.oasis.engine.utils.Numbers.isFirstOne;
 
 /**
  * @author Isuru Weerarathna
  */
 public class FirstEvent extends BadgeProcessor<FirstEventRule> {
 
-    public FirstEvent(JedisPool pool, FirstEventRule rule) {
+    public FirstEvent(Db pool, FirstEventRule rule) {
         super(pool, rule);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, FirstEventRule rule, Jedis jedis) {
+    public List<BadgeSignal> process(Event event, FirstEventRule rule, DbContext db) {
         String key = ID.getUserFirstEventsKey(event.getGameId(), event.getUser());
         long ts = event.getTimestamp();
         String id = event.getExternalId();
         String subKey = rule.getEventName();
         String value = ts + ":" + id + ":" + System.currentTimeMillis();
-        if (isFirstOne(jedis.hsetnx(key, subKey, value))) {
+        if (isFirstOne(db.setIfNotExistsInMap(key, subKey, value))) {
             return Collections.singletonList(new BadgeSignal(rule.getId(),
                     1,
                     ts, ts,
                     id, id));
         }
         return null;
+    }
+
+    private boolean isFirstOne(boolean status) {
+        return status;
     }
 
 }
