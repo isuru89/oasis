@@ -20,6 +20,7 @@
 package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.EventFilter;
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.storage.Db;
@@ -36,10 +37,12 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
 
     protected final Db dbPool;
     protected final R rule;
+    private final RuleContext<R> ruleContext;
 
-    public AbstractProcessor(Db dbPool, R rule) {
+    public AbstractProcessor(Db dbPool, RuleContext<R> ruleCtx) {
         this.dbPool = dbPool;
-        this.rule = rule;
+        this.ruleContext = ruleCtx;
+        this.rule = ruleCtx.getRule();
     }
 
     public boolean isDenied(Event event) {
@@ -57,7 +60,7 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
             if (signals != null) {
                 signals.forEach(signal -> {
                     beforeEmit(signal, event, rule, db);
-                    rule.getCollector().accept(signal);
+                    ruleContext.getCollector().accept(signal);
                 });
             }
             afterEmitAll(signals, event, rule, db);

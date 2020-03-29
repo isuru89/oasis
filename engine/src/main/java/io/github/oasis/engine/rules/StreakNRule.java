@@ -19,12 +19,10 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.model.Event;
 
 import java.util.List;
 import java.util.TreeSet;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -38,7 +36,6 @@ public class StreakNRule extends BadgeRule {
     private List<Integer> streaks;
     private Predicate<Event> criteria;
     private long retainTime;
-    private Consumer<Signal> collector;
 
     public Predicate<Event> getCriteria() {
         return criteria;
@@ -50,14 +47,6 @@ public class StreakNRule extends BadgeRule {
 
     public StreakNRule(String id) {
         super(id);
-    }
-
-    public Consumer<Signal> getCollector() {
-        return collector;
-    }
-
-    public void setCollector(Consumer<Signal> collector) {
-        this.collector = collector;
     }
 
     public int getMaxStreak() {

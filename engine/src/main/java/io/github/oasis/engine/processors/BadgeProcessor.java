@@ -20,6 +20,7 @@
 package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.BadgeRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
@@ -32,8 +33,8 @@ import io.github.oasis.model.Event;
  * @author Isuru Weerarathna
  */
 public abstract class BadgeProcessor<R extends BadgeRule> extends AbstractProcessor<R, BadgeSignal> {
-    public BadgeProcessor(Db pool, R rule) {
-        super(pool, rule);
+    public BadgeProcessor(Db pool, RuleContext<R> ruleContext) {
+        super(pool, ruleContext);
     }
 
     protected String getMetaStreakKey(AbstractRule rule) {

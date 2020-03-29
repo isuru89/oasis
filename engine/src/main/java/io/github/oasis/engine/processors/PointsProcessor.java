@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.PointRule;
 import io.github.oasis.engine.rules.signals.PointSignal;
 import io.github.oasis.engine.storage.Db;
@@ -33,8 +34,13 @@ import java.util.List;
  * @author Isuru Weerarathna
  */
 public class PointsProcessor extends AbstractProcessor<PointRule, PointSignal> {
-    public PointsProcessor(Db dbPool, PointRule rule) {
-        super(dbPool, rule);
+    public PointsProcessor(Db dbPool, RuleContext<PointRule> ruleContext) {
+        super(dbPool, ruleContext);
+    }
+
+    @Override
+    public boolean isDenied(Event event) {
+        return super.isDenied(event) || !isCriteriaSatisfied(event, rule);
     }
 
     @Override
@@ -44,15 +50,12 @@ public class PointsProcessor extends AbstractProcessor<PointRule, PointSignal> {
 
     @Override
     public List<PointSignal> process(Event event, PointRule rule, DbContext db) {
-        if (isCriteriaSatisfied(event, rule)) {
-            if (rule.isAwardBasedOnEvent()) {
-                BigDecimal score = rule.getAmountExpression().apply(event, rule);
-                return Collections.singletonList(new PointSignal(rule.getId(), score, event));
-            } else {
-                return Collections.singletonList(new PointSignal(rule.getId(), rule.getAmountToAward(), event));
-            }
+        if (rule.isAwardBasedOnEvent()) {
+            BigDecimal score = rule.getAmountExpression().apply(event, rule);
+            return Collections.singletonList(new PointSignal(rule.getId(), score, event));
+        } else {
+            return Collections.singletonList(new PointSignal(rule.getId(), rule.getAmountToAward(), event));
         }
-        return null;
     }
 
     private boolean isCriteriaSatisfied(Event event, PointRule rule) {

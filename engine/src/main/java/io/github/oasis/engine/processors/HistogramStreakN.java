@@ -21,6 +21,7 @@ package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.Record;
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.HistogramStreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeRemovalSignal;
@@ -57,8 +58,8 @@ import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
  */
 public class HistogramStreakN extends BadgeProcessor<HistogramStreakNRule> {
 
-    public HistogramStreakN(Db pool, HistogramStreakNRule rule) {
-        super(pool, rule);
+    public HistogramStreakN(Db pool, RuleContext<HistogramStreakNRule> ruleContext) {
+        super(pool, ruleContext);
     }
 
     @Override

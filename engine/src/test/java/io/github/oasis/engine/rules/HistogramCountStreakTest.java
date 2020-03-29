@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.processors.HistogramStreakN;
 import io.github.oasis.engine.rules.signals.HistogramBadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
@@ -71,8 +72,8 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(265, EVT_B, 11);
 
         List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
+        RuleContext<HistogramStreakNRule> ruleContext = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
+        HistogramStreakN streakN = new HistogramStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -92,14 +93,14 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(265, EVT_A, 11);
 
         List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
+        RuleContext<HistogramStreakNRule> ruleContext = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
+        HistogramStreakN streakN = new HistogramStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e7.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e7.getExternalId()));
     }
 
     @DisplayName("Multiple streaks")
@@ -115,15 +116,15 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(312, EVT_A, 80);
 
         List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Arrays.asList(3, 5), FIFTY, signalsRef::add);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
+        RuleContext<HistogramStreakNRule> ruleContext = createOptions(Arrays.asList(3, 5), FIFTY, signalsRef::add);
+        HistogramStreakN streakN = new HistogramStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()),
-                new HistogramBadgeSignal(options.getId(), 5, 100, 300, e8.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), 5, 100, 300, e8.getExternalId()));
     }
 
     @DisplayName("Multiple streaks: Out-of-order no affect for existing badges")
@@ -140,15 +141,15 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         TEvent e9 = TEvent.createKeyValue(170, EVT_A, -88);
 
         List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Arrays.asList(3, 5), FIFTY, signalsRef::add);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
+        RuleContext<HistogramStreakNRule> ruleContext = createOptions(Arrays.asList(3, 5), FIFTY, signalsRef::add);
+        HistogramStreakN streakN = new HistogramStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8, e9);
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()),
-                new HistogramBadgeSignal(options.getId(), 5, 100, 300, e8.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), 5, 100, 300, e8.getExternalId()));
     }
 
     @DisplayName("Multiple streaks: Out-of-order no affects for latest badge")
@@ -165,15 +166,15 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         TEvent e9 = TEvent.createKeyValue(275, EVT_A, -88);
 
         List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Arrays.asList(3, 5), FIFTY, signalsRef::add);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
+        RuleContext<HistogramStreakNRule> ruleContext = createOptions(Arrays.asList(3, 5), FIFTY, signalsRef::add);
+        HistogramStreakN streakN = new HistogramStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8, e9);
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()),
-                new HistogramBadgeSignal(options.getId(), 5, 100, 300, e8.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), 5, 100, 300, e8.getExternalId()));
     }
 
     @DisplayName("Multiple streaks: Out-of-order no affect for former badge in multiple streaks")
@@ -189,14 +190,14 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         TEvent e9 = TEvent.createKeyValue(170, EVT_A, -88);
 
         List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Arrays.asList(3, 5), FIFTY, signalsRef::add);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
+        RuleContext<HistogramStreakNRule> ruleContext = createOptions(Arrays.asList(3, 5), FIFTY, signalsRef::add);
+        HistogramStreakN streakN = new HistogramStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e9);
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e6.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e6.getExternalId()));
     }
 
     @DisplayName("Single streak: No streaks available yet")
@@ -212,8 +213,8 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         TEvent e9 = TEvent.createKeyValue(285, EVT_A, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
+        RuleContext<HistogramStreakNRule> ruleContext = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
+        HistogramStreakN streakN = new HistogramStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e6, e7, e8, e9);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -232,8 +233,8 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         TEvent e9 = TEvent.createKeyValue(285, EVT_A, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
+        RuleContext<HistogramStreakNRule> ruleContext = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
+        HistogramStreakN streakN = new HistogramStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e6, e7, e8, e9);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -253,15 +254,15 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         TEvent e7 = TEvent.createKeyValue(187, EVT_A, 88);
 
         List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
+        RuleContext<HistogramStreakNRule> ruleContext = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
+        HistogramStreakN streakN = new HistogramStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7);
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         Assert.assertEquals(1, signals.size());
         assertStrict(signals,
-                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e7.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e7.getExternalId()));
     }
 
     @DisplayName("Single streak: Out-of-order no affect for only badge")
@@ -276,29 +277,28 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         TEvent e7 = TEvent.createKeyValue(187, EVT_A, -50);
 
         List<Signal> signalsRef = new ArrayList<>();
-        HistogramStreakNRule options = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
-        HistogramStreakN streakN = new HistogramStreakN(pool, options);
+        RuleContext<HistogramStreakNRule> ruleContext = createOptions(Collections.singletonList(3), FIFTY, signalsRef::add);
+        HistogramStreakN streakN = new HistogramStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7);
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(options.getId(), 3, 100, 200, e5.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e5.getExternalId()));
     }
 
-    private HistogramStreakNRule createOptions(List<Integer> streaks, long timeunit, Consumer<Signal> consumer) {
+    private RuleContext<HistogramStreakNRule> createOptions(List<Integer> streaks, long timeunit, Consumer<Signal> consumer) {
         return createOptions(streaks, timeunit, THRESHOLD_ONE, consumer);
     }
 
-    private HistogramStreakNRule createOptions(List<Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
+    private RuleContext<HistogramStreakNRule> createOptions(List<Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
         HistogramCountStreakNRule options = new HistogramCountStreakNRule("test.histogram.count.streak");
         options.setForEvent(EVT_A);
         options.setStreaks(streaks);
         options.setConsecutive(true);
         options.setThreshold(BigDecimal.valueOf(threshold));
         options.setTimeUnit(timeunit);
-        options.setCollector(consumer);
         options.setCondition(event -> (long) event.getFieldValue("value") >= 50);
-        return options;
+        return new RuleContext<>(options, consumer);
     }
 }

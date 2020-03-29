@@ -21,6 +21,7 @@ package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.Record;
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.StreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
@@ -39,6 +40,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import static io.github.oasis.engine.utils.Constants.COLON;
 import static io.github.oasis.engine.utils.Numbers.asInt;
 import static io.github.oasis.engine.utils.Numbers.asLong;
 import static io.github.oasis.engine.utils.Numbers.isZero;
@@ -51,10 +53,8 @@ import static io.github.oasis.engine.utils.Numbers.isZero;
  */
 public class StreakN extends BadgeProcessor<StreakNRule> {
 
-    public static final String COLON = ":";
-
-    public StreakN(Db pool, StreakNRule rule) {
-        super(pool, rule);
+    public StreakN(Db pool, RuleContext<StreakNRule> ruleContext) {
+        super(pool, ruleContext);
     }
 
     @Override

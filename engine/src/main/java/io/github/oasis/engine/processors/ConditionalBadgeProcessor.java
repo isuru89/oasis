@@ -20,6 +20,7 @@
 package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.ConditionalBadgeRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.ConditionalBadge;
@@ -48,8 +49,8 @@ import java.util.Optional;
  */
 public class ConditionalBadgeProcessor extends BadgeProcessor<ConditionalBadgeRule> {
 
-    public ConditionalBadgeProcessor(Db pool, ConditionalBadgeRule rule) {
-        super(pool, rule);
+    public ConditionalBadgeProcessor(Db pool, RuleContext<ConditionalBadgeRule> ruleContext) {
+        super(pool, ruleContext);
     }
 
     @Override

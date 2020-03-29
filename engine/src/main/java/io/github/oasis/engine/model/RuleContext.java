@@ -17,24 +17,31 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.model;
+
+import io.github.oasis.engine.rules.AbstractRule;
+import io.github.oasis.engine.rules.signals.Signal;
+
+import java.util.function.Consumer;
 
 /**
  * @author Isuru Weerarathna
  */
+public class RuleContext<R extends AbstractRule> {
 
-public class FirstEventRule extends BadgeRule {
+    private final R rule;
+    private final Consumer<Signal> collector;
 
-    private final String eventName;
-
-    public FirstEventRule(String id, String eventName) {
-        super(id);
-
-        this.eventName = eventName;
+    public RuleContext(R rule, Consumer<Signal> collector) {
+        this.rule = rule;
+        this.collector = collector;
     }
 
-    public String getEventName() {
-        return eventName;
+    public R getRule() {
+        return rule;
     }
 
+    public Consumer<Signal> getCollector() {
+        return collector;
+    }
 }

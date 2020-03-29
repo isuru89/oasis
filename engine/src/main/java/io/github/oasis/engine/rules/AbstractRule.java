@@ -22,10 +22,8 @@ package io.github.oasis.engine.rules;
 import io.github.oasis.engine.model.EventFilter;
 import io.github.oasis.engine.model.EventTypeMatcher;
 import io.github.oasis.engine.model.EventTypeMatcherFactory;
-import io.github.oasis.engine.rules.signals.Signal;
 
 import java.io.Serializable;
-import java.util.function.Consumer;
 
 /**
  * @author Isuru Weerarathna
@@ -38,18 +36,9 @@ public class AbstractRule implements Serializable {
     private String forEvent;
     private EventTypeMatcher eventTypeMatcher;
     private EventFilter condition;
-    private Consumer<Signal> collector;
 
     public AbstractRule(String id) {
         this.id = id;
-    }
-
-    public Consumer<Signal> getCollector() {
-        return collector;
-    }
-
-    public void setCollector(Consumer<Signal> collector) {
-        this.collector = collector;
     }
 
     public EventFilter getCondition() {

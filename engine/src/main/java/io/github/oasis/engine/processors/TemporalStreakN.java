@@ -21,6 +21,7 @@ package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.Record;
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.StreakNRule;
 import io.github.oasis.engine.rules.TemporalStreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
@@ -48,8 +49,8 @@ import static io.github.oasis.engine.utils.Numbers.asLong;
  * @author Isuru Weerarathna
  */
 public class TemporalStreakN extends StreakN {
-    public TemporalStreakN(Db pool, TemporalStreakNRule rule) {
-        super(pool, rule);
+    public TemporalStreakN(Db pool, RuleContext<StreakNRule> ruleContext) {
+        super(pool, ruleContext);
     }
 
     private long captureTsFromTuple(Record tuple) {

@@ -20,6 +20,7 @@
 package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.FirstEventRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.storage.Db;
@@ -34,8 +35,8 @@ import java.util.List;
  */
 public class FirstEvent extends BadgeProcessor<FirstEventRule> {
 
-    public FirstEvent(Db pool, FirstEventRule rule) {
-        super(pool, rule);
+    public FirstEvent(Db pool, RuleContext<FirstEventRule> ruleContext) {
+        super(pool, ruleContext);
     }
 
     @Override

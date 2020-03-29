@@ -20,6 +20,7 @@
 package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.TemporalBadgeRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
@@ -47,8 +48,8 @@ import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
  */
 public class TemporalBadgeProcessor extends BadgeProcessor<TemporalBadgeRule> {
 
-    public TemporalBadgeProcessor(Db pool, TemporalBadgeRule rule) {
-        super(pool, rule);
+    public TemporalBadgeProcessor(Db pool, RuleContext<TemporalBadgeRule> ruleContext) {
+        super(pool, ruleContext);
     }
 
     @Override

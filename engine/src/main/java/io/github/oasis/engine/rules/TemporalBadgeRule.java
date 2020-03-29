@@ -19,14 +19,12 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -38,7 +36,6 @@ public class TemporalBadgeRule extends BadgeRule {
     private long timeUnit;
     private Predicate<Event> criteria;
     protected Function<Event, BigDecimal> valueResolver;
-    private Consumer<Signal> collector;
     private List<Threshold> thresholds;
 
     public TemporalBadgeRule(String id) {
@@ -51,14 +48,6 @@ public class TemporalBadgeRule extends BadgeRule {
 
     public void setCriteria(Predicate<Event> criteria) {
         this.criteria = criteria;
-    }
-
-    public Consumer<Signal> getCollector() {
-        return collector;
-    }
-
-    public void setCollector(Consumer<Signal> collector) {
-        this.collector = collector;
     }
 
     public Function<Event, BigDecimal> getValueResolver() {

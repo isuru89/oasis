@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.processors.PointsProcessor;
 import io.github.oasis.engine.rules.signals.PointSignal;
 import io.github.oasis.engine.rules.signals.Signal;
@@ -53,9 +54,9 @@ public class PointsTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_B, 14);
 
         List<Signal> signals = new ArrayList<>();
-        PointRule rule = createRule(AMOUNT_10, this::greaterThan50,signals);
-        Assertions.assertEquals(AMOUNT_10, rule.getAmountToAward().doubleValue());
-        PointsProcessor processor = new PointsProcessor(pool, rule);
+        RuleContext<PointRule> ruleContext = createRule(AMOUNT_10, this::greaterThan50,signals);
+        Assertions.assertEquals(AMOUNT_10, ruleContext.getRule().getAmountToAward().doubleValue());
+        PointsProcessor processor = new PointsProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
 
         System.out.println(signals);
@@ -70,9 +71,10 @@ public class PointsTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_A, 14);
 
         List<Signal> signals = new ArrayList<>();
-        PointRule rule = createRule(AMOUNT_10, this::greaterThan50, signals);
+        RuleContext<PointRule> ruleContext = createRule(AMOUNT_10, this::greaterThan50, signals);
+        PointRule rule = ruleContext.getRule();
         Assertions.assertEquals(AMOUNT_10, rule.getAmountToAward().doubleValue());
-        PointsProcessor processor = new PointsProcessor(pool, rule);
+        PointsProcessor processor = new PointsProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
 
         System.out.println(signals);
@@ -87,9 +89,10 @@ public class PointsTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_A, 14);
 
         List<Signal> signals = new ArrayList<>();
-        PointRule rule = createRule(AMOUNT_10, this::greaterThan50, signals);
+        RuleContext<PointRule> ruleContext = createRule(AMOUNT_10, this::greaterThan50, signals);
+        PointRule rule = ruleContext.getRule();
         Assertions.assertEquals(AMOUNT_10, rule.getAmountToAward().doubleValue());
-        PointsProcessor processor = new PointsProcessor(pool, rule);
+        PointsProcessor processor = new PointsProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
 
         System.out.println(signals);
@@ -105,9 +108,10 @@ public class PointsTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_A, 83);
 
         List<Signal> signals = new ArrayList<>();
-        PointRule rule = createRule(AMOUNT_50, this::greaterThan50, signals);
+        RuleContext<PointRule> ruleContext = createRule(AMOUNT_50, this::greaterThan50, signals);
+        PointRule rule = ruleContext.getRule();
         Assertions.assertEquals(AMOUNT_50, rule.getAmountToAward().doubleValue());
-        PointsProcessor processor = new PointsProcessor(pool, rule);
+        PointsProcessor processor = new PointsProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
 
         System.out.println(signals);
@@ -124,13 +128,13 @@ public class PointsTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_A, 14);
 
         List<Signal> signals = new ArrayList<>();
-        PointRule rule = createRule(this::awards, this::greaterThan50, signals);
-        PointsProcessor processor = new PointsProcessor(pool, rule);
+        RuleContext<PointRule> ruleContext = createRule(this::awards, this::greaterThan50, signals);
+        PointsProcessor processor = new PointsProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
 
         System.out.println(signals);
         assertStrict(signals,
-                new PointSignal(rule.getId(), BigDecimal.valueOf(16), e2));
+                new PointSignal(ruleContext.getRule().getId(), BigDecimal.valueOf(16), e2));
     }
 
     @DisplayName("Expression Award: multiple points awarded")
@@ -141,14 +145,14 @@ public class PointsTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_A, 67);
 
         List<Signal> signals = new ArrayList<>();
-        PointRule rule = createRule(this::awards, this::greaterThan50, signals);
-        PointsProcessor processor = new PointsProcessor(pool, rule);
+        RuleContext<PointRule> ruleContext = createRule(this::awards, this::greaterThan50, signals);
+        PointsProcessor processor = new PointsProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
 
         System.out.println(signals);
         assertStrict(signals,
-                new PointSignal(rule.getId(), BigDecimal.valueOf(11), e1),
-                new PointSignal(rule.getId(), BigDecimal.valueOf(13), e3));
+                new PointSignal(ruleContext.getRule().getId(), BigDecimal.valueOf(11), e1),
+                new PointSignal(ruleContext.getRule().getId(), BigDecimal.valueOf(13), e3));
     }
 
     private BigDecimal awards(Event event, PointRule rule) {
@@ -159,21 +163,21 @@ public class PointsTest extends AbstractRuleTest {
         return (long) event.getFieldValue("value") >= 50;
     }
 
-    private PointRule createRule(double amount, BiPredicate<Event, PointRule> criteria, Collection<Signal> collection) {
+    private RuleContext<PointRule> createRule(double amount, BiPredicate<Event, PointRule> criteria, Collection<Signal> collection) {
         PointRule rule = new PointRule("test.point.rule");
         rule.setForEvent(EVT_A);
-        rule.setCollector(collection::add);
         rule.setAmountToAward(BigDecimal.valueOf(amount));
         rule.setCriteria(criteria);
-        return rule;
+
+        return new RuleContext<>(rule, collection::add);
     }
 
-    private PointRule createRule(BiFunction<Event, PointRule, BigDecimal> amount, BiPredicate<Event, PointRule> criteria, Collection<Signal> collection) {
+    private RuleContext<PointRule> createRule(BiFunction<Event, PointRule, BigDecimal> amount, BiPredicate<Event, PointRule> criteria, Collection<Signal> collection) {
         PointRule rule = new PointRule("test.point.rule");
         rule.setForEvent(EVT_A);
-        rule.setCollector(collection::add);
         rule.setAmountExpression(amount);
         rule.setCriteria(criteria);
-        return rule;
+
+        return new RuleContext<>(rule, collection::add);
     }
 }
