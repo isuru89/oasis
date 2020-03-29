@@ -103,4 +103,10 @@ public class TEvent implements Event {
         return (Integer) values.get("game");
     }
 
+    @Override
+    public String toString() {
+        return "TEvent{" +
+                "id=" + getExternalId() +
+                '}';
+    }
 }

@@ -21,6 +21,7 @@ package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
+import io.github.oasis.engine.rules.signals.PointSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.storage.Db;
 import io.github.oasis.engine.storage.DbContext;
@@ -107,6 +108,12 @@ public abstract class AbstractRuleTest {
         Assertions.assertTrue(signal.isPresent(), "Provided badge has different attributes! " + badgeSignal.toString());
     }
 
+    void assertSignal(Collection<Signal> signals, PointSignal pointSignal) {
+        Assertions.assertTrue(signals.contains(pointSignal), "Point not found!\n Expected: " + pointSignal.toString());
+        Optional<Signal> signal = signals.stream().filter(s -> s.compareTo(pointSignal) == 0).findFirst();
+        Assertions.assertTrue(signal.isPresent(), "Provided point has different attributes! " + pointSignal.toString());
+    }
+
     void assertStrict(Collection<Signal> signals, BadgeSignal... badgeSignals) {
         if (badgeSignals == null) {
             Assertions.assertTrue(signals.isEmpty(), "No badges excepted but found many!");
@@ -115,6 +122,17 @@ public abstract class AbstractRuleTest {
         Assertions.assertEquals(badgeSignals.length, signals.size(), "Expected number of badges are different!");
         for (BadgeSignal badgeSignal : badgeSignals) {
             assertSignal(signals, badgeSignal);
+        }
+    }
+
+    void assertStrict(Collection<Signal> signals, PointSignal... pointSignals) {
+        if (pointSignals == null) {
+            Assertions.assertTrue(signals.isEmpty(), "No badges excepted but found many!");
+            return;
+        }
+        Assertions.assertEquals(pointSignals.length, signals.size(), "Expected number of points are different!");
+        for (PointSignal pointSignal : pointSignals) {
+            assertSignal(signals, pointSignal);
         }
     }
 

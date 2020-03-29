@@ -20,19 +20,22 @@
 package io.github.oasis.engine.rules.signals;
 
 import io.github.oasis.model.Event;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
  */
+@ToString
 public class PointSignal extends Signal {
 
     private BigDecimal score;
     private Event eventRef;
 
-    PointSignal(String ruleId, BigDecimal score, Event eventRef) {
+    public PointSignal(String ruleId, BigDecimal score, Event eventRef) {
         super(ruleId);
 
         this.score = score;
@@ -48,9 +51,27 @@ public class PointSignal extends Signal {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PointSignal that = (PointSignal) o;
+        return getRuleId().equals(that.getRuleId()) &&
+                score.equals(that.score) &&
+                eventRef.equals(that.eventRef);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getRuleId(), score, eventRef);
+    }
+
+    @Override
     public int compareTo(Signal o) {
         return Comparator
                 .comparing(PointSignal::getRuleId)
+                .thenComparing(PointSignal::getScore)
+                .thenComparing(o2 -> o2.getEventRef().getExternalId())
+                .thenComparing(o2 -> o2.getEventRef().getUser())
                 .compare(this, (PointSignal) o);
     }
 }

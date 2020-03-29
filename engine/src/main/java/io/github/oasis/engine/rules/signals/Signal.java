@@ -19,9 +19,12 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import lombok.ToString;
+
 /**
  * @author Isuru Weerarathna
  */
+@ToString
 public abstract class Signal implements Comparable<Signal>  {
 
     private final String ruleId;
