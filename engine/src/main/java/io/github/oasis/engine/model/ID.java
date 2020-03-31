@@ -24,6 +24,22 @@ package io.github.oasis.engine.model;
  */
 public final class ID {
 
+    public static String getUserKeyUnderGameMilestone(long userId) {
+        return String.format("u%d", userId);
+    }
+
+    public static String getPenaltiesUserKeyUnderGameMilestone(long userId) {
+        return String.format("u%d:penalties", userId);
+    }
+
+    public static String getUserGameMilestonesKey(int gameId, long userId) {
+        return String.format("u%d:g%d:milestones", userId, gameId);
+    }
+
+    public static String getGameMilestoneKey(int gameId, String milestoneId) {
+        return String.format("g%d:ms:%s", gameId, milestoneId);
+    }
+
     public static String getUserFirstEventsKey(int gameId, long userId) {
         return String.format("u%d:g%d:firstevents", userId, gameId);
     }

@@ -28,6 +28,10 @@ public final class Numbers {
 
     private static final String ZERO = "0";
 
+    public static boolean isNegative(BigDecimal value) {
+        return value.signum() < 0;
+    }
+
     public static boolean isZero(String value) {
         return ZERO.equals(value);
     }

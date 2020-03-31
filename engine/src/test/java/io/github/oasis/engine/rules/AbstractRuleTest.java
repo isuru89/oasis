@@ -21,6 +21,7 @@ package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
+import io.github.oasis.engine.rules.signals.MilestoneSignal;
 import io.github.oasis.engine.rules.signals.PointSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.storage.Db;
@@ -108,6 +109,12 @@ public abstract class AbstractRuleTest {
         Assertions.assertTrue(signal.isPresent(), "Provided badge has different attributes! " + badgeSignal.toString());
     }
 
+    void assertSignal(Collection<Signal> signals, MilestoneSignal milestoneSignal) {
+        Assertions.assertTrue(signals.contains(milestoneSignal), "Milestone not found!\n Expected: " + milestoneSignal.toString());
+        Optional<Signal> signal = signals.stream().filter(s -> s.compareTo(milestoneSignal) == 0).findFirst();
+        Assertions.assertTrue(signal.isPresent(), "Provided milestone has different attributes! " + milestoneSignal.toString());
+    }
+
     void assertSignal(Collection<Signal> signals, PointSignal pointSignal) {
         Assertions.assertTrue(signals.contains(pointSignal), "Point not found!\n Expected: " + pointSignal.toString());
         Optional<Signal> signal = signals.stream().filter(s -> s.compareTo(pointSignal) == 0).findFirst();
@@ -122,6 +129,26 @@ public abstract class AbstractRuleTest {
         Assertions.assertEquals(badgeSignals.length, signals.size(), "Expected number of badges are different!");
         for (BadgeSignal badgeSignal : badgeSignals) {
             assertSignal(signals, badgeSignal);
+        }
+    }
+
+    void assertStrict(Collection<Signal> signals, MilestoneSignal... milestoneSignals) {
+        if (milestoneSignals == null) {
+            Assertions.assertTrue(signals.isEmpty(), "No milestones excepted but found many!");
+            return;
+        }
+        Assertions.assertEquals(milestoneSignals.length, signals.size(), "Expected number of levels are different!");
+        for (MilestoneSignal signal : milestoneSignals) {
+            assertSignal(signals, signal);
+        }
+    }
+
+    void assertRedisHashMapValue(String baseKey, String subKey, String value) {
+        try (DbContext db = pool.createContext()) {
+            String dbValue = db.MAP(baseKey).getValue(subKey);
+            Assertions.assertEquals(value, dbValue);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

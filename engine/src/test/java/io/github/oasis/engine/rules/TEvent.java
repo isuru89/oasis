@@ -30,6 +30,9 @@ import java.util.UUID;
  */
 public class TEvent implements Event {
 
+    public static int GAME_ID = 1;
+    public static long USER_ID = 0L;
+
     private Map<String, Object> values = new HashMap<>();
 
     public static TEvent createKeyValue(long ts, String eventType, long value) {
@@ -37,8 +40,8 @@ public class TEvent implements Event {
         event.values.put("value", value);
         event.values.put("type", eventType);
         event.values.put("ts", ts);
-        event.values.put("game", 1);
-        event.values.put("user", 0);
+        event.values.put("game", GAME_ID);
+        event.values.put("user", USER_ID);
         event.values.put("id", UUID.randomUUID().toString());
         return event;
     }
