@@ -26,6 +26,7 @@ import redis.clients.jedis.Tuple;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -80,6 +81,11 @@ public class RedisSortedSet implements Sorted {
     @Override
     public void removeRangeByScore(long from, long to) {
         jedis.zremrangeByScore(baseKey, from, to);
+    }
+
+    @Override
+    public boolean memberExists(String member) {
+        return !Objects.isNull(jedis.zscore(baseKey, member));
     }
 
     @Override

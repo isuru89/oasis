@@ -17,34 +17,15 @@
  * under the License.
  */
 
-package io.github.oasis.engine.storage;
-
-import io.github.oasis.engine.model.Record;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+package io.github.oasis.engine.rules.signals;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface Sorted {
+public abstract class AbstractChallengeSignal extends Signal {
 
-    void add(String member, long value);
+    AbstractChallengeSignal(String ruleId) {
+        super(ruleId);
+    }
 
-    void add(String number, double value);
-
-    List<Record> getRangeByScoreWithScores(long from, long to);
-    List<Record> getRangeByScoreWithScores(BigDecimal from, BigDecimal to);
-    List<Record> getRangeByRankWithScores(long from, long to);
-
-    void removeRangeByScore(long from, long to);
-
-    boolean memberExists(String member);
-
-    long getRank(String member);
-
-    Optional<String> getMemberByScore(long score);
-
-    void remove(String member);
 }

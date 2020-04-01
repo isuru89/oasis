@@ -49,6 +49,12 @@ public interface Mapped {
 
     long incrementBy(String key, long byValue);
     int incrementByInt(String key, int byValue);
+    default int incrementByOne(String key) {
+        return incrementByInt(key, 1);
+    }
+    default int decrementByOne(String key) {
+        return incrementByInt(key, -1);
+    }
     BigDecimal incrementByDecimal(String key, BigDecimal byValue);
 
     void remove(String key);

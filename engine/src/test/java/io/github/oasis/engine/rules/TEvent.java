@@ -46,6 +46,12 @@ public class TEvent implements Event {
         return event;
     }
 
+    public static TEvent createKeyValue(long user, long ts, String eventType, long value) {
+        TEvent event = createKeyValue(ts, eventType, value);
+        event.values.put("user", user);
+        return event;
+    }
+
     @Override
     public Map<String, Object> getAllFieldValues() {
         return values;
@@ -73,7 +79,7 @@ public class TEvent implements Event {
 
     @Override
     public long getUser() {
-        return 0;
+        return (Long) values.get("user");
     }
 
     @Override

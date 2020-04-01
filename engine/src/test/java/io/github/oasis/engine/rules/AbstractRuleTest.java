@@ -115,6 +115,12 @@ public abstract class AbstractRuleTest {
         Assertions.assertTrue(signal.isPresent(), "Provided milestone has different attributes! " + milestoneSignal.toString());
     }
 
+    void assertSignal(Collection<Signal> signals, Signal signalRef) {
+        Assertions.assertTrue(signals.contains(signalRef), "Signal not found!\n Expected: " + signalRef.toString());
+        Optional<Signal> signal = signals.stream().filter(s -> s.compareTo(signalRef) == 0).findFirst();
+        Assertions.assertTrue(signal.isPresent(), "Provided signal has different attributes! " + signalRef.toString());
+    }
+
     void assertSignal(Collection<Signal> signals, PointSignal pointSignal) {
         Assertions.assertTrue(signals.contains(pointSignal), "Point not found!\n Expected: " + pointSignal.toString());
         Optional<Signal> signal = signals.stream().filter(s -> s.compareTo(pointSignal) == 0).findFirst();
@@ -129,6 +135,17 @@ public abstract class AbstractRuleTest {
         Assertions.assertEquals(badgeSignals.length, signals.size(), "Expected number of badges are different!");
         for (BadgeSignal badgeSignal : badgeSignals) {
             assertSignal(signals, badgeSignal);
+        }
+    }
+
+    void assertStrict(Collection<Signal> signals, Signal... challengeSignals) {
+        if (challengeSignals == null) {
+            Assertions.assertTrue(signals.isEmpty(), "No signals excepted but found many!");
+            return;
+        }
+        Assertions.assertEquals(challengeSignals.length, signals.size(), "Expected number of signals are different!");
+        for (Signal challengeSignal : challengeSignals) {
+            assertSignal(signals, challengeSignal);
         }
     }
 
