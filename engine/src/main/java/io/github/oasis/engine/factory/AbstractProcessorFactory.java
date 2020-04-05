@@ -17,27 +17,19 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.engine.factory;
 
-import akka.actor.ActorRef;
+import io.github.oasis.engine.model.SignalCollector;
+import io.github.oasis.engine.processors.AbstractProcessor;
+import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
-
-import java.io.Serializable;
-import java.util.function.Consumer;
+import io.github.oasis.engine.storage.Db;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SignalCollector implements Consumer<Signal>, Serializable {
+public abstract class AbstractProcessorFactory<R extends AbstractRule> {
 
-    private ActorRef exchangeActor;
+    public abstract AbstractProcessor<R, ? extends Signal> create(R rule, SignalCollector collector, Db db);
 
-    public SignalCollector(ActorRef exchangeActor) {
-        this.exchangeActor = exchangeActor;
-    }
-
-    @Override
-    public void accept(Signal signal) {
-        exchangeActor.tell(signal, exchangeActor);
-    }
 }

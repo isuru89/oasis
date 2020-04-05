@@ -17,27 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.engine.actors.cmds;
 
-import akka.actor.ActorRef;
-import io.github.oasis.engine.rules.signals.Signal;
-
-import java.io.Serializable;
-import java.util.function.Consumer;
+import io.github.oasis.engine.model.Rules;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SignalCollector implements Consumer<Signal>, Serializable {
+public class StartRuleExecutionCommand implements OasisLifecycleCommand {
 
-    private ActorRef exchangeActor;
+    private int parentId;
+    private Rules rules;
 
-    public SignalCollector(ActorRef exchangeActor) {
-        this.exchangeActor = exchangeActor;
+    public StartRuleExecutionCommand(int parentId, Rules rules) {
+        this.parentId = parentId;
+        this.rules = rules;
     }
 
-    @Override
-    public void accept(Signal signal) {
-        exchangeActor.tell(signal, exchangeActor);
+    public Rules getRules() {
+        return rules;
+    }
+
+    public int getParentId() {
+        return parentId;
     }
 }

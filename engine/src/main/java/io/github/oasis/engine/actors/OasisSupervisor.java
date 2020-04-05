@@ -19,36 +19,46 @@
 
 package io.github.oasis.engine.actors;
 
-import akka.actor.typed.Behavior;
-import akka.actor.typed.PostStop;
-import akka.actor.typed.javadsl.AbstractBehavior;
-import akka.actor.typed.javadsl.ActorContext;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
-import io.github.oasis.engine.actors.cmds.OasisCommand;
+import akka.actor.ActorRef;
+import akka.actor.Props;
+import akka.routing.ActorRefRoutee;
+import akka.routing.Routee;
+import akka.routing.Router;
+import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
+import io.github.oasis.model.Event;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public class OasisSupervisor extends AbstractBehavior<OasisCommand> {
+public class OasisSupervisor extends OasisBaseActor {
 
-    public OasisSupervisor(ActorContext<OasisCommand> context) {
-        super(context);
+    private static final int RULE_PROCESSORS = 10;
 
-        getContext().getLog().info("Oasis Supervisor started.");
+    private Router ruleRouters;
+
+    public OasisSupervisor() {
+        createRuleRouters();
     }
 
-    public static Behavior<OasisCommand> create() {
-        return Behaviors.setup(OasisSupervisor::new);
+    private void createRuleRouters() {
+        List<Routee> routees = new ArrayList<>();
+        for (int i = 0; i < RULE_PROCESSORS; i++) {
+            ActorRef ruleActor = getContext().actorOf(Props.create(RuleSupervisor.class, RuleSupervisor::new));
+            getContext().watch(ruleActor);
+            routees.add(new ActorRefRoutee(ruleActor));
+        }
+        ruleRouters = new Router(new UserRouting(), routees);
     }
 
     @Override
-    public Receive<OasisCommand> createReceive() {
-        return newReceiveBuilder().onSignal(PostStop.class, stopSignal -> onPostStop()).build();
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(Event.class, event -> ruleRouters.route(event, getSender()))
+                .match(OasisRuleMessage.class, oasisRuleMessage -> ruleRouters.route(oasisRuleMessage, getSender()))
+                .build();
     }
 
-    private OasisSupervisor onPostStop() {
-        getContext().getLog().info("Oasis Supervisor stopped!");
-        return this;
-    }
 }

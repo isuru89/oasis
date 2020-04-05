@@ -17,27 +17,37 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.engine.rules;
 
-import akka.actor.ActorRef;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.model.Event;
 
-import java.io.Serializable;
-import java.util.function.Consumer;
+import java.math.BigDecimal;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SignalCollector implements Consumer<Signal>, Serializable {
+public class BadgeHistogramCountStreakNRule extends BadgeHistogramStreakNRule {
 
-    private ActorRef exchangeActor;
+    public BadgeHistogramCountStreakNRule(String id) {
+        super(id);
 
-    public SignalCollector(ActorRef exchangeActor) {
-        this.exchangeActor = exchangeActor;
+        super.threshold = BigDecimal.ONE;
     }
 
     @Override
-    public void accept(Signal signal) {
-        exchangeActor.tell(signal, exchangeActor);
+    public void setValueResolver(Function<Event, Double> valueResolver) {
+        throw new IllegalStateException("Use condition instead of value resolver!");
+    }
+
+    public void setCondition(Predicate<Event> condition) {
+        super.valueResolver = event -> {
+            if (condition.test(event)) {
+                return 1.0;
+            } else {
+                return 0.0;
+            }
+        };
     }
 }

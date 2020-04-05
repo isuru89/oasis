@@ -21,7 +21,7 @@ package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.rules.ConditionalBadgeRule;
+import io.github.oasis.engine.rules.BadgeConditionalRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.ConditionalBadge;
 import io.github.oasis.engine.storage.Db;
@@ -47,24 +47,24 @@ import java.util.Optional;
  *
  * @author Isuru Weerarathna
  */
-public class ConditionalBadgeProcessor extends BadgeProcessor<ConditionalBadgeRule> {
+public class BadgeConditionalProcessor extends BadgeProcessor<BadgeConditionalRule> {
 
-    public ConditionalBadgeProcessor(Db pool, RuleContext<ConditionalBadgeRule> ruleContext) {
+    public BadgeConditionalProcessor(Db pool, RuleContext<BadgeConditionalRule> ruleContext) {
         super(pool, ruleContext);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, ConditionalBadgeRule rule, DbContext db) {
-        List<ConditionalBadgeRule.Condition> conditions = rule.getConditions();
+    public List<BadgeSignal> process(Event event, BadgeConditionalRule rule, DbContext db) {
+        List<BadgeConditionalRule.Condition> conditions = rule.getConditions();
         if (conditions.isEmpty()) {
             return null;
         }
 
-        Optional<ConditionalBadgeRule.Condition> first = conditions.stream()
+        Optional<BadgeConditionalRule.Condition> first = conditions.stream()
                 .filter(condition -> condition.getCondition().test(event))
                 .findFirst();
         if (first.isPresent()) {
-            ConditionalBadgeRule.Condition condition = first.get();
+            BadgeConditionalRule.Condition condition = first.get();
             int attrId = condition.getAttribute();
             String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
             String attrKey = rule.getId() + ":attr:" + attrId;

@@ -28,7 +28,7 @@ import java.io.Serializable;
 /**
  * @author Isuru Weerarathna
  */
-public class AbstractRule implements Serializable {
+public abstract class AbstractRule implements Serializable {
 
     private final String id;
     private String name;

@@ -22,7 +22,7 @@ package io.github.oasis.engine.processors;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.Record;
 import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.rules.HistogramStreakNRule;
+import io.github.oasis.engine.rules.BadgeHistogramStreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeRemovalSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeSignal;
@@ -56,14 +56,14 @@ import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
 /**
  * @author Isuru Weerarathna
  */
-public class HistogramStreakN extends BadgeProcessor<HistogramStreakNRule> {
+public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNRule> {
 
-    public HistogramStreakN(Db pool, RuleContext<HistogramStreakNRule> ruleContext) {
+    public BadgeHistogramStreakN(Db pool, RuleContext<BadgeHistogramStreakNRule> ruleContext) {
         super(pool, ruleContext);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, HistogramStreakNRule rule, DbContext db) {
+    public List<BadgeSignal> process(Event event, BadgeHistogramStreakNRule rule, DbContext db) {
         String badgeKey = ID.getBadgeHistogramKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(badgeKey);
         long timestamp = event.getTimestamp() - (event.getTimestamp() % rule.getTimeUnit());
@@ -158,7 +158,7 @@ public class HistogramStreakN extends BadgeProcessor<HistogramStreakNRule> {
         return null;
     }
 
-    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, HistogramStreakNRule rule, DbContext db) {
+    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, BadgeHistogramStreakNRule rule, DbContext db) {
         List<BadgeSignal> signals = new ArrayList<>();
         List<Record> filteredTuples = tuples.stream().map(t -> {
             String[] parts = t.getMember().split(COLON);
@@ -194,7 +194,7 @@ public class HistogramStreakN extends BadgeProcessor<HistogramStreakNRule> {
         return signals;
     }
 
-    public List<BadgeSignal> fold(List<Record> tuples, Event event, HistogramStreakNRule rule, DbContext db, boolean skipOldCheck) {
+    public List<BadgeSignal> fold(List<Record> tuples, Event event, BadgeHistogramStreakNRule rule, DbContext db, boolean skipOldCheck) {
         List<BadgeSignal> signals = new ArrayList<>();
         List<List<Record>> partitions = splitPartitions(tuples, rule);
         if (partitions.isEmpty()) {
@@ -236,7 +236,7 @@ public class HistogramStreakN extends BadgeProcessor<HistogramStreakNRule> {
         return signals;
     }
 
-    private List<List<Record>> splitPartitions(List<Record> tuples, HistogramStreakNRule options) {
+    private List<List<Record>> splitPartitions(List<Record> tuples, BadgeHistogramStreakNRule options) {
         List<Record> currentPartition = new ArrayList<>();
         List<List<Record>> partitions = new ArrayList<>();
         for (Record tuple : tuples) {

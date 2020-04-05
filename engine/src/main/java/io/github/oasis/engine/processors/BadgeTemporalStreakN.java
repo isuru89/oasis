@@ -22,8 +22,8 @@ package io.github.oasis.engine.processors;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.Record;
 import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.rules.StreakNRule;
-import io.github.oasis.engine.rules.TemporalStreakNRule;
+import io.github.oasis.engine.rules.BadgeStreakNRule;
+import io.github.oasis.engine.rules.BadgeTemporalStreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
@@ -48,8 +48,8 @@ import static io.github.oasis.engine.utils.Numbers.asLong;
  *
  * @author Isuru Weerarathna
  */
-public class TemporalStreakN extends StreakN {
-    public TemporalStreakN(Db pool, RuleContext<StreakNRule> ruleContext) {
+public class BadgeTemporalStreakN extends BadgeStreakN {
+    public BadgeTemporalStreakN(Db pool, RuleContext<BadgeStreakNRule> ruleContext) {
         super(pool, ruleContext);
     }
 
@@ -64,8 +64,8 @@ public class TemporalStreakN extends StreakN {
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, StreakNRule ruleRef, DbContext db) {
-        TemporalStreakNRule rule = (TemporalStreakNRule) ruleRef;
+    public List<BadgeSignal> process(Event event, BadgeStreakNRule ruleRef, DbContext db) {
+        BadgeTemporalStreakNRule rule = (BadgeTemporalStreakNRule) ruleRef;
         if (rule.isConsecutive()) {
             return super.process(event, rule, db);
         } else {
@@ -73,7 +73,7 @@ public class TemporalStreakN extends StreakN {
         }
     }
 
-    private List<BadgeSignal> nonConsecutiveAccept(Event event, TemporalStreakNRule rule, DbContext db) {
+    private List<BadgeSignal> nonConsecutiveAccept(Event event, BadgeTemporalStreakNRule rule, DbContext db) {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
@@ -96,7 +96,7 @@ public class TemporalStreakN extends StreakN {
         return null;
     }
 
-    private List<BadgeSignal> countFold(List<Record> tuplesAll, Event event, String lastOffering, TemporalStreakNRule rule, DbContext db) {
+    private List<BadgeSignal> countFold(List<Record> tuplesAll, Event event, String lastOffering, BadgeTemporalStreakNRule rule, DbContext db) {
         List<BadgeSignal> signals = new ArrayList<>();
         int lastStreak = 0;
         long lastTs = 0L;
@@ -197,9 +197,9 @@ public class TemporalStreakN extends StreakN {
 
 
     @Override
-    public List<BadgeSignal> fold(List<Record> tuples, Event event, StreakNRule optionsRef, DbContext db) {
+    public List<BadgeSignal> fold(List<Record> tuples, Event event, BadgeStreakNRule optionsRef, DbContext db) {
         List<BadgeSignal> signals = new ArrayList<>();
-        TemporalStreakNRule options = (TemporalStreakNRule) optionsRef;
+        BadgeTemporalStreakNRule options = (BadgeTemporalStreakNRule) optionsRef;
         List<List<Record>> partitions = splitPartitions(tuples, options);
         if (partitions.isEmpty()) {
             return signals;
@@ -242,8 +242,8 @@ public class TemporalStreakN extends StreakN {
     }
 
     @Override
-    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, StreakNRule rule, DbContext db) {
-        TemporalStreakNRule options = (TemporalStreakNRule) rule;
+    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, BadgeStreakNRule rule, DbContext db) {
+        BadgeTemporalStreakNRule options = (BadgeTemporalStreakNRule) rule;
         List<BadgeSignal> signals = new ArrayList<>();
         long startTs = Math.max(0, ts - options.getTimeUnit());
         String badgeSpecKey = ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), options.getId());
@@ -267,7 +267,7 @@ public class TemporalStreakN extends StreakN {
         return signals;
     }
 
-    public List<List<Record>> splitPartitions(List<Record> tuples, TemporalStreakNRule options) {
+    public List<List<Record>> splitPartitions(List<Record> tuples, BadgeTemporalStreakNRule options) {
         List<Record> currentPartition = new ArrayList<>();
         List<List<Record>> partitions = new ArrayList<>();
         for (Record tuple : tuples) {

@@ -19,60 +19,87 @@
 
 package io.github.oasis.engine.actors;
 
-import akka.actor.typed.ActorRef;
-import akka.actor.typed.Behavior;
-import akka.actor.typed.PostStop;
-import akka.actor.typed.javadsl.AbstractBehavior;
-import akka.actor.typed.javadsl.ActorContext;
-import akka.actor.typed.javadsl.Behaviors;
-import akka.actor.typed.javadsl.Receive;
-import io.github.oasis.engine.actors.cmds.OasisCommand;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.engine.actors.cmds.RuleRemovedMessage;
-import io.github.oasis.engine.actors.cmds.RuleUpdatedMessage;
+import akka.actor.ActorRef;
+import akka.actor.Props;
+import akka.routing.DefaultResizer;
+import akka.routing.RoundRobinPool;
+import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
+import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
+import io.github.oasis.engine.model.Rules;
+import io.github.oasis.engine.model.SignalCollector;
+import io.github.oasis.model.Event;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RuleSupervisor extends AbstractBehavior<OasisCommand> {
+public class RuleSupervisor extends OasisBaseActor {
 
-    private ActorRef<OasisCommand> badgeProcessor;
+    private static final DefaultResizer ELASTICITY = new DefaultResizer(5, 10);
 
-    public RuleSupervisor(ActorContext<OasisCommand> context) {
-        super(context);
+    private static final AtomicInteger counter = new AtomicInteger(0);
 
-        badgeProcessor = getContext().spawn(BadgeProcessingActor.create(), "badge-processor");
-    }
+    private Rules rules;
+    private ActorRef signalExchanger;
+    private SignalCollector collector;
+    private final int id;
+    private ActorRef executor;
 
-    public static Behavior<OasisCommand> create() {
-        return Behaviors.setup(RuleSupervisor::new);
+    public RuleSupervisor() {
+        id = counter.incrementAndGet();
+
+        System.out.println("Starting rule supervisor #" + id + "...");
+        signalExchanger = createSignalExchanger();
+        collector = new SignalCollector(signalExchanger);
+        rules = Rules.get(collector);
     }
 
     @Override
-    public Receive<OasisCommand> createReceive() {
-        return newReceiveBuilder()
-                .onMessage(RuleAddedMessage.class, this::whenRuleAdded)
-                .onMessage(RuleRemovedMessage.class, this::whenRuleRemoved)
-                .onMessage(RuleUpdatedMessage.class, this::whenRuleUpdated)
-                .onSignal(PostStop.class, signal -> onPostStop())
+    public void preStart() {
+        createExecutors();
+
+        beginAllChildren();
+    }
+
+    @Override
+    public void postRestart(Throwable reason) throws Exception {
+        super.postRestart(reason);
+
+        beginAllChildren();
+    }
+
+    private void beginAllChildren() {
+        executor.tell(new StartRuleExecutionCommand(id, rules), getSelf());
+    }
+
+    private ActorRef createSignalExchanger() {
+        ActorRef actorRef = getContext().actorOf(Props.create(SignalExchange.class, SignalExchange::new), "signal-exchanger");
+        getContext().watch(actorRef);
+        return actorRef;
+    }
+
+    private void createExecutors() {
+        executor = getContext().actorOf(new RoundRobinPool(5)
+                .props(Props.create(RuleExecutor.class, RuleExecutor::new)), "rule-executors");
+        getContext().watch(executor);
+    }
+
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(Event.class, this::processEvent)
+                .match(OasisRuleMessage.class, this::forwardRuleModifiedEvent)
                 .build();
     }
 
-    private Behavior<OasisCommand> whenRuleUpdated(RuleUpdatedMessage ruleUpdatedMessage) {
-        return this;
+    private void processEvent(Event event) {
+        System.out.println("Event received... " + event.getUser());
+        executor.forward(event, getContext());
     }
 
-    private Behavior<OasisCommand> whenRuleRemoved(RuleRemovedMessage ruleRemovedMessage) {
-        return this;
+    private void forwardRuleModifiedEvent(OasisRuleMessage ruleMessage) {
+        executor.forward(ruleMessage, getContext());
     }
 
-    private Behavior<OasisCommand> whenRuleAdded(RuleAddedMessage ruleAddedMessage) {
-        badgeProcessor.tell(ruleAddedMessage);
-        return this;
-    }
-
-    private Behavior<OasisCommand> onPostStop() {
-        getContext().getLog().info("Rule supervisor stopped!");
-        return Behaviors.stopped();
-    }
 }

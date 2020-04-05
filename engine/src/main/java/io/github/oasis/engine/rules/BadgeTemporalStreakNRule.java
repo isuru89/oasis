@@ -17,27 +17,33 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
-
-import akka.actor.ActorRef;
-import io.github.oasis.engine.rules.signals.Signal;
-
-import java.io.Serializable;
-import java.util.function.Consumer;
+package io.github.oasis.engine.rules;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SignalCollector implements Consumer<Signal>, Serializable {
+public class BadgeTemporalStreakNRule extends BadgeStreakNRule {
 
-    private ActorRef exchangeActor;
+    private long timeUnit;
+    private boolean consecutive = true;
 
-    public SignalCollector(ActorRef exchangeActor) {
-        this.exchangeActor = exchangeActor;
+    public BadgeTemporalStreakNRule(String id) {
+        super(id);
     }
 
-    @Override
-    public void accept(Signal signal) {
-        exchangeActor.tell(signal, exchangeActor);
+    public boolean isConsecutive() {
+        return consecutive;
+    }
+
+    public void setConsecutive(boolean consecutive) {
+        this.consecutive = consecutive;
+    }
+
+    public long getTimeUnit() {
+        return timeUnit;
+    }
+
+    public void setTimeUnit(long timeUnit) {
+        this.timeUnit = timeUnit;
     }
 }

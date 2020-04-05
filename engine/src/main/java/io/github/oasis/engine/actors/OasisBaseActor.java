@@ -17,27 +17,31 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.engine.actors;
 
-import akka.actor.ActorRef;
-import io.github.oasis.engine.rules.signals.Signal;
+import akka.actor.AbstractActor;
+import akka.actor.OneForOneStrategy;
+import akka.actor.SupervisorStrategy;
+import akka.japi.pf.DeciderBuilder;
 
-import java.io.Serializable;
-import java.util.function.Consumer;
+import java.time.Duration;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SignalCollector implements Consumer<Signal>, Serializable {
+public abstract class OasisBaseActor extends AbstractActor {
 
-    private ActorRef exchangeActor;
+    private static final int MAX_NR_OF_RETRIES = 10;
 
-    public SignalCollector(ActorRef exchangeActor) {
-        this.exchangeActor = exchangeActor;
-    }
+    private static SupervisorStrategy restartingStrategy = new OneForOneStrategy(
+            MAX_NR_OF_RETRIES,
+            Duration.ofMinutes(1),
+            DeciderBuilder.matchAny(e -> SupervisorStrategy.restart())
+                    .build()
+    );
 
     @Override
-    public void accept(Signal signal) {
-        exchangeActor.tell(signal, exchangeActor);
+    public SupervisorStrategy supervisorStrategy() {
+        return restartingStrategy;
     }
 }

@@ -29,12 +29,12 @@ import java.util.function.Predicate;
 /**
  * @author Isuru Weerarathna
  */
-public class ConditionalBadgeRule extends BadgeRule {
+public class BadgeConditionalRule extends BadgeRule {
 
     private int maxAwardTimes = Integer.MAX_VALUE;
     private List<Condition> conditions;
 
-    public ConditionalBadgeRule(String id) {
+    public BadgeConditionalRule(String id) {
         super(id);
     }
 

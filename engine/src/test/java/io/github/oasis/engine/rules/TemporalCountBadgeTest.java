@@ -20,7 +20,7 @@
 package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.processors.TemporalBadgeProcessor;
+import io.github.oasis.engine.processors.BadgeTemporalProcessor;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.rules.signals.TemporalBadge;
 import org.junit.jupiter.api.Assertions;
@@ -54,7 +54,7 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
     @DisplayName("Rule should be able to create")
     @Test
     public void shouldNotBeAbleToSetValueResolver() {
-        TemporalCountBadgeRule rule = new TemporalCountBadgeRule("test.histogram.count");
+        BadgeTemporalCountRule rule = new BadgeTemporalCountRule("test.histogram.count");
         rule.setForEvent(EVENT_TYPE);
         rule.setTimeUnit(FIFTY);
         rule.setThresholds(Arrays.asList(aT(ATTR_1, T_3), aT(ATTR_2, T_5)));
@@ -75,10 +75,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals);
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals);
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(0, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         Assertions.assertEquals(0, signals.size());
@@ -95,10 +95,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         Assertions.assertEquals(0, signals.size());
@@ -115,10 +115,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE_B, 71);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         Assertions.assertEquals(0, signals.size());
@@ -135,10 +135,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -157,10 +157,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -179,10 +179,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 79);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -202,10 +202,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(120, EVENT_TYPE, 63);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -228,10 +228,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 69);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         Assertions.assertEquals(0, signals.size());
@@ -248,10 +248,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE_B, 71);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         Assertions.assertEquals(0, signals.size());
@@ -268,10 +268,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(135, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -291,10 +291,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e7 = TEvent.createKeyValue(140, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7);
 
         System.out.println(signals);
@@ -314,10 +314,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(135, EVENT_TYPE, 95);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -340,10 +340,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e9 = TEvent.createKeyValue(180, EVENT_TYPE, 84);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8, e9);
 
         System.out.println(signals);
@@ -365,10 +365,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         TEvent e7 = TEvent.createKeyValue(120, EVENT_TYPE, 73);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<TemporalBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
-        TemporalBadgeRule rule = ruleContext.getRule();
+        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_3), aT(ATTR_2, T_5), aT(ATTR_4, T_10));
+        BadgeTemporalRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        TemporalBadgeProcessor processor = new TemporalBadgeProcessor(pool, ruleContext);
+        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7);
 
         System.out.println(signals);
@@ -377,12 +377,12 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
                 new TemporalBadge(rule.getId(), ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()));
     }
 
-    private TemporalBadgeRule.Threshold aT(int attr, long threshold) {
-        return new TemporalBadgeRule.Threshold(attr, BigDecimal.valueOf(threshold));
+    private BadgeTemporalRule.Threshold aT(int attr, long threshold) {
+        return new BadgeTemporalRule.Threshold(attr, BigDecimal.valueOf(threshold));
     }
 
-    private RuleContext<TemporalBadgeRule> createRule(long timeUnit, Collection<Signal> collection, TemporalBadgeRule.Threshold... thresholds) {
-        TemporalCountBadgeRule rule = new TemporalCountBadgeRule("test.temporal.badge");
+    private RuleContext<BadgeTemporalRule> createRule(long timeUnit, Collection<Signal> collection, BadgeTemporalRule.Threshold... thresholds) {
+        BadgeTemporalCountRule rule = new BadgeTemporalCountRule("test.temporal.badge");
         rule.setForEvent(EVENT_TYPE);
         rule.setTimeUnit(timeUnit);
         rule.setCriteria(event -> (long) event.getFieldValue("value") >= 50);

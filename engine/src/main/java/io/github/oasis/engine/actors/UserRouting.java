@@ -17,37 +17,27 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.actors;
 
+import akka.routing.BroadcastRoutingLogic;
+import akka.routing.Routee;
+import akka.routing.RoutingLogic;
 import io.github.oasis.model.Event;
-
-import java.math.BigDecimal;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import scala.collection.immutable.IndexedSeq;
 
 /**
  * @author Isuru Weerarathna
  */
-public class HistogramCountStreakNRule extends HistogramStreakNRule {
+public class UserRouting implements RoutingLogic {
 
-    public HistogramCountStreakNRule(String id) {
-        super(id);
-
-        super.threshold = BigDecimal.ONE;
-    }
+    private BroadcastRoutingLogic broadcastRoutingLogic = new BroadcastRoutingLogic();
 
     @Override
-    public void setValueResolver(Function<Event, Double> valueResolver) {
-        throw new IllegalStateException("Use condition instead of value resolver!");
-    }
-
-    public void setCondition(Predicate<Event> condition) {
-        super.valueResolver = event -> {
-            if (condition.test(event)) {
-                return 1.0;
-            } else {
-                return 0.0;
-            }
-        };
+    public Routee select(Object message, IndexedSeq<Routee> routees) {
+        if (message instanceof Event) {
+            Event event = (Event) message;
+            return routees.apply((int) event.getUser() % routees.size());
+        }
+        return broadcastRoutingLogic.select(message, routees);
     }
 }

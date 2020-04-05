@@ -20,10 +20,6 @@
 package io.github.oasis.engine;
 
 import akka.actor.testkit.typed.javadsl.TestKitJunitResource;
-import akka.actor.typed.ActorRef;
-import io.github.oasis.engine.actors.OasisSupervisor;
-import io.github.oasis.engine.actors.cmds.OasisCommand;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -37,8 +33,7 @@ public class OasisEngineTest {
 
     @Test
     public void testOasisEngineStartup() {
-        ActorRef<OasisCommand> ruleActor = testKit.spawn(OasisSupervisor.create());
-        ruleActor.tell(new RuleAddedMessage());
+
     }
 
 }

@@ -20,8 +20,8 @@
 package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.processors.StreakN;
-import io.github.oasis.engine.processors.TemporalStreakN;
+import io.github.oasis.engine.processors.BadgeStreakN;
+import io.github.oasis.engine.processors.BadgeTemporalStreakN;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
 import org.junit.jupiter.api.Assertions;
@@ -52,10 +52,10 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(130, EVT_B, 81);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
-        StreakNRule rule = ruleContext.getRule();
+        RuleContext<BadgeStreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
+        BadgeStreakNRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        StreakN streakN = new TemporalStreakN(pool, ruleContext);
+        BadgeStreakN streakN = new BadgeTemporalStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -72,10 +72,10 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(130, EVT_A, 81);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
-        StreakNRule rule = ruleContext.getRule();
+        RuleContext<BadgeStreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
+        BadgeStreakNRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        StreakN streakN = new TemporalStreakN(pool, ruleContext);
+        BadgeStreakN streakN = new BadgeTemporalStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -95,10 +95,10 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(130, EVT_A, 77); // --
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
-        StreakNRule rule = ruleContext.getRule();
+        RuleContext<BadgeStreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
+        BadgeStreakNRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        StreakN streakN = new TemporalStreakN(pool, ruleContext);
+        BadgeStreakN streakN = new BadgeTemporalStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -118,10 +118,10 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(111, EVT_A, 1);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
-        StreakNRule rule = ruleContext.getRule();
+        RuleContext<BadgeStreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
+        BadgeStreakNRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        StreakN streakN = new TemporalStreakN(pool, ruleContext);
+        BadgeStreakN streakN = new BadgeTemporalStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -142,10 +142,10 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(123, EVT_A, 1);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
-        StreakNRule rule = ruleContext.getRule();
+        RuleContext<BadgeStreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
+        BadgeStreakNRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        StreakN streakN = new TemporalStreakN(pool, ruleContext);
+        BadgeStreakN streakN = new BadgeTemporalStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -165,10 +165,10 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(111, EVT_A, 91); // --
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
-        StreakNRule rule = ruleContext.getRule();
+        RuleContext<BadgeStreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
+        BadgeStreakNRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        StreakN streakN = new TemporalStreakN(pool, ruleContext);
+        BadgeStreakN streakN = new BadgeTemporalStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -189,10 +189,10 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(123, EVT_A, 51);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
-        StreakNRule rule = ruleContext.getRule();
+        RuleContext<BadgeStreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
+        BadgeStreakNRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        StreakN streakN = new TemporalStreakN(pool, ruleContext);
+        BadgeStreakN streakN = new BadgeTemporalStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -214,10 +214,10 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(123, EVT_A, 51); // --
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
-        StreakNRule rule = ruleContext.getRule();
+        RuleContext<BadgeStreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
+        BadgeStreakNRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        StreakN streakN = new TemporalStreakN(pool, ruleContext);
+        BadgeStreakN streakN = new BadgeTemporalStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -241,10 +241,10 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(128, EVT_A, 96);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
-        StreakNRule rule = ruleContext.getRule();
+        RuleContext<BadgeStreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
+        BadgeStreakNRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        StreakN streakN = new TemporalStreakN(pool, ruleContext);
+        BadgeStreakN streakN = new BadgeTemporalStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -264,9 +264,9 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(131, EVT_A, 50);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
+        RuleContext<BadgeStreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
         Assertions.assertEquals(5, ruleContext.getRule().getMaxStreak());
-        StreakN streakN = new TemporalStreakN(pool, ruleContext);
+        BadgeStreakN streakN = new BadgeTemporalStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -289,10 +289,10 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         TEvent e10 = TEvent.createKeyValue(160, EVT_A, 77); // --
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
-        StreakNRule rule = ruleContext.getRule();
+        RuleContext<BadgeStreakNRule> ruleContext = createStreakNOptions(Arrays.asList(3, 5), 30, signalsRef::add);
+        BadgeStreakNRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        StreakN streakN = new TemporalStreakN(pool, ruleContext);
+        BadgeStreakN streakN = new BadgeTemporalStreakN(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -305,8 +305,8 @@ public class TemporalNCMultiStreakTest extends AbstractRuleTest {
         assertSignal(signals, new StreakBadgeSignal(rule.getId(), 5, 131, 160, e6.getExternalId(), e10.getExternalId()));
     }
 
-    private RuleContext<StreakNRule> createStreakNOptions(List<Integer> streaks, long timeUnit, Consumer<Signal> consumer) {
-        TemporalStreakNRule options = new TemporalStreakNRule("test.temporal.streak");
+    private RuleContext<BadgeStreakNRule> createStreakNOptions(List<Integer> streaks, long timeUnit, Consumer<Signal> consumer) {
+        BadgeTemporalStreakNRule options = new BadgeTemporalStreakNRule("test.temporal.streak");
         options.setForEvent(EVT_A);
         options.setStreaks(streaks);
         options.setConsecutive(false);

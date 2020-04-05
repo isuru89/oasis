@@ -22,7 +22,7 @@ package io.github.oasis.engine.rules;
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeRule extends AbstractRule {
+public abstract class BadgeRule extends AbstractRule {
 
     public BadgeRule(String id) {
         super(id);

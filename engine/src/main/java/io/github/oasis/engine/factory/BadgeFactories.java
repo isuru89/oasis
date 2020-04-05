@@ -17,31 +17,32 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
+package io.github.oasis.engine.factory;
 
+import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.engine.model.SignalCollector;
 import io.github.oasis.engine.processors.AbstractProcessor;
-import io.github.oasis.engine.rules.AbstractRule;
+import io.github.oasis.engine.processors.BadgeConditionalProcessor;
+import io.github.oasis.engine.rules.BadgeRule;
+import io.github.oasis.engine.rules.BadgeConditionalRule;
 import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.storage.Db;
 
 /**
  * @author Isuru Weerarathna
  */
-public class EventRequest implements OasisCommand {
+public class BadgeFactories {
 
-    private Event event;
-    private AbstractProcessor<? extends AbstractRule, ? extends Signal> processor;
-
-    public EventRequest(Event event, AbstractProcessor<? extends AbstractRule, ? extends Signal> processor) {
-        this.event = event;
-        this.processor = processor;
+    public static AbstractProcessorFactory<? extends BadgeRule> conditionalBadgeProcessor() {
+        return new ConditionalBadges();
     }
 
-    public Event getEvent() {
-        return event;
+    private static class ConditionalBadges extends AbstractProcessorFactory<BadgeConditionalRule> {
+
+        @Override
+        public AbstractProcessor<BadgeConditionalRule, ? extends Signal> create(BadgeConditionalRule rule, SignalCollector collector, Db db) {
+            return new BadgeConditionalProcessor(db, new RuleContext<>(rule, collector));
+        }
     }
 
-    public AbstractProcessor<? extends AbstractRule, ? extends Signal> getProcessor() {
-        return processor;
-    }
 }

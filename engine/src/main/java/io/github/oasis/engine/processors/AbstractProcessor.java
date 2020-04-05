@@ -27,13 +27,14 @@ import io.github.oasis.engine.storage.Db;
 import io.github.oasis.engine.storage.DbContext;
 import io.github.oasis.model.Event;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal> implements Consumer<Event> {
+public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal> implements Consumer<Event>, Serializable {
 
     protected final Db dbPool;
     protected final R rule;

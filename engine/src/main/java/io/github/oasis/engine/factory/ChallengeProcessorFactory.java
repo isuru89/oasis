@@ -17,30 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.factory;
 
-import io.github.oasis.model.Event;
-
-import java.math.BigDecimal;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.engine.model.SignalCollector;
+import io.github.oasis.engine.processors.AbstractProcessor;
+import io.github.oasis.engine.processors.ChallengeProcessor;
+import io.github.oasis.engine.rules.ChallengeRule;
+import io.github.oasis.engine.rules.signals.AbstractChallengeSignal;
+import io.github.oasis.engine.storage.Db;
 
 /**
  * @author Isuru Weerarathna
  */
-public class TemporalCountBadgeRule extends TemporalBadgeRule {
-    public TemporalCountBadgeRule(String id) {
-        super(id);
-    }
+public class ChallengeProcessorFactory extends AbstractProcessorFactory<ChallengeRule> {
+
+    public static final ChallengeProcessorFactory INSTANCE = new ChallengeProcessorFactory();
+
+    private ChallengeProcessorFactory() {}
 
     @Override
-    public void setCriteria(Predicate<Event> criteria) {
-        super.setCriteria(criteria);
-        super.valueResolver = event -> BigDecimal.ONE;
+    public AbstractProcessor<ChallengeRule, AbstractChallengeSignal> create(ChallengeRule rule, SignalCollector collector, Db db) {
+        return new ChallengeProcessor(db, new RuleContext<>(rule, collector));
     }
 
-    @Override
-    public void setValueResolver(Function<Event, BigDecimal> valueResolver) {
-        throw new IllegalStateException("Use condition instead of value resolver!");
-    }
 }

@@ -22,5 +22,15 @@ package io.github.oasis.engine.actors.cmds;
 /**
  * @author Isuru Weerarathna
  */
-public class RuleRemovedMessage implements OasisCommand {
+public class RuleRemovedMessage implements OasisRuleMessage {
+
+    private String ruleId;
+
+    public RuleRemovedMessage(String ruleId) {
+        this.ruleId = ruleId;
+    }
+
+    public String getRuleId() {
+        return ruleId;
+    }
 }

@@ -21,7 +21,7 @@ package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.rules.TemporalBadgeRule;
+import io.github.oasis.engine.rules.BadgeTemporalRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.TemporalBadge;
@@ -46,9 +46,9 @@ import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
  *
  * @author Isuru Weerarathna
  */
-public class TemporalBadgeProcessor extends BadgeProcessor<TemporalBadgeRule> {
+public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
 
-    public TemporalBadgeProcessor(Db pool, RuleContext<TemporalBadgeRule> ruleContext) {
+    public BadgeTemporalProcessor(Db pool, RuleContext<BadgeTemporalRule> ruleContext) {
         super(pool, ruleContext);
     }
 
@@ -58,7 +58,7 @@ public class TemporalBadgeProcessor extends BadgeProcessor<TemporalBadgeRule> {
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, TemporalBadgeRule rule, DbContext db) {
+    public List<BadgeSignal> process(Event event, BadgeTemporalRule rule, DbContext db) {
         BigDecimal value = resolveValueOfEvent(event, rule);
         String badgeKey = ID.getUserTemporalBadgeKey(event.getGameId(), event.getUser(), rule.getId());
         Mapped map = db.MAP(badgeKey);
@@ -68,7 +68,7 @@ public class TemporalBadgeProcessor extends BadgeProcessor<TemporalBadgeRule> {
         BigDecimal updatedVal = map.incrementByDecimal(subKey, value);
         BigDecimal prevValue = updatedVal.subtract(value).setScale(SCALE, BigDecimal.ROUND_HALF_UP);
         boolean increased = isIncreasedOrEqual(prevValue, updatedVal);
-        Optional<List<TemporalBadgeRule.Threshold>> crossedThreshold = getCrossedThreshold(prevValue, updatedVal, rule);
+        Optional<List<BadgeTemporalRule.Threshold>> crossedThreshold = getCrossedThreshold(prevValue, updatedVal, rule);
         return crossedThreshold.map(thresholds -> thresholds.stream()
                 .map(threshold -> increased
                         ? badgeCreation(rule, threshold, event, tsUnit)
@@ -76,7 +76,7 @@ public class TemporalBadgeProcessor extends BadgeProcessor<TemporalBadgeRule> {
                 .collect(Collectors.toList())).orElse(null);
     }
 
-    private BadgeSignal badgeCreation(TemporalBadgeRule rule, TemporalBadgeRule.Threshold threshold, Event event, long tsUnit) {
+    private BadgeSignal badgeCreation(BadgeTemporalRule rule, BadgeTemporalRule.Threshold threshold, Event event, long tsUnit) {
         return new TemporalBadge(rule.getId(),
                 threshold.getAttribute(),
                 tsUnit,
@@ -85,7 +85,7 @@ public class TemporalBadgeProcessor extends BadgeProcessor<TemporalBadgeRule> {
                 event.getExternalId());
     }
 
-    private BadgeSignal badgeRemoval(TemporalBadgeRule rule, TemporalBadgeRule.Threshold threshold, Event event, long tsUnit) {
+    private BadgeSignal badgeRemoval(BadgeTemporalRule rule, BadgeTemporalRule.Threshold threshold, Event event, long tsUnit) {
         return new BadgeRemoveSignal(rule.getId(),
                 threshold.getAttribute(),
                 tsUnit,
@@ -94,9 +94,9 @@ public class TemporalBadgeProcessor extends BadgeProcessor<TemporalBadgeRule> {
                 event.getExternalId());
     }
 
-    private Optional<List<TemporalBadgeRule.Threshold>> getCrossedThreshold(BigDecimal prev, BigDecimal now, TemporalBadgeRule rule) {
-        List<TemporalBadgeRule.Threshold> thresholds = new LinkedList<>();
-        for (TemporalBadgeRule.Threshold threshold : rule.getThresholds()) {
+    private Optional<List<BadgeTemporalRule.Threshold>> getCrossedThreshold(BigDecimal prev, BigDecimal now, BadgeTemporalRule rule) {
+        List<BadgeTemporalRule.Threshold> thresholds = new LinkedList<>();
+        for (BadgeTemporalRule.Threshold threshold : rule.getThresholds()) {
             if (isThresholdCrossedUp(prev, now, threshold.getValue())) {
                 thresholds.add(threshold);
             } else if (isThresholdCrossedDown(prev, now, threshold.getValue())) {
@@ -106,11 +106,11 @@ public class TemporalBadgeProcessor extends BadgeProcessor<TemporalBadgeRule> {
         return thresholds.isEmpty() ? Optional.empty() : Optional.of(thresholds);
     }
 
-    private BigDecimal resolveValueOfEvent(Event event, TemporalBadgeRule rule) {
+    private BigDecimal resolveValueOfEvent(Event event, BadgeTemporalRule rule) {
         return rule.getValueResolver().apply(event).setScale(SCALE, BigDecimal.ROUND_HALF_UP);
     }
 
-    private boolean isCriteriaSatisfied(Event event, TemporalBadgeRule rule) {
+    private boolean isCriteriaSatisfied(Event event, BadgeTemporalRule rule) {
         return rule.getCriteria() == null || rule.getCriteria().test(event);
     }
 }

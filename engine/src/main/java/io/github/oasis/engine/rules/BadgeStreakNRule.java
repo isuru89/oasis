@@ -28,7 +28,7 @@ import java.util.function.Predicate;
 /**
  * @author Isuru Weerarathna
  */
-public class StreakNRule extends BadgeRule {
+public class BadgeStreakNRule extends BadgeRule {
 
     private int maxStreak = 0;
     private int minStreak = Integer.MAX_VALUE;
@@ -45,7 +45,7 @@ public class StreakNRule extends BadgeRule {
         this.criteria = criteria;
     }
 
-    public StreakNRule(String id) {
+    public BadgeStreakNRule(String id) {
         super(id);
     }
 

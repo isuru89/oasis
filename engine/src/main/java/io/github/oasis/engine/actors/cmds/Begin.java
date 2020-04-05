@@ -17,33 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.actors.cmds;
 
 /**
  * @author Isuru Weerarathna
  */
-public class TemporalStreakNRule extends StreakNRule {
-
-    private long timeUnit;
-    private boolean consecutive = true;
-
-    public TemporalStreakNRule(String id) {
-        super(id);
-    }
-
-    public boolean isConsecutive() {
-        return consecutive;
-    }
-
-    public void setConsecutive(boolean consecutive) {
-        this.consecutive = consecutive;
-    }
-
-    public long getTimeUnit() {
-        return timeUnit;
-    }
-
-    public void setTimeUnit(long timeUnit) {
-        this.timeUnit = timeUnit;
-    }
+public class Begin implements OasisLifecycleCommand {
 }

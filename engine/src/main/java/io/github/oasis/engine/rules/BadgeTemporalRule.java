@@ -31,14 +31,14 @@ import java.util.function.Predicate;
 /**
  * @author Isuru Weerarathna
  */
-public class TemporalBadgeRule extends BadgeRule {
+public class BadgeTemporalRule extends BadgeRule {
 
     private long timeUnit;
     private Predicate<Event> criteria;
     protected Function<Event, BigDecimal> valueResolver;
     private List<Threshold> thresholds;
 
-    public TemporalBadgeRule(String id) {
+    public BadgeTemporalRule(String id) {
         super(id);
     }
 

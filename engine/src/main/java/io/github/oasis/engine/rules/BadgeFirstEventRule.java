@@ -17,27 +17,24 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
-
-import akka.actor.ActorRef;
-import io.github.oasis.engine.rules.signals.Signal;
-
-import java.io.Serializable;
-import java.util.function.Consumer;
+package io.github.oasis.engine.rules;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SignalCollector implements Consumer<Signal>, Serializable {
 
-    private ActorRef exchangeActor;
+public class BadgeFirstEventRule extends BadgeRule {
 
-    public SignalCollector(ActorRef exchangeActor) {
-        this.exchangeActor = exchangeActor;
+    private final String eventName;
+
+    public BadgeFirstEventRule(String id, String eventName) {
+        super(id);
+
+        this.eventName = eventName;
     }
 
-    @Override
-    public void accept(Signal signal) {
-        exchangeActor.tell(signal, exchangeActor);
+    public String getEventName() {
+        return eventName;
     }
+
 }

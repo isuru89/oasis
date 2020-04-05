@@ -21,7 +21,7 @@ package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.rules.FirstEventRule;
+import io.github.oasis.engine.rules.BadgeFirstEventRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.storage.Db;
 import io.github.oasis.engine.storage.DbContext;
@@ -33,14 +33,14 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
-public class FirstEvent extends BadgeProcessor<FirstEventRule> {
+public class BadgeFirstEvent extends BadgeProcessor<BadgeFirstEventRule> {
 
-    public FirstEvent(Db pool, RuleContext<FirstEventRule> ruleContext) {
+    public BadgeFirstEvent(Db pool, RuleContext<BadgeFirstEventRule> ruleContext) {
         super(pool, ruleContext);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, FirstEventRule rule, DbContext db) {
+    public List<BadgeSignal> process(Event event, BadgeFirstEventRule rule, DbContext db) {
         String key = ID.getUserFirstEventsKey(event.getGameId(), event.getUser());
         long ts = event.getTimestamp();
         String id = event.getExternalId();

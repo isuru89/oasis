@@ -17,27 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.engine.rules;
 
-import akka.actor.ActorRef;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.model.Event;
 
-import java.io.Serializable;
-import java.util.function.Consumer;
+import java.math.BigDecimal;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SignalCollector implements Consumer<Signal>, Serializable {
-
-    private ActorRef exchangeActor;
-
-    public SignalCollector(ActorRef exchangeActor) {
-        this.exchangeActor = exchangeActor;
+public class BadgeTemporalCountRule extends BadgeTemporalRule {
+    public BadgeTemporalCountRule(String id) {
+        super(id);
     }
 
     @Override
-    public void accept(Signal signal) {
-        exchangeActor.tell(signal, exchangeActor);
+    public void setCriteria(Predicate<Event> criteria) {
+        super.setCriteria(criteria);
+        super.valueResolver = event -> BigDecimal.ONE;
+    }
+
+    @Override
+    public void setValueResolver(Function<Event, BigDecimal> valueResolver) {
+        throw new IllegalStateException("Use condition instead of value resolver!");
     }
 }

@@ -19,8 +19,20 @@
 
 package io.github.oasis.engine.actors.cmds;
 
+import io.github.oasis.engine.rules.AbstractRule;
+
 /**
  * @author Isuru Weerarathna
  */
-public class RuleUpdatedMessage implements OasisCommand {
+public class RuleUpdatedMessage implements OasisRuleMessage {
+
+    private AbstractRule rule;
+
+    public RuleUpdatedMessage(AbstractRule rule) {
+        this.rule = rule;
+    }
+
+    public AbstractRule getRule() {
+        return rule;
+    }
 }

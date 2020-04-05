@@ -28,7 +28,7 @@ import java.util.function.Function;
 /**
  * @author Isuru Weerarathna
  */
-public class HistogramStreakNRule extends BadgeRule {
+public class BadgeHistogramStreakNRule extends BadgeRule {
 
     private int maxStreak = 0;
     private int minStreak = Integer.MAX_VALUE;
@@ -39,7 +39,7 @@ public class HistogramStreakNRule extends BadgeRule {
     private boolean consecutive;
     protected BigDecimal threshold;
 
-    public HistogramStreakNRule(String id) {
+    public BadgeHistogramStreakNRule(String id) {
         super(id);
     }
 
