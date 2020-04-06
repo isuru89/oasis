@@ -17,28 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.engine.factory;
+package io.github.oasis.engine.actors;
 
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.model.SignalCollector;
-import io.github.oasis.engine.processors.AbstractProcessor;
-import io.github.oasis.engine.processors.ChallengeProcessor;
-import io.github.oasis.engine.rules.ChallengeRule;
-import io.github.oasis.engine.rules.signals.AbstractChallengeSignal;
+import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.storage.Db;
+
+import javax.inject.Inject;
 
 /**
  * @author Isuru Weerarathna
  */
-public class ChallengeProcessorFactory extends AbstractProcessorFactory<ChallengeRule> {
+public class SignalConsumer extends OasisBaseActor {
 
-    public static final ChallengeProcessorFactory INSTANCE = new ChallengeProcessorFactory();
-
-    private ChallengeProcessorFactory() {}
+    @Inject
+    private Db db;
 
     @Override
-    public AbstractProcessor<ChallengeRule, AbstractChallengeSignal> create(ChallengeRule rule, SignalCollector collector, Db db) {
-        return new ChallengeProcessor(db, new RuleContext<>(rule, collector));
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(Signal.class, this::processSignal)
+                .build();
     }
 
+    private void processSignal(Signal signal) {
+
+    }
 }

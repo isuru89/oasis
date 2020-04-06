@@ -17,26 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.engine.factory;
+package io.github.oasis.model;
 
-import io.github.oasis.engine.model.SignalCollector;
-import io.github.oasis.engine.processors.AbstractProcessor;
-import io.github.oasis.engine.rules.RatingRule;
-import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.storage.Db;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RatingProcessorFactory extends AbstractProcessorFactory<RatingRule> {
+public enum GameElement {
 
-    public static final RatingProcessorFactory INSTANCE = new RatingProcessorFactory();
+    POINT(1),
+    MILESTONE(3),
+    BADGE(5),
 
-    private RatingProcessorFactory() {
+    RATING(7),
+    CHALLENGE(8);
+
+    private final int type;
+
+    GameElement(int type) {
+        this.type = type;
     }
 
-    @Override
-    public AbstractProcessor<RatingRule, ? extends Signal> create(RatingRule rule, SignalCollector collector, Db db) {
-        return null;
+    public static Optional<GameElement> findById(int id) {
+        return Stream.of(values()).filter(e -> e.type == id).findFirst();
     }
 }

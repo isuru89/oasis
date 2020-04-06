@@ -114,4 +114,8 @@ public interface Event extends Serializable {
      * @return game id.
      */
     Integer getGameId();
+
+    default EventScope asEventScope() {
+        return new EventScope(getGameId(), getSource(), getUser());
+    }
 }

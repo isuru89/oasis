@@ -17,30 +17,17 @@
  * under the License.
  */
 
-package io.github.oasis.engine;
+package io.github.oasis.engine.factory;
 
-import io.github.oasis.engine.actors.OasisBaseActor;
-import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.storage.Db;
-
-import javax.inject.Inject;
+import akka.actor.Actor;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SignalConsumer extends OasisBaseActor {
+public interface InjectedActorSupport {
 
-    @Inject
-    private Db db;
-
-    @Override
-    public Receive createReceive() {
-        return receiveBuilder()
-                .match(Signal.class, this::processSignal)
-                .build();
+    default <T extends Actor> T injectInstance(Class<T> actorClz) {
+        return ActorProviderModuleFactory.getInstanceModule().createInjectedActor(actorClz);
     }
 
-    private void processSignal(Signal signal) {
-
-    }
 }

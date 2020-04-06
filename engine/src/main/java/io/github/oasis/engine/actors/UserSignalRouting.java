@@ -17,23 +17,32 @@
  * under the License.
  */
 
-package io.github.oasis.engine.factory;
+package io.github.oasis.engine.actors;
 
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.model.SignalCollector;
-import io.github.oasis.engine.processors.AbstractProcessor;
-import io.github.oasis.engine.processors.MilestoneProcessor;
-import io.github.oasis.engine.rules.MilestoneRule;
+import akka.routing.RoundRobinRoutingLogic;
+import akka.routing.Routee;
+import akka.routing.RoutingLogic;
 import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.storage.Db;
+import scala.collection.immutable.IndexedSeq;
+
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
  */
-public class MilestoneProcessorFactory extends AbstractProcessorFactory<MilestoneRule> {
+public class UserSignalRouting implements RoutingLogic {
+
+    private RoundRobinRoutingLogic roundRobinRoutingLogic = new RoundRobinRoutingLogic();
 
     @Override
-    public AbstractProcessor<MilestoneRule, ? extends Signal> create(MilestoneRule rule, SignalCollector collector, Db db) {
-        return new MilestoneProcessor(db, new RuleContext<>(rule, collector));
+    public Routee select(Object message, IndexedSeq<Routee> routees) {
+        if (message instanceof Signal) {
+            Signal signal = (Signal) message;
+            if (Objects.nonNull(signal.getEventScope())) {
+                long userId = signal.getEventScope().getUserId();
+                return routees.apply((int) userId % routees.size());
+            }
+        }
+        return roundRobinRoutingLogic.select(message, routees);
     }
 }

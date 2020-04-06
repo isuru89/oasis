@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.engine.model.EventCreatable;
 import io.github.oasis.model.Event;
 import lombok.ToString;
 
@@ -30,7 +31,7 @@ import java.util.Objects;
  * @author Isuru Weerarathna
  */
 @ToString
-public class ChallengePointsAwardedSignal extends AbstractChallengeSignal {
+public class ChallengePointsAwardedSignal extends AbstractChallengeSignal implements EventCreatable {
 
     private BigDecimal points;
     private Event causedEvent;

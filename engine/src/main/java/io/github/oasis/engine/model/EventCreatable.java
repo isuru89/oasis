@@ -17,28 +17,17 @@
  * under the License.
  */
 
-package io.github.oasis.engine.factory;
+package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.model.SignalCollector;
-import io.github.oasis.engine.processors.AbstractProcessor;
-import io.github.oasis.engine.processors.PointsProcessor;
-import io.github.oasis.engine.rules.PointRule;
-import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.storage.Db;
+import io.github.oasis.model.Event;
+
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
  */
-public class PointProcessorFactory extends AbstractProcessorFactory<PointRule> {
+public interface EventCreatable {
 
-    public static final PointProcessorFactory INSTANCE = new PointProcessorFactory();
+    Optional<Event> generateEvent();
 
-    public PointProcessorFactory() {
-    }
-
-    @Override
-    public AbstractProcessor<PointRule, ? extends Signal> create(PointRule rule, SignalCollector collector, Db db) {
-        return new PointsProcessor(db, new RuleContext<>(rule, collector));
-    }
 }

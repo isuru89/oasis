@@ -58,33 +58,30 @@ public class RuleExecutor extends OasisBaseActor {
                 .match(StartRuleExecutionCommand.class, this::assignRules)
                 .build();
         executing = receiveBuilder()
-                .match(StartRuleExecutionCommand.class, this::assignRules)
-                .match(Event.class, this::process)
+                .match(Event.class, this::processEvent)
                 .match(OasisRuleMessage.class, this::ruleModified)
                 .build();
     }
 
     @Override
     public Receive createReceive() {
-        return executing;
+        return starting;
     }
 
     private void ruleModified(OasisRuleMessage message) {
-        System.out.println("Rule modified received in " + myId);
+        //System.out.println("Rule modified received in " + myId + " IN " + this);
     }
 
     private void assignRules(StartRuleExecutionCommand startRuleExecutionCommand) {
         this.rules = startRuleExecutionCommand.getRules();
         this.parentId = startRuleExecutionCommand.getParentId();
         this.myId = COUNTER.incrementAndGet();
+        System.out.println("Initializing msg recieved " + rules + " -- " + this.myId + " @" + System.currentTimeMillis() + " : " + this);
         getContext().become(executing);
     }
 
-    private void process(Event event) {
-        System.out.println("Processing event for user #" + event.getUser() + " in " + myId);
-    }
-
     private void processEvent(Event event) {
+        System.out.println("Processing event for user #" + event.getUser() + " in " + myId + " p " + processors + " in this " + this);
         Iterator<AbstractRule> allRulesForEvent = rules.getAllRulesForEvent(event);
         while (allRulesForEvent.hasNext()) {
             AbstractRule rule = allRulesForEvent.next();

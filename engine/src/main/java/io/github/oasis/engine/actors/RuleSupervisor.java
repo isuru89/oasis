@@ -21,20 +21,25 @@ package io.github.oasis.engine.actors;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.routing.ActorRefRoutee;
 import akka.routing.DefaultResizer;
-import akka.routing.RoundRobinPool;
+import akka.routing.Routee;
+import akka.routing.Router;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
+import io.github.oasis.engine.factory.InjectedActorSupport;
 import io.github.oasis.engine.model.Rules;
 import io.github.oasis.engine.model.SignalCollector;
 import io.github.oasis.model.Event;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RuleSupervisor extends OasisBaseActor {
+public class RuleSupervisor extends OasisBaseActor implements InjectedActorSupport {
 
     private static final DefaultResizer ELASTICITY = new DefaultResizer(5, 10);
 
@@ -44,12 +49,11 @@ public class RuleSupervisor extends OasisBaseActor {
     private ActorRef signalExchanger;
     private SignalCollector collector;
     private final int id;
-    private ActorRef executor;
+    private Router executor;
 
     public RuleSupervisor() {
         id = counter.incrementAndGet();
 
-        System.out.println("Starting rule supervisor #" + id + "...");
         signalExchanger = createSignalExchanger();
         collector = new SignalCollector(signalExchanger);
         rules = Rules.get(collector);
@@ -59,6 +63,7 @@ public class RuleSupervisor extends OasisBaseActor {
     public void preStart() {
         createExecutors();
 
+        System.out.println("Starting rule supervisor #" + id + "...");
         beginAllChildren();
     }
 
@@ -70,19 +75,23 @@ public class RuleSupervisor extends OasisBaseActor {
     }
 
     private void beginAllChildren() {
-        executor.tell(new StartRuleExecutionCommand(id, rules), getSelf());
+        executor.route(new StartRuleExecutionCommand(id, rules), getSelf());
     }
 
     private ActorRef createSignalExchanger() {
-        ActorRef actorRef = getContext().actorOf(Props.create(SignalExchange.class, SignalExchange::new), "signal-exchanger");
+        ActorRef actorRef = getContext().actorOf(Props.create(SignalExchange.class, () -> injectInstance(SignalExchange.class)), "signal-exchanger");
         getContext().watch(actorRef);
         return actorRef;
     }
 
     private void createExecutors() {
-        executor = getContext().actorOf(new RoundRobinPool(5)
-                .props(Props.create(RuleExecutor.class, RuleExecutor::new)), "rule-executors");
-        getContext().watch(executor);
+        List<Routee> routees = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            ActorRef actorRef = getContext().actorOf(Props.create(RuleExecutor.class, () -> injectInstance(RuleExecutor.class)));
+            getContext().watch(actorRef);
+            routees.add(new ActorRefRoutee(actorRef));
+        }
+        this.executor = new Router(new UserRouting(), routees);
     }
 
     @Override
@@ -95,11 +104,11 @@ public class RuleSupervisor extends OasisBaseActor {
 
     private void processEvent(Event event) {
         System.out.println("Event received... " + event.getUser());
-        executor.forward(event, getContext());
+        executor.route(event, getSelf());
     }
 
     private void forwardRuleModifiedEvent(OasisRuleMessage ruleMessage) {
-        executor.forward(ruleMessage, getContext());
+        executor.route(ruleMessage, getSelf());
     }
 
 }
