@@ -71,10 +71,7 @@ public class BadgeConditionalProcessor extends BadgeProcessor<BadgeConditionalRu
             Mapped map = db.MAP(badgeMetaKey);
             long count = map.incrementBy(attrKey, 1);
             if (rule.getMaxAwardTimes() >= count) {
-                return Collections.singletonList(new ConditionalBadge(rule.getId(),
-                        attrId,
-                        event.getTimestamp(),
-                        event.getExternalId()));
+                return Collections.singletonList(ConditionalBadge.create(rule.getId(), event, attrId));
             } else {
                 map.incrementBy(attrKey, -1);
             }

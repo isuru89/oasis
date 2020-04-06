@@ -100,7 +100,7 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e7.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), e7, 3, 100, 200, e7.getExternalId()));
     }
 
     @DisplayName("Multiple streaks")
@@ -123,8 +123,8 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e6.getExternalId()),
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), 5, 100, 300, e8.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), e6, 3, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), e8, 5, 100, 300, e8.getExternalId()));
     }
 
     @DisplayName("Multiple streaks: Out-of-order no affect for existing badges")
@@ -148,8 +148,8 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e6.getExternalId()),
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), 5, 100, 300, e8.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), e6, 3, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), e8, 5, 100, 300, e8.getExternalId()));
     }
 
     @DisplayName("Multiple streaks: Out-of-order no affects for latest badge")
@@ -173,8 +173,8 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e6.getExternalId()),
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), 5, 100, 300, e8.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), e6, 3, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), e8, 5, 100, 300, e8.getExternalId()));
     }
 
     @DisplayName("Multiple streaks: Out-of-order no affect for former badge in multiple streaks")
@@ -197,7 +197,7 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e6.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), e6, 3, 100, 200, e6.getExternalId()));
     }
 
     @DisplayName("Single streak: No streaks available yet")
@@ -262,7 +262,7 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         System.out.println(signals);
         Assert.assertEquals(1, signals.size());
         assertStrict(signals,
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e7.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), e7, 3, 100, 200, e7.getExternalId()));
     }
 
     @DisplayName("Single streak: Out-of-order no affect for only badge")
@@ -284,7 +284,7 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), 3, 100, 200, e5.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), e5, 3, 100, 200, e5.getExternalId()));
     }
 
     private RuleContext<BadgeHistogramStreakNRule> createOptions(List<Integer> streaks, long timeunit, Consumer<Signal> consumer) {

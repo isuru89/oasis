@@ -36,7 +36,7 @@ public class RatingPointsSignal extends AbstractRatingSignal {
     private Event causedEvent;
 
     public RatingPointsSignal(String ruleId, int currentRating, BigDecimal points, Event causedEvent) {
-        super(ruleId, currentRating);
+        super(ruleId, causedEvent.asEventScope(), currentRating);
         this.points = points;
         this.causedEvent = causedEvent;
     }
@@ -69,6 +69,7 @@ public class RatingPointsSignal extends AbstractRatingSignal {
     public int compareTo(Signal o) {
         if (o instanceof RatingPointsSignal) {
             return Comparator.comparing(RatingPointsSignal::getRuleId)
+                    .thenComparing(Signal::getEventScope)
                     .thenComparing(RatingPointsSignal::getCurrentRating)
                     .thenComparing(RatingPointsSignal::getPoints)
                     .thenComparing(o2 -> o2.causedEvent.getExternalId())

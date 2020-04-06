@@ -82,13 +82,13 @@ public class MilestoneProcessor extends AbstractProcessor<MilestoneRule, Milesto
                     defaultLevel(prevLevel),
                     defaultLevel(currentLevel),
                     updatedValue,
-                    event.getExternalId()));
+                    event));
         } else if (!rule.containsFlag(SKIP_NEGATIVE_VALUES) && hasLevelDecreased(prevLevel, currentLevel)) {
             return Collections.singletonList(new MilestoneSignal(rule.getId(),
                     defaultLevel(prevLevel),
                     defaultLevel(currentLevel),
                     updatedValue,
-                    event.getExternalId()));
+                    event));
         }
         return null;
     }

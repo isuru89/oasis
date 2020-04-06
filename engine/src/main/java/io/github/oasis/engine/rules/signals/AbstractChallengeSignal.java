@@ -19,13 +19,15 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.EventScope;
+
 /**
  * @author Isuru Weerarathna
  */
 public abstract class AbstractChallengeSignal extends Signal {
 
-    AbstractChallengeSignal(String ruleId) {
-        super(ruleId);
+    AbstractChallengeSignal(String ruleId, EventScope eventScope) {
+        super(ruleId, eventScope);
     }
 
 }

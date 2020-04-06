@@ -129,6 +129,7 @@ public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
             if (prev < now && start != null) {
                 String[] startParts = start.getMember().split(COLON);
                 BadgeSignal signal = new StreakBadgeSignal(options.getId(),
+                        event,
                         now,
                         Long.parseLong(startParts[0]),
                         Long.parseLong(parts[0]),

@@ -36,7 +36,7 @@ public class PointSignal extends Signal {
     private Event eventRef;
 
     public PointSignal(String ruleId, BigDecimal score, Event eventRef) {
-        super(ruleId);
+        super(ruleId, eventRef.asEventScope());
 
         this.score = score;
         this.eventRef = eventRef;
@@ -69,6 +69,7 @@ public class PointSignal extends Signal {
     public int compareTo(Signal o) {
         return Comparator
                 .comparing(PointSignal::getRuleId)
+                .thenComparing(PointSignal::getEventScope)
                 .thenComparing(PointSignal::getScore)
                 .thenComparing(o2 -> o2.getEventRef().getExternalId())
                 .thenComparing(o2 -> o2.getEventRef().getUser())

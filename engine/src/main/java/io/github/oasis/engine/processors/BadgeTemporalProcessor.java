@@ -78,6 +78,7 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
 
     private BadgeSignal badgeCreation(BadgeTemporalRule rule, BadgeTemporalRule.Threshold threshold, Event event, long tsUnit) {
         return new TemporalBadge(rule.getId(),
+                event,
                 threshold.getAttribute(),
                 tsUnit,
                 tsUnit + rule.getTimeUnit(),
@@ -87,6 +88,7 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
 
     private BadgeSignal badgeRemoval(BadgeTemporalRule rule, BadgeTemporalRule.Threshold threshold, Event event, long tsUnit) {
         return new BadgeRemoveSignal(rule.getId(),
+                event.asEventScope(),
                 threshold.getAttribute(),
                 tsUnit,
                 tsUnit + rule.getTimeUnit(),

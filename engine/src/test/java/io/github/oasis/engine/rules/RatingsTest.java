@@ -115,7 +115,7 @@ public class RatingsTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e2.getTimestamp(), e2.getExternalId()),
+                new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e2.getTimestamp(), e2),
                 new RatingPointsSignal(rule.getId(), 2, asDecimal(0), e2)
         );
     }
@@ -141,7 +141,7 @@ public class RatingsTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e2.getTimestamp(), e2.getExternalId()),
+                new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e2.getTimestamp(), e2),
                 new RatingPointsSignal(rule.getId(), 2, asDecimal(10), e2)
         );
     }
@@ -167,8 +167,8 @@ public class RatingsTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new RatingChangedSignal(rule.getId(), DEF_RATING, 3, e1.getTimestamp(), e1.getExternalId()),
-                new RatingChangedSignal(rule.getId(), 3, 1, e2.getTimestamp(), e2.getExternalId()),
+                new RatingChangedSignal(rule.getId(), DEF_RATING, 3, e1.getTimestamp(), e1),
+                new RatingChangedSignal(rule.getId(), 3, 1, e2.getTimestamp(), e2),
                 new RatingPointsSignal(rule.getId(), 3, asDecimal(20), e1),
                 new RatingPointsSignal(rule.getId(), 1, asDecimal(-20), e2)
         );

@@ -77,7 +77,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), 1, 110, 110, e1.getExternalId(), e1.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), e1, 1, 110, 110, e1.getExternalId(), e1.getExternalId()));
     }
 
     @DisplayName("No Condition: different event types")
@@ -97,7 +97,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), 1, 110, 110, e1.getExternalId(), e1.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), e1, 1, 110, 110, e1.getExternalId(), e1.getExternalId()));
     }
 
     @DisplayName("No Condition: mixed event types")
@@ -117,7 +117,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), 1, 110, 110, e1.getExternalId(), e1.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), e1, 1, 110, 110, e1.getExternalId(), e1.getExternalId()));
     }
 
     @DisplayName("With Condition: same event types")
@@ -137,7 +137,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), 1, 144, 144, e2.getExternalId(), e2.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), e2, 1, 144, 144, e2.getExternalId(), e2.getExternalId()));
     }
 
     @DisplayName("With Condition: different event types")
@@ -157,7 +157,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), 1, 144, 144, e2.getExternalId(), e2.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), e2, 1, 144, 144, e2.getExternalId(), e2.getExternalId()));
     }
 
     @DisplayName("With Condition: mixed event types")
@@ -177,7 +177,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), 1, 144, 144, e2.getExternalId(), e2.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), e2, 1, 144, 144, e2.getExternalId(), e2.getExternalId()));
     }
 
     @DisplayName("With Condition: no event types")
@@ -231,7 +231,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), 1, 144, 144, e2.getExternalId(), e2.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), e2, 1, 144, 144, e2.getExternalId(), e2.getExternalId()));
     }
 
     private boolean eventGreaterThan50(Event e, AbstractRule rule) {

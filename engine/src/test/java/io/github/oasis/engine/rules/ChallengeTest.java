@@ -111,8 +111,8 @@ public class ChallengeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ChallengeWinSignal(rule.getId(), 1, U1, e1.getTimestamp(), e1.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 2, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2)
                 );
@@ -136,8 +136,8 @@ public class ChallengeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ChallengeWinSignal(rule.getId(), 1, U1, e1.getTimestamp(), e1.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 2, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), asDecimal(7), e1),
                 new ChallengePointsAwardedSignal(rule.getId(), asDecimal(33), e2)
                 );
@@ -161,13 +161,13 @@ public class ChallengeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ChallengeWinSignal(rule.getId(), 1, U1, e1.getTimestamp(), e1.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 2, U2, e2.getTimestamp(), e2.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 3, U4, e4.getTimestamp(), e4.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e4, 3, U4, e4.getTimestamp(), e4.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e4),
-                new ChallengeOverSignal(rule.getId(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
         );
     }
 
@@ -191,9 +191,9 @@ public class ChallengeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ChallengeWinSignal(rule.getId(), 1, U1, e1.getTimestamp(), e1.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 2, U2, e2.getTimestamp(), e2.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 3, U4, e5.getTimestamp(), e5.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e5, 3, U4, e5.getTimestamp(), e5.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e5)
@@ -219,13 +219,13 @@ public class ChallengeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ChallengeWinSignal(rule.getId(), 1, U1, e1.getTimestamp(), e1.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 2, U1, e2.getTimestamp(), e2.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 3, U1, e4.getTimestamp(), e4.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e2, 2, U1, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e4, 3, U1, e4.getTimestamp(), e4.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e4),
-                new ChallengeOverSignal(rule.getId(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
         );
     }
 
@@ -246,8 +246,8 @@ public class ChallengeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ChallengeWinSignal(rule.getId(), 1, U1, e1.getTimestamp(), e1.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 2, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2)
         );
@@ -270,8 +270,8 @@ public class ChallengeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ChallengeWinSignal(rule.getId(), 1, U2, e2.getTimestamp(), e2.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 2, U4, e4.getTimestamp(), e4.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e4, 2, U4, e4.getTimestamp(), e4.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e4)
         );
@@ -299,9 +299,9 @@ public class ChallengeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ChallengeWinSignal(rule.getId(), 1, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2),
-                new ChallengeOverSignal(rule.getId(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
         );
     }
 
@@ -328,9 +328,9 @@ public class ChallengeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ChallengeWinSignal(rule.getId(), 1, U2, e2.getTimestamp(), e2.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 2, U2, e4.getTimestamp(), e4.getExternalId()),
-                new ChallengeWinSignal(rule.getId(), 3, U2, e5.getTimestamp(), e5.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e4, 2, U2, e4.getTimestamp(), e4.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e5, 3, U2, e5.getTimestamp(), e5.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e4),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e5)
@@ -361,7 +361,7 @@ public class ChallengeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ChallengeWinSignal(rule.getId(), 1, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2)
         );
     }

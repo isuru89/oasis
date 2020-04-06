@@ -21,28 +21,45 @@ package io.github.oasis.engine;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.japi.Creator;
 import io.github.oasis.engine.actors.OasisSupervisor;
 import io.github.oasis.engine.actors.cmds.RuleRemovedMessage;
+import io.github.oasis.engine.factory.OasisDependencyModule;
+import io.github.oasis.engine.processors.Processors;
 import io.github.oasis.model.events.JsonEvent;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * @author Isuru Weerarathna
  */
 public class OasisEngine {
 
-    public static void main(String[] args) {
+    @Inject
+    @Named("oasis-supervisor")
+    private ActorRef oasisActor;
+
+    @Inject
+    private Processors processors;
+
+    public void start() throws InterruptedException {
         ActorSystem oasisEngine = ActorSystem.create("oasis-engine");
-        ActorRef oasisActor = oasisEngine.actorOf(Props.create(OasisSupervisor.class, (Creator<OasisSupervisor>) OasisSupervisor::new));
-        for (int i = 0; i < 100; i++) {
+        System.out.println(oasisEngine);
+        new OasisDependencyModule(oasisEngine);
+
+        ActorRef oasisActor = oasisEngine.actorOf(Props.create(OasisSupervisor.class, OasisSupervisor::new));
+        for (int i = 0; i < 20; i++) {
             if (i % 5 == 0) {
                 oasisActor.tell(new RuleRemovedMessage("rule-removed" + i), oasisActor);
             }
             oasisActor.tell(TestE.create(i), oasisActor);
         }
-        oasisActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        new OasisEngine().start();
     }
 
     private static class TestE extends JsonEvent {

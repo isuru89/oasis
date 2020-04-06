@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.Event;
 import lombok.ToString;
 
 import java.util.Comparator;
@@ -31,8 +32,8 @@ public class TemporalBadge extends BadgeSignal {
 
     private long timestamp;
 
-    public TemporalBadge(String ruleId, int attributeId, long st, long et, long timestamp, String eventId) {
-        super(ruleId, attributeId, st, et, eventId, null);
+    public TemporalBadge(String ruleId, Event causedEvent, int attributeId, long st, long et, long timestamp, String eventId) {
+        super(ruleId, causedEvent, attributeId, st, et, eventId, null);
         this.timestamp = timestamp;
     }
 
@@ -46,6 +47,7 @@ public class TemporalBadge extends BadgeSignal {
                 .comparingLong(BadgeSignal::getStartTime)
                 .thenComparing(BadgeSignal::getAttribute)
                 .thenComparing(BadgeSignal::getRuleId)
+                .thenComparing(Signal::getEventScope)
                 .thenComparingLong(BadgeSignal::getEndTime)
                 .thenComparing(BadgeSignal::getStartId)
                 .compare(this, (BadgeSignal) o);

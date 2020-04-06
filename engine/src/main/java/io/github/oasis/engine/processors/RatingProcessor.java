@@ -69,7 +69,7 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, AbstractRatin
                 BigDecimal score = deriveAwardedPoints(event, currRating, rating).setScale(Constants.SCALE, BigDecimal.ROUND_HALF_UP);
                 ratingsMap.setValue(subRatingKey, String.format("%d:%d:%s", newRating, ts, id));
                 return Arrays.asList(
-                        new RatingChangedSignal(rule.getId(), currRating, newRating, ts, id),
+                        new RatingChangedSignal(rule.getId(), currRating, newRating, ts, event),
                         new RatingPointsSignal(rule.getId(), newRating, score, event)
                 );
             }

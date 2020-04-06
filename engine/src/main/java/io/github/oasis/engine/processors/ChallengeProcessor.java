@@ -69,12 +69,14 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Abstrac
         int position = map.incrementByOne(winnerCountKey);
         if (position > rule.getWinnerCount()) {
             map.decrementByOne(winnerCountKey);
-            return Collections.singletonList(new ChallengeOverSignal(rule.getId(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND));
+            return Collections.singletonList(new ChallengeOverSignal(rule.getId(),
+                    event.asEventScope(),
+                    ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND));
         }
         BigDecimal score = rule.deriveAwardPointsForPosition(position, event).setScale(Constants.SCALE, BigDecimal.ROUND_HALF_UP);
         winnerSet.add(member, score.doubleValue());
         return Arrays.asList(
-                new ChallengeWinSignal(rule.getId(), position, event.getUser(), event.getTimestamp(), event.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), event, position, event.getUser(), event.getTimestamp(), event.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), score, event)
         );
     }

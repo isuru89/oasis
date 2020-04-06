@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.Event;
 import lombok.ToString;
 
 import java.math.BigDecimal;
@@ -37,13 +38,13 @@ public class MilestoneSignal extends Signal {
     private String causedEvent;
 
     public MilestoneSignal(String ruleId, int previousLevel, int currentLevel, BigDecimal currentScore,
-                           String causedEvent) {
-        super(ruleId);
+                           Event causedEvent) {
+        super(ruleId, causedEvent.asEventScope());
 
         this.currentLevel = currentLevel;
         this.previousLevel = previousLevel;
         this.currentScore = currentScore;
-        this.causedEvent = causedEvent;
+        this.causedEvent = causedEvent.getExternalId();
     }
 
     public int getCurrentLevel() {
@@ -82,6 +83,7 @@ public class MilestoneSignal extends Signal {
     @Override
     public int compareTo(Signal o) {
         return Comparator.comparing(MilestoneSignal::getRuleId)
+                .thenComparing(Signal::getEventScope)
                 .thenComparing(MilestoneSignal::getCurrentLevel)
                 .thenComparing(MilestoneSignal::getPreviousLevel)
                 .thenComparing(MilestoneSignal::getCausedEvent)

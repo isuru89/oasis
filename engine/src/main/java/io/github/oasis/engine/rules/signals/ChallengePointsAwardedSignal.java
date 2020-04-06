@@ -36,7 +36,7 @@ public class ChallengePointsAwardedSignal extends AbstractChallengeSignal {
     private Event causedEvent;
 
     public ChallengePointsAwardedSignal(String ruleId, BigDecimal points, Event causedEvent) {
-        super(ruleId);
+        super(ruleId, causedEvent.asEventScope());
         this.points = points;
         this.causedEvent = causedEvent;
     }
@@ -68,6 +68,7 @@ public class ChallengePointsAwardedSignal extends AbstractChallengeSignal {
     public int compareTo(Signal o) {
         if (o instanceof ChallengePointsAwardedSignal) {
             return Comparator.comparing(ChallengePointsAwardedSignal::getRuleId)
+                        .thenComparing(Signal::getEventScope)
                         .thenComparing(ChallengePointsAwardedSignal::getPoints)
                         .thenComparing(o2 -> o2.getCausedEvent().getExternalId())
                         .compare(this, (ChallengePointsAwardedSignal) o);

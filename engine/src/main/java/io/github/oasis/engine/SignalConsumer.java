@@ -17,20 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules.signals;
+package io.github.oasis.engine;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.actors.OasisBaseActor;
+import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.storage.Db;
+
+import javax.inject.Inject;
 
 /**
  * @author Isuru Weerarathna
  */
-public class StreakBadgeSignal extends BadgeSignal {
+public class SignalConsumer extends OasisBaseActor {
 
-    public StreakBadgeSignal(String ruleId, Event causedEvent, int streak, long st, long et, String sid, String eid) {
-        super(ruleId, causedEvent, streak, st, et, sid, eid);
+    @Inject
+    private Db db;
+
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(Signal.class, this::processSignal)
+                .build();
     }
 
-    public int getStreak() {
-        return getAttribute();
+    private void processSignal(Signal signal) {
+
     }
 }

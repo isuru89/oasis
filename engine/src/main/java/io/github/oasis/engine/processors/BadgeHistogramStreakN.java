@@ -110,6 +110,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
                     lastTs = lastTs - (lastTs % rule.getTimeUnit());
                     map.setValue(lastHitSubKey, event.getTimestamp() + COLON + event.getExternalId());
                     return Collections.singletonList(new HistogramBadgeSignal(rule.getId(),
+                            event,
                             total,
                             ts - (ts % rule.getTimeUnit()),
                             lastTs,
@@ -149,6 +150,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
                     lastTs = lastTs - (lastTs % rule.getTimeUnit());
                     map.setValue(lastHitSubKey, event.getTimestamp() + COLON + event.getExternalId());
                     return Collections.singletonList(new HistogramBadgeRemovalSignal(rule.getId(),
+                            event.asEventScope(),
                             total + 1,
                             ts - (ts % rule.getTimeUnit()),
                             lastTs));
@@ -225,6 +227,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
                     }
                     signals.add(new HistogramBadgeSignal(
                             rule.getId(),
+                            event,
                             streak,
                             startTs,
                             ts,

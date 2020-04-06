@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.Event;
+import io.github.oasis.model.EventScope;
 import lombok.ToString;
 
 import java.util.Comparator;
@@ -37,16 +39,37 @@ public class BadgeSignal extends Signal {
     private int attribute;
 
     public BadgeSignal(String ruleId,
+                EventScope eventScope,
                 int attributeId,
                 long st, long et,
                 String sid, String eid) {
-        super(ruleId);
+        super(ruleId, eventScope);
 
         this.attribute = attributeId;
         startTime = st;
         endTime = et;
         startId = sid;
         endId = eid;
+    }
+
+    public BadgeSignal(String ruleId,
+                       Event event,
+                       int attributeId,
+                       long st, long et,
+                       String sid, String eid) {
+        super(ruleId, event);
+
+        this.attribute = attributeId;
+        this.startTime = st;
+        this.endTime = et;
+        this.startId = sid;
+        this.endId = eid;
+    }
+
+    public static BadgeSignal firstEvent(String ruleId, Event causedEvent, int attributeId) {
+        return new BadgeSignal(ruleId, causedEvent, attributeId,
+                causedEvent.getTimestamp(), causedEvent.getTimestamp(),
+                causedEvent.getExternalId(), causedEvent.getExternalId());
     }
 
     public long getStartTime() {
@@ -90,6 +113,7 @@ public class BadgeSignal extends Signal {
     public int compareTo(Signal o) {
         return Comparator
                 .comparingLong(BadgeSignal::getStartTime)
+                .thenComparing(Signal::getEventScope)
                 .thenComparing(BadgeSignal::getAttribute)
                 .thenComparing(BadgeSignal::getRuleId)
                 .thenComparingLong(BadgeSignal::getEndTime)

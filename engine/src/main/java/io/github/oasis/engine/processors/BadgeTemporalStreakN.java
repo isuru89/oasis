@@ -153,6 +153,7 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
                     firstId = startTuple.getMember().split(":")[1];
                 }
                 signals.add(new StreakBadgeSignal(rule.getId(),
+                        event,
                         currStreak,
                         badgeStartTs,
                         ts,
@@ -229,6 +230,7 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
                     }
                     signals.add(new StreakBadgeSignal(
                             options.getId(),
+                            event,
                             streak,
                             startTs,
                             ts,
@@ -259,6 +261,7 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
             }).map(t -> {
                 String[] parts = t.getMember().split(":");
                 return new BadgeRemoveSignal(options.getId(),
+                        event.asEventScope(),
                         Integer.parseInt(parts[3]),
                         BigDecimal.valueOf(t.getScore()).longValue());
             }).forEach(signals::add);

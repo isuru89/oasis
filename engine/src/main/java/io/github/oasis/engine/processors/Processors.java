@@ -36,6 +36,8 @@ import io.github.oasis.engine.rules.BadgeTemporalStreakNRule;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.storage.Db;
 
+import javax.inject.Inject;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -43,6 +45,7 @@ public class Processors {
 
     private final Db db;
 
+    @Inject
     private Processors(Db db) {
         this.db = db;
     }

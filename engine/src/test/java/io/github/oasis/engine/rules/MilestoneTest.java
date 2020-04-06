@@ -117,7 +117,7 @@ public class MilestoneTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_1, BigDecimal.valueOf(140.0), e2.getExternalId()));
+                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_1, BigDecimal.valueOf(140.0), e2));
     }
 
     @DisplayName("Multiple Levels")
@@ -140,9 +140,9 @@ public class MilestoneTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_1, BigDecimal.valueOf(140.0), e2.getExternalId()),
-                new MilestoneSignal(ruleContext.getRule().getId(), L_1, L_2, BigDecimal.valueOf(269.0), e5.getExternalId()),
-                new MilestoneSignal(ruleContext.getRule().getId(), L_2, L_3, BigDecimal.valueOf(361.0), e6.getExternalId()));
+                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_1, BigDecimal.valueOf(140.0), e2),
+                new MilestoneSignal(ruleContext.getRule().getId(), L_1, L_2, BigDecimal.valueOf(269.0), e5),
+                new MilestoneSignal(ruleContext.getRule().getId(), L_2, L_3, BigDecimal.valueOf(361.0), e6));
     }
 
     @DisplayName("Multiple Levels: No fluctuations")
@@ -165,9 +165,9 @@ public class MilestoneTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_1, BigDecimal.valueOf(140.0), e2.getExternalId()),
-                new MilestoneSignal(ruleContext.getRule().getId(), L_1, L_2, BigDecimal.valueOf(235.0), e5.getExternalId()),
-                new MilestoneSignal(ruleContext.getRule().getId(), L_2, L_3, BigDecimal.valueOf(327.0), e6.getExternalId()));
+                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_1, BigDecimal.valueOf(140.0), e2),
+                new MilestoneSignal(ruleContext.getRule().getId(), L_1, L_2, BigDecimal.valueOf(235.0), e5),
+                new MilestoneSignal(ruleContext.getRule().getId(), L_2, L_3, BigDecimal.valueOf(327.0), e6));
     }
 
     @DisplayName("Multiple Levels: Penalties with fluctuations")
@@ -192,10 +192,10 @@ public class MilestoneTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new MilestoneSignal(rule.getId(), L_0, L_1, BigDecimal.valueOf(140.0), e2.getExternalId()),
-                new MilestoneSignal(rule.getId(), L_1, L_0, BigDecimal.valueOf(66.0), e3.getExternalId()),
-                new MilestoneSignal(rule.getId(), L_0, L_1, BigDecimal.valueOf(161.0), e5.getExternalId()),
-                new MilestoneSignal(rule.getId(), L_1, L_2, BigDecimal.valueOf(253.0), e6.getExternalId()));
+                new MilestoneSignal(rule.getId(), L_0, L_1, BigDecimal.valueOf(140.0), e2),
+                new MilestoneSignal(rule.getId(), L_1, L_0, BigDecimal.valueOf(66.0), e3),
+                new MilestoneSignal(rule.getId(), L_0, L_1, BigDecimal.valueOf(161.0), e5),
+                new MilestoneSignal(rule.getId(), L_1, L_2, BigDecimal.valueOf(253.0), e6));
     }
 
     @DisplayName("Multiple Levels: Single penalty reset all levels")
@@ -221,10 +221,10 @@ public class MilestoneTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new MilestoneSignal(rule.getId(), L_0, L_1, BigDecimal.valueOf(140.0), e2.getExternalId()),
-                new MilestoneSignal(rule.getId(), L_1, L_2, BigDecimal.valueOf(269.0), e5.getExternalId()),
-                new MilestoneSignal(rule.getId(), L_2, L_3, BigDecimal.valueOf(361.0), e6.getExternalId()),
-                new MilestoneSignal(rule.getId(), L_3, L_0, BigDecimal.valueOf(-39.0), e7.getExternalId()));
+                new MilestoneSignal(rule.getId(), L_0, L_1, BigDecimal.valueOf(140.0), e2),
+                new MilestoneSignal(rule.getId(), L_1, L_2, BigDecimal.valueOf(269.0), e5),
+                new MilestoneSignal(rule.getId(), L_2, L_3, BigDecimal.valueOf(361.0), e6),
+                new MilestoneSignal(rule.getId(), L_3, L_0, BigDecimal.valueOf(-39.0), e7));
     }
 
     @DisplayName("With condition")
@@ -247,8 +247,8 @@ public class MilestoneTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_1, BigDecimal.valueOf(171.0), e5.getExternalId()),
-                new MilestoneSignal(ruleContext.getRule().getId(), L_1, L_2, BigDecimal.valueOf(171.0 + 92.0), e6.getExternalId()));
+                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_1, BigDecimal.valueOf(171.0), e5),
+                new MilestoneSignal(ruleContext.getRule().getId(), L_1, L_2, BigDecimal.valueOf(171.0 + 92.0), e6));
     }
 
     @DisplayName("Single event passes multiple levels from first level")
@@ -271,7 +271,7 @@ public class MilestoneTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_3, BigDecimal.valueOf(340.0), e2.getExternalId()));
+                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_3, BigDecimal.valueOf(340.0), e2));
     }
 
     @DisplayName("Single event passes multiple levels from a middle level")
@@ -294,8 +294,8 @@ public class MilestoneTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_1, BigDecimal.valueOf(187.0), e1.getExternalId()),
-                new MilestoneSignal(ruleContext.getRule().getId(), L_1, L_3, BigDecimal.valueOf(540.0), e3.getExternalId()));
+                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_1, BigDecimal.valueOf(187.0), e1),
+                new MilestoneSignal(ruleContext.getRule().getId(), L_1, L_3, BigDecimal.valueOf(540.0), e3));
     }
 
     @DisplayName("Track penalties")
@@ -318,7 +318,7 @@ public class MilestoneTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new MilestoneSignal(rule.getId(), L_0, L_1, BigDecimal.valueOf(187.0), e1.getExternalId()));
+                new MilestoneSignal(rule.getId(), L_0, L_1, BigDecimal.valueOf(187.0), e1));
 
         assertRedisHashMapValue(ID.getGameMilestoneKey(TEvent.GAME_ID, rule.getId()),
                 ID.getPenaltiesUserKeyUnderGameMilestone(TEvent.USER_ID),

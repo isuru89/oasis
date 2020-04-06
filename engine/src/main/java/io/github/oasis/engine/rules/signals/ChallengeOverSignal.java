@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.EventScope;
+
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -31,8 +33,8 @@ public class ChallengeOverSignal extends AbstractChallengeSignal {
 
     private CompletionType completionType;
 
-    public ChallengeOverSignal(String ruleId, CompletionType completionType) {
-        super(ruleId);
+    public ChallengeOverSignal(String ruleId, EventScope eventScope, CompletionType completionType) {
+        super(ruleId, eventScope);
         this.completionType = completionType;
     }
 
@@ -57,6 +59,7 @@ public class ChallengeOverSignal extends AbstractChallengeSignal {
     public int compareTo(Signal o) {
         if (o instanceof ChallengeOverSignal) {
             return Comparator.comparing(ChallengeOverSignal::getRuleId)
+                        .thenComparing(Signal::getEventScope)
                         .thenComparing(ChallengeOverSignal::getCompletionType)
                         .compare(this, (ChallengeOverSignal) o);
         }

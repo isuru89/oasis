@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.Event;
 import lombok.ToString;
 
 import java.util.Comparator;
@@ -28,8 +29,8 @@ import java.util.Comparator;
  */
 @ToString(callSuper = true)
 public class HistogramBadgeSignal extends StreakBadgeSignal {
-    public HistogramBadgeSignal(String ruleId, int streak, long st, long et, String eid) {
-        super(ruleId, streak, st, et, null, eid);
+    public HistogramBadgeSignal(String ruleId, Event causedEvent, int streak, long st, long et, String eid) {
+        super(ruleId, causedEvent, streak, st, et, null, eid);
     }
 
     @Override
@@ -38,6 +39,7 @@ public class HistogramBadgeSignal extends StreakBadgeSignal {
                 .comparingLong(BadgeSignal::getStartTime)
                 .thenComparing(BadgeSignal::getAttribute)
                 .thenComparing(BadgeSignal::getRuleId)
+                .thenComparing(Signal::getEventScope)
                 .thenComparingLong(BadgeSignal::getEndTime)
                 .compare(this, (BadgeSignal) o);
     }

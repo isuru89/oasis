@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.EventScope;
+
 import java.util.Comparator;
 
 /**
@@ -26,11 +28,11 @@ import java.util.Comparator;
  */
 public class HistogramBadgeRemovalSignal extends BadgeRemoveSignal {
     public HistogramBadgeRemovalSignal(BadgeSignal prevBadge) {
-        this(prevBadge.getRuleId(), prevBadge.getAttribute(), prevBadge.getStartTime(), prevBadge.getEndTime());
+        this(prevBadge.getRuleId(), prevBadge.getEventScope(), prevBadge.getAttribute(), prevBadge.getStartTime(), prevBadge.getEndTime());
     }
 
-    public HistogramBadgeRemovalSignal(String ruleId, int streak, long st, long et) {
-        super(ruleId, streak, st, et, null, null);
+    public HistogramBadgeRemovalSignal(String ruleId, EventScope eventScope, int streak, long st, long et) {
+        super(ruleId, eventScope, streak, st, et, null, null);
     }
 
     @Override
@@ -40,6 +42,7 @@ public class HistogramBadgeRemovalSignal extends BadgeRemoveSignal {
                 .thenComparing(BadgeSignal::getEndTime)
                 .thenComparing(BadgeSignal::getAttribute)
                 .thenComparing(BadgeSignal::getRuleId)
+                .thenComparing(Signal::getEventScope)
                 .compare(this, (BadgeSignal) o);
     }
 }

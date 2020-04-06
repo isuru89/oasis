@@ -47,10 +47,7 @@ public class BadgeFirstEvent extends BadgeProcessor<BadgeFirstEventRule> {
         String subKey = rule.getEventName();
         String value = ts + ":" + id + ":" + System.currentTimeMillis();
         if (isFirstOne(db.setIfNotExistsInMap(key, subKey, value))) {
-            return Collections.singletonList(new BadgeSignal(rule.getId(),
-                    1,
-                    ts, ts,
-                    id, id));
+            return Collections.singletonList(BadgeSignal.firstEvent(rule.getId(), event, 1));
         }
         return null;
     }

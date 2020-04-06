@@ -17,20 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules.signals;
+package io.github.oasis.engine.sinks;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.rules.AbstractRule;
+import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.storage.Db;
 
 /**
  * @author Isuru Weerarathna
  */
-public class StreakBadgeSignal extends BadgeSignal {
-
-    public StreakBadgeSignal(String ruleId, Event causedEvent, int streak, long st, long et, String sid, String eid) {
-        super(ruleId, causedEvent, streak, st, et, sid, eid);
+public class BadgeSink extends AbstractSink {
+    protected BadgeSink(Db db) {
+        super(db);
     }
 
-    public int getStreak() {
-        return getAttribute();
+    @Override
+    public void consume(Signal signal, AbstractRule rule) {
+
     }
 }

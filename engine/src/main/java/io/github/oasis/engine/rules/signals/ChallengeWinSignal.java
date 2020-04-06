@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.Event;
+import io.github.oasis.model.EventScope;
 import lombok.ToString;
 
 import java.util.Comparator;
@@ -35,8 +37,16 @@ public class ChallengeWinSignal extends AbstractChallengeSignal {
     private long wonAt;
     private String wonEventId;
 
-    public ChallengeWinSignal(String ruleId, int position, long winnerUserId, long wonAt, String wonEventId) {
-        super(ruleId);
+    public ChallengeWinSignal(String ruleId, EventScope eventScope, int position, long winnerUserId, long wonAt, String wonEventId) {
+        super(ruleId, eventScope);
+        this.position = position;
+        this.winnerUserId = winnerUserId;
+        this.wonAt = wonAt;
+        this.wonEventId = wonEventId;
+    }
+
+    public ChallengeWinSignal(String ruleId, Event event, int position, long winnerUserId, long wonAt, String wonEventId) {
+        super(ruleId, event.asEventScope());
         this.position = position;
         this.winnerUserId = winnerUserId;
         this.wonAt = wonAt;
@@ -80,6 +90,7 @@ public class ChallengeWinSignal extends AbstractChallengeSignal {
     public int compareTo(Signal o) {
         if (o instanceof ChallengeWinSignal) {
             return Comparator.comparing(ChallengeWinSignal::getRuleId)
+                    .thenComparing(Signal::getEventScope)
                     .thenComparing(ChallengeWinSignal::getPosition)
                     .thenComparing(ChallengeWinSignal::getWinnerUserId)
                     .thenComparing(ChallengeWinSignal::getWonAt)

@@ -19,7 +19,12 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.Event;
+import io.github.oasis.model.EventScope;
 import lombok.ToString;
+
+import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
@@ -28,12 +33,43 @@ import lombok.ToString;
 public abstract class Signal implements Comparable<Signal>  {
 
     private final String ruleId;
+    private final EventScope eventScope;
 
-    Signal(String ruleId) {
+    Signal(String ruleId, Event event) {
+        this(ruleId, event.asEventScope());
+    }
+
+    Signal(String ruleId, EventScope eventScope) {
         this.ruleId = ruleId;
+        this.eventScope = eventScope;
     }
 
     public String getRuleId() {
         return ruleId;
+    }
+
+    public EventScope getEventScope() {
+        return eventScope;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Signal signal = (Signal) o;
+        return ruleId.equals(signal.ruleId) &&
+                Objects.equals(eventScope, signal.eventScope);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ruleId, eventScope);
+    }
+
+    @Override
+    public int compareTo(Signal o) {
+        return Comparator.comparing(Signal::getRuleId)
+                .thenComparing(Signal::getEventScope)
+                .compare(this, o);
     }
 }

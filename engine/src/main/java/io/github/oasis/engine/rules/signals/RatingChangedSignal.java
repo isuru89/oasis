@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.Event;
 import lombok.ToString;
 
 import java.util.Comparator;
@@ -34,11 +35,11 @@ public class RatingChangedSignal extends AbstractRatingSignal {
     private long changedAt;
     private String changedEvent;
 
-    public RatingChangedSignal(String ruleId, int previousRating, int rating, long changedAt, String changedEvent) {
-        super(ruleId, rating);
+    public RatingChangedSignal(String ruleId, int previousRating, int rating, long changedAt, Event changedEvent) {
+        super(ruleId, changedEvent.asEventScope(), rating);
         this.previousRating = previousRating;
         this.changedAt = changedAt;
-        this.changedEvent = changedEvent;
+        this.changedEvent = changedEvent.getExternalId();
     }
 
     public int getPreviousRating() {
@@ -74,6 +75,7 @@ public class RatingChangedSignal extends AbstractRatingSignal {
     public int compareTo(Signal o) {
         if (o instanceof RatingChangedSignal) {
             return Comparator.comparing(RatingChangedSignal::getRuleId)
+                    .thenComparing(Signal::getEventScope)
                     .thenComparing(RatingChangedSignal::getCurrentRating)
                     .thenComparing(RatingChangedSignal::getPreviousRating)
                     .thenComparing(RatingChangedSignal::getChangedAt)

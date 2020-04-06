@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.EventScope;
 import lombok.ToString;
 
 /**
@@ -26,16 +27,17 @@ import lombok.ToString;
  */
 @ToString
 public class BadgeRemoveSignal extends BadgeSignal {
-    public BadgeRemoveSignal(String ruleId, int streak, long st, long et, String sid, String eid) {
-        super(ruleId, streak, st, et, sid, eid);
+    public BadgeRemoveSignal(String ruleId, EventScope event, int streak, long st, long et, String sid, String eid) {
+        super(ruleId, event, streak, st, et, sid, eid);
     }
 
-    public BadgeRemoveSignal(String ruleId, int streak, long st) {
-        super(ruleId, streak, st, -1, null, null);
+    public BadgeRemoveSignal(String ruleId, EventScope eventScope, int streak, long st) {
+        super(ruleId, eventScope, streak, st, -1, null, null);
     }
 
     public BadgeRemoveSignal(BadgeSignal prevBadge) {
         super(prevBadge.getRuleId(),
+                prevBadge.getEventScope(),
                 prevBadge.getAttribute(),
                 prevBadge.getStartTime(),
                 prevBadge.getEndTime(),

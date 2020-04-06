@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.model.EventScope;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -26,8 +28,8 @@ public abstract class AbstractRatingSignal extends Signal {
 
     private int currentRating;
 
-    public AbstractRatingSignal(String ruleId, int currentRating) {
-        super(ruleId);
+    public AbstractRatingSignal(String ruleId, EventScope eventScope, int currentRating) {
+        super(ruleId, eventScope);
         this.currentRating = currentRating;
     }
 

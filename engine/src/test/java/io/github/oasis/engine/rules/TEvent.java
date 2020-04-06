@@ -30,6 +30,7 @@ import java.util.UUID;
  */
 public class TEvent implements Event {
 
+    public static int SOURCE_ID = 1;
     public static int GAME_ID = 1;
     public static long USER_ID = 0L;
 
@@ -42,6 +43,7 @@ public class TEvent implements Event {
         event.values.put("ts", ts);
         event.values.put("game", GAME_ID);
         event.values.put("user", USER_ID);
+        event.values.put("sourceId", SOURCE_ID);
         event.values.put("id", UUID.randomUUID().toString());
         return event;
     }
@@ -104,7 +106,7 @@ public class TEvent implements Event {
 
     @Override
     public Integer getSource() {
-        return null;
+        return (Integer) values.get("sourceId");
     }
 
     @Override

@@ -135,7 +135,7 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ConditionalBadge(ruleContext.getRule().getId(), ATTR_50, 144, e2.getExternalId()));
+                new ConditionalBadge(ruleContext.getRule().getId(), e2, ATTR_50, 144, e2.getExternalId()));
     }
 
     @DisplayName("Single condition: multiple same badge creation")
@@ -154,8 +154,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ConditionalBadge(rule.getId(), ATTR_50, 144, e2.getExternalId()),
-                new ConditionalBadge(rule.getId(), ATTR_50, 125, e3.getExternalId()));
+                new ConditionalBadge(rule.getId(), e2, ATTR_50, 144, e2.getExternalId()),
+                new ConditionalBadge(rule.getId(), e3, ATTR_50, 125, e3.getExternalId()));
     }
 
     @DisplayName("Single condition: only once award")
@@ -174,7 +174,7 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ConditionalBadge(rule.getId(), ATTR_50, 144, e2.getExternalId()));
+                new ConditionalBadge(rule.getId(), e2, ATTR_50, 144, e2.getExternalId()));
     }
 
     @DisplayName("Single condition: Out-of-order only once award not affected")
@@ -193,7 +193,7 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ConditionalBadge(rule.getId(), ATTR_50, 144, e2.getExternalId()));
+                new ConditionalBadge(rule.getId(), e2, ATTR_50, 144, e2.getExternalId()));
     }
 
     // ------------------------------------------------------
@@ -258,7 +258,7 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ConditionalBadge(ruleContext.getRule().getId(), ATTR_50, 144, e2.getExternalId()));
+                new ConditionalBadge(ruleContext.getRule().getId(), e2, ATTR_50, 144, e2.getExternalId()));
     }
 
     @DisplayName("Multi condition: multi badge creation")
@@ -279,8 +279,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ConditionalBadge(rule.getId(), ATTR_50, 144, e2.getExternalId()),
-                new ConditionalBadge(rule.getId(), ATTR_75, 145, e3.getExternalId()));
+                new ConditionalBadge(rule.getId(), e2, ATTR_50, 144, e2.getExternalId()),
+                new ConditionalBadge(rule.getId(), e3, ATTR_75, 145, e3.getExternalId()));
     }
 
     @DisplayName("Multi condition: when order is incorrect no multiple different badges")
@@ -301,8 +301,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ConditionalBadge(rule.getId(), ATTR_50, 144, e2.getExternalId()),
-                new ConditionalBadge(rule.getId(), ATTR_50, 145, e3.getExternalId()));
+                new ConditionalBadge(rule.getId(), e2, ATTR_50, 144, e2.getExternalId()),
+                new ConditionalBadge(rule.getId(), e3, ATTR_50, 145, e3.getExternalId()));
     }
 
     @DisplayName("Multi condition: multiple many badges")
@@ -329,12 +329,12 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ConditionalBadge(rule.getId(), ATTR_50, 144, e2.getExternalId()),
-                new ConditionalBadge(rule.getId(), ATTR_50, 185, e6.getExternalId()),
-                new ConditionalBadge(rule.getId(), ATTR_75, 150, e4.getExternalId()),
-                new ConditionalBadge(rule.getId(), ATTR_75, 155, e5.getExternalId()),
-                new ConditionalBadge(rule.getId(), ATTR_85, 145, e3.getExternalId()),
-                new ConditionalBadge(rule.getId(), ATTR_85, 165, e8.getExternalId()));
+                new ConditionalBadge(rule.getId(), e2, ATTR_50, 144, e2.getExternalId()),
+                new ConditionalBadge(rule.getId(), e6, ATTR_50, 185, e6.getExternalId()),
+                new ConditionalBadge(rule.getId(), e4, ATTR_75, 150, e4.getExternalId()),
+                new ConditionalBadge(rule.getId(), e5, ATTR_75, 155, e5.getExternalId()),
+                new ConditionalBadge(rule.getId(), e3, ATTR_85, 145, e3.getExternalId()),
+                new ConditionalBadge(rule.getId(), e8, ATTR_85, 165, e8.getExternalId()));
     }
 
     @DisplayName("Multi condition: limited badges")
@@ -361,9 +361,9 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new ConditionalBadge(rule.getId(), ATTR_50, 144, e2.getExternalId()),
-                new ConditionalBadge(rule.getId(), ATTR_75, 150, e4.getExternalId()),
-                new ConditionalBadge(rule.getId(), ATTR_85, 145, e3.getExternalId()));
+                new ConditionalBadge(rule.getId(), e2, ATTR_50, 144, e2.getExternalId()),
+                new ConditionalBadge(rule.getId(), e4, ATTR_75, 150, e4.getExternalId()),
+                new ConditionalBadge(rule.getId(), e3, ATTR_85, 145, e3.getExternalId()));
     }
 
     private boolean greater50(Event event) {
