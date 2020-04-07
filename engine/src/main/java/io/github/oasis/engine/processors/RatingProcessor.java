@@ -29,6 +29,7 @@ import io.github.oasis.engine.storage.Db;
 import io.github.oasis.engine.storage.DbContext;
 import io.github.oasis.engine.storage.Mapped;
 import io.github.oasis.engine.utils.Constants;
+import io.github.oasis.engine.utils.Utils;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;
@@ -68,9 +69,10 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, AbstractRatin
                 String id = event.getExternalId();
                 BigDecimal score = deriveAwardedPoints(event, currRating, rating).setScale(Constants.SCALE, BigDecimal.ROUND_HALF_UP);
                 ratingsMap.setValue(subRatingKey, String.format("%d:%d:%s", newRating, ts, id));
+                Event copiedEvent = Utils.deepClone(event);
                 return Arrays.asList(
                         new RatingChangedSignal(rule.getId(), currRating, newRating, ts, event),
-                        new RatingPointsSignal(rule.getId(), newRating, score, event)
+                        new RatingPointsSignal(rule.getId(), rating.getPointId(), newRating, score, copiedEvent)
                 );
             }
         }

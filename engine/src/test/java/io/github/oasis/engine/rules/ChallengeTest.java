@@ -56,6 +56,8 @@ public class ChallengeTest extends AbstractRuleTest {
 
     static final int WIN_3 = 3;
 
+    static final String POINT_ID = "challenge.points";
+
     @DisplayName("No relevant events, no winners")
     @Test
     public void testWithoutWinner() {
@@ -113,8 +115,8 @@ public class ChallengeTest extends AbstractRuleTest {
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2)
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2)
                 );
     }
 
@@ -138,8 +140,8 @@ public class ChallengeTest extends AbstractRuleTest {
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), asDecimal(7), e1),
-                new ChallengePointsAwardedSignal(rule.getId(), asDecimal(33), e2)
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, asDecimal(7), e1),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, asDecimal(33), e2)
                 );
     }
 
@@ -164,9 +166,9 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e4, 3, U4, e4.getTimestamp(), e4.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e4),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e4),
                 new ChallengeOverSignal(rule.getId(), e5.asEventScope(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
         );
     }
@@ -194,9 +196,9 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e5, 3, U4, e5.getTimestamp(), e5.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e5)
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e5)
         );
     }
 
@@ -222,9 +224,9 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e2, 2, U1, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e4, 3, U1, e4.getTimestamp(), e4.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e4),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e4),
                 new ChallengeOverSignal(rule.getId(), e5.asEventScope(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
         );
     }
@@ -248,8 +250,8 @@ public class ChallengeTest extends AbstractRuleTest {
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e1),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2)
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2)
         );
     }
 
@@ -272,8 +274,8 @@ public class ChallengeTest extends AbstractRuleTest {
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e4, 2, U4, e4.getTimestamp(), e4.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e4)
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e4)
         );
     }
 
@@ -300,7 +302,7 @@ public class ChallengeTest extends AbstractRuleTest {
         System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
                 new ChallengeOverSignal(rule.getId(), e5.asEventScope(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
         );
     }
@@ -331,9 +333,9 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e4, 2, U2, e4.getTimestamp(), e4.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e5, 3, U2, e5.getTimestamp(), e5.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e4),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e5)
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e4),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e5)
         );
     }
 
@@ -362,8 +364,20 @@ public class ChallengeTest extends AbstractRuleTest {
         System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), AWARD, e2)
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2)
         );
+    }
+
+    @DisplayName("No point event when empty point id")
+    @Test
+    public void noPointEventIfEmptyPointId() {
+        TEvent e1 = TEvent.createKeyValue(U1,100, EVT_A, 57);
+        RuleContext<ChallengeRule> ruleContext = createRule(BigDecimal.valueOf(20), 3, 100, 200, new ArrayList<>());
+        ChallengeRule rule = ruleContext.getRule();
+        ChallengePointsAwardedSignal withPointId = new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, BigDecimal.valueOf(20), e1);
+        Assertions.assertTrue(withPointId.generateEvent().isPresent());
+        ChallengePointsAwardedSignal noPointId = new ChallengePointsAwardedSignal(rule.getId(), null, BigDecimal.valueOf(20), e1);
+        Assertions.assertFalse(noPointId.generateEvent().isPresent());
     }
 
     private BigDecimal asDecimal(long val) {
@@ -387,6 +401,7 @@ public class ChallengeTest extends AbstractRuleTest {
         rule.setExpireAt(end);
         rule.setCriteria(this::check);
         rule.setWinnerCount(winners);
+        rule.setPointId(POINT_ID);
         return new RuleContext<>(rule, signals::add);
     }
 

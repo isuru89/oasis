@@ -49,6 +49,8 @@ public class RatingsTest extends AbstractRuleTest {
 
     private static final int DEF_RATING = 1;
 
+    private static final String POINT_ID = "rating.points";
+
     @DisplayName("No ratings")
     @Test
     public void testNoRatings() {
@@ -116,7 +118,7 @@ public class RatingsTest extends AbstractRuleTest {
         System.out.println(signals);
         assertStrict(signals,
                 new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e2.getTimestamp(), e2),
-                new RatingPointsSignal(rule.getId(), 2, asDecimal(0), e2)
+                new RatingPointsSignal(rule.getId(), POINT_ID, 2, asDecimal(0), e2)
         );
     }
 
@@ -142,7 +144,7 @@ public class RatingsTest extends AbstractRuleTest {
         System.out.println(signals);
         assertStrict(signals,
                 new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e2.getTimestamp(), e2),
-                new RatingPointsSignal(rule.getId(), 2, asDecimal(10), e2)
+                new RatingPointsSignal(rule.getId(), POINT_ID, 2, asDecimal(10), e2)
         );
     }
 
@@ -169,9 +171,26 @@ public class RatingsTest extends AbstractRuleTest {
         assertStrict(signals,
                 new RatingChangedSignal(rule.getId(), DEF_RATING, 3, e1.getTimestamp(), e1),
                 new RatingChangedSignal(rule.getId(), 3, 1, e2.getTimestamp(), e2),
-                new RatingPointsSignal(rule.getId(), 3, asDecimal(20), e1),
-                new RatingPointsSignal(rule.getId(), 1, asDecimal(-20), e2)
+                new RatingPointsSignal(rule.getId(), POINT_ID, 3, asDecimal(20), e1),
+                new RatingPointsSignal(rule.getId(), POINT_ID, 1, asDecimal(-20), e2)
         );
+    }
+
+    @DisplayName("No point event when empty point id")
+    @Test
+    public void noPointEventIfEmptyPointId() {
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 57);
+        List<Signal> signals = new ArrayList<>();
+        RuleContext<RatingRule> ruleContext = createRule(signals,
+                aRating(1, 3, checkGt(85), pointAward(3)),
+                aRating(2, 2, checkGt(65), pointAward(2)),
+                aRating(3, 1, checkGt(50), pointAward(1))
+        );
+        RatingRule rule = ruleContext.getRule();
+        RatingPointsSignal withPointId = new RatingPointsSignal(rule.getId(), POINT_ID, 3, asDecimal(20), e1);
+        Assertions.assertTrue(withPointId.generateEvent().isPresent());
+        RatingPointsSignal noPointId = new RatingPointsSignal(rule.getId(), null, 3, asDecimal(20), e1);
+        Assertions.assertFalse(noPointId.generateEvent().isPresent());
     }
 
     private BigDecimal asDecimal(long val) {
@@ -196,7 +215,12 @@ public class RatingsTest extends AbstractRuleTest {
 
     private RatingRule.Rating aRating(int priority, int rating, Predicate<Event> criteria,
                                       BiFunction<Event, Integer, BigDecimal> pointDerive) {
-        return new RatingRule.Rating(priority, rating, criteria, pointDerive);
+        return new RatingRule.Rating(priority, rating, criteria, pointDerive, POINT_ID);
+    }
+
+    private RatingRule.Rating aRating(int priority, int rating, Predicate<Event> criteria, String pointId,
+                                      BiFunction<Event, Integer, BigDecimal> pointDerive) {
+        return new RatingRule.Rating(priority, rating, criteria, pointDerive, pointId);
     }
 
     private RuleContext<RatingRule> createRule(Collection<Signal> signals, RatingRule.Rating... ratings) {

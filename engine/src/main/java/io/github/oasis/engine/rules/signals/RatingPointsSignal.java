@@ -21,11 +21,14 @@ package io.github.oasis.engine.rules.signals;
 
 import io.github.oasis.engine.model.EventCreatable;
 import io.github.oasis.model.Event;
+import io.github.oasis.model.EventScope;
+import io.github.oasis.model.events.RatingPointEvent;
 import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
@@ -33,13 +36,19 @@ import java.util.Objects;
 @ToString(callSuper = true)
 public class RatingPointsSignal extends AbstractRatingSignal implements EventCreatable {
 
+    private String pointId;
     private BigDecimal points;
     private Event causedEvent;
 
-    public RatingPointsSignal(String ruleId, int currentRating, BigDecimal points, Event causedEvent) {
-        super(ruleId, causedEvent.asEventScope(), currentRating);
+    public RatingPointsSignal(String ruleId, String pointId, int currentRating, BigDecimal points, Event causedEvent) {
+        super(ruleId, causedEvent == null ? EventScope.NO_SCOPE : causedEvent.asEventScope(), currentRating);
         this.points = points;
         this.causedEvent = causedEvent;
+        this.pointId = pointId;
+    }
+
+    public String getPointId() {
+        return pointId;
     }
 
     public BigDecimal getPoints() {
@@ -55,7 +64,8 @@ public class RatingPointsSignal extends AbstractRatingSignal implements EventCre
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RatingPointsSignal that = (RatingPointsSignal) o;
-        return getRuleId().equals(that.getRuleId()) &&
+        return super.equals(o) &&
+                Objects.equals(getPointId(), that.getPointId()) &&
                 getCurrentRating() == that.getCurrentRating() &&
                 points.equals(that.points) &&
                 causedEvent.equals(that.causedEvent);
@@ -63,7 +73,7 @@ public class RatingPointsSignal extends AbstractRatingSignal implements EventCre
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRuleId(), getCurrentRating(), points, causedEvent);
+        return Objects.hash(super.hashCode(), getPointId(), getCurrentRating(), points, causedEvent);
     }
 
     @Override
@@ -71,11 +81,21 @@ public class RatingPointsSignal extends AbstractRatingSignal implements EventCre
         if (o instanceof RatingPointsSignal) {
             return Comparator.comparing(RatingPointsSignal::getRuleId)
                     .thenComparing(Signal::getEventScope)
+                    .thenComparing(RatingPointsSignal::getPointId)
                     .thenComparing(RatingPointsSignal::getCurrentRating)
                     .thenComparing(RatingPointsSignal::getPoints)
                     .thenComparing(o2 -> o2.causedEvent.getExternalId())
                     .compare(this, (RatingPointsSignal) o);
         }
         return -1;
+    }
+
+    @Override
+    public Optional<Event> generateEvent() {
+        if (Objects.nonNull(pointId)) {
+            return Optional.of(new RatingPointEvent(pointId, "points", points, causedEvent));
+        } else {
+            return Optional.empty();
+        }
     }
 }

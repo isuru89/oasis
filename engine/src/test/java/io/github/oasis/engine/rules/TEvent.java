@@ -23,6 +23,7 @@ import io.github.oasis.model.Event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -112,6 +113,19 @@ public class TEvent implements Event {
     @Override
     public Integer getGameId() {
         return (Integer) values.get("game");
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getExternalId());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        TEvent that = (TEvent) obj;
+        return Objects.equals(getExternalId(), that.getExternalId());
     }
 
     @Override

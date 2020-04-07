@@ -34,6 +34,7 @@ public class ChallengeRule extends AbstractRule {
     private long startAt;
     private int winnerCount;
 
+    private String pointId;
     private BigDecimal awardPoints = BigDecimal.ZERO;
     private BiFunction<Event, Integer, BigDecimal> customAwardPoints;
     private ChallengeAwardMethod awardMethod = ChallengeAwardMethod.REPEATABLE;
@@ -56,6 +57,14 @@ public class ChallengeRule extends AbstractRule {
             return customAwardPoints.apply(event, position);
         }
         return awardPoints;
+    }
+
+    public String getPointId() {
+        return pointId;
+    }
+
+    public void setPointId(String pointId) {
+        this.pointId = pointId;
     }
 
     public void setAwardMethod(ChallengeAwardMethod awardMethod) {

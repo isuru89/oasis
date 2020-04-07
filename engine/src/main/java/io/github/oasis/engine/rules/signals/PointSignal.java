@@ -55,7 +55,7 @@ public class PointSignal extends Signal {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PointSignal that = (PointSignal) o;
-        return getRuleId().equals(that.getRuleId()) &&
+        return super.equals(o) &&
                 score.equals(that.score) &&
                 eventRef.equals(that.eventRef);
     }

@@ -61,13 +61,20 @@ public class RatingRule extends AbstractRule {
         private int priority;
         private int rating;
         private Predicate<Event> criteria;
+        private String pointId;
         private BiFunction<Event, Integer, BigDecimal> pointAwards;
 
-        public Rating(int priority, int rating, Predicate<Event> criteria, BiFunction<Event, Integer, BigDecimal> pointAwards) {
+        public Rating(int priority, int rating, Predicate<Event> criteria, BiFunction<Event, Integer, BigDecimal> pointAwards,
+                      String pointId) {
             this.priority = priority;
             this.rating = rating;
             this.criteria = criteria;
             this.pointAwards = pointAwards;
+            this.pointId = pointId;
+        }
+
+        public String getPointId() {
+            return pointId;
         }
 
         public BiFunction<Event, Integer, BigDecimal> getPointAwards() {

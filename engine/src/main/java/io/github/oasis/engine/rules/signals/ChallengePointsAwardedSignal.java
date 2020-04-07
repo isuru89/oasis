@@ -21,11 +21,14 @@ package io.github.oasis.engine.rules.signals;
 
 import io.github.oasis.engine.model.EventCreatable;
 import io.github.oasis.model.Event;
+import io.github.oasis.model.EventScope;
+import io.github.oasis.model.events.ChallengePointEvent;
 import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
@@ -33,13 +36,19 @@ import java.util.Objects;
 @ToString
 public class ChallengePointsAwardedSignal extends AbstractChallengeSignal implements EventCreatable {
 
+    private String pointId;
     private BigDecimal points;
     private Event causedEvent;
 
-    public ChallengePointsAwardedSignal(String ruleId, BigDecimal points, Event causedEvent) {
-        super(ruleId, causedEvent.asEventScope());
+    public ChallengePointsAwardedSignal(String ruleId, String pointId, BigDecimal points, Event causedEvent) {
+        super(ruleId, causedEvent == null ? EventScope.NO_SCOPE : causedEvent.asEventScope());
         this.points = points;
         this.causedEvent = causedEvent;
+        this.pointId = pointId;
+    }
+
+    public String getPointId() {
+        return pointId;
     }
 
     public BigDecimal getPoints() {
@@ -55,14 +64,15 @@ public class ChallengePointsAwardedSignal extends AbstractChallengeSignal implem
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChallengePointsAwardedSignal that = (ChallengePointsAwardedSignal) o;
-        return getRuleId().equals(((ChallengePointsAwardedSignal) o).getRuleId()) &&
+        return super.equals(o) &&
+                Objects.equals(getPointId(), that.getPointId()) &&
                 points.equals(that.points) &&
                 causedEvent.equals(that.causedEvent);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRuleId(), points, causedEvent);
+        return Objects.hash(super.hashCode(), getPointId(), points, causedEvent);
     }
 
     @Override
@@ -70,11 +80,21 @@ public class ChallengePointsAwardedSignal extends AbstractChallengeSignal implem
         if (o instanceof ChallengePointsAwardedSignal) {
             return Comparator.comparing(ChallengePointsAwardedSignal::getRuleId)
                         .thenComparing(Signal::getEventScope)
+                        .thenComparing(ChallengePointsAwardedSignal::getPointId)
                         .thenComparing(ChallengePointsAwardedSignal::getPoints)
                         .thenComparing(o2 -> o2.getCausedEvent().getExternalId())
                         .compare(this, (ChallengePointsAwardedSignal) o);
         } else {
             return -1;
+        }
+    }
+
+    @Override
+    public Optional<Event> generateEvent() {
+        if (Objects.nonNull(pointId)) {
+            return Optional.of(new ChallengePointEvent(pointId, "points", points, causedEvent));
+        } else {
+            return Optional.empty();
         }
     }
 }

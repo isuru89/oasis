@@ -77,7 +77,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Abstrac
         winnerSet.add(member, score.doubleValue());
         return Arrays.asList(
                 new ChallengeWinSignal(rule.getId(), event, position, event.getUser(), event.getTimestamp(), event.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), score, event)
+                new ChallengePointsAwardedSignal(rule.getId(), rule.getPointId(), score, event)
         );
     }
 
