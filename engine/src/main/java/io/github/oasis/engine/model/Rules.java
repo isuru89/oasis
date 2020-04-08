@@ -53,8 +53,11 @@ public class Rules implements Serializable {
     }
 
     public void addRule(AbstractRule rule) {
-        //AbstractProcessor<? extends AbstractRule, ? extends Signal> processor = Processors.createProcessor(rule, collector);
-        //ruleContexts.put(rule.getId(), new RuleExecutionContext(processor));
+        ruleReferences.put(rule.getId(), rule);
+    }
+
+    public AbstractRule getRuleById(String id) {
+        return ruleReferences.get(id);
     }
 
     public void updateRule(AbstractRule rule) {

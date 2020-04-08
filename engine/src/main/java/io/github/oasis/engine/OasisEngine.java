@@ -24,43 +24,51 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
-import io.github.oasis.engine.actors.cmds.RuleRemovedMessage;
 import io.github.oasis.engine.factory.AbstractActorProviderModule;
 import io.github.oasis.engine.factory.OasisDependencyModule;
 import io.github.oasis.engine.processors.Processors;
 import io.github.oasis.model.events.JsonEvent;
+import scala.concurrent.Await;
+import scala.concurrent.duration.Duration;
 
 import javax.inject.Inject;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Isuru Weerarathna
  */
 public class OasisEngine {
 
+    private ActorSystem oasisEngine;
     private ActorRef oasisActor;
 
     @Inject
     private Processors processors;
 
     private EngineContext context;
+    private AbstractActorProviderModule providerModule;
 
     public OasisEngine(EngineContext context) {
         this.context = context;
     }
 
     public void start() {
-        ActorSystem oasisEngine = ActorSystem.create("oasis-engine");
+        oasisEngine = ActorSystem.create("oasis-engine");
         System.out.println(oasisEngine);
         AbstractActorProviderModule dependencyModule = context.getModuleProvider().apply(oasisEngine);
+        providerModule = dependencyModule;
 
         oasisActor = oasisEngine.actorOf(Props.create(OasisSupervisor.class,
                 () -> dependencyModule.getInjector().getInstance(OasisSupervisor.class)), ActorNames.OASIS_SUPERVISOR);
-        for (int i = 0; i < 20; i++) {
-            if (i % 5 == 0) {
-                oasisActor.tell(new RuleRemovedMessage("rule-removed" + i), oasisActor);
-            }
-            oasisActor.tell(TestE.create(i), oasisActor);
-        }
+    }
+
+    public void awaitTerminated() throws TimeoutException, InterruptedException {
+        Await.ready(oasisEngine.terminate(), Duration.apply(2, TimeUnit.MINUTES));
+    }
+
+    public AbstractActorProviderModule getProviderModule() {
+        return providerModule;
     }
 
     public ActorRef getOasisActor() {

@@ -45,6 +45,8 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
 
     private static final AtomicInteger counter = new AtomicInteger(0);
 
+    private static final int EXECUTORS = 3;
+
     private Rules rules;
     private ActorRef signalExchanger;
     private SignalCollector collector;
@@ -75,6 +77,7 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     }
 
     private void beginAllChildren() {
+        signalExchanger.tell(new StartRuleExecutionCommand(id, rules), getSelf());
         executor.route(new StartRuleExecutionCommand(id, rules), getSelf());
     }
 
@@ -86,7 +89,7 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
 
     private void createExecutors() {
         List<Routee> routees = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < EXECUTORS; i++) {
             ActorRef actorRef = getContext().actorOf(Props.create(RuleExecutor.class, () -> injectInstance(RuleExecutor.class)));
             getContext().watch(actorRef);
             routees.add(new ActorRefRoutee(actorRef));
@@ -108,6 +111,7 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     }
 
     private void forwardRuleModifiedEvent(OasisRuleMessage ruleMessage) {
+        System.out.println("Rule modified forwarding " + ruleMessage);
         executor.route(ruleMessage, getSelf());
     }
 

@@ -21,6 +21,7 @@ package io.github.oasis.engine.actors;
 
 import akka.actor.AbstractActor;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
+import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.model.Rules;
 import io.github.oasis.engine.processors.AbstractProcessor;
@@ -69,7 +70,10 @@ public class RuleExecutor extends OasisBaseActor {
     }
 
     private void ruleModified(OasisRuleMessage message) {
-        System.out.println("Rule modified received in " + myId + " IN " + this.getSelf().path());
+        if (message instanceof RuleAddedMessage) {
+            System.out.println("Rule modified received in " + myId + " IN " + this.rules + " -> " + message);
+            rules.addRule(((RuleAddedMessage) message).getRule());
+        }
     }
 
     private void assignRules(StartRuleExecutionCommand startRuleExecutionCommand) {
@@ -81,8 +85,8 @@ public class RuleExecutor extends OasisBaseActor {
     }
 
     private void processEvent(Event event) {
-        System.out.println("Processing event for user #" + event.getUser() + " in " + myId + " p " + processors + " in this " + this);
-        Iterator<AbstractRule> allRulesForEvent = rules.getAllRulesForEvent(event);
+        System.out.println("Processing event for user #" + event.getUser() + " in " + this.myId + " p " + processors + " in this " + this.rules);
+        Iterator<AbstractRule> allRulesForEvent = this.rules.getAllRulesForEvent(event);
         while (allRulesForEvent.hasNext()) {
             AbstractRule rule = allRulesForEvent.next();
 

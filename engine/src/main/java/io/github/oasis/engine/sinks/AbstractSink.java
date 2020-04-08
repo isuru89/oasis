@@ -28,10 +28,10 @@ import io.github.oasis.engine.external.Db;
  */
 public abstract class AbstractSink {
 
-    protected Db db;
+    protected Db dbPool;
 
-    protected AbstractSink(Db db) {
-        this.db = db;
+    protected AbstractSink(Db dbPool) {
+        this.dbPool = dbPool;
     }
 
     public abstract void consume(Signal signal, AbstractRule rule);

@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class OasisSupervisor extends OasisBaseActor {
 
-    private static final int GAME_PROCESSORS = 5;
+    private static final int GAME_SUPERVISORS = 2;
 
     private Router gameProcessors;
 
@@ -48,7 +48,7 @@ public class OasisSupervisor extends OasisBaseActor {
 
     private void createRuleRouters() {
         List<Routee> routees = new ArrayList<>();
-        for (int i = 0; i < GAME_PROCESSORS; i++) {
+        for (int i = 0; i < GAME_SUPERVISORS; i++) {
             ActorRef ruleActor = getContext().actorOf(Props.create(GameSupervisor.class, GameSupervisor::new), "game-supervisor-" + i);
             getContext().watch(ruleActor);
             routees.add(new ActorRefRoutee(ruleActor));

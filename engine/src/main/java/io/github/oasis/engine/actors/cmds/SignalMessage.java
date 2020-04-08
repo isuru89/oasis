@@ -20,25 +20,26 @@
 package io.github.oasis.engine.actors.cmds;
 
 import io.github.oasis.engine.rules.AbstractRule;
+import io.github.oasis.engine.rules.signals.Signal;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RuleAddedMessage extends OasisRuleMessage {
+public class SignalMessage implements OasisCommand {
 
+    private Signal signal;
     private AbstractRule rule;
 
-    public RuleAddedMessage(AbstractRule rule) {
+    public SignalMessage(Signal signal, AbstractRule rule) {
+        this.signal = signal;
         this.rule = rule;
+    }
+
+    public Signal getSignal() {
+        return signal;
     }
 
     public AbstractRule getRule() {
         return rule;
-    }
-
-    public static RuleAddedMessage create(int gameId, AbstractRule rule) {
-        RuleAddedMessage addedMessage = new RuleAddedMessage(rule);
-        addedMessage.setGameId(gameId);
-        return addedMessage;
     }
 }

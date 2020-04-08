@@ -17,28 +17,23 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
+package io.github.oasis.engine.utils;
 
-import io.github.oasis.engine.rules.AbstractRule;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RuleAddedMessage extends OasisRuleMessage {
+public class Timestamps {
 
-    private AbstractRule rule;
-
-    public RuleAddedMessage(AbstractRule rule) {
-        this.rule = rule;
+    public static ZonedDateTime getUserSpecificTime(long ts, int userTzOffsetInSeconds) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneOffset.ofTotalSeconds(userTzOffsetInSeconds));
     }
 
-    public AbstractRule getRule() {
-        return rule;
+    public static int getYear(long ts, int userTzOffsetInSeconds) {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneOffset.ofTotalSeconds(userTzOffsetInSeconds)).getYear();
     }
 
-    public static RuleAddedMessage create(int gameId, AbstractRule rule) {
-        RuleAddedMessage addedMessage = new RuleAddedMessage(rule);
-        addedMessage.setGameId(gameId);
-        return addedMessage;
-    }
 }

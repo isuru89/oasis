@@ -20,22 +20,20 @@
 package io.github.oasis.engine;
 
 import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.testkit.TestKit;
-import io.github.oasis.engine.actors.OasisSupervisor;
-import io.github.oasis.engine.actors.cmds.RuleRemovedMessage;
+import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.factory.OasisDependencyModule;
+import io.github.oasis.engine.rules.PointRule;
 import io.github.oasis.engine.rules.TEvent;
-import io.github.oasis.engine.rules.signals.PointSignal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import scala.concurrent.duration.Duration;
 
+import javax.inject.Inject;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Isuru Weerarathna
@@ -44,33 +42,60 @@ public class OasisEngineTest {
 
     private static final String TEST_SYSTEM = "test-oasis-system";
 
-    private ActorSystem system;
-    private TestKit testKit;
+    private static final String EVT_A = "event.a";
+    private static final String EVT_B = "event.b";
+    private static final double AMOUNT_10 = 10.0;
+    private static final double AMOUNT_50 = 50.0;
+
+    private OasisEngine engine;
     private ActorRef supervisor;
+    @Inject
+    private Db dbPool;
 
     @BeforeEach
-    public void setup() {
-        system = ActorSystem.create(TEST_SYSTEM);
-        testKit = new TestKit(system);
-        new OasisDependencyModule(system);
+    public void setup() throws IOException, InterruptedException {
+        EngineContext context = new EngineContext();
+        context.setModuleProvider(OasisDependencyModule::new);
+        engine = new OasisEngine(context);
+        engine.start();
+        supervisor = engine.getOasisActor();
+        engine.getProviderModule().getInjector().injectMembers(this);
 
-        supervisor = testKit.childActorOf(Props.create(OasisSupervisor.class, OasisSupervisor::new), "supervisor");
+        try (DbContext db = dbPool.createContext()) {
+            db.allKeys("*").forEach(db::removeKey);
+        }
     }
 
     @AfterEach
-    public void shutdown() {
-        testKit.shutdown(system, Duration.apply(2, TimeUnit.SECONDS), true);
-        system = null;
+    public void shutdown() throws IOException, InterruptedException {
+
+    }
+
+    private void awaitTerminated() {
+        try {
+            engine.awaitTerminated();
+        } catch (TimeoutException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void testOasisEngineStartup() {
-        TEvent e1 = TEvent.createKeyValue(100, "event.a", 75);
-        System.out.println(supervisor.path());
-        ActorSelection actorSelection = system.actorSelection(supervisor.path() + "/rule-supervisor-1/signal-exchanger");
-        ActorRef anchor = actorSelection.anchor();
-        anchor.tell(new PointSignal("a.b.c", BigDecimal.valueOf(20), e1), anchor);
-        supervisor.tell(new RuleRemovedMessage("rule-removed" + 10), supervisor);
+        TEvent e1 = TEvent.createKeyValue(System.currentTimeMillis(), EVT_A, 15);
+        TEvent e2 = TEvent.createKeyValue(System.currentTimeMillis(), EVT_A, 83);
+        TEvent e3 = TEvent.createKeyValue(System.currentTimeMillis(), EVT_A, 14);
+
+        PointRule rule = new PointRule("test.point.rule");
+        rule.setForEvent(EVT_A);
+        rule.setAmountToAward(BigDecimal.valueOf(AMOUNT_10));
+        rule.setCriteria((event, rule1) -> (long) event.getFieldValue("value") >= 50);
+
+        supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
+        supervisor.tell(e1, supervisor);
+        supervisor.tell(e2, supervisor);
+        supervisor.tell(e3, supervisor);
+        awaitTerminated();
+
     }
 
 }

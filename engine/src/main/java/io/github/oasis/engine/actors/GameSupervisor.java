@@ -25,6 +25,7 @@ import akka.routing.ActorRefRoutee;
 import akka.routing.Routee;
 import akka.routing.Router;
 import io.github.oasis.engine.actors.cmds.OasisCommand;
+import io.github.oasis.model.Event;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ import java.util.List;
  */
 public class GameSupervisor extends OasisBaseActor {
 
-    private static final int RULE_PROCESSORS = 10;
+    private static final int RULE_SUPERVISORS = 2;
 
     private Router ruleRouters;
 
@@ -44,7 +45,7 @@ public class GameSupervisor extends OasisBaseActor {
 
     private void createRuleRouters() {
         List<Routee> routees = new ArrayList<>();
-        for (int i = 0; i < RULE_PROCESSORS; i++) {
+        for (int i = 0; i < RULE_SUPERVISORS; i++) {
             ActorRef ruleActor = getContext().actorOf(Props.create(RuleSupervisor.class, RuleSupervisor::new), "rule-supervisor-" + i);
             getContext().watch(ruleActor);
             routees.add(new ActorRefRoutee(ruleActor));
@@ -55,6 +56,7 @@ public class GameSupervisor extends OasisBaseActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
+                .match(Event.class, event -> ruleRouters.route(event, getSender()))
                 .match(OasisCommand.class, this::processOasisCommand)
                 .build();
     }

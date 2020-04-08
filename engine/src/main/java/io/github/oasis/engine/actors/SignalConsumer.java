@@ -19,8 +19,12 @@
 
 package io.github.oasis.engine.actors;
 
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.rules.AbstractRule;
+import io.github.oasis.engine.rules.signals.PointSignal;
+import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.sinks.PointsSink;
 
 import javax.inject.Inject;
 
@@ -35,11 +39,17 @@ public class SignalConsumer extends OasisBaseActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(Signal.class, this::processSignal)
+                .match(SignalMessage.class, this::processSignal)
                 .build();
     }
 
-    private void processSignal(Signal signal) {
+    private void processSignal(SignalMessage signalMessage) {
+        Signal signal = signalMessage.getSignal();
+        AbstractRule rule = signalMessage.getRule();
 
+        System.out.println("Processing signal " + signal + " with rule " + rule);
+        if (signal instanceof PointSignal) {
+            new PointsSink(db).consume(signal, rule);
+        }
     }
 }

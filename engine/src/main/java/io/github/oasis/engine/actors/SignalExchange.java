@@ -24,8 +24,13 @@ import akka.actor.Props;
 import akka.routing.ActorRefRoutee;
 import akka.routing.Routee;
 import akka.routing.Router;
+import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
+import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
+import io.github.oasis.engine.actors.cmds.SignalMessage;
+import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.factory.InjectedActorSupport;
 import io.github.oasis.engine.model.EventCreatable;
+import io.github.oasis.engine.model.Rules;
 import io.github.oasis.engine.rules.signals.Signal;
 
 import java.util.ArrayList;
@@ -37,6 +42,8 @@ import java.util.List;
 public class SignalExchange extends OasisBaseActor implements InjectedActorSupport {
 
     private Router router;
+
+    private Rules rules;
 
     @Override
     public void preStart() {
@@ -52,8 +59,20 @@ public class SignalExchange extends OasisBaseActor implements InjectedActorSuppo
     @Override
     public Receive createReceive() {
         return receiveBuilder()
+                .match(StartRuleExecutionCommand.class, this::initializeRules)
                 .match(Signal.class, this::whenSignalReceived)
+                .match(OasisRuleMessage.class, this::handleRuleModificationMessage)
                 .build();
+    }
+
+    private void initializeRules(StartRuleExecutionCommand command) {
+        this.rules = command.getRules();
+    }
+
+    private void handleRuleModificationMessage(OasisRuleMessage message) {
+        if (message instanceof RuleAddedMessage) {
+            rules.addRule(((RuleAddedMessage) message).getRule());
+        }
     }
 
     private void whenSignalReceived(Signal signal) {
@@ -61,7 +80,7 @@ public class SignalExchange extends OasisBaseActor implements InjectedActorSuppo
         if (signal instanceof EventCreatable) {
             ((EventCreatable) signal).generateEvent().ifPresent(event -> getContext().getParent().tell(event, getSelf()));
         }
-        router.route(signal, getSelf());
+        router.route(new SignalMessage(signal, this.rules.getRuleById(signal.getRuleId())), getSelf());
     }
 
 }
