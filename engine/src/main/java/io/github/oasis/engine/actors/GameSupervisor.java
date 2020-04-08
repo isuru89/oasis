@@ -24,48 +24,42 @@ import akka.actor.Props;
 import akka.routing.ActorRefRoutee;
 import akka.routing.Routee;
 import akka.routing.Router;
-import io.github.oasis.engine.actors.cmds.AbstractGameCommand;
-import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.actors.cmds.OasisCommand;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages all games running in the system.
- *
  * @author Isuru Weerarathna
  */
-public class OasisSupervisor extends OasisBaseActor {
+public class GameSupervisor extends OasisBaseActor {
 
-    private static final int GAME_PROCESSORS = 5;
+    private static final int RULE_PROCESSORS = 10;
 
-    private Router gameProcessors;
+    private Router ruleRouters;
 
-    public OasisSupervisor() {
+    public GameSupervisor() {
         createRuleRouters();
     }
 
     private void createRuleRouters() {
         List<Routee> routees = new ArrayList<>();
-        for (int i = 0; i < GAME_PROCESSORS; i++) {
-            ActorRef ruleActor = getContext().actorOf(Props.create(GameSupervisor.class, GameSupervisor::new), "game-supervisor-" + i);
+        for (int i = 0; i < RULE_PROCESSORS; i++) {
+            ActorRef ruleActor = getContext().actorOf(Props.create(RuleSupervisor.class, RuleSupervisor::new), "rule-supervisor-" + i);
             getContext().watch(ruleActor);
             routees.add(new ActorRefRoutee(ruleActor));
         }
-        gameProcessors = new Router(new GameRouting(), routees);
+        ruleRouters = new Router(new UserRouting(), routees);
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(Event.class, event -> gameProcessors.route(event, getSender()))
-                .match(OasisRuleMessage.class, oasisRuleMessage -> gameProcessors.route(oasisRuleMessage, getSender()))
-                .match(AbstractGameCommand.class, this::gameSpecificCommand)
+                .match(OasisCommand.class, this::processOasisCommand)
                 .build();
     }
 
-    private void gameSpecificCommand(AbstractGameCommand gameCommand) {
-
+    private void processOasisCommand(OasisCommand command) {
+        ruleRouters.route(command, getSelf());
     }
 }

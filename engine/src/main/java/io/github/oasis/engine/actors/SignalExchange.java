@@ -57,6 +57,7 @@ public class SignalExchange extends OasisBaseActor implements InjectedActorSuppo
     }
 
     private void whenSignalReceived(Signal signal) {
+        System.out.println("Signal recieved");
         if (signal instanceof EventCreatable) {
             ((EventCreatable) signal).generateEvent().ifPresent(event -> getContext().getParent().tell(event, getSelf()));
         }

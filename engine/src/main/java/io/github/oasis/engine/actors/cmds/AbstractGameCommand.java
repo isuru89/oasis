@@ -17,22 +17,20 @@
  * under the License.
  */
 
-package io.github.oasis.engine.sinks;
-
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.external.Db;
+package io.github.oasis.engine.actors.cmds;
 
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeSink extends AbstractSink {
-    protected BadgeSink(Db db) {
-        super(db);
+public abstract class AbstractGameCommand implements OasisLifecycleCommand {
+
+    private int gameId;
+
+    public int getGameId() {
+        return gameId;
     }
 
-    @Override
-    public void consume(Signal signal, AbstractRule rule) {
-
+    public void setGameId(int gameId) {
+        this.gameId = gameId;
     }
 }

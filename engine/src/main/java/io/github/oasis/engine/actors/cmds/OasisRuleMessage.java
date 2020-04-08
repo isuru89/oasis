@@ -22,5 +22,15 @@ package io.github.oasis.engine.actors.cmds;
 /**
  * @author Isuru Weerarathna
  */
-public interface OasisRuleMessage extends OasisCommand {
+public abstract class OasisRuleMessage implements OasisCommand {
+
+    private int gameId;
+
+    public int getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(int gameId) {
+        this.gameId = gameId;
+    }
 }

@@ -23,8 +23,8 @@ import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.BadgeFirstEventRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
-import io.github.oasis.engine.storage.Db;
-import io.github.oasis.engine.storage.DbContext;
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.model.Event;
 
 import java.util.Collections;

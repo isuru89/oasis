@@ -26,10 +26,10 @@ import io.github.oasis.engine.rules.signals.AbstractChallengeSignal;
 import io.github.oasis.engine.rules.signals.ChallengeOverSignal;
 import io.github.oasis.engine.rules.signals.ChallengePointsAwardedSignal;
 import io.github.oasis.engine.rules.signals.ChallengeWinSignal;
-import io.github.oasis.engine.storage.Db;
-import io.github.oasis.engine.storage.DbContext;
-import io.github.oasis.engine.storage.Mapped;
-import io.github.oasis.engine.storage.Sorted;
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.Mapped;
+import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.engine.utils.Constants;
 import io.github.oasis.model.Event;
 

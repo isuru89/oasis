@@ -17,22 +17,25 @@
  * under the License.
  */
 
-package io.github.oasis.engine.sinks;
+package io.github.oasis.engine;
 
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.external.Db;
+import akka.actor.ActorSystem;
+import io.github.oasis.engine.factory.AbstractActorProviderModule;
+
+import java.util.function.Function;
 
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeSink extends AbstractSink {
-    protected BadgeSink(Db db) {
-        super(db);
+public class EngineContext {
+
+    private Function<ActorSystem, AbstractActorProviderModule> moduleProvider;
+
+    public Function<ActorSystem, AbstractActorProviderModule> getModuleProvider() {
+        return moduleProvider;
     }
 
-    @Override
-    public void consume(Signal signal, AbstractRule rule) {
-
+    public void setModuleProvider(Function<ActorSystem, AbstractActorProviderModule> moduleProvider) {
+        this.moduleProvider = moduleProvider;
     }
 }

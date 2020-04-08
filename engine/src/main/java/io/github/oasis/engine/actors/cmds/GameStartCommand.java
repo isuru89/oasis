@@ -17,15 +17,11 @@
  * under the License.
  */
 
-package io.github.oasis.engine.storage;
-
-import java.io.Closeable;
+package io.github.oasis.engine.actors.cmds;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface Db extends Closeable {
-
-    DbContext createContext();
+public class GameStartCommand extends AbstractGameCommand {
 
 }

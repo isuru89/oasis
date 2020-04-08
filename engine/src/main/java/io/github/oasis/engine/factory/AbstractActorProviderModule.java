@@ -27,6 +27,7 @@ import akka.actor.Props;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.google.inject.util.Providers;
 
@@ -55,6 +56,13 @@ public class AbstractActorProviderModule extends AbstractModule {
         bind(ActorRef.class)
                 .annotatedWith(Names.named(name))
                 .toProvider(Providers.guicify(new ActorRefProvider(system, name, actorClass)));
+    }
+
+    protected void bindSingletonActor(ActorSystem system, Class<? extends Actor> actorClass, String name) {
+        bind(ActorRef.class)
+                .annotatedWith(Names.named(name))
+                .toProvider(Providers.guicify(new ActorRefProvider(system, name, actorClass)))
+                .in(Singleton.class);
     }
 
     private class ActorRefProvider implements Provider<ActorRef> {

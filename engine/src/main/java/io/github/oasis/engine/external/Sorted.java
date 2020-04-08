@@ -17,38 +17,34 @@
  * under the License.
  */
 
-package io.github.oasis.engine.storage.redis;
+package io.github.oasis.engine.external;
 
-import io.github.oasis.engine.storage.Db;
-import io.github.oasis.engine.storage.DbContext;
-import redis.clients.jedis.JedisPool;
+import io.github.oasis.engine.model.Record;
 
-import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RedisDb implements Db {
+public interface Sorted {
 
-    private JedisPool pool;
+    void add(String member, long value);
 
-    private RedisDb(JedisPool pool) {
-        this.pool = pool;
-    }
+    void add(String number, double value);
 
-    public static RedisDb create(JedisPool pool) {
-        return new RedisDb(pool);
-    }
+    List<Record> getRangeByScoreWithScores(long from, long to);
+    List<Record> getRangeByScoreWithScores(BigDecimal from, BigDecimal to);
+    List<Record> getRangeByRankWithScores(long from, long to);
 
-    @Override
-    public DbContext createContext() {
-        return new RedisContext(pool.getResource());
-    }
+    void removeRangeByScore(long from, long to);
 
-    @Override
-    public void close() throws IOException {
-        if (pool != null) {
-            pool.close();
-        }
-    }
+    boolean memberExists(String member);
+
+    long getRank(String member);
+
+    Optional<String> getMemberByScore(long score);
+
+    void remove(String member);
 }

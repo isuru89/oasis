@@ -17,9 +17,9 @@
  * under the License.
  */
 
-package io.github.oasis.engine.storage.redis;
+package io.github.oasis.engine.external.redis;
 
-import io.github.oasis.engine.storage.Mapped;
+import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.utils.Numbers;
 import redis.clients.jedis.Jedis;
 

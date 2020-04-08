@@ -17,34 +17,25 @@
  * under the License.
  */
 
-package io.github.oasis.engine.storage;
+package io.github.oasis.engine.actors;
 
-import io.github.oasis.engine.model.Record;
+import akka.actor.ActorRef;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface Sorted {
+public class OasisActorSource implements Consumer<Object> {
 
-    void add(String member, long value);
+    private ActorRef actorRef;
 
-    void add(String number, double value);
+    public OasisActorSource(ActorRef actorRef) {
+        this.actorRef = actorRef;
+    }
 
-    List<Record> getRangeByScoreWithScores(long from, long to);
-    List<Record> getRangeByScoreWithScores(BigDecimal from, BigDecimal to);
-    List<Record> getRangeByRankWithScores(long from, long to);
-
-    void removeRangeByScore(long from, long to);
-
-    boolean memberExists(String member);
-
-    long getRank(String member);
-
-    Optional<String> getMemberByScore(long score);
-
-    void remove(String member);
+    @Override
+    public void accept(Object message) {
+        actorRef.tell(message, actorRef);
+    }
 }

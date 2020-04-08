@@ -17,22 +17,13 @@
  * under the License.
  */
 
-package io.github.oasis.engine.sinks;
+package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.external.Db;
+import java.util.function.Consumer;
 
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeSink extends AbstractSink {
-    protected BadgeSink(Db db) {
-        super(db);
-    }
+public interface EventSourceSupport extends Consumer<Object> {
 
-    @Override
-    public void consume(Signal signal, AbstractRule rule) {
-
-    }
 }

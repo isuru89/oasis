@@ -17,77 +17,81 @@
  * under the License.
  */
 
-package io.github.oasis.engine.storage.redis;
+package io.github.oasis.engine.db;
 
-import io.github.oasis.engine.storage.DbContext;
-import io.github.oasis.engine.storage.Mapped;
-import io.github.oasis.engine.storage.Sorted;
-import io.github.oasis.engine.utils.Numbers;
-import redis.clients.jedis.Jedis;
+import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.Mapped;
+import io.github.oasis.engine.external.Sorted;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RedisContext implements DbContext {
+public class MockedDb implements DbContext {
 
-    private final Jedis jedis;
-
-    public RedisContext(Jedis jedis) {
-        this.jedis = jedis;
-    }
-
-    @Override
-    public void close() {
-        if (jedis != null) {
-            jedis.close();
-        }
-    }
+    private Map<String, Object> map = new ConcurrentHashMap<>();
 
     @Override
     public Set<String> allKeys(String pattern) {
-        return jedis.keys(pattern);
+        return map.keySet();
     }
 
     @Override
     public void removeKey(String key) {
-        jedis.del(key);
+        map.remove(key);
     }
 
     @Override
     public void setValueInMap(String contextKey, String field, String value) {
-        jedis.hset(contextKey, field, value);
+        MAP(contextKey).setValue(field, value);
     }
 
     @Override
     public String getValueFromMap(String contextKey, String key) {
-        return jedis.hget(contextKey, key);
+        return MAP(contextKey).getValue(key);
     }
 
     @Override
     public void addToSorted(String contextKey, String member, long value) {
-        jedis.zadd(contextKey, value, member);
+
     }
 
     @Override
     public boolean setIfNotExistsInMap(String contextKey, String key, String value) {
-        return Numbers.isFirstOne(jedis.hsetnx(contextKey, key, value));
+        return MAP(contextKey).setIfNotExists(key, value);
     }
 
     @Override
     public List<String> getValuesFromMap(String contextKey, String... keys) {
-        return jedis.hmget(contextKey, keys);
+        return MAP(contextKey).getValues(keys);
     }
 
     @Override
     public Sorted SORTED(String contextKey) {
-        return new RedisSortedSet(jedis, contextKey);
+        Object o = map.computeIfAbsent(contextKey, k -> new MockedSorted());
+        if (o instanceof Sorted) {
+            return (Sorted) o;
+        } else {
+            throw new IllegalStateException("Given key does have a different data structure than a sorted map!");
+        }
     }
 
     @Override
     public Mapped MAP(String contextKey) {
-        return new RedisHashSet(jedis, contextKey);
+        Object o = map.computeIfAbsent(contextKey, k -> new MockedMap());
+        if (o instanceof Mapped) {
+            return (Mapped) o;
+        } else {
+            throw new IllegalStateException("Given key does have a different data structure than a map!");
+        }
+    }
+
+    @Override
+    public void close() {
+
     }
 }

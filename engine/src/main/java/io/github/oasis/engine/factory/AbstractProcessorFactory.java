@@ -23,7 +23,7 @@ import io.github.oasis.engine.model.SignalCollector;
 import io.github.oasis.engine.processors.AbstractProcessor;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.external.Db;
 
 /**
  * @author Isuru Weerarathna

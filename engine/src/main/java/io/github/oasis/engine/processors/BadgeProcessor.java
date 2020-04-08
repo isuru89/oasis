@@ -24,9 +24,9 @@ import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.BadgeRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
-import io.github.oasis.engine.storage.Db;
-import io.github.oasis.engine.storage.DbContext;
-import io.github.oasis.engine.storage.Mapped;
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.model.Event;
 
 /**

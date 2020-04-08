@@ -26,10 +26,10 @@ import io.github.oasis.engine.rules.BadgeHistogramStreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeRemovalSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeSignal;
-import io.github.oasis.engine.storage.Db;
-import io.github.oasis.engine.storage.DbContext;
-import io.github.oasis.engine.storage.Mapped;
-import io.github.oasis.engine.storage.Sorted;
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.Mapped;
+import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;

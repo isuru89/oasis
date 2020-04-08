@@ -69,7 +69,7 @@ public class RuleExecutor extends OasisBaseActor {
     }
 
     private void ruleModified(OasisRuleMessage message) {
-        //System.out.println("Rule modified received in " + myId + " IN " + this);
+        System.out.println("Rule modified received in " + myId + " IN " + this.getSelf().path());
     }
 
     private void assignRules(StartRuleExecutionCommand startRuleExecutionCommand) {

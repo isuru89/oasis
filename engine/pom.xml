@@ -60,7 +60,7 @@
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor-testkit-typed_2.13</artifactId>
+            <artifactId>akka-testkit_2.12</artifactId>
             <version>2.6.4</version>
             <scope>test</scope>
         </dependency>

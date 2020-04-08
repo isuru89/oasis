@@ -21,7 +21,7 @@ package io.github.oasis.engine.sinks;
 
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.external.Db;
 
 /**
  * @author Isuru Weerarathna

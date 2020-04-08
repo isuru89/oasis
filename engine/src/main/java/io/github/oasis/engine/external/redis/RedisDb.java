@@ -17,28 +17,38 @@
  * under the License.
  */
 
-package io.github.oasis.engine.storage;
+package io.github.oasis.engine.external.redis;
 
-import java.io.Closeable;
-import java.util.List;
-import java.util.Set;
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
+import redis.clients.jedis.JedisPool;
+
+import java.io.IOException;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface DbContext extends Closeable {
+public class RedisDb implements Db {
 
-    Set<String> allKeys(String pattern);
-    void removeKey(String key);
+    private JedisPool pool;
 
-    void setValueInMap(String contextKey, String field, String value);
-    String getValueFromMap(String contextKey, String key);
-    void addToSorted(String contextKey, String member, long value);
-    boolean setIfNotExistsInMap(String contextKey, String key, String value);
-    List<String> getValuesFromMap(String contextKey, String... keys);
+    private RedisDb(JedisPool pool) {
+        this.pool = pool;
+    }
 
-    Sorted SORTED(String contextKey);
+    public static RedisDb create(JedisPool pool) {
+        return new RedisDb(pool);
+    }
 
-    Mapped MAP(String contextKey);
+    @Override
+    public DbContext createContext() {
+        return new RedisContext(pool.getResource());
+    }
 
+    @Override
+    public void close() throws IOException {
+        if (pool != null) {
+            pool.close();
+        }
+    }
 }

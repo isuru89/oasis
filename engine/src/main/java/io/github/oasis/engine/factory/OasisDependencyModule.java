@@ -26,8 +26,8 @@ import com.google.inject.Singleton;
 import io.github.oasis.engine.actors.OasisSupervisor;
 import io.github.oasis.engine.actors.RuleExecutor;
 import io.github.oasis.engine.actors.SignalExchange;
-import io.github.oasis.engine.storage.Db;
-import io.github.oasis.engine.storage.redis.RedisDb;
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.redis.RedisDb;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -46,7 +46,7 @@ public class OasisDependencyModule extends AbstractActorProviderModule {
     @Override
     protected void configure() {
         bindActor(actorSystem, RuleExecutor.class, "rule-executor-actor");
-        bindActor(actorSystem, OasisSupervisor.class, "oasis-supervisor");
+        bindSingletonActor(actorSystem, OasisSupervisor.class, "oasis-supervisor");
         bindActor(actorSystem, SignalExchange.class, "signal-exchanger");
     }
 
@@ -58,5 +58,7 @@ public class OasisDependencyModule extends AbstractActorProviderModule {
         JedisPool poolRedis = new JedisPool(config, "localhost");
         return RedisDb.create(poolRedis);
     }
+
+
 
 }

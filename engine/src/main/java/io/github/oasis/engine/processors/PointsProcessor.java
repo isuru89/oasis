@@ -22,8 +22,8 @@ package io.github.oasis.engine.processors;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.PointRule;
 import io.github.oasis.engine.rules.signals.PointSignal;
-import io.github.oasis.engine.storage.Db;
-import io.github.oasis.engine.storage.DbContext;
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;

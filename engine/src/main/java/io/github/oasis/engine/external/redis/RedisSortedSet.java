@@ -17,10 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.engine.storage.redis;
+package io.github.oasis.engine.external.redis;
 
 import io.github.oasis.engine.model.Record;
-import io.github.oasis.engine.storage.Sorted;
+import io.github.oasis.engine.external.Sorted;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Tuple;
 

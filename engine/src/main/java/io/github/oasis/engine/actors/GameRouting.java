@@ -19,27 +19,29 @@
 
 package io.github.oasis.engine.actors;
 
-import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.external.Db;
-
-import javax.inject.Inject;
+import akka.routing.BroadcastRoutingLogic;
+import akka.routing.Routee;
+import akka.routing.RoutingLogic;
+import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
+import io.github.oasis.model.Event;
+import scala.collection.immutable.IndexedSeq;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SignalConsumer extends OasisBaseActor {
+public class GameRouting implements RoutingLogic {
 
-    @Inject
-    private Db db;
+    private BroadcastRoutingLogic broadcastRoutingLogic = new BroadcastRoutingLogic();
 
     @Override
-    public Receive createReceive() {
-        return receiveBuilder()
-                .match(Signal.class, this::processSignal)
-                .build();
-    }
-
-    private void processSignal(Signal signal) {
-
+    public Routee select(Object message, IndexedSeq<Routee> routees) {
+        if (message instanceof Event) {
+            Event event = (Event) message;
+            return routees.apply(event.getGameId() % routees.size());
+        } else if (message instanceof OasisRuleMessage) {
+            OasisRuleMessage ruleMessage = (OasisRuleMessage) message;
+            return routees.apply(ruleMessage.getGameId() % routees.size());
+        }
+        return broadcastRoutingLogic.select(message, routees);
     }
 }

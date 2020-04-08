@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.engine.storage;
+package io.github.oasis.engine.external;
 
 import io.github.oasis.engine.utils.Numbers;
 

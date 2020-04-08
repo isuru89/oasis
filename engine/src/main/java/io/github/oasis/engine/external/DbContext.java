@@ -17,22 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.engine.sinks;
+package io.github.oasis.engine.external;
 
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.external.Db;
+import java.io.Closeable;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeSink extends AbstractSink {
-    protected BadgeSink(Db db) {
-        super(db);
-    }
+public interface DbContext extends Closeable {
 
-    @Override
-    public void consume(Signal signal, AbstractRule rule) {
+    Set<String> allKeys(String pattern);
+    void removeKey(String key);
 
-    }
+    void setValueInMap(String contextKey, String field, String value);
+    String getValueFromMap(String contextKey, String key);
+    void addToSorted(String contextKey, String member, long value);
+    boolean setIfNotExistsInMap(String contextKey, String key, String value);
+    List<String> getValuesFromMap(String contextKey, String... keys);
+
+    Sorted SORTED(String contextKey);
+
+    Mapped MAP(String contextKey);
+
 }

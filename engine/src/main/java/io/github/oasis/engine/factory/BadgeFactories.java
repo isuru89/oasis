@@ -26,7 +26,7 @@ import io.github.oasis.engine.processors.BadgeConditionalProcessor;
 import io.github.oasis.engine.rules.BadgeRule;
 import io.github.oasis.engine.rules.BadgeConditionalRule;
 import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.external.Db;
 
 /**
  * @author Isuru Weerarathna

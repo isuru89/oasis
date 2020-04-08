@@ -24,7 +24,7 @@ import io.github.oasis.engine.rules.AbstractRule;
 /**
  * @author Isuru Weerarathna
  */
-public class RuleUpdatedMessage implements OasisRuleMessage {
+public class RuleUpdatedMessage extends OasisRuleMessage {
 
     private AbstractRule rule;
 

@@ -22,44 +22,55 @@ package io.github.oasis.engine;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
 import io.github.oasis.engine.actors.cmds.RuleRemovedMessage;
+import io.github.oasis.engine.factory.AbstractActorProviderModule;
 import io.github.oasis.engine.factory.OasisDependencyModule;
 import io.github.oasis.engine.processors.Processors;
 import io.github.oasis.model.events.JsonEvent;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * @author Isuru Weerarathna
  */
 public class OasisEngine {
 
-    @Inject
-    @Named("oasis-supervisor")
     private ActorRef oasisActor;
 
     @Inject
     private Processors processors;
 
-    public void start() throws InterruptedException {
+    private EngineContext context;
+
+    public OasisEngine(EngineContext context) {
+        this.context = context;
+    }
+
+    public void start() {
         ActorSystem oasisEngine = ActorSystem.create("oasis-engine");
         System.out.println(oasisEngine);
-        new OasisDependencyModule(oasisEngine);
+        AbstractActorProviderModule dependencyModule = context.getModuleProvider().apply(oasisEngine);
 
-        ActorRef oasisActor = oasisEngine.actorOf(Props.create(OasisSupervisor.class, OasisSupervisor::new));
+        oasisActor = oasisEngine.actorOf(Props.create(OasisSupervisor.class,
+                () -> dependencyModule.getInjector().getInstance(OasisSupervisor.class)), ActorNames.OASIS_SUPERVISOR);
         for (int i = 0; i < 20; i++) {
             if (i % 5 == 0) {
                 oasisActor.tell(new RuleRemovedMessage("rule-removed" + i), oasisActor);
             }
             oasisActor.tell(TestE.create(i), oasisActor);
         }
-
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        new OasisEngine().start();
+    public ActorRef getOasisActor() {
+        return oasisActor;
+    }
+
+    public static void main(String[] args) {
+        EngineContext context = new EngineContext();
+        context.setModuleProvider(OasisDependencyModule::new);
+        new OasisEngine(context).start();
     }
 
     private static class TestE extends JsonEvent {

@@ -27,9 +27,9 @@ import io.github.oasis.engine.rules.BadgeTemporalStreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
-import io.github.oasis.engine.storage.Db;
-import io.github.oasis.engine.storage.DbContext;
-import io.github.oasis.engine.storage.Sorted;
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;

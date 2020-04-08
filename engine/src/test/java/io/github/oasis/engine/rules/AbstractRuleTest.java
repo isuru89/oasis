@@ -19,14 +19,14 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.redis.RedisDb;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.MilestoneSignal;
 import io.github.oasis.engine.rules.signals.PointSignal;
 import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.storage.Db;
-import io.github.oasis.engine.storage.DbContext;
-import io.github.oasis.engine.storage.redis.RedisDb;
 import io.github.oasis.model.Event;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -53,7 +53,7 @@ public abstract class AbstractRuleTest {
     protected static Db pool;
 
     @BeforeAll
-    public static void beforeAll() {
+    public static void beforeAll() throws IOException {
         JedisPoolConfig config = new JedisPoolConfig();
         config.setMaxTotal(5);
         JedisPool poolRedis = new JedisPool(config, "localhost");

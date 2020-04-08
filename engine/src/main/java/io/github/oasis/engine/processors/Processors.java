@@ -34,7 +34,7 @@ import io.github.oasis.engine.rules.BadgeStreakNRule;
 import io.github.oasis.engine.rules.BadgeTemporalRule;
 import io.github.oasis.engine.rules.BadgeTemporalStreakNRule;
 import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.storage.Db;
+import io.github.oasis.engine.external.Db;
 
 import javax.inject.Inject;
 
