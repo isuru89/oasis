@@ -440,7 +440,7 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         rule.setTimeUnit(timeUnit);
         rule.setValueResolver(event -> new BigDecimal(event.getFieldValue("value").toString()));
         rule.setThresholds(Arrays.asList(thresholds));
-        return new RuleContext<>(rule, collection::add);
+        return new RuleContext<>(rule, fromConsumer(collection::add));
     }
 
 }

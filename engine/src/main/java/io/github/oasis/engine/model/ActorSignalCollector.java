@@ -17,23 +17,26 @@
  * under the License.
  */
 
-package io.github.oasis.engine.sinks;
+package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.model.ExecutionContext;
+import akka.actor.ActorRef;
+import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.external.Db;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractSink {
+public class ActorSignalCollector implements SignalCollector {
 
-    protected Db dbPool;
+    private ActorRef exchangeActor;
 
-    protected AbstractSink(Db dbPool) {
-        this.dbPool = dbPool;
+    public ActorSignalCollector(ActorRef exchangeActor) {
+        this.exchangeActor = exchangeActor;
     }
 
-    public abstract void consume(Signal signal, AbstractRule rule, ExecutionContext context);
+    @Override
+    public void accept(Signal signal, ExecutionContext context, AbstractRule rule) {
+        exchangeActor.tell(new SignalMessage(signal, context, rule), exchangeActor);
+    }
 }

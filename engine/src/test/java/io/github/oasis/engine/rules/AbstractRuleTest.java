@@ -24,6 +24,7 @@ import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.redis.RedisDb;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.SignalCollector;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.MilestoneSignal;
 import io.github.oasis.engine.rules.signals.PointSignal;
@@ -45,6 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * @author Isuru Weerarathna
@@ -109,6 +111,10 @@ public abstract class AbstractRuleTest {
             signals.add(signal);
         }
         return signals;
+    }
+
+    SignalCollector fromConsumer(Consumer<Signal> eventConsumer) {
+        return (SignalCollector) (signal, context, rule) -> eventConsumer.accept(signal);
     }
 
     void assertSignal(Collection<Signal> signals, BadgeSignal badgeSignal) {

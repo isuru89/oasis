@@ -113,11 +113,6 @@ public class MilestoneEvent implements Event {
     }
 
     @Override
-    public Long getTeamScope() {
-        return causedEvent.getTeamScope();
-    }
-
-    @Override
     public Integer getSource() {
         return causedEvent.getSource();
     }

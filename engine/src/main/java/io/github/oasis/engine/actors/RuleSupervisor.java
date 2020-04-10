@@ -25,11 +25,13 @@ import akka.routing.ActorRefRoutee;
 import akka.routing.DefaultResizer;
 import akka.routing.Routee;
 import akka.routing.Router;
+import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.factory.InjectedActorSupport;
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.Rules;
-import io.github.oasis.engine.model.SignalCollector;
+import io.github.oasis.engine.model.ActorSignalCollector;
 import io.github.oasis.model.Event;
 
 import java.util.ArrayList;
@@ -49,7 +51,7 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
 
     private Rules rules;
     private ActorRef signalExchanger;
-    private SignalCollector collector;
+    private ActorSignalCollector collector;
     private final int id;
     private Router executor;
 
@@ -57,7 +59,7 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
         id = counter.incrementAndGet();
 
         signalExchanger = createSignalExchanger();
-        collector = new SignalCollector(signalExchanger);
+        collector = new ActorSignalCollector(signalExchanger);
         rules = Rules.get(collector);
     }
 
@@ -105,7 +107,7 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     }
 
     private void processEvent(Event event) {
-        executor.route(event, getSelf());
+        executor.route(new EventMessage(event, new ExecutionContext()), getSelf());
     }
 
     private void forwardRuleModifiedEvent(OasisRuleMessage ruleMessage) {

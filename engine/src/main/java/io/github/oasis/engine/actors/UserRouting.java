@@ -38,6 +38,9 @@ public class UserRouting implements RoutingLogic {
         if (message instanceof EventMessage) {
             Event event = ((EventMessage) message).getEvent();
             return routees.apply((int) event.getUser() % routees.size());
+        } else if (message instanceof Event) {
+            Event event = (Event) message;
+            return routees.apply((int) event.getUser() % routees.size());
         }
         return broadcastRoutingLogic.select(message, routees);
     }

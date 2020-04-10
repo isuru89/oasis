@@ -20,7 +20,7 @@
 package io.github.oasis.engine.factory;
 
 import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.model.SignalCollector;
+import io.github.oasis.engine.model.ActorSignalCollector;
 import io.github.oasis.engine.processors.AbstractProcessor;
 import io.github.oasis.engine.processors.BadgeConditionalProcessor;
 import io.github.oasis.engine.rules.BadgeRule;
@@ -40,7 +40,7 @@ public class BadgeFactories {
     private static class ConditionalBadges extends AbstractProcessorFactory<BadgeConditionalRule> {
 
         @Override
-        public AbstractProcessor<BadgeConditionalRule, ? extends Signal> create(BadgeConditionalRule rule, SignalCollector collector, Db db) {
+        public AbstractProcessor<BadgeConditionalRule, ? extends Signal> create(BadgeConditionalRule rule, ActorSignalCollector collector, Db db) {
             return new BadgeConditionalProcessor(db, new RuleContext<>(rule, collector));
         }
     }

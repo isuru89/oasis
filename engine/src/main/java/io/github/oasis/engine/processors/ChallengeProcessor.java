@@ -40,6 +40,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static io.github.oasis.engine.rules.ChallengeRule.ChallengeAwardMethod.*;
+import static io.github.oasis.engine.rules.ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE;
+import static io.github.oasis.engine.rules.signals.ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -63,7 +67,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Abstrac
     public List<AbstractChallengeSignal> process(Event event, ChallengeRule rule, ExecutionContext context, DbContext db) {
         Sorted winnerSet = db.SORTED(ID.getGameChallengeKey(event.getGameId(), rule.getId()));
         String member = getMemberKeyFormatInChallengeList(event, rule);
-        if (rule.getAwardMethod() == ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE && winnerSet.memberExists(member)) {
+        if (rule.getAwardMethod() == NON_REPEATABLE && winnerSet.memberExists(member)) {
             return null;
         }
         Mapped map = db.MAP(ID.getGameChallengesKey(event.getGameId()));
@@ -74,7 +78,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Abstrac
             return Collections.singletonList(new ChallengeOverSignal(rule.getId(),
                     event.asEventScope(),
                     event.getTimestamp(),
-                    ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND));
+                    ALL_WINNERS_FOUND));
         }
         BigDecimal score = rule.deriveAwardPointsForPosition(position, event).setScale(Constants.SCALE, RoundingMode.HALF_UP);
         winnerSet.add(member, score.doubleValue());
@@ -86,7 +90,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Abstrac
 
     private String getMemberKeyFormatInChallengeList(Event event, ChallengeRule rule) {
         String member = "u" + event.getUser();
-        if (rule.getAwardMethod() == ChallengeRule.ChallengeAwardMethod.REPEATABLE) {
+        if (rule.getAwardMethod() == REPEATABLE) {
             member = String.format("u%d:%s", event.getUser(), event.getExternalId());
         }
         return member;
@@ -106,6 +110,8 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Abstrac
         long scopeId = rule.getScopeId();
         if (scope == ChallengeRule.ChallengeScope.USER) {
             return event.getUser() != scopeId;
+        } else if (scope == ChallengeRule.ChallengeScope.TEAM) {
+            return event.getTeam() != scopeId;
         }
         return false;
     }

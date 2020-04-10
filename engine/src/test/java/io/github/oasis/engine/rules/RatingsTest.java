@@ -31,6 +31,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -194,7 +195,7 @@ public class RatingsTest extends AbstractRuleTest {
     }
 
     private BigDecimal asDecimal(long val) {
-        return BigDecimal.valueOf(val).setScale(Constants.SCALE, BigDecimal.ROUND_HALF_UP);
+        return BigDecimal.valueOf(val).setScale(Constants.SCALE, RoundingMode.HALF_UP);
     }
 
     private Predicate<Event> checkGt(long margin) {
@@ -228,7 +229,7 @@ public class RatingsTest extends AbstractRuleTest {
         rule.setForEvent(EVT_A);
         rule.setDefaultRating(DEF_RATING);
         rule.setRatings(Arrays.asList(ratings));
-        return new RuleContext<>(rule, signals::add);
+        return new RuleContext<>(rule, fromConsumer(signals::add));
     }
 
 }

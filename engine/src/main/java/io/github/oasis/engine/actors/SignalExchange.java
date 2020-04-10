@@ -31,7 +31,6 @@ import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.factory.InjectedActorSupport;
 import io.github.oasis.engine.model.EventCreatable;
 import io.github.oasis.engine.model.Rules;
-import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
 
 import java.util.ArrayList;
@@ -64,7 +63,7 @@ public class SignalExchange extends OasisBaseActor implements InjectedActorSuppo
     public Receive createReceive() {
         return receiveBuilder()
                 .match(StartRuleExecutionCommand.class, this::initializeRules)
-                .match(Signal.class, this::whenSignalReceived)
+                .match(SignalMessage.class, this::whenSignalReceived)
                 .match(OasisRuleMessage.class, this::handleRuleModificationMessage)
                 .build();
     }
@@ -79,15 +78,14 @@ public class SignalExchange extends OasisBaseActor implements InjectedActorSuppo
         }
     }
 
-    private void whenSignalReceived(Signal signal) {
+    private void whenSignalReceived(SignalMessage signalMessage) {
+        Signal signal = signalMessage.getSignal();
         if (signal instanceof EventCreatable) {
             ((EventCreatable) signal).generateEvent().ifPresent(event -> getContext().getParent().tell(event, getSelf()));
         }
-        System.out.println("Signal recieved " + signal);
-        AbstractRule ruleById = this.rules.getRuleById(signal.getRuleId());
 
-        System.out.println("Signal recieved " + signal + " rule " + ruleById);
-        router.route(new SignalMessage(signal, ruleById), getSelf());
+        System.out.println("Signal received " + signal + " rule " + signalMessage.getRule());
+        router.route(signalMessage, getSelf());
     }
 
 }

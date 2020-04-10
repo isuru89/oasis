@@ -54,6 +54,7 @@ public class ChallengeTest extends AbstractRuleTest {
     static final long U2 = 2;
     static final long U3 = 3;
     static final long U4 = 4;
+    static final long U5 = 5;
 
     static final int WIN_3 = 3;
 
@@ -381,6 +382,80 @@ public class ChallengeTest extends AbstractRuleTest {
         Assertions.assertFalse(noPointId.generateEvent().isPresent());
     }
 
+    @DisplayName("Team Scoped: multiple non-repeatable winners")
+    @Test
+    public void teamScopedSingleChallenge() {
+        TEvent e1 = TEvent.createWithTeam(U1, 1,100, EVT_A, 57);
+        TEvent e2 = TEvent.createWithTeam(U2, 2,105, EVT_A, 83);
+        TEvent e3 = TEvent.createWithTeam(U3, 2, 110, EVT_A, 98);
+        TEvent e4 = TEvent.createWithTeam(U2, 2,155, EVT_A, 75);
+        TEvent e5 = TEvent.createWithTeam(U1, 1,160, EVT_A, 88);
+        TEvent e6 = TEvent.createWithTeam(U1, 1,165, EVT_A, 71);
+        TEvent e7 = TEvent.createWithTeam(U4, 2,170, EVT_A, 64);
+        TEvent e8 = TEvent.createWithTeam(U5, 2,175, EVT_A, 50);
+
+        List<Signal> signals = new ArrayList<>();
+        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
+        ChallengeRule rule = ruleContext.getRule();
+        rule.setAwardMethod(ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE);
+        rule.setScope(ChallengeRule.ChallengeScope.TEAM);
+        rule.setScopeId(2);
+        Assertions.assertEquals(WIN_3, rule.getWinnerCount());
+        Assertions.assertEquals(2, rule.getScopeId());
+        Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM, rule.getScope());
+        Assertions.assertEquals(ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE, rule.getAwardMethod());
+        ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
+        submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8);
+
+        System.out.println(signals);
+        assertStrict(signals,
+                new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e3, 2, U3, e3.getTimestamp(), e3.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e7, 3, U4, e7.getTimestamp(), e7.getExternalId()),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e3),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e7),
+                new ChallengeOverSignal(rule.getId(), e8.asEventScope(), e8.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+        );
+    }
+
+    @DisplayName("Team Scoped: multiple repeatable winners")
+    @Test
+    public void teamScopedRepeatableWinners() {
+        TEvent e1 = TEvent.createWithTeam(U1, 1,100, EVT_A, 57);
+        TEvent e2 = TEvent.createWithTeam(U2, 2,105, EVT_A, 83);
+        TEvent e3 = TEvent.createWithTeam(U3, 2,110, EVT_A, 98);
+        TEvent e4 = TEvent.createWithTeam(U2, 2,155, EVT_A, 75);
+        TEvent e5 = TEvent.createWithTeam(U1, 1,160, EVT_A, 88);
+        TEvent e6 = TEvent.createWithTeam(U1, 1,165, EVT_A, 71);
+        TEvent e7 = TEvent.createWithTeam(U4, 2,170, EVT_A, 64);
+        TEvent e8 = TEvent.createWithTeam(U5, 2,175, EVT_A, 50);
+
+        List<Signal> signals = new ArrayList<>();
+        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
+        ChallengeRule rule = ruleContext.getRule();
+        rule.setScope(ChallengeRule.ChallengeScope.TEAM);
+        rule.setScopeId(2);
+        Assertions.assertEquals(WIN_3, rule.getWinnerCount());
+        Assertions.assertEquals(2, rule.getScopeId());
+        Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM, rule.getScope());
+        Assertions.assertEquals(ChallengeRule.ChallengeAwardMethod.REPEATABLE, rule.getAwardMethod());
+        ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
+        submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8);
+
+        System.out.println(signals);
+        assertStrict(signals,
+                new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e3, 2, U3, e3.getTimestamp(), e3.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e4, 3, U2, e4.getTimestamp(), e4.getExternalId()),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e3),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e4),
+                new ChallengeOverSignal(rule.getId(), e7.asEventScope(), e7.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND),
+                new ChallengeOverSignal(rule.getId(), e8.asEventScope(), e8.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+        );
+    }
+
     private BigDecimal asDecimal(long val) {
         return BigDecimal.valueOf(val).setScale(Constants.SCALE, RoundingMode.HALF_UP);
     }
@@ -403,7 +478,7 @@ public class ChallengeTest extends AbstractRuleTest {
         rule.setCriteria(this::check);
         rule.setWinnerCount(winners);
         rule.setPointId(POINT_ID);
-        return new RuleContext<>(rule, signals::add);
+        return new RuleContext<>(rule, fromConsumer(signals::add));
     }
 
 }

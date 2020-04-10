@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.factory;
 
-import io.github.oasis.engine.model.SignalCollector;
+import io.github.oasis.engine.model.ActorSignalCollector;
 import io.github.oasis.engine.processors.AbstractProcessor;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
@@ -30,6 +30,6 @@ import io.github.oasis.engine.external.Db;
  */
 public abstract class AbstractProcessorFactory<R extends AbstractRule> {
 
-    public abstract AbstractProcessor<R, ? extends Signal> create(R rule, SignalCollector collector, Db db);
+    public abstract AbstractProcessor<R, ? extends Signal> create(R rule, ActorSignalCollector collector, Db db);
 
 }

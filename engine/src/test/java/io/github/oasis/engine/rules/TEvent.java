@@ -33,6 +33,7 @@ public class TEvent implements Event {
 
     public static int SOURCE_ID = 1;
     public static int GAME_ID = 1;
+    public static long TEAM_ID = 1;
     public static long USER_ID = 0L;
 
     private Map<String, Object> values = new HashMap<>();
@@ -44,6 +45,7 @@ public class TEvent implements Event {
         event.values.put("ts", ts);
         event.values.put("game", GAME_ID);
         event.values.put("user", USER_ID);
+        event.values.put("team", TEAM_ID);
         event.values.put("sourceId", SOURCE_ID);
         event.values.put("id", UUID.randomUUID().toString());
         return event;
@@ -52,6 +54,13 @@ public class TEvent implements Event {
     public static TEvent createKeyValue(long user, long ts, String eventType, long value) {
         TEvent event = createKeyValue(ts, eventType, value);
         event.values.put("user", user);
+        return event;
+    }
+
+    public static TEvent createWithTeam(long user, long team, long ts, String eventType, long value) {
+        TEvent event = createKeyValue(ts, eventType, value);
+        event.values.put("user", user);
+        event.values.put("team", team);
         return event;
     }
 
@@ -97,12 +106,7 @@ public class TEvent implements Event {
 
     @Override
     public Long getTeam() {
-        return null;
-    }
-
-    @Override
-    public Long getTeamScope() {
-        return null;
+        return (Long) values.get("team");
     }
 
     @Override

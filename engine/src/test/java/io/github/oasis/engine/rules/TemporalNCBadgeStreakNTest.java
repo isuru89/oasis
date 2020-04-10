@@ -200,7 +200,7 @@ public class TemporalNCBadgeStreakNTest extends AbstractRuleTest {
         options.setCriteria(event -> (long) event.getFieldValue("value") >= 50);
         options.setRetainTime(100);
         options.setTimeUnit(timeUnit);
-        return new RuleContext<>(options, consumer);
+        return new RuleContext<>(options, fromConsumer(consumer));
     }
 
 }

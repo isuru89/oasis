@@ -22,6 +22,7 @@ package io.github.oasis.engine.sinks;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Mapped;
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.TimeContext;
 import io.github.oasis.engine.rules.AbstractRule;
@@ -43,7 +44,7 @@ public class PointsSink extends AbstractSink {
     }
 
     @Override
-    public void consume(Signal pointSignal, AbstractRule rule) {
+    public void consume(Signal pointSignal, AbstractRule rule, ExecutionContext context) {
         try (DbContext db = dbPool.createContext()) {
             PointSignal signal = (PointSignal) pointSignal;
 
@@ -57,7 +58,7 @@ public class PointsSink extends AbstractSink {
             BigDecimal score = signal.getScore();
             pointMap.incrementByDecimal("all", score);
 
-            TimeContext tcx = new TimeContext(ts, getUserTzOffset(userId));
+            TimeContext tcx = new TimeContext(ts, context.getUserTimeOffset());
 
             pointMap.incrementByDecimal("all:" + tcx.getYear(), score);
             pointMap.incrementByDecimal("all:" + tcx.getMonth(), score);
@@ -65,8 +66,8 @@ public class PointsSink extends AbstractSink {
             pointMap.incrementByDecimal("all:" + tcx.getWeek(), score);
             pointMap.incrementByDecimal("all:" + tcx.getQuarter(), score);
 
+            // by rule wise
             String rulePfx = "rule:" + ruleId;
-
             pointMap.incrementByDecimal(rulePfx, score);
             pointMap.incrementByDecimal(rulePfx + ":" + tcx.getYear(), score);
             pointMap.incrementByDecimal(rulePfx + ":" + tcx.getMonth(), score);
@@ -75,17 +76,18 @@ public class PointsSink extends AbstractSink {
             pointMap.incrementByDecimal(rulePfx + ":" + tcx.getQuarter(), score);
 
             // by team wise
-            List<Integer> teamIds = getUserTeams(gameId, userId);
-            for (int teamId : teamIds) {
-                String teamPfx = "team." + teamId;
+            long teamId = signal.getEventScope().getTeamId();
+            String teamPfx = "team:" + teamId;
+            pointMap.incrementByDecimal(teamPfx, score);
+            pointMap.incrementByDecimal(teamPfx + ":" + tcx.getYear(), score);
+            pointMap.incrementByDecimal(teamPfx + ":" + tcx.getMonth(), score);
+            pointMap.incrementByDecimal(teamPfx + ":" + tcx.getDay(), score);
+            pointMap.incrementByDecimal(teamPfx + ":" + tcx.getWeek(), score);
+            pointMap.incrementByDecimal(teamPfx + ":" + tcx.getQuarter(), score);
 
-                pointMap.incrementByDecimal(teamPfx, score);
-                pointMap.incrementByDecimal(teamPfx + ":" + tcx.getYear(), score);
-                pointMap.incrementByDecimal(teamPfx + ":" + tcx.getMonth(), score);
-                pointMap.incrementByDecimal(teamPfx + ":" + tcx.getDay(), score);
-                pointMap.incrementByDecimal(teamPfx + ":" + tcx.getWeek(), score);
-                pointMap.incrementByDecimal(teamPfx + ":" + tcx.getQuarter(), score);
-            }
+            // by source-wise
+            String sourcePfx = "source:" + signal.getEventScope().getSourceId();
+            pointMap.incrementByDecimal(sourcePfx, score);
 
         } catch (IOException e) {
             e.printStackTrace();

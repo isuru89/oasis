@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.sinks;
 
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.external.Db;
@@ -32,7 +33,7 @@ public class BadgeSink extends AbstractSink {
     }
 
     @Override
-    public void consume(Signal signal, AbstractRule rule) {
+    public void consume(Signal signal, AbstractRule rule, ExecutionContext context) {
 
     }
 }

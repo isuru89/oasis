@@ -339,6 +339,6 @@ public class MilestoneTest extends AbstractRuleTest {
         rule.setValueExtractor(extractor);
         rule.setLevels(Arrays.asList(levels));
         rule.setFlags(new HashSet<>(Collections.singletonList(SKIP_NEGATIVE_VALUES)));
-        return new RuleContext<>(rule, collector::add);
+        return new RuleContext<>(rule, fromConsumer(collector::add));
     }
 }

@@ -323,6 +323,6 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         options.setStreaks(streaks);
         options.setCriteria(event -> (long) event.getFieldValue("value") >= 50);
         options.setRetainTime(10);
-        return new RuleContext<>(options, consumer);
+        return new RuleContext<>(options, fromConsumer(consumer));
     }
 }

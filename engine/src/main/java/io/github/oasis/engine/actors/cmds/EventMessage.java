@@ -30,6 +30,11 @@ public class EventMessage implements OasisCommand {
     private Event event;
     private ExecutionContext context;
 
+    public EventMessage(Event event, ExecutionContext context) {
+        this.event = event;
+        this.context = context;
+    }
+
     public Event getEvent() {
         return event;
     }

@@ -91,6 +91,11 @@ public class MockedDb implements DbContext {
     }
 
     @Override
+    public Object runScript(String scriptName, String... args) {
+        return null;
+    }
+
+    @Override
     public void close() {
 
     }

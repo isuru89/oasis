@@ -19,25 +19,16 @@
 
 package io.github.oasis.engine.model;
 
-import akka.actor.ActorRef;
+import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
 
 import java.io.Serializable;
-import java.util.function.Consumer;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SignalCollector implements Consumer<Signal>, Serializable {
+public interface SignalCollector extends Serializable {
 
-    private ActorRef exchangeActor;
+    void accept(Signal signal, ExecutionContext context, AbstractRule rule);
 
-    public SignalCollector(ActorRef exchangeActor) {
-        this.exchangeActor = exchangeActor;
-    }
-
-    @Override
-    public void accept(Signal signal) {
-        exchangeActor.tell(signal, exchangeActor);
-    }
 }

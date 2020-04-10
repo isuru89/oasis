@@ -387,6 +387,6 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         rule.setTimeUnit(timeUnit);
         rule.setCriteria(event -> (long) event.getFieldValue("value") >= 50);
         rule.setThresholds(Arrays.asList(thresholds));
-        return new RuleContext<>(rule, collection::add);
+        return new RuleContext<>(rule, fromConsumer(collection::add));
     }
 }

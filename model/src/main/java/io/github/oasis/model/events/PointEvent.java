@@ -130,11 +130,6 @@ public class PointEvent implements Event {
     }
 
     @Override
-    public Long getTeamScope() {
-        return refEvent.getTeamScope();
-    }
-
-    @Override
     public Integer getSource() {
         return refEvent.getSource();
     }

@@ -395,7 +395,7 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         rule.setForEvent(EVT_1);
         rule.setMaxAwardTimes(maxTimes);
         rule.setConditions(Arrays.asList(conditions));
-        return new RuleContext<>(rule, collector::add);
+        return new RuleContext<>(rule, fromConsumer(collector::add));
     }
 
 }

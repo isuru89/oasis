@@ -21,6 +21,7 @@ package io.github.oasis.engine.actors;
 
 import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.PointSignal;
 import io.github.oasis.engine.rules.signals.Signal;
@@ -46,10 +47,11 @@ public class SignalConsumer extends OasisBaseActor {
     private void processSignal(SignalMessage signalMessage) {
         Signal signal = signalMessage.getSignal();
         AbstractRule rule = signalMessage.getRule();
+        ExecutionContext context = signalMessage.getContext();
 
         System.out.println("Processing signal " + signalMessage + " with rule " + rule);
         if (signal instanceof PointSignal) {
-            new PointsSink(db).consume(signal, rule);
+            new PointsSink(db).consume(signal, rule, context);
         }
     }
 }

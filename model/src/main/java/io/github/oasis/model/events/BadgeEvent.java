@@ -118,11 +118,6 @@ public class BadgeEvent implements Event {
     }
 
     @Override
-    public Long getTeamScope() {
-        return causedEvent.getTeamScope();
-    }
-
-    @Override
     public Integer getSource() {
         return causedEvent.getSource();
     }

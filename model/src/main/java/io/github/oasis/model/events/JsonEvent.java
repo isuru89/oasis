@@ -78,11 +78,6 @@ public class JsonEvent extends HashMap<String, Object> implements Event {
     }
 
     @Override
-    public Long getTeamScope() {
-        return getLongOrNull(Constants.FIELD_SCOPE);
-    }
-
-    @Override
     public Integer getSource() {
         Object o = get(Constants.FIELD_SOURCE);
         if (o == null) {

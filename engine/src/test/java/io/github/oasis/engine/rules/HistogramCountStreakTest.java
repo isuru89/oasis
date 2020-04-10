@@ -299,6 +299,6 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         options.setThreshold(BigDecimal.valueOf(threshold));
         options.setTimeUnit(timeunit);
         options.setCondition(event -> (long) event.getFieldValue("value") >= 50);
-        return new RuleContext<>(options, consumer);
+        return new RuleContext<>(options, fromConsumer(consumer));
     }
 }

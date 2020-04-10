@@ -100,11 +100,6 @@ public abstract class BasePointEvent implements Event {
     }
 
     @Override
-    public Long getTeamScope() {
-        return eventRef.getTeamScope();
-    }
-
-    @Override
     public Integer getSource() {
         return eventRef.getSource();
     }

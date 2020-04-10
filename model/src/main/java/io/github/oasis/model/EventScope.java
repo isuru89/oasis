@@ -27,16 +27,18 @@ import java.util.Objects;
  */
 public class EventScope implements Comparable<EventScope> {
 
-    public static final EventScope NO_SCOPE = new EventScope(0, 0, 0);
+    public static final EventScope NO_SCOPE = new EventScope(0, 0, 0, 0);
 
     private int gameId;
     private int sourceId;
     private long userId;
+    private long teamId;
 
-    public EventScope(int gameId, int sourceId, long userId) {
+    public EventScope(int gameId, int sourceId, long userId, long teamId) {
         this.gameId = gameId;
         this.sourceId = sourceId;
         this.userId = userId;
+        this.teamId = teamId;
     }
 
     public int getGameId() {
@@ -51,6 +53,10 @@ public class EventScope implements Comparable<EventScope> {
         return userId;
     }
 
+    public long getTeamId() {
+        return teamId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -58,12 +64,13 @@ public class EventScope implements Comparable<EventScope> {
         EventScope that = (EventScope) o;
         return gameId == that.gameId &&
                 sourceId == that.sourceId &&
-                userId == that.userId;
+                userId == that.userId &&
+                teamId == that.teamId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameId, sourceId, userId);
+        return Objects.hash(gameId, sourceId, userId, teamId);
     }
 
     @Override
@@ -71,6 +78,17 @@ public class EventScope implements Comparable<EventScope> {
         return Comparator.comparing(EventScope::getGameId)
                 .thenComparing(EventScope::getSourceId)
                 .thenComparing(EventScope::getUserId)
+                .thenComparing(EventScope::getTeamId)
                 .compare(this, o);
+    }
+
+    @Override
+    public String toString() {
+        return "EventScope{" +
+                "game=" + gameId +
+                ", source=" + sourceId +
+                ", user=" + userId +
+                ", team=" + teamId +
+                '}';
     }
 }

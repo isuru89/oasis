@@ -90,4 +90,9 @@ public class RedisContext implements DbContext {
     public Mapped MAP(String contextKey) {
         return new RedisHashSet(jedis, contextKey);
     }
+
+    @Override
+    public Object runScript(String scriptName, String... args) {
+        return null;
+    }
 }

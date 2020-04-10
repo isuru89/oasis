@@ -41,4 +41,6 @@ public interface DbContext extends Closeable {
 
     Mapped MAP(String contextKey);
 
+    Object runScript(String scriptName, String... args);
+
 }

@@ -20,9 +20,6 @@
 package io.github.oasis.engine.model;
 
 import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.Signal;
-
-import java.util.function.Consumer;
 
 /**
  * @author Isuru Weerarathna
@@ -30,9 +27,9 @@ import java.util.function.Consumer;
 public class RuleContext<R extends AbstractRule> {
 
     private final R rule;
-    private final Consumer<Signal> collector;
+    private final SignalCollector collector;
 
-    public RuleContext(R rule, Consumer<Signal> collector) {
+    public RuleContext(R rule, SignalCollector collector) {
         this.rule = rule;
         this.collector = collector;
     }
@@ -41,7 +38,7 @@ public class RuleContext<R extends AbstractRule> {
         return rule;
     }
 
-    public Consumer<Signal> getCollector() {
+    public SignalCollector getCollector() {
         return collector;
     }
 }

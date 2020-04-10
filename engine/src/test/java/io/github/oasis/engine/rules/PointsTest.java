@@ -169,7 +169,7 @@ public class PointsTest extends AbstractRuleTest {
         rule.setAmountToAward(BigDecimal.valueOf(amount));
         rule.setCriteria(criteria);
 
-        return new RuleContext<>(rule, collection::add);
+        return new RuleContext<>(rule, fromConsumer(collection::add));
     }
 
     private RuleContext<PointRule> createRule(BiFunction<Event, PointRule, BigDecimal> amount, BiPredicate<Event, PointRule> criteria, Collection<Signal> collection) {
@@ -178,6 +178,6 @@ public class PointsTest extends AbstractRuleTest {
         rule.setAmountExpression(amount);
         rule.setCriteria(criteria);
 
-        return new RuleContext<>(rule, collection::add);
+        return new RuleContext<>(rule, fromConsumer(collection::add));
     }
 }

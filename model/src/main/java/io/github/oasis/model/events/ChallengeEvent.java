@@ -124,11 +124,6 @@ public class ChallengeEvent implements Event {
     }
 
     @Override
-    public Long getTeamScope() {
-        return event.getTeamScope();
-    }
-
-    @Override
     public Integer getSource() {
         return event.getSource();
     }

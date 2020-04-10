@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.actors.cmds;
 
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
 
@@ -29,10 +30,15 @@ public class SignalMessage implements OasisCommand {
 
     private Signal signal;
     private AbstractRule rule;
+    private ExecutionContext context;
 
-    public SignalMessage(Signal signal, AbstractRule rule) {
+    public SignalMessage(Signal signal, ExecutionContext context, AbstractRule rule) {
         this.signal = signal;
         this.rule = rule;
+    }
+
+    public ExecutionContext getContext() {
+        return context;
     }
 
     public Signal getSignal() {

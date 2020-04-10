@@ -62,7 +62,7 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
             if (signals != null) {
                 signals.forEach(signal -> {
                     beforeEmit(signal, event, rule, context, db);
-                    ruleContext.getCollector().accept(signal);
+                    ruleContext.getCollector().accept(signal, context, rule);
                 });
             }
             afterEmitAll(signals, event, rule, context, db);

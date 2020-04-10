@@ -242,7 +242,7 @@ public class FirstEventTest extends AbstractRuleTest {
         BadgeFirstEventRule rule = new BadgeFirstEventRule("test.event", forEvent);
         rule.setForEvent(EVT_1);
         rule.setCondition(predicate);
-        return new RuleContext<>(rule, collectTo::add);
+        return new RuleContext<>(rule, fromConsumer(collectTo::add));
     }
 
 }

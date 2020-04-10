@@ -94,14 +94,6 @@ public interface Event extends Serializable {
     Long getTeam();
 
     /**
-     * Returns the scope id of the current team.
-     * Operators does not care about this field for its computation.
-     *
-     * @return the scope id of the current team.
-     */
-    Long getTeamScope();
-
-    /**
      * Return source id generated this event.
      *
      * @return source id
@@ -115,7 +107,12 @@ public interface Event extends Serializable {
      */
     Integer getGameId();
 
+    /**
+     * Creates scope of this event using game id, source id and user id.
+     *
+     * @return scope of event.
+     */
     default EventScope asEventScope() {
-        return new EventScope(getGameId(), getSource(), getUser());
+        return new EventScope(getGameId(), getSource(), getUser(), getTeam());
     }
 }
