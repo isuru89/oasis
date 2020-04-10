@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.AbstractRule;
@@ -46,7 +47,7 @@ public abstract class BadgeProcessor<R extends BadgeRule> extends AbstractProces
     }
 
     @Override
-    protected void beforeEmit(BadgeSignal signal, Event event, R rule, DbContext db) {
+    protected void beforeEmit(BadgeSignal signal, Event event, R rule, ExecutionContext context, DbContext db) {
         db.addToSorted(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), rule.getId()),
                 String.format("%d:%s:%d:%d", signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getAttribute()),
                 signal.getStartTime());

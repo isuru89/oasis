@@ -19,6 +19,11 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.Mapped;
+import io.github.oasis.engine.external.Sorted;
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.Record;
 import io.github.oasis.engine.model.RuleContext;
@@ -26,10 +31,6 @@ import io.github.oasis.engine.rules.BadgeHistogramStreakNRule;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeRemovalSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeSignal;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Mapped;
-import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;
@@ -63,7 +64,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeHistogramStreakNRule rule, DbContext db) {
+    public List<BadgeSignal> process(Event event, BadgeHistogramStreakNRule rule, ExecutionContext context, DbContext db) {
         String badgeKey = ID.getBadgeHistogramKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(badgeKey);
         long timestamp = event.getTimestamp() - (event.getTimestamp() % rule.getTimeUnit());

@@ -19,21 +19,22 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.Mapped;
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.RatingRule;
 import io.github.oasis.engine.rules.signals.AbstractRatingSignal;
 import io.github.oasis.engine.rules.signals.RatingChangedSignal;
 import io.github.oasis.engine.rules.signals.RatingPointsSignal;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.utils.Constants;
 import io.github.oasis.engine.utils.Utils;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
+import java.math.RoundingMode;
 import java.util.List;
 
 import static io.github.oasis.engine.utils.Numbers.asInt;
@@ -48,11 +49,11 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, AbstractRatin
     }
 
     @Override
-    protected void beforeEmit(AbstractRatingSignal signal, Event event, RatingRule rule, DbContext db) {
+    protected void beforeEmit(AbstractRatingSignal signal, Event event, RatingRule rule, ExecutionContext context, DbContext db) {
     }
 
     @Override
-    public List<AbstractRatingSignal> process(Event event, RatingRule rule, DbContext db) {
+    public List<AbstractRatingSignal> process(Event event, RatingRule rule, ExecutionContext context, DbContext db) {
         Mapped ratingsMap = db.MAP(ID.getGameRatingKey(event.getGameId(), rule.getId()));
         String subRatingKey = String.valueOf(event.getUser());
         String userCurrentRating = ratingsMap.getValue(subRatingKey);
@@ -67,12 +68,12 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, AbstractRatin
             if (rating.getCriteria().test(event) && newRating != currRating) {
                 long ts = event.getTimestamp();
                 String id = event.getExternalId();
-                BigDecimal score = deriveAwardedPoints(event, currRating, rating).setScale(Constants.SCALE, BigDecimal.ROUND_HALF_UP);
+                BigDecimal score = deriveAwardedPoints(event, currRating, rating).setScale(Constants.SCALE, RoundingMode.HALF_UP);
                 ratingsMap.setValue(subRatingKey, String.format("%d:%d:%s", newRating, ts, id));
                 Event copiedEvent = Utils.deepClone(event);
-                return Arrays.asList(
-                        new RatingChangedSignal(rule.getId(), currRating, newRating, ts, event),
-                        new RatingPointsSignal(rule.getId(), rating.getPointId(), newRating, score, copiedEvent)
+                return List.of(
+                        RatingChangedSignal.create(rule, copiedEvent, currRating, newRating),
+                        RatingPointsSignal.create(rule, copiedEvent, newRating, rating.getPointId(), score)
                 );
             }
         }

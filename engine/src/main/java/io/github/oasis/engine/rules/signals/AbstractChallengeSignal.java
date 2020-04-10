@@ -26,8 +26,8 @@ import io.github.oasis.model.EventScope;
  */
 public abstract class AbstractChallengeSignal extends Signal {
 
-    AbstractChallengeSignal(String ruleId, EventScope eventScope) {
-        super(ruleId, eventScope);
+    AbstractChallengeSignal(String ruleId, EventScope eventScope, long occurredTs) {
+        super(ruleId, eventScope, occurredTs);
     }
 
 }

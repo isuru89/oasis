@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.Record;
 import io.github.oasis.engine.model.RuleContext;
@@ -58,7 +59,7 @@ public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeStreakNRule rule, DbContext db) {
+    public List<BadgeSignal> process(Event event, BadgeStreakNRule rule, ExecutionContext context, DbContext db) {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
@@ -109,12 +110,12 @@ public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
         return signals;
     }
 
-    public List<BadgeSignal> fold(List<Record> tuples, Event event, BadgeStreakNRule options, DbContext db) {
+    public List<BadgeSignal> fold(List<Record> tuples, Event event, BadgeStreakNRule rule, DbContext db) {
         Record start = null;
         int len = 0;
         List<BadgeSignal> signals = new ArrayList<>();
         for (Record tuple : tuples) {
-            int prev = asInt(options.getStreakMap().floor(len));
+            int prev = asInt(rule.getStreakMap().floor(len));
             String[] parts = tuple.getMember().split(COLON);
             if (isZero(parts[1])) {
                 start = null;
@@ -125,10 +126,10 @@ public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
                 }
                 len++;
             }
-            int now = asInt(options.getStreakMap().floor(len));
+            int now = asInt(rule.getStreakMap().floor(len));
             if (prev < now && start != null) {
                 String[] startParts = start.getMember().split(COLON);
-                BadgeSignal signal = new StreakBadgeSignal(options.getId(),
+                BadgeSignal signal = new StreakBadgeSignal(rule.getId(),
                         event,
                         now,
                         Long.parseLong(startParts[0]),

@@ -17,32 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.engine.db;
-
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
+package io.github.oasis.engine.model;
 
 /**
  * @author Isuru Weerarathna
  */
-public class MockedRedisDb implements Db {
+public class ExecutionContext {
 
-    public MockedRedisDb() {
+    private int userTimeOffset;
 
+    public int getUserTimeOffset() {
+        return userTimeOffset;
     }
 
-    @Override
-    public void init() {
-
-    }
-
-    @Override
-    public DbContext createContext() {
-        return new MockedDb();
-    }
-
-    @Override
-    public void close() {
-
+    public static ExecutionContext withUserTz(int offSet) {
+        ExecutionContext context = new ExecutionContext();
+        context.userTimeOffset = offSet;
+        return context;
     }
 }

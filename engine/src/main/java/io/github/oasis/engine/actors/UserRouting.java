@@ -22,6 +22,7 @@ package io.github.oasis.engine.actors;
 import akka.routing.BroadcastRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.RoutingLogic;
+import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.model.Event;
 import scala.collection.immutable.IndexedSeq;
 
@@ -34,8 +35,8 @@ public class UserRouting implements RoutingLogic {
 
     @Override
     public Routee select(Object message, IndexedSeq<Routee> routees) {
-        if (message instanceof Event) {
-            Event event = (Event) message;
+        if (message instanceof EventMessage) {
+            Event event = ((EventMessage) message).getEvent();
             return routees.apply((int) event.getUser() % routees.size());
         }
         return broadcastRoutingLogic.select(message, routees);

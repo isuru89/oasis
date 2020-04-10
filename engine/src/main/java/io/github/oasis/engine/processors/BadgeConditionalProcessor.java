@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.BadgeConditionalRule;
@@ -54,7 +55,7 @@ public class BadgeConditionalProcessor extends BadgeProcessor<BadgeConditionalRu
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeConditionalRule rule, DbContext db) {
+    public List<BadgeSignal> process(Event event, BadgeConditionalRule rule, ExecutionContext context, DbContext db) {
         List<BadgeConditionalRule.Condition> conditions = rule.getConditions();
         if (conditions.isEmpty()) {
             return null;

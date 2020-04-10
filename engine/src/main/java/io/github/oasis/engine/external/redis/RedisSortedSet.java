@@ -79,6 +79,12 @@ public class RedisSortedSet implements Sorted {
     }
 
     @Override
+    public Sorted expireIn(long milliseconds) {
+        jedis.expire(baseKey, (int) Math.ceil(milliseconds / 1000.0));
+        return this;
+    }
+
+    @Override
     public void removeRangeByScore(long from, long to) {
         jedis.zremrangeByScore(baseKey, from, to);
     }

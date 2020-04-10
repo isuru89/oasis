@@ -23,8 +23,6 @@ import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import redis.clients.jedis.JedisPool;
 
-import java.io.IOException;
-
 /**
  * @author Isuru Weerarathna
  */
@@ -41,12 +39,17 @@ public class RedisDb implements Db {
     }
 
     @Override
+    public void init() {
+
+    }
+
+    @Override
     public DbContext createContext() {
         return new RedisContext(pool.getResource());
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (pool != null) {
             pool.close();
         }

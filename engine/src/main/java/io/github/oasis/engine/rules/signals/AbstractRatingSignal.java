@@ -28,8 +28,8 @@ public abstract class AbstractRatingSignal extends Signal {
 
     private int currentRating;
 
-    public AbstractRatingSignal(String ruleId, EventScope eventScope, int currentRating) {
-        super(ruleId, eventScope);
+    public AbstractRatingSignal(String ruleId, EventScope eventScope, long occurredTs, int currentRating) {
+        super(ruleId, eventScope, occurredTs);
         this.currentRating = currentRating;
     }
 

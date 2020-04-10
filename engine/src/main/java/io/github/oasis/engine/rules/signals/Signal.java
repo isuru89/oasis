@@ -34,14 +34,16 @@ public abstract class Signal implements Comparable<Signal>  {
 
     private final String ruleId;
     private final EventScope eventScope;
+    private long occurredTimestamp;
 
-    Signal(String ruleId, Event event) {
-        this(ruleId, event.asEventScope());
+    Signal(String ruleId, Event event, long occurredTimestamp) {
+        this(ruleId, event.asEventScope(), occurredTimestamp);
     }
 
-    Signal(String ruleId, EventScope eventScope) {
+    Signal(String ruleId, EventScope eventScope, long occurredTimestamp) {
         this.ruleId = ruleId;
         this.eventScope = eventScope;
+        this.occurredTimestamp = occurredTimestamp;
     }
 
     public String getRuleId() {
@@ -50,6 +52,10 @@ public abstract class Signal implements Comparable<Signal>  {
 
     public EventScope getEventScope() {
         return eventScope;
+    }
+
+    public long getOccurredTimestamp() {
+        return occurredTimestamp;
     }
 
     @Override

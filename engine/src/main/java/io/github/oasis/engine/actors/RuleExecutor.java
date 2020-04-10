@@ -20,6 +20,7 @@
 package io.github.oasis.engine.actors;
 
 import akka.actor.AbstractActor;
+import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
@@ -59,7 +60,7 @@ public class RuleExecutor extends OasisBaseActor {
                 .match(StartRuleExecutionCommand.class, this::assignRules)
                 .build();
         executing = receiveBuilder()
-                .match(Event.class, this::processEvent)
+                .match(EventMessage.class, this::processEvent)
                 .match(OasisRuleMessage.class, this::ruleModified)
                 .build();
     }
@@ -71,7 +72,7 @@ public class RuleExecutor extends OasisBaseActor {
 
     private void ruleModified(OasisRuleMessage message) {
         if (message instanceof RuleAddedMessage) {
-            System.out.println("Rule modified received in " + myId + " IN " + this.rules + " -> " + message);
+//            System.out.println("Rule modified received in " + myId + " IN " + this.rules + " -> " + message);
             rules.addRule(((RuleAddedMessage) message).getRule());
         }
     }
@@ -80,12 +81,13 @@ public class RuleExecutor extends OasisBaseActor {
         this.rules = startRuleExecutionCommand.getRules();
         this.parentId = startRuleExecutionCommand.getParentId();
         this.myId = COUNTER.incrementAndGet();
-        System.out.println("Initializing msg recieved " + rules + " -- " + this.myId + " @" + System.currentTimeMillis() + " : " + this);
+//        System.out.println("Initializing msg recieved " + rules + " -- " + this.myId + " @" + System.currentTimeMillis() + " : " + this);
         getContext().become(executing);
     }
 
-    private void processEvent(Event event) {
-        System.out.println("Processing event for user #" + event.getUser() + " in " + this.myId + " p " + processors + " in this " + this.rules);
+    private void processEvent(EventMessage eventMessage) {
+        Event event = eventMessage.getEvent();
+        System.out.println("Processing event for user #" + event.getUser() + " in " + this + " in this " + this.rules);
         Iterator<AbstractRule> allRulesForEvent = this.rules.getAllRulesForEvent(event);
         while (allRulesForEvent.hasNext()) {
             AbstractRule rule = allRulesForEvent.next();
@@ -95,7 +97,7 @@ public class RuleExecutor extends OasisBaseActor {
                     s -> processors.createProcessor(rule, rules.getCollector()));
 
             // execute processor using event
-            processor.accept(event);
+            processor.accept(event, eventMessage.getContext());
         }
     }
 

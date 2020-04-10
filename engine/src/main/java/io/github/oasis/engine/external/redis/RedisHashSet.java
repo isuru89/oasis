@@ -84,6 +84,12 @@ public class RedisHashSet implements Mapped {
     }
 
     @Override
+    public Mapped expireIn(long milliseconds) {
+        jedis.expire(baseKey, (int) Math.ceil(milliseconds / 1000.0));
+        return this;
+    }
+
+    @Override
     public void remove(String key) {
         jedis.hdel(baseKey, key);
     }

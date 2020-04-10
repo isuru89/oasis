@@ -57,6 +57,8 @@ public interface Mapped {
     }
     BigDecimal incrementByDecimal(String key, BigDecimal byValue);
 
+    Mapped expireIn(long milliseconds);
+
     void remove(String key);
 
     List<String> getValues(String... keys);

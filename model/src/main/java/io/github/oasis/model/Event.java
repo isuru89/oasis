@@ -116,6 +116,6 @@ public interface Event extends Serializable {
     Integer getGameId();
 
     default EventScope asEventScope() {
-        return new EventScope(getGameId(), getSource(), getUser(), getTimestamp());
+        return new EventScope(getGameId(), getSource(), getUser());
     }
 }

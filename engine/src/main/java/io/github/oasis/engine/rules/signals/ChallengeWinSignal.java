@@ -38,7 +38,7 @@ public class ChallengeWinSignal extends AbstractChallengeSignal {
     private String wonEventId;
 
     public ChallengeWinSignal(String ruleId, EventScope eventScope, int position, long winnerUserId, long wonAt, String wonEventId) {
-        super(ruleId, eventScope);
+        super(ruleId, eventScope, wonAt);
         this.position = position;
         this.winnerUserId = winnerUserId;
         this.wonAt = wonAt;
@@ -46,7 +46,7 @@ public class ChallengeWinSignal extends AbstractChallengeSignal {
     }
 
     public ChallengeWinSignal(String ruleId, Event event, int position, long winnerUserId, long wonAt, String wonEventId) {
-        super(ruleId, event.asEventScope());
+        super(ruleId, event.asEventScope(), wonAt);
         this.position = position;
         this.winnerUserId = winnerUserId;
         this.wonAt = wonAt;

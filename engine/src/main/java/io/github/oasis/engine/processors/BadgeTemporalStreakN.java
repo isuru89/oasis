@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.Record;
 import io.github.oasis.engine.model.RuleContext;
@@ -64,16 +65,16 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeStreakNRule ruleRef, DbContext db) {
+    public List<BadgeSignal> process(Event event, BadgeStreakNRule ruleRef, ExecutionContext context, DbContext db) {
         BadgeTemporalStreakNRule rule = (BadgeTemporalStreakNRule) ruleRef;
         if (rule.isConsecutive()) {
-            return super.process(event, rule, db);
+            return super.process(event, rule, context, db);
         } else {
-            return nonConsecutiveAccept(event, rule, db);
+            return nonConsecutiveAccept(event, rule, context, db);
         }
     }
 
-    private List<BadgeSignal> nonConsecutiveAccept(Event event, BadgeTemporalStreakNRule rule, DbContext db) {
+    private List<BadgeSignal> nonConsecutiveAccept(Event event, BadgeTemporalStreakNRule rule, ExecutionContext context, DbContext db) {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
@@ -198,9 +199,9 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
 
 
     @Override
-    public List<BadgeSignal> fold(List<Record> tuples, Event event, BadgeStreakNRule optionsRef, DbContext db) {
+    public List<BadgeSignal> fold(List<Record> tuples, Event event, BadgeStreakNRule rule, DbContext db) {
         List<BadgeSignal> signals = new ArrayList<>();
-        BadgeTemporalStreakNRule options = (BadgeTemporalStreakNRule) optionsRef;
+        BadgeTemporalStreakNRule options = (BadgeTemporalStreakNRule) rule;
         List<List<Record>> partitions = splitPartitions(tuples, options);
         if (partitions.isEmpty()) {
             return signals;
@@ -209,7 +210,7 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
         long lastBadgeTs = 0L;
         int lastBadgeStreak = 0;
         String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-        List<String> badgeInfos = db.getValuesFromMap(badgeMetaKey, getMetaEndTimeKey(rule), getMetaStreakKey(rule));
+        List<String> badgeInfos = db.getValuesFromMap(badgeMetaKey, getMetaEndTimeKey(this.rule), getMetaStreakKey(this.rule));
         lastBadgeTs = asLong(badgeInfos.get(0));
         lastBadgeStreak = asInt(badgeInfos.get(1));
 

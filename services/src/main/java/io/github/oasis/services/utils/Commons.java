@@ -19,7 +19,6 @@
 
 package io.github.oasis.services.utils;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +85,6 @@ public class Commons {
         }
     }
 
-    @Nullable
     public static <T> T firstNonNull(T... items) {
         if (items == null) {
             return null;

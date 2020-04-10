@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.engine.rules.RatingRule;
 import io.github.oasis.model.Event;
 import lombok.ToString;
 
@@ -36,7 +37,7 @@ public class RatingChangedSignal extends AbstractRatingSignal {
     private String changedEvent;
 
     public RatingChangedSignal(String ruleId, int previousRating, int rating, long changedAt, Event changedEvent) {
-        super(ruleId, changedEvent.asEventScope(), rating);
+        super(ruleId, changedEvent.asEventScope(), changedAt, rating);
         this.previousRating = previousRating;
         this.changedAt = changedAt;
         this.changedEvent = changedEvent.getExternalId();
@@ -52,6 +53,10 @@ public class RatingChangedSignal extends AbstractRatingSignal {
 
     public String getChangedEvent() {
         return changedEvent;
+    }
+
+    public static RatingChangedSignal create(RatingRule rule, Event causedEvent, int previousRating, int newRating) {
+        return new RatingChangedSignal(rule.getId(), previousRating, newRating, causedEvent.getTimestamp(), causedEvent);
     }
 
     @Override

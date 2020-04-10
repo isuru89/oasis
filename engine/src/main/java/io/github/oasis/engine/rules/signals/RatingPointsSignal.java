@@ -20,6 +20,7 @@
 package io.github.oasis.engine.rules.signals;
 
 import io.github.oasis.engine.model.EventCreatable;
+import io.github.oasis.engine.rules.RatingRule;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.EventScope;
 import io.github.oasis.model.events.RatingPointEvent;
@@ -41,10 +42,22 @@ public class RatingPointsSignal extends AbstractRatingSignal implements EventCre
     private Event causedEvent;
 
     public RatingPointsSignal(String ruleId, String pointId, int currentRating, BigDecimal points, Event causedEvent) {
-        super(ruleId, causedEvent == null ? EventScope.NO_SCOPE : causedEvent.asEventScope(), currentRating);
+        super(ruleId, causedEvent == null ? EventScope.NO_SCOPE : causedEvent.asEventScope(),
+                causedEvent == null ? System.currentTimeMillis() : causedEvent.getTimestamp(), currentRating);
         this.points = points;
         this.causedEvent = causedEvent;
         this.pointId = pointId;
+    }
+
+    public RatingPointsSignal(String ruleId, String pointId, int currentRating, BigDecimal points, long ratedTime, Event causedEvent) {
+        super(ruleId, causedEvent == null ? EventScope.NO_SCOPE : causedEvent.asEventScope(), ratedTime, currentRating);
+        this.points = points;
+        this.causedEvent = causedEvent;
+        this.pointId = pointId;
+    }
+
+    public static RatingPointsSignal create(RatingRule rule, Event causedEvent, int currentRating, String pointId, BigDecimal points) {
+        return new RatingPointsSignal(rule.getId(), pointId, currentRating, points, causedEvent.getTimestamp(), causedEvent);
     }
 
     public String getPointId() {

@@ -26,7 +26,7 @@ import io.github.oasis.model.Event;
  */
 public class ConditionalBadge extends BadgeSignal {
     public ConditionalBadge(String ruleId, Event event, int attributeId, long timestamp, String eventId) {
-        super(ruleId, event, attributeId, timestamp, timestamp, eventId, eventId);
+        super(ruleId, event, event.getTimestamp(), attributeId, timestamp, timestamp, eventId, eventId);
     }
     public static ConditionalBadge create(String ruleId, Event causedEvent, int attributeId) {
         return new ConditionalBadge(ruleId, causedEvent, attributeId, causedEvent.getTimestamp(), causedEvent.getExternalId());

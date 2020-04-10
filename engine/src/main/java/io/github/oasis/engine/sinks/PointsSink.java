@@ -22,6 +22,7 @@ package io.github.oasis.engine.sinks;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Mapped;
+import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.TimeContext;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.PointSignal;
@@ -48,10 +49,10 @@ public class PointsSink extends AbstractSink {
 
             long userId = signal.getEventScope().getUserId();
             int gameId = signal.getEventScope().getGameId();
-            long ts = signal.getEventScope().getTimestamp();
+            long ts = signal.getOccurredTimestamp();
             String ruleId = signal.getRuleId();
 
-            Mapped pointMap = db.MAP(String.format("g%d:u%d:points", gameId, userId));
+            Mapped pointMap = db.MAP(ID.getGameUserPointsSummary(gameId, userId));
 
             BigDecimal score = signal.getScore();
             pointMap.incrementByDecimal("all", score);

@@ -22,6 +22,7 @@ package io.github.oasis.engine.actors;
 import akka.routing.RoundRobinRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.RoutingLogic;
+import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.rules.signals.Signal;
 import scala.collection.immutable.IndexedSeq;
 
@@ -36,8 +37,8 @@ public class UserSignalRouting implements RoutingLogic {
 
     @Override
     public Routee select(Object message, IndexedSeq<Routee> routees) {
-        if (message instanceof Signal) {
-            Signal signal = (Signal) message;
+        if (message instanceof SignalMessage) {
+            Signal signal = ((SignalMessage) message).getSignal();
             if (Objects.nonNull(signal.getEventScope())) {
                 long userId = signal.getEventScope().getUserId();
                 return routees.apply((int) userId % routees.size());

@@ -38,6 +38,8 @@ public interface Sorted {
     List<Record> getRangeByScoreWithScores(BigDecimal from, BigDecimal to);
     List<Record> getRangeByRankWithScores(long from, long to);
 
+    Sorted expireIn(long milliseconds);
+
     void removeRangeByScore(long from, long to);
 
     boolean memberExists(String member);

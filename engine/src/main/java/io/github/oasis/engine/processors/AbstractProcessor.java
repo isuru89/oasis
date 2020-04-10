@@ -19,22 +19,23 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.model.EventFilter;
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.model.Event;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal> implements Consumer<Event>, Serializable {
+public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal> implements BiConsumer<Event, ExecutionContext>, Serializable {
 
     protected final Db dbPool;
     protected final R rule;
@@ -46,28 +47,40 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
         this.rule = ruleCtx.getRule();
     }
 
-    public boolean isDenied(Event event) {
+    public boolean isDenied(Event event, ExecutionContext context) {
         return !isMatchEvent(event, rule) || unableToProcess(event, rule);
     }
 
     @Override
-    public void accept(Event event) {
-        if (isDenied(event)) {
+    public void accept(Event event, ExecutionContext context) {
+        if (isDenied(event, context)) {
             return;
         }
 
         try (DbContext db = dbPool.createContext()) {
-            List<S> signals = process(event, rule, db);
+            List<S> signals = process(event, rule, context, db);
             if (signals != null) {
                 signals.forEach(signal -> {
-                    beforeEmit(signal, event, rule, db);
+                    beforeEmit(signal, event, rule, context, db);
                     ruleContext.getCollector().accept(signal);
                 });
             }
-            afterEmitAll(signals, event, rule, db);
+            afterEmitAll(signals, event, rule, context, db);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Returns timestamp related to user's timezone as specified in his/her profile.
+     *
+     * @param userId user id.
+     * @param ts timestamp to convert.
+     * @param db db context to retrieve settings.
+     * @return converted timestamp to user's timezone.
+     */
+    protected long getUserSpecificEpochTs(long userId, long ts, DbContext db) {
+        return ts;
     }
 
     /**
@@ -78,7 +91,7 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
      * @param rule rule reference.
      * @param db db context.
      */
-    protected abstract void beforeEmit(S signal, Event event, R rule, DbContext db);
+    protected abstract void beforeEmit(S signal, Event event, R rule, ExecutionContext context, DbContext db);
 
     /**
      * Calls after all of signals are sent to the collector.
@@ -88,7 +101,7 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
      * @param rule rule reference.
      * @param db db context.
      */
-    protected void afterEmitAll(List<S> signals, Event event, R rule, DbContext db) {
+    protected void afterEmitAll(List<S> signals, Event event, R rule, ExecutionContext context, DbContext db) {
         // do nothing.
     }
 
@@ -100,7 +113,7 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
      * @param db db context.
      * @return list of signals to notify.
      */
-    public abstract List<S> process(Event event, R rule, DbContext db);
+    public abstract List<S> process(Event event, R rule, ExecutionContext context, DbContext db);
 
     private boolean isMatchEvent(Event event, AbstractRule rule) {
         return rule.getEventTypeMatcher().matches(event.getEventType());

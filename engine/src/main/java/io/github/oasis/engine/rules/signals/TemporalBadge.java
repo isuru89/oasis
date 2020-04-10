@@ -33,7 +33,7 @@ public class TemporalBadge extends BadgeSignal {
     private long timestamp;
 
     public TemporalBadge(String ruleId, Event causedEvent, int attributeId, long st, long et, long timestamp, String eventId) {
-        super(ruleId, causedEvent, attributeId, st, et, eventId, null);
+        super(ruleId, causedEvent, timestamp, attributeId, st, et, eventId, null);
         this.timestamp = timestamp;
     }
 

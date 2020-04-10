@@ -24,6 +24,10 @@ package io.github.oasis.engine.model;
  */
 public final class ID {
 
+    public static String getGameUserPointsSummary(int gameId, long userId) {
+        return String.format("g%d:u%d:points", gameId, userId);
+    }
+
     public static String getUserRatingsKey(int gameId, long userId, String ratingId) {
         return String.format("u%d:g%d:rt:%s", userId, gameId, ratingId);
     }

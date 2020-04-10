@@ -28,16 +28,17 @@ import lombok.ToString;
 @ToString
 public class BadgeRemoveSignal extends BadgeSignal {
     public BadgeRemoveSignal(String ruleId, EventScope event, int streak, long st, long et, String sid, String eid) {
-        super(ruleId, event, streak, st, et, sid, eid);
+        super(ruleId, event, st, streak, st, et, sid, eid);
     }
 
     public BadgeRemoveSignal(String ruleId, EventScope eventScope, int streak, long st) {
-        super(ruleId, eventScope, streak, st, -1, null, null);
+        super(ruleId, eventScope, st, streak, st, -1, null, null);
     }
 
     public BadgeRemoveSignal(BadgeSignal prevBadge) {
         super(prevBadge.getRuleId(),
                 prevBadge.getEventScope(),
+                prevBadge.getStartTime(),
                 prevBadge.getAttribute(),
                 prevBadge.getStartTime(),
                 prevBadge.getEndTime(),

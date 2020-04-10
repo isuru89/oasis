@@ -41,7 +41,18 @@ public class ChallengePointsAwardedSignal extends AbstractChallengeSignal implem
     private Event causedEvent;
 
     public ChallengePointsAwardedSignal(String ruleId, String pointId, BigDecimal points, Event causedEvent) {
-        super(ruleId, causedEvent == null ? EventScope.NO_SCOPE : causedEvent.asEventScope());
+        super(ruleId,
+                causedEvent.asEventScope(),
+                causedEvent.getTimestamp());
+        this.points = points;
+        this.causedEvent = causedEvent;
+        this.pointId = pointId;
+    }
+
+    public ChallengePointsAwardedSignal(String ruleId, String pointId, BigDecimal points, long awardTime, Event causedEvent) {
+        super(ruleId,
+                causedEvent == null ? EventScope.NO_SCOPE : causedEvent.asEventScope(),
+                awardTime);
         this.points = points;
         this.causedEvent = causedEvent;
         this.pointId = pointId;

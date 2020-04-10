@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.PointRule;
 import io.github.oasis.engine.rules.signals.PointSignal;
@@ -39,17 +40,17 @@ public class PointsProcessor extends AbstractProcessor<PointRule, PointSignal> {
     }
 
     @Override
-    public boolean isDenied(Event event) {
-        return super.isDenied(event) || !isCriteriaSatisfied(event, rule);
+    public boolean isDenied(Event event, ExecutionContext context) {
+        return super.isDenied(event, context) || !isCriteriaSatisfied(event, rule);
     }
 
     @Override
-    protected void beforeEmit(PointSignal signal, Event event, PointRule rule, DbContext db) {
+    protected void beforeEmit(PointSignal signal, Event event, PointRule rule, ExecutionContext context, DbContext db) {
         // do nothing
     }
 
     @Override
-    public List<PointSignal> process(Event event, PointRule rule, DbContext db) {
+    public List<PointSignal> process(Event event, PointRule rule, ExecutionContext context, DbContext db) {
         if (rule.isAwardBasedOnEvent()) {
             BigDecimal score = rule.getAmountExpression().apply(event, rule);
             return Collections.singletonList(new PointSignal(rule.getId(), score, event));

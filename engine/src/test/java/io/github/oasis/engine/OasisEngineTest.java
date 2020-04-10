@@ -20,25 +20,34 @@
 package io.github.oasis.engine;
 
 import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.testkit.TestKit;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.factory.OasisDependencyModule;
+import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.PointRule;
 import io.github.oasis.engine.rules.TEvent;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.concurrent.TimeoutException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
 public class OasisEngineTest {
+
+    static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private static final String TEST_SYSTEM = "test-oasis-system";
 
@@ -49,6 +58,8 @@ public class OasisEngineTest {
 
     private OasisEngine engine;
     private ActorRef supervisor;
+    private ActorSystem system;
+    private TestKit testKit;
     @Inject
     private Db dbPool;
 
@@ -73,21 +84,34 @@ public class OasisEngineTest {
 
     private void awaitTerminated() {
         try {
-            engine.awaitTerminated();
-        } catch (TimeoutException | InterruptedException e) {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
+    private Map<String, String> getDataOnKey(String key) {
+        try (DbContext db = dbPool.createContext()) {
+            return db.MAP(key).getAll();
+        } catch (IOException e) {
+            Assertions.fail("Unable to connect to db host!", e);
+            return Map.of();
+        }
+    }
+
+    private long TS(String timeStr) {
+        return LocalDateTime.parse(timeStr, FORMATTER).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
     @Test
     public void testOasisEngineStartup() {
-        TEvent e1 = TEvent.createKeyValue(System.currentTimeMillis(), EVT_A, 15);
-        TEvent e2 = TEvent.createKeyValue(System.currentTimeMillis(), EVT_A, 83);
-        TEvent e3 = TEvent.createKeyValue(System.currentTimeMillis(), EVT_A, 14);
+        TEvent e1 = TEvent.createKeyValue(TS("2020-04-02 07:15"), EVT_A, 15);
+        TEvent e2 = TEvent.createKeyValue(TS("2020-04-02 08:20"), EVT_A, 83);
+        TEvent e3 = TEvent.createKeyValue(TS("2020-04-02 08:45"), EVT_A, 74);
 
         PointRule rule = new PointRule("test.point.rule");
         rule.setForEvent(EVT_A);
-        rule.setAmountToAward(BigDecimal.valueOf(AMOUNT_10));
+        rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long)event.getFieldValue("value") - 50));
         rule.setCriteria((event, rule1) -> (long) event.getFieldValue("value") >= 50);
 
         supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
@@ -96,6 +120,8 @@ public class OasisEngineTest {
         supervisor.tell(e3, supervisor);
         awaitTerminated();
 
+        Map<String, String> map = getDataOnKey(ID.getGameUserPointsSummary(TEvent.GAME_ID, TEvent.USER_ID));
+        System.out.println(map);
     }
 
 }

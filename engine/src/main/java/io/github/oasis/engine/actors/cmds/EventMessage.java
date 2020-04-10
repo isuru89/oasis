@@ -17,25 +17,24 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors;
+package io.github.oasis.engine.actors.cmds;
 
-import akka.actor.ActorRef;
-
-import java.util.function.Consumer;
+import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.model.Event;
 
 /**
  * @author Isuru Weerarathna
  */
-public class OasisActorSource implements Consumer<Object> {
+public class EventMessage implements OasisCommand {
 
-    private ActorRef actorRef;
+    private Event event;
+    private ExecutionContext context;
 
-    public OasisActorSource(ActorRef actorRef) {
-        this.actorRef = actorRef;
+    public Event getEvent() {
+        return event;
     }
 
-    @Override
-    public void accept(Object message) {
-        actorRef.tell(message, actorRef);
+    public ExecutionContext getContext() {
+        return context;
     }
 }

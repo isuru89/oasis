@@ -32,6 +32,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -45,7 +46,7 @@ public class ChallengeTest extends AbstractRuleTest {
     private static final String EVT_A = "a";
     private static final String EVT_B = "b";
 
-    static final BigDecimal AWARD = BigDecimal.valueOf(100).setScale(Constants.SCALE, BigDecimal.ROUND_HALF_UP);
+    static final BigDecimal AWARD = BigDecimal.valueOf(100).setScale(Constants.SCALE, RoundingMode.HALF_UP);
 
     static final long START = 0;
 
@@ -169,7 +170,7 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e4),
-                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), e5.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
         );
     }
 
@@ -227,7 +228,7 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e4),
-                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), e5.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
         );
     }
 
@@ -303,7 +304,7 @@ public class ChallengeTest extends AbstractRuleTest {
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
-                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), e5.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
         );
     }
 
@@ -381,7 +382,7 @@ public class ChallengeTest extends AbstractRuleTest {
     }
 
     private BigDecimal asDecimal(long val) {
-        return BigDecimal.valueOf(val).setScale(Constants.SCALE, BigDecimal.ROUND_HALF_UP);
+        return BigDecimal.valueOf(val).setScale(Constants.SCALE, RoundingMode.HALF_UP);
     }
 
     private BigDecimal award(Event event, int position) {

@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.MilestoneRule;
@@ -47,12 +48,12 @@ public class MilestoneProcessor extends AbstractProcessor<MilestoneRule, Milesto
     }
 
     @Override
-    protected void beforeEmit(MilestoneSignal signal, Event event, MilestoneRule rule, DbContext db) {
+    protected void beforeEmit(MilestoneSignal signal, Event event, MilestoneRule rule, ExecutionContext context, DbContext db) {
         // do nothing...
     }
 
     @Override
-    public List<MilestoneSignal> process(Event event, MilestoneRule rule, DbContext db) {
+    public List<MilestoneSignal> process(Event event, MilestoneRule rule, ExecutionContext context, DbContext db) {
         if (Objects.isNull(rule.getValueExtractor())) {
             return null;
         }

@@ -27,7 +27,7 @@ import io.github.oasis.model.Event;
 public class StreakBadgeSignal extends BadgeSignal {
 
     public StreakBadgeSignal(String ruleId, Event causedEvent, int streak, long st, long et, String sid, String eid) {
-        super(ruleId, causedEvent, streak, st, et, sid, eid);
+        super(ruleId, causedEvent, causedEvent.getTimestamp(), streak, st, et, sid, eid);
     }
 
     public int getStreak() {

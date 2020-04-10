@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.BadgeFirstEventRule;
@@ -40,14 +41,14 @@ public class BadgeFirstEvent extends BadgeProcessor<BadgeFirstEventRule> {
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeFirstEventRule rule, DbContext db) {
+    public List<BadgeSignal> process(Event event, BadgeFirstEventRule rule, ExecutionContext context, DbContext db) {
         String key = ID.getUserFirstEventsKey(event.getGameId(), event.getUser());
         long ts = event.getTimestamp();
         String id = event.getExternalId();
         String subKey = rule.getEventName();
         String value = ts + ":" + id + ":" + System.currentTimeMillis();
         if (isFirstOne(db.setIfNotExistsInMap(key, subKey, value))) {
-            return Collections.singletonList(BadgeSignal.firstEvent(rule.getId(), event, 1));
+            return Collections.singletonList(BadgeSignal.firstEvent(rule.getId(), event, rule.getAttributeId()));
         }
         return null;
     }

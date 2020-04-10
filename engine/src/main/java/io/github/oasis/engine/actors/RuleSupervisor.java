@@ -65,7 +65,6 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     public void preStart() {
         createExecutors();
 
-        System.out.println("Starting rule supervisor #" + id + "...");
         beginAllChildren();
     }
 
@@ -106,12 +105,10 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     }
 
     private void processEvent(Event event) {
-        System.out.println("Event received... " + event.getUser());
         executor.route(event, getSelf());
     }
 
     private void forwardRuleModifiedEvent(OasisRuleMessage ruleMessage) {
-        System.out.println("Rule modified forwarding " + ruleMessage);
         executor.route(ruleMessage, getSelf());
     }
 

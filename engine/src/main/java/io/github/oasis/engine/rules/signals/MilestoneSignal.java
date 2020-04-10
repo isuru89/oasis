@@ -39,7 +39,7 @@ public class MilestoneSignal extends Signal {
 
     public MilestoneSignal(String ruleId, int previousLevel, int currentLevel, BigDecimal currentScore,
                            Event causedEvent) {
-        super(ruleId, causedEvent.asEventScope());
+        super(ruleId, causedEvent.asEventScope(), causedEvent.getTimestamp());
 
         this.currentLevel = currentLevel;
         this.previousLevel = previousLevel;

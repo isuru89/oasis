@@ -28,12 +28,8 @@ import io.github.oasis.engine.factory.AbstractActorProviderModule;
 import io.github.oasis.engine.factory.OasisDependencyModule;
 import io.github.oasis.engine.processors.Processors;
 import io.github.oasis.model.events.JsonEvent;
-import scala.concurrent.Await;
-import scala.concurrent.duration.Duration;
 
 import javax.inject.Inject;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author Isuru Weerarathna
@@ -61,10 +57,6 @@ public class OasisEngine {
 
         oasisActor = oasisEngine.actorOf(Props.create(OasisSupervisor.class,
                 () -> dependencyModule.getInjector().getInstance(OasisSupervisor.class)), ActorNames.OASIS_SUPERVISOR);
-    }
-
-    public void awaitTerminated() throws TimeoutException, InterruptedException {
-        Await.ready(oasisEngine.terminate(), Duration.apply(2, TimeUnit.MINUTES));
     }
 
     public AbstractActorProviderModule getProviderModule() {

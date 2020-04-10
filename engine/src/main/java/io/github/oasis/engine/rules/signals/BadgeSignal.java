@@ -40,10 +40,11 @@ public class BadgeSignal extends Signal {
 
     public BadgeSignal(String ruleId,
                 EventScope eventScope,
+                long occurredTs,
                 int attributeId,
                 long st, long et,
                 String sid, String eid) {
-        super(ruleId, eventScope);
+        super(ruleId, eventScope, occurredTs);
 
         this.attribute = attributeId;
         startTime = st;
@@ -54,10 +55,11 @@ public class BadgeSignal extends Signal {
 
     public BadgeSignal(String ruleId,
                        Event event,
+                       long occurredTs,
                        int attributeId,
                        long st, long et,
                        String sid, String eid) {
-        super(ruleId, event);
+        super(ruleId, event, occurredTs);
 
         this.attribute = attributeId;
         this.startTime = st;
@@ -67,7 +69,7 @@ public class BadgeSignal extends Signal {
     }
 
     public static BadgeSignal firstEvent(String ruleId, Event causedEvent, int attributeId) {
-        return new BadgeSignal(ruleId, causedEvent, attributeId,
+        return new BadgeSignal(ruleId, causedEvent,causedEvent.getTimestamp(),  attributeId,
                 causedEvent.getTimestamp(), causedEvent.getTimestamp(),
                 causedEvent.getExternalId(), causedEvent.getExternalId());
     }

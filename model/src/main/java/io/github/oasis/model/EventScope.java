@@ -27,22 +27,16 @@ import java.util.Objects;
  */
 public class EventScope implements Comparable<EventScope> {
 
-    public static final EventScope NO_SCOPE = new EventScope(0, 0, 0, 0);
+    public static final EventScope NO_SCOPE = new EventScope(0, 0, 0);
 
     private int gameId;
     private int sourceId;
     private long userId;
-    private long timestamp;
 
-    public EventScope(int gameId, int sourceId, long userId, long ts) {
+    public EventScope(int gameId, int sourceId, long userId) {
         this.gameId = gameId;
         this.sourceId = sourceId;
         this.userId = userId;
-        this.timestamp = ts;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
     }
 
     public int getGameId() {
@@ -64,13 +58,12 @@ public class EventScope implements Comparable<EventScope> {
         EventScope that = (EventScope) o;
         return gameId == that.gameId &&
                 sourceId == that.sourceId &&
-                userId == that.userId &&
-                timestamp == that.timestamp;
+                userId == that.userId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameId, sourceId, userId, timestamp);
+        return Objects.hash(gameId, sourceId, userId);
     }
 
     @Override
@@ -78,7 +71,6 @@ public class EventScope implements Comparable<EventScope> {
         return Comparator.comparing(EventScope::getGameId)
                 .thenComparing(EventScope::getSourceId)
                 .thenComparing(EventScope::getUserId)
-                .thenComparing(EventScope::getTimestamp)
                 .compare(this, o);
     }
 }

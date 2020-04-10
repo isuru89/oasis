@@ -47,7 +47,7 @@ public class SignalConsumer extends OasisBaseActor {
         Signal signal = signalMessage.getSignal();
         AbstractRule rule = signalMessage.getRule();
 
-        System.out.println("Processing signal " + signal + " with rule " + rule);
+        System.out.println("Processing signal " + signalMessage + " with rule " + rule);
         if (signal instanceof PointSignal) {
             new PointsSink(db).consume(signal, rule);
         }

@@ -56,7 +56,9 @@ public class OasisDependencyModule extends AbstractActorProviderModule {
         JedisPoolConfig config = new JedisPoolConfig();
         config.setMaxTotal(5);
         JedisPool poolRedis = new JedisPool(config, "localhost");
-        return RedisDb.create(poolRedis);
+        RedisDb redisDb = RedisDb.create(poolRedis);
+        redisDb.init();
+        return redisDb;
     }
 
 

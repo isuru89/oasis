@@ -22,6 +22,7 @@ package io.github.oasis.engine.rules;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.redis.RedisDb;
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.MilestoneSignal;
@@ -43,12 +44,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * @author Isuru Weerarathna
  */
 public abstract class AbstractRuleTest {
+
+    protected ExecutionContext defaultContext = ExecutionContext.withUserTz(0);
 
     protected static Db pool;
 
@@ -58,6 +61,7 @@ public abstract class AbstractRuleTest {
         config.setMaxTotal(5);
         JedisPool poolRedis = new JedisPool(config, "localhost");
         pool = RedisDb.create(poolRedis);
+        pool.init();
     }
 
     @AfterAll
@@ -88,9 +92,13 @@ public abstract class AbstractRuleTest {
         }
     }
 
-    void submitOrder(Consumer<Event> eventConsumer, Event... events) {
+    void submitOrder(BiConsumer<Event, ExecutionContext> eventConsumer, Event... events) {
+        submitOrder(eventConsumer, defaultContext, events);
+    }
+
+    void submitOrder(BiConsumer<Event, ExecutionContext> eventConsumer, ExecutionContext context, Event... events) {
         for (Event event : events) {
-            eventConsumer.accept(event);
+            eventConsumer.accept(event, context);
         }
     }
 

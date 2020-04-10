@@ -33,8 +33,8 @@ public class ChallengeOverSignal extends AbstractChallengeSignal {
 
     private CompletionType completionType;
 
-    public ChallengeOverSignal(String ruleId, EventScope eventScope, CompletionType completionType) {
-        super(ruleId, eventScope);
+    public ChallengeOverSignal(String ruleId, EventScope eventScope, long completedTime, CompletionType completionType) {
+        super(ruleId, eventScope, completedTime);
         this.completionType = completionType;
     }
 

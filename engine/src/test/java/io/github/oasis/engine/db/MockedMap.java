@@ -78,6 +78,11 @@ public class MockedMap implements Mapped {
     }
 
     @Override
+    public Mapped expireIn(long milliseconds) {
+        return this;
+    }
+
+    @Override
     public void remove(String key) {
         data.remove(key);
     }

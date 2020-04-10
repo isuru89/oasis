@@ -36,7 +36,7 @@ public class PointSignal extends Signal {
     private Event eventRef;
 
     public PointSignal(String ruleId, BigDecimal score, Event eventRef) {
-        super(ruleId, eventRef.asEventScope());
+        super(ruleId, eventRef.asEventScope(), eventRef.getTimestamp());
 
         this.score = score;
         this.eventRef = eventRef;

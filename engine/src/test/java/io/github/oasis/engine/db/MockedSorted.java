@@ -73,6 +73,11 @@ public class MockedSorted implements Sorted {
     }
 
     @Override
+    public Sorted expireIn(long milliseconds) {
+        return this;
+    }
+
+    @Override
     public void removeRangeByScore(long from, long to) {
          data.removeAll(getRangeByScoreWithScores(from, to)
                 .stream()

@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.BadgeTemporalRule;
@@ -31,6 +32,7 @@ import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -53,20 +55,20 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
     }
 
     @Override
-    public boolean isDenied(Event event) {
-        return super.isDenied(event) || !isCriteriaSatisfied(event, rule);
+    public boolean isDenied(Event event, ExecutionContext context) {
+        return super.isDenied(event, context) || !isCriteriaSatisfied(event, rule);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeTemporalRule rule, DbContext db) {
+    public List<BadgeSignal> process(Event event, BadgeTemporalRule rule, ExecutionContext context, DbContext db) {
         BigDecimal value = resolveValueOfEvent(event, rule);
         String badgeKey = ID.getUserTemporalBadgeKey(event.getGameId(), event.getUser(), rule.getId());
         Mapped map = db.MAP(badgeKey);
-        long ts = event.getTimestamp();
+        long ts = getUserSpecificEpochTs(event.getUser(), event.getTimestamp(), db);
         long tsUnit = ts - (ts % rule.getTimeUnit());
         String subKey = String.valueOf(tsUnit);
         BigDecimal updatedVal = map.incrementByDecimal(subKey, value);
-        BigDecimal prevValue = updatedVal.subtract(value).setScale(SCALE, BigDecimal.ROUND_HALF_UP);
+        BigDecimal prevValue = updatedVal.subtract(value).setScale(SCALE, RoundingMode.HALF_UP);
         boolean increased = isIncreasedOrEqual(prevValue, updatedVal);
         Optional<List<BadgeTemporalRule.Threshold>> crossedThreshold = getCrossedThreshold(prevValue, updatedVal, rule);
         return crossedThreshold.map(thresholds -> thresholds.stream()
@@ -109,7 +111,7 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
     }
 
     private BigDecimal resolveValueOfEvent(Event event, BadgeTemporalRule rule) {
-        return rule.getValueResolver().apply(event).setScale(SCALE, BigDecimal.ROUND_HALF_UP);
+        return rule.getValueResolver().apply(event).setScale(SCALE, RoundingMode.HALF_UP);
     }
 
     private boolean isCriteriaSatisfied(Event event, BadgeTemporalRule rule) {

@@ -26,6 +26,8 @@ import java.io.Closeable;
  */
 public interface Db extends Closeable {
 
+    void init();
+
     DbContext createContext();
 
 }
