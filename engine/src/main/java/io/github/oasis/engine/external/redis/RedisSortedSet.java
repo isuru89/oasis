@@ -79,6 +79,11 @@ public class RedisSortedSet implements Sorted {
     }
 
     @Override
+    public BigDecimal incrementScore(String member, BigDecimal byScore) {
+        return BigDecimal.valueOf(jedis.zincrby(baseKey, byScore.doubleValue(), member));
+    }
+
+    @Override
     public Sorted expireIn(long milliseconds) {
         jedis.expire(baseKey, (int) Math.ceil(milliseconds / 1000.0));
         return this;

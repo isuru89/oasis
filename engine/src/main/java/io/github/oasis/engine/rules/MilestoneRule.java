@@ -56,6 +56,15 @@ public class MilestoneRule extends AbstractRule {
         this.flags = flags;
     }
 
+    public Optional<Level> getNextLevel(BigDecimal currentValue) {
+        Map.Entry<BigDecimal, Level> levelEntry = levelMap.ceilingEntry(currentValue);
+        if (levelEntry == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(levelEntry.getValue());
+        }
+    }
+
     public Optional<Level> getLevelFor(BigDecimal value) {
         Map.Entry<BigDecimal, Level> levelEntry = levelMap.floorEntry(value);
         if (levelEntry == null || levelEntry.getValue() == Level.LEVEL_ZERO) {

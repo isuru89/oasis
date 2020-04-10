@@ -52,6 +52,10 @@ public final class Numbers {
         return now.compareTo(threshold) < 0 && prev.compareTo(threshold) >= 0;
     }
 
+    public static int asInt(boolean value) {
+        return value ? 1 : 0;
+    }
+
     public static int asInt(String value) {
         return value == null ? 0 : Integer.parseInt(value);
     }

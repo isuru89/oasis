@@ -73,6 +73,11 @@ public class MockedSorted implements Sorted {
     }
 
     @Override
+    public BigDecimal incrementScore(String member, BigDecimal byScore) {
+        return null;
+    }
+
+    @Override
     public Sorted expireIn(long milliseconds) {
         return this;
     }

@@ -89,6 +89,9 @@ public class PointsSink extends AbstractSink {
             String sourcePfx = "source:" + signal.getEventScope().getSourceId();
             pointMap.incrementByDecimal(sourcePfx, score);
 
+            // @TODO leaderboards
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
