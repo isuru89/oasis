@@ -35,6 +35,7 @@ public class SignalMessage implements OasisCommand {
     public SignalMessage(Signal signal, ExecutionContext context, AbstractRule rule) {
         this.signal = signal;
         this.rule = rule;
+        this.context = context;
     }
 
     public ExecutionContext getContext() {

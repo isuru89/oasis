@@ -31,13 +31,17 @@ import io.github.oasis.engine.rules.signals.Signal;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
 public class PointsSink extends AbstractSink {
+
+    private static final String ANNUALLY = "y";
+    private static final String MONTHLY = "m";
+    private static final String WEEKLY = "w";
+    private static final String DAILY = "d";
+    private static final String QUARTERLY = "q";
 
     public PointsSink(Db db) {
         super(db);
@@ -89,19 +93,22 @@ public class PointsSink extends AbstractSink {
             String sourcePfx = "source:" + signal.getEventScope().getSourceId();
             pointMap.incrementByDecimal(sourcePfx, score);
 
-            // @TODO leaderboards
+            // leaderboards
+            String member = String.valueOf(userId);
+            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, ANNUALLY, tcx.getYear()), member, score);
+            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, QUARTERLY, tcx.getQuarter()), member, score);
+            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, MONTHLY, tcx.getMonth()), member, score);
+            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, WEEKLY, tcx.getWeek()), member, score);
+            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, DAILY, tcx.getDay()), member, score);
 
+            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, ANNUALLY, tcx.getYear()), member, score);
+            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, QUARTERLY, tcx.getQuarter()), member, score);
+            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, MONTHLY, tcx.getMonth()), member, score);
+            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, WEEKLY, tcx.getWeek()), member, score);
+            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, DAILY, tcx.getDay()), member, score);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private List<Integer> getUserTeams(int gameId, long userId) {
-        return new ArrayList<>();
-    }
-
-    private int getUserTzOffset(long userId) {
-        return 0;
     }
 }

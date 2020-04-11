@@ -17,38 +17,27 @@
  * under the License.
  */
 
-package io.github.oasis.engine.external;
+package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.model.Record;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface Sorted {
+public class RegexEventTypeMatcher implements EventTypeMatcher {
 
-    void add(String member, long value);
-    void add(byte[] member, long value);
-    void add(String number, double value);
+    private Pattern matcher;
 
-    List<Record> getRangeByScoreWithScores(long from, long to);
-    List<Record> getRangeByScoreWithScores(BigDecimal from, BigDecimal to);
-    List<Record> getRangeByRankWithScores(long from, long to);
+    public RegexEventTypeMatcher(Pattern pattern) {
+        this.matcher = pattern;
+    }
 
-    BigDecimal incrementScore(String member, BigDecimal byScore);
+    @Override
+    public boolean matches(String eventType) {
+        return matcher.matcher(eventType).matches();
+    }
 
-    Sorted expireIn(long milliseconds);
-
-    void removeRangeByScore(long from, long to);
-
-    boolean memberExists(String member);
-
-    long getRank(String member);
-
-    Optional<String> getMemberByScore(long score);
-
-    void remove(String member);
+    public static RegexEventTypeMatcher create(String source) {
+        return new RegexEventTypeMatcher(Pattern.compile(source));
+    }
 }

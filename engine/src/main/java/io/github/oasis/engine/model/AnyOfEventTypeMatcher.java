@@ -20,6 +20,8 @@
 package io.github.oasis.engine.model;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Isuru Weerarathna
@@ -35,5 +37,9 @@ public class AnyOfEventTypeMatcher implements EventTypeMatcher {
     @Override
     public boolean matches(String eventType) {
         return against.contains(eventType);
+    }
+
+    public static AnyOfEventTypeMatcher create(String pattern) {
+        return new AnyOfEventTypeMatcher(Stream.of(pattern.split(",")).collect(Collectors.toSet()));
     }
 }

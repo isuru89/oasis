@@ -23,6 +23,7 @@ import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.external.Sorted;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +44,11 @@ public class MockedDb implements DbContext {
     @Override
     public void removeKey(String key) {
         map.remove(key);
+    }
+
+    @Override
+    public BigDecimal incrementScoreInSorted(String contextKey, String member, BigDecimal byScore) {
+        return null;
     }
 
     @Override

@@ -25,6 +25,7 @@ import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.engine.utils.Numbers;
 import redis.clients.jedis.Jedis;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -54,6 +55,11 @@ public class RedisContext implements DbContext {
     @Override
     public void removeKey(String key) {
         jedis.del(key);
+    }
+
+    @Override
+    public BigDecimal incrementScoreInSorted(String contextKey, String member, BigDecimal byScore) {
+        return BigDecimal.valueOf(jedis.zincrby(contextKey, byScore.doubleValue(), member));
     }
 
     @Override

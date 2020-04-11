@@ -45,6 +45,11 @@ public class MockedSorted implements Sorted {
     }
 
     @Override
+    public void add(byte[] member, long value) {
+
+    }
+
+    @Override
     public void add(String member, double value) {
         data.add(new SortedRecord(member, BigDecimal.valueOf(value)));
     }

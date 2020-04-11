@@ -19,19 +19,21 @@
 
 package io.github.oasis.engine.model;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import io.github.oasis.engine.utils.Texts;
 
 /**
  * @author Isuru Weerarathna
  */
 public final class EventTypeMatcherFactory {
 
+    public static final String ANY_OF_PREFIX = "anyOf:";
+    public static final String REGEX_PREFIX = "regex:";
+
     public static EventTypeMatcher createMatcher(String source) {
-        if (source.indexOf(',') > 0) {
-            Set<String> events = Stream.of(source.split(",")).collect(Collectors.toSet());
-            return new AnyOfEventTypeMatcher(events);
+        if (source.startsWith(ANY_OF_PREFIX)) {
+            return AnyOfEventTypeMatcher.create(Texts.subStrPrefixAfter(source, ANY_OF_PREFIX));
+        } else if (source.startsWith(REGEX_PREFIX)) {
+            return RegexEventTypeMatcher.create(Texts.subStrPrefixAfter(source, REGEX_PREFIX));
         } else {
             return new SingleEventTypeMatcher(source);
         }

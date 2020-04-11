@@ -17,38 +17,15 @@
  * under the License.
  */
 
-package io.github.oasis.engine.external;
-
-import io.github.oasis.engine.model.Record;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+package io.github.oasis.engine.utils;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface Sorted {
+public class Texts {
 
-    void add(String member, long value);
-    void add(byte[] member, long value);
-    void add(String number, double value);
+    public static String subStrPrefixAfter(String source, String prefix) {
+        return source.substring(prefix.length());
+    }
 
-    List<Record> getRangeByScoreWithScores(long from, long to);
-    List<Record> getRangeByScoreWithScores(BigDecimal from, BigDecimal to);
-    List<Record> getRangeByRankWithScores(long from, long to);
-
-    BigDecimal incrementScore(String member, BigDecimal byScore);
-
-    Sorted expireIn(long milliseconds);
-
-    void removeRangeByScore(long from, long to);
-
-    boolean memberExists(String member);
-
-    long getRank(String member);
-
-    Optional<String> getMemberByScore(long score);
-
-    void remove(String member);
 }

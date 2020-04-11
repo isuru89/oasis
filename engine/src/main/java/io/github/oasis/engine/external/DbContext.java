@@ -20,6 +20,7 @@
 package io.github.oasis.engine.external;
 
 import java.io.Closeable;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +32,7 @@ public interface DbContext extends Closeable {
     Set<String> allKeys(String pattern);
     void removeKey(String key);
 
+    BigDecimal incrementScoreInSorted(String contextKey, String member, BigDecimal byScore);
     void setValueInMap(String contextKey, String field, String value);
     String getValueFromMap(String contextKey, String key);
     void addToSorted(String contextKey, String member, long value);

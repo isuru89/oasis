@@ -28,12 +28,24 @@ public final class ID {
         return String.format("g%d:u%d:points", gameId, userId);
     }
 
-    public static String getGameLeaderboard(int gameId, String trait) {
-        return String.format("g%d:leaderboard:%s", gameId, trait);
+    public static String getGameLeaderboard(int gameId, String trait, String duration) {
+        return String.format("g%d:leaderboard:%s:%s", gameId, trait, duration);
+    }
+
+    public static String getGameTeamLeaderboard(int gameId, long teamId, String trait, String duration) {
+        return String.format("g%d:t%d:leaderboard:%s:%s", gameId, teamId, trait, duration);
     }
 
     public static String getGameUserMilestonesSummary(int gameId, long userId) {
         return String.format("g%d:u%d:milestones", gameId, userId);
+    }
+
+    public static String getGameUseChallengesSummary(int gameId, long userId) {
+        return String.format("g%d:u%d:challenges", gameId, userId);
+    }
+
+    public static String getGameUseChallengesLog(int gameId, long userId) {
+        return String.format("g%d:u%d:challengeslog", gameId, userId);
     }
 
     public static String getGameUserBadgesSummary(int gameId, long userId) {

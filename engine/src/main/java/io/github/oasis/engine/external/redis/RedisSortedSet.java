@@ -25,6 +25,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Tuple;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,15 +39,22 @@ public class RedisSortedSet implements Sorted {
 
     private final Jedis jedis;
     private final String baseKey;
+    private final byte[] baseKeyBytes;
 
     public RedisSortedSet(Jedis jedis, String baseKey) {
         this.jedis = jedis;
         this.baseKey = baseKey;
+        this.baseKeyBytes = baseKey.getBytes(StandardCharsets.US_ASCII);
     }
 
     @Override
     public void add(String member, long value) {
         jedis.zadd(baseKey, value, member);
+    }
+
+    @Override
+    public void add(byte[] member, long value) {
+        jedis.zadd(baseKeyBytes, value, member);
     }
 
     @Override

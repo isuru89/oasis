@@ -34,9 +34,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Rules implements Serializable {
 
     private final ConcurrentHashMap<String, AbstractRule> ruleReferences = new ConcurrentHashMap<>();
-    private final ActorSignalCollector collector;
+    private final SignalCollector collector;
 
-    private Rules(ActorSignalCollector collector) {
+    private Rules(SignalCollector collector) {
         this.collector = collector;
     }
 
@@ -44,7 +44,7 @@ public class Rules implements Serializable {
         return new Rules(collector);
     }
 
-    public ActorSignalCollector getCollector() {
+    public SignalCollector getCollector() {
         return collector;
     }
 

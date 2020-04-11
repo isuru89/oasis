@@ -29,7 +29,7 @@ import java.time.temporal.IsoFields;
  */
 public class TimeContext {
 
-    private int year;
+    private String year;
     private String month;
     private String day;
     private String week;
@@ -37,14 +37,14 @@ public class TimeContext {
 
     public TimeContext(long ts, int offset) {
         ZonedDateTime userTime = Timestamps.getUserSpecificTime(ts, offset);
-        year = userTime.getYear();
-        month = String.format("%d%02d", year, userTime.getMonth().getValue());
+        year = String.valueOf(userTime.getYear());
+        month = String.format("%s%02d", year, userTime.getMonth().getValue());
         day = String.format("%s%02d", month, userTime.getDayOfMonth());
-        week = String.format("%dW%02d", year, userTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
-        quarter = String.format("%dQ%02d", year, userTime.get(IsoFields.QUARTER_OF_YEAR));
+        week = String.format("W%s%02d", year, userTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
+        quarter = String.format("Q%s%02d", year, userTime.get(IsoFields.QUARTER_OF_YEAR));
     }
 
-    public int getYear() {
+    public String getYear() {
         return year;
     }
 

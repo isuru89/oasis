@@ -19,22 +19,22 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.model.ActorSignalCollector;
+import io.github.oasis.engine.model.SignalCollector;
 import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.BadgeRule;
-import io.github.oasis.engine.rules.ChallengeRule;
 import io.github.oasis.engine.rules.BadgeConditionalRule;
 import io.github.oasis.engine.rules.BadgeFirstEventRule;
 import io.github.oasis.engine.rules.BadgeHistogramStreakNRule;
-import io.github.oasis.engine.rules.MilestoneRule;
-import io.github.oasis.engine.rules.PointRule;
-import io.github.oasis.engine.rules.RatingRule;
+import io.github.oasis.engine.rules.BadgeRule;
 import io.github.oasis.engine.rules.BadgeStreakNRule;
 import io.github.oasis.engine.rules.BadgeTemporalRule;
 import io.github.oasis.engine.rules.BadgeTemporalStreakNRule;
+import io.github.oasis.engine.rules.ChallengeRule;
+import io.github.oasis.engine.rules.MilestoneRule;
+import io.github.oasis.engine.rules.PointRule;
+import io.github.oasis.engine.rules.RatingRule;
 import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.external.Db;
 
 import javax.inject.Inject;
 
@@ -50,7 +50,7 @@ public class Processors {
         this.db = db;
     }
 
-    public AbstractProcessor<? extends AbstractRule, ? extends Signal> createProcessor(AbstractRule rule, ActorSignalCollector collector) {
+    public AbstractProcessor<? extends AbstractRule, ? extends Signal> createProcessor(AbstractRule rule, SignalCollector collector) {
         if (rule instanceof ChallengeRule) {
             RuleContext<ChallengeRule> ruleContext = new RuleContext<>((ChallengeRule) rule, collector);
             return new ChallengeProcessor(db, ruleContext);
@@ -69,7 +69,7 @@ public class Processors {
         return null;
     }
 
-    private AbstractProcessor<? extends AbstractRule, ? extends Signal> createBadgeProcessor(BadgeRule rule, ActorSignalCollector collector) {
+    private AbstractProcessor<? extends AbstractRule, ? extends Signal> createBadgeProcessor(BadgeRule rule, SignalCollector collector) {
         if (rule instanceof BadgeFirstEventRule) {
             RuleContext<BadgeFirstEventRule> ruleContext = new RuleContext<>((BadgeFirstEventRule) rule, collector);
             return new BadgeFirstEvent(db, ruleContext);
