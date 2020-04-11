@@ -26,10 +26,7 @@ import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
 import io.github.oasis.engine.factory.AbstractActorProviderModule;
 import io.github.oasis.engine.factory.OasisDependencyModule;
-import io.github.oasis.engine.processors.Processors;
 import io.github.oasis.model.events.JsonEvent;
-
-import javax.inject.Inject;
 
 /**
  * @author Isuru Weerarathna
@@ -38,9 +35,6 @@ public class OasisEngine {
 
     private ActorSystem oasisEngine;
     private ActorRef oasisActor;
-
-    @Inject
-    private Processors processors;
 
     private EngineContext context;
     private AbstractActorProviderModule providerModule;
@@ -51,7 +45,6 @@ public class OasisEngine {
 
     public void start() {
         oasisEngine = ActorSystem.create("oasis-engine");
-        System.out.println(oasisEngine);
         AbstractActorProviderModule dependencyModule = context.getModuleProvider().apply(oasisEngine);
         providerModule = dependencyModule;
 
@@ -69,7 +62,7 @@ public class OasisEngine {
 
     public static void main(String[] args) {
         EngineContext context = new EngineContext();
-        context.setModuleProvider(OasisDependencyModule::new);
+        context.setModuleProvider(actorSystem -> new OasisDependencyModule(actorSystem, context));
         new OasisEngine(context).start();
     }
 

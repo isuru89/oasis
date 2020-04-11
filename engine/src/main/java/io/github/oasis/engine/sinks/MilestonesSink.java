@@ -31,6 +31,7 @@ import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.utils.Numbers;
 import io.github.oasis.model.EventScope;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -38,6 +39,7 @@ import java.util.Optional;
  * @author Isuru Weerarathna
  */
 public class MilestonesSink extends AbstractSink {
+    @Inject
     public MilestonesSink(Db dbPool) {
         super(dbPool);
     }

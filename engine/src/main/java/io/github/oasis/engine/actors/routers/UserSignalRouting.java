@@ -17,31 +17,33 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors;
+package io.github.oasis.engine.actors.routers;
 
-import akka.routing.BroadcastRoutingLogic;
+import akka.routing.RoundRobinRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.RoutingLogic;
-import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.actors.cmds.SignalMessage;
+import io.github.oasis.engine.rules.signals.Signal;
 import scala.collection.immutable.IndexedSeq;
+
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
  */
-public class GameRouting implements RoutingLogic {
+public class UserSignalRouting implements RoutingLogic {
 
-    private BroadcastRoutingLogic broadcastRoutingLogic = new BroadcastRoutingLogic();
+    private RoundRobinRoutingLogic roundRobinRoutingLogic = new RoundRobinRoutingLogic();
 
     @Override
     public Routee select(Object message, IndexedSeq<Routee> routees) {
-        if (message instanceof Event) {
-            Event event = (Event) message;
-            return routees.apply(event.getGameId() % routees.size());
-        } else if (message instanceof OasisRuleMessage) {
-            OasisRuleMessage ruleMessage = (OasisRuleMessage) message;
-            return routees.apply(ruleMessage.getGameId() % routees.size());
+        if (message instanceof SignalMessage) {
+            Signal signal = ((SignalMessage) message).getSignal();
+            if (Objects.nonNull(signal.getEventScope())) {
+                long userId = signal.getEventScope().getUserId();
+                return routees.apply((int) userId % routees.size());
+            }
         }
-        return broadcastRoutingLogic.select(message, routees);
+        return roundRobinRoutingLogic.select(message, routees);
     }
 }

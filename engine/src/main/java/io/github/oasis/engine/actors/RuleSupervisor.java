@@ -25,15 +25,18 @@ import akka.routing.ActorRefRoutee;
 import akka.routing.DefaultResizer;
 import akka.routing.Routee;
 import akka.routing.Router;
+import io.github.oasis.engine.OasisConfigs;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
+import io.github.oasis.engine.actors.routers.UserRouting;
 import io.github.oasis.engine.factory.InjectedActorSupport;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.Rules;
 import io.github.oasis.engine.model.ActorSignalCollector;
 import io.github.oasis.model.Event;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,7 +58,10 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     private final int id;
     private Router executor;
 
-    public RuleSupervisor() {
+    @Inject
+    public RuleSupervisor(OasisConfigs configs) {
+        super(configs);
+
         id = counter.incrementAndGet();
 
         signalExchanger = createSignalExchanger();
@@ -83,15 +89,16 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     }
 
     private ActorRef createSignalExchanger() {
-        ActorRef actorRef = getContext().actorOf(Props.create(SignalExchange.class, () -> injectInstance(SignalExchange.class)), "signal-exchanger");
+        ActorRef actorRef = getContext().actorOf(Props.create(SignalSupervisor.class, () -> injectActor(SignalSupervisor.class)), "signal-exchanger");
         getContext().watch(actorRef);
         return actorRef;
     }
 
     private void createExecutors() {
+        int executors = configs.getInt(OasisConfigs.RULE_EXECUTOR_COUNT, EXECUTORS);
         List<Routee> routees = new ArrayList<>();
-        for (int i = 0; i < EXECUTORS; i++) {
-            ActorRef actorRef = getContext().actorOf(Props.create(RuleExecutor.class, () -> injectInstance(RuleExecutor.class)));
+        for (int i = 0; i < executors; i++) {
+            ActorRef actorRef = getContext().actorOf(Props.create(RuleExecutor.class, () -> injectActor(RuleExecutor.class)));
             getContext().watch(actorRef);
             routees.add(new ActorRefRoutee(actorRef));
         }

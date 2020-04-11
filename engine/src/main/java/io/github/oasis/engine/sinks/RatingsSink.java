@@ -30,12 +30,14 @@ import io.github.oasis.engine.rules.signals.RatingChangedSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.model.EventScope;
 
+import javax.inject.Inject;
 import java.io.IOException;
 
 /**
  * @author Isuru Weerarathna
  */
 public class RatingsSink extends AbstractSink {
+    @Inject
     public RatingsSink(Db dbPool) {
         super(dbPool);
     }

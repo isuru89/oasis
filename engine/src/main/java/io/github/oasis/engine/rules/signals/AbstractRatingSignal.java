@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.engine.sinks.AbstractSink;
+import io.github.oasis.engine.sinks.RatingsSink;
 import io.github.oasis.model.EventScope;
 
 /**
@@ -31,6 +33,11 @@ public abstract class AbstractRatingSignal extends Signal {
     public AbstractRatingSignal(String ruleId, EventScope eventScope, long occurredTs, int currentRating) {
         super(ruleId, eventScope, occurredTs);
         this.currentRating = currentRating;
+    }
+
+    @Override
+    public Class<? extends AbstractSink> sinkHandler() {
+        return RatingsSink.class;
     }
 
     public int getCurrentRating() {

@@ -17,30 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors;
+package io.github.oasis.engine.actors.routers;
 
 import akka.routing.BroadcastRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.RoutingLogic;
-import io.github.oasis.engine.actors.cmds.EventMessage;
+import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.model.Event;
 import scala.collection.immutable.IndexedSeq;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserRouting implements RoutingLogic {
+public class GameRouting implements RoutingLogic {
 
     private BroadcastRoutingLogic broadcastRoutingLogic = new BroadcastRoutingLogic();
 
     @Override
     public Routee select(Object message, IndexedSeq<Routee> routees) {
-        if (message instanceof EventMessage) {
-            Event event = ((EventMessage) message).getEvent();
-            return routees.apply((int) event.getUser() % routees.size());
-        } else if (message instanceof Event) {
+        if (message instanceof Event) {
             Event event = (Event) message;
-            return routees.apply((int) event.getUser() % routees.size());
+            return routees.apply(event.getGameId() % routees.size());
+        } else if (message instanceof OasisRuleMessage) {
+            OasisRuleMessage ruleMessage = (OasisRuleMessage) message;
+            return routees.apply(ruleMessage.getGameId() % routees.size());
         }
         return broadcastRoutingLogic.select(message, routees);
     }

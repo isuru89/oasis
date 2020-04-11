@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.engine.sinks.AbstractSink;
+import io.github.oasis.engine.sinks.BadgeSink;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.EventScope;
 import lombok.ToString;
@@ -96,6 +98,11 @@ public class BadgeSignal extends Signal {
 
     public String getUniqueId() {
         return getRuleId() + ":" + attribute + ":" + startTime;
+    }
+
+    @Override
+    public Class<? extends AbstractSink> sinkHandler() {
+        return BadgeSink.class;
     }
 
     @Override

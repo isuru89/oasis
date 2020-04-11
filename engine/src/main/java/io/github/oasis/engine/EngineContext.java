@@ -22,6 +22,7 @@ package io.github.oasis.engine;
 import akka.actor.ActorSystem;
 import io.github.oasis.engine.factory.AbstractActorProviderModule;
 
+import javax.inject.Provider;
 import java.util.function.Function;
 
 /**
@@ -30,6 +31,15 @@ import java.util.function.Function;
 public class EngineContext {
 
     private Function<ActorSystem, AbstractActorProviderModule> moduleProvider;
+    private Provider<OasisConfigs> configsProvider;
+
+    public Provider<OasisConfigs> getConfigsProvider() {
+        return configsProvider;
+    }
+
+    public void setConfigsProvider(Provider<OasisConfigs> configsProvider) {
+        this.configsProvider = configsProvider;
+    }
 
     public Function<ActorSystem, AbstractActorProviderModule> getModuleProvider() {
         return moduleProvider;

@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.engine.sinks.AbstractSink;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.EventScope;
 import lombok.ToString;
@@ -45,6 +46,8 @@ public abstract class Signal implements Comparable<Signal>  {
         this.eventScope = eventScope;
         this.occurredTimestamp = occurredTimestamp;
     }
+
+    public abstract Class<? extends AbstractSink> sinkHandler();
 
     public String getRuleId() {
         return ruleId;

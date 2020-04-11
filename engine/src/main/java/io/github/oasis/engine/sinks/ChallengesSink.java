@@ -32,6 +32,7 @@ import io.github.oasis.engine.rules.signals.ChallengeWinSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.model.EventScope;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -42,6 +43,7 @@ public class ChallengesSink extends AbstractSink {
 
     private static final int WIN = 1;
 
+    @Inject
     public ChallengesSink(Db dbPool) {
         super(dbPool);
     }

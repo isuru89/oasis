@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.engine.sinks.AbstractSink;
+import io.github.oasis.engine.sinks.MilestonesSink;
 import io.github.oasis.model.Event;
 import lombok.ToString;
 
@@ -61,6 +63,11 @@ public class MilestoneSignal extends Signal {
 
     public String getCausedEvent() {
         return causedEvent;
+    }
+
+    @Override
+    public Class<? extends AbstractSink> sinkHandler() {
+        return MilestonesSink.class;
     }
 
     @Override

@@ -23,9 +23,11 @@ import akka.actor.ActorSystem;
 import com.google.inject.Guice;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import io.github.oasis.engine.EngineContext;
+import io.github.oasis.engine.OasisConfigs;
 import io.github.oasis.engine.actors.OasisSupervisor;
 import io.github.oasis.engine.actors.RuleExecutor;
-import io.github.oasis.engine.actors.SignalExchange;
+import io.github.oasis.engine.actors.SignalSupervisor;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.redis.RedisDb;
 import redis.clients.jedis.JedisPool;
@@ -37,9 +39,11 @@ import redis.clients.jedis.JedisPoolConfig;
 public class OasisDependencyModule extends AbstractActorProviderModule {
 
     private final ActorSystem actorSystem;
+    private EngineContext context;
 
-    public OasisDependencyModule(ActorSystem actorSystem) {
+    public OasisDependencyModule(ActorSystem actorSystem, EngineContext context) {
         this.actorSystem = actorSystem;
+        this.context = context;
         injector = Guice.createInjector(this);
     }
 
@@ -47,7 +51,8 @@ public class OasisDependencyModule extends AbstractActorProviderModule {
     protected void configure() {
         bindActor(actorSystem, RuleExecutor.class, "rule-executor-actor");
         bindSingletonActor(actorSystem, OasisSupervisor.class, "oasis-supervisor");
-        bindActor(actorSystem, SignalExchange.class, "signal-exchanger");
+        bindActor(actorSystem, SignalSupervisor.class, "signal-exchanger");
+        bind(OasisConfigs.class).toProvider(context.getConfigsProvider());
     }
 
     @Provides @Singleton
@@ -60,7 +65,5 @@ public class OasisDependencyModule extends AbstractActorProviderModule {
         redisDb.init();
         return redisDb;
     }
-
-
 
 }

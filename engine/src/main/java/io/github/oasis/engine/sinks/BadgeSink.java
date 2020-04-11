@@ -33,12 +33,15 @@ import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
 import io.github.oasis.engine.rules.signals.TemporalBadge;
 
+import javax.inject.Inject;
 import java.io.IOException;
 
 /**
  * @author Isuru Weerarathna
  */
 public class BadgeSink extends AbstractSink {
+
+    @Inject
     public BadgeSink(Db db) {
         super(db);
     }

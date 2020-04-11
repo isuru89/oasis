@@ -24,10 +24,13 @@ import akka.actor.Props;
 import akka.routing.ActorRefRoutee;
 import akka.routing.Routee;
 import akka.routing.Router;
+import io.github.oasis.engine.OasisConfigs;
 import io.github.oasis.engine.actors.cmds.AbstractGameCommand;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
+import io.github.oasis.engine.actors.routers.GameRouting;
 import io.github.oasis.model.Event;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,14 +45,19 @@ public class OasisSupervisor extends OasisBaseActor {
 
     private Router gameProcessors;
 
-    public OasisSupervisor() {
+    @Inject
+    public OasisSupervisor(OasisConfigs configs) {
+        super(configs);
+
         createRuleRouters();
     }
 
     private void createRuleRouters() {
         List<Routee> routees = new ArrayList<>();
-        for (int i = 0; i < GAME_SUPERVISORS; i++) {
-            ActorRef ruleActor = getContext().actorOf(Props.create(GameSupervisor.class, GameSupervisor::new), "game-supervisor-" + i);
+        int supervisorCount = configs.getInt(OasisConfigs.GAME_SUPERVISOR_COUNT, GAME_SUPERVISORS);
+        for (int i = 0; i < supervisorCount; i++) {
+            ActorRef ruleActor = getContext().actorOf(Props.create(GameSupervisor.class,
+                    () -> injectActor(GameSupervisor.class)), "game-supervisor-" + i);
             getContext().watch(ruleActor);
             routees.add(new ActorRefRoutee(ruleActor));
         }

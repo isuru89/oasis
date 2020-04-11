@@ -40,6 +40,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -85,7 +86,8 @@ public class OasisEngineTest {
     @BeforeEach
     public void setup() throws IOException, InterruptedException {
         EngineContext context = new EngineContext();
-        context.setModuleProvider(OasisDependencyModule::new);
+        context.setConfigsProvider(new TestConfigProvider());
+        context.setModuleProvider(actorSystem -> new OasisDependencyModule(actorSystem, context));
         engine = new OasisEngine(context);
         engine.start();
         supervisor = engine.getOasisActor();
@@ -248,7 +250,6 @@ public class OasisEngineTest {
                 new RatingRule.Rating(1, 3, checkGt(85), pointAward(3), "rating.points"),
                 new RatingRule.Rating(2, 2, checkGt(65), pointAward(2), "rating.points"),
                 new RatingRule.Rating(3, 1, checkGt(50), pointAward(1), "rating.points")
-
         ));
 
         supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
@@ -262,5 +263,19 @@ public class OasisEngineTest {
 
     private Predicate<Event> checkGt(long margin) {
         return event1 -> (long) event1.getFieldValue("value") >= margin;
+    }
+
+    private static class TestConfigProvider implements Provider<OasisConfigs> {
+
+        private static final OasisConfigs DEFAULT = new OasisConfigs.Builder()
+                .withSupervisors(2, 2, 1)
+                .withExecutors(2, 2)
+                .build();
+
+        @Override
+        public OasisConfigs get() {
+            System.out.println("Config provider called");
+            return DEFAULT;
+        }
     }
 }

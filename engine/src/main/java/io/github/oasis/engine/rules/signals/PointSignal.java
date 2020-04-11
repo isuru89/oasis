@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules.signals;
 
+import io.github.oasis.engine.sinks.AbstractSink;
+import io.github.oasis.engine.sinks.PointsSink;
 import io.github.oasis.model.Event;
 import lombok.ToString;
 
@@ -58,6 +60,11 @@ public class PointSignal extends Signal {
 
     public Event getEventRef() {
         return eventRef;
+    }
+
+    @Override
+    public Class<? extends AbstractSink> sinkHandler() {
+        return PointsSink.class;
     }
 
     @Override

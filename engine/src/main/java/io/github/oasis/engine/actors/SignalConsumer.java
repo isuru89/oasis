@@ -19,21 +19,12 @@
 
 package io.github.oasis.engine.actors;
 
+import io.github.oasis.engine.OasisConfigs;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
-import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.AbstractChallengeSignal;
-import io.github.oasis.engine.rules.signals.AbstractRatingSignal;
-import io.github.oasis.engine.rules.signals.BadgeSignal;
-import io.github.oasis.engine.rules.signals.MilestoneSignal;
-import io.github.oasis.engine.rules.signals.PointSignal;
 import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.sinks.BadgeSink;
-import io.github.oasis.engine.sinks.ChallengesSink;
-import io.github.oasis.engine.sinks.MilestonesSink;
-import io.github.oasis.engine.sinks.PointsSink;
-import io.github.oasis.engine.sinks.RatingsSink;
+import io.github.oasis.engine.sinks.AbstractSink;
 
 import javax.inject.Inject;
 
@@ -43,7 +34,9 @@ import javax.inject.Inject;
 public class SignalConsumer extends OasisBaseActor {
 
     @Inject
-    private Db db;
+    public SignalConsumer(OasisConfigs configs) {
+        super(configs);
+    }
 
     @Override
     public Receive createReceive() {
@@ -57,17 +50,8 @@ public class SignalConsumer extends OasisBaseActor {
         AbstractRule rule = signalMessage.getRule();
         ExecutionContext context = signalMessage.getContext();
 
-        System.out.println("Processing signal " + signalMessage + " with rule " + rule);
-        if (signal instanceof PointSignal) {
-            new PointsSink(db).consume(signal, rule, context);
-        } else if (signal instanceof BadgeSignal) {
-            new BadgeSink(db).consume(signal, rule, context);
-        } else if (signal instanceof MilestoneSignal) {
-            new MilestonesSink(db).consume(signal, rule, context);
-        } else if (signal instanceof AbstractChallengeSignal) {
-            new ChallengesSink(db).consume(signal, rule, context);
-        } else if (signal instanceof AbstractRatingSignal) {
-            new RatingsSink(db).consume(signal, rule, context);
-        }
+        AbstractSink sink = injectInstance(signal.sinkHandler());
+        System.out.println("Processing signal " + signal + " with rule " + rule + " in " + sink);
+        sink.consume(signal, rule, context);
     }
 }

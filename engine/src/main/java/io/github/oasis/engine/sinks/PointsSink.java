@@ -29,6 +29,7 @@ import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.PointSignal;
 import io.github.oasis.engine.rules.signals.Signal;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.math.BigDecimal;
 
@@ -46,6 +47,7 @@ public class PointsSink extends AbstractSink {
     private static final String DAILY = "d";
     private static final String QUARTERLY = "q";
 
+    @Inject
     public PointsSink(Db db) {
         super(db);
     }

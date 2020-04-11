@@ -23,13 +23,15 @@ import akka.actor.AbstractActor;
 import akka.actor.OneForOneStrategy;
 import akka.actor.SupervisorStrategy;
 import akka.japi.pf.DeciderBuilder;
+import io.github.oasis.engine.OasisConfigs;
+import io.github.oasis.engine.factory.InjectedActorSupport;
 
 import java.time.Duration;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class OasisBaseActor extends AbstractActor {
+public abstract class OasisBaseActor extends AbstractActor implements InjectedActorSupport {
 
     private static final int MAX_NR_OF_RETRIES = 10;
 
@@ -39,6 +41,12 @@ public abstract class OasisBaseActor extends AbstractActor {
             DeciderBuilder.matchAny(e -> SupervisorStrategy.restart())
                     .build()
     );
+
+    protected OasisConfigs configs;
+
+    OasisBaseActor(OasisConfigs configs) {
+        this.configs = configs;
+    }
 
     @Override
     public SupervisorStrategy supervisorStrategy() {

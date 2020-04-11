@@ -26,8 +26,12 @@ import akka.actor.Actor;
  */
 public interface InjectedActorSupport {
 
-    default <T extends Actor> T injectInstance(Class<T> actorClz) {
+    default <T extends Actor> T injectActor(Class<T> actorClz) {
         return ActorProviderModuleFactory.getInstanceModule().createInjectedActor(actorClz);
+    }
+
+    default <T> T injectInstance(Class<T> clz) {
+        return ActorProviderModuleFactory.getInstanceModule().getInjector().getInstance(clz);
     }
 
 }

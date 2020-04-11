@@ -20,9 +20,12 @@
 package io.github.oasis.engine.actors;
 
 import akka.actor.AbstractActor;
+import io.github.oasis.engine.OasisConfigs;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
+import io.github.oasis.engine.actors.cmds.RuleRemovedMessage;
+import io.github.oasis.engine.actors.cmds.RuleUpdatedMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.model.Rules;
 import io.github.oasis.engine.processors.AbstractProcessor;
@@ -53,9 +56,13 @@ public class RuleExecutor extends OasisBaseActor {
     private AbstractActor.Receive executing;
     private AbstractActor.Receive starting;
 
-    @Inject private Processors processors;
+    private Processors processors;
 
-    public RuleExecutor() {
+    @Inject
+    public RuleExecutor(OasisConfigs configs, Processors processors) {
+        super(configs);
+        this.processors = processors;
+
         starting = receiveBuilder()
                 .match(StartRuleExecutionCommand.class, this::assignRules)
                 .build();
@@ -72,8 +79,11 @@ public class RuleExecutor extends OasisBaseActor {
 
     private void ruleModified(OasisRuleMessage message) {
         if (message instanceof RuleAddedMessage) {
-//            System.out.println("Rule modified received in " + myId + " IN " + this.rules + " -> " + message);
             rules.addRule(((RuleAddedMessage) message).getRule());
+        } else if (message instanceof RuleRemovedMessage) {
+            rules.removeRule(((RuleRemovedMessage) message).getRuleId());
+        } else if (message instanceof RuleUpdatedMessage) {
+            rules.updateRule(((RuleUpdatedMessage) message).getRule());
         }
     }
 
@@ -81,13 +91,12 @@ public class RuleExecutor extends OasisBaseActor {
         this.rules = startRuleExecutionCommand.getRules();
         this.parentId = startRuleExecutionCommand.getParentId();
         this.myId = COUNTER.incrementAndGet();
-//        System.out.println("Initializing msg recieved " + rules + " -- " + this.myId + " @" + System.currentTimeMillis() + " : " + this);
         getContext().become(executing);
     }
 
     private void processEvent(EventMessage eventMessage) {
         Event event = eventMessage.getEvent();
-        System.out.println("Processing event for user #" + event.getUser() + " in " + this + " in this " + this.rules);
+        System.out.println("Processing event for user #" + event.getEventType() + " in " + this + " in this " + this.rules);
         Iterator<AbstractRule> allRulesForEvent = this.rules.getAllRulesForEvent(event);
         while (allRulesForEvent.hasNext()) {
             AbstractRule rule = allRulesForEvent.next();

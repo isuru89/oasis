@@ -17,23 +17,15 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules.signals;
+package io.github.oasis.engine.sinks;
 
-import io.github.oasis.engine.sinks.AbstractSink;
-import io.github.oasis.engine.sinks.ChallengesSink;
-import io.github.oasis.model.EventScope;
+import javax.inject.Singleton;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractChallengeSignal extends Signal {
+@Singleton
+public final class Sinks {
 
-    AbstractChallengeSignal(String ruleId, EventScope eventScope, long occurredTs) {
-        super(ruleId, eventScope, occurredTs);
-    }
 
-    @Override
-    public Class<? extends AbstractSink> sinkHandler() {
-        return ChallengesSink.class;
-    }
 }
