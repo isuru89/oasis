@@ -22,7 +22,6 @@ package io.github.oasis.engine.rules.signals;
 import io.github.oasis.engine.model.EventCreatable;
 import io.github.oasis.engine.rules.RatingRule;
 import io.github.oasis.model.Event;
-import io.github.oasis.model.EventScope;
 import io.github.oasis.model.events.RatingPointEvent;
 import lombok.ToString;
 
@@ -35,41 +34,21 @@ import java.util.Optional;
  * @author Isuru Weerarathna
  */
 @ToString(callSuper = true)
-public class RatingPointsSignal extends AbstractRatingSignal implements EventCreatable {
+public class RatingPointsSignal extends PointSignal implements EventCreatable {
 
-    private String pointId;
-    private BigDecimal points;
-    private Event causedEvent;
+    private int currentRating;
 
     public RatingPointsSignal(String ruleId, String pointId, int currentRating, BigDecimal points, Event causedEvent) {
-        super(ruleId, causedEvent == null ? EventScope.NO_SCOPE : causedEvent.asEventScope(),
-                causedEvent == null ? System.currentTimeMillis() : causedEvent.getTimestamp(), currentRating);
-        this.points = points;
-        this.causedEvent = causedEvent;
-        this.pointId = pointId;
-    }
-
-    public RatingPointsSignal(String ruleId, String pointId, int currentRating, BigDecimal points, long ratedTime, Event causedEvent) {
-        super(ruleId, causedEvent == null ? EventScope.NO_SCOPE : causedEvent.asEventScope(), ratedTime, currentRating);
-        this.points = points;
-        this.causedEvent = causedEvent;
-        this.pointId = pointId;
+        super(ruleId, pointId, points, causedEvent);
+        this.currentRating = currentRating;
     }
 
     public static RatingPointsSignal create(RatingRule rule, Event causedEvent, int currentRating, String pointId, BigDecimal points) {
-        return new RatingPointsSignal(rule.getId(), pointId, currentRating, points, causedEvent.getTimestamp(), causedEvent);
+        return new RatingPointsSignal(rule.getId(), pointId, currentRating, points, causedEvent);
     }
 
-    public String getPointId() {
-        return pointId;
-    }
-
-    public BigDecimal getPoints() {
-        return points;
-    }
-
-    public Event getCausedEvent() {
-        return causedEvent;
+    public int getCurrentRating() {
+        return currentRating;
     }
 
     @Override
@@ -78,26 +57,21 @@ public class RatingPointsSignal extends AbstractRatingSignal implements EventCre
         if (o == null || getClass() != o.getClass()) return false;
         RatingPointsSignal that = (RatingPointsSignal) o;
         return super.equals(o) &&
-                Objects.equals(getPointId(), that.getPointId()) &&
-                getCurrentRating() == that.getCurrentRating() &&
-                points.equals(that.points) &&
-                causedEvent.equals(that.causedEvent);
+                currentRating == that.currentRating;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getPointId(), getCurrentRating(), points, causedEvent);
+        return Objects.hash(super.hashCode(), getCurrentRating());
     }
 
     @Override
     public int compareTo(Signal o) {
         if (o instanceof RatingPointsSignal) {
-            return Comparator.comparing(RatingPointsSignal::getRuleId)
-                    .thenComparing(Signal::getEventScope)
-                    .thenComparing(RatingPointsSignal::getPointId)
-                    .thenComparing(RatingPointsSignal::getCurrentRating)
-                    .thenComparing(RatingPointsSignal::getPoints)
-                    .thenComparing(o2 -> o2.causedEvent.getExternalId())
+            return Comparator.comparing(RatingPointsSignal::getCurrentRating)
+                    .thenComparing(PointSignal::getScore)
+                    .thenComparing(PointSignal::getPointId)
+                    .thenComparing(o2 -> o2.getEventRef().getExternalId())
                     .compare(this, (RatingPointsSignal) o);
         }
         return -1;
@@ -105,8 +79,8 @@ public class RatingPointsSignal extends AbstractRatingSignal implements EventCre
 
     @Override
     public Optional<Event> generateEvent() {
-        if (Objects.nonNull(pointId)) {
-            return Optional.of(new RatingPointEvent(pointId, "points", points, causedEvent));
+        if (Objects.nonNull(getPointId())) {
+            return Optional.of(new RatingPointEvent(getPointId(), "points", getScore(), getEventRef()));
         } else {
             return Optional.empty();
         }

@@ -34,6 +34,7 @@ import io.github.oasis.engine.rules.signals.HistogramBadgeSignal;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -68,7 +69,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
         String badgeKey = ID.getBadgeHistogramKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(badgeKey);
         long timestamp = event.getTimestamp() - (event.getTimestamp() % rule.getTimeUnit());
-        BigDecimal value = evaluateForValue(event).setScale(SCALE, BigDecimal.ROUND_HALF_UP);
+        BigDecimal value = evaluateForValue(event).setScale(SCALE, RoundingMode.HALF_UP);
         Optional<String> memberByScore = sortedRange.getMemberByScore(timestamp);
         BigDecimal prev = BigDecimal.ZERO;
         String prevMember = null;

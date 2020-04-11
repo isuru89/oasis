@@ -32,14 +32,24 @@ import java.util.Objects;
 @ToString
 public class PointSignal extends Signal {
 
+    private String pointId;
     private BigDecimal score;
     private Event eventRef;
 
     public PointSignal(String ruleId, BigDecimal score, Event eventRef) {
+        this(ruleId, ruleId, score, eventRef);
+    }
+
+    public PointSignal(String ruleId, String pointId, BigDecimal score, Event eventRef) {
         super(ruleId, eventRef.asEventScope(), eventRef.getTimestamp());
 
+        this.pointId = pointId;
         this.score = score;
         this.eventRef = eventRef;
+    }
+
+    public String getPointId() {
+        return pointId;
     }
 
     public BigDecimal getScore() {
@@ -56,23 +66,29 @@ public class PointSignal extends Signal {
         if (o == null || getClass() != o.getClass()) return false;
         PointSignal that = (PointSignal) o;
         return super.equals(o) &&
+                pointId.equals(that.pointId) &&
                 score.equals(that.score) &&
                 eventRef.equals(that.eventRef);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRuleId(), score, eventRef);
+        return Objects.hash(getRuleId(), pointId, score, eventRef);
     }
 
     @Override
     public int compareTo(Signal o) {
-        return Comparator
-                .comparing(PointSignal::getRuleId)
-                .thenComparing(PointSignal::getEventScope)
-                .thenComparing(PointSignal::getScore)
-                .thenComparing(o2 -> o2.getEventRef().getExternalId())
-                .thenComparing(o2 -> o2.getEventRef().getUser())
-                .compare(this, (PointSignal) o);
+        if (o instanceof PointSignal) {
+            return Comparator
+                    .comparing(PointSignal::getRuleId)
+                    .thenComparing(PointSignal::getPointId)
+                    .thenComparing(PointSignal::getEventScope)
+                    .thenComparing(PointSignal::getScore)
+                    .thenComparing(o2 -> o2.getEventRef().getExternalId())
+                    .thenComparing(o2 -> o2.getEventRef().getUser())
+                    .compare(this, (PointSignal) o);
+        } else {
+            return -1;
+        }
     }
 }

@@ -21,12 +21,10 @@ package io.github.oasis.engine.rules.signals;
 
 import io.github.oasis.engine.model.EventCreatable;
 import io.github.oasis.model.Event;
-import io.github.oasis.model.EventScope;
 import io.github.oasis.model.events.ChallengePointEvent;
 import lombok.ToString;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -34,76 +32,16 @@ import java.util.Optional;
  * @author Isuru Weerarathna
  */
 @ToString
-public class ChallengePointsAwardedSignal extends AbstractChallengeSignal implements EventCreatable {
-
-    private String pointId;
-    private BigDecimal points;
-    private Event causedEvent;
+public class ChallengePointsAwardedSignal extends PointSignal implements EventCreatable {
 
     public ChallengePointsAwardedSignal(String ruleId, String pointId, BigDecimal points, Event causedEvent) {
-        super(ruleId,
-                causedEvent.asEventScope(),
-                causedEvent.getTimestamp());
-        this.points = points;
-        this.causedEvent = causedEvent;
-        this.pointId = pointId;
-    }
-
-    public ChallengePointsAwardedSignal(String ruleId, String pointId, BigDecimal points, long awardTime, Event causedEvent) {
-        super(ruleId,
-                causedEvent == null ? EventScope.NO_SCOPE : causedEvent.asEventScope(),
-                awardTime);
-        this.points = points;
-        this.causedEvent = causedEvent;
-        this.pointId = pointId;
-    }
-
-    public String getPointId() {
-        return pointId;
-    }
-
-    public BigDecimal getPoints() {
-        return points;
-    }
-
-    public Event getCausedEvent() {
-        return causedEvent;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ChallengePointsAwardedSignal that = (ChallengePointsAwardedSignal) o;
-        return super.equals(o) &&
-                Objects.equals(getPointId(), that.getPointId()) &&
-                points.equals(that.points) &&
-                causedEvent.equals(that.causedEvent);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), getPointId(), points, causedEvent);
-    }
-
-    @Override
-    public int compareTo(Signal o) {
-        if (o instanceof ChallengePointsAwardedSignal) {
-            return Comparator.comparing(ChallengePointsAwardedSignal::getRuleId)
-                        .thenComparing(Signal::getEventScope)
-                        .thenComparing(ChallengePointsAwardedSignal::getPointId)
-                        .thenComparing(ChallengePointsAwardedSignal::getPoints)
-                        .thenComparing(o2 -> o2.getCausedEvent().getExternalId())
-                        .compare(this, (ChallengePointsAwardedSignal) o);
-        } else {
-            return -1;
-        }
+        super(ruleId, pointId, points, causedEvent);
     }
 
     @Override
     public Optional<Event> generateEvent() {
-        if (Objects.nonNull(pointId)) {
-            return Optional.of(new ChallengePointEvent(pointId, "points", points, causedEvent));
+        if (Objects.nonNull(getPointId())) {
+            return Optional.of(new ChallengePointEvent(getPointId(), "points", getScore(), getEventRef()));
         } else {
             return Optional.empty();
         }

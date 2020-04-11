@@ -26,9 +26,9 @@ import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.RatingRule;
-import io.github.oasis.engine.rules.signals.AbstractRatingSignal;
 import io.github.oasis.engine.rules.signals.RatingChangedSignal;
 import io.github.oasis.engine.rules.signals.RatingPointsSignal;
+import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.utils.Constants;
 import io.github.oasis.engine.utils.Utils;
 import io.github.oasis.model.Event;
@@ -42,18 +42,18 @@ import static io.github.oasis.engine.utils.Numbers.asInt;
 /**
  * @author Isuru Weerarathna
  */
-public class RatingProcessor extends AbstractProcessor<RatingRule, AbstractRatingSignal> {
+public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
 
     public RatingProcessor(Db dbPool, RuleContext<RatingRule> ruleCtx) {
         super(dbPool, ruleCtx);
     }
 
     @Override
-    protected void beforeEmit(AbstractRatingSignal signal, Event event, RatingRule rule, ExecutionContext context, DbContext db) {
+    protected void beforeEmit(Signal signal, Event event, RatingRule rule, ExecutionContext context, DbContext db) {
     }
 
     @Override
-    public List<AbstractRatingSignal> process(Event event, RatingRule rule, ExecutionContext context, DbContext db) {
+    public List<Signal> process(Event event, RatingRule rule, ExecutionContext context, DbContext db) {
         Mapped ratingsMap = db.MAP(ID.getGameRatingKey(event.getGameId(), rule.getId()));
         String subRatingKey = String.valueOf(event.getUser());
         String userCurrentRating = ratingsMap.getValue(subRatingKey);

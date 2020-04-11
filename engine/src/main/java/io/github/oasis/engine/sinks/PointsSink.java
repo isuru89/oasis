@@ -55,7 +55,6 @@ public class PointsSink extends AbstractSink {
             long userId = signal.getEventScope().getUserId();
             int gameId = signal.getEventScope().getGameId();
             long ts = signal.getOccurredTimestamp();
-            String ruleId = signal.getRuleId();
 
             Mapped pointMap = db.MAP(ID.getGameUserPointsSummary(gameId, userId));
 
@@ -71,7 +70,8 @@ public class PointsSink extends AbstractSink {
             pointMap.incrementByDecimal("all:" + tcx.getQuarter(), score);
 
             // by rule wise
-            String rulePfx = "rule:" + ruleId;
+            String pointId = signal.getRuleId();
+            String rulePfx = "rule:" + pointId;
             pointMap.incrementByDecimal(rulePfx, score);
             pointMap.incrementByDecimal(rulePfx + ":" + tcx.getYear(), score);
             pointMap.incrementByDecimal(rulePfx + ":" + tcx.getMonth(), score);

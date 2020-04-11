@@ -19,18 +19,18 @@
 
 package io.github.oasis.engine.processors;
 
-import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.rules.ChallengeRule;
-import io.github.oasis.engine.rules.signals.AbstractChallengeSignal;
-import io.github.oasis.engine.rules.signals.ChallengeOverSignal;
-import io.github.oasis.engine.rules.signals.ChallengePointsAwardedSignal;
-import io.github.oasis.engine.rules.signals.ChallengeWinSignal;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.external.Sorted;
+import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.engine.rules.ChallengeRule;
+import io.github.oasis.engine.rules.signals.ChallengeOverSignal;
+import io.github.oasis.engine.rules.signals.ChallengePointsAwardedSignal;
+import io.github.oasis.engine.rules.signals.ChallengeWinSignal;
+import io.github.oasis.engine.rules.signals.Signal;
 import io.github.oasis.engine.utils.Constants;
 import io.github.oasis.model.Event;
 
@@ -40,14 +40,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static io.github.oasis.engine.rules.ChallengeRule.ChallengeAwardMethod.*;
 import static io.github.oasis.engine.rules.ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE;
+import static io.github.oasis.engine.rules.ChallengeRule.ChallengeAwardMethod.REPEATABLE;
 import static io.github.oasis.engine.rules.signals.ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND;
 
 /**
  * @author Isuru Weerarathna
  */
-public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, AbstractChallengeSignal> {
+public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal> {
 
     public ChallengeProcessor(Db dbPool, RuleContext<ChallengeRule> ruleCtx) {
         super(dbPool, ruleCtx);
@@ -59,12 +59,12 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Abstrac
     }
 
     @Override
-    protected void beforeEmit(AbstractChallengeSignal signal, Event event, ChallengeRule rule, ExecutionContext context, DbContext db) {
+    protected void beforeEmit(Signal signal, Event event, ChallengeRule rule, ExecutionContext context, DbContext db) {
 
     }
 
     @Override
-    public List<AbstractChallengeSignal> process(Event event, ChallengeRule rule, ExecutionContext context, DbContext db) {
+    public List<Signal> process(Event event, ChallengeRule rule, ExecutionContext context, DbContext db) {
         Sorted winnerSet = db.SORTED(ID.getGameChallengeKey(event.getGameId(), rule.getId()));
         String member = getMemberKeyFormatInChallengeList(event, rule);
         if (rule.getAwardMethod() == NON_REPEATABLE && winnerSet.memberExists(member)) {
@@ -84,7 +84,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Abstrac
         winnerSet.add(member, score.doubleValue());
         return Arrays.asList(
                 new ChallengeWinSignal(rule.getId(), event, position, event.getUser(), event.getTimestamp(), event.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), rule.getPointId(), score, event.getTimestamp(), event)
+                new ChallengePointsAwardedSignal(rule.getId(), rule.getPointId(), score, event)
         );
     }
 
