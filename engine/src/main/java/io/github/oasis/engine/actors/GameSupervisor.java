@@ -25,9 +25,9 @@ import akka.routing.ActorRefRoutee;
 import akka.routing.Routee;
 import akka.routing.Router;
 import io.github.oasis.engine.OasisConfigs;
+import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisCommand;
 import io.github.oasis.engine.actors.routers.UserRouting;
-import io.github.oasis.model.Event;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -63,7 +63,7 @@ public class GameSupervisor extends OasisBaseActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(Event.class, event -> ruleRouters.route(event, getSender()))
+                .match(GameEventMessage.class, event -> ruleRouters.route(event, getSender()))
                 .match(OasisCommand.class, this::processOasisCommand)
                 .build();
     }
@@ -71,4 +71,5 @@ public class GameSupervisor extends OasisBaseActor {
     private void processOasisCommand(OasisCommand command) {
         ruleRouters.route(command, getSelf());
     }
+
 }

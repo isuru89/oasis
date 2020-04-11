@@ -27,14 +27,14 @@ import akka.routing.Routee;
 import akka.routing.Router;
 import io.github.oasis.engine.OasisConfigs;
 import io.github.oasis.engine.actors.cmds.EventMessage;
+import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.actors.routers.UserRouting;
 import io.github.oasis.engine.factory.InjectedActorSupport;
+import io.github.oasis.engine.model.ActorSignalCollector;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.Rules;
-import io.github.oasis.engine.model.ActorSignalCollector;
-import io.github.oasis.model.Event;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -108,13 +108,20 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(Event.class, this::processEvent)
+                .match(GameEventMessage.class, this::processEvent)
+                .match(EventMessage.class, this::forwardEventMessage)
                 .match(OasisRuleMessage.class, this::forwardRuleModifiedEvent)
                 .build();
     }
 
-    private void processEvent(Event event) {
-        executor.route(new EventMessage(event, new ExecutionContext()), getSelf());
+    private void forwardEventMessage(EventMessage eventMessage) {
+        executor.route(eventMessage, getSelf());
+    }
+
+    private void processEvent(GameEventMessage eventMessage) {
+        executor.route(new EventMessage(eventMessage.getEvent(),
+                ExecutionContext.from(eventMessage.getGameContext()).withUserTz(0).build()),
+                getSelf());
     }
 
     private void forwardRuleModifiedEvent(OasisRuleMessage ruleMessage) {

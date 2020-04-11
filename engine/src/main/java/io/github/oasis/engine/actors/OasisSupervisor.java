@@ -26,13 +26,17 @@ import akka.routing.Routee;
 import akka.routing.Router;
 import io.github.oasis.engine.OasisConfigs;
 import io.github.oasis.engine.actors.cmds.AbstractGameCommand;
+import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.routers.GameRouting;
+import io.github.oasis.engine.model.GameContext;
 import io.github.oasis.model.Event;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Manages all games running in the system.
@@ -42,6 +46,8 @@ import java.util.List;
 public class OasisSupervisor extends OasisBaseActor {
 
     private static final int GAME_SUPERVISORS = 2;
+
+    private final Map<Integer, GameContext> contextMap = new HashMap<>();
 
     private Router gameProcessors;
 
@@ -67,13 +73,22 @@ public class OasisSupervisor extends OasisBaseActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(Event.class, event -> gameProcessors.route(event, getSender()))
+                .match(Event.class, this::forwardEvent)
                 .match(OasisRuleMessage.class, oasisRuleMessage -> gameProcessors.route(oasisRuleMessage, getSender()))
                 .match(AbstractGameCommand.class, this::gameSpecificCommand)
                 .build();
     }
 
+    private void forwardEvent(Event event) {
+        GameContext gameContext = contextMap.computeIfAbsent(event.getGameId(), this::loadGameContext);
+        gameProcessors.route(new GameEventMessage(event, gameContext), getSender());
+    }
+
     private void gameSpecificCommand(AbstractGameCommand gameCommand) {
 
+    }
+
+    private GameContext loadGameContext(int gameId) {
+        return new GameContext(gameId);
     }
 }

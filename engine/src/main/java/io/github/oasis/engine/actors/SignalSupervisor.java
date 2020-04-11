@@ -25,6 +25,7 @@ import akka.routing.ActorRefRoutee;
 import akka.routing.Routee;
 import akka.routing.Router;
 import io.github.oasis.engine.OasisConfigs;
+import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
@@ -89,7 +90,8 @@ public class SignalSupervisor extends OasisBaseActor implements InjectedActorSup
     private void whenSignalReceived(SignalMessage signalMessage) {
         Signal signal = signalMessage.getSignal();
         if (signal instanceof EventCreatable) {
-            ((EventCreatable) signal).generateEvent().ifPresent(event -> getContext().getParent().tell(event, getSelf()));
+            ((EventCreatable) signal).generateEvent()
+                    .ifPresent(event -> getContext().getParent().tell(new EventMessage(event, signalMessage.getContext()), getSelf()));
         }
 
         System.out.println("Signal received " + signal + " rule " + signalMessage.getRule());

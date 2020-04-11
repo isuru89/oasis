@@ -25,6 +25,11 @@ package io.github.oasis.engine.model;
 public class ExecutionContext {
 
     private int userTimeOffset;
+    private GameContext gameContext;
+
+    public GameContext getGameContext() {
+        return gameContext;
+    }
 
     public int getUserTimeOffset() {
         return userTimeOffset;
@@ -34,5 +39,27 @@ public class ExecutionContext {
         ExecutionContext context = new ExecutionContext();
         context.userTimeOffset = offSet;
         return context;
+    }
+
+    public static Builder from(GameContext gameContext) {
+        return new Builder().using(gameContext);
+    }
+
+    public static class Builder {
+        private ExecutionContext context = new ExecutionContext();
+
+        public ExecutionContext build() {
+            return context;
+        }
+
+        public Builder using(GameContext gameContext) {
+            context.gameContext = gameContext;
+            return this;
+        }
+
+        public Builder withUserTz(int offSetInSeconds) {
+            context.userTimeOffset = offSetInSeconds;
+            return this;
+        }
     }
 }

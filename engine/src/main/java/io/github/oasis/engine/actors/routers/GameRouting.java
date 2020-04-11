@@ -22,6 +22,7 @@ package io.github.oasis.engine.actors.routers;
 import akka.routing.BroadcastRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.RoutingLogic;
+import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.model.Event;
 import scala.collection.immutable.IndexedSeq;
@@ -41,6 +42,9 @@ public class GameRouting implements RoutingLogic {
         } else if (message instanceof OasisRuleMessage) {
             OasisRuleMessage ruleMessage = (OasisRuleMessage) message;
             return routees.apply(ruleMessage.getGameId() % routees.size());
+        } else if (message instanceof GameEventMessage) {
+            GameEventMessage gameEventMessage = (GameEventMessage) message;
+            return routees.apply(gameEventMessage.getEvent().getGameId() % routees.size());
         }
         return broadcastRoutingLogic.select(message, routees);
     }
