@@ -30,7 +30,7 @@ import java.util.Optional;
  */
 public interface Sorted {
 
-    void add(String member, long value);
+    boolean add(String member, long value);
     void add(byte[] member, long value);
     void add(String number, double value);
 

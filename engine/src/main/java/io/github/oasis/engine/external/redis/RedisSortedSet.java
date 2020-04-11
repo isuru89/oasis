@@ -19,8 +19,8 @@
 
 package io.github.oasis.engine.external.redis;
 
-import io.github.oasis.engine.model.Record;
 import io.github.oasis.engine.external.Sorted;
+import io.github.oasis.engine.model.Record;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Tuple;
 
@@ -31,6 +31,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static io.github.oasis.engine.utils.Numbers.isFirstOne;
 
 /**
  * @author Isuru Weerarathna
@@ -48,8 +50,8 @@ public class RedisSortedSet implements Sorted {
     }
 
     @Override
-    public void add(String member, long value) {
-        jedis.zadd(baseKey, value, member);
+    public boolean add(String member, long value) {
+        return isFirstOne(jedis.zadd(baseKey, value, member));
     }
 
     @Override

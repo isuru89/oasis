@@ -40,8 +40,9 @@ public class MockedSorted implements Sorted {
     private NavigableSet<SortedRecord> data = new TreeSet<>();
 
     @Override
-    public void add(String member, long value) {
+    public boolean add(String member, long value) {
         data.add(new SortedRecord(member, BigDecimal.valueOf(value)));
+        return true;
     }
 
     @Override

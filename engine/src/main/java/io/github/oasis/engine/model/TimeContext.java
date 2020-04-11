@@ -37,11 +37,12 @@ public class TimeContext {
 
     public TimeContext(long ts, int offset) {
         ZonedDateTime userTime = Timestamps.getUserSpecificTime(ts, offset);
-        year = String.valueOf(userTime.getYear());
-        month = String.format("%s%02d", year, userTime.getMonth().getValue());
-        day = String.format("%s%02d", month, userTime.getDayOfMonth());
-        week = String.format("W%s%02d", year, userTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
-        quarter = String.format("Q%s%02d", year, userTime.get(IsoFields.QUARTER_OF_YEAR));
+        int y = userTime.getYear();
+        year = "Y" + y;
+        month = String.format("M%s%02d", y, userTime.getMonth().getValue());
+        day = String.format("D%d%s%02d", y, userTime.getMonth().getValue(), userTime.getDayOfMonth());
+        week = String.format("W%d%02d", y, userTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
+        quarter = String.format("Q%d%02d", y, userTime.get(IsoFields.QUARTER_OF_YEAR));
     }
 
     public String getYear() {

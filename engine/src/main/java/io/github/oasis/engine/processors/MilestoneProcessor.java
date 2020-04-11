@@ -61,11 +61,11 @@ public class MilestoneProcessor extends AbstractProcessor<MilestoneRule, Milesto
         if (rule.containsFlag(SKIP_NEGATIVE_VALUES) && isNegative(delta)) {
             return null;
         }
-        Mapped userMilestonesMap = db.MAP(ID.getUserGameMilestonesKey(event.getGameId(), event.getUser()));
+        Mapped userMilestonesMap = db.MAP(ID.getGameUserMilestonesSummary(event.getGameId(), event.getUser()));
         userMilestonesMap.incrementByDecimal(rule.getId(), delta);
         userMilestonesMap.setValues(String.format("%s:lastupdated", rule.getId()),
                 String.valueOf(event.getTimestamp()),
-                String.format("%s:lastevent", event.getExternalId()),
+                String.format("%s:lastevent", rule.getId()),
                 event.getExternalId());
 
         String milestoneKey = ID.getGameMilestoneKey(event.getGameId(), rule.getId());

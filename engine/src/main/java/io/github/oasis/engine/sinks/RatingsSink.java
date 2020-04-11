@@ -36,7 +36,7 @@ import java.io.IOException;
  * @author Isuru Weerarathna
  */
 public class RatingsSink extends AbstractSink {
-    protected RatingsSink(Db dbPool) {
+    public RatingsSink(Db dbPool) {
         super(dbPool);
     }
 

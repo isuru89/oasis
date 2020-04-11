@@ -37,6 +37,9 @@ import java.math.BigDecimal;
  */
 public class PointsSink extends AbstractSink {
 
+    private static final String EMPTY = "";
+
+    private static final String ALL = "all";
     private static final String ANNUALLY = "y";
     private static final String MONTHLY = "m";
     private static final String WEEKLY = "w";
@@ -95,12 +98,14 @@ public class PointsSink extends AbstractSink {
 
             // leaderboards
             String member = String.valueOf(userId);
+            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, ALL, EMPTY), member, score);
             db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, ANNUALLY, tcx.getYear()), member, score);
             db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, QUARTERLY, tcx.getQuarter()), member, score);
             db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, MONTHLY, tcx.getMonth()), member, score);
             db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, WEEKLY, tcx.getWeek()), member, score);
             db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, DAILY, tcx.getDay()), member, score);
 
+            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, ALL, EMPTY), member, score);
             db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, ANNUALLY, tcx.getYear()), member, score);
             db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, QUARTERLY, tcx.getQuarter()), member, score);
             db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, MONTHLY, tcx.getMonth()), member, score);

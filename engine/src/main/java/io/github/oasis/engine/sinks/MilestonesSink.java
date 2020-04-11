@@ -38,7 +38,7 @@ import java.util.Optional;
  * @author Isuru Weerarathna
  */
 public class MilestonesSink extends AbstractSink {
-    protected MilestonesSink(Db dbPool) {
+    public MilestonesSink(Db dbPool) {
         super(dbPool);
     }
 
@@ -55,12 +55,12 @@ public class MilestonesSink extends AbstractSink {
             Mapped milestoneMap = db.MAP(ID.getGameUserMilestonesSummary(gameId, userId));
 
             String rulePfx = milestoneSignal.getRuleId() + ":";
-            milestoneMap.setValue(rulePfx + "currentvalue", signal.getCurrentScore().toString());
+            milestoneMap.setValue(rulePfx + "changedvalue", signal.getCurrentScore().toString());
             milestoneMap.setValue(rulePfx + "currentlevel", signal.getCurrentLevel());
             milestoneMap.setValue(rulePfx + "lastupdated", signal.getOccurredTimestamp());
 
             Optional<MilestoneRule.Level> nextLevelOpt = rule.getNextLevel(signal.getCurrentScore());
-            milestoneMap.setValue(rulePfx + "completed", String.valueOf(Numbers.asInt(nextLevelOpt.isPresent())));
+            milestoneMap.setValue(rulePfx + "completed", String.valueOf(Numbers.asInt(nextLevelOpt.isEmpty())));
             if (nextLevelOpt.isPresent()) {
                 MilestoneRule.Level nextLevel = nextLevelOpt.get();
                 milestoneMap.setValue(rulePfx + "nextlevel", nextLevel.getLevel());

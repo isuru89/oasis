@@ -39,7 +39,7 @@ import java.io.IOException;
  * @author Isuru Weerarathna
  */
 public class BadgeSink extends AbstractSink {
-    protected BadgeSink(Db db) {
+    public BadgeSink(Db db) {
         super(db);
     }
 
@@ -53,6 +53,15 @@ public class BadgeSink extends AbstractSink {
             long ts = signal.getOccurredTimestamp();
             String ruleId = signal.getRuleId();
             int addition = signal instanceof BadgeRemoveSignal ? -1 : 1;
+
+            // badge log
+            Sorted badgeLog = db.SORTED(ID.getGameUserBadgesLog(gameId, userId));
+            String logMember = getBadgeKey(signal);
+            boolean added = badgeLog.add(logMember, signal.getOccurredTimestamp());
+
+            if (!added) {
+                return;
+            }
 
             Mapped badgesMap = db.MAP(ID.getGameUserBadgesSummary(gameId, userId));
 
@@ -83,10 +92,7 @@ public class BadgeSink extends AbstractSink {
             badgesMap.incrementByInt(attrPfx + ":" + tcx.getWeek(), addition);
             badgesMap.incrementByInt(attrPfx + ":" + tcx.getQuarter(), addition);
 
-            // badge log
-            Sorted badgeLog = db.SORTED(ID.getGameUserBadgesLog(gameId, userId));
-            String logMember = getBadgeKey(signal);
-            badgeLog.add(logMember, signal.getOccurredTimestamp());
+
 
         } catch (IOException e) {
             e.printStackTrace();

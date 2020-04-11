@@ -42,7 +42,7 @@ public class ChallengesSink extends AbstractSink {
 
     private static final int WIN = 1;
 
-    protected ChallengesSink(Db dbPool) {
+    public ChallengesSink(Db dbPool) {
         super(dbPool);
     }
 
