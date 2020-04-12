@@ -19,11 +19,11 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.model.EventValueResolver;
+import io.github.oasis.engine.model.ExecutionContext;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * @author Isuru Weerarathna
@@ -34,7 +34,7 @@ public class BadgeHistogramStreakNRule extends BadgeRule {
     private int minStreak = Integer.MAX_VALUE;
     private List<Integer> streaks;
     private long timeUnit;
-    protected Function<Event, Double> valueResolver;
+    protected EventValueResolver<ExecutionContext> valueResolver;
 
     private boolean consecutive;
     protected BigDecimal threshold;
@@ -43,11 +43,11 @@ public class BadgeHistogramStreakNRule extends BadgeRule {
         super(id);
     }
 
-    public Function<Event, Double> getValueResolver() {
+    public EventValueResolver<ExecutionContext> getValueResolver() {
         return valueResolver;
     }
 
-    public void setValueResolver(Function<Event, Double> valueResolver) {
+    public void setValueResolver(EventValueResolver<ExecutionContext> valueResolver) {
         this.valueResolver = valueResolver;
     }
 

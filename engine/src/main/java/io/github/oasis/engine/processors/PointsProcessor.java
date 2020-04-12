@@ -41,7 +41,7 @@ public class PointsProcessor extends AbstractProcessor<PointRule, PointSignal> {
 
     @Override
     public boolean isDenied(Event event, ExecutionContext context) {
-        return super.isDenied(event, context) || !isCriteriaSatisfied(event, rule);
+        return super.isDenied(event, context) || !isCriteriaSatisfied(event, rule, context);
     }
 
     @Override
@@ -52,14 +52,14 @@ public class PointsProcessor extends AbstractProcessor<PointRule, PointSignal> {
     @Override
     public List<PointSignal> process(Event event, PointRule rule, ExecutionContext context, DbContext db) {
         if (rule.isAwardBasedOnEvent()) {
-            BigDecimal score = rule.getAmountExpression().apply(event, rule);
+            BigDecimal score = rule.getAmountExpression().resolve(event, context);
             return Collections.singletonList(new PointSignal(rule.getId(), score, event));
         } else {
             return Collections.singletonList(new PointSignal(rule.getId(), rule.getAmountToAward(), event));
         }
     }
 
-    private boolean isCriteriaSatisfied(Event event, PointRule rule) {
-        return rule.getCriteria() == null || rule.getCriteria().test(event, rule);
+    private boolean isCriteriaSatisfied(Event event, PointRule rule, ExecutionContext context) {
+        return rule.getCriteria() == null || rule.getCriteria().matches(event, rule, context);
     }
 }

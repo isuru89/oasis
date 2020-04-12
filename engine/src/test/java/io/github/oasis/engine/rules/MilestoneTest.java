@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.model.EventBiValueResolver;
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.TEvent;
@@ -37,7 +39,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import static io.github.oasis.engine.rules.MilestoneRule.MilestoneFlag.SKIP_NEGATIVE_VALUES;
 import static io.github.oasis.engine.rules.MilestoneRule.MilestoneFlag.TRACK_PENALTIES;
@@ -242,7 +243,7 @@ public class MilestoneTest extends AbstractRuleTest {
         RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue,
                 aLevel(1, 100),
                 aLevel(2, 200));
-        ruleContext.getRule().setCondition((event, rule) -> (long) event.getFieldValue("value") >= 75);
+        ruleContext.getRule().setCondition((event, rule, ctx) -> (long) event.getFieldValue("value") >= 75);
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3, e4, e5, e6);
 
@@ -326,7 +327,7 @@ public class MilestoneTest extends AbstractRuleTest {
                 "-98");
     }
 
-    private BigDecimal extractValue(Event event, MilestoneRule rule) {
+    private BigDecimal extractValue(Event event, MilestoneRule rule, ExecutionContext context) {
         return BigDecimal.valueOf((long)event.getFieldValue("value"));
     }
 
@@ -334,7 +335,7 @@ public class MilestoneTest extends AbstractRuleTest {
         return new MilestoneRule.Level(level, BigDecimal.valueOf(milestone));
     }
 
-    private RuleContext<MilestoneRule> createRule(Collection<Signal> collector, BiFunction<Event, MilestoneRule, BigDecimal> extractor, MilestoneRule.Level... levels) {
+    private RuleContext<MilestoneRule> createRule(Collection<Signal> collector, EventBiValueResolver<MilestoneRule, ExecutionContext> extractor, MilestoneRule.Level... levels) {
         MilestoneRule rule = new MilestoneRule("test.milestone.rule");
         rule.setForEvent(EVT_A);
         rule.setValueExtractor(extractor);

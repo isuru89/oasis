@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.engine.model.EventValueResolver;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.RatingProcessor;
@@ -37,8 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 
 /**
  * @author Isuru Weerarathna
@@ -199,29 +199,29 @@ public class RatingsTest extends AbstractRuleTest {
         return BigDecimal.valueOf(val).setScale(Constants.SCALE, RoundingMode.HALF_UP);
     }
 
-    private Predicate<Event> checkGt(long margin) {
-        return event1 -> (long) event1.getFieldValue("value") >= margin;
+    private EventExecutionFilter checkGt(long margin) {
+        return (e,r,c) -> (long) e.getFieldValue("value") >= margin;
     }
 
-    private Predicate<Event> checkLt(long margin) {
-        return event1 -> (long) event1.getFieldValue("value") < margin;
+    private EventExecutionFilter checkLt(long margin) {
+        return (e,r,c) -> (long) e.getFieldValue("value") < margin;
     }
 
     private BigDecimal noPoints(Event event, int prevRating) {
         return BigDecimal.ZERO;
     }
 
-    private BiFunction<Event, Integer, BigDecimal> pointAward(int currRating) {
+    private EventValueResolver<Integer> pointAward(int currRating) {
         return (event, prevRating) -> BigDecimal.valueOf((currRating - prevRating) * 10.0);
     }
 
-    private RatingRule.Rating aRating(int priority, int rating, Predicate<Event> criteria,
-                                      BiFunction<Event, Integer, BigDecimal> pointDerive) {
+    private RatingRule.Rating aRating(int priority, int rating, EventExecutionFilter criteria,
+                                      EventValueResolver<Integer> pointDerive) {
         return new RatingRule.Rating(priority, rating, criteria, pointDerive, POINT_ID);
     }
 
-    private RatingRule.Rating aRating(int priority, int rating, Predicate<Event> criteria, String pointId,
-                                      BiFunction<Event, Integer, BigDecimal> pointDerive) {
+    private RatingRule.Rating aRating(int priority, int rating, EventExecutionFilter criteria, String pointId,
+                                      EventValueResolver<Integer> pointDerive) {
         return new RatingRule.Rating(priority, rating, criteria, pointDerive, pointId);
     }
 

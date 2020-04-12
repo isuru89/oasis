@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.engine.model.EventFilter;
+import io.github.oasis.engine.model.EventExecutionFilter;
 import io.github.oasis.engine.model.EventTypeMatcher;
 import io.github.oasis.engine.model.EventTypeMatcherFactory;
 
@@ -35,17 +35,17 @@ public abstract class AbstractRule implements Serializable {
     private String description;
     private String forEvent;
     private EventTypeMatcher eventTypeMatcher;
-    private EventFilter condition;
+    private EventExecutionFilter condition;
 
     public AbstractRule(String id) {
         this.id = id;
     }
 
-    public EventFilter getCondition() {
+    public EventExecutionFilter getCondition() {
         return condition;
     }
 
-    public void setCondition(EventFilter condition) {
+    public void setCondition(EventExecutionFilter condition) {
         this.condition = condition;
     }
 

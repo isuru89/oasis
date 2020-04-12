@@ -56,12 +56,12 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
 
     @Override
     public boolean isDenied(Event event, ExecutionContext context) {
-        return super.isDenied(event, context) || !isCriteriaSatisfied(event, rule);
+        return super.isDenied(event, context) || !isCriteriaSatisfied(event, rule, context);
     }
 
     @Override
     public List<BadgeSignal> process(Event event, BadgeTemporalRule rule, ExecutionContext context, DbContext db) {
-        BigDecimal value = resolveValueOfEvent(event, rule);
+        BigDecimal value = resolveValueOfEvent(event, rule, context);
         String badgeKey = ID.getUserTemporalBadgeKey(event.getGameId(), event.getUser(), rule.getId());
         Mapped map = db.MAP(badgeKey);
         long ts = getUserSpecificEpochTs(event.getUser(), event.getTimestamp(), db);
@@ -110,11 +110,11 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
         return thresholds.isEmpty() ? Optional.empty() : Optional.of(thresholds);
     }
 
-    private BigDecimal resolveValueOfEvent(Event event, BadgeTemporalRule rule) {
-        return rule.getValueResolver().apply(event).setScale(SCALE, RoundingMode.HALF_UP);
+    private BigDecimal resolveValueOfEvent(Event event, BadgeTemporalRule rule, ExecutionContext context) {
+        return rule.getValueResolver().resolve(event, context).setScale(SCALE, RoundingMode.HALF_UP);
     }
 
-    private boolean isCriteriaSatisfied(Event event, BadgeTemporalRule rule) {
-        return rule.getCriteria() == null || rule.getCriteria().test(event);
+    private boolean isCriteriaSatisfied(Event event, BadgeTemporalRule rule, ExecutionContext context) {
+        return rule.getCriteria() == null || rule.getCriteria().matches(event, rule, context);
     }
 }

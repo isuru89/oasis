@@ -26,14 +26,15 @@ import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.factory.OasisDependencyModule;
+import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.engine.model.EventValueResolver;
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.rules.BadgeStreakNRule;
 import io.github.oasis.engine.rules.ChallengeRule;
 import io.github.oasis.engine.rules.MilestoneRule;
 import io.github.oasis.engine.rules.PointRule;
 import io.github.oasis.engine.rules.RatingRule;
-import io.github.oasis.engine.model.TEvent;
-import io.github.oasis.model.Event;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,8 +52,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 
 import static io.github.oasis.engine.rules.MilestoneRule.MilestoneFlag.SKIP_NEGATIVE_VALUES;
 
@@ -139,7 +138,7 @@ public class OasisEngineTest {
         PointRule rule = new PointRule("test.point.rule");
         rule.setForEvent(EVT_A);
         rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long)event.getFieldValue("value") - 50));
-        rule.setCriteria((event, rule1) -> (long) event.getFieldValue("value") >= 50);
+        rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
 
         supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
         supervisor.tell(e1, supervisor);
@@ -163,7 +162,7 @@ public class OasisEngineTest {
         BadgeStreakNRule rule = new BadgeStreakNRule("abc");
         rule.setForEvent(EVT_A);
         rule.setStreaks(List.of(3, 5));
-        rule.setCriteria(event -> (long) event.getFieldValue("value") >= 50);
+        rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
         rule.setRetainTime(10);
 
         supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
@@ -191,7 +190,7 @@ public class OasisEngineTest {
 
         MilestoneRule rule = new MilestoneRule("test.milestone.rule");
         rule.setForEvent(EVT_A);
-        rule.setValueExtractor((event, rule1) -> BigDecimal.valueOf((long)event.getFieldValue("value")));
+        rule.setValueExtractor((event, rule1, ctx) -> BigDecimal.valueOf((long)event.getFieldValue("value")));
         rule.setLevels(Arrays.asList(new MilestoneRule.Level(1, BigDecimal.valueOf(100)),
                 new MilestoneRule.Level(2, BigDecimal.valueOf(200)),
                 new MilestoneRule.Level(3, BigDecimal.valueOf(300)),
@@ -223,10 +222,10 @@ public class OasisEngineTest {
         ChallengeRule rule = new ChallengeRule("test.challenge.rule");
         rule.setForEvent(EVT_A);
         rule.setScope(ChallengeRule.ChallengeScope.GAME);
-        rule.setCustomAwardPoints((event, rank) -> BigDecimal.valueOf(100 * rank));
+        rule.setCustomAwardPoints((event, rank, ctx) -> BigDecimal.valueOf(100 * rank));
         rule.setStartAt(TS("2020-03-01 07:15"));
         rule.setExpireAt(TS("2020-05-01 07:15"));
-        rule.setCriteria((event, rule1) -> (long) event.getFieldValue("value") >= 50);
+        rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
         rule.setWinnerCount(3);
         rule.setPointId("challenge.points");
 
@@ -257,12 +256,12 @@ public class OasisEngineTest {
         awaitTerminated();
     }
 
-    private BiFunction<Event, Integer, BigDecimal> pointAward(int currRating) {
+    private EventValueResolver<Integer> pointAward(int currRating) {
         return (event, prevRating) -> BigDecimal.valueOf((currRating - prevRating) * 10.0);
     }
 
-    private Predicate<Event> checkGt(long margin) {
-        return event1 -> (long) event1.getFieldValue("value") >= margin;
+    private EventExecutionFilter checkGt(long margin) {
+        return (e, r, ctx) -> (long) e.getFieldValue("value") >= margin;
     }
 
     private static class TestConfigProvider implements Provider<OasisConfigs> {

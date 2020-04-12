@@ -19,20 +19,20 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.engine.model.EventValueResolver;
+import io.github.oasis.engine.model.ExecutionContext;
 
 import java.math.BigDecimal;
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 
 /**
  * @author Isuru Weerarathna
  */
 public class PointRule extends AbstractRule {
 
-    private BiPredicate<Event, PointRule> criteria;
+    private EventExecutionFilter criteria;
     private BigDecimal amountToAward;
-    private BiFunction<Event, PointRule, BigDecimal> amountExpression;
+    private EventValueResolver<ExecutionContext> amountExpression;
 
     public PointRule(String id) {
         super(id);
@@ -42,11 +42,11 @@ public class PointRule extends AbstractRule {
         return amountExpression != null;
     }
 
-    public BiPredicate<Event, PointRule> getCriteria() {
+    public EventExecutionFilter getCriteria() {
         return criteria;
     }
 
-    public void setCriteria(BiPredicate<Event, PointRule> criteria) {
+    public void setCriteria(EventExecutionFilter criteria) {
         this.criteria = criteria;
     }
 
@@ -58,11 +58,11 @@ public class PointRule extends AbstractRule {
         this.amountToAward = amountToAward;
     }
 
-    public BiFunction<Event, PointRule, BigDecimal> getAmountExpression() {
+    public EventValueResolver<ExecutionContext> getAmountExpression() {
         return amountExpression;
     }
 
-    public void setAmountExpression(BiFunction<Event, PointRule, BigDecimal> amountExpression) {
+    public void setAmountExpression(EventValueResolver<ExecutionContext> amountExpression) {
         this.amountExpression = amountExpression;
     }
 }

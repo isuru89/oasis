@@ -147,7 +147,7 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         List<Signal> signals = new ArrayList<>();
         RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
         BadgeTemporalRule rule = ruleContext.getRule();
-        rule.setCondition((event, ruleRef) -> (long)event.getFieldValue("value") < 50);
+        rule.setCondition((event, ruleRef, ctx) -> (long)event.getFieldValue("value") < 50);
         Assertions.assertEquals(1, rule.getThresholds().size());
         BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
@@ -352,7 +352,7 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         List<Signal> signals = new ArrayList<>();
         RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
         BadgeTemporalRule rule = ruleContext.getRule();
-        rule.setCondition((event, ruleRef) -> (long) event.getFieldValue("value") >= 50);
+        rule.setCondition((event, ruleRef, ctx) -> (long) event.getFieldValue("value") >= 50);
         Assertions.assertEquals(3, rule.getThresholds().size());
         BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
@@ -439,7 +439,7 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         BadgeTemporalRule rule = new BadgeTemporalRule("test.temporal.badge");
         rule.setForEvent(EVENT_TYPE);
         rule.setTimeUnit(timeUnit);
-        rule.setValueResolver(event -> new BigDecimal(event.getFieldValue("value").toString()));
+        rule.setValueResolver((e,c) -> new BigDecimal(e.getFieldValue("value").toString()));
         rule.setThresholds(Arrays.asList(thresholds));
         return new RuleContext<>(rule, fromConsumer(collection::add));
     }

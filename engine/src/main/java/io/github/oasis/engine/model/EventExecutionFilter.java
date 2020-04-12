@@ -19,25 +19,27 @@
 
 package io.github.oasis.engine.model;
 
-import java.util.regex.Pattern;
+import io.github.oasis.engine.rules.AbstractRule;
+import io.github.oasis.model.Event;
+
+import java.io.Serializable;
 
 /**
+ * Interface used to filter out events before send it processing.
+ *
  * @author Isuru Weerarathna
  */
-public class RegexEventTypeMatcher implements EventTypeMatcher {
+@FunctionalInterface
+public interface EventExecutionFilter extends Serializable {
 
-    private final Pattern matcher;
+    /**
+     * Returns true if criteria successfully matches.
+     *
+     * @param event event instance.
+     * @param rule rule which executes against.
+     * @param ctx execution context.
+     * @return true if this event can be sent for processing.
+     */
+    boolean matches(Event event, AbstractRule rule, ExecutionContext ctx);
 
-    public RegexEventTypeMatcher(Pattern pattern) {
-        this.matcher = pattern;
-    }
-
-    @Override
-    public boolean matches(String eventType) {
-        return matcher.matcher(eventType).matches();
-    }
-
-    public static RegexEventTypeMatcher create(String source) {
-        return new RegexEventTypeMatcher(Pattern.compile(source));
-    }
 }

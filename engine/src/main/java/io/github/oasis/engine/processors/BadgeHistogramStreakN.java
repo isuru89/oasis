@@ -69,7 +69,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
         String badgeKey = ID.getBadgeHistogramKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(badgeKey);
         long timestamp = event.getTimestamp() - (event.getTimestamp() % rule.getTimeUnit());
-        BigDecimal value = evaluateForValue(event).setScale(SCALE, RoundingMode.HALF_UP);
+        BigDecimal value = evaluateForValue(event, context).setScale(SCALE, RoundingMode.HALF_UP);
         Optional<String> memberByScore = sortedRange.getMemberByScore(timestamp);
         BigDecimal prev = BigDecimal.ZERO;
         String prevMember = null;
@@ -262,8 +262,8 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
         return partitions;
     }
 
-    private BigDecimal evaluateForValue(Event event) {
-        return BigDecimal.valueOf(rule.getValueResolver().apply(event));
+    private BigDecimal evaluateForValue(Event event, ExecutionContext context) {
+        return rule.getValueResolver().resolve(event, context);
     }
 
 }

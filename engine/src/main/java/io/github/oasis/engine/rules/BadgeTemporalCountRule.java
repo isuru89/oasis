@@ -19,11 +19,11 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.engine.model.EventValueResolver;
+import io.github.oasis.engine.model.ExecutionContext;
 
 import java.math.BigDecimal;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * @author Isuru Weerarathna
@@ -34,13 +34,13 @@ public class BadgeTemporalCountRule extends BadgeTemporalRule {
     }
 
     @Override
-    public void setCriteria(Predicate<Event> criteria) {
+    public void setCriteria(EventExecutionFilter criteria) {
         super.setCriteria(criteria);
-        super.valueResolver = event -> BigDecimal.ONE;
+        super.valueResolver = (event, ctx) -> BigDecimal.ONE;
     }
 
     @Override
-    public void setValueResolver(Function<Event, BigDecimal> valueResolver) {
+    public void setValueResolver(EventValueResolver<ExecutionContext> valueResolver) {
         throw new IllegalStateException("Use condition instead of value resolver!");
     }
 }

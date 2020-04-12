@@ -25,7 +25,7 @@
             <level>INFO</level>
         </filter>
         <encoder>
-            <pattern>[%date{ISO8601}] [%level] [%logger{10}] - %msg %n</pattern>
+            <pattern>[%date{ISO8601}] [%-5level] [%-30logger{10}] - %msg %n</pattern>
         </encoder>
     </appender>
 

@@ -55,10 +55,10 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         options.setStreaks(Arrays.asList(3,5));
         options.setConsecutive(true);
         options.setTimeUnit(FIFTY);
-        options.setCondition(event -> (long) event.getFieldValue("value") >= 50);
+        options.setCondition((e, r, ctx) -> (long) e.getFieldValue("value") >= 50);
 
         Assertions.assertEquals(BigDecimal.ONE, options.getThreshold());
-        Assertions.assertThrows(IllegalStateException.class, () -> options.setValueResolver(event -> 0.0));
+        Assertions.assertThrows(IllegalStateException.class, () -> options.setValueResolver((e, ctx) -> BigDecimal.ZERO));
     }
 
     @DisplayName("Single streak: No matching event types")
@@ -299,7 +299,7 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
         options.setConsecutive(true);
         options.setThreshold(BigDecimal.valueOf(threshold));
         options.setTimeUnit(timeunit);
-        options.setCondition(event -> (long) event.getFieldValue("value") >= 50);
+        options.setCondition((e, r, c) -> (long) e.getFieldValue("value") >= 50);
         return new RuleContext<>(options, fromConsumer(consumer));
     }
 }

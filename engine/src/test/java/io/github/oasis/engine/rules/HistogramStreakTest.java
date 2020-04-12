@@ -293,7 +293,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
         options.setConsecutive(true);
         options.setThreshold(BigDecimal.valueOf(threshold));
         options.setTimeUnit(timeunit);
-        options.setValueResolver(event -> Double.parseDouble(event.getFieldValue("value").toString()));
+        options.setValueResolver((e,ctx) -> new BigDecimal(e.getFieldValue("value").toString()));
         return new RuleContext<>(options, fromConsumer(consumer));
     }
 }

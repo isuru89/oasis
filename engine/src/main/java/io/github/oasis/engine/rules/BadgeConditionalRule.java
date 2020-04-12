@@ -19,12 +19,11 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.model.EventExecutionFilter;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * @author Isuru Weerarathna
@@ -57,10 +56,10 @@ public class BadgeConditionalRule extends BadgeRule {
 
     public static class Condition implements Comparable<Condition> {
         private int priority;
-        private Predicate<Event> condition;
+        private EventExecutionFilter condition;
         private int attribute;
 
-        public Condition(int priority, Predicate<Event> condition, int attribute) {
+        public Condition(int priority, EventExecutionFilter condition, int attribute) {
             this.priority = priority;
             this.condition = condition;
             this.attribute = attribute;
@@ -70,7 +69,7 @@ public class BadgeConditionalRule extends BadgeRule {
             return priority;
         }
 
-        public Predicate<Event> getCondition() {
+        public EventExecutionFilter getCondition() {
             return condition;
         }
 

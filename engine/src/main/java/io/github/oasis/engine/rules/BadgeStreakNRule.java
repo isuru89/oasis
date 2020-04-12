@@ -19,11 +19,11 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.model.EventExecutionFilter;
 
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.TreeSet;
-import java.util.function.Predicate;
 
 /**
  * @author Isuru Weerarathna
@@ -32,16 +32,16 @@ public class BadgeStreakNRule extends BadgeRule {
 
     private int maxStreak = 0;
     private int minStreak = Integer.MAX_VALUE;
-    private TreeSet<Integer> streakMap;
+    private NavigableSet<Integer> streakMap;
     private List<Integer> streaks;
-    private Predicate<Event> criteria;
+    private EventExecutionFilter criteria;
     private long retainTime;
 
-    public Predicate<Event> getCriteria() {
+    public EventExecutionFilter getCriteria() {
         return criteria;
     }
 
-    public void setCriteria(Predicate<Event> criteria) {
+    public void setCriteria(EventExecutionFilter criteria) {
         this.criteria = criteria;
     }
 
@@ -53,7 +53,7 @@ public class BadgeStreakNRule extends BadgeRule {
         return maxStreak;
     }
 
-    public TreeSet<Integer> getStreakMap() {
+    public NavigableSet<Integer> getStreakMap() {
         return streakMap;
     }
 

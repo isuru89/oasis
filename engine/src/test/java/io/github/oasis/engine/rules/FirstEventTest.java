@@ -19,7 +19,8 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.engine.model.EventFilter;
+import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.BadgeFirstEvent;
@@ -235,11 +236,11 @@ public class FirstEventTest extends AbstractRuleTest {
         assertSignal(signals, new BadgeSignal(rule.getId(), e2, e2.getTimestamp(), 1, 144, 144, e2.getExternalId(), e2.getExternalId()));
     }
 
-    private boolean eventGreaterThan50(Event e, AbstractRule rule) {
+    private boolean eventGreaterThan50(Event e, AbstractRule rule, ExecutionContext context) {
         return (long) e.getFieldValue("value") >= 50;
     }
 
-    private RuleContext<BadgeFirstEventRule> createRule(String forEvent, List<Signal> collectTo, EventFilter predicate) {
+    private RuleContext<BadgeFirstEventRule> createRule(String forEvent, List<Signal> collectTo, EventExecutionFilter predicate) {
         BadgeFirstEventRule rule = new BadgeFirstEventRule("test.event", forEvent);
         rule.setForEvent(EVT_1);
         rule.setCondition(predicate);

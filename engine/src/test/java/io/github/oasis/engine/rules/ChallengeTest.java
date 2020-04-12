@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.ChallengeProcessor;
@@ -461,11 +462,11 @@ public class ChallengeTest extends AbstractRuleTest {
         return BigDecimal.valueOf(val).setScale(Constants.SCALE, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal award(Event event, int position) {
+    private BigDecimal award(Event event, int position, ExecutionContext context) {
         return BigDecimal.valueOf((long)event.getFieldValue("value") - 50);
     }
 
-    private boolean check(Event event, ChallengeRule rule) {
+    private boolean check(Event event, AbstractRule rule, ExecutionContext context) {
         return (long)event.getFieldValue("value") >= 50;
     }
 

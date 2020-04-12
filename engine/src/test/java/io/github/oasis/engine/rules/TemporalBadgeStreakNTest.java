@@ -250,7 +250,7 @@ public class TemporalBadgeStreakNTest extends AbstractRuleTest {
         BadgeTemporalStreakNRule options = new BadgeTemporalStreakNRule("test.temporal.streak");
         options.setForEvent(EVENT_TYPE);
         options.setStreaks(streaks);
-        options.setCriteria(event -> (long) event.getFieldValue("value") >= 50);
+        options.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
         options.setRetainTime(100);
         options.setTimeUnit(timeUnit);
         return new RuleContext<>(options, fromConsumer(consumer));

@@ -21,7 +21,7 @@ package io.github.oasis.engine.processors;
 
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.model.EventFilter;
+import io.github.oasis.engine.model.EventExecutionFilter;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.rules.AbstractRule;
@@ -48,7 +48,7 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
     }
 
     public boolean isDenied(Event event, ExecutionContext context) {
-        return !isMatchEvent(event, rule) || unableToProcess(event, rule);
+        return !isMatchEvent(event, rule) || unableToProcess(event, rule, context);
     }
 
     @Override
@@ -119,12 +119,12 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
         return rule.getEventTypeMatcher().matches(event.getEventType());
     }
 
-    private boolean unableToProcess(Event event, AbstractRule rule) {
-        EventFilter condition = rule.getCondition();
+    private boolean unableToProcess(Event event, AbstractRule rule, ExecutionContext context) {
+        EventExecutionFilter condition = rule.getCondition();
         if (condition == null) {
             return false;
         }
-        return !condition.matches(event, rule);
+        return !condition.matches(event, rule, context);
     }
 
 }

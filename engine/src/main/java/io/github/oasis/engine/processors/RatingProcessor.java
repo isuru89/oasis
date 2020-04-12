@@ -65,7 +65,7 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
 
         for (RatingRule.Rating rating : rule.getRatings()) {
             int newRating = rating.getRating();
-            if (rating.getCriteria().test(event) && newRating != currRating) {
+            if (rating.getCriteria().matches(event, rule, context) && newRating != currRating) {
                 long ts = event.getTimestamp();
                 String id = event.getExternalId();
                 BigDecimal score = deriveAwardedPoints(event, currRating, rating).setScale(Constants.SCALE, RoundingMode.HALF_UP);
@@ -82,7 +82,7 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
 
     private BigDecimal deriveAwardedPoints(Event event, int prevRating, RatingRule.Rating rating) {
         if (rating.getPointAwards() != null) {
-            return rating.getPointAwards().apply(event, prevRating);
+            return rating.getPointAwards().resolve(event, prevRating);
         }
         return BigDecimal.ZERO;
     }

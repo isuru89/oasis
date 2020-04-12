@@ -62,7 +62,7 @@ public class BadgeConditionalProcessor extends BadgeProcessor<BadgeConditionalRu
         }
 
         Optional<BadgeConditionalRule.Condition> first = conditions.stream()
-                .filter(condition -> condition.getCondition().test(event))
+                .filter(condition -> condition.getCondition().matches(event, rule, context))
                 .findFirst();
         if (first.isPresent()) {
             BadgeConditionalRule.Condition condition = first.get();

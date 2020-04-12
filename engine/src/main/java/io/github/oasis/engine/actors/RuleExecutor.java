@@ -52,10 +52,10 @@ public class RuleExecutor extends OasisBaseActor {
     private String parentId;
     private Rules rules;
 
-    private AbstractActor.Receive executing;
-    private AbstractActor.Receive starting;
+    private final AbstractActor.Receive executing;
+    private final AbstractActor.Receive starting;
 
-    private Processors processors;
+    private final Processors processors;
 
     @Inject
     public RuleExecutor(OasisConfigs configs, Processors processors) {

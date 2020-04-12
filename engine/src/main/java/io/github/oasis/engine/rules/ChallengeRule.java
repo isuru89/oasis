@@ -19,11 +19,11 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.model.EventBiValueResolver;
+import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.engine.model.ExecutionContext;
 
 import java.math.BigDecimal;
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 
 /**
  * @author Isuru Weerarathna
@@ -36,10 +36,10 @@ public class ChallengeRule extends AbstractRule {
 
     private String pointId;
     private BigDecimal awardPoints = BigDecimal.ZERO;
-    private BiFunction<Event, Integer, BigDecimal> customAwardPoints;
+    private EventBiValueResolver<Integer, ExecutionContext> customAwardPoints;
     private ChallengeAwardMethod awardMethod = ChallengeAwardMethod.REPEATABLE;
 
-    private BiPredicate<Event, ChallengeRule> criteria;
+    private EventExecutionFilter criteria;
 
     private ChallengeScope scope = ChallengeScope.GAME;
     private long scopeId;
@@ -50,13 +50,6 @@ public class ChallengeRule extends AbstractRule {
 
     public ChallengeAwardMethod getAwardMethod() {
         return awardMethod;
-    }
-
-    public BigDecimal deriveAwardPointsForPosition(int position, Event event) {
-        if (customAwardPoints != null) {
-            return customAwardPoints.apply(event, position);
-        }
-        return awardPoints;
     }
 
     public String getPointId() {
@@ -103,19 +96,19 @@ public class ChallengeRule extends AbstractRule {
         this.awardPoints = awardPoints;
     }
 
-    public BiFunction<Event, Integer, BigDecimal> getCustomAwardPoints() {
+    public EventBiValueResolver<Integer, ExecutionContext> getCustomAwardPoints() {
         return customAwardPoints;
     }
 
-    public void setCustomAwardPoints(BiFunction<Event, Integer, BigDecimal> customAwardPoints) {
+    public void setCustomAwardPoints(EventBiValueResolver<Integer, ExecutionContext> customAwardPoints) {
         this.customAwardPoints = customAwardPoints;
     }
 
-    public BiPredicate<Event, ChallengeRule> getCriteria() {
+    public EventExecutionFilter getCriteria() {
         return criteria;
     }
 
-    public void setCriteria(BiPredicate<Event, ChallengeRule> criteria) {
+    public void setCriteria(EventExecutionFilter criteria) {
         this.criteria = criteria;
     }
 

@@ -19,25 +19,19 @@
 
 package io.github.oasis.engine.model;
 
-import java.util.regex.Pattern;
+import io.github.oasis.model.Event;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
+ * Used for dynamically resolving a value from a expression using two additional argument.
+ *
  * @author Isuru Weerarathna
  */
-public class RegexEventTypeMatcher implements EventTypeMatcher {
+@FunctionalInterface
+public interface EventBiValueResolver<I extends Serializable, J extends Serializable> {
 
-    private final Pattern matcher;
+    BigDecimal resolve(Event event, I input, J otherInput);
 
-    public RegexEventTypeMatcher(Pattern pattern) {
-        this.matcher = pattern;
-    }
-
-    @Override
-    public boolean matches(String eventType) {
-        return matcher.matcher(eventType).matches();
-    }
-
-    public static RegexEventTypeMatcher create(String source) {
-        return new RegexEventTypeMatcher(Pattern.compile(source));
-    }
 }

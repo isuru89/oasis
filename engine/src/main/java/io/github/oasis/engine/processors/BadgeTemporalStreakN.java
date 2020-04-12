@@ -78,7 +78,7 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
-        if (rule.getCriteria().test(event)) {
+        if (rule.getCriteria().matches(event, rule, context)) {
             String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
             String lastOffering = db.getValueFromMap(badgeMetaKey, rule.getId() + ":lasttime");  // <timestamp>:<streak>:<id>
             long lastTimeOffered = 0L;

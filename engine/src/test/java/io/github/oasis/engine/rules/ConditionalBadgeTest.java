@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.BadgeConditionalProcessor;
@@ -33,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * @author Isuru Weerarathna
@@ -76,7 +77,7 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         List<Signal> signals = new ArrayList<>();
         RuleContext<BadgeConditionalRule> ruleContext = createRule(signals, aCond(1, ATTR_50, this::greater50));
-        ruleContext.getRule().setCondition(((event, rule1) -> (long)event.getFieldValue("value") >= 75));
+        ruleContext.getRule().setCondition(((event, rule1, ctx) -> (long)event.getFieldValue("value") >= 75));
         Assertions.assertEquals(1, ruleContext.getRule().getConditions().size());
         BadgeConditionalProcessor processor = new BadgeConditionalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -367,23 +368,23 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
                 new ConditionalBadge(rule.getId(), e3, ATTR_85, 145, e3.getExternalId()));
     }
 
-    private boolean greater50(Event event) {
+    private boolean greater50(Event event, AbstractRule rule, ExecutionContext context) {
         return (long) event.getFieldValue("value") >= 50;
     }
 
-    private boolean greater65(Event event) {
+    private boolean greater65(Event event, AbstractRule rule, ExecutionContext context) {
         return (long) event.getFieldValue("value") >= 65;
     }
 
-    private boolean greater75(Event event) {
+    private boolean greater75(Event event, AbstractRule rule, ExecutionContext context) {
         return (long) event.getFieldValue("value") >= 75;
     }
 
-    private boolean greater85(Event event) {
+    private boolean greater85(Event event, AbstractRule rule, ExecutionContext context) {
         return (long) event.getFieldValue("value") >= 85;
     }
 
-    private BadgeConditionalRule.Condition aCond(int priority, int attr, Predicate<Event> cond) {
+    private BadgeConditionalRule.Condition aCond(int priority, int attr, EventExecutionFilter cond) {
         return new BadgeConditionalRule.Condition(priority, cond, attr);
     }
 

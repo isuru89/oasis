@@ -19,14 +19,14 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.engine.model.EventValueResolver;
+import io.github.oasis.engine.model.ExecutionContext;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * @author Isuru Weerarathna
@@ -34,27 +34,27 @@ import java.util.function.Predicate;
 public class BadgeTemporalRule extends BadgeRule {
 
     private long timeUnit;
-    private Predicate<Event> criteria;
-    protected Function<Event, BigDecimal> valueResolver;
+    private EventExecutionFilter criteria;
+    protected EventValueResolver<ExecutionContext> valueResolver;
     private List<Threshold> thresholds;
 
     public BadgeTemporalRule(String id) {
         super(id);
     }
 
-    public Predicate<Event> getCriteria() {
+    public EventExecutionFilter getCriteria() {
         return criteria;
     }
 
-    public void setCriteria(Predicate<Event> criteria) {
+    public void setCriteria(EventExecutionFilter criteria) {
         this.criteria = criteria;
     }
 
-    public Function<Event, BigDecimal> getValueResolver() {
+    public EventValueResolver<ExecutionContext> getValueResolver() {
         return valueResolver;
     }
 
-    public void setValueResolver(Function<Event, BigDecimal> valueResolver) {
+    public void setValueResolver(EventValueResolver<ExecutionContext> valueResolver) {
         this.valueResolver = valueResolver;
     }
 

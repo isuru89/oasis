@@ -19,11 +19,11 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.engine.model.EventValueResolver;
+import io.github.oasis.engine.model.ExecutionContext;
 
 import java.math.BigDecimal;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * @author Isuru Weerarathna
@@ -37,16 +37,16 @@ public class BadgeHistogramCountStreakNRule extends BadgeHistogramStreakNRule {
     }
 
     @Override
-    public void setValueResolver(Function<Event, Double> valueResolver) {
+    public void setValueResolver(EventValueResolver<ExecutionContext> valueResolver) {
         throw new IllegalStateException("Use condition instead of value resolver!");
     }
 
-    public void setCondition(Predicate<Event> condition) {
-        super.valueResolver = event -> {
-            if (condition.test(event)) {
-                return 1.0;
+    public void setCondition(EventExecutionFilter condition) {
+        super.valueResolver = (event, ctx) -> {
+            if (condition.matches(event, this, ctx)) {
+                return BigDecimal.ONE;
             } else {
-                return 0.0;
+                return BigDecimal.ZERO;
             }
         };
     }

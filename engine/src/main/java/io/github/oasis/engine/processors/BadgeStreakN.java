@@ -63,7 +63,7 @@ public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
-        if (rule.getCriteria().test(event)) {
+        if (rule.getCriteria().matches(event, rule, context)) {
             String member = ts + ":1:" + event.getExternalId();
             sortedRange.add(member, ts);
             long rank = sortedRange.getRank(member);

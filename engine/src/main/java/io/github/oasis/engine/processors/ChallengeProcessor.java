@@ -23,6 +23,7 @@ import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.external.Sorted;
+import io.github.oasis.engine.model.EventBiValueResolver;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
@@ -55,7 +56,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
 
     @Override
     public boolean isDenied(Event event, ExecutionContext context) {
-        return super.isDenied(event, context) || notInScope(event, rule) || notInRange(event, rule) || !criteriaSatisfied(event, rule);
+        return super.isDenied(event, context) || notInScope(event, rule) || notInRange(event, rule) || !criteriaSatisfied(event, rule, context);
     }
 
     @Override
@@ -80,7 +81,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
                     event.getTimestamp(),
                     ALL_WINNERS_FOUND));
         }
-        BigDecimal score = rule.deriveAwardPointsForPosition(position, event).setScale(Constants.SCALE, RoundingMode.HALF_UP);
+        BigDecimal score = this.deriveAwardPointsForPosition(rule, position, event, context).setScale(Constants.SCALE, RoundingMode.HALF_UP);
         winnerSet.add(member, score.doubleValue());
         return Arrays.asList(
                 new ChallengeWinSignal(rule.getId(), event, position, event.getUser(), event.getTimestamp(), event.getExternalId()),
@@ -96,8 +97,16 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
         return member;
     }
 
-    private boolean criteriaSatisfied(Event event, ChallengeRule rule) {
-        return rule.getCriteria() == null || rule.getCriteria().test(event, rule);
+    private BigDecimal deriveAwardPointsForPosition(ChallengeRule rule, int position, Event event, ExecutionContext context) {
+        EventBiValueResolver<Integer, ExecutionContext> customAwardPoints = rule.getCustomAwardPoints();
+        if (customAwardPoints != null) {
+            return customAwardPoints.resolve(event, position, context);
+        }
+        return rule.getAwardPoints();
+    }
+
+    private boolean criteriaSatisfied(Event event, ChallengeRule rule, ExecutionContext context) {
+        return rule.getCriteria() == null || rule.getCriteria().matches(event, rule, context);
     }
 
     private boolean notInRange(Event event, ChallengeRule rule) {

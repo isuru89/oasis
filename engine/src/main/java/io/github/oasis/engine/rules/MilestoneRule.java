@@ -19,7 +19,8 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.model.EventBiValueResolver;
+import io.github.oasis.engine.model.ExecutionContext;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,7 +32,6 @@ import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.BiFunction;
 
 /**
  * @author Isuru Weerarathna
@@ -41,7 +41,7 @@ public class MilestoneRule extends AbstractRule {
     private List<Level> levels;
     private NavigableMap<BigDecimal, Level> levelMap;
     private BigDecimal lastLevelMilestone = BigDecimal.ZERO;
-    private BiFunction<Event, MilestoneRule, BigDecimal> valueExtractor;
+    private EventBiValueResolver<MilestoneRule, ExecutionContext> valueExtractor;
     private Set<MilestoneFlag> flags;
 
     public MilestoneRule(String id) {
@@ -74,11 +74,11 @@ public class MilestoneRule extends AbstractRule {
         }
     }
 
-    public BiFunction<Event, MilestoneRule, BigDecimal> getValueExtractor() {
+    public EventBiValueResolver<MilestoneRule, ExecutionContext> getValueExtractor() {
         return valueExtractor;
     }
 
-    public void setValueExtractor(BiFunction<Event, MilestoneRule, BigDecimal> valueExtractor) {
+    public void setValueExtractor(EventBiValueResolver<MilestoneRule, ExecutionContext> valueExtractor) {
         this.valueExtractor = valueExtractor;
     }
 

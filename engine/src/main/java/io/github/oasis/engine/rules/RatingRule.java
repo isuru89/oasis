@@ -19,14 +19,12 @@
 
 package io.github.oasis.engine.rules;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.engine.model.EventValueResolver;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 
 /**
  * @author Isuru Weerarathna
@@ -60,11 +58,11 @@ public class RatingRule extends AbstractRule {
     public static class Rating implements Comparable<Rating> {
         private int priority;
         private int rating;
-        private Predicate<Event> criteria;
+        private EventExecutionFilter criteria;
         private String pointId;
-        private BiFunction<Event, Integer, BigDecimal> pointAwards;
+        private EventValueResolver<Integer> pointAwards;
 
-        public Rating(int priority, int rating, Predicate<Event> criteria, BiFunction<Event, Integer, BigDecimal> pointAwards,
+        public Rating(int priority, int rating, EventExecutionFilter criteria, EventValueResolver<Integer> pointAwards,
                       String pointId) {
             this.priority = priority;
             this.rating = rating;
@@ -77,7 +75,7 @@ public class RatingRule extends AbstractRule {
             return pointId;
         }
 
-        public BiFunction<Event, Integer, BigDecimal> getPointAwards() {
+        public EventValueResolver<Integer> getPointAwards() {
             return pointAwards;
         }
 
@@ -89,7 +87,7 @@ public class RatingRule extends AbstractRule {
             return rating;
         }
 
-        public Predicate<Event> getCriteria() {
+        public EventExecutionFilter getCriteria() {
             return criteria;
         }
 

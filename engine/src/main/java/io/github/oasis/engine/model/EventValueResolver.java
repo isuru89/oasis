@@ -19,24 +19,19 @@
 
 package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.model.Event;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+
 /**
- * Interface used to filter out events before send it processing.
+ * Used for dynamically resolving a value from a expression using single additional argument.
  *
  * @author Isuru Weerarathna
  */
 @FunctionalInterface
-public interface EventFilter {
+public interface EventValueResolver<T extends Serializable> {
 
-    /**
-     * Checks whether given event can be processed.
-     *
-     * @param event event instance.
-     * @param rule rule which executes against.
-     * @return true if this event can be sent for processing.
-     */
-    boolean matches(Event event, AbstractRule rule);
+    BigDecimal resolve(Event event, T input);
 
 }

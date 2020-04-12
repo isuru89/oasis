@@ -21,45 +21,35 @@ package io.github.oasis.engine.model;
 
 import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.model.Event;
+import org.mvel2.MVEL;
 
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 /**
+ * Event filter using a provided MVEL script.
+ *
  * @author Isuru Weerarathna
  */
-public class Rules implements Serializable {
+public class ScriptedEventFilter implements EventExecutionFilter {
 
-    private final ConcurrentHashMap<String, AbstractRule> ruleReferences = new ConcurrentHashMap<>();
-    private final SignalCollector collector;
+    private final Serializable compiledExpression;
 
-    private Rules(SignalCollector collector) {
-        this.collector = collector;
+    private ScriptedEventFilter(Serializable compiledExpression) {
+        this.compiledExpression = compiledExpression;
     }
 
-    public static Rules get(ActorSignalCollector collector) {
-        return new Rules(collector);
+    public static ScriptedEventFilter create(String scriptText) {
+        return new ScriptedEventFilter(MVEL.compileExpression(scriptText));
     }
 
-    public SignalCollector getCollector() {
-        return collector;
+    @Override
+    public boolean matches(Event event, AbstractRule rule, ExecutionContext context) {
+        Map<String, Serializable> variables = Map.of("e", event, "rule", rule, "ctx", context);
+        Object result = MVEL.executeExpression(compiledExpression, variables);
+        if (result instanceof Boolean) {
+            return (boolean) result;
+        }
+        return false;
     }
-
-    public Iterator<AbstractRule> getAllRulesForEvent(Event event) {
-        return ruleReferences.values().iterator();
-    }
-
-    public void addRule(AbstractRule rule) {
-        ruleReferences.put(rule.getId(), rule);
-    }
-
-    public void updateRule(AbstractRule rule) {
-        addRule(rule);
-    }
-
-    public void removeRule(String ruleId) {
-        ruleReferences.remove(ruleId);
-    }
-
 }

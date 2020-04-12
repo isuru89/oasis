@@ -19,10 +19,12 @@
 
 package io.github.oasis.engine.model;
 
+import java.io.Serializable;
+
 /**
  * @author Isuru Weerarathna
  */
-public class ExecutionContext {
+public class ExecutionContext implements Serializable {
 
     private int userTimeOffset;
     private GameContext gameContext;

@@ -59,10 +59,10 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         rule.setForEvent(EVENT_TYPE);
         rule.setTimeUnit(FIFTY);
         rule.setThresholds(Arrays.asList(aT(ATTR_1, T_3), aT(ATTR_2, T_5)));
-        rule.setCriteria(event -> (long) event.getFieldValue("value") >= 50);
+        rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
 
         Assertions.assertNotNull(rule.getCriteria());
-        Assertions.assertThrows(IllegalStateException.class, () -> rule.setValueResolver(event -> BigDecimal.ONE));
+        Assertions.assertThrows(IllegalStateException.class, () -> rule.setValueResolver((e,c) -> BigDecimal.ONE));
     }
 
     @DisplayName("No Thresholds")
@@ -386,7 +386,7 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
         BadgeTemporalCountRule rule = new BadgeTemporalCountRule("test.temporal.badge");
         rule.setForEvent(EVENT_TYPE);
         rule.setTimeUnit(timeUnit);
-        rule.setCriteria(event -> (long) event.getFieldValue("value") >= 50);
+        rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
         rule.setThresholds(Arrays.asList(thresholds));
         return new RuleContext<>(rule, fromConsumer(collection::add));
     }

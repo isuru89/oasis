@@ -57,7 +57,7 @@ public class MilestoneProcessor extends AbstractProcessor<MilestoneRule, Milesto
         if (Objects.isNull(rule.getValueExtractor())) {
             return null;
         }
-        BigDecimal delta = rule.getValueExtractor().apply(event, rule);
+        BigDecimal delta = rule.getValueExtractor().resolve(event, rule, context);
         if (rule.containsFlag(SKIP_NEGATIVE_VALUES) && isNegative(delta)) {
             return null;
         }

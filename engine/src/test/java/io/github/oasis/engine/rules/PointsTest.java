@@ -19,6 +19,9 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.engine.model.EventValueResolver;
+import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.PointsProcessor;
@@ -33,8 +36,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
 
 /**
  * @author Isuru Weerarathna
@@ -156,15 +157,15 @@ public class PointsTest extends AbstractRuleTest {
                 new PointSignal(ruleContext.getRule().getId(), BigDecimal.valueOf(13), e3));
     }
 
-    private BigDecimal awards(Event event, PointRule rule) {
+    private BigDecimal awards(Event event, ExecutionContext context) {
         return BigDecimal.valueOf((long)event.getFieldValue("value") / 5);
     }
 
-    private boolean greaterThan50(Event event, PointRule rule) {
+    private boolean greaterThan50(Event event, AbstractRule rule, ExecutionContext context) {
         return (long) event.getFieldValue("value") >= 50;
     }
 
-    private RuleContext<PointRule> createRule(double amount, BiPredicate<Event, PointRule> criteria, Collection<Signal> collection) {
+    private RuleContext<PointRule> createRule(double amount, EventExecutionFilter criteria, Collection<Signal> collection) {
         PointRule rule = new PointRule("test.point.rule");
         rule.setForEvent(EVT_A);
         rule.setAmountToAward(BigDecimal.valueOf(amount));
@@ -173,7 +174,7 @@ public class PointsTest extends AbstractRuleTest {
         return new RuleContext<>(rule, fromConsumer(collection::add));
     }
 
-    private RuleContext<PointRule> createRule(BiFunction<Event, PointRule, BigDecimal> amount, BiPredicate<Event, PointRule> criteria, Collection<Signal> collection) {
+    private RuleContext<PointRule> createRule(EventValueResolver<ExecutionContext> amount, EventExecutionFilter criteria, Collection<Signal> collection) {
         PointRule rule = new PointRule("test.point.rule");
         rule.setForEvent(EVT_A);
         rule.setAmountExpression(amount);
