@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.factory.Scripting;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.BadgeHistogramStreakN;
@@ -287,13 +288,13 @@ public class HistogramStreakTest extends AbstractRuleTest {
     }
 
     private RuleContext<BadgeHistogramStreakNRule> createOptions(List<Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
-        BadgeHistogramStreakNRule options = new BadgeHistogramStreakNRule("test.histogram.streak");
-        options.setForEvent(EVT_A);
-        options.setStreaks(streaks);
-        options.setConsecutive(true);
-        options.setThreshold(BigDecimal.valueOf(threshold));
-        options.setTimeUnit(timeunit);
-        options.setValueResolver((e,ctx) -> new BigDecimal(e.getFieldValue("value").toString()));
-        return new RuleContext<>(options, fromConsumer(consumer));
+        BadgeHistogramStreakNRule rule = new BadgeHistogramStreakNRule("test.histogram.streak");
+        rule.setForEvent(EVT_A);
+        rule.setStreaks(streaks);
+        rule.setConsecutive(true);
+        rule.setThreshold(BigDecimal.valueOf(threshold));
+        rule.setTimeUnit(timeunit);
+        rule.setValueResolver(Scripting.create("e.value", Scripting.CONTEXT_VAR));
+        return new RuleContext<>(rule, fromConsumer(consumer));
     }
 }

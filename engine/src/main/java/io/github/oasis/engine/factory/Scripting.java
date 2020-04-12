@@ -26,12 +26,17 @@ import org.mvel2.MVEL;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
 public class Scripting {
+
+    public static final String CONTEXT_VAR = "ctx";
+    public static final String EVENT_VAR = "e";
+    public static final String RULE_VAR = "rule";
 
     public static <I extends Serializable, J extends Serializable> EventBiValueResolver<I, J> create(String scriptText,
                                                                                                      String firstParamName,
@@ -55,7 +60,9 @@ public class Scripting {
 
         @Override
         public BigDecimal resolve(Event event, I input) {
-            Map<String, Serializable> vars = Map.of("e", event, paramName, input);
+            Map<String, Object> vars = new HashMap<>();
+            vars.put(EVENT_VAR , event.getAllFieldValues());
+            vars.put(paramName, input);
             Object result = MVEL.executeExpression(compiledExpression, vars);
             if (result instanceof BigDecimal) {
                 return (BigDecimal)result;
@@ -80,7 +87,10 @@ public class Scripting {
 
         @Override
         public BigDecimal resolve(Event event, I input, J otherInput) {
-            Map<String, Serializable> vars = Map.of("e", event, firstParamName, input, secondParamName, otherInput);
+            Map<String, Object> vars = new HashMap<>();
+            vars.put(EVENT_VAR, event.getAllFieldValues());
+            vars.put(firstParamName, input);
+            vars.put(secondParamName, otherInput);
             Object result = MVEL.executeExpression(compiledExpression, vars);
             if (result instanceof BigDecimal) {
                 return (BigDecimal)result;

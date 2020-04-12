@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.rules;
 
+import io.github.oasis.engine.factory.Scripting;
 import io.github.oasis.engine.model.EventBiValueResolver;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
@@ -309,7 +310,7 @@ public class MilestoneTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(115, EVT_A, 11);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue,
+        RuleContext<MilestoneRule> ruleContext = createRule(signals, this.valueExtraction(),
                 aLevel(1, 100),
                 aLevel(2, 200),
                 aLevel(3, 300));
@@ -325,6 +326,10 @@ public class MilestoneTest extends AbstractRuleTest {
         assertRedisHashMapValue(ID.getGameMilestoneKey(TEvent.GAME_ID, rule.getId()),
                 ID.getPenaltiesUserKeyUnderGameMilestone(TEvent.USER_ID),
                 "-98");
+    }
+
+    private EventBiValueResolver<MilestoneRule, ExecutionContext> valueExtraction() {
+        return Scripting.create("e.value", Scripting.RULE_VAR, Scripting.CONTEXT_VAR);
     }
 
     private BigDecimal extractValue(Event event, MilestoneRule rule, ExecutionContext context) {
