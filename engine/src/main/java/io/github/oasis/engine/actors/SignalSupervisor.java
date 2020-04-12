@@ -30,25 +30,29 @@ import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.actors.routers.UserSignalRouting;
 import io.github.oasis.engine.model.EventCreatable;
 import io.github.oasis.engine.model.Rules;
+import io.github.oasis.engine.rules.AbstractRule;
 import io.github.oasis.engine.rules.signals.Signal;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Isuru Weerarathna
  */
 public class SignalSupervisor extends OasisBaseActor {
 
+    private static final AtomicInteger COUNTER = new AtomicInteger(0);
+
     private static final int CONSUMER_COUNT = 2;
 
     private Router router;
-
     private Rules rules;
 
     @Inject
     SignalSupervisor(OasisConfigs configs) {
         super(configs);
+        myId = "S" + COUNTER.incrementAndGet();
     }
 
     @Override
@@ -58,6 +62,7 @@ public class SignalSupervisor extends OasisBaseActor {
                 index -> ActorNames.SIGNAL_CONSUMER_PREFIX + index,
                 consumers);
         router = new Router(new UserSignalRouting(), allRoutes);
+        router.route(new StartRuleExecutionCommand(myId, null), getSelf());
     }
 
     @Override
@@ -71,6 +76,7 @@ public class SignalSupervisor extends OasisBaseActor {
 
     private void initializeRules(StartRuleExecutionCommand command) {
         this.rules = command.getRules();
+        this.parentId = command.getParentId();
     }
 
     private void handleRuleModificationMessage(OasisRuleMessage message) {
@@ -81,12 +87,14 @@ public class SignalSupervisor extends OasisBaseActor {
 
     private void whenSignalReceived(SignalMessage signalMessage) {
         Signal signal = signalMessage.getSignal();
+        AbstractRule rule = signalMessage.getRule();
+        log.info("[{}#{}] Signal received. {} with {}", parentId, myId, signal, rule);
+
         if (signal instanceof EventCreatable) {
             ((EventCreatable) signal).generateEvent()
                     .ifPresent(event -> getContext().getParent().tell(new EventMessage(event, signalMessage.getContext()), getSelf()));
         }
 
-        System.out.println("Signal received " + signal + " rule " + signalMessage.getRule());
         router.route(signalMessage, getSelf());
     }
 

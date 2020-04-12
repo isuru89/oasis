@@ -21,6 +21,7 @@ package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.MilestoneProcessor;
 import io.github.oasis.engine.rules.signals.MilestoneSignal;
 import io.github.oasis.engine.rules.signals.Signal;

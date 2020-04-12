@@ -22,7 +22,6 @@ package io.github.oasis.engine.rules.signals;
 import io.github.oasis.engine.model.EventCreatable;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.events.ChallengePointEvent;
-import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -31,11 +30,19 @@ import java.util.Optional;
 /**
  * @author Isuru Weerarathna
  */
-@ToString
 public class ChallengePointsAwardedSignal extends PointSignal implements EventCreatable {
 
     public ChallengePointsAwardedSignal(String ruleId, String pointId, BigDecimal points, Event causedEvent) {
         super(ruleId, pointId, points, causedEvent);
+    }
+
+    @Override
+    public String toString() {
+        return "ChallengePointsAwardedSignal{" +
+                "pointId='" + getPointId() + '\'' +
+                ", score=" + getScore() +
+                ", eventRef=" + getEventRef() +
+                '}';
     }
 
     @Override

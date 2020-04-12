@@ -20,6 +20,7 @@
 package io.github.oasis.engine.utils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * @author Isuru Weerarathna
@@ -77,7 +78,7 @@ public final class Numbers {
     }
 
     public static BigDecimal addToScale(BigDecimal num1, BigDecimal num2, int scale) {
-        return num1.add(num2).setScale(scale, BigDecimal.ROUND_HALF_UP);
+        return num1.add(num2).setScale(scale, RoundingMode.HALF_UP);
     }
 
     public static BigDecimal asDecimal(Double val) {

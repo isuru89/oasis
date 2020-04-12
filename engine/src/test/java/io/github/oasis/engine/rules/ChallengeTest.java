@@ -20,6 +20,7 @@
 package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.ChallengeProcessor;
 import io.github.oasis.engine.rules.signals.ChallengeOverSignal;
 import io.github.oasis.engine.rules.signals.ChallengePointsAwardedSignal;

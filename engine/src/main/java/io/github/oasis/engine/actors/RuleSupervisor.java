@@ -50,14 +50,13 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     private Rules rules;
     private ActorRef signalExchanger;
     private ActorSignalCollector collector;
-    private final int id;
     private Router executor;
 
     @Inject
     public RuleSupervisor(OasisConfigs configs) {
         super(configs);
 
-        id = counter.incrementAndGet();
+        myId = "R" + counter.incrementAndGet();
 
         signalExchanger = createSignalExchanger();
         collector = new ActorSignalCollector(signalExchanger);
@@ -79,14 +78,14 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     }
 
     private void beginAllChildren() {
-        signalExchanger.tell(new StartRuleExecutionCommand(id, rules), getSelf());
-        executor.route(new StartRuleExecutionCommand(id, rules), getSelf());
+        signalExchanger.tell(new StartRuleExecutionCommand(myId, rules), getSelf());
+        executor.route(new StartRuleExecutionCommand(myId, rules), getSelf());
     }
 
     private ActorRef createSignalExchanger() {
         ActorRef actorRef = getContext().actorOf(Props.create(SignalSupervisor.class,
                 () -> injectActor(SignalSupervisor.class)),
-                ActorNames.SIGNAL_SUPERVISOR_PREFIX + id);
+                ActorNames.SIGNAL_SUPERVISOR_PREFIX + myId);
         getContext().watch(actorRef);
         return actorRef;
     }
@@ -102,10 +101,15 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     @Override
     public Receive createReceive() {
         return receiveBuilder()
+                .match(StartRuleExecutionCommand.class, this::initializeMe)
                 .match(GameEventMessage.class, this::processEvent)
                 .match(EventMessage.class, this::forwardEventMessage)
                 .match(OasisRuleMessage.class, this::forwardRuleModifiedEvent)
                 .build();
+    }
+
+    private void initializeMe(StartRuleExecutionCommand message) {
+
     }
 
     private void forwardEventMessage(EventMessage eventMessage) {

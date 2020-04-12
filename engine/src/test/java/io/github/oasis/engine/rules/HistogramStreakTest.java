@@ -20,6 +20,7 @@
 package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.BadgeHistogramStreakN;
 import io.github.oasis.engine.rules.signals.HistogramBadgeRemovalSignal;
 import io.github.oasis.engine.rules.signals.HistogramBadgeSignal;

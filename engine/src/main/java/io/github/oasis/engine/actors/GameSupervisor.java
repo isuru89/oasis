@@ -28,11 +28,14 @@ import io.github.oasis.engine.actors.routers.UserRouting;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Isuru Weerarathna
  */
 public class GameSupervisor extends OasisBaseActor {
+
+    private static final AtomicInteger COUNTER = new AtomicInteger(0);
 
     private static final int RULE_SUPERVISORS = 2;
 
@@ -42,6 +45,7 @@ public class GameSupervisor extends OasisBaseActor {
     public GameSupervisor(OasisConfigs configs) {
         super(configs);
 
+        myId = "G" + COUNTER.incrementAndGet();
         createRuleRouters();
     }
 

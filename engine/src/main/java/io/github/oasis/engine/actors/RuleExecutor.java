@@ -49,8 +49,7 @@ public class RuleExecutor extends OasisBaseActor {
 
     private final Map<String, AbstractProcessor<? extends AbstractRule, ? extends Signal>> cache = new HashMap<>();
 
-    private int parentId;
-    private long myId;
+    private String parentId;
     private Rules rules;
 
     private AbstractActor.Receive executing;
@@ -61,6 +60,8 @@ public class RuleExecutor extends OasisBaseActor {
     @Inject
     public RuleExecutor(OasisConfigs configs, Processors processors) {
         super(configs);
+
+        this.myId = "E" + COUNTER.incrementAndGet();
         this.processors = processors;
 
         starting = receiveBuilder()
@@ -90,13 +91,13 @@ public class RuleExecutor extends OasisBaseActor {
     private void assignRules(StartRuleExecutionCommand startRuleExecutionCommand) {
         this.rules = startRuleExecutionCommand.getRules();
         this.parentId = startRuleExecutionCommand.getParentId();
-        this.myId = COUNTER.incrementAndGet();
+        log.info("[{}] Initialization from {}", myId, parentId);
         getContext().become(executing);
     }
 
     private void processEvent(EventMessage eventMessage) {
         Event event = eventMessage.getEvent();
-        System.out.println("Processing event for user #" + event.getEventType() + " in " + this + " in this " + this.rules);
+        log.info("[{}#{}] Processing event {}", parentId, myId, event);
         Iterator<AbstractRule> allRulesForEvent = this.rules.getAllRulesForEvent(event);
         while (allRulesForEvent.hasNext()) {
             AbstractRule rule = allRulesForEvent.next();

@@ -20,6 +20,7 @@
 package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.BadgeConditionalProcessor;
 import io.github.oasis.engine.rules.signals.ConditionalBadge;
 import io.github.oasis.engine.rules.signals.Signal;

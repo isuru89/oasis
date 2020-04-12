@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.engine.rules;
+package io.github.oasis.engine.model;
 
 import io.github.oasis.model.Event;
 
@@ -135,6 +135,7 @@ public class TEvent implements Event {
     @Override
     public String toString() {
         return "TEvent{" +
+                "type=" + getEventType() + ", " +
                 "id=" + getExternalId() +
                 '}';
     }

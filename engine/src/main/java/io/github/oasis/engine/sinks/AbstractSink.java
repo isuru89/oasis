@@ -36,4 +36,9 @@ public abstract class AbstractSink {
     }
 
     public abstract void consume(Signal signal, AbstractRule rule, ExecutionContext context);
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
 }

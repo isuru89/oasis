@@ -32,7 +32,7 @@ import io.github.oasis.engine.rules.ChallengeRule;
 import io.github.oasis.engine.rules.MilestoneRule;
 import io.github.oasis.engine.rules.PointRule;
 import io.github.oasis.engine.rules.RatingRule;
-import io.github.oasis.engine.rules.TEvent;
+import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.model.Event;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -274,7 +274,6 @@ public class OasisEngineTest {
 
         @Override
         public OasisConfigs get() {
-            System.out.println("Config provider called");
             return DEFAULT;
         }
     }

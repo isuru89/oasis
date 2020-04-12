@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.actors.routers;
 
-import akka.routing.RoundRobinRoutingLogic;
+import akka.routing.BroadcastRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.RoutingLogic;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
@@ -33,7 +33,7 @@ import java.util.Objects;
  */
 public class UserSignalRouting implements RoutingLogic {
 
-    private RoundRobinRoutingLogic roundRobinRoutingLogic = new RoundRobinRoutingLogic();
+    private RoutingLogic delegatedRoutingLogic = new BroadcastRoutingLogic();
 
     @Override
     public Routee select(Object message, IndexedSeq<Routee> routees) {
@@ -44,6 +44,6 @@ public class UserSignalRouting implements RoutingLogic {
                 return routees.apply((int) userId % routees.size());
             }
         }
-        return roundRobinRoutingLogic.select(message, routees);
+        return delegatedRoutingLogic.select(message, routees);
     }
 }

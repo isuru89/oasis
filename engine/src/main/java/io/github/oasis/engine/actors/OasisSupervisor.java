@@ -33,6 +33,7 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Manages all games running in the system.
@@ -40,6 +41,8 @@ import java.util.Map;
  * @author Isuru Weerarathna
  */
 public class OasisSupervisor extends OasisBaseActor {
+
+    private static final AtomicInteger COUNTER = new AtomicInteger(0);
 
     private static final int GAME_SUPERVISORS = 2;
 
@@ -51,6 +54,7 @@ public class OasisSupervisor extends OasisBaseActor {
     public OasisSupervisor(OasisConfigs configs) {
         super(configs);
 
+        myId = "O" + COUNTER.incrementAndGet();
         createRuleRouters();
     }
 

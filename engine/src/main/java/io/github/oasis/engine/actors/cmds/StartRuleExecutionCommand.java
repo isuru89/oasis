@@ -26,10 +26,10 @@ import io.github.oasis.engine.model.Rules;
  */
 public class StartRuleExecutionCommand implements OasisLifecycleCommand {
 
-    private int parentId;
+    private String parentId;
     private Rules rules;
 
-    public StartRuleExecutionCommand(int parentId, Rules rules) {
+    public StartRuleExecutionCommand(String parentId, Rules rules) {
         this.parentId = parentId;
         this.rules = rules;
     }
@@ -38,7 +38,7 @@ public class StartRuleExecutionCommand implements OasisLifecycleCommand {
         return rules;
     }
 
-    public int getParentId() {
+    public String getParentId() {
         return parentId;
     }
 }

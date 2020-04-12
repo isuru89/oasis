@@ -20,6 +20,7 @@
 package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.RatingProcessor;
 import io.github.oasis.engine.rules.signals.RatingChangedSignal;
 import io.github.oasis.engine.rules.signals.RatingPointsSignal;

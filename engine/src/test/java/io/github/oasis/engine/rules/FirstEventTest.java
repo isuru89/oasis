@@ -21,6 +21,7 @@ package io.github.oasis.engine.rules;
 
 import io.github.oasis.engine.model.EventFilter;
 import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.processors.BadgeFirstEvent;
 import io.github.oasis.engine.rules.signals.BadgeSignal;
 import io.github.oasis.engine.rules.signals.Signal;
