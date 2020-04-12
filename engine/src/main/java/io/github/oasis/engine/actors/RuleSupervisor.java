@@ -21,8 +21,6 @@ package io.github.oasis.engine.actors;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.routing.ActorRefRoutee;
-import akka.routing.DefaultResizer;
 import akka.routing.Routee;
 import akka.routing.Router;
 import io.github.oasis.engine.OasisConfigs;
@@ -37,7 +35,6 @@ import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.Rules;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,8 +42,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Isuru Weerarathna
  */
 public class RuleSupervisor extends OasisBaseActor implements InjectedActorSupport {
-
-    private static final DefaultResizer ELASTICITY = new DefaultResizer(5, 10);
 
     private static final AtomicInteger counter = new AtomicInteger(0);
 
@@ -89,20 +84,19 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     }
 
     private ActorRef createSignalExchanger() {
-        ActorRef actorRef = getContext().actorOf(Props.create(SignalSupervisor.class, () -> injectActor(SignalSupervisor.class)), "signal-exchanger");
+        ActorRef actorRef = getContext().actorOf(Props.create(SignalSupervisor.class,
+                () -> injectActor(SignalSupervisor.class)),
+                ActorNames.SIGNAL_SUPERVISOR_PREFIX + id);
         getContext().watch(actorRef);
         return actorRef;
     }
 
     private void createExecutors() {
         int executors = configs.getInt(OasisConfigs.RULE_EXECUTOR_COUNT, EXECUTORS);
-        List<Routee> routees = new ArrayList<>();
-        for (int i = 0; i < executors; i++) {
-            ActorRef actorRef = getContext().actorOf(Props.create(RuleExecutor.class, () -> injectActor(RuleExecutor.class)));
-            getContext().watch(actorRef);
-            routees.add(new ActorRefRoutee(actorRef));
-        }
-        this.executor = new Router(new UserRouting(), routees);
+        List<Routee> allRoutes = createChildRouteActorsOfType(RuleExecutor.class,
+                index -> ActorNames.RULE_EXECUTOR_PREFIX + index,
+                executors);
+        this.executor = new Router(new UserRouting(), allRoutes);
     }
 
     @Override

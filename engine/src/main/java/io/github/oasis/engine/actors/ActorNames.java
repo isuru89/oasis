@@ -26,4 +26,9 @@ public class ActorNames {
 
     public static final String OASIS_SUPERVISOR = "oasis-supervisor";
 
+    public static final String GAME_SUPERVISOR_PREFIX = "game-supervisor-";
+    public static final String RULE_SUPERVISOR_PREFIX = "rule-supervisor-";
+    public static final String RULE_EXECUTOR_PREFIX = "rule-processor-";
+    public static final String SIGNAL_SUPERVISOR_PREFIX = "signal-exchange-";
+    public static final String SIGNAL_CONSUMER_PREFIX = "signal-consumer-";
 }

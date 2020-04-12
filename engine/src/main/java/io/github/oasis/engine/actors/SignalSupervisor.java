@@ -19,9 +19,6 @@
 
 package io.github.oasis.engine.actors;
 
-import akka.actor.ActorRef;
-import akka.actor.Props;
-import akka.routing.ActorRefRoutee;
 import akka.routing.Routee;
 import akka.routing.Router;
 import io.github.oasis.engine.OasisConfigs;
@@ -31,19 +28,17 @@ import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.actors.routers.UserSignalRouting;
-import io.github.oasis.engine.factory.InjectedActorSupport;
 import io.github.oasis.engine.model.EventCreatable;
 import io.github.oasis.engine.model.Rules;
 import io.github.oasis.engine.rules.signals.Signal;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SignalSupervisor extends OasisBaseActor implements InjectedActorSupport {
+public class SignalSupervisor extends OasisBaseActor {
 
     private static final int CONSUMER_COUNT = 2;
 
@@ -59,13 +54,10 @@ public class SignalSupervisor extends OasisBaseActor implements InjectedActorSup
     @Override
     public void preStart() {
         int consumers = configs.getInt(OasisConfigs.SIGNAL_EXECUTOR_COUNT, CONSUMER_COUNT);
-        List<Routee> routees = new ArrayList<>();
-        for (int i = 0; i < consumers; i++) {
-            ActorRef consumer = getContext().actorOf(Props.create(SignalConsumer.class, () -> injectActor(SignalConsumer.class)));
-            getContext().watch(consumer);
-            routees.add(new ActorRefRoutee(consumer));
-        }
-        router = new Router(new UserSignalRouting(), routees);
+        List<Routee> allRoutes = createChildRouteActorsOfType(SignalConsumer.class,
+                index -> ActorNames.SIGNAL_CONSUMER_PREFIX + index,
+                consumers);
+        router = new Router(new UserSignalRouting(), allRoutes);
     }
 
     @Override
