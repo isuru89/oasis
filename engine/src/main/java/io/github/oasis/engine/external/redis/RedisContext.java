@@ -35,8 +35,10 @@ import java.util.Set;
 public class RedisContext implements DbContext {
 
     private final Jedis jedis;
+    private final RedisDb db;
 
-    public RedisContext(Jedis jedis) {
+    public RedisContext(RedisDb db, Jedis jedis) {
+        this.db = db;
         this.jedis = jedis;
     }
 
@@ -99,6 +101,7 @@ public class RedisContext implements DbContext {
 
     @Override
     public Object runScript(String scriptName, String... args) {
-        return null;
+        RedisDb.RedisScript scriptSha = db.getScriptSha(scriptName);
+        return jedis.evalsha(scriptSha.getSha(), scriptSha.getNoOfKeys(), args);
     }
 }

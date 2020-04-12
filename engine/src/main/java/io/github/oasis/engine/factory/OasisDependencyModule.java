@@ -30,8 +30,6 @@ import io.github.oasis.engine.actors.RuleExecutor;
 import io.github.oasis.engine.actors.SignalSupervisor;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.redis.RedisDb;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @author Isuru Weerarathna
@@ -56,12 +54,8 @@ public class OasisDependencyModule extends AbstractActorProviderModule {
     }
 
     @Provides @Singleton
-    Db createDb() {
-        System.out.println("DB CALLED");
-        JedisPoolConfig config = new JedisPoolConfig();
-        config.setMaxTotal(5);
-        JedisPool poolRedis = new JedisPool(config, "localhost");
-        RedisDb redisDb = RedisDb.create(poolRedis);
+    Db createDb(OasisConfigs configs) {
+        RedisDb redisDb = RedisDb.create(configs);
         redisDb.init();
         return redisDb;
     }

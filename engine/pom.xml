@@ -15,6 +15,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.github.cliftonlabs</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
             <groupId>io.github.oasis</groupId>
             <artifactId>oasis-model</artifactId>
             <version>${project.version}</version>

@@ -73,6 +73,11 @@ public class OasisConfigs implements Serializable {
         return asInt(String.valueOf(props.getOrDefault(property, defaultValue)));
     }
 
+    public String get(String property, String defaultVal) {
+        return (String) props.getOrDefault(property, defaultVal);
+    }
+
+
     public static class Builder {
         private final Map<String, Object> map = new HashMap<>();
 
