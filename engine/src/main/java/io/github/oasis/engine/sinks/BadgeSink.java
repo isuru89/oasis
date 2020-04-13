@@ -26,12 +26,12 @@ import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.TimeContext;
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.BadgeRemoveSignal;
-import io.github.oasis.engine.rules.signals.BadgeSignal;
-import io.github.oasis.engine.rules.signals.Signal;
-import io.github.oasis.engine.rules.signals.StreakBadgeSignal;
-import io.github.oasis.engine.rules.signals.TemporalBadge;
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
+import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
+import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.engine.elements.badges.signals.StreakBadgeSignal;
+import io.github.oasis.engine.elements.badges.signals.TemporalBadge;
 
 import javax.inject.Inject;
 import java.io.IOException;

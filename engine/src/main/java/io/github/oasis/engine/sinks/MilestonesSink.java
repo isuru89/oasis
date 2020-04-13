@@ -24,10 +24,10 @@ import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.MilestoneRule;
-import io.github.oasis.engine.rules.signals.MilestoneSignal;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.milestones.MilestoneRule;
+import io.github.oasis.engine.elements.milestones.MilestoneSignal;
+import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.utils.Numbers;
 import io.github.oasis.model.EventScope;
 

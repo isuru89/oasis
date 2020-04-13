@@ -19,22 +19,33 @@
 
 package io.github.oasis.engine.processors;
 
+import io.github.oasis.engine.elements.AbstractProcessor;
+import io.github.oasis.engine.elements.badges.BadgeConditionalProcessor;
+import io.github.oasis.engine.elements.badges.BadgeFirstEvent;
+import io.github.oasis.engine.elements.badges.BadgeHistogramStreakN;
+import io.github.oasis.engine.elements.badges.BadgeStreakN;
+import io.github.oasis.engine.elements.badges.BadgeTemporalProcessor;
+import io.github.oasis.engine.elements.badges.BadgeTemporalStreakN;
+import io.github.oasis.engine.elements.challenges.ChallengeProcessor;
+import io.github.oasis.engine.elements.milestones.MilestoneProcessor;
+import io.github.oasis.engine.elements.points.PointsProcessor;
+import io.github.oasis.engine.elements.ratings.RatingProcessor;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.SignalCollector;
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.BadgeConditionalRule;
-import io.github.oasis.engine.rules.BadgeFirstEventRule;
-import io.github.oasis.engine.rules.BadgeHistogramStreakNRule;
-import io.github.oasis.engine.rules.BadgeRule;
-import io.github.oasis.engine.rules.BadgeStreakNRule;
-import io.github.oasis.engine.rules.BadgeTemporalRule;
-import io.github.oasis.engine.rules.BadgeTemporalStreakNRule;
-import io.github.oasis.engine.rules.ChallengeRule;
-import io.github.oasis.engine.rules.MilestoneRule;
-import io.github.oasis.engine.rules.PointRule;
-import io.github.oasis.engine.rules.RatingRule;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.badges.rules.BadgeConditionalRule;
+import io.github.oasis.engine.elements.badges.rules.BadgeFirstEventRule;
+import io.github.oasis.engine.elements.badges.rules.BadgeHistogramStreakNRule;
+import io.github.oasis.engine.elements.badges.rules.BadgeRule;
+import io.github.oasis.engine.elements.badges.rules.BadgeStreakNRule;
+import io.github.oasis.engine.elements.badges.rules.BadgeTemporalRule;
+import io.github.oasis.engine.elements.badges.rules.BadgeTemporalStreakNRule;
+import io.github.oasis.engine.elements.challenges.ChallengeRule;
+import io.github.oasis.engine.elements.milestones.MilestoneRule;
+import io.github.oasis.engine.elements.points.PointRule;
+import io.github.oasis.engine.elements.ratings.RatingRule;
+import io.github.oasis.engine.elements.Signal;
 
 import javax.inject.Inject;
 

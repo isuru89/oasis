@@ -30,8 +30,8 @@ import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.actors.routers.UserSignalRouting;
 import io.github.oasis.engine.model.EventCreatable;
 import io.github.oasis.engine.model.Rules;
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.Signal;
 
 import javax.inject.Inject;
 import java.util.List;

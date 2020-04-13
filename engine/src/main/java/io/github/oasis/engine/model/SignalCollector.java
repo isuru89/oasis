@@ -19,8 +19,8 @@
 
 package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.Signal;
 
 import java.io.Serializable;
 

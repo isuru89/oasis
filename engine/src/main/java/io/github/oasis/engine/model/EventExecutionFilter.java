@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.rules.AbstractRule;
+import io.github.oasis.engine.elements.AbstractRule;
 import io.github.oasis.model.Event;
 
 import java.io.Serializable;

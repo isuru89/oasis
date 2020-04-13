@@ -20,8 +20,8 @@
 package io.github.oasis.engine.actors.cmds;
 
 import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.Signal;
 
 /**
  * @author Isuru Weerarathna

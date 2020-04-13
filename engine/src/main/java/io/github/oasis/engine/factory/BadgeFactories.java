@@ -21,11 +21,11 @@ package io.github.oasis.engine.factory;
 
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.ActorSignalCollector;
-import io.github.oasis.engine.processors.AbstractProcessor;
-import io.github.oasis.engine.processors.BadgeConditionalProcessor;
-import io.github.oasis.engine.rules.BadgeRule;
-import io.github.oasis.engine.rules.BadgeConditionalRule;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.elements.AbstractProcessor;
+import io.github.oasis.engine.elements.badges.BadgeConditionalProcessor;
+import io.github.oasis.engine.elements.badges.rules.BadgeRule;
+import io.github.oasis.engine.elements.badges.rules.BadgeConditionalRule;
+import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.external.Db;
 
 /**

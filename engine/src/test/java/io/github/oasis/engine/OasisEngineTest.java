@@ -23,6 +23,11 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.TestKit;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
+import io.github.oasis.engine.elements.badges.rules.BadgeStreakNRule;
+import io.github.oasis.engine.elements.challenges.ChallengeRule;
+import io.github.oasis.engine.elements.milestones.MilestoneRule;
+import io.github.oasis.engine.elements.points.PointRule;
+import io.github.oasis.engine.elements.ratings.RatingRule;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.factory.OasisDependencyModule;
@@ -30,11 +35,6 @@ import io.github.oasis.engine.model.EventExecutionFilter;
 import io.github.oasis.engine.model.EventValueResolver;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.TEvent;
-import io.github.oasis.engine.rules.BadgeStreakNRule;
-import io.github.oasis.engine.rules.ChallengeRule;
-import io.github.oasis.engine.rules.MilestoneRule;
-import io.github.oasis.engine.rules.PointRule;
-import io.github.oasis.engine.rules.RatingRule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +53,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import static io.github.oasis.engine.rules.MilestoneRule.MilestoneFlag.SKIP_NEGATIVE_VALUES;
+import static io.github.oasis.engine.elements.milestones.MilestoneRule.MilestoneFlag.SKIP_NEGATIVE_VALUES;
 
 /**
  * @author Isuru Weerarathna

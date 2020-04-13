@@ -25,9 +25,9 @@ import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.TimeContext;
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.PointSignal;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.points.PointSignal;
+import io.github.oasis.engine.elements.Signal;
 
 import javax.inject.Inject;
 import java.io.IOException;

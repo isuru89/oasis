@@ -23,7 +23,7 @@ import akka.routing.BroadcastRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.RoutingLogic;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.elements.Signal;
 import scala.collection.immutable.IndexedSeq;
 
 import java.util.Objects;

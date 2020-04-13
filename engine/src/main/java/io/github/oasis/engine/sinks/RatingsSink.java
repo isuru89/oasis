@@ -24,10 +24,10 @@ import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.RatingRule;
-import io.github.oasis.engine.rules.signals.RatingChangedSignal;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.ratings.RatingRule;
+import io.github.oasis.engine.elements.ratings.RatingChangedSignal;
+import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.model.EventScope;
 
 import javax.inject.Inject;

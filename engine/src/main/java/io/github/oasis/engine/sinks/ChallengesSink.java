@@ -26,10 +26,10 @@ import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.TimeContext;
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.ChallengeRule;
-import io.github.oasis.engine.rules.signals.ChallengeWinSignal;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.challenges.ChallengeRule;
+import io.github.oasis.engine.elements.challenges.ChallengeWinSignal;
+import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.model.EventScope;
 
 import javax.inject.Inject;

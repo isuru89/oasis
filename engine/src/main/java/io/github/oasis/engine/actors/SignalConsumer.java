@@ -23,8 +23,8 @@ import io.github.oasis.engine.OasisConfigs;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.engine.rules.AbstractRule;
-import io.github.oasis.engine.rules.signals.Signal;
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.sinks.AbstractSink;
 
 import javax.inject.Inject;
