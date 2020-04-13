@@ -23,7 +23,7 @@ import io.github.oasis.engine.elements.AbstractRuleTest;
 import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.elements.badges.rules.BadgeTemporalCountRule;
 import io.github.oasis.engine.elements.badges.rules.BadgeTemporalRule;
-import io.github.oasis.engine.elements.badges.signals.TemporalBadge;
+import io.github.oasis.engine.elements.badges.signals.TemporalBadgeSignal;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Assertions;
@@ -146,7 +146,7 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()));
     }
 
     @DisplayName("Single Threshold: badge creation sparse condition")
@@ -168,7 +168,7 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e4, ATTR_1, 100, 150, e4.getTimestamp(), e4.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e4, ATTR_1, 100, 150, e4.getTimestamp(), e4.getExternalId()));
     }
 
     @DisplayName("Single Threshold: badges in different time units")
@@ -190,8 +190,8 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()),
-                new TemporalBadge(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()));
     }
 
     @DisplayName("Single Threshold: Out-of-order badge creation")
@@ -213,7 +213,7 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e6, ATTR_1, 100, 150, e6.getTimestamp(), e6.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e6, ATTR_1, 100, 150, e6.getTimestamp(), e6.getExternalId()));
     }
 
     // ------------------------------------------------------
@@ -279,7 +279,7 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e5, ATTR_1, 100, 150, e5.getTimestamp(), e5.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e5, ATTR_1, 100, 150, e5.getTimestamp(), e5.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: many badges creation")
@@ -302,8 +302,8 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
-                new TemporalBadge(rule.getId(), e6, ATTR_2, 100, 150, e6.getTimestamp(), e6.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e6, ATTR_2, 100, 150, e6.getTimestamp(), e6.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: many badges creation to exact threshold")
@@ -325,8 +325,8 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
-                new TemporalBadge(rule.getId(), e6, ATTR_2, 100, 150, e6.getTimestamp(), e6.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e6, ATTR_2, 100, 150, e6.getTimestamp(), e6.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: many badges in different time unit creation")
@@ -351,9 +351,9 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
-                new TemporalBadge(rule.getId(), e5, ATTR_2, 100, 150, e5.getTimestamp(), e5.getExternalId()),
-                new TemporalBadge(rule.getId(), e9, ATTR_1, 150, 200, e9.getTimestamp(), e9.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e5, ATTR_2, 100, 150, e5.getTimestamp(), e5.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e9, ATTR_1, 150, 200, e9.getTimestamp(), e9.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: Out-of-order badges creation")
@@ -376,8 +376,8 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e7, ATTR_1, 100, 150, e7.getTimestamp(), e7.getExternalId()),
-                new TemporalBadge(rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e7, ATTR_1, 100, 150, e7.getTimestamp(), e7.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()));
     }
 
     private BadgeTemporalRule.Threshold aT(int attr, long threshold) {

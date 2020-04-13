@@ -45,23 +45,13 @@ import static io.github.oasis.engine.utils.Numbers.asInt;
 import static io.github.oasis.engine.utils.Numbers.asLong;
 
 /**
- * Awards a badge when a condition fulfilled for a N number of times within a time unit T.
+ * Awards a badge when a condition fulfilled for a N number of times within a rolling time unit T.
  *
  * @author Isuru Weerarathna
  */
 public class BadgeTemporalStreakN extends BadgeStreakN {
     public BadgeTemporalStreakN(Db pool, RuleContext<BadgeStreakNRule> ruleContext) {
         super(pool, ruleContext);
-    }
-
-    private long captureTsFromTuple(Record tuple) {
-        String[] parts = tuple.getMember().split(":");
-        return Long.parseLong(parts[0]);
-    }
-
-    private String captureEventIdFromTuple(Record tuple) {
-        String[] parts = tuple.getMember().split(":");
-        return parts[2];
     }
 
     @Override
@@ -121,11 +111,11 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
         countMap.put(0L, 0);
         countMap.put(firstTs, 0);
         countMap.put(lastTs, lastStreak);
-        tupleMap.put(firstTs, new Record(lastTs + ":" + prevBadgeFirstId, firstTs * 1.0));
+        tupleMap.put(firstTs, Record.create(lastTs + ":" + prevBadgeFirstId, firstTs * 1.0));
         List<Integer> streakList = rule.getStreaks();
         int size = 0;
         for (Record record : tuplesAll) {
-            long ts = (long) record.getScore();
+            long ts = record.getScoreAsLong();
             tupleMap.put(ts, record);
             countMap.put(ts, ++size);
         }
@@ -134,7 +124,7 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
         List<Record> tuples = new ArrayList<>(tuplesAll);
         for (int i = 0; i < tuples.size(); i++) {
             Record tuple = tuples.get(i);
-            long ts = (long) tuple.getScore();
+            long ts = tuple.getScoreAsLong();
             if (ts <= marker) {
                 continue;
             }
@@ -153,14 +143,21 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
                 } else {
                     firstId = startTuple.getMember().split(":")[1];
                 }
-                signals.add(new StreakBadgeSignal(rule.getId(),
+                StreakBadgeSignal signal = new StreakBadgeSignal(rule.getId(),
                         event,
                         currStreak,
+                        rule.getAttributeForStreak(currStreak),
                         badgeStartTs,
                         ts,
                         firstId,
-                        tuple.getMember().split(":")[1]));
-                db.setValueInMap(badgeMetaKey, rule.getId() + ":lasttime", ts + ":" + currStreak + ":" + badgeStartTs + ":" + firstId);
+                        tuple.getMember().split(":")[1]);
+                signals.add(signal);
+                db.setValueInMap(badgeMetaKey,
+                        rule.getId() + ":lasttime", ts + ":" + signal.getStreak() + ":" + signal.getStartTime() + ":" + signal.getStartId());
+
+                if (rule.isLastStreak(currStreak)) {
+                    db.SORTED(ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId())).removeRangeByScore(0, ts);
+                }
 
                 // no more streaks to find
 //                if (streakIndex == streakList.size() - 1) {
@@ -233,6 +230,7 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
                             options.getId(),
                             event,
                             streak,
+                            rule.getAttributeForStreak(streak),
                             startTs,
                             ts,
                             captureEventIdFromTuple(firstTuple),
@@ -290,4 +288,15 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
         }
         return partitions;
     }
+
+    private long captureTsFromTuple(Record tuple) {
+        String[] parts = tuple.getMember().split(":");
+        return Long.parseLong(parts[0]);
+    }
+
+    private String captureEventIdFromTuple(Record tuple) {
+        String[] parts = tuple.getMember().split(":");
+        return parts[2];
+    }
+
 }

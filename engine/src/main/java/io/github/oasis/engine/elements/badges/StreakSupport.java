@@ -17,25 +17,13 @@
  * under the License.
  */
 
-package io.github.oasis.engine.elements.badges.signals;
-
-import io.github.oasis.engine.elements.badges.StreakSupport;
-import io.github.oasis.model.Event;
+package io.github.oasis.engine.elements.badges;
 
 /**
  * @author Isuru Weerarathna
  */
-public class StreakBadgeSignal extends BadgeSignal implements StreakSupport {
+public interface StreakSupport {
 
-    private final int streak;
+    int getStreak();
 
-    public StreakBadgeSignal(String ruleId, Event causedEvent, int streak, int attribute, long st, long et, String sid, String eid) {
-        super(ruleId, causedEvent, causedEvent.getTimestamp(), attribute, st, et, sid, eid);
-        this.streak = streak;
-    }
-
-    @Override
-    public int getStreak() {
-        return streak;
-    }
 }

@@ -23,7 +23,7 @@ import io.github.oasis.engine.elements.AbstractRuleTest;
 import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.elements.badges.rules.BadgeTemporalRule;
 import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
-import io.github.oasis.engine.elements.badges.signals.TemporalBadge;
+import io.github.oasis.engine.elements.badges.signals.TemporalBadgeSignal;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Assertions;
@@ -132,7 +132,7 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()));
     }
 
     @DisplayName("Single Threshold: badge creation with condition")
@@ -155,7 +155,7 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e4, ATTR_1, 100, 150, e4.getTimestamp(), e4.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e4, ATTR_1, 100, 150, e4.getTimestamp(), e4.getExternalId()));
     }
 
     @DisplayName("Single Threshold: badges in different time units")
@@ -177,8 +177,8 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()),
-                new TemporalBadge(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()));
     }
 
     @DisplayName("Single Threshold: Out-of-order badge creation")
@@ -200,8 +200,8 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e5, ATTR_1, 150, 200, e5.getTimestamp(), e5.getExternalId()),
-                new TemporalBadge(rule.getId(), e6, ATTR_1, 100, 150, e6.getTimestamp(), e6.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e5, ATTR_1, 150, 200, e5.getTimestamp(), e5.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e6, ATTR_1, 100, 150, e6.getTimestamp(), e6.getExternalId()));
     }
 
     @DisplayName("Single Threshold: Out-of-order badge removal")
@@ -223,8 +223,8 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
-                new TemporalBadge(rule.getId(), e5, ATTR_1, 150, 200, e5.getTimestamp(), e5.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e5, ATTR_1, 150, 200, e5.getTimestamp(), e5.getExternalId()),
                 new BadgeRemoveSignal(rule.getId(), e6.asEventScope(), ATTR_1, 100, 150, e6.getExternalId(), e6.getExternalId()));
     }
 
@@ -291,7 +291,7 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: many badges creation")
@@ -313,8 +313,8 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
-                new TemporalBadge(rule.getId(), e3, ATTR_2, 100, 150, e3.getTimestamp(), e3.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e3, ATTR_2, 100, 150, e3.getTimestamp(), e3.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: many badges creation to exact threshold")
@@ -336,8 +336,8 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
-                new TemporalBadge(rule.getId(), e3, ATTR_2, 100, 150, e3.getTimestamp(), e3.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e3, ATTR_2, 100, 150, e3.getTimestamp(), e3.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: many badges creation with condition")
@@ -360,7 +360,7 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: many badges in different time unit creation")
@@ -382,9 +382,9 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
-                new TemporalBadge(rule.getId(), e3, ATTR_2, 100, 150, e3.getTimestamp(), e3.getExternalId()),
-                new TemporalBadge(rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e3, ATTR_2, 100, 150, e3.getTimestamp(), e3.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: jumped badges creation")
@@ -404,8 +404,8 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
-                new TemporalBadge(rule.getId(), e2, ATTR_2, 100, 150, e2.getTimestamp(), e2.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e2, ATTR_2, 100, 150, e2.getTimestamp(), e2.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: Out-of-order badges creation")
@@ -427,9 +427,9 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadge(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
-                new TemporalBadge(rule.getId(), e6, ATTR_2, 100, 150, e6.getTimestamp(), e6.getExternalId()),
-                new TemporalBadge(rule.getId(), e5, ATTR_1, 150, 200, e5.getTimestamp(), e5.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e6, ATTR_2, 100, 150, e6.getTimestamp(), e6.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), e5, ATTR_1, 150, 200, e5.getTimestamp(), e5.getExternalId()));
     }
 
     private BadgeTemporalRule.Threshold aT(int attr, long threshold) {

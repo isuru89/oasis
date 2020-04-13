@@ -32,11 +32,19 @@ public class Record {
         this.score = score;
     }
 
+    public static Record create(String member, double score) {
+        return new Record(member, score);
+    }
+
     public String getMember() {
         return member;
     }
 
     public double getScore() {
         return score;
+    }
+
+    public long getScoreAsLong() {
+        return (long) score;
     }
 }

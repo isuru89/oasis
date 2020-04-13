@@ -29,11 +29,11 @@ import java.util.Comparator;
  * @author Isuru Weerarathna
  */
 @ToString(callSuper = true)
-public class TemporalBadge extends BadgeSignal {
+public class TemporalBadgeSignal extends BadgeSignal {
 
     private long timestamp;
 
-    public TemporalBadge(String ruleId, Event causedEvent, int attributeId, long st, long et, long timestamp, String eventId) {
+    public TemporalBadgeSignal(String ruleId, Event causedEvent, int attributeId, long st, long et, long timestamp, String eventId) {
         super(ruleId, causedEvent, timestamp, attributeId, st, et, eventId, null);
         this.timestamp = timestamp;
     }

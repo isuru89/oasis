@@ -31,7 +31,7 @@ import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
 import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.elements.badges.signals.StreakBadgeSignal;
-import io.github.oasis.engine.elements.badges.signals.TemporalBadge;
+import io.github.oasis.engine.elements.badges.signals.TemporalBadgeSignal;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -103,7 +103,7 @@ public class BadgeSink extends AbstractSink {
     }
 
     private String getBadgeKey(BadgeSignal signal) {
-        if (signal instanceof TemporalBadge || signal instanceof StreakBadgeSignal) {
+        if (signal instanceof TemporalBadgeSignal || signal instanceof StreakBadgeSignal) {
             return String.format("%s:%d:%d", signal.getRuleId(), signal.getAttribute(), signal.getStartTime());
         } else {
             return String.format("%s:%d:%s", signal.getRuleId(), signal.getAttribute(), signal.getEndId());

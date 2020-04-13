@@ -56,6 +56,16 @@ import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedDown;
 import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
 
 /**
+ * Awards badges based on continuous/non-continuous tumbling histograms.
+ * For e.g. 1: When user scores 200+ daily reputations,
+ *              - Award gold badge, for 10 consecutive days.
+ *              - Award silver badge, for 5 consecutive days.
+ *              etc.
+ *
+ * E.g. 2: When user scores 100+ daily reputations,
+ *              - Award gold badge, for any 5 days
+ *              - Award silver badge, for any 3 days
+ *
  * @author Isuru Weerarathna
  */
 public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNRule> {
@@ -114,6 +124,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
                     return Collections.singletonList(new HistogramBadgeSignal(rule.getId(),
                             event,
                             total,
+                            rule.findAttributeOfStreak(total),
                             ts - (ts % rule.getTimeUnit()),
                             lastTs,
                             event.getExternalId()));
@@ -153,7 +164,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
                     map.setValue(lastHitSubKey, event.getTimestamp() + COLON + event.getExternalId());
                     return Collections.singletonList(new HistogramBadgeRemovalSignal(rule.getId(),
                             event.asEventScope(),
-                            total + 1,
+                            rule.findAttributeOfStreak(total + 1),
                             ts - (ts % rule.getTimeUnit()),
                             lastTs));
                 }
@@ -231,6 +242,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
                             rule.getId(),
                             event,
                             streak,
+                            rule.findAttributeOfStreak(streak),
                             startTs,
                             ts,
                             event.getExternalId()

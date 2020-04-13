@@ -30,8 +30,8 @@ import java.util.Comparator;
  */
 @ToString(callSuper = true)
 public class HistogramBadgeSignal extends StreakBadgeSignal {
-    public HistogramBadgeSignal(String ruleId, Event causedEvent, int streak, long st, long et, String eid) {
-        super(ruleId, causedEvent, streak, st, et, null, eid);
+    public HistogramBadgeSignal(String ruleId, Event causedEvent, int streak, int attribute, long st, long et, String eid) {
+        super(ruleId, causedEvent, streak, attribute, st, et, null, eid);
     }
 
     @Override

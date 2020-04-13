@@ -50,7 +50,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import static io.github.oasis.engine.elements.milestones.MilestoneRule.MilestoneFlag.SKIP_NEGATIVE_VALUES;
@@ -161,7 +160,7 @@ public class OasisEngineTest {
 
         BadgeStreakNRule rule = new BadgeStreakNRule("abc");
         rule.setForEvent(EVT_A);
-        rule.setStreaks(List.of(3, 5));
+        rule.setStreaks(Map.of(3, 3, 5, 5));
         rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
         rule.setRetainTime(10);
 

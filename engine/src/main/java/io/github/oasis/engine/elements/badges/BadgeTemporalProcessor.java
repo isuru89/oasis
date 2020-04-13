@@ -22,7 +22,7 @@ package io.github.oasis.engine.elements.badges;
 import io.github.oasis.engine.elements.badges.rules.BadgeTemporalRule;
 import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
-import io.github.oasis.engine.elements.badges.signals.TemporalBadge;
+import io.github.oasis.engine.elements.badges.signals.TemporalBadgeSignal;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
@@ -45,6 +45,12 @@ import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
 
 /**
  * Satisfy condition N times within a tumbling time unit. (daily, weekly, monthly)
+ * Based on different thresholds, user will be awarded different badges.
+ *
+ * For e.g: Award,
+ *            - gold badge if user scores more than 1000+ points in a day
+ *            - silver badge if user scores more than 500+ points in a day
+ *            - bronze badge if user scores more than 200+ points in a day
  *
  * @author Isuru Weerarathna
  */
@@ -64,22 +70,24 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
         BigDecimal value = resolveValueOfEvent(event, rule, context);
         String badgeKey = ID.getUserTemporalBadgeKey(event.getGameId(), event.getUser(), rule.getId());
         Mapped map = db.MAP(badgeKey);
-        long ts = getUserSpecificEpochTs(event.getUser(), event.getTimestamp(), db);
+        long ts = event.getTimestamp() + context.getUserTimeOffset();
         long tsUnit = ts - (ts % rule.getTimeUnit());
         String subKey = String.valueOf(tsUnit);
         BigDecimal updatedVal = map.incrementByDecimal(subKey, value);
         BigDecimal prevValue = updatedVal.subtract(value).setScale(SCALE, RoundingMode.HALF_UP);
         boolean increased = isIncreasedOrEqual(prevValue, updatedVal);
         Optional<List<BadgeTemporalRule.Threshold>> crossedThreshold = getCrossedThreshold(prevValue, updatedVal, rule);
-        return crossedThreshold.map(thresholds -> thresholds.stream()
-                .map(threshold -> increased
+        return crossedThreshold.map(thresholds ->
+                thresholds.stream()
+                        .map(threshold -> increased
                         ? badgeCreation(rule, threshold, event, tsUnit)
                         : badgeRemoval(rule, threshold, event, tsUnit))
-                .collect(Collectors.toList())).orElse(null);
+                .collect(Collectors.toList()))
+                .orElse(null);
     }
 
     private BadgeSignal badgeCreation(BadgeTemporalRule rule, BadgeTemporalRule.Threshold threshold, Event event, long tsUnit) {
-        return new TemporalBadge(rule.getId(),
+        return new TemporalBadgeSignal(rule.getId(),
                 event,
                 threshold.getAttribute(),
                 tsUnit,

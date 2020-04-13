@@ -23,13 +23,13 @@ import io.github.oasis.engine.elements.badges.rules.BadgeStreakNRule;
 import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
 import io.github.oasis.engine.elements.badges.signals.StreakBadgeSignal;
+import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.Record;
 import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.model.Event;
 
 import java.util.ArrayList;
@@ -115,7 +115,7 @@ public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
         int len = 0;
         List<BadgeSignal> signals = new ArrayList<>();
         for (Record tuple : tuples) {
-            int prev = asInt(rule.getStreakMap().floor(len));
+            int prev = asInt(rule.findOnGoingStreak(len));
             String[] parts = tuple.getMember().split(COLON);
             if (isZero(parts[1])) {
                 start = null;
@@ -126,14 +126,15 @@ public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
                 }
                 len++;
             }
-            int now = asInt(rule.getStreakMap().floor(len));
+            int now = asInt(rule.findOnGoingStreak(len));
             if (prev < now && start != null) {
                 String[] startParts = start.getMember().split(COLON);
                 BadgeSignal signal = new StreakBadgeSignal(rule.getId(),
                         event,
                         now,
-                        Long.parseLong(startParts[0]),
-                        Long.parseLong(parts[0]),
+                        rule.getAttributeForStreak(now),
+                        asLong(startParts[0]),
+                        asLong(parts[0]),
                         startParts[2],
                         parts[2]);
                 signals.add(signal);

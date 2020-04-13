@@ -23,7 +23,11 @@ import io.github.oasis.engine.model.EventValueResolver;
 import io.github.oasis.engine.model.ExecutionContext;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Isuru Weerarathna
@@ -32,7 +36,8 @@ public class BadgeHistogramStreakNRule extends BadgeRule {
 
     private int maxStreak = 0;
     private int minStreak = Integer.MAX_VALUE;
-    private List<Integer> streaks;
+    private List<Integer> orderedStreakList;
+    private Map<Integer, Integer> streakMap;
     private long timeUnit;
     protected EventValueResolver<ExecutionContext> valueResolver;
 
@@ -56,7 +61,7 @@ public class BadgeHistogramStreakNRule extends BadgeRule {
     }
 
     public boolean containsStreakMargin(int streak) {
-        return streaks.contains(streak);
+        return streakMap.containsKey(streak);
     }
 
     public boolean isMaxStreakPassed(int streak) {
@@ -72,16 +77,22 @@ public class BadgeHistogramStreakNRule extends BadgeRule {
     }
 
     public List<Integer> getStreaks() {
-        return streaks;
+        return orderedStreakList;
     }
 
     public int getMinStreak() {
         return minStreak;
     }
 
-    public void setStreaks(List<Integer> streaks) {
-        this.streaks = streaks;
-        for (int streak : streaks) {
+    public int findAttributeOfStreak(int streak) {
+        return streakMap.getOrDefault(streak, 0);
+    }
+
+    public void setStreaks(Map<Integer, Integer> streaks) {
+        this.streakMap = new TreeMap<>(streaks);
+        this.orderedStreakList = new ArrayList<>(streaks.keySet());
+        this.orderedStreakList.sort(Comparator.naturalOrder());
+        for (int streak : orderedStreakList) {
             maxStreak = Math.max(streak, maxStreak);
             minStreak = Math.min(streak, minStreak);
         }

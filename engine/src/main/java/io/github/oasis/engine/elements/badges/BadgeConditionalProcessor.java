@@ -22,15 +22,14 @@ package io.github.oasis.engine.elements.badges;
 import io.github.oasis.engine.elements.badges.rules.BadgeConditionalRule;
 import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
 import io.github.oasis.engine.elements.badges.signals.ConditionalBadgeSignal;
-import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Mapped;
+import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.model.Event;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,11 +69,11 @@ public class BadgeConditionalProcessor extends BadgeProcessor<BadgeConditionalRu
             String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
             String attrKey = rule.getId() + ":attr:" + attrId;
             Mapped map = db.MAP(badgeMetaKey);
-            long count = map.incrementBy(attrKey, 1);
+            long count = map.incrementByOne(attrKey);
             if (rule.getMaxAwardTimes() >= count) {
-                return Collections.singletonList(ConditionalBadgeSignal.create(rule.getId(), event, attrId));
+                return List.of(ConditionalBadgeSignal.create(rule.getId(), event, attrId));
             } else {
-                map.incrementBy(attrKey, -1);
+                map.decrementByOne(attrKey);
             }
         }
         return null;

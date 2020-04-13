@@ -21,9 +21,12 @@ package io.github.oasis.engine.elements.badges.rules;
 
 import io.github.oasis.engine.model.EventExecutionFilter;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.NavigableSet;
-import java.util.TreeSet;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 /**
  * @author Isuru Weerarathna
@@ -32,8 +35,8 @@ public class BadgeStreakNRule extends BadgeRule {
 
     private int maxStreak = 0;
     private int minStreak = Integer.MAX_VALUE;
-    private NavigableSet<Integer> streakMap;
-    private List<Integer> streaks;
+    private List<Integer> orderedStreakList;
+    private NavigableMap<Integer, Integer> streakAttrMap;
     private EventExecutionFilter criteria;
     private long retainTime;
 
@@ -53,19 +56,28 @@ public class BadgeStreakNRule extends BadgeRule {
         return maxStreak;
     }
 
-    public NavigableSet<Integer> getStreakMap() {
-        return streakMap;
+    public boolean isLastStreak(int streak) {
+        return streak == maxStreak;
     }
 
-    public void setStreaks(List<Integer> streaks) {
-        this.streaks = streaks;
-        streakMap = new TreeSet<>();
-        streakMap.add(0);
-        for (Integer streak : streaks) {
+    public int findOnGoingStreak(int currStreak) {
+        Integer streak = streakAttrMap.floorKey(currStreak);
+        return streak == null ? 0 : streak;
+    }
+
+    public int getAttributeForStreak(int streak) {
+        return streakAttrMap.getOrDefault(streak, 0);
+    }
+
+    public void setStreaks(Map<Integer, Integer> streaks) {
+        this.streakAttrMap = new TreeMap<>(streaks);
+        this.streakAttrMap.put(0, 0);
+        for (Integer streak : streaks.keySet()) {
             maxStreak = Math.max(streak, maxStreak);
             minStreak = Math.min(streak, minStreak);
-            streakMap.add(streak);
         }
+        orderedStreakList = new ArrayList<>(streaks.keySet());
+        orderedStreakList.sort(Comparator.naturalOrder());
     }
 
     public int getMinStreak() {
@@ -81,7 +93,7 @@ public class BadgeStreakNRule extends BadgeRule {
     }
 
     public List<Integer> getStreaks() {
-        return streaks;
+        return orderedStreakList;
     }
 
 }

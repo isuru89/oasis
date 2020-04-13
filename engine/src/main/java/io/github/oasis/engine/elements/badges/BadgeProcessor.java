@@ -55,15 +55,24 @@ public abstract class BadgeProcessor<R extends BadgeRule> extends AbstractProces
         String userBadgesMeta = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
         Mapped map = db.MAP(userBadgesMeta);
         String value = map.getValue(rule.getId());
+        int streak = 0;
+        boolean supportStreak = false;
+        if (signal instanceof StreakSupport) {
+            StreakSupport streakSupport = (StreakSupport) signal;
+            streak = streakSupport.getStreak();
+            supportStreak = true;
+        }
         String streakKey = getMetaStreakKey(rule);
         String endTimeKey = getMetaEndTimeKey(rule);
         if (value == null) {
             map.setValue(endTimeKey, signal.getEndTime());
-            map.setValue(streakKey, signal.getAttribute());
+            if (supportStreak) {
+                map.setValue(streakKey, streak);
+            }
         } else {
             long val = Long.parseLong(value);
             if (signal.getEndTime() >= val) {
-                map.setValue(streakKey, signal.getAttribute());
+                map.setValue(streakKey, streak);
             }
             map.setValue(endTimeKey, Math.max(signal.getEndTime(), val));
         }
