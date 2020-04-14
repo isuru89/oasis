@@ -136,6 +136,7 @@ public class TEvent implements Event {
     public String toString() {
         return "TEvent{" +
                 "type=" + getEventType() + ", " +
+                "ts=" + getTimestamp() + ", " +
                 "id=" + getExternalId() +
                 '}';
     }

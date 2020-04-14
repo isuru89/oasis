@@ -17,8 +17,9 @@
  * under the License.
  */
 
-package io.github.oasis.engine.sinks;
+package io.github.oasis.engine.elements.badges;
 
+import io.github.oasis.engine.elements.AbstractSink;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Mapped;
@@ -88,7 +89,7 @@ public class BadgeSink extends AbstractSink {
 
             // by attr
             String attrPfx = "attr:" + signal.getAttribute();
-            badgesMap.incrementByInt(rulePfx, addition);
+            badgesMap.incrementByInt(attrPfx, addition);
             badgesMap.incrementByInt(attrPfx + ":" + tcx.getYear(), addition);
             badgesMap.incrementByInt(attrPfx + ":" + tcx.getMonth(), addition);
             badgesMap.incrementByInt(attrPfx + ":" + tcx.getDay(), addition);

@@ -20,8 +20,7 @@
 package io.github.oasis.engine.elements.points;
 
 import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.sinks.AbstractSink;
-import io.github.oasis.engine.sinks.PointsSink;
+import io.github.oasis.engine.elements.AbstractSink;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;

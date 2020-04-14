@@ -148,6 +148,32 @@ public class RatingsTest extends AbstractRuleTest {
         );
     }
 
+    @DisplayName("Rating stays after goes up")
+    @Test
+    public void testRatingStays() {
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 57);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 83);
+        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 75);
+
+        List<Signal> signals = new ArrayList<>();
+        RuleContext<RatingRule> ruleContext = createRule(signals,
+                aRating(1, 3, checkGt(85), pointAward(3)),
+                aRating(2, 2, checkGt(65), pointAward(2)),
+                aRating(3, 1, checkGt(50), pointAward(1))
+        );
+        RatingRule rule = ruleContext.getRule();
+        Assertions.assertEquals(3, rule.getRatings().size());
+        Assertions.assertEquals(DEF_RATING, rule.getDefaultRating());
+        RatingProcessor processor = new RatingProcessor(pool, ruleContext);
+        submitOrder(processor, e1, e2, e3);
+
+        System.out.println(signals);
+        assertStrict(signals,
+                new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e2.getTimestamp(), e2),
+                new RatingPointsSignal(rule.getId(), POINT_ID, 2, asDecimal(10), e2)
+        );
+    }
+
     @DisplayName("Rating go down")
     @Test
     public void testGoDownRating() {

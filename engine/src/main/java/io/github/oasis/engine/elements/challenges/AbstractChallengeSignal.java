@@ -20,8 +20,7 @@
 package io.github.oasis.engine.elements.challenges;
 
 import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.sinks.AbstractSink;
-import io.github.oasis.engine.sinks.ChallengesSink;
+import io.github.oasis.engine.elements.AbstractSink;
 import io.github.oasis.model.EventScope;
 
 /**

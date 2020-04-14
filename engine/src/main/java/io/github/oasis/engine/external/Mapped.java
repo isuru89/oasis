@@ -47,6 +47,8 @@ public interface Mapped {
 
     void setValues(String... keyValuePairs);
 
+    BigDecimal setValueIfMax(String key, BigDecimal value);
+
     long incrementBy(String key, long byValue);
     int incrementByInt(String key, int byValue);
     default int incrementByOne(String key) {

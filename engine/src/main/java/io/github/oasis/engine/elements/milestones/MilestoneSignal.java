@@ -20,8 +20,7 @@
 package io.github.oasis.engine.elements.milestones;
 
 import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.sinks.AbstractSink;
-import io.github.oasis.engine.sinks.MilestonesSink;
+import io.github.oasis.engine.elements.AbstractSink;
 import io.github.oasis.model.Event;
 import lombok.ToString;
 

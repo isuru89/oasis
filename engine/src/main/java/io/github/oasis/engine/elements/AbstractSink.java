@@ -17,32 +17,26 @@
  * under the License.
  */
 
-package io.github.oasis.engine.db;
+package io.github.oasis.engine.elements;
 
 import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.model.ExecutionContext;
 
 /**
  * @author Isuru Weerarathna
  */
-public class MockedRedisDb implements Db {
+public abstract class AbstractSink {
 
-    public MockedRedisDb() {
+    protected Db dbPool;
 
+    protected AbstractSink(Db dbPool) {
+        this.dbPool = dbPool;
     }
 
-    @Override
-    public void init() {
-
-    }
+    public abstract void consume(Signal signal, AbstractRule rule, ExecutionContext context);
 
     @Override
-    public DbContext createContext() {
-        return new MockedDb();
-    }
-
-    @Override
-    public void close() {
-
+    public String toString() {
+        return this.getClass().getSimpleName();
     }
 }

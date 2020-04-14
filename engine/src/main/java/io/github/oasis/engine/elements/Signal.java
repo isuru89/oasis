@@ -19,7 +19,6 @@
 
 package io.github.oasis.engine.elements;
 
-import io.github.oasis.engine.sinks.AbstractSink;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.EventScope;
 import lombok.ToString;

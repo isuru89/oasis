@@ -25,7 +25,7 @@ import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.elements.AbstractRule;
 import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.sinks.AbstractSink;
+import io.github.oasis.engine.elements.AbstractSink;
 
 import javax.inject.Inject;
 import java.util.concurrent.atomic.AtomicLong;

@@ -34,6 +34,7 @@ public interface Sorted {
     void add(byte[] member, long value);
     void add(String number, double value);
 
+    List<Record> getRangeWithScores(long startRank, long endRank);
     List<Record> getRangeByScoreWithScores(long from, long to);
     List<Record> getRangeByScoreWithScores(BigDecimal from, BigDecimal to);
     List<Record> getRangeByRankWithScores(long from, long to);

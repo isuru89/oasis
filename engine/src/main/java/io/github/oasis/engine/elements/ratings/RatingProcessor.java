@@ -63,16 +63,19 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
 
         for (RatingRule.Rating rating : rule.getRatings()) {
             int newRating = rating.getRating();
-            if (rating.getCriteria().matches(event, rule, context) && newRating != currRating) {
-                long ts = event.getTimestamp();
-                String id = event.getExternalId();
-                BigDecimal score = deriveAwardedPoints(event, currRating, rating).setScale(Constants.SCALE, RoundingMode.HALF_UP);
-                ratingsMap.setValue(subRatingKey, String.format("%d:%d:%s", newRating, ts, id));
-                Event copiedEvent = Utils.deepClone(event);
-                return List.of(
-                        RatingChangedSignal.create(rule, copiedEvent, currRating, newRating),
-                        RatingPointsSignal.create(rule, copiedEvent, newRating, rating.getPointId(), score)
-                );
+            if (rating.getCriteria().matches(event, rule, context)) {
+                if (newRating != currRating) {
+                    long ts = event.getTimestamp();
+                    String id = event.getExternalId();
+                    BigDecimal score = deriveAwardedPoints(event, currRating, rating).setScale(Constants.SCALE, RoundingMode.HALF_UP);
+                    ratingsMap.setValue(subRatingKey, String.format("%d:%d:%s", newRating, ts, id));
+                    Event copiedEvent = Utils.deepClone(event);
+                    return List.of(
+                            RatingChangedSignal.create(rule, copiedEvent, currRating, newRating),
+                            RatingPointsSignal.create(rule, copiedEvent, newRating, rating.getPointId(), score)
+                    );
+                }
+                break;
             }
         }
         return null;

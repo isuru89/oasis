@@ -17,17 +17,16 @@
  * under the License.
  */
 
-package io.github.oasis.engine.sinks;
+package io.github.oasis.engine.elements.milestones;
 
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.AbstractSink;
+import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.elements.milestones.MilestoneRule;
-import io.github.oasis.engine.elements.milestones.MilestoneSignal;
-import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.utils.Numbers;
 import io.github.oasis.model.EventScope;
 
@@ -59,7 +58,7 @@ public class MilestonesSink extends AbstractSink {
             String rulePfx = milestoneSignal.getRuleId() + ":";
             milestoneMap.setValue(rulePfx + "changedvalue", signal.getCurrentScore().toString());
             milestoneMap.setValue(rulePfx + "currentlevel", signal.getCurrentLevel());
-            milestoneMap.setValue(rulePfx + "lastupdated", signal.getOccurredTimestamp());
+            milestoneMap.setValue(rulePfx + "levellastupdated", signal.getOccurredTimestamp());
 
             Optional<MilestoneRule.Level> nextLevelOpt = rule.getNextLevel(signal.getCurrentScore());
             milestoneMap.setValue(rulePfx + "completed", String.valueOf(Numbers.asInt(nextLevelOpt.isEmpty())));

@@ -322,8 +322,8 @@ public class MilestoneTest extends AbstractRuleTest {
         assertStrict(signals,
                 new MilestoneSignal(rule.getId(), L_0, L_1, BigDecimal.valueOf(187.0), e1));
 
-        assertRedisHashMapValue(ID.getGameMilestoneKey(TEvent.GAME_ID, rule.getId()),
-                ID.getPenaltiesUserKeyUnderGameMilestone(TEvent.USER_ID),
+        assertRedisHashMapValue(ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
+                rule.getId() + ":penalties",
                 "-98");
     }
 

@@ -27,7 +27,9 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import static io.github.oasis.engine.utils.Numbers.asDecimal;
 import static io.github.oasis.engine.utils.Numbers.asInt;
 import static io.github.oasis.engine.utils.Numbers.asLong;
 
@@ -66,6 +68,16 @@ public class RedisHashSet implements Mapped {
             map.put(keyValuePairs[i], keyValuePairs[i + 1]);
         }
         jedis.hmset(baseKey, map);
+    }
+
+    @Override
+    public BigDecimal setValueIfMax(String key, BigDecimal value) {
+        String existVal = jedis.hget(baseKey, key);
+        if (Objects.isNull(existVal) || value.compareTo(asDecimal(existVal)) > 0) {
+            jedis.hset(baseKey, key, value.toString());
+            return value;
+        }
+        return asDecimal(existVal);
     }
 
     @Override

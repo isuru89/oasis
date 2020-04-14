@@ -17,17 +17,17 @@
  * under the License.
  */
 
-package io.github.oasis.engine.sinks;
+package io.github.oasis.engine.elements.points;
 
+import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.engine.elements.AbstractSink;
+import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.TimeContext;
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.elements.points.PointSignal;
-import io.github.oasis.engine.elements.Signal;
 
 import javax.inject.Inject;
 import java.io.IOException;

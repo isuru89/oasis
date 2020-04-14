@@ -40,7 +40,7 @@ public class TimeContext {
         int y = userTime.getYear();
         year = "Y" + y;
         month = String.format("M%s%02d", y, userTime.getMonth().getValue());
-        day = String.format("D%d%s%02d", y, userTime.getMonth().getValue(), userTime.getDayOfMonth());
+        day = String.format("D%d%02d%02d", y, userTime.getMonth().getValue(), userTime.getDayOfMonth());
         week = String.format("W%d%02d", y, userTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
         quarter = String.format("Q%d%02d", y, userTime.get(IsoFields.QUARTER_OF_YEAR));
     }
