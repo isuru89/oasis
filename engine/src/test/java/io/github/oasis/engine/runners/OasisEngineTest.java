@@ -103,8 +103,8 @@ public class OasisEngineTest {
     private static class TestConfigProvider implements Provider<OasisConfigs> {
 
         private static final OasisConfigs DEFAULT = new OasisConfigs.Builder()
-                .withSupervisors(2, 2, 1)
-                .withExecutors(2, 2)
+                .withSupervisors(2, 1, 1)
+                .withExecutors(1, 2)
                 .build();
 
         @Override

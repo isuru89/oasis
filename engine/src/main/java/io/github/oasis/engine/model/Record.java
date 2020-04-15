@@ -47,4 +47,12 @@ public class Record {
     public long getScoreAsLong() {
         return (long) score;
     }
+
+    @Override
+    public String toString() {
+        return "Record{" +
+                "member='" + member + '\'' +
+                ", score=" + score +
+                '}';
+    }
 }

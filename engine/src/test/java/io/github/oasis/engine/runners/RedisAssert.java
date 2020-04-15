@@ -53,9 +53,38 @@ public class RedisAssert {
         return map;
     }
 
+    public static void assertSortedRef(Db dbPool, String sortedKey, String refKey, NavigableMap<String, Long> entries) {
+        try (DbContext db = dbPool.createContext()) {
+            Map<String, Long> all = db.SORTED(sortedKey).getRefRangeByRankWithScores(0, Long.MAX_VALUE, refKey)
+                    .stream().collect(Collectors.toMap(Record::getMember, Record::getScoreAsLong));
+            System.out.println(all);
+            if (all.size() > entries.size()) {
+                Set<String> expected = entries.keySet();
+                Set<String> actual = all.keySet();
+                actual.removeAll(expected);
+                Assertions.fail("More entries (#" + actual.size() + ") are in db than expected! " + actual);
+            } else if (all.size() < entries.size()) {
+                Set<String> expected = entries.keySet();
+                Set<String> actual = all.keySet();
+                expected.removeAll(actual);
+                Assertions.fail("Expected entries (#" + expected.size() + ") are not in db! " + expected);
+            }
+
+            entries.forEach((k, v) -> {
+                if (!all.containsKey(k)) {
+                    Assertions.fail("Sorted member " + k + " does not exist in db! " + k);
+                }
+                Assertions.assertEquals(v, all.get(k));
+            });
+
+        } catch (IOException e) {
+            Assertions.fail(e);
+        }
+    }
+
     public static void assertSorted(Db dbPool, String key, NavigableMap<String, Long> entries) {
         try (DbContext db = dbPool.createContext()) {
-            Map<String, Long> all = db.SORTED(key).getRangeWithScores(0, Long.MAX_VALUE)
+            Map<String, Long> all = db.SORTED(key).getRangeByRankWithScores(0, Long.MAX_VALUE)
                     .stream().collect(Collectors.toMap(Record::getMember, Record::getScoreAsLong));
             if (all.size() > entries.size()) {
                 Set<String> expected = entries.keySet();

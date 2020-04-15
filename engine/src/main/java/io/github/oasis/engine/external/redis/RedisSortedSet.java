@@ -26,7 +26,9 @@ import redis.clients.jedis.Tuple;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -65,11 +67,9 @@ public class RedisSortedSet implements Sorted {
     }
 
     @Override
-    public List<Record> getRangeWithScores(long startRank, long endRank) {
-        return jedis.zrangeWithScores(baseKey, startRank, endRank)
-                .stream()
-                .map(tuple -> new Record(tuple.getElement(), tuple.getScore()))
-                .collect(Collectors.toList());
+    public void addRef(String member, long value, String refKey, String refValue) {
+        jedis.zadd(baseKey, value, member);
+        jedis.hset(refKey, member, refValue);
     }
 
     @Override
@@ -94,6 +94,18 @@ public class RedisSortedSet implements Sorted {
                 .stream()
                 .map(tuple -> new Record(tuple.getElement(), tuple.getScore()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Record> getRefRangeByRankWithScores(long from, long to, String refKey) {
+        Set<Tuple> tuples = jedis.zrangeWithScores(baseKey, from, to);
+        String[] memberIdArray = tuples.stream().map(Tuple::getElement).toArray(String[]::new);
+        List<String> refValues = jedis.hmget(refKey, memberIdArray);
+        Map<String, String> mapped = new HashMap<>();
+        for (int i = 0; i < memberIdArray.length; i++) {
+            mapped.put(memberIdArray[i], refValues.get(i));
+        }
+        return tuples.stream().map(t -> new Record(mapped.get(t.getElement()), t.getScore())).collect(Collectors.toList());
     }
 
     @Override

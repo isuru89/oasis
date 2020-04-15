@@ -20,6 +20,7 @@
 package io.github.oasis.engine.elements.challenges;
 
 import io.github.oasis.engine.elements.AbstractProcessor;
+import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.external.Mapped;
@@ -28,19 +29,16 @@ import io.github.oasis.engine.model.EventBiValueResolver;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.utils.Constants;
 import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
+import static io.github.oasis.engine.elements.challenges.ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND;
 import static io.github.oasis.engine.elements.challenges.ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE;
 import static io.github.oasis.engine.elements.challenges.ChallengeRule.ChallengeAwardMethod.REPEATABLE;
-import static io.github.oasis.engine.elements.challenges.ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND;
 
 /**
  * @author Isuru Weerarathna
@@ -73,14 +71,14 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
         int position = map.incrementByOne(winnerCountKey);
         if (position > rule.getWinnerCount()) {
             map.decrementByOne(winnerCountKey);
-            return Collections.singletonList(new ChallengeOverSignal(rule.getId(),
+            return List.of(new ChallengeOverSignal(rule.getId(),
                     event.asEventScope(),
                     event.getTimestamp(),
                     ALL_WINNERS_FOUND));
         }
         BigDecimal score = this.deriveAwardPointsForPosition(rule, position, event, context).setScale(Constants.SCALE, RoundingMode.HALF_UP);
         winnerSet.add(member, score.doubleValue());
-        return Arrays.asList(
+        return List.of(
                 new ChallengeWinSignal(rule.getId(), event, position, event.getUser(), event.getTimestamp(), event.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), rule.getPointId(), score, event)
         );

@@ -58,13 +58,28 @@ public class EngineChallengesTest extends OasisEngineTest {
         submit(supervisor, e1, e2, e3, e4, e5, e6);
         awaitTerminated();
 
+        int gameId = e1.getGameId();
+        String rid = rule.getId();
         try (DbContext db = dbPool.createContext()) {
-            System.out.println("u1" + db.MAP(ID.getGameUserPointsSummary(e1.getGameId(), U1)).getAll());
-            System.out.println("u2" + db.MAP(ID.getGameUserPointsSummary(e2.getGameId(), U2)).getAll());
-            System.out.println("u4" + db.MAP(ID.getGameUserPointsSummary(e4.getGameId(), U4)).getAll());
+            System.out.println("u1" + db.MAP(ID.getGameUserPointsSummary(gameId, U1)).getAll());
+            System.out.println("u2" + db.MAP(ID.getGameUserPointsSummary(gameId, U2)).getAll());
+            System.out.println("u4" + db.MAP(ID.getGameUserPointsSummary(gameId, U4)).getAll());
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        RedisAssert.assertSortedRef(dbPool,
+                ID.getGameUseChallengesLog(gameId, U1),
+                ID.getGameUseChallengesSummary(gameId, U1),
+                RedisAssert.ofSortedEntries(rid + ":1:" + e1.getExternalId(), e1.getTimestamp()));
+        RedisAssert.assertSortedRef(dbPool,
+                ID.getGameUseChallengesLog(gameId, U2),
+                ID.getGameUseChallengesSummary(gameId, U2),
+                RedisAssert.ofSortedEntries(rid + ":2:" + e2.getExternalId(), e2.getTimestamp()));
+        RedisAssert.assertSortedRef(dbPool,
+                ID.getGameUseChallengesLog(gameId, U4),
+                ID.getGameUseChallengesSummary(gameId, U4),
+                RedisAssert.ofSortedEntries(rid + ":3:" + e4.getExternalId(), e4.getTimestamp()));
 
         String score = "300";
         RedisAssert.assertMap(dbPool, ID.getGameUserPointsSummary(e1.getGameId(), U1),

@@ -64,7 +64,8 @@ public class ChallengesSink extends AbstractSink {
             long userId = eventScope.getUserId();
             long wonAt = signal.getWonAt();
 
-            Mapped challengesMap = db.MAP(ID.getGameUseChallengesSummary(gameId, userId));
+            String challengeMapKey = ID.getGameUseChallengesSummary(gameId, userId);
+            Mapped challengesMap = db.MAP(challengeMapKey);
 
             TimeContext tcx = new TimeContext(wonAt, context.getUserTimeOffset());
 
@@ -81,9 +82,7 @@ public class ChallengesSink extends AbstractSink {
             // log
             Sorted log = db.SORTED(ID.getGameUseChallengesLog(gameId, userId));
             String winId = UUID.randomUUID().toString();
-            log.add(winId, wonAt);
-
-            challengesMap.setValue(winId, String.format("%s:%d:%s", rule.getId(), signal.getPosition(), signal.getWonEventId()));
+            log.addRef(winId, wonAt, challengeMapKey, String.format("%s:%d:%s", rule.getId(), signal.getPosition(), signal.getWonEventId()));
 
         } catch (IOException e) {
             e.printStackTrace();
