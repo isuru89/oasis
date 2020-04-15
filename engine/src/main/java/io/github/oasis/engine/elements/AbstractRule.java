@@ -24,6 +24,8 @@ import io.github.oasis.engine.model.EventTypeMatcher;
 import io.github.oasis.engine.model.EventTypeMatcherFactory;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
@@ -34,11 +36,28 @@ public abstract class AbstractRule implements Serializable {
     private String name;
     private String description;
     private String forEvent;
+    private Set<String> flags = new HashSet<>();
     private EventTypeMatcher eventTypeMatcher;
     private EventExecutionFilter condition;
 
     public AbstractRule(String id) {
         this.id = id;
+    }
+
+    public boolean hasFlag(String flag) {
+        return flags.contains(flag);
+    }
+
+    public boolean doesNotHaveFlag(String flag) {
+        return !flags.contains(flag);
+    }
+
+    public void setFlags(Set<String> flags) {
+        this.flags = flags;
+    }
+
+    public void addFlag(String flag) {
+        this.flags.add(flag);
     }
 
     public EventExecutionFilter getCondition() {

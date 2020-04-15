@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -39,22 +38,16 @@ import java.util.TreeMap;
  */
 public class MilestoneRule extends AbstractRule {
 
+    public static final String TRACK_PENALTIES = "TRACK_PENALTIES";
+    public static final String SKIP_NEGATIVE_VALUES = "SKIP_NEGATIVE_VALUES";
+
     private List<Level> levels;
     private NavigableMap<BigDecimal, Level> levelMap;
     private BigDecimal lastLevelMilestone = BigDecimal.ZERO;
     private EventBiValueResolver<MilestoneRule, ExecutionContext> valueExtractor;
-    private Set<MilestoneFlag> flags;
 
     public MilestoneRule(String id) {
         super(id);
-    }
-
-    public boolean containsFlag(MilestoneFlag flag) {
-        return flags != null && flags.contains(flag);
-    }
-
-    public void setFlags(Set<MilestoneFlag> flags) {
-        this.flags = flags;
     }
 
     public Optional<Level> getNextLevel(BigDecimal currentValue) {
@@ -92,11 +85,6 @@ public class MilestoneRule extends AbstractRule {
             levelMap.put(level.getMilestone(), level);
             lastLevelMilestone = lastLevelMilestone.max(level.getMilestone());
         }
-    }
-
-    public enum MilestoneFlag {
-        TRACK_PENALTIES,
-        SKIP_NEGATIVE_VALUES
     }
 
     public static class Level implements Comparable<Level> {

@@ -36,6 +36,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
@@ -71,7 +72,7 @@ public class ChallengeTest extends AbstractRuleTest {
         RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 150, signals);
         ChallengeRule rule = ruleContext.getRule();
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
-        Assertions.assertEquals(ChallengeRule.ChallengeAwardMethod.REPEATABLE, rule.getAwardMethod());
+        Assertions.assertTrue(rule.hasFlag(ChallengeRule.REPEATABLE_WINNERS));
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
 
@@ -187,9 +188,9 @@ public class ChallengeTest extends AbstractRuleTest {
         List<Signal> signals = new ArrayList<>();
         RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
         ChallengeRule rule = ruleContext.getRule();
-        rule.setAwardMethod(ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE);
+        rule.setFlags(Set.of());
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
-        Assertions.assertEquals(ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE, rule.getAwardMethod());
+        Assertions.assertTrue(rule.doesNotHaveFlag(ChallengeRule.REPEATABLE_WINNERS));
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5);
 
@@ -217,7 +218,7 @@ public class ChallengeTest extends AbstractRuleTest {
         RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
         ChallengeRule rule = ruleContext.getRule();
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
-        Assertions.assertEquals(ChallengeRule.ChallengeAwardMethod.REPEATABLE, rule.getAwardMethod());
+        Assertions.assertTrue(rule.hasFlag(ChallengeRule.REPEATABLE_WINNERS));
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5);
 
@@ -326,7 +327,7 @@ public class ChallengeTest extends AbstractRuleTest {
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertEquals(U2, rule.getScopeId());
         Assertions.assertEquals(ChallengeRule.ChallengeScope.USER, rule.getScope());
-        Assertions.assertEquals(ChallengeRule.ChallengeAwardMethod.REPEATABLE, rule.getAwardMethod());
+        Assertions.assertTrue(rule.hasFlag(ChallengeRule.REPEATABLE_WINNERS));
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5);
 
@@ -355,11 +356,11 @@ public class ChallengeTest extends AbstractRuleTest {
         ChallengeRule rule = ruleContext.getRule();
         rule.setScope(ChallengeRule.ChallengeScope.USER);
         rule.setScopeId(U2);
-        rule.setAwardMethod(ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE);
+        rule.setFlags(Set.of());
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertEquals(U2, rule.getScopeId());
         Assertions.assertEquals(ChallengeRule.ChallengeScope.USER, rule.getScope());
-        Assertions.assertEquals(ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE, rule.getAwardMethod());
+        Assertions.assertTrue(rule.doesNotHaveFlag(ChallengeRule.REPEATABLE_WINNERS));
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5);
 
@@ -397,13 +398,13 @@ public class ChallengeTest extends AbstractRuleTest {
         List<Signal> signals = new ArrayList<>();
         RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
         ChallengeRule rule = ruleContext.getRule();
-        rule.setAwardMethod(ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE);
+        rule.setFlags(Set.of());
         rule.setScope(ChallengeRule.ChallengeScope.TEAM);
         rule.setScopeId(2);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertEquals(2, rule.getScopeId());
         Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM, rule.getScope());
-        Assertions.assertEquals(ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE, rule.getAwardMethod());
+        Assertions.assertTrue(rule.doesNotHaveFlag(ChallengeRule.REPEATABLE_WINNERS));
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8);
 
@@ -439,7 +440,7 @@ public class ChallengeTest extends AbstractRuleTest {
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertEquals(2, rule.getScopeId());
         Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM, rule.getScope());
-        Assertions.assertEquals(ChallengeRule.ChallengeAwardMethod.REPEATABLE, rule.getAwardMethod());
+        Assertions.assertTrue(rule.hasFlag(ChallengeRule.REPEATABLE_WINNERS));
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8);
 
@@ -478,6 +479,7 @@ public class ChallengeTest extends AbstractRuleTest {
         rule.setCriteria(this::check);
         rule.setWinnerCount(winners);
         rule.setPointId(POINT_ID);
+        rule.setFlags(Set.of(ChallengeRule.REPEATABLE_WINNERS));
         return new RuleContext<>(rule, fromConsumer(signals::add));
     }
 

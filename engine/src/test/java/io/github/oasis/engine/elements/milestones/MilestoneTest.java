@@ -36,12 +36,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import static io.github.oasis.engine.elements.milestones.MilestoneRule.MilestoneFlag.SKIP_NEGATIVE_VALUES;
-import static io.github.oasis.engine.elements.milestones.MilestoneRule.MilestoneFlag.TRACK_PENALTIES;
+import static io.github.oasis.engine.elements.milestones.MilestoneRule.SKIP_NEGATIVE_VALUES;
+import static io.github.oasis.engine.elements.milestones.MilestoneRule.TRACK_PENALTIES;
 
 /**
  * @author Isuru Weerarathna
@@ -314,7 +314,7 @@ public class MilestoneTest extends AbstractRuleTest {
                 aLevel(2, 200),
                 aLevel(3, 300));
         MilestoneRule rule = ruleContext.getRule();
-        rule.setFlags(new HashSet<>(Collections.singletonList(TRACK_PENALTIES)));
+        rule.setFlags(Set.of(TRACK_PENALTIES));
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3, e4);
 
@@ -344,7 +344,7 @@ public class MilestoneTest extends AbstractRuleTest {
         rule.setForEvent(EVT_A);
         rule.setValueExtractor(extractor);
         rule.setLevels(Arrays.asList(levels));
-        rule.setFlags(new HashSet<>(Collections.singletonList(SKIP_NEGATIVE_VALUES)));
+        rule.setFlags(Set.of(SKIP_NEGATIVE_VALUES));
         return new RuleContext<>(rule, fromConsumer(collector::add));
     }
 }

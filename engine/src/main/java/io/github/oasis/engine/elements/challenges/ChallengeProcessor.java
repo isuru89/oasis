@@ -37,8 +37,6 @@ import java.math.RoundingMode;
 import java.util.List;
 
 import static io.github.oasis.engine.elements.challenges.ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND;
-import static io.github.oasis.engine.elements.challenges.ChallengeRule.ChallengeAwardMethod.NON_REPEATABLE;
-import static io.github.oasis.engine.elements.challenges.ChallengeRule.ChallengeAwardMethod.REPEATABLE;
 
 /**
  * @author Isuru Weerarathna
@@ -63,7 +61,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
     public List<Signal> process(Event event, ChallengeRule rule, ExecutionContext context, DbContext db) {
         Sorted winnerSet = db.SORTED(ID.getGameChallengeKey(event.getGameId(), rule.getId()));
         String member = getMemberKeyFormatInChallengeList(event, rule);
-        if (rule.getAwardMethod() == NON_REPEATABLE && winnerSet.memberExists(member)) {
+        if (rule.doesNotHaveFlag(ChallengeRule.REPEATABLE_WINNERS) && winnerSet.memberExists(member)) {
             return null;
         }
         Mapped map = db.MAP(ID.getGameChallengesKey(event.getGameId()));
@@ -86,7 +84,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
 
     private String getMemberKeyFormatInChallengeList(Event event, ChallengeRule rule) {
         String member = "u" + event.getUser();
-        if (rule.getAwardMethod() == REPEATABLE) {
+        if (rule.hasFlag(ChallengeRule.REPEATABLE_WINNERS)) {
             member = String.format("u%d:%s", event.getUser(), event.getExternalId());
         }
         return member;

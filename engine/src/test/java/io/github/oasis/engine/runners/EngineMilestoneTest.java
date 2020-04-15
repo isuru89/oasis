@@ -27,11 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
-
-import static io.github.oasis.engine.elements.milestones.MilestoneRule.MilestoneFlag.SKIP_NEGATIVE_VALUES;
 
 /**
  * @author Isuru Weerarathna
@@ -56,7 +52,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
                 new MilestoneRule.Level(2, BigDecimal.valueOf(200)),
                 new MilestoneRule.Level(3, BigDecimal.valueOf(300)),
                 new MilestoneRule.Level(4, BigDecimal.valueOf(500))));
-        rule.setFlags(new HashSet<>(Collections.singletonList(SKIP_NEGATIVE_VALUES)));
+        rule.setFlags(Set.of(MilestoneRule.SKIP_NEGATIVE_VALUES));
 
         supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
         submit(supervisor, e1, e2, e3, e4, e5, e6, e7, e8);
@@ -92,7 +88,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
         rule.setValueExtractor((event, rule1, ctx) -> BigDecimal.valueOf((long)event.getFieldValue("value")));
         rule.setLevels(Arrays.asList(new MilestoneRule.Level(1, BigDecimal.valueOf(100)),
                 new MilestoneRule.Level(2, BigDecimal.valueOf(200))));
-        rule.setFlags(Set.of(MilestoneRule.MilestoneFlag.TRACK_PENALTIES));
+        rule.setFlags(Set.of(MilestoneRule.TRACK_PENALTIES));
 
         supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
         submit(supervisor, e1, e2, e3, e4, e5, e6, e7, e8);

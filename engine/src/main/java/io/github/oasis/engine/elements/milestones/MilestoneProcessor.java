@@ -34,8 +34,8 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Objects;
 
-import static io.github.oasis.engine.elements.milestones.MilestoneRule.MilestoneFlag.SKIP_NEGATIVE_VALUES;
-import static io.github.oasis.engine.elements.milestones.MilestoneRule.MilestoneFlag.TRACK_PENALTIES;
+import static io.github.oasis.engine.elements.milestones.MilestoneRule.SKIP_NEGATIVE_VALUES;
+import static io.github.oasis.engine.elements.milestones.MilestoneRule.TRACK_PENALTIES;
 import static io.github.oasis.engine.utils.Numbers.isNegative;
 
 /**
@@ -58,7 +58,7 @@ public class MilestoneProcessor extends AbstractProcessor<MilestoneRule, Milesto
             return null;
         }
         BigDecimal delta = rule.getValueExtractor().resolve(event, rule, context).setScale(Constants.SCALE, RoundingMode.HALF_UP);
-        if (rule.containsFlag(SKIP_NEGATIVE_VALUES) && isNegative(delta)) {
+        if (rule.hasFlag(SKIP_NEGATIVE_VALUES) && isNegative(delta)) {
             return null;
         }
         Mapped userMilestonesMap = db.MAP(ID.getGameUserMilestonesSummary(event.getGameId(), event.getUser()));
@@ -71,7 +71,7 @@ public class MilestoneProcessor extends AbstractProcessor<MilestoneRule, Milesto
         String milestoneKey = ID.getGameMilestoneKey(event.getGameId(), rule.getId());
         Mapped gameMilestoneMap = db.MAP(milestoneKey);
         BigDecimal updatedValue = gameMilestoneMap.incrementByDecimal(ID.getUserKeyUnderGameMilestone(event.getUser()), delta);
-        if (rule.containsFlag(TRACK_PENALTIES) && isNegative(delta)) {
+        if (rule.hasFlag(TRACK_PENALTIES) && isNegative(delta)) {
             userMilestonesMap.incrementByDecimal(String.format("%s:penalties", rule.getId()), delta);
         }
 
@@ -84,7 +84,7 @@ public class MilestoneProcessor extends AbstractProcessor<MilestoneRule, Milesto
                     defaultLevel(currentLevel),
                     updatedValue,
                     event));
-        } else if (!rule.containsFlag(SKIP_NEGATIVE_VALUES) && hasLevelDecreased(prevLevel, currentLevel)) {
+        } else if (!rule.hasFlag(SKIP_NEGATIVE_VALUES) && hasLevelDecreased(prevLevel, currentLevel)) {
             return List.of(new MilestoneSignal(rule.getId(),
                     defaultLevel(prevLevel),
                     defaultLevel(currentLevel),

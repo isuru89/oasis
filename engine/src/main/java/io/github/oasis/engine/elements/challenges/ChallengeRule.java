@@ -31,6 +31,8 @@ import java.math.BigDecimal;
  */
 public class ChallengeRule extends AbstractRule {
 
+    public static final String REPEATABLE_WINNERS = "REPEATABLE_WINNERS";
+
     private long expireAt;
     private long startAt;
     private int winnerCount;
@@ -38,7 +40,6 @@ public class ChallengeRule extends AbstractRule {
     private String pointId;
     private BigDecimal awardPoints = BigDecimal.ZERO;
     private EventBiValueResolver<Integer, ExecutionContext> customAwardPoints;
-    private ChallengeAwardMethod awardMethod = ChallengeAwardMethod.REPEATABLE;
 
     private EventExecutionFilter criteria;
 
@@ -49,20 +50,12 @@ public class ChallengeRule extends AbstractRule {
         super(id);
     }
 
-    public ChallengeAwardMethod getAwardMethod() {
-        return awardMethod;
-    }
-
     public String getPointId() {
         return pointId;
     }
 
     public void setPointId(String pointId) {
         this.pointId = pointId;
-    }
-
-    public void setAwardMethod(ChallengeAwardMethod awardMethod) {
-        this.awardMethod = awardMethod;
     }
 
     public long getExpireAt() {
@@ -127,11 +120,6 @@ public class ChallengeRule extends AbstractRule {
 
     public void setScopeId(long scopeId) {
         this.scopeId = scopeId;
-    }
-
-    public enum ChallengeAwardMethod {
-        REPEATABLE,
-        NON_REPEATABLE
     }
 
     public enum ChallengeScope {
