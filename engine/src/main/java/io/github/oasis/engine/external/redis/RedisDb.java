@@ -74,7 +74,7 @@ public class RedisDb implements Db {
                     Map<String, Object> ref = (Map<String, Object>) entry.getValue();
                     String content = readClassPathEntry(basePath + '/' + ref.get("filename"));
                     String hash = jedis.scriptLoad(content);
-                    RedisScript script = new RedisScript(hash, ((Number)ref.get("keyCount")).intValue());
+                    RedisScript script = new RedisScript(hash);
                     scriptReferenceMap.put(entry.getKey(), script);
                 }
             }
@@ -110,19 +110,13 @@ public class RedisDb implements Db {
 
     static class RedisScript {
         private String sha;
-        private int noOfKeys;
 
-        RedisScript(String sha, int noOfKeys) {
+        RedisScript(String sha) {
             this.sha = sha;
-            this.noOfKeys = noOfKeys;
         }
 
         public String getSha() {
             return sha;
-        }
-
-        public int getNoOfKeys() {
-            return noOfKeys;
         }
     }
 }

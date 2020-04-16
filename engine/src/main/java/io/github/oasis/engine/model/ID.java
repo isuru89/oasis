@@ -84,6 +84,10 @@ public final class ID {
         return String.format("g%d:ch:%s", gameId, ruleId);
     }
 
+    public static String getGameChallengeEventsKey(int gameId, String ruleId) {
+        return String.format("g%d:challengeevents:%s", gameId, ruleId);
+    }
+
     public static String getGameChallengeSubKey(String ruleId, String metaStatus) {
         return String.format("%s:%s", ruleId, metaStatus);
     }

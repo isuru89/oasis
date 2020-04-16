@@ -24,6 +24,7 @@ import io.github.oasis.engine.utils.Numbers;
 import redis.clients.jedis.Jedis;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,16 @@ public class RedisHashSet implements Mapped {
     @Override
     public void setValue(String key, String value) {
         jedis.hset(baseKey, key, value);
+    }
+
+    @Override
+    public void setValue(String key, byte[] data) {
+        jedis.hset(baseKey.getBytes(StandardCharsets.US_ASCII), key.getBytes(StandardCharsets.US_ASCII), data);
+    }
+
+    @Override
+    public byte[] readValue(String key) {
+        return jedis.hget(baseKey.getBytes(StandardCharsets.US_ASCII), key.getBytes(StandardCharsets.US_ASCII));
     }
 
     @Override

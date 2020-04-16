@@ -24,7 +24,6 @@ import io.github.oasis.engine.elements.AbstractSink;
 import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
@@ -33,6 +32,7 @@ import io.github.oasis.model.EventScope;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -65,19 +65,18 @@ public class ChallengesSink extends AbstractSink {
             long wonAt = signal.getWonAt();
 
             String challengeMapKey = ID.getGameUseChallengesSummary(gameId, userId);
-            Mapped challengesMap = db.MAP(challengeMapKey);
-
             TimeContext tcx = new TimeContext(wonAt, context.getUserTimeOffset());
 
-            challengesMap.incrementByInt("all", WIN);
-            challengesMap.incrementByInt("all:" + tcx.getYear(), WIN);
-            challengesMap.incrementByInt("all:" + tcx.getQuarter(), WIN);
-            challengesMap.incrementByInt("all:" + tcx.getMonth(), WIN);
-            challengesMap.incrementByInt("all:" + tcx.getWeek(), WIN);
-            challengesMap.incrementByInt("all:" + tcx.getDay(), WIN);
-
-            // by rule
-            challengesMap.incrementByInt("rule:" + signal.getRuleId(), WIN);
+            db.incrementAll(WIN,
+                    challengeMapKey,
+                    Arrays.asList("all",
+                            "all:" + tcx.getYear(),
+                            "all:" + tcx.getQuarter(),
+                            "all:" + tcx.getMonth(),
+                            "all:" + tcx.getWeek(),
+                            "all:" + tcx.getDay(),
+                            "rule:" + signal.getRuleId()
+                            ));
 
             // log
             Sorted log = db.SORTED(ID.getGameUseChallengesLog(gameId, userId));

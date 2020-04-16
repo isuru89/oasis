@@ -24,7 +24,6 @@ import io.github.oasis.engine.elements.AbstractSink;
 import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.TimeContext;
@@ -32,6 +31,7 @@ import io.github.oasis.engine.model.TimeContext;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 /**
  * @author Isuru Weerarathna
@@ -61,58 +61,60 @@ public class PointsSink extends AbstractSink {
             int gameId = signal.getEventScope().getGameId();
             long ts = signal.getOccurredTimestamp();
 
-            Mapped pointMap = db.MAP(ID.getGameUserPointsSummary(gameId, userId));
-
             BigDecimal score = signal.getScore();
-            pointMap.incrementByDecimal("all", score);
-
             TimeContext tcx = new TimeContext(ts, context.getUserTimeOffset());
-
-            pointMap.incrementByDecimal("all:" + tcx.getYear(), score);
-            pointMap.incrementByDecimal("all:" + tcx.getMonth(), score);
-            pointMap.incrementByDecimal("all:" + tcx.getDay(), score);
-            pointMap.incrementByDecimal("all:" + tcx.getWeek(), score);
-            pointMap.incrementByDecimal("all:" + tcx.getQuarter(), score);
 
             // by rule wise
             String pointId = signal.getRuleId();
             String rulePfx = "rule:" + pointId;
-            pointMap.incrementByDecimal(rulePfx, score);
-            pointMap.incrementByDecimal(rulePfx + ":" + tcx.getYear(), score);
-            pointMap.incrementByDecimal(rulePfx + ":" + tcx.getMonth(), score);
-            pointMap.incrementByDecimal(rulePfx + ":" + tcx.getDay(), score);
-            pointMap.incrementByDecimal(rulePfx + ":" + tcx.getWeek(), score);
-            pointMap.incrementByDecimal(rulePfx + ":" + tcx.getQuarter(), score);
 
             // by team wise
             long teamId = signal.getEventScope().getTeamId();
             String teamPfx = "team:" + teamId;
-            pointMap.incrementByDecimal(teamPfx, score);
-            pointMap.incrementByDecimal(teamPfx + ":" + tcx.getYear(), score);
-            pointMap.incrementByDecimal(teamPfx + ":" + tcx.getMonth(), score);
-            pointMap.incrementByDecimal(teamPfx + ":" + tcx.getDay(), score);
-            pointMap.incrementByDecimal(teamPfx + ":" + tcx.getWeek(), score);
-            pointMap.incrementByDecimal(teamPfx + ":" + tcx.getQuarter(), score);
 
             // by source-wise
             String sourcePfx = "source:" + signal.getEventScope().getSourceId();
-            pointMap.incrementByDecimal(sourcePfx, score);
+
+            db.incrementAll(score, ID.getGameUserPointsSummary(gameId, userId),
+                Arrays.asList("all",
+                    "all:" + tcx.getYear(),
+                    "all:" + tcx.getMonth(),
+                    "all:" + tcx.getDay(),
+                    "all:" + tcx.getWeek(),
+                    "all:" + tcx.getQuarter(),
+                    rulePfx,
+                    rulePfx + ":" + tcx.getYear(),
+                    rulePfx + ":" + tcx.getMonth(),
+                    rulePfx + ":" + tcx.getDay(),
+                    rulePfx + ":" + tcx.getWeek(),
+                    rulePfx + ":" + tcx.getQuarter(),
+                    teamPfx,
+                    teamPfx + ":" + tcx.getYear(),
+                    teamPfx + ":" + tcx.getMonth(),
+                    teamPfx + ":" + tcx.getDay(),
+                    teamPfx + ":" + tcx.getWeek(),
+                    teamPfx + ":" + tcx.getQuarter(),
+                    sourcePfx
+                )
+            );
 
             // leaderboards
             String member = String.valueOf(userId);
-            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, ALL, EMPTY), member, score);
-            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, ANNUALLY, tcx.getYear()), member, score);
-            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, QUARTERLY, tcx.getQuarter()), member, score);
-            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, MONTHLY, tcx.getMonth()), member, score);
-            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, WEEKLY, tcx.getWeek()), member, score);
-            db.incrementScoreInSorted(ID.getGameLeaderboard(gameId, DAILY, tcx.getDay()), member, score);
-
-            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, ALL, EMPTY), member, score);
-            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, ANNUALLY, tcx.getYear()), member, score);
-            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, QUARTERLY, tcx.getQuarter()), member, score);
-            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, MONTHLY, tcx.getMonth()), member, score);
-            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, WEEKLY, tcx.getWeek()), member, score);
-            db.incrementScoreInSorted(ID.getGameTeamLeaderboard(gameId, teamId, DAILY, tcx.getDay()), member, score);
+            db.incrementAllInSorted(score,
+                    member,
+                    Arrays.asList(ID.getGameLeaderboard(gameId, ALL, EMPTY),
+                            ID.getGameLeaderboard(gameId, ANNUALLY, tcx.getYear()),
+                            ID.getGameLeaderboard(gameId, QUARTERLY, tcx.getQuarter()),
+                            ID.getGameLeaderboard(gameId, MONTHLY, tcx.getMonth()),
+                            ID.getGameLeaderboard(gameId, WEEKLY, tcx.getWeek()),
+                            ID.getGameLeaderboard(gameId, DAILY, tcx.getDay()),
+                            ID.getGameTeamLeaderboard(gameId, teamId, ALL, EMPTY),
+                            ID.getGameTeamLeaderboard(gameId, teamId, ANNUALLY, tcx.getYear()),
+                            ID.getGameTeamLeaderboard(gameId, teamId, QUARTERLY, tcx.getQuarter()),
+                            ID.getGameTeamLeaderboard(gameId, teamId, MONTHLY, tcx.getMonth()),
+                            ID.getGameTeamLeaderboard(gameId, teamId, WEEKLY, tcx.getWeek()),
+                            ID.getGameTeamLeaderboard(gameId, teamId, DAILY, tcx.getDay())
+                    ));
 
         } catch (IOException e) {
             e.printStackTrace();

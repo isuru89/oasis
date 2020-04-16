@@ -21,7 +21,10 @@ package io.github.oasis.engine.external.redis;
 
 import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.engine.model.Record;
+import io.github.oasis.model.collect.Pair;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 import redis.clients.jedis.Tuple;
 
 import java.math.BigDecimal;
@@ -54,6 +57,16 @@ public class RedisSortedSet implements Sorted {
     @Override
     public boolean add(String member, long value) {
         return isFirstOne(jedis.zadd(baseKey, value, member));
+    }
+
+    @Override
+    public Pair<Long, Long> addAndGetRankSize(String member, long value) {
+        Pipeline pipe = jedis.pipelined();
+        pipe.zadd(baseKey, value, member);
+        Response<Long> ranking = pipe.zrank(baseKey, member);
+        Response<Long> total = pipe.zcard(baseKey);
+        pipe.sync();
+        return Pair.of(ranking.get(), total.get());
     }
 
     @Override

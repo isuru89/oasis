@@ -1,6 +1,8 @@
 {
-  "OASIS.INCRALL": {
-    "filename": "scripts/INCRALL.lua",
-    "keyCount": 1
+  "O.INCRALL": {
+    "filename": "scripts/INCRALL.lua"
+  },
+  "O.ZINCRALL": {
+    "filename": "scripts/ZINCRALL.lua"
   }
 }

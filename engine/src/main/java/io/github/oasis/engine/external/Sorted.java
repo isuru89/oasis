@@ -20,6 +20,7 @@
 package io.github.oasis.engine.external;
 
 import io.github.oasis.engine.model.Record;
+import io.github.oasis.model.collect.Pair;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.Optional;
 public interface Sorted {
 
     boolean add(String member, long value);
+    Pair<Long, Long> addAndGetRankSize(String member, long value);
     void add(byte[] member, long value);
     void add(String number, double value);
 

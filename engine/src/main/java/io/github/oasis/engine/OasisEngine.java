@@ -52,6 +52,16 @@ public class OasisEngine {
                 () -> dependencyModule.getInjector().getInstance(OasisSupervisor.class)), ActorNames.OASIS_SUPERVISOR);
     }
 
+    public void submitEvent(Object event) {
+        oasisActor.tell(event, oasisActor);
+    }
+
+    public void submit(Object... events) {
+        for (Object event : events) {
+            submitEvent(event);
+        }
+    }
+
     public AbstractActorProviderModule getProviderModule() {
         return providerModule;
     }

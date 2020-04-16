@@ -48,7 +48,7 @@ public class RedisAssert {
     public static NavigableMap<String, Long> ofSortedEntries(Object... keyValuePairs) {
         NavigableMap<String, Long> map = new TreeMap<>();
         for (int i = 0; i < keyValuePairs.length; i += 2) {
-            map.put(keyValuePairs[i].toString(), (long) keyValuePairs[i+1]);
+            map.put(keyValuePairs[i].toString(), Long.parseLong(keyValuePairs[i+1].toString()));
         }
         return map;
     }

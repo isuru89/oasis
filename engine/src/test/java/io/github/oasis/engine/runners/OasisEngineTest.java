@@ -57,7 +57,7 @@ public class OasisEngineTest {
     static final long U4 = 4;
     static final long U5 = 5;
 
-    private OasisEngine engine;
+    protected OasisEngine engine;
     protected ActorRef supervisor;
     @Inject
     protected Db dbPool;

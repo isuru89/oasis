@@ -42,6 +42,27 @@ public class Utils {
     }
 
     @SuppressWarnings("unchecked")
+    public static <T extends Serializable> T fromSerializedContent(byte[] data) {
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
+             ObjectInputStream ois = new ObjectInputStream(bis)) {
+
+            return (T) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    public static byte[] toSerializableContent(Object object) {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream(bos);) {
+            oos.writeObject(object);
+            return bos.toByteArray();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public static <T extends Serializable> T deepClone(T object) {
 
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();

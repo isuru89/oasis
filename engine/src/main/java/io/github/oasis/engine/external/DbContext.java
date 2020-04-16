@@ -43,6 +43,9 @@ public interface DbContext extends Closeable {
 
     Mapped MAP(String contextKey);
 
-    Object runScript(String scriptName, String... args);
+    void incrementAll(int value, String baseKey, List<String> keys);
+    void incrementAll(BigDecimal value, String baseKey, List<String> keys);
+    void incrementAllInSorted(BigDecimal value, String commonMember, List<String> baseKeys);
+    Object runScript(String scriptName, int noOfKeys, String... args);
 
 }

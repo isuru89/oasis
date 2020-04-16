@@ -44,6 +44,8 @@ public interface Mapped {
     default void setValue(String key, int value) {
         setValue(key, String.valueOf(value));
     }
+    void setValue(String key, byte[] data);
+    byte[] readValue(String key);
 
     void setValues(String... keyValuePairs);
 

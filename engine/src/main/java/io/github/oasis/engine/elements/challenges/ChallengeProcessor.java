@@ -75,7 +75,8 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
                     ALL_WINNERS_FOUND));
         }
         BigDecimal score = this.deriveAwardPointsForPosition(rule, position, event, context).setScale(Constants.SCALE, RoundingMode.HALF_UP);
-        winnerSet.add(member, score.doubleValue());
+        winnerSet.add(member, event.getTimestamp());
+
         return List.of(
                 new ChallengeWinSignal(rule.getId(), event, position, event.getUser(), event.getTimestamp(), event.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), rule.getPointId(), score, event)

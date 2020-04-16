@@ -26,6 +26,7 @@ import io.github.oasis.engine.utils.Numbers;
 import redis.clients.jedis.Jedis;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +34,9 @@ import java.util.Set;
  * @author Isuru Weerarathna
  */
 public class RedisContext implements DbContext {
+
+    private static final String INCRALL = "O.INCRALL";
+    private static final String ZINCRALL = "O.ZINCRALL";
 
     private final Jedis jedis;
     private final RedisDb db;
@@ -100,8 +104,37 @@ public class RedisContext implements DbContext {
     }
 
     @Override
-    public Object runScript(String scriptName, String... args) {
+    public void incrementAll(int value, String baseKey, List<String> keys) {
+        incrementAll(String.valueOf(value), baseKey, keys);
+    }
+
+    @Override
+    public void incrementAll(BigDecimal value, String baseKey, List<String> keys) {
+        incrementAll(value.toString(), baseKey, keys);
+    }
+
+    @Override
+    public void incrementAllInSorted(BigDecimal value, String commonMember, List<String> baseKeys) {
+        List<String> allArgs = new ArrayList<>();
+        allArgs.add(commonMember);
+        allArgs.addAll(baseKeys);
+        allArgs.add(value.toString());
+        String[] args = allArgs.toArray(new String[0]);
+        runScript(ZINCRALL, args.length - 1, args);
+    }
+
+    private void incrementAll(String value, String baseKey, List<String> keys) {
+        List<String> allArgs = new ArrayList<>();
+        allArgs.add(baseKey);
+        allArgs.addAll(keys);
+        allArgs.add(value);
+        String[] args = allArgs.toArray(new String[0]);
+        runScript(INCRALL, args.length - 1, args);
+    }
+
+    @Override
+    public Object runScript(String scriptName, int noOfKeys, String... args) {
         RedisDb.RedisScript scriptSha = db.getScriptSha(scriptName);
-        return jedis.evalsha(scriptSha.getSha(), scriptSha.getNoOfKeys(), args);
+        return jedis.evalsha(scriptSha.getSha(), noOfKeys, args);
     }
 }
