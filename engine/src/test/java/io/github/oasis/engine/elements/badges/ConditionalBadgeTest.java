@@ -19,17 +19,17 @@
 
 package io.github.oasis.engine.elements.badges;
 
-import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.elements.badges.rules.BadgeConditionalRule;
-import io.github.oasis.engine.model.EventExecutionFilter;
-import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.model.TEvent;
-import io.github.oasis.engine.elements.badges.BadgeConditionalProcessor;
 import io.github.oasis.engine.elements.badges.signals.ConditionalBadgeSignal;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
+import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -98,8 +98,7 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         List<Signal> signals = new ArrayList<>();
         RuleContext<BadgeConditionalRule> ruleContext = createRule(signals, aCond(1, ATTR_50, this::greater50));
-        ruleContext.getRule().setForEvent(EVT_1);
-        Assertions.assertEquals(EVT_1, ruleContext.getRule().getForEvent());
+        ruleContext.getRule().setEventTypeMatcher(new SingleEventTypeMatcher(EVT_1));
         Assertions.assertEquals(1, ruleContext.getRule().getConditions().size());
         BadgeConditionalProcessor processor = new BadgeConditionalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -217,8 +216,7 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
                 aCond(2, ATTR_50, this::greater50),
                 aCond(1, ATTR_75, this::greater75));
         BadgeConditionalRule rule = ruleContext.getRule();
-        rule.setForEvent(EVT_1);
-        Assertions.assertEquals(EVT_1, rule.getForEvent());
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_1));
         Assertions.assertEquals(2, rule.getConditions().size());
         BadgeConditionalProcessor processor = new BadgeConditionalProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -397,7 +395,7 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
     private RuleContext<BadgeConditionalRule> createRule(Collection<Signal> collector, int maxTimes, BadgeConditionalRule.Condition... conditions) {
         BadgeConditionalRule rule = new BadgeConditionalRule(RULE_ID);
-        rule.setForEvent(EVT_1);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_1));
         rule.setMaxAwardTimes(maxTimes);
         rule.setConditions(Arrays.asList(conditions));
         return new RuleContext<>(rule, fromConsumer(collector::add));

@@ -20,7 +20,6 @@
 package io.github.oasis.model.events;
 
 import io.github.oasis.model.Event;
-import io.github.oasis.model.EventScope;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -109,8 +108,4 @@ public abstract class BasePointEvent implements Event {
         return eventRef.getGameId();
     }
 
-    @Override
-    public EventScope asEventScope() {
-        return eventRef.asEventScope();
-    }
 }

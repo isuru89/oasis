@@ -20,11 +20,12 @@
 package io.github.oasis.engine.elements.badges;
 
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.elements.badges.rules.BadgeTemporalRule;
 import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.elements.badges.signals.TemporalBadgeSignal;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -438,7 +439,7 @@ public class TemporalBadgeTest extends AbstractRuleTest {
 
     private RuleContext<BadgeTemporalRule> createRule(long timeUnit, Collection<Signal> collection, BadgeTemporalRule.Threshold... thresholds) {
         BadgeTemporalRule rule = new BadgeTemporalRule("test.temporal.badge");
-        rule.setForEvent(EVENT_TYPE);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVENT_TYPE));
         rule.setTimeUnit(timeUnit);
         rule.setValueResolver((e,c) -> new BigDecimal(e.getFieldValue("value").toString()));
         rule.setThresholds(Arrays.asList(thresholds));

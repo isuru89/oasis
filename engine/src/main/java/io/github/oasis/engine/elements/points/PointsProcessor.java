@@ -19,12 +19,12 @@
 
 package io.github.oasis.engine.elements.points;
 
-import io.github.oasis.engine.elements.AbstractProcessor;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.RuleContext;
 
 import java.math.BigDecimal;
 import java.util.Collections;

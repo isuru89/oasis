@@ -19,17 +19,17 @@
 
 package io.github.oasis.engine.elements.badges;
 
-import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.elements.badges.rules.BadgeFirstEventRule;
-import io.github.oasis.engine.model.EventExecutionFilter;
-import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.model.TEvent;
-import io.github.oasis.engine.elements.badges.BadgeFirstEvent;
 import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
+import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -245,7 +245,7 @@ public class FirstEventTest extends AbstractRuleTest {
 
     private RuleContext<BadgeFirstEventRule> createRule(String forEvent, List<Signal> collectTo, EventExecutionFilter predicate) {
         BadgeFirstEventRule rule = new BadgeFirstEventRule("test.event", forEvent);
-        rule.setForEvent(EVT_1);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_1));
         rule.setCondition(predicate);
         return new RuleContext<>(rule, fromConsumer(collectTo::add));
     }

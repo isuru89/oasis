@@ -21,15 +21,15 @@ package io.github.oasis.engine.actors;
 
 import akka.routing.Routee;
 import akka.routing.Router;
-import io.github.oasis.engine.OasisConfigs;
+import io.github.oasis.core.Event;
+import io.github.oasis.engine.EngineContext;
+import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.engine.actors.cmds.AbstractGameCommand;
 import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.routers.GameRouting;
-import io.github.oasis.engine.model.GameContext;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.context.GameContext;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,9 +50,8 @@ public class OasisSupervisor extends OasisBaseActor {
 
     private Router gameProcessors;
 
-    @Inject
-    public OasisSupervisor(OasisConfigs configs) {
-        super(configs);
+    public OasisSupervisor(EngineContext context) {
+        super(context);
 
         myId = "O" + COUNTER.incrementAndGet();
         createRuleRouters();

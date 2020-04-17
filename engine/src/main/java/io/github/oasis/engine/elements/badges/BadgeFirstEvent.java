@@ -19,14 +19,14 @@
 
 package io.github.oasis.engine.elements.badges;
 
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.elements.badges.rules.BadgeFirstEventRule;
 import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.elements.RuleContext;
 
 import java.util.List;
 

@@ -20,12 +20,13 @@
 package io.github.oasis.engine.elements.badges;
 
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.elements.badges.rules.BadgeHistogramStreakNRule;
 import io.github.oasis.engine.elements.badges.signals.HistogramBadgeRemovalSignal;
 import io.github.oasis.engine.elements.badges.signals.HistogramBadgeSignal;
 import io.github.oasis.engine.factory.Scripting;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -295,7 +296,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
 
     private RuleContext<BadgeHistogramStreakNRule> createOptions(Map<Integer, Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
         BadgeHistogramStreakNRule rule = new BadgeHistogramStreakNRule("test.histogram.streak");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setStreaks(streaks);
         rule.setConsecutive(true);
         rule.setThreshold(BigDecimal.valueOf(threshold));

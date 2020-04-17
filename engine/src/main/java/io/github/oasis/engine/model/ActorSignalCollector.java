@@ -20,9 +20,11 @@
 package io.github.oasis.engine.model;
 
 import akka.actor.ActorRef;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Signal;
 
 /**
  * @author Isuru Weerarathna

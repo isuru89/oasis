@@ -19,10 +19,10 @@
 
 package io.github.oasis.engine.external.redis;
 
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Mapped;
-import io.github.oasis.engine.external.Sorted;
-import io.github.oasis.engine.utils.Numbers;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.external.Sorted;
+import io.github.oasis.core.utils.Numbers;
 import redis.clients.jedis.Jedis;
 
 import java.math.BigDecimal;

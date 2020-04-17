@@ -19,15 +19,16 @@
 
 package io.github.oasis.engine.elements.milestones;
 
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.factory.Scripting;
-import io.github.oasis.engine.model.EventBiValueResolver;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.elements.EventBiValueResolver;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
-import io.github.oasis.model.Event;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -341,7 +342,7 @@ public class MilestoneTest extends AbstractRuleTest {
 
     private RuleContext<MilestoneRule> createRule(Collection<Signal> collector, EventBiValueResolver<MilestoneRule, ExecutionContext> extractor, MilestoneRule.Level... levels) {
         MilestoneRule rule = new MilestoneRule("test.milestone.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setValueExtractor(extractor);
         rule.setLevels(Arrays.asList(levels));
         rule.setFlags(Set.of(SKIP_NEGATIVE_VALUES));

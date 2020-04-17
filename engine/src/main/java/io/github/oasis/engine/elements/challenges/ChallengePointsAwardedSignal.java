@@ -19,10 +19,10 @@
 
 package io.github.oasis.engine.elements.challenges;
 
+import io.github.oasis.core.Event;
+import io.github.oasis.core.events.ChallengePointEvent;
 import io.github.oasis.engine.elements.points.PointSignal;
-import io.github.oasis.engine.model.EventCreatable;
-import io.github.oasis.model.Event;
-import io.github.oasis.model.events.ChallengePointEvent;
+import io.github.oasis.core.elements.EventCreatable;
 
 import java.math.BigDecimal;
 import java.util.Objects;

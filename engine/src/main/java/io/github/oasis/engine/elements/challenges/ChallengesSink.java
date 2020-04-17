@@ -19,18 +19,17 @@
 
 package io.github.oasis.engine.elements.challenges;
 
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.elements.AbstractSink;
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Sorted;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.EventScope;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.Sorted;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.TimeContext;
-import io.github.oasis.model.EventScope;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
@@ -42,7 +41,6 @@ public class ChallengesSink extends AbstractSink {
 
     private static final int WIN = 1;
 
-    @Inject
     public ChallengesSink(Db dbPool) {
         super(dbPool);
     }

@@ -20,11 +20,12 @@
 package io.github.oasis.engine.elements.badges;
 
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.elements.badges.rules.BadgeTemporalCountRule;
 import io.github.oasis.engine.elements.badges.rules.BadgeTemporalRule;
 import io.github.oasis.engine.elements.badges.signals.TemporalBadgeSignal;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -58,7 +59,7 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
     @Test
     public void shouldNotBeAbleToSetValueResolver() {
         BadgeTemporalCountRule rule = new BadgeTemporalCountRule("test.histogram.count");
-        rule.setForEvent(EVENT_TYPE);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVENT_TYPE));
         rule.setTimeUnit(FIFTY);
         rule.setThresholds(Arrays.asList(aT(ATTR_1, T_3), aT(ATTR_2, T_5)));
         rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
@@ -386,7 +387,7 @@ public class TemporalCountBadgeTest extends AbstractRuleTest {
 
     private RuleContext<BadgeTemporalRule> createRule(long timeUnit, Collection<Signal> collection, BadgeTemporalRule.Threshold... thresholds) {
         BadgeTemporalCountRule rule = new BadgeTemporalCountRule("test.temporal.badge");
-        rule.setForEvent(EVENT_TYPE);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVENT_TYPE));
         rule.setTimeUnit(timeUnit);
         rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
         rule.setThresholds(Arrays.asList(thresholds));

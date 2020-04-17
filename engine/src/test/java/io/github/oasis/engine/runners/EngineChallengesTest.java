@@ -22,8 +22,9 @@ package io.github.oasis.engine.runners;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.elements.challenges.ChallengeOverEvent;
 import io.github.oasis.engine.elements.challenges.ChallengeRule;
-import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.core.external.DbContext;
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +51,7 @@ public class EngineChallengesTest extends OasisEngineTest {
         TEvent e6 = TEvent.createKeyValue(U3, TS("2020-05-02 07:15"), EVT_A, 99);
 
         ChallengeRule rule = new ChallengeRule("test.challenge.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setScope(ChallengeRule.ChallengeScope.GAME);
         rule.setCustomAwardPoints((event, rank, ctx) -> BigDecimal.valueOf(100 * (3-rank+1)));
         rule.setStartAt(TS("2020-03-01 07:15"));
@@ -165,7 +166,7 @@ public class EngineChallengesTest extends OasisEngineTest {
         TEvent e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
 
         ChallengeRule rule = new ChallengeRule("test.challenge.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setScope(ChallengeRule.ChallengeScope.TEAM);
         rule.setScopeId(2);
         rule.setCustomAwardPoints((event, rank, r) -> BigDecimal.valueOf(100 * (3-rank+1)));
@@ -213,7 +214,7 @@ public class EngineChallengesTest extends OasisEngineTest {
         TEvent e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
 
         ChallengeRule rule = new ChallengeRule("test.challenge.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setScope(ChallengeRule.ChallengeScope.TEAM);
         rule.setScopeId(2);
         rule.setCustomAwardPoints((event, rank, r) -> BigDecimal.valueOf(100 * (3-rank+1)));

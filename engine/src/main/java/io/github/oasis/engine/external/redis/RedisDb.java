@@ -20,9 +20,9 @@
 package io.github.oasis.engine.external.redis;
 
 import com.github.cliftonlabs.json_simple.Jsoner;
-import io.github.oasis.engine.OasisConfigs;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;

@@ -19,8 +19,8 @@
 
 package io.github.oasis.engine.actors.cmds;
 
-import io.github.oasis.engine.model.GameContext;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.context.GameContext;
 
 /**
  * @author Isuru Weerarathna

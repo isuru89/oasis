@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.elements.challenges;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
 
 import java.util.Map;
 

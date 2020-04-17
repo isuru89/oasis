@@ -19,18 +19,19 @@
 
 package io.github.oasis.engine.elements;
 
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.EventReadWrite;
-import io.github.oasis.engine.external.redis.RedisDb;
-import io.github.oasis.engine.external.redis.RedisEventLoader;
-import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.model.SignalCollector;
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.elements.milestones.MilestoneSignal;
 import io.github.oasis.engine.elements.points.PointSignal;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.engine.external.redis.RedisDb;
+import io.github.oasis.engine.external.redis.RedisEventLoader;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.engine.model.ID;
+import io.github.oasis.core.elements.SignalCollector;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;

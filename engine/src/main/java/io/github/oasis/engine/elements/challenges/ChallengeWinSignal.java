@@ -19,9 +19,9 @@
 
 package io.github.oasis.engine.elements.challenges;
 
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.model.Event;
-import io.github.oasis.model.EventScope;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.EventScope;
+import io.github.oasis.core.elements.Signal;
 import lombok.ToString;
 
 import java.util.Comparator;

@@ -23,25 +23,25 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.routing.Routee;
 import akka.routing.Router;
-import io.github.oasis.engine.OasisConfigs;
+import io.github.oasis.engine.EngineContext;
+import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.actors.routers.UserRouting;
-import io.github.oasis.engine.factory.InjectedActorSupport;
 import io.github.oasis.engine.model.ActorSignalCollector;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.engine.model.RuleExecutionContext;
 import io.github.oasis.engine.model.Rules;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RuleSupervisor extends OasisBaseActor implements InjectedActorSupport {
+public class RuleSupervisor extends OasisBaseActor {
 
     private static final AtomicInteger counter = new AtomicInteger(0);
 
@@ -50,17 +50,18 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     private Rules rules;
     private ActorRef signalExchanger;
     private ActorSignalCollector collector;
+    private RuleExecutionContext ruleExecutionContext;
     private Router executor;
 
-    @Inject
-    public RuleSupervisor(OasisConfigs configs) {
-        super(configs);
+    public RuleSupervisor(EngineContext context) {
+        super(context);
 
         myId = "R" + counter.incrementAndGet();
 
         signalExchanger = createSignalExchanger();
         collector = new ActorSignalCollector(signalExchanger);
-        rules = Rules.get(collector);
+        rules = Rules.create();
+        ruleExecutionContext = RuleExecutionContext.from(collector);
     }
 
     @Override
@@ -78,13 +79,13 @@ public class RuleSupervisor extends OasisBaseActor implements InjectedActorSuppo
     }
 
     private void beginAllChildren() {
-        signalExchanger.tell(new StartRuleExecutionCommand(myId, rules), getSelf());
-        executor.route(new StartRuleExecutionCommand(myId, rules), getSelf());
+        signalExchanger.tell(new StartRuleExecutionCommand(myId, rules, ruleExecutionContext), getSelf());
+        executor.route(new StartRuleExecutionCommand(myId, rules,ruleExecutionContext), getSelf());
     }
 
     private ActorRef createSignalExchanger() {
-        ActorRef actorRef = getContext().actorOf(Props.create(SignalSupervisor.class,
-                () -> injectActor(SignalSupervisor.class)),
+        ActorRef actorRef = getContext().actorOf(
+                Props.create(SignalSupervisor.class, this.engineContext),
                 ActorNames.SIGNAL_SUPERVISOR_PREFIX + myId);
         getContext().watch(actorRef);
         return actorRef;

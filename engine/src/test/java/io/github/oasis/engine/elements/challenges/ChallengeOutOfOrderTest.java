@@ -19,14 +19,15 @@
 
 package io.github.oasis.engine.elements.challenges;
 
-import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.utils.Constants;
-import io.github.oasis.model.Event;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -176,7 +177,7 @@ public class ChallengeOutOfOrderTest extends AbstractRuleTest {
 
     private RuleContext<ChallengeRule> createRule(BigDecimal points, int winners, long start, long end, Collection<Signal> signals) {
         ChallengeRule rule = new ChallengeRule("test.challenge.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setScope(ChallengeRule.ChallengeScope.GAME);
         rule.setAwardPoints(points);
         rule.setStartAt(start);

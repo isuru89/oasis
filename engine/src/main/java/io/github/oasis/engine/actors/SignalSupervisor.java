@@ -21,19 +21,19 @@ package io.github.oasis.engine.actors;
 
 import akka.routing.Routee;
 import akka.routing.Router;
-import io.github.oasis.engine.OasisConfigs;
+import io.github.oasis.engine.EngineContext;
+import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.actors.routers.UserSignalRouting;
-import io.github.oasis.engine.model.EventCreatable;
+import io.github.oasis.core.elements.EventCreatable;
 import io.github.oasis.engine.model.Rules;
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Signal;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -49,9 +49,9 @@ public class SignalSupervisor extends OasisBaseActor {
     private Router router;
     private Rules rules;
 
-    @Inject
-    SignalSupervisor(OasisConfigs configs) {
-        super(configs);
+    SignalSupervisor(EngineContext context) {
+        super(context);
+
         myId = "S" + COUNTER.incrementAndGet();
     }
 
@@ -62,7 +62,7 @@ public class SignalSupervisor extends OasisBaseActor {
                 index -> ActorNames.SIGNAL_CONSUMER_PREFIX + index,
                 consumers);
         router = new Router(new UserSignalRouting(), allRoutes);
-        router.route(new StartRuleExecutionCommand(myId, null), getSelf());
+        router.route(new StartRuleExecutionCommand(myId, null, null), getSelf());
     }
 
     @Override

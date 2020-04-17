@@ -21,10 +21,11 @@ package io.github.oasis.engine.runners;
 
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.elements.ratings.RatingRule;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.model.EventExecutionFilter;
-import io.github.oasis.engine.model.EventValueResolver;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.core.elements.EventValueResolver;
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +45,7 @@ public class EngineRatingsTest extends OasisEngineTest {
         TEvent e3 = TEvent.createKeyValue(TS("2020-03-24 20:15"), EVT_A, 54);
 
         RatingRule rule = new RatingRule("test.rating.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setDefaultRating(1);
         rule.setRatings(Arrays.asList(
                 new RatingRule.Rating(1, 3, checkGt(85), pointAward(3), "rating.points"),
@@ -94,7 +95,7 @@ public class EngineRatingsTest extends OasisEngineTest {
         TEvent e3 = TEvent.createKeyValue(TS("2020-03-24 20:15"), EVT_A, 68);
 
         RatingRule rule = new RatingRule("test.rating.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setDefaultRating(1);
         rule.setRatings(Arrays.asList(
                 new RatingRule.Rating(1, 3, checkGt(85), pointAward(3), "rating.points"),

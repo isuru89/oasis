@@ -22,9 +22,9 @@ package io.github.oasis.engine.actors.routers;
 import akka.routing.BroadcastRoutingLogic;
 import akka.routing.Routee;
 import akka.routing.RoutingLogic;
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
-import io.github.oasis.model.Event;
 import scala.collection.immutable.IndexedSeq;
 
 /**

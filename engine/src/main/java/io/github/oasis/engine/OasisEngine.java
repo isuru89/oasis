@@ -22,11 +22,9 @@ package io.github.oasis.engine;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
-import io.github.oasis.engine.factory.AbstractActorProviderModule;
-import io.github.oasis.engine.factory.OasisDependencyModule;
-import io.github.oasis.model.events.JsonEvent;
 
 /**
  * @author Isuru Weerarathna
@@ -37,19 +35,16 @@ public class OasisEngine {
     private ActorRef oasisActor;
 
     private EngineContext context;
-    private AbstractActorProviderModule providerModule;
 
     public OasisEngine(EngineContext context) {
         this.context = context;
     }
 
-    public void start() {
-        oasisEngine = ActorSystem.create("oasis-engine");
-        AbstractActorProviderModule dependencyModule = context.getModuleProvider().apply(oasisEngine);
-        providerModule = dependencyModule;
+    public void start() throws OasisException {
+        context.init();
 
-        oasisActor = oasisEngine.actorOf(Props.create(OasisSupervisor.class,
-                () -> dependencyModule.getInjector().getInstance(OasisSupervisor.class)), ActorNames.OASIS_SUPERVISOR);
+        oasisEngine = ActorSystem.create("oasis-engine");
+        oasisActor = oasisEngine.actorOf(Props.create(OasisSupervisor.class, context), ActorNames.OASIS_SUPERVISOR);
     }
 
     public void submitEvent(Object event) {
@@ -62,27 +57,12 @@ public class OasisEngine {
         }
     }
 
-    public AbstractActorProviderModule getProviderModule() {
-        return providerModule;
-    }
-
     public ActorRef getOasisActor() {
         return oasisActor;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws OasisException {
         EngineContext context = new EngineContext();
-        context.setModuleProvider(actorSystem -> new OasisDependencyModule(actorSystem, context));
         new OasisEngine(context).start();
-    }
-
-    private static class TestE extends JsonEvent {
-
-        private static TestE create(long userId) {
-            TestE testE = new TestE();
-            testE.put("user", userId);
-            return testE;
-        }
-
     }
 }

@@ -19,10 +19,10 @@
 
 package io.github.oasis.engine.actors.cmds;
 
-import io.github.oasis.engine.elements.AbstractProcessor;
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Signal;
 
 /**
  * @author Isuru Weerarathna

@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.actors.cmds;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
 
 /**
  * @author Isuru Weerarathna

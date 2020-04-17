@@ -19,9 +19,9 @@
 
 package io.github.oasis.engine.elements.challenges;
 
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.model.EventBiValueResolver;
-import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.EventBiValueResolver;
+import io.github.oasis.core.elements.EventExecutionFilter;
 
 import java.math.BigDecimal;
 

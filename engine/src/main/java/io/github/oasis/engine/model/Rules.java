@@ -19,8 +19,8 @@
 
 package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.AbstractRule;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -32,18 +32,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Rules implements Serializable {
 
     private final ConcurrentHashMap<String, AbstractRule> ruleReferences = new ConcurrentHashMap<>();
-    private final SignalCollector collector;
 
-    private Rules(SignalCollector collector) {
-        this.collector = collector;
+    private Rules() {
     }
 
-    public static Rules get(ActorSignalCollector collector) {
-        return new Rules(collector);
-    }
-
-    public SignalCollector getCollector() {
-        return collector;
+    public static Rules create() {
+        return new Rules();
     }
 
     public Iterator<AbstractRule> getAllRulesForEvent(Event event) {

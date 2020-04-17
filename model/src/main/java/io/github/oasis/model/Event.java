@@ -106,13 +106,4 @@ public interface Event extends Serializable {
      * @return game id.
      */
     Integer getGameId();
-
-    /**
-     * Creates scope of this event using game id, source id and user id.
-     *
-     * @return scope of event.
-     */
-    default EventScope asEventScope() {
-        return new EventScope(getGameId(), getSource(), getUser(), getTeam());
-    }
 }

@@ -19,8 +19,8 @@
 
 package io.github.oasis.engine.elements.badges.signals;
 
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.elements.badges.StreakSupport;
-import io.github.oasis.model.Event;
 
 /**
  * @author Isuru Weerarathna

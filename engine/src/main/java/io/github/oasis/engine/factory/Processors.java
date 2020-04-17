@@ -19,90 +19,34 @@
 
 package io.github.oasis.engine.factory;
 
-import io.github.oasis.engine.elements.AbstractProcessor;
-import io.github.oasis.engine.elements.badges.BadgeConditionalProcessor;
-import io.github.oasis.engine.elements.badges.BadgeFirstEvent;
-import io.github.oasis.engine.elements.badges.BadgeHistogramStreakN;
-import io.github.oasis.engine.elements.badges.BadgeStreakN;
-import io.github.oasis.engine.elements.badges.BadgeTemporalProcessor;
-import io.github.oasis.engine.elements.badges.BadgeTemporalStreakN;
-import io.github.oasis.engine.elements.challenges.ChallengeProcessor;
-import io.github.oasis.engine.elements.milestones.MilestoneProcessor;
-import io.github.oasis.engine.elements.points.PointsProcessor;
-import io.github.oasis.engine.elements.ratings.RatingProcessor;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.EventReadWrite;
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.model.SignalCollector;
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.elements.badges.rules.BadgeConditionalRule;
-import io.github.oasis.engine.elements.badges.rules.BadgeFirstEventRule;
-import io.github.oasis.engine.elements.badges.rules.BadgeHistogramStreakNRule;
-import io.github.oasis.engine.elements.badges.rules.BadgeRule;
-import io.github.oasis.engine.elements.badges.rules.BadgeStreakNRule;
-import io.github.oasis.engine.elements.badges.rules.BadgeTemporalRule;
-import io.github.oasis.engine.elements.badges.rules.BadgeTemporalStreakNRule;
-import io.github.oasis.engine.elements.challenges.ChallengeRule;
-import io.github.oasis.engine.elements.milestones.MilestoneRule;
-import io.github.oasis.engine.elements.points.PointRule;
-import io.github.oasis.engine.elements.ratings.RatingRule;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.engine.EngineContext;
+import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.engine.model.RuleExecutionContext;
 
-import javax.inject.Inject;
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
  */
 public class Processors {
 
-    private final Db db;
-    private final EventReadWrite eventLoader;
+    private EngineContext engineContext;
 
-    @Inject
-    private Processors(Db db, EventReadWrite eventLoader) {
-        this.db = db;
-        this.eventLoader = eventLoader;
+    public Processors() {
     }
 
-    public AbstractProcessor<? extends AbstractRule, ? extends Signal> createProcessor(AbstractRule rule, SignalCollector collector) {
-        if (rule instanceof ChallengeRule) {
-            RuleContext<ChallengeRule> ruleContext = new RuleContext<>((ChallengeRule) rule, collector);
-            return new ChallengeProcessor(db, eventLoader, ruleContext);
-        } else if (rule instanceof PointRule) {
-            RuleContext<PointRule> ruleContext = new RuleContext<>((PointRule) rule, collector);
-            return new PointsProcessor(db, ruleContext);
-        } else if (rule instanceof RatingRule) {
-            RuleContext<RatingRule> ruleContext = new RuleContext<>((RatingRule) rule, collector);
-            return new RatingProcessor(db, ruleContext);
-        } else if (rule instanceof MilestoneRule) {
-            RuleContext<MilestoneRule> ruleContext = new RuleContext<>((MilestoneRule) rule, collector);
-            return new MilestoneProcessor(db, ruleContext);
-        } else if (rule instanceof BadgeRule) {
-            return createBadgeProcessor((BadgeRule) rule, collector);
-        }
-        return null;
+    public void init(EngineContext context) {
+        engineContext = context;
     }
 
-    private AbstractProcessor<? extends AbstractRule, ? extends Signal> createBadgeProcessor(BadgeRule rule, SignalCollector collector) {
-        if (rule instanceof BadgeFirstEventRule) {
-            RuleContext<BadgeFirstEventRule> ruleContext = new RuleContext<>((BadgeFirstEventRule) rule, collector);
-            return new BadgeFirstEvent(db, ruleContext);
-        } else if (rule instanceof BadgeConditionalRule) {
-            RuleContext<BadgeConditionalRule> ruleContext = new RuleContext<>((BadgeConditionalRule) rule, collector);
-            return new BadgeConditionalProcessor(db, ruleContext);
-        } else if (rule instanceof BadgeHistogramStreakNRule) {
-            RuleContext<BadgeHistogramStreakNRule> ruleContext = new RuleContext<>((BadgeHistogramStreakNRule) rule, collector);
-            return new BadgeHistogramStreakN(db, ruleContext);
-        } else if (rule instanceof BadgeTemporalStreakNRule) {
-            RuleContext<BadgeStreakNRule> ruleContext = new RuleContext<>((BadgeStreakNRule) rule, collector);
-            return new BadgeTemporalStreakN(db, ruleContext);
-        } else if (rule instanceof BadgeTemporalRule) {
-            RuleContext<BadgeTemporalRule> ruleContext = new RuleContext<>((BadgeTemporalRule) rule, collector);
-            return new BadgeTemporalProcessor(db, ruleContext);
-        } else if (rule instanceof BadgeStreakNRule) {
-            RuleContext<BadgeStreakNRule> ruleContext = new RuleContext<>((BadgeStreakNRule) rule, collector);
-            return new BadgeStreakN(db, ruleContext);
-        }
-        return null;
+    public AbstractProcessor<? extends AbstractRule, ? extends Signal> createProcessor(AbstractRule rule, RuleExecutionContext ruleExecutionContext) {
+        return this.engineContext.getModuleList().stream()
+                .map(mod -> mod.createProcessor(rule, ruleExecutionContext))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
+
 }

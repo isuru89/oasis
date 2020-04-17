@@ -19,9 +19,9 @@
 
 package io.github.oasis.engine.factory;
 
-import io.github.oasis.engine.model.EventBiValueResolver;
-import io.github.oasis.engine.model.EventValueResolver;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.EventBiValueResolver;
+import io.github.oasis.core.elements.EventValueResolver;
 import org.mvel2.MVEL;
 
 import java.io.Serializable;

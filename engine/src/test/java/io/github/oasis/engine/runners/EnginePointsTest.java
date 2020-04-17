@@ -22,6 +22,7 @@ package io.github.oasis.engine.runners;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.elements.points.PointRule;
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -49,7 +50,7 @@ public class EnginePointsTest extends OasisEngineTest {
         TEvent e5 = TEvent.createKeyValue(U1, TS("2020-03-25 08:45"), EVT_A, 61);
 
         PointRule rule = new PointRule("test.point.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long)event.getFieldValue("value") - 50));
         rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
 
@@ -166,7 +167,7 @@ public class EnginePointsTest extends OasisEngineTest {
         TEvent e8 = TEvent.createWithTeam(U2, T1, TS("2020-04-03 11:45"), EVT_A, 78);
 
         PointRule rule = new PointRule("test.point.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long) event.getFieldValue("value") - 50));
         rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
 

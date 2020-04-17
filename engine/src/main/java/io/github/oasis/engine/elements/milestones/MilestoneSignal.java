@@ -19,9 +19,9 @@
 
 package io.github.oasis.engine.elements.milestones;
 
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.elements.AbstractSink;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.Signal;
 import lombok.ToString;
 
 import java.math.BigDecimal;

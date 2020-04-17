@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.actors.cmds;
 
-import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.core.elements.AbstractRule;
 
 /**
  * @author Isuru Weerarathna

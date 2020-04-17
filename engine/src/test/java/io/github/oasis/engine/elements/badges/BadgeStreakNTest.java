@@ -20,11 +20,12 @@
 package io.github.oasis.engine.elements.badges;
 
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.elements.badges.rules.BadgeStreakNRule;
 import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.elements.badges.signals.StreakBadgeSignal;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -325,11 +326,11 @@ public class BadgeStreakNTest extends AbstractRuleTest {
     }
 
     private RuleContext<BadgeStreakNRule> createRule(Map<Integer, Integer> streaks, Consumer<Signal> consumer) {
-        BadgeStreakNRule options = new BadgeStreakNRule("abc");
-        options.setForEvent(EVT_A);
-        options.setStreaks(streaks);
-        options.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
-        options.setRetainTime(1000);
-        return new RuleContext<>(options, fromConsumer(consumer));
+        BadgeStreakNRule rule = new BadgeStreakNRule("abc");
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
+        rule.setStreaks(streaks);
+        rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
+        rule.setRetainTime(1000);
+        return new RuleContext<>(rule, fromConsumer(consumer));
     }
 }

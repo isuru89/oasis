@@ -19,14 +19,15 @@
 
 package io.github.oasis.engine.elements.ratings;
 
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.model.EventExecutionFilter;
-import io.github.oasis.engine.model.EventValueResolver;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.core.elements.EventValueResolver;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import io.github.oasis.engine.utils.Constants;
-import io.github.oasis.model.Event;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -251,7 +252,7 @@ public class RatingsTest extends AbstractRuleTest {
 
     private RuleContext<RatingRule> createRule(Collection<Signal> signals, RatingRule.Rating... ratings) {
         RatingRule rule = new RatingRule("test.rating.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setDefaultRating(DEF_RATING);
         rule.setRatings(Arrays.asList(ratings));
         return new RuleContext<>(rule, fromConsumer(signals::add));

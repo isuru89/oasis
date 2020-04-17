@@ -22,6 +22,7 @@ package io.github.oasis.engine.runners;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.elements.badges.rules.BadgeStreakNRule;
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +43,7 @@ public class EngineBadgesTest extends OasisEngineTest {
         TEvent e6 = TEvent.createKeyValue(TS("2020-04-05 11:15"), EVT_A, 26);
 
         BadgeStreakNRule rule = new BadgeStreakNRule("test.badge.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setStreaks(Map.of(3, 10, 5, 20));
         rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
         rule.setRetainTime(10);

@@ -20,21 +20,21 @@
 package io.github.oasis.engine.actors;
 
 import akka.actor.AbstractActor;
-import io.github.oasis.engine.OasisConfigs;
+import io.github.oasis.core.Event;
+import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.actors.cmds.RuleRemovedMessage;
 import io.github.oasis.engine.actors.cmds.RuleUpdatedMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
-import io.github.oasis.engine.model.Rules;
-import io.github.oasis.engine.elements.AbstractProcessor;
+import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.factory.Processors;
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.model.Event;
+import io.github.oasis.engine.model.RuleExecutionContext;
+import io.github.oasis.engine.model.Rules;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -54,15 +54,15 @@ public class RuleExecutor extends OasisBaseActor {
 
     private final AbstractActor.Receive executing;
     private final AbstractActor.Receive starting;
+    private RuleExecutionContext ruleExecutionContext;
 
     private final Processors processors;
 
-    @Inject
-    public RuleExecutor(OasisConfigs configs, Processors processors) {
-        super(configs);
+    public RuleExecutor(EngineContext context) {
+        super(context);
 
         this.myId = "E" + COUNTER.incrementAndGet();
-        this.processors = processors;
+        this.processors = context.getProcessors();
 
         starting = receiveBuilder()
                 .match(StartRuleExecutionCommand.class, this::assignRules)
@@ -88,9 +88,10 @@ public class RuleExecutor extends OasisBaseActor {
         }
     }
 
-    private void assignRules(StartRuleExecutionCommand startRuleExecutionCommand) {
-        this.rules = startRuleExecutionCommand.getRules();
-        this.parentId = startRuleExecutionCommand.getParentId();
+    private void assignRules(StartRuleExecutionCommand command) {
+        this.rules = command.getRules();
+        this.parentId = command.getParentId();
+        this.ruleExecutionContext = RuleExecutionContext.from(engineContext, command.getRuleExecutionContext());
         log.info("[{}] Initialization from {}", myId, parentId);
         getContext().become(executing);
     }
@@ -104,7 +105,7 @@ public class RuleExecutor extends OasisBaseActor {
 
             // create processor
             AbstractProcessor<? extends AbstractRule, ? extends Signal> processor = cache.computeIfAbsent(rule.getId(),
-                    s -> processors.createProcessor(rule, rules.getCollector()));
+                    s -> processors.createProcessor(rule, ruleExecutionContext));
 
             // execute processor using event
             processor.accept(event, eventMessage.getContext());

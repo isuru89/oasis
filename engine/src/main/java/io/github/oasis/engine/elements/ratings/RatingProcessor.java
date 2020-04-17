@@ -19,23 +19,23 @@
 
 package io.github.oasis.engine.elements.ratings;
 
-import io.github.oasis.engine.elements.AbstractProcessor;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Mapped;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.engine.utils.Constants;
 import io.github.oasis.engine.utils.Utils;
-import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
-import static io.github.oasis.engine.utils.Numbers.asInt;
+import static io.github.oasis.core.utils.Numbers.asInt;
 
 /**
  * @author Isuru Weerarathna

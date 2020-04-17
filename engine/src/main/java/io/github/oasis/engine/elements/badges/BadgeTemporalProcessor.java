@@ -19,17 +19,17 @@
 
 package io.github.oasis.engine.elements.badges;
 
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.elements.badges.rules.BadgeTemporalRule;
 import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
 import io.github.oasis.engine.elements.badges.signals.TemporalBadgeSignal;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Mapped;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.elements.RuleContext;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -39,9 +39,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.github.oasis.engine.utils.Constants.SCALE;
-import static io.github.oasis.engine.utils.Numbers.isIncreasedOrEqual;
-import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedDown;
-import static io.github.oasis.engine.utils.Numbers.isThresholdCrossedUp;
+import static io.github.oasis.core.utils.Numbers.isIncreasedOrEqual;
+import static io.github.oasis.core.utils.Numbers.isThresholdCrossedDown;
+import static io.github.oasis.core.utils.Numbers.isThresholdCrossedUp;
 
 /**
  * Satisfy condition N times within a tumbling time unit. (daily, weekly, monthly)

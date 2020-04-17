@@ -19,11 +19,11 @@
 
 package io.github.oasis.engine.elements.ratings;
 
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.events.RatingPointEvent;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.elements.points.PointSignal;
-import io.github.oasis.engine.model.EventCreatable;
-import io.github.oasis.model.Event;
-import io.github.oasis.model.events.RatingPointEvent;
+import io.github.oasis.core.elements.EventCreatable;
 import lombok.ToString;
 
 import java.math.BigDecimal;

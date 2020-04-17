@@ -19,16 +19,15 @@
 
 package io.github.oasis.engine.elements.points;
 
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.elements.AbstractSink;
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.TimeContext;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -47,7 +46,6 @@ public class PointsSink extends AbstractSink {
     private static final String DAILY = "d";
     private static final String QUARTERLY = "q";
 
-    @Inject
     public PointsSink(Db db) {
         super(db);
     }

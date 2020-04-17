@@ -19,15 +19,15 @@
 
 package io.github.oasis.engine.elements.milestones;
 
-import io.github.oasis.engine.elements.AbstractProcessor;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Mapped;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.engine.utils.Constants;
-import io.github.oasis.model.Event;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -36,7 +36,7 @@ import java.util.Objects;
 
 import static io.github.oasis.engine.elements.milestones.MilestoneRule.SKIP_NEGATIVE_VALUES;
 import static io.github.oasis.engine.elements.milestones.MilestoneRule.TRACK_PENALTIES;
-import static io.github.oasis.engine.utils.Numbers.isNegative;
+import static io.github.oasis.core.utils.Numbers.isNegative;
 
 /**
  * @author Isuru Weerarathna

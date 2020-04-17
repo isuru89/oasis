@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.model;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
 
 import java.util.HashMap;
 import java.util.Map;

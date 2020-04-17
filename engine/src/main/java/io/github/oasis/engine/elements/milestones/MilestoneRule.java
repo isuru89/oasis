@@ -19,9 +19,9 @@
 
 package io.github.oasis.engine.elements.milestones;
 
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.model.EventBiValueResolver;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.EventBiValueResolver;
+import io.github.oasis.core.context.ExecutionContext;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

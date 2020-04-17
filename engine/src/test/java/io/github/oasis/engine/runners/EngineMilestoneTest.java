@@ -22,6 +22,7 @@ package io.github.oasis.engine.runners;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.elements.milestones.MilestoneRule;
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +47,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
         TEvent e8 = TEvent.createKeyValue(135, EVT_B, 120);
 
         MilestoneRule rule = new MilestoneRule("test.milestone.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setValueExtractor((event, rule1, ctx) -> BigDecimal.valueOf((long)event.getFieldValue("value")));
         rule.setLevels(Arrays.asList(new MilestoneRule.Level(1, BigDecimal.valueOf(100)),
                 new MilestoneRule.Level(2, BigDecimal.valueOf(200)),
@@ -84,7 +85,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
         TEvent e8 = TEvent.createKeyValue(135, EVT_B, 120);
 
         MilestoneRule rule = new MilestoneRule("test.milestone.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setValueExtractor((event, rule1, ctx) -> BigDecimal.valueOf((long)event.getFieldValue("value")));
         rule.setLevels(Arrays.asList(new MilestoneRule.Level(1, BigDecimal.valueOf(100)),
                 new MilestoneRule.Level(2, BigDecimal.valueOf(200))));

@@ -19,15 +19,15 @@
 
 package io.github.oasis.engine.actors;
 
-import io.github.oasis.engine.OasisConfigs;
+import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
-import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.elements.AbstractSink;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.engine.factory.Sinks;
+import io.github.oasis.core.context.ExecutionContext;
 
-import javax.inject.Inject;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -38,10 +38,12 @@ public class SignalConsumer extends OasisBaseActor {
     private static final AtomicLong COUNTER = new AtomicLong(0L);
 
     private String logId;
+    private Sinks sinks;
 
-    @Inject
-    public SignalConsumer(OasisConfigs configs) {
-        super(configs);
+    public SignalConsumer(EngineContext context) {
+        super(context);
+
+        this.sinks = context.getSinks();
         myId = "C" + COUNTER.incrementAndGet();
         logId = myId;
     }
@@ -65,7 +67,7 @@ public class SignalConsumer extends OasisBaseActor {
         AbstractRule rule = signalMessage.getRule();
         ExecutionContext context = signalMessage.getContext();
 
-        AbstractSink sink = injectInstance(signal.sinkHandler());
+        AbstractSink sink = sinks.create(signal.sinkHandler());
         log.info("[{}] {} processing {} of rule {}", logId, sink, signal, rule);
         sink.consume(signal, rule, context);
     }

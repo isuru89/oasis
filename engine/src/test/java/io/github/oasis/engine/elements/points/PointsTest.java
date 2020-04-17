@@ -19,15 +19,16 @@
 
 package io.github.oasis.engine.elements.points;
 
-import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.model.EventExecutionFilter;
-import io.github.oasis.engine.model.EventValueResolver;
-import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.core.elements.EventValueResolver;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
-import io.github.oasis.model.Event;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -167,7 +168,7 @@ public class PointsTest extends AbstractRuleTest {
 
     private RuleContext<PointRule> createRule(double amount, EventExecutionFilter criteria, Collection<Signal> collection) {
         PointRule rule = new PointRule("test.point.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setAmountToAward(BigDecimal.valueOf(amount));
         rule.setCriteria(criteria);
 
@@ -176,7 +177,7 @@ public class PointsTest extends AbstractRuleTest {
 
     private RuleContext<PointRule> createRule(EventValueResolver<ExecutionContext> amount, EventExecutionFilter criteria, Collection<Signal> collection) {
         PointRule rule = new PointRule("test.point.rule");
-        rule.setForEvent(EVT_A);
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setAmountExpression(amount);
         rule.setCriteria(criteria);
 

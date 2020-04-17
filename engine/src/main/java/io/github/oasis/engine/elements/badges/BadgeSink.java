@@ -19,22 +19,21 @@
 
 package io.github.oasis.engine.elements.badges;
 
-import io.github.oasis.engine.elements.AbstractSink;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Mapped;
-import io.github.oasis.engine.external.Sorted;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.external.Sorted;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.TimeContext;
-import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.elements.badges.signals.StreakBadgeSignal;
 import io.github.oasis.engine.elements.badges.signals.TemporalBadgeSignal;
 
-import javax.inject.Inject;
 import java.io.IOException;
 
 /**
@@ -42,7 +41,6 @@ import java.io.IOException;
  */
 public class BadgeSink extends AbstractSink {
 
-    @Inject
     public BadgeSink(Db db) {
         super(db);
     }

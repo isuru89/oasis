@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.elements.badges.signals;
 
-import io.github.oasis.model.EventScope;
+import io.github.oasis.core.EventScope;
 import lombok.ToString;
 
 /**

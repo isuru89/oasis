@@ -19,14 +19,13 @@
 
 package io.github.oasis.engine.external.redis;
 
-import io.github.oasis.engine.OasisConfigs;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.EventReadWrite;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.EventReadWrite;
 import io.github.oasis.engine.utils.Utils;
-import io.github.oasis.model.Event;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -43,7 +42,6 @@ public class RedisEventLoader implements EventReadWrite {
     private final Db dbPool;
     private final OasisConfigs configs;
 
-    @Inject
     public RedisEventLoader(Db dbPool, OasisConfigs configs) {
         this.dbPool = dbPool;
         this.configs = configs;

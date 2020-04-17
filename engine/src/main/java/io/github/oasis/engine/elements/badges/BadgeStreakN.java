@@ -19,18 +19,18 @@
 
 package io.github.oasis.engine.elements.badges;
 
+import io.github.oasis.core.Event;
 import io.github.oasis.engine.elements.badges.rules.BadgeStreakNRule;
 import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
 import io.github.oasis.engine.elements.badges.signals.StreakBadgeSignal;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Sorted;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.Sorted;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.model.Record;
-import io.github.oasis.engine.model.RuleContext;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.collect.Record;
+import io.github.oasis.core.elements.RuleContext;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -42,9 +42,9 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static io.github.oasis.engine.utils.Constants.COLON;
-import static io.github.oasis.engine.utils.Numbers.asInt;
-import static io.github.oasis.engine.utils.Numbers.asLong;
-import static io.github.oasis.engine.utils.Numbers.isZero;
+import static io.github.oasis.core.utils.Numbers.asInt;
+import static io.github.oasis.core.utils.Numbers.asLong;
+import static io.github.oasis.core.utils.Numbers.isZero;
 
 /**
  * Awards badges when a condition is satisfied continuously for a number of times.

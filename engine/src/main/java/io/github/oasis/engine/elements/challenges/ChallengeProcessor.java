@@ -19,22 +19,22 @@
 
 package io.github.oasis.engine.elements.challenges;
 
-import io.github.oasis.engine.elements.AbstractProcessor;
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.EventReadWrite;
-import io.github.oasis.engine.external.Mapped;
-import io.github.oasis.engine.external.Sorted;
-import io.github.oasis.engine.model.EventBiValueResolver;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.collect.Pair;
+import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.external.Sorted;
+import io.github.oasis.core.elements.EventBiValueResolver;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.model.Record;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.collect.Record;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.engine.utils.Constants;
-import io.github.oasis.engine.utils.Numbers;
-import io.github.oasis.model.Event;
-import io.github.oasis.model.collect.Pair;
+import io.github.oasis.core.utils.Numbers;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -117,7 +117,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
         }
 
         Pair<Long, Long> addResult = winnerSet.addAndGetRankSize(member, event.getTimestamp());
-        int position = Numbers.asInt(addResult.getValue0());
+        int position = Numbers.asInt(addResult.getLeft());
         if (position >= rule.getWinnerCount()) {
             winnerSet.remove(member);
             return null;

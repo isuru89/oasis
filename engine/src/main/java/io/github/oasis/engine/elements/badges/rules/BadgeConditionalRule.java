@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.elements.badges.rules;
 
-import io.github.oasis.engine.model.EventExecutionFilter;
+import io.github.oasis.core.elements.EventExecutionFilter;
 
 import java.util.Collections;
 import java.util.LinkedList;

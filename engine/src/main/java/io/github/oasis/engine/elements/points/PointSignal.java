@@ -19,9 +19,9 @@
 
 package io.github.oasis.engine.elements.points;
 
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.elements.AbstractSink;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.Signal;
 
 import java.math.BigDecimal;
 import java.util.Comparator;

@@ -20,11 +20,12 @@
 package io.github.oasis.engine.elements.badges;
 
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.elements.badges.rules.BadgeHistogramCountStreakNRule;
 import io.github.oasis.engine.elements.badges.rules.BadgeHistogramStreakNRule;
 import io.github.oasis.engine.elements.badges.signals.HistogramBadgeSignal;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -300,14 +301,14 @@ public class HistogramCountStreakTest extends AbstractRuleTest {
     }
 
     private RuleContext<BadgeHistogramStreakNRule> createRule(Map<Integer, Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
-        BadgeHistogramCountStreakNRule options = new BadgeHistogramCountStreakNRule("test.histogram.count.streak");
-        options.setForEvent(EVT_A);
-        options.setStreaks(streaks);
-        options.setConsecutive(true);
-        options.setThreshold(BigDecimal.valueOf(threshold));
-        options.setTimeUnit(timeunit);
-        options.setCondition((e, r, c) -> (long) e.getFieldValue("value") >= 50);
-        return new RuleContext<>(options, fromConsumer(consumer));
+        BadgeHistogramCountStreakNRule rule = new BadgeHistogramCountStreakNRule("test.histogram.count.streak");
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
+        rule.setStreaks(streaks);
+        rule.setConsecutive(true);
+        rule.setThreshold(BigDecimal.valueOf(threshold));
+        rule.setTimeUnit(timeunit);
+        rule.setCondition((e, r, c) -> (long) e.getFieldValue("value") >= 50);
+        return new RuleContext<>(rule, fromConsumer(consumer));
     }
 
 }

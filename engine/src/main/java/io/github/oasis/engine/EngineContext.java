@@ -19,43 +19,94 @@
 
 package io.github.oasis.engine;
 
-import akka.actor.ActorSystem;
-import io.github.oasis.engine.external.EventReadWrite;
-import io.github.oasis.engine.factory.AbstractActorProviderModule;
+import io.github.oasis.core.context.RuntimeContextSupport;
+import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.engine.factory.Processors;
+import io.github.oasis.engine.factory.Sinks;
 
-import javax.inject.Provider;
-import java.util.function.Function;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public class EngineContext {
+public class EngineContext implements RuntimeContextSupport, Registrar {
 
-    private Function<ActorSystem, AbstractActorProviderModule> moduleProvider;
-    private Provider<OasisConfigs> configsProvider;
-    private Class<? extends EventReadWrite> eventLoaderClazz;
+    private OasisConfigs configs;
+    private Db db;
+    private EventReadWrite eventStore;
 
-    public Class<? extends EventReadWrite> getEventLoaderClazz() {
-        return eventLoaderClazz;
+    private Processors processors;
+    private Sinks sinks;
+
+    private List<Class<? extends ElementModuleFactory>> moduleFactoryList = new ArrayList<>();
+    private List<ElementModule> moduleList = new ArrayList<>();
+
+    public void init() throws OasisException {
+        processors = new Processors();
+        sinks = new Sinks();
+
+        try {
+            for (Class<? extends ElementModuleFactory> moduleFactory : moduleFactoryList) {
+                moduleFactory.getDeclaredConstructor().newInstance().init(this, configs);
+            }
+        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            throw new OasisException(e.getMessage(), e);
+        }
+
+        processors.init(this);
+        sinks.init(this);
     }
 
-    public void setEventLoaderClazz(Class<? extends EventReadWrite> eventLoaderClazz) {
-        this.eventLoaderClazz = eventLoaderClazz;
+    public List<ElementModule> getModuleList() {
+        return moduleList;
     }
 
-    public Provider<OasisConfigs> getConfigsProvider() {
-        return configsProvider;
+    public Sinks getSinks() {
+        return sinks;
     }
 
-    public void setConfigsProvider(Provider<OasisConfigs> configsProvider) {
-        this.configsProvider = configsProvider;
+    public Processors getProcessors() {
+        return processors;
     }
 
-    public Function<ActorSystem, AbstractActorProviderModule> getModuleProvider() {
-        return moduleProvider;
+    @Override
+    public OasisConfigs getConfigs() {
+        return configs;
     }
 
-    public void setModuleProvider(Function<ActorSystem, AbstractActorProviderModule> moduleProvider) {
-        this.moduleProvider = moduleProvider;
+    public void setConfigs(OasisConfigs configs) {
+        this.configs = configs;
+    }
+
+    @Override
+    public Db getDb() {
+        return db;
+    }
+
+    public void setDb(Db db) {
+        this.db = db;
+    }
+
+    @Override
+    public EventReadWrite getEventStore() {
+        return eventStore;
+    }
+
+    public void setEventStore(EventReadWrite eventStore) {
+        this.eventStore = eventStore;
+    }
+
+    public void setModuleFactoryList(List<Class<? extends ElementModuleFactory>> moduleFactoryList) {
+        this.moduleFactoryList = moduleFactoryList;
+    }
+
+    @Override
+    public void registerModule(ElementModule module) {
+        moduleList.add(module);
     }
 }

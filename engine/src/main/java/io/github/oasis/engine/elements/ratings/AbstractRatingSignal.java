@@ -19,9 +19,9 @@
 
 package io.github.oasis.engine.elements.ratings;
 
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.elements.AbstractSink;
-import io.github.oasis.model.EventScope;
+import io.github.oasis.core.EventScope;
+import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.Signal;
 
 /**
  * @author Isuru Weerarathna

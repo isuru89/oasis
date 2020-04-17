@@ -19,8 +19,10 @@
 
 package io.github.oasis.engine.model;
 
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.EventExecutionFilter;
 import org.mvel2.MVEL;
 
 import java.io.Serializable;

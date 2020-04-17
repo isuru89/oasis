@@ -20,12 +20,13 @@
 package io.github.oasis.engine.elements.badges;
 
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.Signal;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.elements.badges.rules.BadgeStreakNRule;
 import io.github.oasis.engine.elements.badges.rules.BadgeTemporalStreakNRule;
 import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.engine.elements.badges.signals.StreakBadgeSignal;
-import io.github.oasis.engine.model.RuleContext;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -253,12 +254,12 @@ public class TemporalBadgeStreakNTest extends AbstractRuleTest {
     }
 
     private RuleContext<BadgeStreakNRule> createRule(Map<Integer, Integer> streaks, long timeUnit, Consumer<Signal> consumer) {
-        BadgeTemporalStreakNRule options = new BadgeTemporalStreakNRule("test.temporal.streak");
-        options.setForEvent(EVENT_TYPE);
-        options.setStreaks(streaks);
-        options.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
-        options.setRetainTime(100);
-        options.setTimeUnit(timeUnit);
-        return new RuleContext<>(options, fromConsumer(consumer));
+        BadgeTemporalStreakNRule rule = new BadgeTemporalStreakNRule("test.temporal.streak");
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVENT_TYPE));
+        rule.setStreaks(streaks);
+        rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
+        rule.setRetainTime(100);
+        rule.setTimeUnit(timeUnit);
+        return new RuleContext<>(rule, fromConsumer(consumer));
     }
 }

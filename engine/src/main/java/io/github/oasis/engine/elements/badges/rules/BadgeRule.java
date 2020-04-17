@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.elements.badges.rules;
 
-import io.github.oasis.engine.elements.AbstractRule;
+import io.github.oasis.core.elements.AbstractRule;
 
 /**
  * @author Isuru Weerarathna

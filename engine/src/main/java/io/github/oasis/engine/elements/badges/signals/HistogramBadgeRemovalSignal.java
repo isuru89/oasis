@@ -19,8 +19,8 @@
 
 package io.github.oasis.engine.elements.badges.signals;
 
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.model.EventScope;
+import io.github.oasis.core.EventScope;
+import io.github.oasis.core.elements.Signal;
 
 import java.util.Comparator;
 

@@ -21,22 +21,27 @@ package io.github.oasis.engine.runners;
 
 import akka.actor.ActorRef;
 import io.github.oasis.engine.EngineContext;
-import io.github.oasis.engine.OasisConfigs;
+import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.engine.OasisEngine;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.engine.elements.badges.BadgesModuleFactory;
+import io.github.oasis.engine.elements.challenges.ChallengesModuleFactory;
+import io.github.oasis.engine.elements.milestones.MilestonesModuleFactory;
+import io.github.oasis.engine.elements.points.PointsModuleFactory;
+import io.github.oasis.engine.elements.ratings.RatingsModuleFactory;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.engine.external.redis.RedisDb;
 import io.github.oasis.engine.external.redis.RedisEventLoader;
-import io.github.oasis.engine.factory.OasisDependencyModule;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -60,19 +65,32 @@ public class OasisEngineTest {
 
     protected OasisEngine engine;
     protected ActorRef supervisor;
-    @Inject
+
     protected Db dbPool;
 
     @BeforeEach
-    public void setup() throws IOException {
+    public void setup() throws IOException, OasisException {
         EngineContext context = new EngineContext();
-        context.setConfigsProvider(new TestConfigProvider());
-        context.setEventLoaderClazz(RedisEventLoader.class);
-        context.setModuleProvider(actorSystem -> new OasisDependencyModule(actorSystem, context));
+        OasisConfigs oasisConfigs = new OasisConfigs.Builder()
+                .withSupervisors(2, 1, 1)
+                .withExecutors(1, 2)
+                .build();
+        dbPool = RedisDb.create(oasisConfigs);
+        dbPool.init();
+
+        context.setModuleFactoryList(List.of(
+                RatingsModuleFactory.class,
+                PointsModuleFactory.class,
+                MilestonesModuleFactory.class,
+                ChallengesModuleFactory.class,
+                BadgesModuleFactory.class
+                ));
+        context.setConfigs(oasisConfigs);
+        context.setDb(dbPool);
+        context.setEventStore(new RedisEventLoader(dbPool, oasisConfigs));
         engine = new OasisEngine(context);
         engine.start();
         supervisor = engine.getOasisActor();
-        engine.getProviderModule().getInjector().injectMembers(this);
 
         try (DbContext db = dbPool.createContext()) {
             db.allKeys("*").forEach(db::removeKey);
@@ -102,16 +120,4 @@ public class OasisEngineTest {
         }
     }
 
-    private static class TestConfigProvider implements Provider<OasisConfigs> {
-
-        private static final OasisConfigs DEFAULT = new OasisConfigs.Builder()
-                .withSupervisors(2, 1, 1)
-                .withExecutors(1, 2)
-                .build();
-
-        @Override
-        public OasisConfigs get() {
-            return DEFAULT;
-        }
-    }
 }

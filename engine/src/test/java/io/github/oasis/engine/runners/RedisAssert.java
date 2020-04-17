@@ -19,9 +19,9 @@
 
 package io.github.oasis.engine.runners;
 
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.model.Record;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.collect.Record;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;

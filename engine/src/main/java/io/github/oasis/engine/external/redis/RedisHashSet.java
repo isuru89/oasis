@@ -19,8 +19,8 @@
 
 package io.github.oasis.engine.external.redis;
 
-import io.github.oasis.engine.external.Mapped;
-import io.github.oasis.engine.utils.Numbers;
+import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.utils.Numbers;
 import redis.clients.jedis.Jedis;
 
 import java.math.BigDecimal;
@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.github.oasis.engine.utils.Numbers.asDecimal;
-import static io.github.oasis.engine.utils.Numbers.asInt;
-import static io.github.oasis.engine.utils.Numbers.asLong;
+import static io.github.oasis.core.utils.Numbers.asDecimal;
+import static io.github.oasis.core.utils.Numbers.asInt;
+import static io.github.oasis.core.utils.Numbers.asLong;
 
 /**
  * @author Isuru Weerarathna

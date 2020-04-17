@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.elements.badges.signals;
 
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
 
 /**
  * @author Isuru Weerarathna

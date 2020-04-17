@@ -19,9 +19,9 @@
 
 package io.github.oasis.engine.external.redis;
 
-import io.github.oasis.engine.external.Sorted;
-import io.github.oasis.engine.model.Record;
-import io.github.oasis.model.collect.Pair;
+import io.github.oasis.core.collect.Pair;
+import io.github.oasis.core.external.Sorted;
+import io.github.oasis.core.collect.Record;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
@@ -37,7 +37,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.github.oasis.engine.utils.Numbers.isFirstOne;
+import static io.github.oasis.core.utils.Numbers.isFirstOne;
 
 /**
  * @author Isuru Weerarathna

@@ -19,8 +19,8 @@
 
 package io.github.oasis.engine.actors.cmds;
 
-import io.github.oasis.engine.model.ExecutionContext;
-import io.github.oasis.model.Event;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.context.ExecutionContext;
 
 /**
  * @author Isuru Weerarathna

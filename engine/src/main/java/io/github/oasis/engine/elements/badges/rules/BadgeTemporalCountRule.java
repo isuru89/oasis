@@ -19,9 +19,9 @@
 
 package io.github.oasis.engine.elements.badges.rules;
 
-import io.github.oasis.engine.model.EventExecutionFilter;
-import io.github.oasis.engine.model.EventValueResolver;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.core.elements.EventValueResolver;
+import io.github.oasis.core.context.ExecutionContext;
 
 import java.math.BigDecimal;
 

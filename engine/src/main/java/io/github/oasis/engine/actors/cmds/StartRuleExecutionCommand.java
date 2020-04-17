@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.actors.cmds;
 
+import io.github.oasis.engine.model.RuleExecutionContext;
 import io.github.oasis.engine.model.Rules;
 
 /**
@@ -28,10 +29,16 @@ public class StartRuleExecutionCommand implements OasisLifecycleCommand {
 
     private String parentId;
     private Rules rules;
+    private RuleExecutionContext ruleExecutionContext;
 
-    public StartRuleExecutionCommand(String parentId, Rules rules) {
+    public StartRuleExecutionCommand(String parentId, Rules rules, RuleExecutionContext ruleExecutionContext) {
         this.parentId = parentId;
         this.rules = rules;
+        this.ruleExecutionContext = ruleExecutionContext;
+    }
+
+    public RuleExecutionContext getRuleExecutionContext() {
+        return ruleExecutionContext;
     }
 
     public Rules getRules() {

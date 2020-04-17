@@ -19,18 +19,17 @@
 
 package io.github.oasis.engine.elements.milestones;
 
-import io.github.oasis.engine.elements.AbstractRule;
-import io.github.oasis.engine.elements.AbstractSink;
-import io.github.oasis.engine.elements.Signal;
-import io.github.oasis.engine.external.Db;
-import io.github.oasis.engine.external.DbContext;
-import io.github.oasis.engine.external.Mapped;
-import io.github.oasis.engine.model.ExecutionContext;
+import io.github.oasis.core.EventScope;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.ID;
-import io.github.oasis.engine.utils.Numbers;
-import io.github.oasis.model.EventScope;
+import io.github.oasis.core.utils.Numbers;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -38,7 +37,7 @@ import java.util.Optional;
  * @author Isuru Weerarathna
  */
 public class MilestonesSink extends AbstractSink {
-    @Inject
+
     public MilestonesSink(Db dbPool) {
         super(dbPool);
     }
