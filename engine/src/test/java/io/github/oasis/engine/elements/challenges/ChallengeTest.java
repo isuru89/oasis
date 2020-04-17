@@ -461,7 +461,7 @@ public class ChallengeTest extends AbstractRuleTest {
         return BigDecimal.valueOf(val).setScale(Constants.SCALE, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal award(Event event, int position, ExecutionContext context) {
+    private BigDecimal award(Event event, int position, ChallengeRule rule) {
         return BigDecimal.valueOf((long)event.getFieldValue("value") - 50);
     }
 

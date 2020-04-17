@@ -23,20 +23,28 @@ import io.github.oasis.engine.elements.AbstractProcessor;
 import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.EventReadWrite;
 import io.github.oasis.engine.external.Mapped;
 import io.github.oasis.engine.external.Sorted;
 import io.github.oasis.engine.model.EventBiValueResolver;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.model.Record;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.utils.Constants;
+import io.github.oasis.engine.utils.Numbers;
 import io.github.oasis.model.Event;
+import io.github.oasis.model.collect.Pair;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static io.github.oasis.engine.elements.challenges.ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND;
+import static io.github.oasis.engine.elements.challenges.ChallengeRule.OUT_OF_ORDER_WINNERS;
+import static io.github.oasis.engine.elements.challenges.ChallengeRule.REPEATABLE_WINNERS;
 
 /**
  * @author Isuru Weerarathna
@@ -47,9 +55,19 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
         super(dbPool, ruleCtx);
     }
 
+    public ChallengeProcessor(Db dbPool, EventReadWrite eventLoader, RuleContext<ChallengeRule> ruleCtx) {
+        super(dbPool, eventLoader, ruleCtx);
+    }
+
     @Override
     public boolean isDenied(Event event, ExecutionContext context) {
-        return super.isDenied(event, context) || notInScope(event, rule) || notInRange(event, rule) || !criteriaSatisfied(event, rule, context);
+        if (isChallengeOverEvent(event)) {
+            return false;
+        }
+        return super.isDenied(event, context)
+                || notInScope(event, rule)
+                || notInRange(event, rule)
+                || !criteriaSatisfied(event, rule, context);
     }
 
     @Override
@@ -59,9 +77,17 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
 
     @Override
     public List<Signal> process(Event event, ChallengeRule rule, ExecutionContext context, DbContext db) {
+        if (rule.hasFlag(OUT_OF_ORDER_WINNERS)) {
+            if (isChallengeOverEvent(event)) {
+                return finalizeOutOfOrderChallenge((ChallengeOverEvent) event, rule, context, db);
+            } else {
+                return processOutOfOrderSupportChallenge(event, rule, context, db);
+            }
+        }
+
         Sorted winnerSet = db.SORTED(ID.getGameChallengeKey(event.getGameId(), rule.getId()));
         String member = getMemberKeyFormatInChallengeList(event, rule);
-        if (rule.doesNotHaveFlag(ChallengeRule.REPEATABLE_WINNERS) && winnerSet.memberExists(member)) {
+        if (rule.doesNotHaveFlag(REPEATABLE_WINNERS) && winnerSet.memberExists(member)) {
             return null;
         }
         Mapped map = db.MAP(ID.getGameChallengesKey(event.getGameId()));
@@ -74,7 +100,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
                     event.getTimestamp(),
                     ALL_WINNERS_FOUND));
         }
-        BigDecimal score = this.deriveAwardPointsForPosition(rule, position, event, context).setScale(Constants.SCALE, RoundingMode.HALF_UP);
+        BigDecimal score = this.deriveAwardPointsForPosition(rule, position, event).setScale(Constants.SCALE, RoundingMode.HALF_UP);
         winnerSet.add(member, event.getTimestamp());
 
         return List.of(
@@ -83,18 +109,68 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
         );
     }
 
+    private List<Signal> processOutOfOrderSupportChallenge(Event event, ChallengeRule rule, ExecutionContext context, DbContext db) {
+        Sorted winnerSet = db.SORTED(ID.getGameChallengeKey(event.getGameId(), rule.getId()));
+        String member = getMemberKeyFormatInChallengeList(event, rule);
+        if (rule.doesNotHaveFlag(REPEATABLE_WINNERS) && winnerSet.memberExists(member)) {
+            return null;
+        }
+
+        Pair<Long, Long> addResult = winnerSet.addAndGetRankSize(member, event.getTimestamp());
+        int position = Numbers.asInt(addResult.getValue0());
+        if (position >= rule.getWinnerCount()) {
+            winnerSet.remove(member);
+            return null;
+        }
+
+        String gameChallengeEventsKey = ID.getGameChallengeEventsKey(event.getGameId(), rule.getId());
+        db.setValueInMap(gameChallengeEventsKey, member, event.getExternalId());
+        eventLoader.write(gameChallengeEventsKey, event);
+        return null;
+    }
+
+    private List<Signal> finalizeOutOfOrderChallenge(ChallengeOverEvent overEvent, ChallengeRule rule, ExecutionContext context, DbContext db) {
+        int gameId = overEvent.getGameId();
+        String ruleId = overEvent.getChallengeRuleId();
+        Sorted winnerSet = db.SORTED(ID.getGameChallengeKey(gameId, ruleId));
+        String gameChallengeEventsKey = ID.getGameChallengeEventsKey(gameId, ruleId);
+        Mapped eventMapRef = db.MAP(gameChallengeEventsKey);
+        List<Record> ranksWithUsers = winnerSet.getRangeByRankWithScores(0, rule.getWinnerCount() - 1);
+        List<Signal> signals = new ArrayList<>();
+        for (int position = 0; position < ranksWithUsers.size(); position++) {
+            Record record = ranksWithUsers.get(position);
+            String eventId = eventMapRef.getValue(record.getMember());
+            Optional<Event> eventRef = eventLoader.read(gameChallengeEventsKey, eventId);
+            if (eventRef.isPresent()) {
+                long userId = getUserIdFormatInChallengeList(record.getMember(), rule);
+                Event event = eventRef.get();
+                BigDecimal score = this.deriveAwardPointsForPosition(rule, position + 1, event).setScale(Constants.SCALE, RoundingMode.HALF_UP);
+                signals.add(new ChallengeWinSignal(ruleId, event, position + 1, userId, record.getScoreAsLong(), eventId));
+                signals.add(new ChallengePointsAwardedSignal(ruleId, rule.getPointId(), score, event));
+            }
+        }
+        return signals;
+    }
+
+    private long getUserIdFormatInChallengeList(String member, ChallengeRule rule) {
+        if (rule.hasFlag(REPEATABLE_WINNERS)) {
+            return Numbers.asLong(member.split(":")[0].substring(1));
+        }
+        return Numbers.asLong(member.substring(1));
+    }
+
     private String getMemberKeyFormatInChallengeList(Event event, ChallengeRule rule) {
         String member = "u" + event.getUser();
-        if (rule.hasFlag(ChallengeRule.REPEATABLE_WINNERS)) {
+        if (rule.hasFlag(REPEATABLE_WINNERS)) {
             member = String.format("u%d:%s", event.getUser(), event.getExternalId());
         }
         return member;
     }
 
-    private BigDecimal deriveAwardPointsForPosition(ChallengeRule rule, int position, Event event, ExecutionContext context) {
-        EventBiValueResolver<Integer, ExecutionContext> customAwardPoints = rule.getCustomAwardPoints();
+    private BigDecimal deriveAwardPointsForPosition(ChallengeRule rule, int position, Event event) {
+        EventBiValueResolver<Integer, ChallengeRule> customAwardPoints = rule.getCustomAwardPoints();
         if (customAwardPoints != null) {
-            return customAwardPoints.resolve(event, position, context);
+            return customAwardPoints.resolve(event, position, rule);
         }
         return rule.getAwardPoints();
     }
@@ -117,5 +193,9 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
             return event.getTeam() != scopeId;
         }
         return false;
+    }
+
+    private boolean isChallengeOverEvent(Event event) {
+        return event instanceof ChallengeOverEvent;
     }
 }

@@ -20,6 +20,7 @@
 package io.github.oasis.engine;
 
 import akka.actor.ActorSystem;
+import io.github.oasis.engine.external.EventReadWrite;
 import io.github.oasis.engine.factory.AbstractActorProviderModule;
 
 import javax.inject.Provider;
@@ -32,6 +33,15 @@ public class EngineContext {
 
     private Function<ActorSystem, AbstractActorProviderModule> moduleProvider;
     private Provider<OasisConfigs> configsProvider;
+    private Class<? extends EventReadWrite> eventLoaderClazz;
+
+    public Class<? extends EventReadWrite> getEventLoaderClazz() {
+        return eventLoaderClazz;
+    }
+
+    public void setEventLoaderClazz(Class<? extends EventReadWrite> eventLoaderClazz) {
+        this.eventLoaderClazz = eventLoaderClazz;
+    }
 
     public Provider<OasisConfigs> getConfigsProvider() {
         return configsProvider;

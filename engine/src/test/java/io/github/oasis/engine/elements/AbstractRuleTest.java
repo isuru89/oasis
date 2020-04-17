@@ -21,7 +21,9 @@ package io.github.oasis.engine.elements;
 
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.EventReadWrite;
 import io.github.oasis.engine.external.redis.RedisDb;
+import io.github.oasis.engine.external.redis.RedisEventLoader;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.ID;
 import io.github.oasis.engine.model.SignalCollector;
@@ -55,6 +57,7 @@ public abstract class AbstractRuleTest {
     protected ExecutionContext defaultContext = ExecutionContext.withUserTz(0);
 
     protected static Db pool;
+    protected static EventReadWrite eventReadWrite;
 
     @BeforeAll
     public static void beforeAll() throws IOException {
@@ -63,6 +66,7 @@ public abstract class AbstractRuleTest {
         JedisPool poolRedis = new JedisPool(config, "localhost");
         pool = RedisDb.create(poolRedis);
         pool.init();
+        eventReadWrite = new RedisEventLoader(pool, null);
     }
 
     @AfterAll

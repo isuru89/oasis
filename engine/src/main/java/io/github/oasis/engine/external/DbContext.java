@@ -29,12 +29,17 @@ import java.util.Set;
  */
 public interface DbContext extends Closeable {
 
+    boolean keyExists(String key);
     Set<String> allKeys(String pattern);
     void removeKey(String key);
 
     BigDecimal incrementScoreInSorted(String contextKey, String member, BigDecimal byScore);
     void setValueInMap(String contextKey, String field, String value);
+    void setRawValueInMap(String contextKey, String field, byte[] value);
     String getValueFromMap(String contextKey, String key);
+    byte[] getValueFromMap(String contextKey, byte[] key);
+    List<byte[]> getRawValuesFromMap(String contextKey, String... keys);
+    boolean removeKeyFromMap(String contextKey, String... keys);
     void addToSorted(String contextKey, String member, long value);
     boolean setIfNotExistsInMap(String contextKey, String key, String value);
     List<String> getValuesFromMap(String contextKey, String... keys);

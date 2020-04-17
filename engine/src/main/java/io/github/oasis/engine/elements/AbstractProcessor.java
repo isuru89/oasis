@@ -21,6 +21,7 @@ package io.github.oasis.engine.elements;
 
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.EventReadWrite;
 import io.github.oasis.engine.model.EventExecutionFilter;
 import io.github.oasis.engine.model.ExecutionContext;
 import io.github.oasis.engine.model.RuleContext;
@@ -36,13 +37,19 @@ import java.util.function.BiConsumer;
 public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal> implements BiConsumer<Event, ExecutionContext>, Serializable {
 
     protected final Db dbPool;
+    protected final EventReadWrite eventLoader;
     protected final R rule;
     private final RuleContext<R> ruleContext;
 
     public AbstractProcessor(Db dbPool, RuleContext<R> ruleCtx) {
+        this(dbPool, null, ruleCtx);
+    }
+
+    public AbstractProcessor(Db dbPool, EventReadWrite eventLoader, RuleContext<R> ruleCtx) {
         this.dbPool = dbPool;
         this.ruleContext = ruleCtx;
         this.rule = ruleCtx.getRule();
+        this.eventLoader = eventLoader;
     }
 
     public boolean isDenied(Event event, ExecutionContext context) {

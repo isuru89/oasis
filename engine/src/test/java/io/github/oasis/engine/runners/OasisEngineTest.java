@@ -25,6 +25,7 @@ import io.github.oasis.engine.OasisConfigs;
 import io.github.oasis.engine.OasisEngine;
 import io.github.oasis.engine.external.Db;
 import io.github.oasis.engine.external.DbContext;
+import io.github.oasis.engine.external.redis.RedisEventLoader;
 import io.github.oasis.engine.factory.OasisDependencyModule;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.AfterEach;
@@ -66,6 +67,7 @@ public class OasisEngineTest {
     public void setup() throws IOException {
         EngineContext context = new EngineContext();
         context.setConfigsProvider(new TestConfigProvider());
+        context.setEventLoaderClazz(RedisEventLoader.class);
         context.setModuleProvider(actorSystem -> new OasisDependencyModule(actorSystem, context));
         engine = new OasisEngine(context);
         engine.start();

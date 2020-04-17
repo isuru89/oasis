@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.engine.processors;
+package io.github.oasis.engine.factory;
 
 import io.github.oasis.engine.elements.AbstractProcessor;
 import io.github.oasis.engine.elements.badges.BadgeConditionalProcessor;
@@ -31,6 +31,7 @@ import io.github.oasis.engine.elements.milestones.MilestoneProcessor;
 import io.github.oasis.engine.elements.points.PointsProcessor;
 import io.github.oasis.engine.elements.ratings.RatingProcessor;
 import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.EventReadWrite;
 import io.github.oasis.engine.model.RuleContext;
 import io.github.oasis.engine.model.SignalCollector;
 import io.github.oasis.engine.elements.AbstractRule;
@@ -55,16 +56,18 @@ import javax.inject.Inject;
 public class Processors {
 
     private final Db db;
+    private final EventReadWrite eventLoader;
 
     @Inject
-    private Processors(Db db) {
+    private Processors(Db db, EventReadWrite eventLoader) {
         this.db = db;
+        this.eventLoader = eventLoader;
     }
 
     public AbstractProcessor<? extends AbstractRule, ? extends Signal> createProcessor(AbstractRule rule, SignalCollector collector) {
         if (rule instanceof ChallengeRule) {
             RuleContext<ChallengeRule> ruleContext = new RuleContext<>((ChallengeRule) rule, collector);
-            return new ChallengeProcessor(db, ruleContext);
+            return new ChallengeProcessor(db, eventLoader, ruleContext);
         } else if (rule instanceof PointRule) {
             RuleContext<PointRule> ruleContext = new RuleContext<>((PointRule) rule, collector);
             return new PointsProcessor(db, ruleContext);

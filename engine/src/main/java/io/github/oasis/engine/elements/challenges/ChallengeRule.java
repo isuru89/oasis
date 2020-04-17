@@ -22,7 +22,6 @@ package io.github.oasis.engine.elements.challenges;
 import io.github.oasis.engine.elements.AbstractRule;
 import io.github.oasis.engine.model.EventBiValueResolver;
 import io.github.oasis.engine.model.EventExecutionFilter;
-import io.github.oasis.engine.model.ExecutionContext;
 
 import java.math.BigDecimal;
 
@@ -32,6 +31,7 @@ import java.math.BigDecimal;
 public class ChallengeRule extends AbstractRule {
 
     public static final String REPEATABLE_WINNERS = "REPEATABLE_WINNERS";
+    public static final String OUT_OF_ORDER_WINNERS = "OUT_OF_ORDER_WINNERS";
 
     private long expireAt;
     private long startAt;
@@ -39,7 +39,7 @@ public class ChallengeRule extends AbstractRule {
 
     private String pointId;
     private BigDecimal awardPoints = BigDecimal.ZERO;
-    private EventBiValueResolver<Integer, ExecutionContext> customAwardPoints;
+    private EventBiValueResolver<Integer, ChallengeRule> customAwardPoints;
 
     private EventExecutionFilter criteria;
 
@@ -90,11 +90,11 @@ public class ChallengeRule extends AbstractRule {
         this.awardPoints = awardPoints;
     }
 
-    public EventBiValueResolver<Integer, ExecutionContext> getCustomAwardPoints() {
+    public EventBiValueResolver<Integer, ChallengeRule> getCustomAwardPoints() {
         return customAwardPoints;
     }
 
-    public void setCustomAwardPoints(EventBiValueResolver<Integer, ExecutionContext> customAwardPoints) {
+    public void setCustomAwardPoints(EventBiValueResolver<Integer, ChallengeRule> customAwardPoints) {
         this.customAwardPoints = customAwardPoints;
     }
 

@@ -20,6 +20,7 @@
 package io.github.oasis.engine.runners;
 
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
+import io.github.oasis.engine.elements.challenges.ChallengeOverEvent;
 import io.github.oasis.engine.elements.challenges.ChallengeRule;
 import io.github.oasis.engine.external.DbContext;
 import io.github.oasis.engine.model.ID;
@@ -28,12 +29,16 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Set;
+
+import static io.github.oasis.engine.runners.RedisAssert.assertKeyNotExist;
+import static io.github.oasis.engine.runners.RedisAssert.assertSorted;
+import static io.github.oasis.engine.runners.RedisAssert.ofSortedEntries;
 
 /**
  * @author Isuru Weerarathna
  */
 public class EngineChallengesTest extends OasisEngineTest {
-
 
     @Test
     public void testChallenges() {
@@ -71,15 +76,15 @@ public class EngineChallengesTest extends OasisEngineTest {
         RedisAssert.assertSortedRef(dbPool,
                 ID.getGameUseChallengesLog(gameId, U1),
                 ID.getGameUseChallengesSummary(gameId, U1),
-                RedisAssert.ofSortedEntries(rid + ":1:" + e1.getExternalId(), e1.getTimestamp()));
+                ofSortedEntries(rid + ":1:" + e1.getExternalId(), e1.getTimestamp()));
         RedisAssert.assertSortedRef(dbPool,
                 ID.getGameUseChallengesLog(gameId, U2),
                 ID.getGameUseChallengesSummary(gameId, U2),
-                RedisAssert.ofSortedEntries(rid + ":2:" + e2.getExternalId(), e2.getTimestamp()));
+                ofSortedEntries(rid + ":2:" + e2.getExternalId(), e2.getTimestamp()));
         RedisAssert.assertSortedRef(dbPool,
                 ID.getGameUseChallengesLog(gameId, U4),
                 ID.getGameUseChallengesSummary(gameId, U4),
-                RedisAssert.ofSortedEntries(rid + ":3:" + e4.getExternalId(), e4.getTimestamp()));
+                ofSortedEntries(rid + ":3:" + e4.getExternalId(), e4.getTimestamp()));
 
         String score = "300";
         RedisAssert.assertMap(dbPool, ID.getGameUserPointsSummary(e1.getGameId(), U1),
@@ -148,5 +153,90 @@ public class EngineChallengesTest extends OasisEngineTest {
                         "team:1", score));
     }
 
+    @Test
+    public void testOutOfOrderChallenge() {
+        TEvent e1 = TEvent.createWithTeam(U1, 1, TS("2020-03-23 08:00"), EVT_A, 57);
+        TEvent e2 = TEvent.createWithTeam(U1, 2, TS("2020-03-24 08:00"), EVT_A, 83);
+        TEvent e3 = TEvent.createWithTeam(U3, 2, TS("2020-03-25 08:00"), EVT_A, 98);
+        TEvent e4 = TEvent.createWithTeam(U4, 2, TS("2020-03-26 08:00"), EVT_A, 75);
+        TEvent e5 = TEvent.createWithTeam(U1, 1, TS("2020-03-26 08:00"), EVT_A, 88);
+        TEvent e6 = TEvent.createWithTeam(U1, 1, TS("2020-04-02 08:00"), EVT_A, 71);
+        TEvent e7 = TEvent.createWithTeam(U5, 2, TS("2020-03-25 11:00"), EVT_A, 64);
+        TEvent e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
 
+        ChallengeRule rule = new ChallengeRule("test.challenge.rule");
+        rule.setForEvent(EVT_A);
+        rule.setScope(ChallengeRule.ChallengeScope.TEAM);
+        rule.setScopeId(2);
+        rule.setCustomAwardPoints((event, rank, r) -> BigDecimal.valueOf(100 * (3-rank+1)));
+        rule.setStartAt(TS("2020-03-01 07:15"));
+        rule.setExpireAt(TS("2020-05-01 07:15"));
+        rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
+        rule.setWinnerCount(3);
+        rule.setPointId("challenge.points");
+        rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS));
+
+        engine.submitEvent(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submit(e1, e2, e3, e4, e5, e6, e7, e8,
+                ChallengeOverEvent.createFor(e1.getGameId(), rule.getId()));
+        awaitTerminated();
+
+        int gameId = TEvent.GAME_ID;
+        String ruleId = rule.getId();
+        assertSorted(dbPool,
+                ID.getGameChallengeKey(gameId, ruleId),
+                ofSortedEntries(
+                        "u" + U1, e2.getTimestamp(),
+                        "u" + U3, e3.getTimestamp(),
+                        "u" + U5, e7.getTimestamp(),
+                        "u" + U4, e4.getTimestamp()
+                ));
+
+        assertSorted(dbPool,
+                ID.getGameLeaderboard(gameId, "all", ""),
+                ofSortedEntries(U1, 300,
+                        U3, 200,
+                        U5, 100));
+        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200324"), ofSortedEntries(U1, 300));
+        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200325"), ofSortedEntries(U5, 100, U3, 200));
+    }
+
+    @Test
+    public void testOutOfOrderChallengeNoPointsUntil() {
+        TEvent e1 = TEvent.createWithTeam(U1, 1, TS("2020-03-23 08:00"), EVT_A, 57);
+        TEvent e2 = TEvent.createWithTeam(U1, 2, TS("2020-03-24 08:00"), EVT_A, 83);
+        TEvent e3 = TEvent.createWithTeam(U3, 2, TS("2020-03-25 08:00"), EVT_A, 98);
+        TEvent e4 = TEvent.createWithTeam(U1, 2, TS("2020-03-26 08:00"), EVT_A, 75);
+        TEvent e5 = TEvent.createWithTeam(U1, 1, TS("2020-03-26 08:00"), EVT_A, 88);
+        TEvent e6 = TEvent.createWithTeam(U1, 1, TS("2020-04-02 08:00"), EVT_A, 71);
+        TEvent e7 = TEvent.createWithTeam(U5, 2, TS("2020-03-25 11:00"), EVT_A, 64);
+        TEvent e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
+
+        ChallengeRule rule = new ChallengeRule("test.challenge.rule");
+        rule.setForEvent(EVT_A);
+        rule.setScope(ChallengeRule.ChallengeScope.TEAM);
+        rule.setScopeId(2);
+        rule.setCustomAwardPoints((event, rank, r) -> BigDecimal.valueOf(100 * (3-rank+1)));
+        rule.setStartAt(TS("2020-03-01 07:15"));
+        rule.setExpireAt(TS("2020-05-01 07:15"));
+        rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
+        rule.setWinnerCount(3);
+        rule.setPointId("challenge.points");
+        rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS));
+
+        engine.submitEvent(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submit(e1, e2, e3, e4, e5, e6, e7, e8);
+        awaitTerminated();
+
+        int gameId = TEvent.GAME_ID;
+        String ruleId = rule.getId();
+        assertSorted(dbPool,
+                ID.getGameChallengeKey(gameId, ruleId),
+                ofSortedEntries(
+                        "u" + U1, e2.getTimestamp(),
+                        "u" + U3, e3.getTimestamp(),
+                        "u" + U5, e7.getTimestamp()
+                ));
+        assertKeyNotExist(dbPool, ID.getGameLeaderboard(gameId, "all", ""));
+    }
 }

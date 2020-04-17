@@ -29,7 +29,7 @@ import io.github.oasis.engine.actors.cmds.RuleUpdatedMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.model.Rules;
 import io.github.oasis.engine.elements.AbstractProcessor;
-import io.github.oasis.engine.processors.Processors;
+import io.github.oasis.engine.factory.Processors;
 import io.github.oasis.engine.elements.AbstractRule;
 import io.github.oasis.engine.elements.Signal;
 import io.github.oasis.model.Event;

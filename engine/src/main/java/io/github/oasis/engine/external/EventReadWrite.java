@@ -17,14 +17,24 @@
  * under the License.
  */
 
-package io.github.oasis.engine.exceptions;
+package io.github.oasis.engine.external;
+
+import io.github.oasis.model.Event;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
  */
-public class OasisExecutionException extends Exception {
+public interface EventReadWrite {
 
-    public OasisExecutionException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    Optional<Event> read(String contextRef, String eventId);
+
+    List<Event> bulkRead(String contextRed, String... eventIds);
+
+    boolean write(String contextRef, Event event);
+
+    boolean remove(String contextRef, String... eventIds);
+
 }

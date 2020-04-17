@@ -37,6 +37,14 @@ import java.util.stream.Collectors;
  */
 public class RedisAssert {
 
+    public static void assertKeyNotExist(Db dbPool, String key) {
+        try (DbContext db = dbPool.createContext()) {
+            Assertions.assertFalse(db.keyExists(key), "Given key should not exist in db! " + key);
+        } catch (IOException e) {
+            Assertions.fail(e);
+        }
+    }
+
     public static Map<String, String> ofEntries(String... keyValuePairs) {
         Map<String, String> map = new HashMap<>();
         for (int i = 0; i < keyValuePairs.length; i += 2) {
@@ -102,7 +110,7 @@ public class RedisAssert {
                 if (!all.containsKey(k)) {
                     Assertions.fail("Sorted member " + k + " does not exist in db! " + k);
                 }
-                Assertions.assertEquals(v, all.get(k));
+                Assertions.assertEquals(v, all.get(k), "Expected score is different!");
             });
 
         } catch (IOException e) {

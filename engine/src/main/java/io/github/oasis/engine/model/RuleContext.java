@@ -34,6 +34,10 @@ public class RuleContext<R extends AbstractRule> {
         this.collector = collector;
     }
 
+    public static <R extends AbstractRule> RuleContext<R> create(Class<R> clz, R rule, SignalCollector collector) {
+        return new RuleContext<>(rule, collector);
+    }
+
     public R getRule() {
         return rule;
     }

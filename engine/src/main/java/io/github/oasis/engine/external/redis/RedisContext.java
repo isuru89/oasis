@@ -26,6 +26,7 @@ import io.github.oasis.engine.utils.Numbers;
 import redis.clients.jedis.Jedis;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -54,6 +55,11 @@ public class RedisContext implements DbContext {
     }
 
     @Override
+    public boolean keyExists(String key) {
+        return jedis.exists(key);
+    }
+
+    @Override
     public Set<String> allKeys(String pattern) {
         return jedis.keys(pattern);
     }
@@ -74,8 +80,33 @@ public class RedisContext implements DbContext {
     }
 
     @Override
+    public void setRawValueInMap(String contextKey, String field, byte[] value) {
+        jedis.hset(contextKey.getBytes(StandardCharsets.US_ASCII), field.getBytes(StandardCharsets.US_ASCII), value);
+    }
+
+    @Override
     public String getValueFromMap(String contextKey, String key) {
         return jedis.hget(contextKey, key);
+    }
+
+    @Override
+    public byte[] getValueFromMap(String contextKey, byte[] key) {
+        return jedis.hget(contextKey.getBytes(StandardCharsets.US_ASCII), key);
+    }
+
+    @Override
+    public List<byte[]> getRawValuesFromMap(String contextKey, String... keys) {
+        List<byte[]> listKeys = new ArrayList<>();
+        for (String k : keys) {
+            listKeys.add(k.getBytes(StandardCharsets.US_ASCII));
+        }
+        return jedis.hmget(contextKey.getBytes(StandardCharsets.US_ASCII),
+                listKeys.toArray(new byte[0][]));
+    }
+
+    @Override
+    public boolean removeKeyFromMap(String contextKey, String... keys) {
+        return Numbers.asLong(jedis.hdel(contextKey, keys)) > 0;
     }
 
     @Override

@@ -29,6 +29,7 @@ import io.github.oasis.engine.actors.OasisSupervisor;
 import io.github.oasis.engine.actors.RuleExecutor;
 import io.github.oasis.engine.actors.SignalSupervisor;
 import io.github.oasis.engine.external.Db;
+import io.github.oasis.engine.external.EventReadWrite;
 import io.github.oasis.engine.external.redis.RedisDb;
 
 /**
@@ -51,6 +52,7 @@ public class OasisDependencyModule extends AbstractActorProviderModule {
         bindSingletonActor(actorSystem, OasisSupervisor.class, "oasis-supervisor");
         bindActor(actorSystem, SignalSupervisor.class, "signal-exchanger");
         bind(OasisConfigs.class).toProvider(context.getConfigsProvider());
+        bind(EventReadWrite.class).to(context.getEventLoaderClazz()).in(Singleton.class);
     }
 
     @Provides @Singleton
