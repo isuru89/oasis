@@ -24,7 +24,7 @@ import io.github.oasis.elements.challenges.ChallengeOverEvent;
 import io.github.oasis.elements.challenges.ChallengeRule;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.ID;
-import io.github.oasis.engine.model.SingleEventTypeMatcher;
+import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 

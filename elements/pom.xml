@@ -28,5 +28,11 @@
             <artifactId>oasis-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.oasis</groupId>
+            <artifactId>oasis-db-redis</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

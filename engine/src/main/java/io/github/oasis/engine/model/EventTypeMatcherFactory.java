@@ -20,6 +20,7 @@
 package io.github.oasis.engine.model;
 
 import io.github.oasis.core.elements.EventTypeMatcher;
+import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.core.utils.Texts;
 
 import java.io.Serializable;

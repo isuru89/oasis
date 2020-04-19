@@ -22,7 +22,7 @@ package io.github.oasis.engine.runners;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.element.points.PointRule;
 import io.github.oasis.core.ID;
-import io.github.oasis.engine.model.SingleEventTypeMatcher;
+import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 

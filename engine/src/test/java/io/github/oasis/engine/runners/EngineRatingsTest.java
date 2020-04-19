@@ -25,7 +25,7 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventValueResolver;
 import io.github.oasis.core.ID;
-import io.github.oasis.engine.model.SingleEventTypeMatcher;
+import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
