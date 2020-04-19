@@ -19,11 +19,12 @@
 
 package io.github.oasis.engine.elements.badges;
 
+import io.github.oasis.elements.badges.BadgeTemporalProcessor;
 import io.github.oasis.engine.elements.AbstractRuleTest;
 import io.github.oasis.core.elements.Signal;
-import io.github.oasis.engine.elements.badges.rules.BadgeTemporalRule;
-import io.github.oasis.engine.elements.badges.signals.BadgeRemoveSignal;
-import io.github.oasis.engine.elements.badges.signals.TemporalBadgeSignal;
+import io.github.oasis.elements.badges.rules.BadgeTemporalRule;
+import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
+import io.github.oasis.elements.badges.signals.TemporalBadgeSignal;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;

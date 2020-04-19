@@ -19,11 +19,15 @@
 
 package io.github.oasis.engine;
 
-import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.context.RuntimeContextSupport;
+import io.github.oasis.core.elements.ElementModule;
+import io.github.oasis.core.elements.ElementModuleFactory;
+import io.github.oasis.core.elements.Registrar;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.engine.factory.Parsers;
 import io.github.oasis.engine.factory.Processors;
 import io.github.oasis.engine.factory.Sinks;
 
@@ -40,11 +44,12 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
     private Db db;
     private EventReadWrite eventStore;
 
+    private Parsers parsers;
     private Processors processors;
     private Sinks sinks;
 
     private List<Class<? extends ElementModuleFactory>> moduleFactoryList = new ArrayList<>();
-    private List<ElementModule> moduleList = new ArrayList<>();
+    private transient List<ElementModule> moduleList = new ArrayList<>();
 
     public void init() throws OasisException {
         processors = new Processors();
@@ -58,6 +63,7 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
             throw new OasisException(e.getMessage(), e);
         }
 
+        parsers = Parsers.from(this);
         processors.init(this);
         sinks.init(this);
     }

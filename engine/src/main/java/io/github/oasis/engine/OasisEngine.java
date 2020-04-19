@@ -22,9 +22,11 @@ package io.github.oasis.engine;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import io.github.oasis.core.Event;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
+import io.github.oasis.engine.actors.cmds.OasisCommand;
 
 /**
  * @author Isuru Weerarathna
@@ -32,7 +34,7 @@ import io.github.oasis.engine.actors.OasisSupervisor;
 public class OasisEngine {
 
     private ActorSystem oasisEngine;
-    private ActorRef oasisActor;
+    private ActorRef supervisor;
 
     private EngineContext context;
 
@@ -44,21 +46,25 @@ public class OasisEngine {
         context.init();
 
         oasisEngine = ActorSystem.create("oasis-engine");
-        oasisActor = oasisEngine.actorOf(Props.create(OasisSupervisor.class, context), ActorNames.OASIS_SUPERVISOR);
+        supervisor = oasisEngine.actorOf(Props.create(OasisSupervisor.class, context), ActorNames.OASIS_SUPERVISOR);
     }
 
-    public void submitEvent(Object event) {
-        oasisActor.tell(event, oasisActor);
+    public void submit(OasisCommand command) {
+        supervisor.tell(command, supervisor);
     }
 
-    public void submit(Object... events) {
+    public void submit(Event event) {
+        supervisor.tell(event, supervisor);
+    }
+
+    public void submitAll(Object... events) {
         for (Object event : events) {
-            submitEvent(event);
+            if (event instanceof Event) {
+                submit((Event) event);
+            } else if (event instanceof OasisCommand) {
+                submit((OasisCommand) event);
+            }
         }
-    }
-
-    public ActorRef getOasisActor() {
-        return oasisActor;
     }
 
     public static void main(String[] args) throws OasisException {

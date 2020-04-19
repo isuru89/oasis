@@ -15,14 +15,44 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.cliftonlabs</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>3.1.0</version>
-        </dependency>
-        <dependency>
             <groupId>io.github.oasis</groupId>
             <artifactId>oasis-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.oasis</groupId>
+            <artifactId>oasis-db-redis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.oasis</groupId>
+            <artifactId>oasis-mod-points</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.oasis</groupId>
+            <artifactId>oasis-mod-milestones</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.oasis</groupId>
+            <artifactId>oasis-mod-ratings</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.oasis</groupId>
+            <artifactId>oasis-mod-badges</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.oasis</groupId>
+            <artifactId>oasis-mod-challenges</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>redis.clients</groupId>

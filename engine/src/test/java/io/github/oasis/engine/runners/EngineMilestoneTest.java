@@ -20,8 +20,8 @@
 package io.github.oasis.engine.runners;
 
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.engine.elements.milestones.MilestoneRule;
-import io.github.oasis.engine.model.ID;
+import io.github.oasis.elements.milestones.MilestoneRule;
+import io.github.oasis.core.ID;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
@@ -55,8 +55,8 @@ public class EngineMilestoneTest extends OasisEngineTest {
                 new MilestoneRule.Level(4, BigDecimal.valueOf(500))));
         rule.setFlags(Set.of(MilestoneRule.SKIP_NEGATIVE_VALUES));
 
-        supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
-        submit(supervisor, e1, e2, e3, e4, e5, e6, e7, e8);
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
         String rid = rule.getId();
@@ -91,8 +91,8 @@ public class EngineMilestoneTest extends OasisEngineTest {
                 new MilestoneRule.Level(2, BigDecimal.valueOf(200))));
         rule.setFlags(Set.of(MilestoneRule.TRACK_PENALTIES));
 
-        supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
-        submit(supervisor, e1, e2, e3, e4, e5, e6, e7, e8);
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
         String rid = rule.getId();

@@ -48,8 +48,6 @@ public abstract class AbstractDef implements Serializable {
         }
     }
 
-    public abstract AbstractRule toRule();
-
     protected AbstractRule toRule(AbstractRule source) {
         source.setName(getName());
         source.setDescription(getDescription());

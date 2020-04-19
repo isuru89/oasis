@@ -19,11 +19,12 @@
 
 package io.github.oasis.engine.elements.badges;
 
+import io.github.oasis.elements.badges.BadgeHistogramStreakN;
 import io.github.oasis.engine.elements.AbstractRuleTest;
 import io.github.oasis.core.elements.Signal;
-import io.github.oasis.engine.elements.badges.rules.BadgeHistogramStreakNRule;
-import io.github.oasis.engine.elements.badges.signals.HistogramBadgeRemovalSignal;
-import io.github.oasis.engine.elements.badges.signals.HistogramBadgeSignal;
+import io.github.oasis.elements.badges.rules.BadgeHistogramStreakNRule;
+import io.github.oasis.elements.badges.signals.HistogramBadgeRemovalSignal;
+import io.github.oasis.elements.badges.signals.HistogramBadgeSignal;
 import io.github.oasis.engine.factory.Scripting;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
@@ -39,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+
+import static io.github.oasis.core.VariableNames.CONTEXT_VAR;
 
 /**
  * @author Isuru Weerarathna
@@ -301,7 +304,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
         rule.setConsecutive(true);
         rule.setThreshold(BigDecimal.valueOf(threshold));
         rule.setTimeUnit(timeunit);
-        rule.setValueResolver(Scripting.create("e.value", Scripting.CONTEXT_VAR));
+        rule.setValueResolver(Scripting.create("e.value", CONTEXT_VAR));
         return new RuleContext<>(rule, fromConsumer(consumer));
     }
 }

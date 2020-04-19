@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.factory;
 
-import io.github.oasis.engine.ElementModule;
+import io.github.oasis.core.elements.ElementModule;
 import io.github.oasis.engine.EngineContext;
 import io.github.oasis.core.elements.AbstractSink;
 

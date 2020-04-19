@@ -20,6 +20,10 @@
 package io.github.oasis.engine.elements.ratings;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.elements.ratings.RatingChangedSignal;
+import io.github.oasis.elements.ratings.RatingPointsSignal;
+import io.github.oasis.elements.ratings.RatingProcessor;
+import io.github.oasis.elements.ratings.RatingRule;
 import io.github.oasis.engine.elements.AbstractRuleTest;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.EventExecutionFilter;
@@ -27,7 +31,7 @@ import io.github.oasis.core.elements.EventValueResolver;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
-import io.github.oasis.engine.utils.Constants;
+import io.github.oasis.core.utils.Constants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

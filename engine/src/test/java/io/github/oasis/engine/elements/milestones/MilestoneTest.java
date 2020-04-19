@@ -20,12 +20,15 @@
 package io.github.oasis.engine.elements.milestones;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.elements.milestones.MilestoneProcessor;
+import io.github.oasis.elements.milestones.MilestoneRule;
+import io.github.oasis.elements.milestones.MilestoneSignal;
 import io.github.oasis.engine.elements.AbstractRuleTest;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.factory.Scripting;
 import io.github.oasis.core.elements.EventBiValueResolver;
 import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.engine.model.ID;
+import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
@@ -41,8 +44,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static io.github.oasis.engine.elements.milestones.MilestoneRule.SKIP_NEGATIVE_VALUES;
-import static io.github.oasis.engine.elements.milestones.MilestoneRule.TRACK_PENALTIES;
+import static io.github.oasis.core.VariableNames.CONTEXT_VAR;
+import static io.github.oasis.core.VariableNames.RULE_VAR;
+import static io.github.oasis.elements.milestones.MilestoneRule.SKIP_NEGATIVE_VALUES;
+import static io.github.oasis.elements.milestones.MilestoneRule.TRACK_PENALTIES;
 
 /**
  * @author Isuru Weerarathna
@@ -329,7 +334,7 @@ public class MilestoneTest extends AbstractRuleTest {
     }
 
     private EventBiValueResolver<MilestoneRule, ExecutionContext> valueExtraction() {
-        return Scripting.create("e.value", Scripting.RULE_VAR, Scripting.CONTEXT_VAR);
+        return Scripting.create("e.value", RULE_VAR, CONTEXT_VAR);
     }
 
     private BigDecimal extractValue(Event event, MilestoneRule rule, ExecutionContext context) {

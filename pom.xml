@@ -21,10 +21,11 @@
     </properties>
 
     <modules>
-        <module>dao</module>
+        <module>dbs</module>
         <module>core</module>
         <module>model</module>
         <module>engine</module>
+        <module>elements</module>
     </modules>
 
     <dependencies>

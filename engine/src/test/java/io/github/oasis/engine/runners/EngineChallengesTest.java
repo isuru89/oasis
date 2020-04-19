@@ -20,10 +20,10 @@
 package io.github.oasis.engine.runners;
 
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.engine.elements.challenges.ChallengeOverEvent;
-import io.github.oasis.engine.elements.challenges.ChallengeRule;
+import io.github.oasis.elements.challenges.ChallengeOverEvent;
+import io.github.oasis.elements.challenges.ChallengeRule;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.engine.model.ID;
+import io.github.oasis.core.ID;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
@@ -60,8 +60,8 @@ public class EngineChallengesTest extends OasisEngineTest {
         rule.setWinnerCount(3);
         rule.setPointId("challenge.points");
 
-        supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
-        submit(supervisor, e1, e2, e3, e4, e5, e6);
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3, e4, e5, e6);
         awaitTerminated();
 
         int gameId = e1.getGameId();
@@ -177,8 +177,8 @@ public class EngineChallengesTest extends OasisEngineTest {
         rule.setPointId("challenge.points");
         rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS));
 
-        engine.submitEvent(RuleAddedMessage.create(TEvent.GAME_ID, rule));
-        engine.submit(e1, e2, e3, e4, e5, e6, e7, e8,
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8,
                 ChallengeOverEvent.createFor(e1.getGameId(), rule.getId()));
         awaitTerminated();
 
@@ -225,8 +225,8 @@ public class EngineChallengesTest extends OasisEngineTest {
         rule.setPointId("challenge.points");
         rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS));
 
-        engine.submitEvent(RuleAddedMessage.create(TEvent.GAME_ID, rule));
-        engine.submit(e1, e2, e3, e4, e5, e6, e7, e8);
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
         int gameId = TEvent.GAME_ID;

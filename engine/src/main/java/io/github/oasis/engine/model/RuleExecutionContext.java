@@ -19,7 +19,12 @@
 
 package io.github.oasis.engine.model;
 
+import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.context.RuleExecutionContextSupport;
+import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.elements.SignalCollector;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.EventReadWrite;
 import io.github.oasis.engine.EngineContext;
 
 import java.io.Serializable;
@@ -27,21 +32,22 @@ import java.io.Serializable;
 /**
  * @author Isuru Weerarathna
  */
-public class RuleExecutionContext implements Serializable {
+public class RuleExecutionContext implements RuleExecutionContextSupport, Serializable {
 
     private SignalCollector signalCollector;
-    private EngineContext engineContext;
+    private RuntimeContextSupport engineContext;
 
     private RuleExecutionContext(SignalCollector signalCollector, EngineContext engineContext) {
         this.signalCollector = signalCollector;
         this.engineContext = engineContext;
     }
 
+    @Override
     public SignalCollector getSignalCollector() {
         return signalCollector;
     }
 
-    public EngineContext getEngineContext() {
+    public RuntimeContextSupport getEngineContext() {
         return engineContext;
     }
 
@@ -55,5 +61,20 @@ public class RuleExecutionContext implements Serializable {
 
     public static RuleExecutionContext from(SignalCollector collector) {
         return new RuleExecutionContext(collector, null);
+    }
+
+    @Override
+    public OasisConfigs getConfigs() {
+        return engineContext.getConfigs();
+    }
+
+    @Override
+    public Db getDb() {
+        return engineContext.getDb();
+    }
+
+    @Override
+    public EventReadWrite getEventStore() {
+        return engineContext.getEventStore();
     }
 }

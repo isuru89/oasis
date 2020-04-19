@@ -29,14 +29,14 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.github.oasis.core.VariableNames.EVENT_VAR;
+
 /**
  * @author Isuru Weerarathna
  */
 public class Scripting {
 
-    public static final String CONTEXT_VAR = "ctx";
-    public static final String EVENT_VAR = "e";
-    public static final String RULE_VAR = "rule";
+
 
     public static <I extends Serializable, J extends Serializable> EventBiValueResolver<I, J> create(String scriptText,
                                                                                                      String firstParamName,

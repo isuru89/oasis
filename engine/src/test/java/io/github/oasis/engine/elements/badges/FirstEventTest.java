@@ -20,9 +20,10 @@
 package io.github.oasis.engine.elements.badges;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.elements.badges.BadgeFirstEvent;
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.badges.rules.BadgeFirstEventRule;
-import io.github.oasis.engine.elements.badges.signals.BadgeSignal;
+import io.github.oasis.elements.badges.rules.BadgeFirstEventRule;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.EventExecutionFilter;

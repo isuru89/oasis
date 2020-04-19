@@ -20,8 +20,8 @@
 package io.github.oasis.engine.runners;
 
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.engine.elements.badges.rules.BadgeStreakNRule;
-import io.github.oasis.engine.model.ID;
+import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
+import io.github.oasis.core.ID;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
@@ -48,8 +48,8 @@ public class EngineBadgesTest extends OasisEngineTest {
         rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
         rule.setRetainTime(10);
 
-        supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
-        submit(supervisor, e1, e2, e3, e4, e5, e6);
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3, e4, e5, e6);
         awaitTerminated();
 
         RedisAssert.assertMap(dbPool, ID.getGameUserBadgesSummary(TEvent.GAME_ID, TEvent.USER_ID),

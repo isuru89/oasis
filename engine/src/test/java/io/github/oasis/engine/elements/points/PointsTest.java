@@ -20,6 +20,9 @@
 package io.github.oasis.engine.elements.points;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.engine.element.points.PointRule;
+import io.github.oasis.engine.element.points.PointSignal;
+import io.github.oasis.engine.element.points.PointsProcessor;
 import io.github.oasis.engine.elements.AbstractRuleTest;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Signal;

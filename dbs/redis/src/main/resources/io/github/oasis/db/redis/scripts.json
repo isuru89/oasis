@@ -1,0 +1,8 @@
+{
+  "O.INCRALL": {
+    "filename": "scripts/INCRALL.lua"
+  },
+  "O.ZINCRALL": {
+    "filename": "scripts/ZINCRALL.lua"
+  }
+}

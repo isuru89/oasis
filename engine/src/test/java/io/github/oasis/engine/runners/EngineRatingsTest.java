@@ -20,11 +20,11 @@
 package io.github.oasis.engine.runners;
 
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.engine.elements.ratings.RatingRule;
+import io.github.oasis.elements.ratings.RatingRule;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventValueResolver;
-import io.github.oasis.engine.model.ID;
+import io.github.oasis.core.ID;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
@@ -53,8 +53,8 @@ public class EngineRatingsTest extends OasisEngineTest {
                 new RatingRule.Rating(3, 1, checkGt(50), pointAward(1), "rating.points")
         ));
 
-        supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
-        submit(supervisor, e1, e2, e3);
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3);
         awaitTerminated();
 
         String rid = rule.getId();
@@ -103,8 +103,8 @@ public class EngineRatingsTest extends OasisEngineTest {
                 new RatingRule.Rating(3, 1, checkGt(50), pointAward(1), "rating.points")
         ));
 
-        supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
-        submit(supervisor, e1, e2, e3);
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3);
         awaitTerminated();
 
         try (DbContext db = dbPool.createContext()) {

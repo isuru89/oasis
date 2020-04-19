@@ -19,11 +19,13 @@
 
 package io.github.oasis.engine.elements.badges;
 
+import io.github.oasis.elements.badges.BadgeStreakN;
+import io.github.oasis.elements.badges.BadgeTemporalStreakN;
 import io.github.oasis.engine.elements.AbstractRuleTest;
 import io.github.oasis.core.elements.Signal;
-import io.github.oasis.engine.elements.badges.rules.BadgeStreakNRule;
-import io.github.oasis.engine.elements.badges.rules.BadgeTemporalStreakNRule;
-import io.github.oasis.engine.elements.badges.signals.StreakBadgeSignal;
+import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
+import io.github.oasis.elements.badges.rules.BadgeTemporalStreakNRule;
+import io.github.oasis.elements.badges.signals.StreakBadgeSignal;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;

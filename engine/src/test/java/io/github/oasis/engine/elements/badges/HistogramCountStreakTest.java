@@ -19,11 +19,12 @@
 
 package io.github.oasis.engine.elements.badges;
 
+import io.github.oasis.elements.badges.BadgeHistogramStreakN;
 import io.github.oasis.engine.elements.AbstractRuleTest;
 import io.github.oasis.core.elements.Signal;
-import io.github.oasis.engine.elements.badges.rules.BadgeHistogramCountStreakNRule;
-import io.github.oasis.engine.elements.badges.rules.BadgeHistogramStreakNRule;
-import io.github.oasis.engine.elements.badges.signals.HistogramBadgeSignal;
+import io.github.oasis.elements.badges.rules.BadgeHistogramCountStreakNRule;
+import io.github.oasis.elements.badges.rules.BadgeHistogramStreakNRule;
+import io.github.oasis.elements.badges.signals.HistogramBadgeSignal;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;

@@ -20,6 +20,11 @@
 package io.github.oasis.engine.elements.challenges;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.elements.challenges.ChallengeOverSignal;
+import io.github.oasis.elements.challenges.ChallengePointsAwardedSignal;
+import io.github.oasis.elements.challenges.ChallengeProcessor;
+import io.github.oasis.elements.challenges.ChallengeRule;
+import io.github.oasis.elements.challenges.ChallengeWinSignal;
 import io.github.oasis.engine.elements.AbstractRuleTest;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Signal;
@@ -27,7 +32,7 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
-import io.github.oasis.engine.utils.Constants;
+import io.github.oasis.core.utils.Constants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -20,8 +20,8 @@
 package io.github.oasis.engine.runners;
 
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.engine.elements.points.PointRule;
-import io.github.oasis.engine.model.ID;
+import io.github.oasis.engine.element.points.PointRule;
+import io.github.oasis.core.ID;
 import io.github.oasis.engine.model.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
@@ -54,8 +54,8 @@ public class EnginePointsTest extends OasisEngineTest {
         rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long)event.getFieldValue("value") - 50));
         rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
 
-        supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
-        engine.submit(e1, e2, e3, e4, e5);
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3, e4, e5);
         awaitTerminated();
 
         // total = 33 + 24 + 48 = 105
@@ -171,8 +171,8 @@ public class EnginePointsTest extends OasisEngineTest {
         rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long) event.getFieldValue("value") - 50));
         rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
 
-        supervisor.tell(RuleAddedMessage.create(TEvent.GAME_ID, rule), supervisor);
-        engine.submit(e1, e2, e3, e4, e5, e6, e7, e8);
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
         int gameId = TEvent.GAME_ID;

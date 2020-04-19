@@ -20,9 +20,10 @@
 package io.github.oasis.engine.elements.badges;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.elements.badges.BadgeConditionalProcessor;
 import io.github.oasis.engine.elements.AbstractRuleTest;
-import io.github.oasis.engine.elements.badges.rules.BadgeConditionalRule;
-import io.github.oasis.engine.elements.badges.signals.ConditionalBadgeSignal;
+import io.github.oasis.elements.badges.rules.BadgeConditionalRule;
+import io.github.oasis.elements.badges.signals.ConditionalBadgeSignal;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.EventExecutionFilter;

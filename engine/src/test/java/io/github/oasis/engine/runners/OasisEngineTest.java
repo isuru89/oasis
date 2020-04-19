@@ -24,15 +24,15 @@ import io.github.oasis.engine.EngineContext;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.engine.OasisEngine;
 import io.github.oasis.core.exception.OasisException;
-import io.github.oasis.engine.elements.badges.BadgesModuleFactory;
-import io.github.oasis.engine.elements.challenges.ChallengesModuleFactory;
-import io.github.oasis.engine.elements.milestones.MilestonesModuleFactory;
-import io.github.oasis.engine.elements.points.PointsModuleFactory;
-import io.github.oasis.engine.elements.ratings.RatingsModuleFactory;
+import io.github.oasis.elements.badges.BadgesModuleFactory;
+import io.github.oasis.elements.challenges.ChallengesModuleFactory;
+import io.github.oasis.elements.milestones.MilestonesModuleFactory;
+import io.github.oasis.engine.element.points.PointsModuleFactory;
+import io.github.oasis.elements.ratings.RatingsModuleFactory;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.engine.external.redis.RedisDb;
-import io.github.oasis.engine.external.redis.RedisEventLoader;
+import io.github.oasis.db.redis.RedisDb;
+import io.github.oasis.db.redis.RedisEventLoader;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,7 +64,6 @@ public class OasisEngineTest {
     static final long U5 = 5;
 
     protected OasisEngine engine;
-    protected ActorRef supervisor;
 
     protected Db dbPool;
 
@@ -90,7 +89,6 @@ public class OasisEngineTest {
         context.setEventStore(new RedisEventLoader(dbPool, oasisConfigs));
         engine = new OasisEngine(context);
         engine.start();
-        supervisor = engine.getOasisActor();
 
         try (DbContext db = dbPool.createContext()) {
             db.allKeys("*").forEach(db::removeKey);
