@@ -17,26 +17,25 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.internal;
+package io.github.oasis.services.events.db;
 
-import io.github.oasis.services.events.json.NewEvent;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
+import io.github.oasis.services.events.model.EventSource;
+import io.github.oasis.services.events.model.UserInfo;
+import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.ProxyGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+
 
 /**
  * @author Isuru Weerarathna
  */
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-public class OasisTypeMatcher implements InvalidEventTypeMatcher {
+@ProxyGen
+public interface RedisService {
 
-    private final AntPathMatcher matcher = new AntPathMatcher(".");
-    private static final String OASIS_EVENT_PATTERN = "oasis.**";
+    @Fluent
+    RedisService readUserInfo(String sourceId, Handler<AsyncResult<UserInfo>> resultHandler);
 
-    @Override
-    public boolean valid(NewEvent event) {
-        return !matcher.matchStart(OASIS_EVENT_PATTERN, event.getEventType().toLowerCase());
-    }
+    @Fluent
+    RedisService readSourceInfo(String sourceId, Handler<AsyncResult<EventSource>> resultHandler);
 }

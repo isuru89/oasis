@@ -17,19 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.internal.exceptions;
+package io.github.oasis.services.events;
 
-import io.github.oasis.services.common.OasisServiceException;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Verticle;
+import io.vertx.core.spi.VerticleFactory;
 
 /**
  * @author Isuru Weerarathna
  */
-public class EventSubmissionException extends OasisServiceException {
-    public EventSubmissionException(int errorCode, String message) {
-        super(errorCode, message);
+public class TestDispatcherFactory implements VerticleFactory {
+
+    private AbstractVerticle verticle;
+
+    public TestDispatcherFactory(AbstractVerticle verticle) {
+        this.verticle = verticle;
     }
 
-    public EventSubmissionException(int errorCode, String message, Throwable cause) {
-        super(errorCode, message, cause);
+    @Override
+    public String prefix() {
+        return "test";
+    }
+
+    @Override
+    public Verticle createVerticle(String s, ClassLoader classLoader) throws Exception {
+        return verticle;
     }
 }

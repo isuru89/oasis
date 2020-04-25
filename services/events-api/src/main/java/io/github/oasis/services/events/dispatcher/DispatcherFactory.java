@@ -17,21 +17,26 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.handlers;
+package io.github.oasis.services.events.dispatcher;
 
-import io.github.oasis.services.common.internal.events.admin.ExternalAppEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
+import io.vertx.core.Verticle;
+import io.vertx.core.spi.VerticleFactory;
 
 /**
  * @author Isuru Weerarathna
  */
-@Component
-public class ExtAppModifiedHandler {
+public class DispatcherFactory implements VerticleFactory {
 
-    @EventListener
-    public void onExtAppEvent(ExternalAppEvent externalAppEvent) {
+    public static final String OASIS_VERTICLE = "oasis";
 
+    @Override
+    public String prefix() {
+        return OASIS_VERTICLE;
     }
 
+    @Override
+    public Verticle createVerticle(String type, ClassLoader classLoader) {
+        System.out.println("My dispatcher called");
+        return new RabbitMQVerticle();
+    }
 }

@@ -17,21 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.domain;
+package io.github.oasis.services.events.auth;
+
+import io.github.oasis.services.events.model.EventSource;
+import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.codegen.annotations.ProxyGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 
 /**
  * @author Isuru Weerarathna
  */
-public class EventSourceId {
+@ProxyGen
+public interface AuthService {
 
-    private final int id;
+    String AUTH_SERVICE_QUEUE = "auth.service.queue";
 
-    public EventSourceId(int id) {
-        this.id = id;
+    @GenIgnore
+    static AuthService createProxy(Vertx vertx, String address) {
+        return new AuthServiceVertxEBProxy(vertx, address);
     }
 
-    public int getId() {
-        return id;
-    }
+    @Fluent
+    AuthService readSource(String sourceId, Handler<AsyncResult<EventSource>> handler);
 
 }

@@ -26,6 +26,7 @@
         <module>model</module>
         <module>engine</module>
         <module>elements</module>
+        <module>services</module>
     </modules>
 
     <dependencies>

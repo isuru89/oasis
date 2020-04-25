@@ -17,48 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.json;
-
-import java.io.Serializable;
-
 /**
  * @author Isuru Weerarathna
  */
-public class EventResponse implements Serializable {
+@ModuleGen(name = "oasis", groupPackage = "io.github.oasis.services.events")
+package io.github.oasis.services.events.model;
 
-    private String eventId;
-
-    private int userId;
-    private int mappedGameCount;
-
-    public EventResponse() {
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public int getMappedGameCount() {
-        return mappedGameCount;
-    }
-
-    public void setMappedGameCount(int mappedGameCount) {
-        this.mappedGameCount = mappedGameCount;
-    }
-
-    public EventResponse(String eventId) {
-        this.eventId = eventId;
-    }
-
-    public String getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
-    }
-}
+import io.vertx.codegen.annotations.ModuleGen;

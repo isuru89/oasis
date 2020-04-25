@@ -17,44 +17,12 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.domain;
+package io.github.oasis.services.events;
 
-import java.util.Set;
+import io.vertx.core.AbstractVerticle;
 
 /**
  * @author Isuru Weerarathna
  */
-public class EventSourceRef {
-
-    private int id;
-    private Set<Integer> mappedGames;
-    private Set<String> allowedEventTypes;
-
-    public boolean isEventAllowed(String event) {
-        return allowedEventTypes.contains(event);
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public Set<Integer> getMappedGames() {
-        return mappedGames;
-    }
-
-    public void setMappedGames(Set<Integer> mappedGames) {
-        this.mappedGames = mappedGames;
-    }
-
-    public Set<String> getAllowedEventTypes() {
-        return allowedEventTypes;
-    }
-
-    public void setAllowedEventTypes(Set<String> allowedEventTypes) {
-        this.allowedEventTypes = allowedEventTypes;
-    }
+public class TestDispatcherVerticle extends AbstractVerticle {
 }

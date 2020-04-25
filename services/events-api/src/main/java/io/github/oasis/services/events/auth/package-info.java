@@ -17,14 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.internal;
-
 /**
  * @author Isuru Weerarathna
  */
-public final class EndPoints {
+@ModuleGen(name = "oasis", groupPackage = "io.github.oasis.services.events")
+package io.github.oasis.services.events.auth;
 
-    public static final String EVENT = "/event";
-    public static final String EVENTS_BATCH = "/event/batch";
-
-}
+import io.vertx.codegen.annotations.ModuleGen;

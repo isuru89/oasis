@@ -17,21 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.internal;
-
-import io.github.oasis.services.events.json.NewEvent;
-
-import java.util.function.Predicate;
-
 /**
  * @author Isuru Weerarathna
  */
-public interface InvalidEventTypeMatcher extends Predicate<NewEvent> {
+@ModuleGen(name = "oasis", groupPackage = "io.github.oasis.services.events")
+package io.github.oasis.services.events.db;
 
-    boolean valid(NewEvent event);
-
-    @Override
-    default boolean test(NewEvent event) {
-        return valid(event);
-    }
-}
+import io.vertx.codegen.annotations.ModuleGen;

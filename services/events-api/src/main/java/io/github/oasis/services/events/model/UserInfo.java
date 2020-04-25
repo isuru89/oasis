@@ -17,20 +17,37 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.internal;
+package io.github.oasis.services.events.model;
 
-import io.github.oasis.services.events.domain.UserId;
-import io.github.oasis.services.events.json.NewEvent;
-
-import java.util.Optional;
+import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.json.JsonObject;
 
 /**
- * Interface to map a user as indicated by the input event.
- *
  * @author Isuru Weerarathna
  */
-public interface IUserMapper {
+@DataObject
+public class UserInfo {
 
-    Optional<UserId> map(NewEvent event);
+    private JsonObject ref;
+
+    public UserInfo(JsonObject ref) {
+        this.ref = ref;
+    }
+
+    public JsonObject toJson() {
+        return ref;
+    }
+
+    public long getId() {
+        return ref.getLong("id");
+    }
+
+    public long getTeamId() {
+        return ref.getLong("team");
+    }
+
+    public String getEmail() {
+        return ref.getString("email");
+    }
 
 }

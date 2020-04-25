@@ -17,18 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.internal;
-
 /**
  * @author Isuru Weerarathna
  */
-public final class ErrorCodes {
+@ModuleGen(name = "oasis", groupPackage = "io.github.oasis.services.events")
+package io.github.oasis.services.events.dispatcher;
 
-    public static final int MISSING_MANDATORY_FIELDS = 60001;
-    public static final int NO_USER_FOUND = 60002;
-    public static final int ILLEGAL_EVENT_TYPE = 60003;
-    public static final int INVALID_DATA_FIELDS = 60004;
-    public static final int UNMAPPED_EVENT_TYPE = 60005;
-
-
-}
+import io.vertx.codegen.annotations.ModuleGen;

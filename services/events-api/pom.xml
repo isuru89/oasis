@@ -14,14 +14,82 @@
     <dependencies>
         <dependency>
             <groupId>io.github.oasis</groupId>
-            <artifactId>services-commons</artifactId>
+            <artifactId>oasis-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.oasis</groupId>
-            <artifactId>admin-api</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-auth-common</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-service-proxy</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-rabbitmq-client</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-redis-client</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-codegen</artifactId>
+            <version>3.9.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-junit5</artifactId>
+            <version>3.9.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web-client</artifactId>
+            <version>3.9.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessors>
+                        <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+                    </annotationProcessors>
+                    <generatedSourcesDirectory>${project.basedir}/src/main/generated</generatedSourcesDirectory>
+                    <compilerArgs>
+                        <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${project.basedir}/src/main/generated</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

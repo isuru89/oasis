@@ -6,12 +6,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>events-api</module>
-        <module>stats-api</module>
-        <module>narrative-api</module>
-        <module>commons</module>
-        <module>profile-api</module>
-        <module>admin-api</module>
-        <module>elements-api</module>
     </modules>
 
     <parent>
