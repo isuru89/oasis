@@ -41,6 +41,17 @@ public class ChallengeEvent implements Event {
     public ChallengeEvent(Event event, ChallengeDef challengeDef) {
         this.event = event;
         this.challengeDef = challengeDef;
+        this.setFieldValue(KEY_DEF_ID, challengeDef.getId());
+    }
+
+    public ChallengeEvent winning(int winNo) {
+        this.setFieldValue(KEY_WIN_NO, winNo);
+        return this;
+    }
+
+    public ChallengeEvent awardPoints(double points) {
+        this.setFieldValue(KEY_POINTS, points);
+        return this;
     }
 
     public Integer getWinNo() {
@@ -110,11 +121,6 @@ public class ChallengeEvent implements Event {
     @Override
     public Long getTeam() {
         return event.getTeam();
-    }
-
-    @Override
-    public Long getTeamScope() {
-        return event.getTeamScope();
     }
 
     @Override

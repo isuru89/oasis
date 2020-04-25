@@ -19,6 +19,7 @@
 
 package io.github.oasis.game.process;
 
+import io.github.oasis.game.states.MilestoneSumState;
 import io.github.oasis.game.utils.Utils;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.Milestone;
@@ -26,6 +27,7 @@ import io.github.oasis.model.events.MilestoneEvent;
 import io.github.oasis.model.events.MilestoneStateEvent;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
@@ -33,136 +35,82 @@ import org.apache.flink.util.OutputTag;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 /**
  * @author iweerarathna
  */
 public class MilestoneSumProcess extends KeyedProcessFunction<Long, Event, MilestoneEvent> {
+    private final ValueStateDescriptor<MilestoneSumState> milestoneValueStateDescriptor;
 
-    private final ValueStateDescriptor<Integer> currLevelStateDesc;
-    private final ValueStateDescriptor<Long> stateDesc;
-    private final ValueStateDescriptor<Long> accNegSumDesc;
-
-    private List<Long> levels;
     private Serializable expression;
     private Milestone milestone;
     private OutputTag<MilestoneStateEvent> outputTag;
 
-    private boolean atEnd = false;
-    private Long nextLevelValue = null;
+    private ValueState<MilestoneSumState> milestoneState;
 
-    private ValueState<Long> accSum;
-    private ValueState<Long> accNegSum;
-    private ValueState<Integer> currentLevel;
-
-    public MilestoneSumProcess(List<Long> levels,
-                               Serializable expression, Milestone milestone,
+    public MilestoneSumProcess(Serializable expression, Milestone milestone,
                                OutputTag<MilestoneStateEvent> outputTag) {
-        this.levels = levels;
         this.expression = expression;
         this.milestone = milestone;
         this.outputTag = outputTag;
 
-        currLevelStateDesc =
-                new ValueStateDescriptor<>(String.format("milestone-%d-curr-level", milestone.getId()),
-                        Integer.class);
-        stateDesc =
-                new ValueStateDescriptor<>(String.format("milestone-%d-sum", milestone.getId()),
-                        Long.class);
-        accNegSumDesc = new ValueStateDescriptor<>(
-                String.format("milestone-%d-negsum", milestone.getId()), Long.class);
+        milestoneValueStateDescriptor = new ValueStateDescriptor<>(
+                OasisIDs.getStateId(milestone),
+                Types.GENERIC(MilestoneSumState.class)
+        );
     }
 
     @Override
     public void processElement(Event value, Context ctx, Collector<MilestoneEvent> out) throws Exception {
-        initDefaultState();
+        MilestoneSumState sumState = initDefaultState();
 
-        Integer currLevel = currentLevel.value();
-        Long currLevelMargin;
-        if (currLevel < levels.size()) {
-            long acc = Long.parseLong(Utils.executeExpression(expression, value.getAllFieldValues()).toString());
-
-            if (milestone.isOnlyPositive() && acc < 0) {
-                accNegSum.update(accNegSum.value() + acc);
-                ctx.output(outputTag, new MilestoneStateEvent(value.getUser(), value.getGameId(), milestone, accNegSum.value()));
-                return;
-            }
-
-            long margin = levels.get(currLevel);
-            currLevelMargin = margin;
-            long currSum = accSum.value();
-            if (currSum < margin && margin <= currSum + acc) {
-                // level changed
-                int nextLevel = currLevel + 1;
-                currentLevel.update(nextLevel);
-                out.collect(new MilestoneEvent(value.getUser(), milestone, nextLevel, value));
-
-                long total = currSum + acc;
-                if (nextLevel < levels.size()) {
-                    margin = levels.get(nextLevel);
-                    currLevelMargin = margin;
-
-                    // check for subsequent levels
-                    while (nextLevel < levels.size() && margin < total) {
-                        margin = levels.get(nextLevel);
-                        if (margin < total) {
-                            nextLevel = nextLevel + 1;
-                            currentLevel.update(nextLevel);
-                            currLevelMargin = margin;
-                            out.collect(new MilestoneEvent(value.getUser(), milestone, nextLevel, value));
-                        }
-                    }
-                }
-                accSum.update(total);
-                nextLevelValue = levels.size() > nextLevel ? levels.get(nextLevel) : null;
-                atEnd = levels.size() <= nextLevel;
-
-            } else {
-                accSum.update(currSum + acc);
-            }
-        } else {
-            currLevelMargin = levels.get(levels.size() - 1);
+        if (sumState.isAllLevelsReached()) {
+            return;
         }
 
-        if (!atEnd && nextLevelValue == null) {
-            if (levels.size() > currentLevel.value()) {
-                nextLevelValue = levels.get(Integer.parseInt(currentLevel.value().toString()));
-            } else {
-                nextLevelValue = null;
-                atEnd = true;
-            }
+        double result = getEvaluatedValue(value);
+
+        if (milestone.isOnlyPositive() && result < 0) {
+            milestoneState.update(sumState.accumulateNegative(result));
+            ctx.output(outputTag, MilestoneStateEvent.lossEvent(value, milestone, sumState.getTotalNegativeSum()));
+            return;
         }
 
-        if (!atEnd) {
-            // update sum in db;
-            ctx.output(outputTag, new MilestoneStateEvent(value.getUser(),
-                    value.getGameId(),
-                    milestone,
-                    accSum.value(),
-                    nextLevelValue,
-                    currLevelMargin));
+        int beforeLevel = sumState.getCurrentLevel();
+        sumState.accumulate(result);
+
+        Optional<Milestone.Level> currentLevelOpt = milestone.findLevelForValue(sumState.getTotalSum());
+        if (currentLevelOpt.isPresent() && sumState.hasLevelChanged(currentLevelOpt.get())) {
+            sumState.updateLevelTo(currentLevelOpt.get(), milestone);
+            IntStream.rangeClosed(beforeLevel + 1, sumState.getCurrentLevel())
+                    .forEach(level -> out.collect(MilestoneEvent.reachedEvent(value, milestone, level)));
         }
+
+        ctx.output(outputTag, MilestoneStateEvent.summing(
+                value,
+                milestone,
+                sumState.getTotalSum(),
+                sumState.getNextLevelTarget(milestone),
+                sumState.getCurrentLevelTarget(milestone)));
     }
 
-    private void initDefaultState() throws IOException {
-        if (Objects.equals(accNegSum.value(), accNegSumDesc.getDefaultValue())) {
-            accNegSum.update(0L);
+    private double getEvaluatedValue(Event event) {
+        return Double.parseDouble(Utils.executeExpression(expression, event.getAllFieldValues()).toString());
+    }
+
+    private MilestoneSumState initDefaultState() throws IOException {
+        if (Objects.isNull(milestoneState.value())) {
+            milestoneState.update(MilestoneSumState.from(milestone));
         }
-        if (Objects.equals(currentLevel.value(), currLevelStateDesc.getDefaultValue())) {
-            currentLevel.update(0);
-        }
-        if (Objects.equals(accSum.value(), stateDesc.getDefaultValue())) {
-            accSum.update(0L);
-        }
+        return milestoneState.value();
     }
 
     @Override
     public void open(Configuration parameters) {
-        accNegSum = getRuntimeContext().getState(accNegSumDesc);
-        currentLevel = getRuntimeContext().getState(currLevelStateDesc);
-        accSum = getRuntimeContext().getState(stateDesc);
+        milestoneState = getRuntimeContext().getState(milestoneValueStateDescriptor);
     }
 
 }

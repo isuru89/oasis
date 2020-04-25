@@ -27,7 +27,7 @@ import java.util.List;
 public class PointDef extends BaseDef {
 
     private String event;
-    private String source;
+    private String source;                  // can be 'POINTS' to award points from points
     private String condition;
     private String conditionClass;
     private Object amount;

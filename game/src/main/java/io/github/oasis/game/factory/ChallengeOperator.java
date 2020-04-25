@@ -20,29 +20,26 @@
 package io.github.oasis.game.factory;
 
 import io.github.oasis.game.process.ChallengeProcess;
-import io.github.oasis.game.utils.Utils;
+import io.github.oasis.game.process.OasisIDs;
+import io.github.oasis.model.DefinitionUpdateEvent;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.events.ChallengeEvent;
-import io.github.oasis.model.events.EventNames;
 import io.github.oasis.model.handlers.PointNotification;
-import io.github.oasis.model.rules.PointRule;
-import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.util.OutputTag;
 
 public class ChallengeOperator {
 
+
     public static ChallengePipelineResponse createChallengePipeline(DataStream<Event> eventDataStream,
-                                                                    OutputTag<PointNotification> pointOutputTag,
-                                                                    PointRule pointRule) {
+                                                                    BroadcastStream<DefinitionUpdateEvent> definitionUpdateBroadcastStream,
+                                                                    OutputTag<PointNotification> pointOutputTag) {
         SingleOutputStreamOperator<ChallengeEvent> challengeStream = eventDataStream
-                .filter(new FilterFunction<Event>() {
-                    @Override
-                    public boolean filter(Event event) {
-                        return Utils.eventEquals(event, EventNames.OASIS_EVENT_CHALLENGE_WINNER);
-                    }
-                }).process(new ChallengeProcess(pointRule, pointOutputTag)).uid("oasis-challenge-process");
+                .connect(definitionUpdateBroadcastStream)
+                .process(new ChallengeProcess())
+                .uid(OasisIDs.CHALLENGE_PROCESSOR_ID);
 
         DataStream<PointNotification> pointOutput = challengeStream.getSideOutput(pointOutputTag);
         return new ChallengePipelineResponse(pointOutput, challengeStream);

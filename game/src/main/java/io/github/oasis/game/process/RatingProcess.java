@@ -19,12 +19,14 @@
 
 package io.github.oasis.game.process;
 
+import io.github.oasis.game.states.RatingState;
 import io.github.oasis.game.utils.Utils;
 import io.github.oasis.model.Event;
 import io.github.oasis.model.Rating;
 import io.github.oasis.model.events.RatingEvent;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
@@ -37,57 +39,52 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Calculates a rating for each user based on the event. Only one rating state can have for a user
+ * at a given time.
+ *
+ * @author Isuru Weerarathna
+ */
 public class RatingProcess extends KeyedProcessFunction<Long, Event, RatingEvent> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RatingProcess.class);
 
-    private final ValueStateDescriptor<Integer> currStateDesc;
-    private final ValueStateDescriptor<Long> prevStateChangedDesc;
+    private final ValueStateDescriptor<RatingState> ratingValueStateDescriptor;
 
     private Rating rating;
     private List<Rating.RatingState> orderedStates;
 
-    private ValueState<Integer> currState;
-    private ValueState<Long> prevChangedAt;
+    private ValueState<RatingState> ratingState;
 
     public RatingProcess(Rating rating) {
         this.rating = rating;
         this.orderedStates = rating.getStates();
-
-        currStateDesc = new ValueStateDescriptor<>(String.format("states-%d-curr-state", rating.getId()),
-                        Integer.class);
-        prevStateChangedDesc = new ValueStateDescriptor<>(
-                String.format("states-%d-prev-state-changedat", rating.getId()),
-                Long.class);
+        this.ratingValueStateDescriptor = new ValueStateDescriptor<>(
+                OasisIDs.getStateId(rating),
+                Types.GENERIC(RatingState.class)
+        );
     }
 
     @Override
     public void processElement(Event event, Context ctx, Collector<RatingEvent> out) throws Exception {
-        initDefaultState();
+        RatingState state = initDefaultState(ctx);
 
         Map<String, Object> allFieldValues = event.getAllFieldValues();
-        int previousState = currState.value();
-        long prevTs = prevChangedAt.value();
         for (Rating.RatingState oaState : orderedStates) {
             if (Utils.evaluateCondition(oaState.getCondition(), allFieldValues)) {
-                // this is the state
                 Serializable stateValueExpression = rating.getStateValueExpression();
-                String cv = String.valueOf(Utils.executeExpression(stateValueExpression, allFieldValues));
+                String ratingValue = String.valueOf(Utils.executeExpression(stateValueExpression, allFieldValues));
 
-                if (oaState.getId() != previousState) {
-                    // state change
-                    prevTs = event.getTimestamp();
+                if (state.hasRatingChanged(oaState) || state.hasRatingValueChanged(ratingValue)) {
+                    ratingState.update(state.updateRatingTo(oaState, ratingValue, event));
+
+                    out.collect(RatingEvent.ratingChanged(event,
+                            rating,
+                            oaState,
+                            ratingValue,
+                            state.getPreviousRating(),
+                            state.getChangedAt()));
                 }
-
-                currState.update(oaState.getId());
-
-                out.collect(new RatingEvent(event.getUser(),
-                        rating,
-                        event,
-                        previousState,
-                        oaState,
-                        cv,
-                        prevTs));
                 return;
             }
         }
@@ -97,18 +94,15 @@ public class RatingProcess extends KeyedProcessFunction<Long, Event, RatingEvent
                 event.getExternalId(), rating.getId(), rating.getName());
     }
 
-    private void initDefaultState() throws IOException {
-        if (Objects.equals(currState.value(), currStateDesc.getDefaultValue())) {
-            currState.update(rating.getDefaultState());
+    private RatingState initDefaultState(Context ctx) throws IOException {
+        if (Objects.isNull(ratingState.value())) {
+            ratingState.update(RatingState.from(rating));
         }
-        if (Objects.equals(prevChangedAt.value(), prevStateChangedDesc.getDefaultValue())) {
-            prevChangedAt.update(1L);
-        }
+        return ratingState.value();
     }
 
     @Override
     public void open(Configuration parameters) {
-        currState = getRuntimeContext().getState(currStateDesc);
-        prevChangedAt = getRuntimeContext().getState(prevStateChangedDesc);
+        ratingState = getRuntimeContext().getState(ratingValueStateDescriptor);
     }
 }

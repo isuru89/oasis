@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+
+    <parent>
+        <groupId>io.github.oasis</groupId>
+        <artifactId>oasis-parent</artifactId>
+        <version>0.2-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>oasis-elements</artifactId>
+
+    <modules>
+        <module>points</module>
+        <module>badges</module>
+        <module>milestones</module>
+        <module>challenges</module>
+        <module>ratings</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.oasis</groupId>
+            <artifactId>oasis-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.oasis</groupId>
+            <artifactId>oasis-db-redis</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

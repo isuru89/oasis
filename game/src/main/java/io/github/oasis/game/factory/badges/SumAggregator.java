@@ -27,6 +27,7 @@ import io.github.oasis.model.events.PointEvent;
 import io.github.oasis.model.rules.BadgeFromEvents;
 import io.github.oasis.model.rules.BadgeFromPoints;
 import io.github.oasis.model.rules.PointRule;
+import io.github.oasis.model.rules.Scoring;
 import org.apache.flink.api.common.functions.AggregateFunction;
 import org.apache.flink.api.common.functions.FilterFunction;
 
@@ -58,10 +59,10 @@ class SumAggregator implements AggregateFunction<PointEvent, BadgeAggregator, Ba
         }
         try {
             if (filterFunction == null || filterFunction.filter(value)) {
-                Pair<Double, PointRule> pointScore = value.getPointScore(badgeRule.getPointsId());
+                Scoring pointScore = value.getPointScore(badgeRule.getPointsId());
                 if (pointScore != null) {
                     accumulator.setFirstRefEvent(Utils.firstNonNull(accumulator.getFirstRefEvent(), value.getRefEvent()));
-                    accumulator.setValue(accumulator.getValue() + pointScore.getValue0());
+                    accumulator.setValue(accumulator.getValue() + pointScore.getScore());
                     accumulator.setLastRefEvent(value.getRefEvent());
                 }
             }

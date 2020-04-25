@@ -40,6 +40,7 @@ public class ResourceFileStream implements EventSource<Event>, Serializable {
     private List<String> csvFiles;
     private boolean cancel = false;
     private boolean orderByTs = true;
+    private volatile boolean begin = false;
 
     public ResourceFileStream(Collection<String> csvFile) {
         this.csvFiles = new LinkedList<>(csvFile);
@@ -50,8 +51,21 @@ public class ResourceFileStream implements EventSource<Event>, Serializable {
         this.orderByTs = orderByTS;
     }
 
+    public ResourceFileStream begin() {
+        begin = true;
+        return this;
+    }
+
     @Override
     public void run(SourceContext<Event> ctx) throws Exception {
+        while (true) {
+            if (!begin) {
+                Thread.sleep(1000);
+            } else {
+                break;
+            }
+        }
+
         for (String csvFile : csvFiles) {
             LineIterator lineIterator = IOUtils.lineIterator(TestUtils.loadResource(csvFile), StandardCharsets.UTF_8);
             String header = lineIterator.next();

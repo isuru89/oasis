@@ -94,14 +94,6 @@ public interface Event extends Serializable {
     Long getTeam();
 
     /**
-     * Returns the scope id of the current team.
-     * Operators does not care about this field for its computation.
-     *
-     * @return the scope id of the current team.
-     */
-    Long getTeamScope();
-
-    /**
      * Return source id generated this event.
      *
      * @return source id

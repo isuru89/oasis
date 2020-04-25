@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,12 +39,20 @@ public class Utils {
     private static final Pattern TIME_PATTERN = Pattern.compile("([0-9]+)\\s*([a-zA-Z]+)");
     private static final Pattern NUMBER_PATTERN = Pattern.compile("([0-9\\\\.]+)\\s*([kKmMbB]?)");
 
+    public static <K, V> Map<K,V> getCloneOfMap(Map<K, V> original) {
+        return new HashMap<>(original);
+    }
+
     public static <T> T firstNonNull(T v1, T v2) {
         if (v1 != null) {
             return v1;
         } else {
             return v2;
         }
+    }
+
+    public static <T> T orDefault(T v1, T v2) {
+        return firstNonNull(v1, v2);
     }
 
     public static boolean eventEquals(Event against, String eventType) {
@@ -78,6 +87,14 @@ public class Utils {
         Object result = executeExpression(expression, variables);
         if (result == null) {
             throw new IOException("Expression does not return anything after evaluation! Make sure 'return' is specified.");
+        }
+        return (Boolean) result;
+    }
+
+    public static boolean evaluateConditionSafe(Serializable expression, Map<String, Object> variables) {
+        Object result = executeExpression(expression, variables);
+        if (result == null) {
+            return false;
         }
         return (Boolean) result;
     }
@@ -135,6 +152,10 @@ public class Utils {
             return unit.startsWith("b");
         }
         return false;
+    }
+
+    public static boolean isValidId(Long id) {
+        return id != null && id > 0;
     }
 
     public static double asDouble(Object val) {

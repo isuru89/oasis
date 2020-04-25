@@ -23,7 +23,6 @@ import io.github.oasis.game.factory.ChallengeOperator;
 import io.github.oasis.game.factory.MilestoneNotifier;
 import io.github.oasis.game.factory.MilestoneOperator;
 import io.github.oasis.game.factory.PointsNotifier;
-import io.github.oasis.game.factory.PointsOperator;
 import io.github.oasis.game.factory.RaceOperator;
 import io.github.oasis.game.factory.RatingNotifier;
 import io.github.oasis.game.factory.RatingsOperator;
@@ -41,6 +40,7 @@ import io.github.oasis.game.process.EventTimestampSelector;
 import io.github.oasis.game.process.EventUserSelector;
 import io.github.oasis.game.process.FieldInjector;
 import io.github.oasis.game.process.PointErrorSplitter;
+import io.github.oasis.game.process.PointProcessor;
 import io.github.oasis.game.process.PointsFromBadgeMapper;
 import io.github.oasis.game.process.PointsFromMilestoneMapper;
 import io.github.oasis.game.process.sinks.OasisBadgesSink;
@@ -50,12 +50,15 @@ import io.github.oasis.game.process.sinks.OasisMilestoneStateSink;
 import io.github.oasis.game.process.sinks.OasisPointsSink;
 import io.github.oasis.game.process.sinks.OasisRaceSink;
 import io.github.oasis.game.process.sinks.OasisRatingSink;
+import io.github.oasis.game.states.DefinitionUpdateState;
+import io.github.oasis.model.DefinitionUpdateEvent;
 import io.github.oasis.model.Event;
-import io.github.oasis.model.FieldCalculator;
 import io.github.oasis.model.Milestone;
 import io.github.oasis.model.Rating;
 import io.github.oasis.model.configs.ConfigKeys;
 import io.github.oasis.model.configs.Configs;
+import io.github.oasis.model.defs.BaseDef;
+import io.github.oasis.model.defs.FieldDef;
 import io.github.oasis.model.events.BadgeEvent;
 import io.github.oasis.model.events.ChallengeEvent;
 import io.github.oasis.model.events.EventNames;
@@ -74,12 +77,14 @@ import io.github.oasis.model.rules.BadgeFromPoints;
 import io.github.oasis.model.rules.BadgeRule;
 import io.github.oasis.model.rules.PointRule;
 import org.apache.commons.io.FileUtils;
-import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.runtime.state.StateBackend;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
+import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
@@ -92,7 +97,9 @@ import org.apache.flink.util.OutputTag;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -106,7 +113,8 @@ public class OasisExecution {
 
     private OasisSink oasisSink;
     private SourceFunction<Event> eventSource;
-    private MapFunction<Event, Event> fieldInjector;
+    private SourceFunction<DefinitionUpdateEvent> definitionUpdates;
+    private List<FieldDef> fieldDefs;
 
     private List<PointRule> pointRules;
     private List<Milestone> milestones;
@@ -116,6 +124,9 @@ public class OasisExecution {
     private DataStream<Event> inputSource;
 
     private IOutputHandler outputHandler;
+
+    private static MapStateDescriptor<Long, BaseDef> definitionUpdateEventDescriptor =
+            new MapStateDescriptor<>("oasis.source.definition", Types.LONG, Types.POJO(BaseDef.class));
 
     static void appendCheckpointStatus(StreamExecutionEnvironment env, Configs gameProperties) throws IOException {
         if (gameProperties.has(ConfigKeys.KEY_CHECKPOINT_ENABLED) &&
@@ -155,24 +166,24 @@ public class OasisExecution {
         String rawSrcStr = String.format("raw-%s", oasisId);
 
         DataStreamSource<Event> rawSource = env.addSource(eventSource);
-        if (fieldInjector != null) {
-            inputSource = rawSource.uid(rawSrcStr)
-                    .map(fieldInjector)
-                    .uid(String.format("kpi-events-%s", oasisId))
-                    .assignTimestampsAndWatermarks(new EventTimestampSelector<>());
-        } else {
-            inputSource = rawSource.uid(rawSrcStr)
-                    .assignTimestampsAndWatermarks(new EventTimestampSelector<>());
-        }
+
+        BroadcastStream<DefinitionUpdateEvent> broadcast = Objects.nonNull(definitionUpdates)
+            ? env.addSource(definitionUpdates).broadcast(DefinitionUpdateState.BROADCAST_DEF_UPDATE_DESCRIPTOR)
+            : env.fromCollection(Collections.singletonList(new DefinitionUpdateEvent())).broadcast(DefinitionUpdateState.BROADCAST_DEF_UPDATE_DESCRIPTOR);
+
+        inputSource = rawSource.uid(rawSrcStr)
+                .connect(broadcast)
+                .process(new FieldInjector<>())
+                .uid(String.format("kpi-events-%s", oasisId))
+                .assignTimestampsAndWatermarks(new EventTimestampSelector<>());
+
 
         KeyedStream<Event, Long> userStream = inputSource.keyBy(new EventUserSelector<>());
 
         //  create point operator
-        PointsOperator<Event> pointsOperator = new PointsOperator<>(pointRules);
-
         SplitStream<PointEvent> pointSplitStream = userStream
-                .flatMap(pointsOperator)
-                .uid(String.format("points-processor-%s", oasisId))
+                .connect(broadcast)
+                .process(new PointProcessor())
                 .split(new PointErrorSplitter());
 
         DataStream<PointEvent> pointStream = pointSplitStream.select(PointErrorSplitter.NAME_POINT);
@@ -251,7 +262,7 @@ public class OasisExecution {
             OutputTag<PointNotification> outputTag = new OutputTag<>("oasis-challenge-point-tag",
                             TypeInformation.of(PointNotification.class));
             ChallengeOperator.ChallengePipelineResponse challengePipeline =
-                    ChallengeOperator.createChallengePipeline(inputSource, outputTag, challengePointRule.get());
+                    ChallengeOperator.createChallengePipeline(inputSource, broadcast, outputTag);
             cStream = challengePipeline.getChallengeEventDataStream();
             challengePointStream = challengePipeline.getPointNotificationStream();
         }
@@ -371,6 +382,11 @@ public class OasisExecution {
         //
         //errorStream
 
+        return this;
+    }
+
+    public OasisExecution usingDefinitionUpdates(SourceFunction<DefinitionUpdateEvent> updateEventSource) {
+        this.definitionUpdates = updateEventSource;
         return this;
     }
 
@@ -502,8 +518,8 @@ public class OasisExecution {
         return this;
     }
 
-    public OasisExecution fieldTransformer(List<FieldCalculator> fieldCalculators) {
-        this.fieldInjector = new FieldInjector<>(fieldCalculators);
+    public OasisExecution fieldTransformer(List<FieldDef> fieldDefinitions) {
+        this.fieldDefs = fieldDefinitions;
         return this;
     }
 

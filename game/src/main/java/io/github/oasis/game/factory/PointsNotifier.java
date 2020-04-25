@@ -19,10 +19,9 @@
 
 package io.github.oasis.game.factory;
 
-import io.github.oasis.model.collect.Pair;
 import io.github.oasis.model.events.PointEvent;
 import io.github.oasis.model.handlers.PointNotification;
-import io.github.oasis.model.rules.PointRule;
+import io.github.oasis.model.rules.Scoring;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.util.Collector;
 
@@ -36,12 +35,12 @@ public class PointsNotifier implements FlatMapFunction<PointEvent, PointNotifica
 
     @Override
     public void flatMap(PointEvent event, Collector<PointNotification> out) {
-        for (Map.Entry<String, Pair<Double, PointRule>> entry : event.getReceivedPoints().entrySet()) {
+        for (Map.Entry<String, Scoring> entry : event.getScores().entrySet()) {
             out.collect(new PointNotification(
                     event.getUser(),
                     Collections.singletonList(event),
-                    entry.getValue().getValue1(),
-                    entry.getValue().getValue0()));
+                    entry.getValue().getRule(),
+                    entry.getValue().getScore()));
         }
     }
 }

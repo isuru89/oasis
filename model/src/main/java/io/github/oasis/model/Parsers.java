@@ -55,7 +55,7 @@ public class Parsers {
         calculator.setPriority(Integer.parseInt(kpiDef.getId().toString()));
         calculator.setForEvent(kpiDef.getEvent());
         calculator.setFieldName(kpiDef.getField());
-        calculator.setExpression(compileExpression(kpiDef.getExpression()));
+        calculator.setExpression(kpiDef.getExpression());
 
         return calculator;
     }

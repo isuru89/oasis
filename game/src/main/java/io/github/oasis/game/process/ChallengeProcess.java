@@ -19,42 +19,129 @@
 
 package io.github.oasis.game.process;
 
+import io.github.oasis.game.states.ChallengeState;
 import io.github.oasis.game.utils.Utils;
+import io.github.oasis.model.DefinitionUpdateEvent;
+import io.github.oasis.model.DefinitionUpdateType;
 import io.github.oasis.model.Event;
+import io.github.oasis.model.defs.BaseDef;
+import io.github.oasis.model.defs.ChallengeDef;
 import io.github.oasis.model.events.ChallengeEvent;
-import io.github.oasis.model.handlers.PointNotification;
-import io.github.oasis.model.rules.PointRule;
-import org.apache.flink.streaming.api.functions.ProcessFunction;
+import org.apache.flink.api.common.state.ListState;
+import org.apache.flink.api.common.state.ListStateDescriptor;
+import org.apache.flink.api.common.state.MapState;
+import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.runtime.state.FunctionInitializationContext;
+import org.apache.flink.runtime.state.FunctionSnapshotContext;
+import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
+import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction;
+import org.apache.flink.streaming.api.functions.co.KeyedBroadcastProcessFunction;
 import org.apache.flink.util.Collector;
-import org.apache.flink.util.OutputTag;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-public class ChallengeProcess extends ProcessFunction<Event, ChallengeEvent> {
+public class ChallengeProcess extends BroadcastProcessFunction<Event, DefinitionUpdateEvent, ChallengeEvent>
+                                implements CheckpointedFunction {
 
-    private OutputTag<PointNotification> pointOutputTag;
-    private PointRule challengePointRule;
+    public static final MapStateDescriptor<Long, BaseDef> BROADCAST_CHALLENGES_DESCRIPTOR = new MapStateDescriptor<>(
+            OasisIDs.CHALLENGE_BROADCAST_STATE_ID,
+            Types.LONG,
+            Types.GENERIC(BaseDef.class)
+    );
 
-    public ChallengeProcess(PointRule challengePointRule, OutputTag<PointNotification> pointOutputTag) {
-        this.pointOutputTag = pointOutputTag;
-        this.challengePointRule = challengePointRule;
+    private final ListStateDescriptor<ChallengeState> challengeStateListStateDescriptor = new
+            ListStateDescriptor<>("oasis.processor.challenges", Types.GENERIC(ChallengeState.class));
+
+    private ListState<ChallengeState> challengeStateListState;
+    private Map<Long, ChallengeState> challengeStates;
+
+    public ChallengeProcess() {
+        this.challengeStates = new HashMap<>();
     }
 
     @Override
-    public void processElement(Event event, Context ctx, Collector<ChallengeEvent> out) {
-        ChallengeEvent challengeEvent = new ChallengeEvent(event, null);
-        double points = Utils.asDouble(event.getFieldValue(ChallengeEvent.KEY_POINTS));
-        challengeEvent.setFieldValue(ChallengeEvent.KEY_DEF_ID,
-                Utils.asLong(event.getFieldValue(ChallengeEvent.KEY_DEF_ID)));
-        challengeEvent.setFieldValue(ChallengeEvent.KEY_POINTS, points);
-        out.collect(challengeEvent);
+    public void processElement(Event event, ReadOnlyContext ctx, Collector<ChallengeEvent> out) throws Exception {
+        Iterable<Map.Entry<Long, BaseDef>> entries = ctx.getBroadcastState(BROADCAST_CHALLENGES_DESCRIPTOR).immutableEntries();
+        for (Map.Entry<Long, BaseDef> challengeDefEntry : entries) {
+            long id = challengeDefEntry.getKey();
+            ChallengeDef challengeDefinition = (ChallengeDef) challengeDefEntry.getValue();
 
-        PointNotification pointNotification = new PointNotification(event.getUser(),
-                Collections.singletonList(event),
-                challengePointRule,
-                points);
-        ctx.output(pointOutputTag, pointNotification);
+            ChallengeState challengeState = Utils.orDefault(this.challengeStates.get(id), new ChallengeState());
+            if (challengeState.allowNoMoreWinners(challengeDefinition)) {
+                clearChallengeState(id);
+                continue;
+            }
+
+            if (matchesEventWithChallenge(event, challengeDefinition)) {
+                int win = challengeState.incrementAndGetWinningNumber();
+                this.challengeStates.put(id, challengeState);
+                out.collect(new ChallengeEvent(event, challengeDefinition)
+                        .winning(win)
+                        .awardPoints(challengeDefinition.getPoints()));
+            }
+        }
     }
 
+    private void clearChallengeState(long id) {
+        challengeStates.remove(id);
+    }
 
+    private boolean matchesEventWithChallenge(Event event, ChallengeDef challenge) {
+        if (challenge.inRange(event.getTimestamp())
+            && challenge.matchesWithEvent(event.getEventType())
+            && challenge.amongTargetedUser(event.getUser())
+            && challenge.amongTargetedTeam(event.getTeam())
+            && Utils.isNonEmpty(challenge.getConditions())) {
+
+            Map<String, Object> contextVariables = event.getAllFieldValues();
+            return challenge.getConditions().stream()
+                    .map(Utils::compileExpression)
+                    .anyMatch(expr -> Utils.evaluateConditionSafe(expr, contextVariables));
+        }
+        return false;
+    }
+
+    @Override
+    public void processBroadcastElement(DefinitionUpdateEvent updateEvent, Context ctx, Collector<ChallengeEvent> out) throws Exception {
+        if (updateEvent.getBaseDef() instanceof ChallengeDef) {
+            ChallengeDef value = (ChallengeDef) updateEvent.getBaseDef();
+            long wm = ctx.currentWatermark();
+
+            Iterator<Map.Entry<Long, BaseDef>> challenges = ctx.getBroadcastState(BROADCAST_CHALLENGES_DESCRIPTOR).iterator();
+            challenges.forEachRemaining(entry -> {
+                ChallengeDef challenge = (ChallengeDef) entry.getValue();
+                if (wm != Long.MIN_VALUE && !challenge.inRange(wm)) {
+                    challenges.remove();
+                }
+            });
+
+
+            System.out.println(">>>>> " + value.getId() + " , " + updateEvent.getType());
+            if (updateEvent.getType() == DefinitionUpdateType.DELETED) {
+                ctx.getBroadcastState(BROADCAST_CHALLENGES_DESCRIPTOR).remove(value.getId());
+            } else {
+                ctx.getBroadcastState(BROADCAST_CHALLENGES_DESCRIPTOR).put(value.getId(), value);
+            }
+        }
+    }
+
+    @Override
+    public void snapshotState(FunctionSnapshotContext context) throws Exception {
+        challengeStateListState.clear();
+        for (Map.Entry<Long, ChallengeState> entry : challengeStates.entrySet()) {
+            challengeStateListState.add(entry.getValue());
+        }
+    }
+
+    @Override
+    public void initializeState(FunctionInitializationContext context) throws Exception {
+       challengeStateListState = context.getOperatorStateStore().getUnionListState(challengeStateListStateDescriptor);
+        for (ChallengeState challengeState : challengeStateListState.get()) {
+            challengeStates.put(challengeState.getChallengeId(), challengeState);
+        }
+    }
 }

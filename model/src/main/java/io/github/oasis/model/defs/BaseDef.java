@@ -59,4 +59,12 @@ public abstract class BaseDef implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

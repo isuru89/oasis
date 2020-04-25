@@ -27,6 +27,7 @@ import io.github.oasis.game.parser.RatingsParser;
 import io.github.oasis.model.FieldCalculator;
 import io.github.oasis.model.Milestone;
 import io.github.oasis.model.Rating;
+import io.github.oasis.model.defs.FieldDef;
 import io.github.oasis.model.handlers.IBadgeHandler;
 import io.github.oasis.model.handlers.IChallengeHandler;
 import io.github.oasis.model.handlers.IMilestoneHandler;
@@ -56,6 +57,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class TestUtils {
 
@@ -275,8 +277,11 @@ public class TestUtils {
                 ratingsHandler, raceHandler);
     }
 
-    public static List<FieldCalculator> getFields(String resourceId) throws IOException {
-        return KpiParser.parse(TestUtils.loadResource(resourceId));
+    public static List<FieldDef> getFields(String resourceId) throws IOException {
+        return KpiParser.parse(TestUtils.loadResource(resourceId))
+                .stream()
+                .map(FieldCalculator::convertToDef)
+                .collect(Collectors.toList());
     }
 
     public static List<BadgeRule> getBadgeRules(String resourceId) throws IOException {

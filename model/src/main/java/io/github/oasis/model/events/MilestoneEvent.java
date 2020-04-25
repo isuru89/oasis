@@ -41,6 +41,14 @@ public class MilestoneEvent implements Event {
         this.user = userId;
     }
 
+    public static MilestoneEvent reachedEvent(Event event, Milestone milestone, int level) {
+        return new MilestoneEvent(
+                event.getUser(),
+                milestone,
+                level,
+                event);
+    }
+
     public Event getCausedEvent() {
         return causedEvent;
     }
@@ -102,11 +110,6 @@ public class MilestoneEvent implements Event {
     @Override
     public Long getTeam() {
         return causedEvent.getTeam();
-    }
-
-    @Override
-    public Long getTeamScope() {
-        return causedEvent.getTeamScope();
     }
 
     @Override

@@ -23,7 +23,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * @author iweerarathna
@@ -43,7 +46,36 @@ public class Milestone implements Serializable {
     private boolean onlyPositive = false;
     private List<Level> levels;
     private transient Map<Integer, Level> levelMap = null;
+    private transient NavigableMap<Double, Level> levelMapByValue = null;
     private Long startingLevel = null;
+
+    public Optional<Level> findLevelForValue(double value) {
+        if (levelMapByValue == null) {
+            setupCache();
+        }
+
+        Map.Entry<Double, Level> entry = levelMapByValue.floorEntry(value);
+        if (entry == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(entry.getValue());
+    }
+
+    public Optional<Level> findNextLevelForValue(double value) {
+        if (levelMapByValue == null) {
+            setupCache();
+        }
+
+        Map.Entry<Double, Level> entry = levelMapByValue.higherEntry(value);
+        if (entry == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(entry.getValue());
+    }
+
+    public boolean hasPointReferenceIds() {
+        return pointIds != null && !pointIds.isEmpty();
+    }
 
     public boolean isFromPoints() {
         return from != null && from.equalsIgnoreCase("points");
@@ -110,10 +142,13 @@ public class Milestone implements Serializable {
 
     private void setupCache() {
         Map<Integer, Level> memo = new HashMap<>();
+        NavigableMap<Double, Level> tempLevelMapByValue = new TreeMap<>();
         for (Level level : levels) {
             memo.put(level.getLevel(), level);
+            tempLevelMapByValue.put(level.number.doubleValue(), level);
         }
         this.levelMap = memo;
+        this.levelMapByValue = tempLevelMapByValue;
     }
 
     public void setLevels(List<Level> levels) {
