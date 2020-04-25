@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.engine.runners;
+package io.github.oasis.engine;
 
 import akka.actor.ActorRef;
 import io.github.oasis.engine.EngineContext;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.engine.runners;
+package io.github.oasis.engine;
 
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.elements.milestones.MilestoneRule;

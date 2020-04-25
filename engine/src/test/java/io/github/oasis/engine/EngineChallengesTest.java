@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.engine.runners;
+package io.github.oasis.engine;
 
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.elements.challenges.ChallengeOverEvent;
@@ -32,9 +32,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Set;
 
-import static io.github.oasis.engine.runners.RedisAssert.assertKeyNotExist;
-import static io.github.oasis.engine.runners.RedisAssert.assertSorted;
-import static io.github.oasis.engine.runners.RedisAssert.ofSortedEntries;
+import static io.github.oasis.engine.RedisAssert.assertKeyNotExist;
+import static io.github.oasis.engine.RedisAssert.assertSorted;
+import static io.github.oasis.engine.RedisAssert.ofSortedEntries;
 
 /**
  * @author Isuru Weerarathna

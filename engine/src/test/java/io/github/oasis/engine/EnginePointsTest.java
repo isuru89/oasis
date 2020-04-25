@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.engine.runners;
+package io.github.oasis.engine;
 
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.element.points.PointRule;
@@ -28,8 +28,8 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static io.github.oasis.engine.runners.RedisAssert.assertSorted;
-import static io.github.oasis.engine.runners.RedisAssert.ofSortedEntries;
+import static io.github.oasis.engine.RedisAssert.assertSorted;
+import static io.github.oasis.engine.RedisAssert.ofSortedEntries;
 
 /**
  * @author Isuru Weerarathna

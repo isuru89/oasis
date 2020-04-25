@@ -22,6 +22,8 @@ package io.github.oasis.engine;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.engine.actors.ActorNames;
@@ -43,9 +45,11 @@ public class OasisEngine {
     }
 
     public void start() throws OasisException {
+        Config config = ConfigFactory.load();
+
         context.init();
 
-        oasisEngine = ActorSystem.create("oasis-engine");
+        oasisEngine = ActorSystem.create("oasis-engine", config);
         supervisor = oasisEngine.actorOf(Props.create(OasisSupervisor.class, context), ActorNames.OASIS_SUPERVISOR);
     }
 
@@ -57,13 +61,13 @@ public class OasisEngine {
         supervisor.tell(event, supervisor);
     }
 
+    public void submit(Object message) {
+        supervisor.tell(message, supervisor);
+    }
+
     public void submitAll(Object... events) {
         for (Object event : events) {
-            if (event instanceof Event) {
-                submit((Event) event);
-            } else if (event instanceof OasisCommand) {
-                submit((OasisCommand) event);
-            }
+            submit(event);
         }
     }
 
