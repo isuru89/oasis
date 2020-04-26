@@ -19,8 +19,11 @@
 
 package io.github.oasis.services.events;
 
+import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
@@ -32,9 +35,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
@@ -42,12 +50,13 @@ import java.security.NoSuchAlgorithmException;
 @ExtendWith(VertxExtension.class)
 public class EventApiTest {
 
-    private TestDispatcherVerticle dispatcherVerticle;
+    private TestDispatcherService dispatcherService;
 
     @BeforeEach
     void beforeEach(Vertx vertx, VertxTestContext testContext) {
         JsonObject testConfigs = new JsonObject().put("oasis.dispatcher", "test:any");
-        dispatcherVerticle = new TestDispatcherVerticle();
+        dispatcherService = Mockito.spy(new TestDispatcherService());
+        TestDispatcherVerticle dispatcherVerticle = new TestDispatcherVerticle(dispatcherService);
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new TestDispatcherFactory(dispatcherVerticle));
         vertx.deployVerticle(new EventsApi(), options, testContext.completing());
@@ -57,7 +66,7 @@ public class EventApiTest {
     @DisplayName("Server: Health check")
     void healthCheck(Vertx vertx, VertxTestContext testContext) {
         WebClient client = WebClient.create(vertx);
-        client.get(8090, "localhost", "/health")
+        client.get(8090, "localhost", "/ping")
                 .as(BodyCodec.jsonObject())
                 .send(testContext.succeeding(res -> {
                     testContext.verify(() -> {
@@ -85,6 +94,38 @@ public class EventApiTest {
     }
 
     @Test
+    @DisplayName("Server: Empty auth header")
+    void emptyAuthHeader(Vertx vertx, VertxTestContext testContext) {
+        WebClient client = WebClient.create(vertx);
+        client.get(8090, "localhost", "/api/event")
+                .method(HttpMethod.PUT)
+                .putHeader(HttpHeaders.AUTHORIZATION.toString(), "")
+                .as(BodyCodec.string())
+                .sendJson(new JsonObject().put("name", "isuru"), testContext.succeeding(res -> {
+                    testContext.verify(() -> {
+                        Assertions.assertEquals(401, res.statusCode());
+                        testContext.completeNow();
+                    });
+                }));
+    }
+
+    @Test
+    @DisplayName("Server: Only bearer type should grant")
+    void invalidAuthType(Vertx vertx, VertxTestContext testContext) {
+        WebClient client = WebClient.create(vertx);
+        client.get(8090, "localhost", "/api/event")
+                .method(HttpMethod.PUT)
+                .basicAuthentication("user", "pass123")
+                .as(BodyCodec.string())
+                .sendJson(new JsonObject().put("name", "isuru"), testContext.succeeding(res -> {
+                    testContext.verify(() -> {
+                        Assertions.assertEquals(400, res.statusCode());
+                        testContext.completeNow();
+                    });
+                }));
+    }
+
+    @Test
     @DisplayName("Server: Bad Auth Header")
     void badAuthHeader(Vertx vertx, VertxTestContext testContext) {
         WebClient client = WebClient.create(vertx);
@@ -101,10 +142,50 @@ public class EventApiTest {
     }
 
     @Test
+    @DisplayName("Server: Bad Auth Header having more values")
+    void badAuthHeaderMoreValues(Vertx vertx, VertxTestContext testContext) {
+        WebClient client = WebClient.create(vertx);
+        client.get(8090, "localhost", "/api/event")
+                .method(HttpMethod.PUT)
+                .bearerTokenAuthentication("abcd efgh")
+                .as(BodyCodec.string())
+                .sendJson(new JsonObject().put("name", "isuru"), testContext.succeeding(res -> {
+                    testContext.verify(() -> {
+                        Assertions.assertEquals(400, res.statusCode());
+                        testContext.completeNow();
+                    });
+                }));
+    }
+
+    @Test
+    @DisplayName("Server: Event source does not exist")
+    void sourceDoeNotExist(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        vertx.deployVerticle(new TestRedisDeployVerticle()
+                .addSource("abc", 1, keyPair.getPublic(), List.of(1)), testContext.succeeding());
+
+        JsonObject payload = new JsonObject().put("name", "isuru");
+        String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
+
+        WebClient client = WebClient.create(vertx);
+        client.get(8090, "localhost", "/api/event")
+                .method(HttpMethod.PUT)
+                .bearerTokenAuthentication("abcd:" + hash)
+                .as(BodyCodec.string())
+                .sendJson(new JsonObject().put("name", "isuru2"), testContext.succeeding(res -> {
+                    testContext.verify(() -> {
+                        Assertions.assertEquals(401, res.statusCode());
+                        testContext.completeNow();
+                    });
+                }));
+    }
+
+    @Test
     @DisplayName("Server: Auth Success but integrity violated")
     void authSuccessIntegrityFailed(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        vertx.deployVerticle(new TestRedisDeployVerticle().addSource("abc", keyPair.getPublic()), testContext.succeeding());
+        vertx.deployVerticle(new TestRedisDeployVerticle()
+                .addSource("abc", 1, keyPair.getPublic(), List.of(1)), testContext.succeeding());
 
         JsonObject payload = new JsonObject().put("name", "isuru");
         String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
@@ -123,10 +204,11 @@ public class EventApiTest {
     }
 
     @Test
-    @DisplayName("Server: Auth Success")
-    void authSuccess(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+    @DisplayName("Server: Payload format incorrect")
+    void payloadFormatIncorrect(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        vertx.deployVerticle(new TestRedisDeployVerticle().addSource("abc", keyPair.getPublic()), testContext.succeeding());
+        vertx.deployVerticle(new TestRedisDeployVerticle()
+                .addSource("abc", 1, keyPair.getPublic(), List.of(1)), testContext.succeeding());
 
         JsonObject payload = new JsonObject().put("name", "isuru");
         String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
@@ -136,11 +218,161 @@ public class EventApiTest {
                 .method(HttpMethod.PUT)
                 .bearerTokenAuthentication("abc:" + hash)
                 .as(BodyCodec.string())
-                .sendJson(new JsonObject().put("name", "isuru"), testContext.succeeding(res -> {
+                .sendJson(payload, testContext.succeeding(res -> {
                     testContext.verify(() -> {
-                        Assertions.assertEquals(200, res.statusCode());
+                        Assertions.assertEquals(400, res.statusCode());
                         testContext.completeNow();
                     });
                 }));
+    }
+
+    @Test
+    @DisplayName("Server: Payload content type incorrect")
+    void payloadContentTypeIncorrect(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        vertx.deployVerticle(new TestRedisDeployVerticle().addSource("abc", 1, keyPair.getPublic(), List.of(1)), testContext.succeeding());
+
+        String payload = "isuru";
+        String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
+
+        WebClient client = WebClient.create(vertx);
+        client.get(8090, "localhost", "/api/event")
+                .method(HttpMethod.PUT)
+                .bearerTokenAuthentication("abc:" + hash)
+                .as(BodyCodec.string())
+                .sendBuffer(Buffer.buffer(payload), testContext.succeeding(res -> {
+                    testContext.verify(() -> {
+                        Assertions.assertEquals(400, res.statusCode());
+                        testContext.completeNow();
+                    });
+                }));
+    }
+
+    @Test
+    @DisplayName("Server: No such user exists")
+    void authSuccess(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        vertx.deployVerticle(new TestRedisDeployVerticle()
+                .addSource("abc", 1, keyPair.getPublic(), List.of(1)),
+                testContext.succeeding());
+
+        JsonObject event = TestUtils.aEvent("isuru@oasis.com", System.currentTimeMillis(), "test.a", 100);
+        JsonObject payload = new JsonObject().put("data", event);
+        String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
+
+        WebClient client = WebClient.create(vertx);
+        client.get(8090, "localhost", "/api/event")
+                .method(HttpMethod.PUT)
+                .bearerTokenAuthentication("abc:" + hash)
+                .as(BodyCodec.string())
+                .sendJson(payload, testContext.succeeding(res -> {
+                    testContext.verify(() -> {
+                        System.out.println(res.body());
+                        Assertions.assertEquals(400, res.statusCode());
+                        verifyPushTimes(0);
+                        testContext.completeNow();
+                    });
+                }));
+    }
+
+    @Test
+    @DisplayName("Server: Publish once success")
+    void successPublish(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        vertx.deployVerticle(new TestRedisDeployVerticle()
+                        .addSource("abc", 1, keyPair.getPublic(), List.of(1))
+                        .addUser("isuru@oasis.com", 500, Map.of("1", new JsonObject().put("team", 200))),
+                testContext.succeeding());
+
+        JsonObject event = TestUtils.aEvent("isuru@oasis.com", System.currentTimeMillis(), "test.a", 100);
+        JsonObject payload = new JsonObject().put("data", event);
+        String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
+
+        WebClient client = WebClient.create(vertx);
+        client.get(8090, "localhost", "/api/event")
+                .method(HttpMethod.PUT)
+                .bearerTokenAuthentication("abc:" + hash)
+                .as(BodyCodec.string())
+                .sendJson(payload, testContext.succeeding(res -> {
+                    testContext.verify(() -> {
+                        System.out.println(res.body());
+                        Assertions.assertEquals(200, res.statusCode());
+                        verifyPushTimes(1);
+                        testContext.completeNow();
+                    });
+                }));
+    }
+
+    @Test
+    @DisplayName("Server: Publish only for user assigned subset of games")
+    void successPublishForOnlyGames(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        vertx.deployVerticle(new TestRedisDeployVerticle()
+                        .addSource("abc", 1, keyPair.getPublic(), List.of(1, 2, 3))
+                        .addUser("isuru@oasis.com", 500,
+                                Map.of("1", new JsonObject().put("team", 200), "2", new JsonObject().put("team", 201))
+                        ),
+                testContext.succeeding());
+
+        JsonObject event = TestUtils.aEvent("isuru@oasis.com", System.currentTimeMillis(), "test.a", 100);
+        JsonObject payload = new JsonObject().put("data", event);
+        String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
+
+        WebClient client = WebClient.create(vertx);
+        client.get(8090, "localhost", "/api/event")
+                .method(HttpMethod.PUT)
+                .bearerTokenAuthentication("abc:" + hash)
+                .as(BodyCodec.string())
+                .sendJson(payload, testContext.succeeding(res -> {
+                    testContext.verify(() -> {
+                        System.out.println(res.body());
+                        Assertions.assertEquals(200, res.statusCode());
+                        verifyPushTimes(2);
+                        testContext.completeNow();
+                    });
+                }));
+    }
+
+    @Test
+    @DisplayName("Server: Publish only for existing games")
+    void successPublishForOnlyExistingGames(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        vertx.deployVerticle(new TestRedisDeployVerticle()
+                        .addSource("abc", 1, keyPair.getPublic(), List.of(1, 2))
+                        .addUser("isuru@oasis.com", 500,
+                                Map.of("1", new JsonObject().put("team", 200), "3", new JsonObject().put("team", 201))
+                        ),
+                testContext.succeeding());
+
+        JsonObject event = TestUtils.aEvent("isuru@oasis.com", System.currentTimeMillis(), "test.a", 100);
+        JsonObject payload = new JsonObject().put("data", event);
+        String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
+
+        WebClient client = WebClient.create(vertx);
+        client.get(8090, "localhost", "/api/event")
+                .method(HttpMethod.PUT)
+                .bearerTokenAuthentication("abc:" + hash)
+                .as(BodyCodec.string())
+                .sendJson(payload, testContext.succeeding(res -> {
+                    testContext.verify(() -> {
+                        System.out.println(res.body());
+                        Assertions.assertEquals(200, res.statusCode());
+                        verifyPushTimes(1);
+                        testContext.completeNow();
+                    });
+                }));
+    }
+
+    private void verifyPushTimes(int invocations) {
+        ArgumentCaptor<EventProxy> eventCapture = ArgumentCaptor.forClass(EventProxy.class);
+        Mockito.verify(dispatcherService, Mockito.times(invocations)).push(eventCapture.capture(), Mockito.any());
+        if (invocations > 0) {
+            for (EventProxy eventProxy : eventCapture.getAllValues()) {
+                Assertions.assertTrue(Objects.nonNull(eventProxy.getExternalId()));
+                Assertions.assertTrue(Objects.nonNull(eventProxy.getSource()));
+                Assertions.assertTrue(Objects.nonNull(eventProxy.getGameId()));
+                Assertions.assertTrue(Objects.nonNull(eventProxy.getTeam()));
+            }
+        }
     }
 }

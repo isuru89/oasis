@@ -19,8 +19,13 @@
 
 package io.github.oasis.services.events.model;
 
+import io.github.oasis.core.collect.Pair;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
@@ -28,7 +33,15 @@ import io.vertx.core.json.JsonObject;
 @DataObject
 public class UserInfo {
 
+    private static final JsonObject EMPTY = new JsonObject();
+
     private JsonObject ref;
+
+    public static UserInfo create(String email, JsonObject other) {
+        return new UserInfo(new JsonObject()
+                .mergeIn(other)
+                .put("email", email));
+    }
 
     public UserInfo(JsonObject ref) {
         this.ref = ref;
@@ -42,12 +55,16 @@ public class UserInfo {
         return ref.getLong("id");
     }
 
-    public long getTeamId() {
-        return ref.getLong("team");
-    }
-
     public String getEmail() {
         return ref.getString("email");
     }
 
+    public Optional<Long> getTeamId(int gameId) {
+        JsonObject games = ref.getJsonObject("games", EMPTY);
+        JsonObject gameInfo = games.getJsonObject(String.valueOf(gameId));
+        if (Objects.isNull(gameInfo)) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(gameInfo.getLong("team"));
+    }
 }

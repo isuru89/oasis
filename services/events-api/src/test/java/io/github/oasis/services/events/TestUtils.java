@@ -30,6 +30,7 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Base64;
+import java.util.UUID;
 
 /**
  * @author Isuru Weerarathna
@@ -51,6 +52,26 @@ public class TestUtils {
             Assertions.fail(e);
             return null;
         }
+    }
+
+    public static String signPayload(String text, PrivateKey privateKey) {
+        try {
+            Signature signer = Signature.getInstance("SHA1withRSA");
+            signer.initSign(privateKey);
+            signer.update(text.getBytes());
+            return Base64.getEncoder().encodeToString(signer.sign());
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            Assertions.fail(e);
+            return null;
+        }
+    }
+
+    public static JsonObject aEvent(String email, long ts, String eventType, int value) {
+        return new JsonObject().put("email", email)
+                .put("id", UUID.randomUUID().toString())
+                .put("ts", ts)
+                .put("type", eventType)
+                .put("payload", new JsonObject().put("value", value));
     }
 
 }

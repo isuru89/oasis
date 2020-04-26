@@ -19,10 +19,25 @@
 
 package io.github.oasis.services.events;
 
+import io.github.oasis.services.events.dispatcher.EventDispatcherService;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.serviceproxy.ServiceBinder;
 
 /**
  * @author Isuru Weerarathna
  */
 public class TestDispatcherVerticle extends AbstractVerticle {
+
+    private EventDispatcherService dispatcherService;
+
+    public TestDispatcherVerticle(EventDispatcherService dispatcherService) {
+        this.dispatcherService = dispatcherService;
+    }
+
+    @Override
+    public void start() {
+        new ServiceBinder(vertx)
+                .setAddress(EventDispatcherService.DISPATCHER_SERVICE_QUEUE)
+                .register(EventDispatcherService.class, dispatcherService);
+    }
 }

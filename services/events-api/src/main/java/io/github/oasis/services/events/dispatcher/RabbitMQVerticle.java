@@ -30,8 +30,6 @@ import io.vertx.serviceproxy.ServiceBinder;
  */
 public class RabbitMQVerticle extends AbstractVerticle {
 
-    public static final String DISPATCHER_QUEUE = "event.dispatcher.queue";
-
     private RabbitMQClient mqClient;
 
     @Override
@@ -45,8 +43,8 @@ public class RabbitMQVerticle extends AbstractVerticle {
         RabbitMQDispatcherService.create(vertx, mqClient, ready -> {
             if (ready.succeeded()) {
                 ServiceBinder binder = new ServiceBinder(vertx);
-                binder.setAddress(DISPATCHER_QUEUE)
-                        .register(RabbitMQDispatcherService.class, ready.result());
+                binder.setAddress(EventDispatcherService.DISPATCHER_SERVICE_QUEUE)
+                        .register(EventDispatcherService.class, ready.result());
                 promise.complete();
             } else {
                 promise.fail(ready.cause());

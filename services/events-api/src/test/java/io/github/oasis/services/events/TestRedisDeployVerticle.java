@@ -23,6 +23,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Redis;
 import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.RedisOptions;
@@ -42,11 +43,25 @@ import java.util.Map;
  */
 public class TestRedisDeployVerticle extends AbstractVerticle {
 
-    private Map<String, PublicKey> sources = new HashMap<>();
+    private Map<String, JsonObject> sources = new HashMap<>();
+    private Map<String, JsonObject> users = new HashMap<>();
     private RedisAPI api;
 
-    public TestRedisDeployVerticle addSource(String id, PublicKey publicKey) {
-        sources.put(id, publicKey);
+    public TestRedisDeployVerticle addUser(String email, long id, Map<String, Object> gameTeamIds) {
+        users.put(email, new JsonObject()
+                .put("email", email)
+                .put("id", id)
+                .put("games", new JsonObject(gameTeamIds))
+        );
+        return this;
+    }
+
+    public TestRedisDeployVerticle addSource(String token, int id, PublicKey publicKey, List<Integer> gameIds) {
+        sources.put(token, new JsonObject()
+            .put("token", token)
+            .put("id", id)
+            .put("key", Base64.getEncoder().encodeToString(publicKey.getEncoded()))
+            .put("games", gameIds));
         return this;
     }
 
@@ -62,12 +77,16 @@ public class TestRedisDeployVerticle extends AbstractVerticle {
         redisClient.connect(onConnect -> {
             if (onConnect.succeeded()) {
                 List<Future> futures = new ArrayList<>();
-                for (Map.Entry<String, PublicKey> entry : sources.entrySet()) {
-                    String key = Base64.getEncoder().encodeToString(entry.getValue().getEncoded());
-                    futures.add(Future.<Response>future(p -> api.hset(Arrays.asList("oasis.sources", entry.getKey(), key), p)));
+                for (Map.Entry<String, JsonObject> entry : sources.entrySet()) {
+                    futures.add(Future.<Response>future(p ->
+                            api.hset(List.of("oasis.sources", entry.getKey(), entry.getValue().encode()), p)));
+                }
+                for (Map.Entry<String, JsonObject> entry : users.entrySet()) {
+                    futures.add(Future.<Response>future(p ->
+                            api.hset(List.of("oasis.users", entry.getKey(), entry.getValue().encode()), p)));
                 }
                 CompositeFuture.all(futures).onComplete(res -> {
-                    System.out.println("Redis added completed!");
+                    System.out.println("Redis adding completed!");
                     promise.complete();
                 });
             } else {
@@ -77,10 +96,15 @@ public class TestRedisDeployVerticle extends AbstractVerticle {
     }
 
     @Override
-    public void stop(Promise<Void> stopPromise) throws Exception {
+    public void stop(Promise<Void> stopPromise) {
         if (api != null) {
-            api.del(Collections.singletonList("oasis.sources"), res -> {
-               stopPromise.complete();
+            CompositeFuture.all(
+                List.of(
+                    Future.<Response>future(p -> api.del(List.of("oasis.sources"), p)),
+                    Future.<Response>future(p -> api.del(List.of("oasis.users"), p))
+                )
+            ).onComplete(res -> {
+                stopPromise.complete();
             });
         }
     }

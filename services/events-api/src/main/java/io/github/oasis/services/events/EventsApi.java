@@ -22,6 +22,7 @@ package io.github.oasis.services.events;
 import io.github.oasis.services.events.db.RedisVerticle;
 import io.github.oasis.services.events.dispatcher.DispatcherFactory;
 import io.github.oasis.services.events.dispatcher.RabbitMQVerticle;
+import io.github.oasis.services.events.http.HttpServiceVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
@@ -69,7 +70,11 @@ public class EventsApi extends AbstractVerticle {
 
         JsonObject configs = new JsonObject().put("oasis.dispatcher", "oasis:" + RabbitMQVerticle.class.getName());
         DeploymentOptions options = new DeploymentOptions().setConfig(configs);
-        vertx.deployVerticle(new EventsApi(), options);
+        vertx.deployVerticle(new EventsApi(), options, res -> {
+            if (!res.succeeded()) {
+                vertx.close();
+            }
+        });
         return vertx;
     }
 

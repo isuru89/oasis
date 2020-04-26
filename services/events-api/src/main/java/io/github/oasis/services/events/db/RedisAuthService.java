@@ -24,6 +24,8 @@ import io.github.oasis.services.events.model.EventSource;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Redis;
 import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.Response;
@@ -59,8 +61,8 @@ public class RedisAuthService implements AuthService {
                             return;
                         }
                         try {
-                            byte[] rawKey = Base64.getDecoder().decode(result.toBytes());
-                            EventSource eventSource = EventSource.create(sourceId, rawKey);
+                            JsonObject sourceJson = (JsonObject) Json.decodeValue(result.toBuffer());
+                            EventSource eventSource = EventSource.create(sourceId, sourceJson);
                             handler.handle(Future.succeededFuture(eventSource));
                         } catch (RuntimeException e) {
                             handler.handle(Future.failedFuture(e));

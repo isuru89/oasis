@@ -97,4 +97,17 @@ public class EventProxy implements Event {
     public Integer getGameId() {
         return ref.getInteger("game");
     }
+
+    public String getUserEmail() {
+        return ref.getString("email");
+    }
+
+    public EventProxy copyForGame(int gameId, int sourceId, long userId, long teamId) {
+        JsonObject event = toJson().copy()
+                .put("source", sourceId)
+                .put("team", teamId)
+                .put("user", userId)
+                .put("game", gameId);
+        return new EventProxy(event);
+    }
 }

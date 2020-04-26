@@ -21,10 +21,14 @@ package io.github.oasis.services.events.db;
 
 import io.github.oasis.services.events.auth.AuthService;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.redis.client.Redis;
 import io.vertx.redis.client.RedisOptions;
 import io.vertx.serviceproxy.ServiceBinder;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Isuru Weerarathna
@@ -51,14 +55,36 @@ public class RedisVerticle extends AbstractVerticle {
     }
 
     private void bindAuthService(Promise<Void> promise) {
-        RedisAuthService.create(redisClient, res -> {
-            if (res.succeeded()) {
-                new ServiceBinder(vertx)
-                        .setAddress(AuthService.AUTH_SERVICE_QUEUE)
-                        .register(AuthService.class, res.result());
+        Future<Object> authFuture = Future.future(authServicePromise -> {
+            RedisAuthService.create(redisClient, res -> {
+                if (res.succeeded()) {
+                    new ServiceBinder(vertx)
+                            .setAddress(AuthService.AUTH_SERVICE_QUEUE)
+                            .register(AuthService.class, res.result());
+                    authServicePromise.complete();
+                } else {
+                    authServicePromise.fail(res.cause());
+                }
+            });
+        });
+
+        Future<Object> dbFuture = Future.future(dbServicePromise -> {
+            RedisServiceImpl.create(redisClient, res -> {
+                if (res.succeeded()) {
+                    new ServiceBinder(vertx)
+                            .setAddress(RedisService.DB_SERVICE_QUEUE)
+                            .register(RedisService.class, res.result());
+                    dbServicePromise.complete();
+                } else {
+                    dbServicePromise.fail(res.cause());
+                }
+            });
+        });
+        CompositeFuture.all(authFuture, dbFuture).onComplete(result -> {
+            if (result.succeeded()) {
                 promise.complete();
             } else {
-                promise.fail(res.cause());
+                promise.fail(result.cause());
             }
         });
     }

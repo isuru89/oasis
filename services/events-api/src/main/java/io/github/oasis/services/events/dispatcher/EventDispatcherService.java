@@ -17,32 +17,35 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.db;
+package io.github.oasis.services.events.dispatcher;
 
-import io.github.oasis.services.events.model.EventSource;
-import io.github.oasis.services.events.model.UserInfo;
+import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.codegen.annotations.ProxyClose;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-
+import io.vertx.core.json.JsonObject;
+import io.vertx.rabbitmq.RabbitMQClient;
 
 /**
  * @author Isuru Weerarathna
  */
 @ProxyGen
-public interface RedisService {
+public interface EventDispatcherService {
 
-    String DB_SERVICE_QUEUE = "db.service.queue";
+    String DISPATCHER_SERVICE_QUEUE = "event.dispatcher.queue";
 
-    static RedisService createProxy(Vertx vertx, String address) {
-        return new RedisServiceVertxEBProxy(vertx, address);
+    @GenIgnore
+    static EventDispatcherService createProxy(Vertx vertx, String address) {
+        return new EventDispatcherServiceVertxEBProxy(vertx, address);
     }
 
     @Fluent
-    RedisService readUserInfo(String email, Handler<AsyncResult<UserInfo>> resultHandler);
+    EventDispatcherService push(EventProxy event, Handler<AsyncResult<JsonObject>> result);
 
-    @Fluent
-    RedisService readSourceInfo(String sourceId, Handler<AsyncResult<EventSource>> resultHandler);
+    @ProxyClose
+    void close();
 }

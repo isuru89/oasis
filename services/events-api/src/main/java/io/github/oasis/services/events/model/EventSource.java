@@ -23,6 +23,7 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
@@ -36,6 +37,8 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -44,15 +47,18 @@ import java.util.Base64;
 public class EventSource implements User {
 
     private JsonObject data;
+    private List<Integer> gameIds;
 
     private PublicKey publicKey;
 
-    public static EventSource create(String id, byte[] key) {
+    public static EventSource create(String token, JsonObject otherData) {
+        byte[] rawKey = Base64.getDecoder().decode(otherData.getString("key"));
         JsonObject data = new JsonObject()
-                .put("id", id)
-                .put("publicKey", key);
+                .put("token", token)
+                .mergeIn(otherData);
         try {
-            PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(key));
+            PublicKey publicKey = KeyFactory.getInstance("RSA")
+                    .generatePublic(new X509EncodedKeySpec(rawKey));
             return new EventSource(data).setPublicKey(publicKey);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new IllegalArgumentException("Invalid key data!", e);
@@ -62,7 +68,12 @@ public class EventSource implements User {
     public EventSource(JsonObject ref) {
         this.data = ref;
         try {
-            this.publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(ref.getBinary("publicKey")));
+            JsonArray games = ref.getJsonArray("games");
+            this.gameIds = games.stream()
+                    .map(g -> Integer.parseInt(g.toString()))
+                    .collect(Collectors.toList());
+            this.publicKey = KeyFactory.getInstance("RSA")
+                    .generatePublic(new X509EncodedKeySpec(ref.getBinary("key")));
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new IllegalArgumentException("Invalid key data!", e);
         }
@@ -88,6 +99,10 @@ public class EventSource implements User {
         }
     }
 
+    public List<Integer> getGameIds() {
+        return gameIds;
+    }
+
     public int getSourceId() {
         return data.getInteger("id");
     }
@@ -98,6 +113,7 @@ public class EventSource implements User {
     }
 
     @Override
+    @Deprecated
     public User clearCache() {
         return null;
     }
@@ -108,6 +124,7 @@ public class EventSource implements User {
     }
 
     @Override
+    @Deprecated
     public void setAuthProvider(AuthProvider authProvider) {
 
     }
