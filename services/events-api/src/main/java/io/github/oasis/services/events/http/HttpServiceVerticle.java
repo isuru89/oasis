@@ -102,6 +102,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
         EventSource eventSource = (EventSource) ctx.user();
         Optional<String> optHeader = Optional.ofNullable(ctx.get("__oasisdigest"));
         if (optHeader.isPresent() && eventSource.verifyEvent(ctx.getBody(), optHeader.get())) {
+            System.out.println(ctx.getBody().toString());
             ctx.next();
         } else {
             ctx.fail(403, new IllegalArgumentException("xxx"));
@@ -153,7 +154,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
                         });
                     });
                 }
-                context.response().end(new JsonObject().put("eventId", event.getExternalId()).toBuffer());
+                context.response().setStatusCode(202).end(new JsonObject().put("eventId", event.getExternalId()).toBuffer());
             } else {
                 System.out.println(res.cause().getMessage());
                 context.fail(400, res.cause());

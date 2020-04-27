@@ -38,7 +38,7 @@ import java.util.Optional;
 public class EventAuthHandler extends AuthHandlerImpl {
 
     private static final HttpStatusException UNAUTHORIZED = new HttpStatusException(401);
-    private static final HttpStatusException BAD_HEADER = new HttpStatusException(400, "Bad Header provided");
+    private static final HttpStatusException BAD_HEADER = new HttpStatusException(401, "Bad Header provided");
 
     private static final String BEARER = "Bearer";
 

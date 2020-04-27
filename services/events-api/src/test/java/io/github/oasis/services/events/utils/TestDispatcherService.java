@@ -1,4 +1,4 @@
-package io.github.oasis.services.events;
+package io.github.oasis.services.events.utils;
 
 import io.github.oasis.services.events.dispatcher.EventDispatcherService;
 import io.github.oasis.services.events.model.EventProxy;

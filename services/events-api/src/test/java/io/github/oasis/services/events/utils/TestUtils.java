@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.services.events;
+package io.github.oasis.services.events.utils;
 
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Assertions;

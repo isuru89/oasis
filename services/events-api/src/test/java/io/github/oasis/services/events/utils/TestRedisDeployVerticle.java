@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.services.events;
+package io.github.oasis.services.events.utils;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
@@ -31,9 +31,7 @@ import io.vertx.redis.client.Response;
 
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

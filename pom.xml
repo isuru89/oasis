@@ -25,7 +25,6 @@
     <modules>
         <module>dbs</module>
         <module>core</module>
-        <module>model</module>
         <module>engine</module>
         <module>elements</module>
         <module>services</module>
