@@ -20,8 +20,10 @@
 package io.github.oasis.services.events.utils;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Redis;
@@ -74,22 +76,30 @@ public class TestRedisDeployVerticle extends AbstractVerticle {
         api = RedisAPI.api(redisClient);
         redisClient.connect(onConnect -> {
             if (onConnect.succeeded()) {
-                List<Future> futures = new ArrayList<>();
-                for (Map.Entry<String, JsonObject> entry : sources.entrySet()) {
-                    futures.add(Future.<Response>future(p ->
-                            api.hset(List.of("oasis.sources", entry.getKey(), entry.getValue().encode()), p)));
-                }
-                for (Map.Entry<String, JsonObject> entry : users.entrySet()) {
-                    futures.add(Future.<Response>future(p ->
-                            api.hset(List.of("oasis.users", entry.getKey(), entry.getValue().encode()), p)));
-                }
-                CompositeFuture.all(futures).onComplete(res -> {
-                    System.out.println("Redis adding completed!");
-                    promise.complete();
+                cleanAll(api, cleanRes -> {
+                    List<Future> futures = new ArrayList<>();
+                    for (Map.Entry<String, JsonObject> entry : sources.entrySet()) {
+                        futures.add(Future.<Response>future(p ->
+                                api.hset(List.of("oasis.sources", entry.getKey(), entry.getValue().encode()), p)));
+                    }
+                    for (Map.Entry<String, JsonObject> entry : users.entrySet()) {
+                        futures.add(Future.<Response>future(p ->
+                                api.hset(List.of("oasis.users", entry.getKey(), entry.getValue().encode()), p)));
+                    }
+                    CompositeFuture.all(futures).onComplete(r -> {
+                        System.out.println("Redis adding completed!");
+                        promise.complete();
+                    });
                 });
             } else {
                 promise.fail(onConnect.cause());
             }
+        });
+    }
+
+    private void cleanAll(RedisAPI api, Handler<AsyncResult<Void>> handler) {
+        api.del(List.of("oasis.sources", "oasis.users"), res -> {
+            handler.handle(Future.succeededFuture());
         });
     }
 

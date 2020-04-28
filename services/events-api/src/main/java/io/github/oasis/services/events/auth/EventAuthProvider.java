@@ -26,11 +26,15 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Isuru Weerarathna
  */
 public class EventAuthProvider implements AuthProvider {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EventAuthProvider.class);
 
     private static final HttpStatusException NO_SOURCE = new HttpStatusException(401);
 
@@ -47,6 +51,7 @@ public class EventAuthProvider implements AuthProvider {
             if (res.succeeded()) {
                 handler.handle(Future.succeededFuture(res.result()));
             } else {
+                LOG.warn("Given event source does not exist!");
                 handler.handle(Future.failedFuture(NO_SOURCE));
             }
         });

@@ -70,7 +70,8 @@ public abstract class AbstractEventPushTest extends AbstractTest {
         });
     }
 
-    protected void verifyPushTimes(int invocations) {
+    protected void verifyPushTimes(int invocations) throws Exception {
+        Thread.sleep(1000);
         ArgumentCaptor<EventProxy> eventCapture = ArgumentCaptor.forClass(EventProxy.class);
         Mockito.verify(dispatcherService, Mockito.times(invocations)).push(eventCapture.capture(), Mockito.any());
         if (invocations > 0) {

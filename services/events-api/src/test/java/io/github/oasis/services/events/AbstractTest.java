@@ -11,6 +11,7 @@ import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -31,6 +32,12 @@ public abstract class AbstractTest {
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new TestDispatcherFactory(dispatcherVerticle));
         vertx.deployVerticle(new EventsApi(), options, testContext.completing());
+    }
+
+    @AfterEach
+    void afterEach(Vertx vertx, VertxTestContext testContext) {
+        System.out.println("................................................................................");
+        testContext.completeNow();
     }
 
     protected HttpRequest<Buffer> callToEndPoint(String endPoint, Vertx vertx) {

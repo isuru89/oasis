@@ -19,34 +19,23 @@
 
 package io.github.oasis.services.events;
 
-import io.github.oasis.services.events.model.EventProxy;
 import io.github.oasis.services.events.utils.TestRedisDeployVerticle;
 import io.github.oasis.services.events.utils.TestUtils;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.codec.BodyCodec;
-import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
  */
+@DisplayName("Successful Event Publish")
 public class PublishSuccessTest extends AbstractEventPushTest {
 
     @Test
@@ -82,7 +71,9 @@ public class PublishSuccessTest extends AbstractEventPushTest {
         callForEvent(vertx, KNOWN_SOURCE + ":" + hash)
                 .sendJson(
                         payload,
-                        testContext.succeeding(res -> assertSuccessWithInvocations(res, testContext, 2))
+                        testContext.succeeding(res -> {
+                            assertSuccessWithInvocations(res, testContext, 2);
+                        })
                 );
     }
 

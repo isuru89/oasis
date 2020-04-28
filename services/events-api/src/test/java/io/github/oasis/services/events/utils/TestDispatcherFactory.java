@@ -40,7 +40,7 @@ public class TestDispatcherFactory implements VerticleFactory {
     }
 
     @Override
-    public Verticle createVerticle(String s, ClassLoader classLoader) throws Exception {
+    public Verticle createVerticle(String s, ClassLoader classLoader) {
         return verticle;
     }
 }

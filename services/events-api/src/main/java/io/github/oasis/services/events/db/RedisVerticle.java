@@ -27,6 +27,8 @@ import io.vertx.core.Promise;
 import io.vertx.redis.client.Redis;
 import io.vertx.redis.client.RedisOptions;
 import io.vertx.serviceproxy.ServiceBinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -34,6 +36,8 @@ import java.util.concurrent.CompletableFuture;
  * @author Isuru Weerarathna
  */
 public class RedisVerticle extends AbstractVerticle {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RedisVerticle.class);
 
     private Redis redisClient;
 
@@ -93,7 +97,7 @@ public class RedisVerticle extends AbstractVerticle {
     public void stop() {
         if (redisClient != null) {
             redisClient.close();
-            System.out.println("Redis shutdown completed!");
+            LOG.debug("Redis shutdown completed!");
         }
     }
 }

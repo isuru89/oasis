@@ -42,6 +42,8 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthHandler;
 import io.vertx.ext.web.handler.BodyHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.List;
@@ -54,6 +56,8 @@ import java.util.stream.Collectors;
  * @author Isuru Weerarathna
  */
 public class HttpServiceVerticle extends AbstractVerticle {
+
+    private static final Logger LOG = LoggerFactory.getLogger(HttpServiceVerticle.class);
 
     private static final String APPLICATION_JSON = HttpHeaderValues.APPLICATION_JSON.toString();
     private static final String DATA = "data";
@@ -102,9 +106,9 @@ public class HttpServiceVerticle extends AbstractVerticle {
         EventSource eventSource = (EventSource) ctx.user();
         Optional<String> optHeader = Optional.ofNullable(ctx.get("__oasisdigest"));
         if (optHeader.isPresent() && eventSource.verifyEvent(ctx.getBody(), optHeader.get())) {
-            System.out.println(ctx.getBody().toString());
             ctx.next();
         } else {
+            LOG.warn("Payload verification failed!");
             ctx.fail(403, new IllegalArgumentException("xxx"));
         }
     }
@@ -133,15 +137,16 @@ public class HttpServiceVerticle extends AbstractVerticle {
     private void putEvent(RoutingContext context) {
         Optional<EventProxy> eventPayload = getEventPayloadAsObject(context.getBody());
         if (eventPayload.isEmpty()) {
+            LOG.warn("Event payload does not comply to the accepted format!");
             context.fail(400);
             return;
         }
         EventProxy event = eventPayload.get();
         EventSource source = asEventSource(context.user());
         String userEmail = event.getUserEmail();
-        System.out.println(userEmail);
         redisService.readUserInfo(userEmail, res -> {
             if (res.succeeded()) {
+                LOG.info("User {} exists in Oasis", userEmail);
                 UserInfo user = res.result();
                 List<Integer> gameIds = source.getGameIds().stream()
                         .filter(gId -> user.getTeamId(gId).isPresent())
@@ -150,13 +155,17 @@ public class HttpServiceVerticle extends AbstractVerticle {
                     user.getTeamId(gameId).ifPresent(teamId -> {
                         EventProxy gameEvent = event.copyForGame(gameId, source.getSourceId(), user.getId(), teamId);
                         dispatcherService.push(gameEvent, dispatcherRes -> {
-                            System.out.println(dispatcherRes.succeeded());
+                            if (dispatcherRes.succeeded()) {
+                                LOG.info("Event published {}", dispatcherRes.result());
+                            } else {
+                                LOG.error("Unable to publish event!", dispatcherRes.cause());
+                            }
                         });
                     });
                 }
                 context.response().setStatusCode(202).end(new JsonObject().put("eventId", event.getExternalId()).toBuffer());
             } else {
-                System.out.println(res.cause().getMessage());
+                LOG.warn("User {} does not exist in Oasis!", userEmail);
                 context.fail(400, res.cause());
             }
         });
@@ -212,7 +221,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
     @Override
     public void stop() {
         if (server != null) {
-            System.out.println("Http server closing..." + context.deploymentID());
+            LOG.debug("Event API shutting down...");
             server.close();
         }
     }

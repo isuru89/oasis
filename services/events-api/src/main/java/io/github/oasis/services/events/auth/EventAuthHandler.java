@@ -29,6 +29,8 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.impl.AuthHandlerImpl;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -36,6 +38,8 @@ import java.util.Optional;
  * @author Isuru Weerarathna
  */
 public class EventAuthHandler extends AuthHandlerImpl {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EventAuthHandler.class);
 
     private static final HttpStatusException UNAUTHORIZED = new HttpStatusException(401);
     private static final HttpStatusException BAD_HEADER = new HttpStatusException(401, "Bad Header provided");
@@ -60,17 +64,20 @@ public class EventAuthHandler extends AuthHandlerImpl {
     public void parseCredentials(RoutingContext context, Handler<AsyncResult<JsonObject>> handler) {
         String authorization = context.request().headers().get(HttpHeaders.AUTHORIZATION);
         if (authorization == null || authorization.isEmpty()) {
+            LOG.warn("No authorization header is provided!");
             handler.handle(Future.failedFuture(UNAUTHORIZED));
             return;
         }
 
         String[] parts = authorization.split(" ");
         if (parts.length != 2 || !parts[0].equals(BEARER)) {
+            LOG.warn("No valid authorization header is provided!");
             handler.handle(Future.failedFuture(BAD_HEADER));
             return;
         }
         String[] dataParts = parts[1].split(":");
         if (dataParts.length != 2) {
+            LOG.warn("Authorization header is invalid!");
             handler.handle(Future.failedFuture(BAD_HEADER));
             return;
         }

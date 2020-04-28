@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PayloadFormatTest extends AbstractEventPushTest {
 
     @Test
-    @DisplayName("Server: Payload content type incorrect")
+    @DisplayName("Payload content type incorrect")
     void payloadContentTypeIncorrect(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
         vertx.deployVerticle(createKnownSource(keyPair), testContext.succeeding());
@@ -54,7 +54,7 @@ public class PayloadFormatTest extends AbstractEventPushTest {
 
     @Test
     @DisplayName("No such user exists")
-    void authSuccess(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+    void noSuchUserExists(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
         vertx.deployVerticle(createKnownSource(keyPair), testContext.succeeding());
 
