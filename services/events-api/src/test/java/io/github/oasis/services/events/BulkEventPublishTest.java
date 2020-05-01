@@ -45,7 +45,7 @@ public class BulkEventPublishTest extends AbstractEventPushTest {
         pushBulkEvents(vertx, KNOWN_SOURCE + ":" + hash)
                 .sendJson(
                         MULTI_PAYLOAD,
-                        testContext.succeeding(res -> assertSuccessWithInvocations(res, testContext, 3))
+                        testContext.succeeding(res -> assertSuccess(res, testContext))
                 );
     }
 

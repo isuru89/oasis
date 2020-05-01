@@ -79,6 +79,13 @@ public abstract class AbstractEventPushTest extends AbstractTest {
         });
     }
 
+    protected void assertSuccess(HttpResponse<String> response, VertxTestContext ctx) {
+        ctx.verify(() -> {
+            assertThat(response.statusCode()).isEqualTo(202);
+            ctx.completeNow();
+        });
+    }
+
     protected void verifyPushTimes(int invocations) {
         sleepWell();
         ArgumentCaptor<EventProxy> eventCapture = ArgumentCaptor.forClass(EventProxy.class);
