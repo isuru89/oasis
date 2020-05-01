@@ -73,6 +73,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> promise) {
+        LOG.info("Starting event api web service...");
         authService = AuthService.createProxy(vertx, AuthService.AUTH_SERVICE_QUEUE);
         redisService = RedisService.createProxy(vertx, RedisService.DB_SERVICE_QUEUE);
         dispatcherService = EventDispatcherService.createProxy(vertx, EventDispatcherService.DISPATCHER_SERVICE_QUEUE);
@@ -99,8 +100,10 @@ public class HttpServiceVerticle extends AbstractVerticle {
         server.requestHandler(router);
         server.listen(8090, onListen -> {
             if (onListen.succeeded()) {
+                LOG.info("Events listening on port " + 8090);
                 promise.complete();
             } else {
+                LOG.error("Events API initialization failed!", onListen.cause());
                 promise.fail(onListen.cause());
             }
         });

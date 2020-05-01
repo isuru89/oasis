@@ -21,13 +21,21 @@ package io.github.oasis.services.events.dispatcher;
 
 import io.vertx.core.Verticle;
 import io.vertx.core.spi.VerticleFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * @author Isuru Weerarathna
  */
 public class DispatcherFactory implements VerticleFactory {
 
+    private static final Logger LOG = LoggerFactory.getLogger(DispatcherFactory.class);
+
     public static final String OASIS_VERTICLE = "oasis";
+    private static final String OASIS_PREFIX = OASIS_VERTICLE + ":";
 
     @Override
     public String prefix() {
@@ -35,8 +43,14 @@ public class DispatcherFactory implements VerticleFactory {
     }
 
     @Override
-    public Verticle createVerticle(String type, ClassLoader classLoader) {
-        System.out.println("My dispatcher called");
-        return new RabbitMQVerticle();
+    public Verticle createVerticle(String type, ClassLoader classLoader) throws Exception {
+        String impl = StringUtils.substringAfter(type, OASIS_PREFIX);
+        LOG.info("Creating dispatcher of type: {}", impl);
+        try {
+            return (Verticle) classLoader.loadClass(impl).getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException e) {
+            LOG.error("Cannot load provided dispatcher implementation!", e);
+            throw e;
+        }
     }
 }

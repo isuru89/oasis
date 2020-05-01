@@ -29,7 +29,10 @@ public abstract class AbstractTest {
 
     @BeforeEach
     void beforeEach(Vertx vertx, VertxTestContext testContext) {
-        JsonObject testConfigs = new JsonObject().put("oasis.dispatcher", "test:any");
+        JsonObject dispatcherConf = new JsonObject().put("impl", "test:any").put("configs", new JsonObject());
+        JsonObject testConfigs = new JsonObject()
+                .put("http", new JsonObject().put("instances", 1))
+                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
         dispatcherService = Mockito.spy(new TestDispatcherService());
         TestDispatcherVerticle dispatcherVerticle = new TestDispatcherVerticle(dispatcherService);
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);

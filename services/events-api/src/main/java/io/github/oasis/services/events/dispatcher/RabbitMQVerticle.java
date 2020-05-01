@@ -21,41 +21,54 @@ package io.github.oasis.services.events.dispatcher;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQOptions;
 import io.vertx.serviceproxy.ServiceBinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Isuru Weerarathna
  */
 public class RabbitMQVerticle extends AbstractVerticle {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RabbitMQVerticle.class);
+
     private RabbitMQClient mqClient;
 
     @Override
     public void start(Promise<Void> promise) {
-        RabbitMQOptions options = new RabbitMQOptions()
-                .setHost("localhost")
-                .setPort(5672)
-                .setAutomaticRecoveryEnabled(true);
+        LOG.info("Starting RabbitMQ connection...");
+        JsonObject rabbitConfigs = config();
+        printRabbitConfigs(rabbitConfigs.copy());
+        RabbitMQOptions options = new RabbitMQOptions(rabbitConfigs);
 
         mqClient = RabbitMQClient.create(vertx, options);
-        RabbitMQDispatcherService.create(vertx, mqClient, ready -> {
+        RabbitMQDispatcherService.create(vertx, mqClient, rabbitConfigs, ready -> {
             if (ready.succeeded()) {
                 ServiceBinder binder = new ServiceBinder(vertx);
                 binder.setAddress(EventDispatcherService.DISPATCHER_SERVICE_QUEUE)
                         .register(EventDispatcherService.class, ready.result());
+                LOG.info("RabbitMQ connection successful!");
                 promise.complete();
             } else {
+                LOG.error("Failed to connect to RabbitMQ!", ready.cause());
                 promise.fail(ready.cause());
             }
         });
     }
 
+    private void printRabbitConfigs(JsonObject configs) {
+        LOG.debug("RabbitMQ configs: {}", configs
+                .put("password", "******")
+                .encodePrettily());
+    }
+
     @Override
     public void stop(Promise<Void> promise) {
         if (mqClient != null) {
-            System.out.println("RabbitMQ stopping...");
+            LOG.warn("Stopping RabbitMQ...");
             mqClient.stop(promise.future());
         }
     }

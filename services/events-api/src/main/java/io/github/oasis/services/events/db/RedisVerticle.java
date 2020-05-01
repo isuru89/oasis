@@ -24,6 +24,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Redis;
 import io.vertx.redis.client.RedisOptions;
 import io.vertx.serviceproxy.ServiceBinder;
@@ -43,16 +44,17 @@ public class RedisVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> promise) {
-        RedisOptions configs = new RedisOptions()
-                .setConnectionString("redis://localhost:6379")
-                .setMaxPoolSize(4)
-                .setMaxWaitingHandlers(16);
+        LOG.info("Starting Redis connection...");
+        JsonObject redisConfigs = config();
+        LOG.debug("Redis Configs: {}", redisConfigs.encodePrettily());
+        RedisOptions configs = new RedisOptions(redisConfigs);
 
         redisClient = Redis.createClient(vertx, configs);
         redisClient.connect(onConnect -> {
             if (onConnect.succeeded()) {
                 bindAuthService(promise);
             } else {
+                LOG.error("Redis connection establishment failed!", onConnect.cause());
                 promise.fail(onConnect.cause());
             }
         });
@@ -86,8 +88,10 @@ public class RedisVerticle extends AbstractVerticle {
         });
         CompositeFuture.all(authFuture, dbFuture).onComplete(result -> {
             if (result.succeeded()) {
+                LOG.info("Redis connection successfully established.");
                 promise.complete();
             } else {
+                LOG.error("Redis connection establishment failed!", result.cause());
                 promise.fail(result.cause());
             }
         });
@@ -97,7 +101,7 @@ public class RedisVerticle extends AbstractVerticle {
     public void stop() {
         if (redisClient != null) {
             redisClient.close();
-            LOG.debug("Redis shutdown completed!");
+            LOG.warn("Redis shutdown completed!");
         }
     }
 }
