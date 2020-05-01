@@ -110,4 +110,11 @@ public class EventProxy implements Event {
                 .put("game", gameId);
         return new EventProxy(event);
     }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                ref +
+                '}';
+    }
 }

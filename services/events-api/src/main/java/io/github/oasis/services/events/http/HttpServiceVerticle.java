@@ -29,6 +29,9 @@ import io.github.oasis.services.events.model.EventSource;
 import io.github.oasis.services.events.model.UserInfo;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
@@ -59,6 +62,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpServiceVerticle.class);
 
+    private static final Throwable NO_SUCH_USER_EXIST = new IllegalArgumentException("User does not exist!");
     private static final String APPLICATION_JSON = HttpHeaderValues.APPLICATION_JSON.toString();
     private static final String DATA = "data";
     private HttpServer server;
@@ -91,7 +95,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
                 .handler(this::verifyIntegrity);
 
         router.put("/api/events").handler(this::putEvents);
-        router.put("/api/event").handler(this::putEvent);
+        router.put("/api/event").handler(this::putEventHandler);
         server.requestHandler(router);
         server.listen(8090, onListen -> {
             if (onListen.succeeded()) {
@@ -122,6 +126,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
         JsonArray eventArray = payloadArray.get();
         Iterator<Object> it = eventArray.iterator();
         EventSource source = asEventSource(context.user());
+        JsonArray submittedEvents = new JsonArray();
         while (it.hasNext()) {
             Object eventPayloadObj = it.next();
             Optional<EventProxy> eventProxy = asEvent(eventPayloadObj);
@@ -130,19 +135,36 @@ public class HttpServiceVerticle extends AbstractVerticle {
                 return;
             }
 
-            // @TODO
+            EventProxy event = eventProxy.get();
+            putEvent(event, source, res -> {
+                if (res.failed()) {
+                    LOG.warn("Unable to publish event! {}", event);
+                }
+            });
+            submittedEvents.add(event.getExternalId());
         }
+        context.response().setStatusCode(202).end(new JsonObject().put("events", submittedEvents).toBuffer());
     }
 
-    private void putEvent(RoutingContext context) {
+    private void putEventHandler(RoutingContext context) {
         Optional<EventProxy> eventPayload = getEventPayloadAsObject(context.getBody());
         if (eventPayload.isEmpty()) {
             LOG.warn("Event payload does not comply to the accepted format!");
             context.fail(400);
             return;
         }
-        EventProxy event = eventPayload.get();
         EventSource source = asEventSource(context.user());
+        EventProxy event = eventPayload.get();
+        putEvent(event, source, res -> {
+            if (res.succeeded()) {
+                context.response().setStatusCode(202).end(new JsonObject().put("eventId", event.getExternalId()).toBuffer());
+            } else {
+                context.fail(400, res.cause());
+            }
+        });
+    }
+
+    private void putEvent(EventProxy event, EventSource source, Handler<AsyncResult<Boolean>> handler) {
         String userEmail = event.getUserEmail();
         redisService.readUserInfo(userEmail, res -> {
             if (res.succeeded()) {
@@ -158,15 +180,15 @@ public class HttpServiceVerticle extends AbstractVerticle {
                             if (dispatcherRes.succeeded()) {
                                 LOG.info("Event published {}", dispatcherRes.result());
                             } else {
-                                LOG.error("Unable to publish event!", dispatcherRes.cause());
+                                LOG.error("Unable to publish event! {}", gameEvent, dispatcherRes.cause());
                             }
                         });
                     });
                 }
-                context.response().setStatusCode(202).end(new JsonObject().put("eventId", event.getExternalId()).toBuffer());
+                handler.handle(Future.succeededFuture(true));
             } else {
                 LOG.warn("User {} does not exist in Oasis!", userEmail);
-                context.fail(400, res.cause());
+                handler.handle(Future.failedFuture(NO_SUCH_USER_EXIST));
             }
         });
     }

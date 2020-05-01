@@ -23,7 +23,7 @@ public class PayloadIntegrityTest extends AbstractEventPushTest {
     @DisplayName("Payload changed after hash is generated")
     void hashIncorrect(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        vertx.deployVerticle(createKnownUser(createKnownSource(keyPair)), testContext.succeeding());
+        awaitRedisInitialization(vertx, testContext, createKnownUser(createKnownSource(keyPair)));
 
         String hash = TestUtils.signPayload(VALID_PAYLOAD, keyPair.getPrivate());
         JsonObject modified = VALID_PAYLOAD.copy();
@@ -42,7 +42,7 @@ public class PayloadIntegrityTest extends AbstractEventPushTest {
     @DisplayName("Payload with correct hash")
     void correctHash(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        vertx.deployVerticle(createKnownUser(createKnownSource(keyPair)), testContext.succeeding());
+        awaitRedisInitialization(vertx, testContext, createKnownUser(createKnownSource(keyPair)));
 
         String hash = TestUtils.signPayload(VALID_PAYLOAD, keyPair.getPrivate());
 

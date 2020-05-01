@@ -36,6 +36,7 @@ public abstract class AbstractEventPushTest extends AbstractTest {
             .put("data", TestUtils.aEvent(KNOWN_USER, System.currentTimeMillis(), "event.a", 100));
 
     protected static final String API_EVENT = "/api/event";
+    protected static final String API_EVENTS = "/api/events";
 
     protected HttpRequest<Buffer> callPushEvent(Vertx vertx) {
         WebClient client = WebClient.create(vertx);
@@ -45,6 +46,14 @@ public abstract class AbstractEventPushTest extends AbstractTest {
 
     protected HttpRequest<String> callForEvent(Vertx vertx, String bearerHeader) {
         return callPushEvent(vertx)
+                .bearerTokenAuthentication(bearerHeader)
+                .as(BodyCodec.string());
+    }
+
+    protected HttpRequest<String> pushBulkEvents(Vertx vertx, String bearerHeader) {
+        WebClient client = WebClient.create(vertx);
+        return client.get(8090, "localhost", API_EVENTS)
+                .method(HttpMethod.PUT)
                 .bearerTokenAuthentication(bearerHeader)
                 .as(BodyCodec.string());
     }
@@ -70,8 +79,8 @@ public abstract class AbstractEventPushTest extends AbstractTest {
         });
     }
 
-    protected void verifyPushTimes(int invocations) throws Exception {
-        Thread.sleep(1000);
+    protected void verifyPushTimes(int invocations) {
+        sleepWell();
         ArgumentCaptor<EventProxy> eventCapture = ArgumentCaptor.forClass(EventProxy.class);
         Mockito.verify(dispatcherService, Mockito.times(invocations)).push(eventCapture.capture(), Mockito.any());
         if (invocations > 0) {

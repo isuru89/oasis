@@ -30,6 +30,8 @@ import io.vertx.redis.client.Redis;
 import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.RedisOptions;
 import io.vertx.redis.client.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -42,6 +44,8 @@ import java.util.Map;
  * @author Isuru Weerarathna
  */
 public class TestRedisDeployVerticle extends AbstractVerticle {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TestRedisDeployVerticle.class);
 
     private Map<String, JsonObject> sources = new HashMap<>();
     private Map<String, JsonObject> users = new HashMap<>();
@@ -87,8 +91,13 @@ public class TestRedisDeployVerticle extends AbstractVerticle {
                                 api.hset(List.of("oasis.users", entry.getKey(), entry.getValue().encode()), p)));
                     }
                     CompositeFuture.all(futures).onComplete(r -> {
-                        System.out.println("Redis adding completed!");
-                        promise.complete();
+                        if (r.succeeded()) {
+                            LOG.info("Redis initialization completed.");
+                            promise.complete();
+                        } else {
+                            LOG.warn("Redis initialization failed! {}", r.cause().getMessage());
+                            promise.fail(r.cause());
+                        }
                     });
                 });
             } else {

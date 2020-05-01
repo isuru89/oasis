@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.events.utils;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Assertions;
 
@@ -40,6 +41,18 @@ public class TestUtils {
     public static KeyPair createKeys() throws NoSuchAlgorithmException {
         KeyPairGenerator pairGenerator = KeyPairGenerator.getInstance("RSA");
         return pairGenerator.generateKeyPair();
+    }
+
+    public static String signPayload(JsonArray json, PrivateKey privateKey) {
+        try {
+            Signature signer = Signature.getInstance("SHA1withRSA");
+            signer.initSign(privateKey);
+            signer.update(json.toBuffer().getBytes());
+            return Base64.getEncoder().encodeToString(signer.sign());
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            Assertions.fail(e);
+            return null;
+        }
     }
 
     public static String signPayload(JsonObject json, PrivateKey privateKey) {

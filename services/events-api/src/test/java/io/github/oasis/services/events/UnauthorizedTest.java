@@ -55,7 +55,7 @@ public class UnauthorizedTest extends AbstractEventPushTest {
     @DisplayName("Event source does not exist")
     void sourceDoeNotExist(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        vertx.deployVerticle(createKnownSource(keyPair), testContext.succeeding());
+        awaitRedisInitialization(vertx, testContext, createKnownSource(keyPair));
 
         String hash = TestUtils.signPayload(VALID_PAYLOAD, keyPair.getPrivate());
         String bearer = "abcd:" + hash;

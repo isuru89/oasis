@@ -3,6 +3,7 @@ package io.github.oasis.services.events;
 import io.github.oasis.services.events.utils.TestDispatcherFactory;
 import io.github.oasis.services.events.utils.TestDispatcherService;
 import io.github.oasis.services.events.utils.TestDispatcherVerticle;
+import io.github.oasis.services.events.utils.TestRedisDeployVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
@@ -34,10 +37,23 @@ public abstract class AbstractTest {
         vertx.deployVerticle(new EventsApi(), options, testContext.completing());
     }
 
-    @AfterEach
-    void afterEach(Vertx vertx, VertxTestContext testContext) {
-        System.out.println("................................................................................");
-        testContext.completeNow();
+    protected void sleepWell() {
+        String relaxTime = System.getenv("OASIS_RELAX_TIME");
+        if (Objects.nonNull(relaxTime)) {
+            long slp = Long.parseLong(relaxTime);
+            if (slp > 0) {
+                try {
+                    Thread.sleep(slp);
+                } catch (InterruptedException e) {
+                    // do nothing
+                }
+            }
+        }
+    }
+
+    protected void awaitRedisInitialization(Vertx vertx, VertxTestContext testContext, TestRedisDeployVerticle verticle) {
+        vertx.deployVerticle(verticle, testContext.succeeding());
+        sleepWell();
     }
 
     protected HttpRequest<Buffer> callToEndPoint(String endPoint, Vertx vertx) {

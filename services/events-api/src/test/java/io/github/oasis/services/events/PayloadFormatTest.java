@@ -3,6 +3,8 @@ package io.github.oasis.services.events;
 import io.github.oasis.services.events.utils.TestUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.junit5.VertxTestContext;
@@ -24,7 +26,7 @@ public class PayloadFormatTest extends AbstractEventPushTest {
     @DisplayName("Payload content type incorrect")
     void payloadContentTypeIncorrect(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        vertx.deployVerticle(createKnownSource(keyPair), testContext.succeeding());
+        awaitRedisInitialization(vertx, testContext, createKnownSource(keyPair));
 
         String payload = "isuru";
         String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
@@ -37,10 +39,26 @@ public class PayloadFormatTest extends AbstractEventPushTest {
     }
 
     @Test
+    @DisplayName("Payload as json array not accpeted")
+    void payloadContentTypeArrayIncorrect(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        awaitRedisInitialization(vertx, testContext, createKnownSource(keyPair));
+
+        JsonArray payload = new JsonArray().add(new JsonObject().put("data", KNOWN_USER));
+        String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
+
+        callForEvent(vertx, KNOWN_SOURCE + ":" + hash)
+                .sendJson(
+                        payload,
+                        testContext.succeeding(res -> assert400Response(res, testContext))
+                );
+    }
+
+    @Test
     @DisplayName("Payload does not have a data field")
     void payloadFormatIncorrect(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        vertx.deployVerticle(createKnownSource(keyPair), testContext.succeeding());
+        awaitRedisInitialization(vertx, testContext, createKnownSource(keyPair));
 
         JsonObject payload = new JsonObject().put("name", "isuru");
         String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
@@ -56,7 +74,7 @@ public class PayloadFormatTest extends AbstractEventPushTest {
     @DisplayName("No such user exists")
     void noSuchUserExists(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        vertx.deployVerticle(createKnownSource(keyPair), testContext.succeeding());
+        awaitRedisInitialization(vertx, testContext, createKnownSource(keyPair));
 
         JsonObject event = TestUtils.aEvent("unknown@oasis.com", System.currentTimeMillis(), "test.a", 100);
         JsonObject payload = new JsonObject().put("data", event);
