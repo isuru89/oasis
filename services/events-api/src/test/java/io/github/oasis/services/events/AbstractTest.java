@@ -25,13 +25,15 @@ import java.util.Objects;
 @ExtendWith(VertxExtension.class)
 public abstract class AbstractTest {
 
+    protected static final int TEST_PORT = 8010;
+
     protected TestDispatcherService dispatcherService;
 
     @BeforeEach
     void beforeEach(Vertx vertx, VertxTestContext testContext) {
         JsonObject dispatcherConf = new JsonObject().put("impl", "test:any").put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
-                .put("http", new JsonObject().put("instances", 1))
+                .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
                 .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
         dispatcherService = Mockito.spy(new TestDispatcherService());
         TestDispatcherVerticle dispatcherVerticle = new TestDispatcherVerticle(dispatcherService);
@@ -61,7 +63,7 @@ public abstract class AbstractTest {
 
     protected HttpRequest<Buffer> callToEndPoint(String endPoint, Vertx vertx) {
         WebClient client = WebClient.create(vertx);
-        return client.get(8090, "localhost", endPoint);
+        return client.get(TEST_PORT, "localhost", endPoint);
     }
 
 }

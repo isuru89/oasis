@@ -33,6 +33,8 @@ import io.vertx.core.Vertx;
 @ProxyGen
 public interface AuthService {
 
+    String REQ_DIGEST = "__oasisdigest";
+
     String AUTH_SERVICE_QUEUE = "auth.service.queue";
 
     @GenIgnore

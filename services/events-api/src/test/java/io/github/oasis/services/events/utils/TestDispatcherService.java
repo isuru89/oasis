@@ -33,8 +33,4 @@ public class TestDispatcherService implements EventDispatcherService {
         this.returnSuccess = returnSuccess;
     }
 
-    @Override
-    public void close() {
-
-    }
 }

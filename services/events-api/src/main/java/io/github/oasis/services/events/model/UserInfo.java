@@ -55,10 +55,6 @@ public class UserInfo {
         return ref.getLong("id");
     }
 
-    public String getEmail() {
-        return ref.getString("email");
-    }
-
     public Optional<Long> getTeamId(int gameId) {
         JsonObject games = ref.getJsonObject("games", EMPTY);
         JsonObject gameInfo = games.getJsonObject(String.valueOf(gameId));

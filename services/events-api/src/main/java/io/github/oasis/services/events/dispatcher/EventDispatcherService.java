@@ -46,6 +46,4 @@ public interface EventDispatcherService {
     @Fluent
     EventDispatcherService push(EventProxy event, Handler<AsyncResult<JsonObject>> result);
 
-    @ProxyClose
-    void close();
 }

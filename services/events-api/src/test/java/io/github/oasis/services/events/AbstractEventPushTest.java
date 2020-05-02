@@ -40,7 +40,7 @@ public abstract class AbstractEventPushTest extends AbstractTest {
 
     protected HttpRequest<Buffer> callPushEvent(Vertx vertx) {
         WebClient client = WebClient.create(vertx);
-        return client.get(8090, "localhost", API_EVENT)
+        return client.get(TEST_PORT, "localhost", API_EVENT)
                 .method(HttpMethod.PUT);
     }
 
@@ -52,7 +52,7 @@ public abstract class AbstractEventPushTest extends AbstractTest {
 
     protected HttpRequest<String> pushBulkEvents(Vertx vertx, String bearerHeader) {
         WebClient client = WebClient.create(vertx);
-        return client.get(8090, "localhost", API_EVENTS)
+        return client.get(TEST_PORT, "localhost", API_EVENTS)
                 .method(HttpMethod.PUT)
                 .bearerTokenAuthentication(bearerHeader)
                 .as(BodyCodec.string());

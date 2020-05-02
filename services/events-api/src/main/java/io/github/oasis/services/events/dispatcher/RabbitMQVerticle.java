@@ -41,11 +41,16 @@ public class RabbitMQVerticle extends AbstractVerticle {
     public void start(Promise<Void> promise) {
         LOG.info("Starting RabbitMQ connection...");
         JsonObject rabbitConfigs = config();
-        printRabbitConfigs(rabbitConfigs.copy());
+        LOG.debug("RabbitMQ configs: {}",
+                printableRabbitConfigs(rabbitConfigs).encodePrettily());
         RabbitMQOptions options = new RabbitMQOptions(rabbitConfigs);
 
         mqClient = RabbitMQClient.create(vertx, options);
-        RabbitMQDispatcherService.create(vertx, mqClient, rabbitConfigs, ready -> {
+        initService(mqClient, rabbitConfigs, promise);
+    }
+
+    void initService(RabbitMQClient client, JsonObject rabbitConfigs, Promise<Void> promise) {
+        RabbitMQDispatcherService.create(vertx, client, rabbitConfigs, ready -> {
             if (ready.succeeded()) {
                 ServiceBinder binder = new ServiceBinder(vertx);
                 binder.setAddress(EventDispatcherService.DISPATCHER_SERVICE_QUEUE)
@@ -59,10 +64,9 @@ public class RabbitMQVerticle extends AbstractVerticle {
         });
     }
 
-    private void printRabbitConfigs(JsonObject configs) {
-        LOG.debug("RabbitMQ configs: {}", configs
-                .put("password", "******")
-                .encodePrettily());
+    JsonObject printableRabbitConfigs(JsonObject configs) {
+        return configs.copy()
+                .put("password", "******");
     }
 
     @Override

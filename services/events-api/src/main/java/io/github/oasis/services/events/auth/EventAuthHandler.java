@@ -81,7 +81,8 @@ public class EventAuthHandler extends AuthHandlerImpl {
             handler.handle(Future.failedFuture(BAD_HEADER));
             return;
         }
-        context.put("__oasisdigest", dataParts[1]);
-        handler.handle(Future.succeededFuture(new JsonObject().put("id", dataParts[0]).put("digest", dataParts[1])));
+        String digest = dataParts[1];
+        context.put(AuthService.REQ_DIGEST, digest);
+        handler.handle(Future.succeededFuture(new JsonObject().put("id", dataParts[0]).put("digest", digest)));
     }
 }

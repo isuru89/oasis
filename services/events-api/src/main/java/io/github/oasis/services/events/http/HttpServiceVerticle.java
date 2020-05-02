@@ -55,12 +55,18 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import static io.github.oasis.services.events.http.Constants.CONF_PORT;
+import static io.github.oasis.services.events.http.Constants.ROUTE_BULK_EVENT_PUSH;
+import static io.github.oasis.services.events.http.Constants.ROUTE_EVENT_PUSH;
+
 /**
  * @author Isuru Weerarathna
  */
 public class HttpServiceVerticle extends AbstractVerticle {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpServiceVerticle.class);
+
+    private static final int DEF_PORT = 8050;
 
     private static final Throwable NO_SUCH_USER_EXIST = new IllegalArgumentException("User does not exist!");
     private static final String APPLICATION_JSON = HttpHeaderValues.APPLICATION_JSON.toString();
@@ -74,13 +80,15 @@ public class HttpServiceVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> promise) {
         LOG.info("Starting event api web service...");
+        JsonObject httpConf = config();
+        LOG.info("HTTP configs {}", httpConf.encodePrettily());
         authService = AuthService.createProxy(vertx, AuthService.AUTH_SERVICE_QUEUE);
         redisService = RedisService.createProxy(vertx, RedisService.DB_SERVICE_QUEUE);
         dispatcherService = EventDispatcherService.createProxy(vertx, EventDispatcherService.DISPATCHER_SERVICE_QUEUE);
 
         AuthHandler authHandler = new EventAuthHandler(new EventAuthProvider(authService));
 
-        HttpServerOptions serverOptions = new HttpServerOptions();
+        HttpServerOptions serverOptions = new HttpServerOptions(httpConf);
         server = vertx.createHttpServer(serverOptions);
 
         Router router = Router.router(vertx);
@@ -95,12 +103,14 @@ public class HttpServiceVerticle extends AbstractVerticle {
                 .handler(authHandler)
                 .handler(this::verifyIntegrity);
 
-        router.put("/api/events").handler(this::putEvents);
-        router.put("/api/event").handler(this::putEventHandler);
+        router.put(ROUTE_BULK_EVENT_PUSH).handler(this::putEvents);
+        router.put(ROUTE_EVENT_PUSH).handler(this::putEventHandler);
         server.requestHandler(router);
-        server.listen(8090, onListen -> {
+
+        int port = httpConf.getInteger(CONF_PORT, DEF_PORT);
+        server.listen(port, onListen -> {
             if (onListen.succeeded()) {
-                LOG.info("Events listening on port " + 8090);
+                LOG.info("Listening for events on port {}", port);
                 promise.complete();
             } else {
                 LOG.error("Events API initialization failed!", onListen.cause());
@@ -111,7 +121,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
 
     private void verifyIntegrity(RoutingContext ctx) {
         EventSource eventSource = (EventSource) ctx.user();
-        Optional<String> optHeader = Optional.ofNullable(ctx.get("__oasisdigest"));
+        Optional<String> optHeader = Optional.ofNullable(ctx.get(AuthService.REQ_DIGEST));
         if (optHeader.isPresent() && eventSource.verifyEvent(ctx.getBody(), optHeader.get())) {
             ctx.next();
         } else {

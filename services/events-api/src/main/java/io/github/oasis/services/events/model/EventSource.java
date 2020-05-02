@@ -46,6 +46,8 @@ import java.util.stream.Collectors;
 @DataObject
 public class EventSource implements User {
 
+    private static final String KEY_ALGORITHM = "RSA";
+
     private JsonObject data;
     private List<Integer> gameIds;
 
@@ -57,7 +59,7 @@ public class EventSource implements User {
                 .put("token", token)
                 .mergeIn(otherData);
         try {
-            PublicKey publicKey = KeyFactory.getInstance("RSA")
+            PublicKey publicKey = KeyFactory.getInstance(KEY_ALGORITHM)
                     .generatePublic(new X509EncodedKeySpec(rawKey));
             return new EventSource(data).setPublicKey(publicKey);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
@@ -72,7 +74,7 @@ public class EventSource implements User {
             this.gameIds = games.stream()
                     .map(g -> Integer.parseInt(g.toString()))
                     .collect(Collectors.toList());
-            this.publicKey = KeyFactory.getInstance("RSA")
+            this.publicKey = KeyFactory.getInstance(KEY_ALGORITHM)
                     .generatePublic(new X509EncodedKeySpec(ref.getBinary("key")));
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new IllegalArgumentException("Invalid key data!", e);
