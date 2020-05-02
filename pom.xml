@@ -6,7 +6,7 @@
 
     <groupId>io.github.oasis</groupId>
     <artifactId>oasis-parent</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -18,30 +18,19 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <jackson.version>2.9.9</jackson.version>
         <jdbi.version>3.9.1</jdbi.version>
+        <vertx.version>3.9.0</vertx.version>
+        <junit.version>5.5.2</junit.version>
     </properties>
 
     <modules>
         <module>dbs</module>
         <module>core</module>
-        <module>model</module>
         <module>engine</module>
         <module>elements</module>
+        <module>services</module>
     </modules>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>org.slf4j</groupId>-->
-<!--            <artifactId>slf4j-log4j12</artifactId>-->
-<!--            <version>1.7.7</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>log4j</groupId>-->
-<!--            <artifactId>log4j</artifactId>-->
-<!--            <version>1.2.17</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -67,19 +56,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.2.0</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.2.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <version>5.2.0</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -104,12 +87,6 @@
             <groupId>com.github.stefanbirkner</groupId>
             <artifactId>system-rules</artifactId>
             <version>1.19.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -190,8 +167,18 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M3</version>
+                    <version>3.0.0-M4</version>
                     <configuration>
+                        <consoleOutputReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5ConsoleOutputReporter">
+                            <disable>false</disable>
+                            <usePhrasedFileName>true</usePhrasedFileName>
+                        </consoleOutputReporter>
+                        <statelessTestsetInfoReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5StatelessTestsetInfoReporter">
+                            <disable>false</disable>
+                            <usePhrasedFileName>false</usePhrasedFileName>
+                            <usePhrasedClassNameInRunning>true</usePhrasedClassNameInRunning>
+                            <usePhrasedClassNameInTestCaseSummary>true</usePhrasedClassNameInTestCaseSummary>
+                        </statelessTestsetInfoReporter>
                         <useSystemClassLoader>true</useSystemClassLoader>
                         <forkMode>once</forkMode>
                         <argLine>${jacocoArgLine}</argLine>

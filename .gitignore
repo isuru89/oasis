@@ -13,6 +13,8 @@ data/
 .settings/
 .project
 
+**/src/main/generated/**
+**/src/main/asciidoc/**
 src/main/resources/io/github/isuru/oasis/db/.vscode/
 
 /configs/auth/private.der

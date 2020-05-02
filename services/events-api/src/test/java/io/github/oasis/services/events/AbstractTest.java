@@ -1,55 +1,69 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 package io.github.oasis.services.events;
 
-import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.core.result.ResultIterable;
+import io.github.oasis.services.events.utils.TestDispatcherFactory;
+import io.github.oasis.services.events.utils.TestDispatcherService;
+import io.github.oasis.services.events.utils.TestDispatcherVerticle;
+import io.github.oasis.services.events.utils.TestRedisDeployVerticle;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.HttpRequest;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.Mockito;
 
-import java.util.Map;
+import java.util.Objects;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest
-@TestPropertySource("classpath:application.yml")
+/**
+ * @author Isuru Weerarathna
+ */
+@ExtendWith(VertxExtension.class)
 public abstract class AbstractTest {
 
-    @Autowired
-    protected Jdbi jdbi;
+    protected static final int TEST_PORT = 8010;
 
-    protected void runBeforeEach() {
-        cleanTables();
+    protected TestDispatcherService dispatcherService;
+
+    @BeforeEach
+    void beforeEach(Vertx vertx, VertxTestContext testContext) {
+        JsonObject dispatcherConf = new JsonObject().put("impl", "test:any").put("configs", new JsonObject());
+        JsonObject testConfigs = new JsonObject()
+                .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
+                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
+        dispatcherService = Mockito.spy(new TestDispatcherService());
+        TestDispatcherVerticle dispatcherVerticle = new TestDispatcherVerticle(dispatcherService);
+        DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
+        vertx.registerVerticleFactory(new TestDispatcherFactory(dispatcherVerticle));
+        vertx.deployVerticle(new EventsApi(), options, testContext.completing());
     }
 
-    private void cleanTables() {
-        jdbi.useHandle(h -> {
-            ResultIterable<Map<String, Object>> result =
-                    h.createQuery("SELECT name FROM sqlite_master WHERE type='table'")
-                            .mapToMap();
-            result.forEach(row -> {
-                String table = row.get("name").toString();
-                h.createScript("DELETE FROM " + table).execute();
-            });
-        });
+    protected void sleepWell() {
+        String relaxTime = System.getenv("OASIS_RELAX_TIME");
+        if (Objects.nonNull(relaxTime)) {
+            long slp = Long.parseLong(relaxTime);
+            if (slp > 0) {
+                try {
+                    Thread.sleep(slp);
+                } catch (InterruptedException e) {
+                    // do nothing
+                }
+            }
+        }
     }
+
+    protected void awaitRedisInitialization(Vertx vertx, VertxTestContext testContext, TestRedisDeployVerticle verticle) {
+        vertx.deployVerticle(verticle, testContext.succeeding());
+        sleepWell();
+    }
+
+    protected HttpRequest<Buffer> callToEndPoint(String endPoint, Vertx vertx) {
+        WebClient client = WebClient.create(vertx);
+        return client.get(TEST_PORT, "localhost", endPoint);
+    }
+
 }

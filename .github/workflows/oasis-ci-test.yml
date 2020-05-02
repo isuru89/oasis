@@ -23,6 +23,8 @@ jobs:
         run: mvn -B package --file pom.xml -DskipTests
 
       - name: Running Tests
+        env:
+            OASIS_RELAX_TIME: 500
         run: mvn test
 
       - name: Upload coverage
