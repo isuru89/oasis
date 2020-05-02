@@ -1,6 +1,0 @@
-points:
-  - name: reputation-earn
-    id: 101
-    event: earn-reputation
-    condition: "true"
-    amount: "reputation"
