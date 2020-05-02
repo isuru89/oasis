@@ -19,11 +19,9 @@
 
 package io.github.oasis.services.events.model;
 
-import io.github.oasis.core.collect.Pair;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 

@@ -21,7 +21,6 @@ package io.github.oasis.services.events;
 
 import io.github.oasis.services.events.utils.TestRedisDeployVerticle;
 import io.github.oasis.services.events.utils.TestUtils;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxTestContext;

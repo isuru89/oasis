@@ -21,7 +21,6 @@ package io.github.oasis.services.events;
 
 import io.github.oasis.services.events.db.RedisVerticle;
 import io.github.oasis.services.events.dispatcher.DispatcherFactory;
-import io.github.oasis.services.events.dispatcher.RabbitMQVerticle;
 import io.github.oasis.services.events.http.HttpServiceVerticle;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
@@ -30,7 +29,6 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

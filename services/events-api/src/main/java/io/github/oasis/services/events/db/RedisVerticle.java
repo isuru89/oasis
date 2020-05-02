@@ -31,8 +31,6 @@ import io.vertx.serviceproxy.ServiceBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
  * @author Isuru Weerarathna
  */

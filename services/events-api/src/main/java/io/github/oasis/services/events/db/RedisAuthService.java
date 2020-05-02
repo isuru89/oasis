@@ -30,7 +30,6 @@ import io.vertx.redis.client.Redis;
 import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.Response;
 
-import java.util.Base64;
 import java.util.Objects;
 
 /**
