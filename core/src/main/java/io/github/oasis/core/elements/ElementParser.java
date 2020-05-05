@@ -19,7 +19,7 @@
 
 package io.github.oasis.core.elements;
 
-import io.github.oasis.core.PersistedDef;
+import io.github.oasis.core.external.messages.PersistedDef;
 
 import java.io.Serializable;
 

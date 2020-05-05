@@ -26,14 +26,16 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.external.SourceFunction;
+import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
-import io.github.oasis.engine.actors.cmds.OasisCommand;
+import io.github.oasis.core.external.messages.OasisCommand;
 
 /**
  * @author Isuru Weerarathna
  */
-public class OasisEngine {
+public class OasisEngine implements SourceFunction {
 
     private ActorSystem oasisEngine;
     private ActorRef supervisor;
@@ -53,10 +55,17 @@ public class OasisEngine {
         supervisor = oasisEngine.actorOf(Props.create(OasisSupervisor.class, context), ActorNames.OASIS_SUPERVISOR);
     }
 
+    @Override
+    public void submit(PersistedDef dto) {
+
+    }
+
+    @Override
     public void submit(OasisCommand command) {
         supervisor.tell(command, supervisor);
     }
 
+    @Override
     public void submit(Event event) {
         supervisor.tell(event, supervisor);
     }

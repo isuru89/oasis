@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
+package io.github.oasis.core.external.messages;
 
 /**
  * @author Isuru Weerarathna

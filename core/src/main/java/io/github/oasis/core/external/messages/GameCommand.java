@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,30 +17,35 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
-
-import io.github.oasis.core.Event;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.external.messages.OasisCommand;
+package io.github.oasis.core.external.messages;
 
 /**
  * @author Isuru Weerarathna
  */
-public class EventMessage implements OasisCommand {
+public class GameCommand implements OasisCommand {
 
-    private Event event;
-    private ExecutionContext context;
+    private int gameId;
+    private GameLifecycle status;
 
-    public EventMessage(Event event, ExecutionContext context) {
-        this.event = event;
-        this.context = context;
+    public GameLifecycle getStatus() {
+        return status;
     }
 
-    public Event getEvent() {
-        return event;
+    public void setStatus(GameLifecycle status) {
+        this.status = status;
     }
 
-    public ExecutionContext getContext() {
-        return context;
+    public int getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(int gameId) {
+        this.gameId = gameId;
+    }
+
+    public enum GameLifecycle {
+        START,
+        UPDATE,
+        END
     }
 }

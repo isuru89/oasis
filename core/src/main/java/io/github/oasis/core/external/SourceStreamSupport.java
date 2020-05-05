@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,30 +17,21 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
+package io.github.oasis.core.external;
 
-import io.github.oasis.core.Event;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.external.messages.OasisCommand;
+import io.github.oasis.core.context.RuntimeContextSupport;
+import io.github.oasis.core.external.messages.GameCommand;
+
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * @author Isuru Weerarathna
  */
-public class EventMessage implements OasisCommand {
+public interface SourceStreamSupport extends Closeable {
 
-    private Event event;
-    private ExecutionContext context;
+    void init(RuntimeContextSupport context, SourceFunction source) throws Exception;
 
-    public EventMessage(Event event, ExecutionContext context) {
-        this.event = event;
-        this.context = context;
-    }
+    void handleGameCommand(GameCommand gameCommand) throws IOException;
 
-    public Event getEvent() {
-        return event;
-    }
-
-    public ExecutionContext getContext() {
-        return context;
-    }
 }

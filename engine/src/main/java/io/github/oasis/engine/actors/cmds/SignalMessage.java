@@ -22,6 +22,7 @@ package io.github.oasis.engine.actors.cmds;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.external.messages.OasisCommand;
 
 /**
  * @author Isuru Weerarathna

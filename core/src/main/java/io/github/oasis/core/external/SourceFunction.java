@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,34 +17,21 @@
  * under the License.
  */
 
-package io.github.oasis.core;
+package io.github.oasis.core.external;
 
-import io.github.oasis.core.utils.Utils;
-
-import java.io.Serializable;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.external.messages.OasisCommand;
+import io.github.oasis.core.external.messages.PersistedDef;
 
 /**
  * @author Isuru Weerarathna
  */
-public class PersistedDef implements Serializable {
+public interface SourceFunction {
 
-    private final String type;
-    private final byte[] data;
+    void submit(PersistedDef dto);
 
-    private PersistedDef(String type, byte[] data) {
-        this.type = type;
-        this.data = data;
-    }
+    void submit(OasisCommand command);
 
-    public static PersistedDef from(Object value) {
-        return new PersistedDef(value.getClass().getName(), Utils.toSerializableContent(value));
-    }
+    void submit(Event event);
 
-    public String getType() {
-        return type;
-    }
-
-    public byte[] getData() {
-        return data;
-    }
 }

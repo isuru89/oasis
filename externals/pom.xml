@@ -12,10 +12,11 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>oasis-dbs</artifactId>
+    <artifactId>oasis-externals</artifactId>
 
     <modules>
         <module>redis</module>
+        <module>rabbit-stream</module>
     </modules>
 
     <dependencies>
@@ -28,6 +29,11 @@
             <groupId>com.github.cliftonlabs</groupId>
             <artifactId>json-simple</artifactId>
             <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.6</version>
         </dependency>
     </dependencies>
 </project>

@@ -23,7 +23,7 @@
     </properties>
 
     <modules>
-        <module>dbs</module>
+        <module>externals</module>
         <module>core</module>
         <module>engine</module>
         <module>elements</module>

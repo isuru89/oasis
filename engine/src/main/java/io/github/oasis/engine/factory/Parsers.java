@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.factory;
 
-import io.github.oasis.core.PersistedDef;
+import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.ElementParser;
