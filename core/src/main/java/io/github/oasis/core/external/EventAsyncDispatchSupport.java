@@ -19,7 +19,7 @@
 
 package io.github.oasis.core.external;
 
-import io.github.oasis.core.Event;
+import io.github.oasis.core.external.messages.PersistedDef;
 
 /**
  * @author Isuru Weerarathna
@@ -30,9 +30,9 @@ public interface EventAsyncDispatchSupport extends EventDispatchSupport {
 
     void init(DispatcherContext context, Handler handler);
 
-    void broadcastAsync(Object message, Handler handler);
+    void broadcastAsync(PersistedDef message, Handler handler);
 
-    void pushAsync(Event event, Handler handler);
+    void pushAsync(PersistedDef event, Handler handler);
 
     @Override
     default void init(DispatcherContext context) {
@@ -40,12 +40,12 @@ public interface EventAsyncDispatchSupport extends EventDispatchSupport {
     }
 
     @Override
-    default void push(Event event) {
+    default void push(PersistedDef event) {
         throw NOT_SUPPORTED;
     }
 
     @Override
-    default void broadcast(Object message) {
+    default void broadcast(PersistedDef message) {
         throw NOT_SUPPORTED;
     }
 

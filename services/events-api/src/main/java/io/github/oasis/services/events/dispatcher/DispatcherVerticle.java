@@ -33,7 +33,7 @@ import java.util.Map;
  */
 public class DispatcherVerticle extends AbstractVerticle {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RabbitMQVerticle.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DispatcherVerticle.class);
 
     private final EventDispatchSupport eventDispatcher;
 

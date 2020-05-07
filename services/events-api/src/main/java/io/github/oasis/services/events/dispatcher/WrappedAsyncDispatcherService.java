@@ -20,6 +20,7 @@
 package io.github.oasis.services.events.dispatcher;
 
 import io.github.oasis.core.external.EventAsyncDispatchSupport;
+import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -29,7 +30,7 @@ import io.vertx.core.json.JsonObject;
 /**
  * @author Isuru Weerarathna
  */
-public class WrappedAsyncDispatcherService implements EventDispatcherService {
+public class WrappedAsyncDispatcherService extends AbstractDispatcherService {
 
     private final EventAsyncDispatchSupport asyncDispatcher;
 
@@ -38,8 +39,8 @@ public class WrappedAsyncDispatcherService implements EventDispatcherService {
     }
 
     @Override
-    public EventDispatcherService push(EventProxy event, Handler<AsyncResult<JsonObject>> handler) {
-        asyncDispatcher.pushAsync(event, new EventAsyncDispatchSupport.Handler() {
+    public EventDispatcherService pushEvent(EventProxy event, Handler<AsyncResult<JsonObject>> handler) {
+        asyncDispatcher.pushAsync(toPersistDef(event), new EventAsyncDispatchSupport.Handler() {
             @Override
             public void onSuccess(Object result) {
                 handler.handle(Future.succeededFuture());
@@ -54,8 +55,24 @@ public class WrappedAsyncDispatcherService implements EventDispatcherService {
     }
 
     @Override
-    public EventDispatcherService broadcast(JsonObject obj, Handler<AsyncResult<JsonObject>> handler) {
-        asyncDispatcher.broadcastAsync(obj, new EventAsyncDispatchSupport.Handler() {
+    public EventDispatcherService push(JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
+        asyncDispatcher.pushAsync(toPersistDef(message), new EventAsyncDispatchSupport.Handler() {
+            @Override
+            public void onSuccess(Object result) {
+                handler.handle(Future.succeededFuture());
+            }
+
+            @Override
+            public void onFail(Throwable error) {
+                handler.handle(Future.failedFuture(error));
+            }
+        });
+        return this;
+    }
+
+    @Override
+    public EventDispatcherService broadcast(JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
+        asyncDispatcher.broadcastAsync(toPersistDef(message), new EventAsyncDispatchSupport.Handler() {
             @Override
             public void onSuccess(Object result) {
                 handler.handle(Future.succeededFuture());

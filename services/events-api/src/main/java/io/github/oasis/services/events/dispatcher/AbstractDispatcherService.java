@@ -17,26 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.core.external;
+package io.github.oasis.services.events.dispatcher;
 
 import io.github.oasis.core.external.messages.PersistedDef;
-
-import java.io.Closeable;
-import java.util.Map;
+import io.github.oasis.services.events.model.EventProxy;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface EventDispatchSupport extends Closeable {
+public abstract class AbstractDispatcherService implements EventDispatcherService {
 
-    void init(DispatcherContext context) throws Exception;
+    private static final JsonObject EMPTY = new JsonObject();
 
-    void push(PersistedDef message) throws Exception;
-
-    void broadcast(PersistedDef message) throws Exception;
-
-    interface DispatcherContext {
-        Map<String, Object> getConfigs();
+    PersistedDef toPersistDef(EventProxy event) {
+        return PersistedDef.fromEvent(event);
     }
 
+    PersistedDef toPersistDef(JsonObject message) {
+        PersistedDef def = new PersistedDef();
+        def.setType(message.getString("type"));
+        def.setImpl(message.getString("impl"));
+        def.setScope(null);
+        def.setData(message.getJsonObject("data", EMPTY).getMap());
+        return def;
+    }
 }

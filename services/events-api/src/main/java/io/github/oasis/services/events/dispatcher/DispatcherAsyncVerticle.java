@@ -20,7 +20,6 @@
 package io.github.oasis.services.events.dispatcher;
 
 import io.github.oasis.core.external.EventAsyncDispatchSupport;
-import io.github.oasis.core.external.EventDispatchSupport;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -33,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DispatcherAsyncVerticle extends AbstractVerticle {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RabbitMQVerticle.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DispatcherAsyncVerticle.class);
 
     private final EventAsyncDispatchSupport eventDispatcher;
 

@@ -22,6 +22,7 @@ package io.github.oasis.services.events.dispatcher;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.external.EventAsyncDispatchSupport;
 import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.services.events.EventsApi;
 import io.github.oasis.services.events.model.EventProxy;
 import io.github.oasis.services.events.utils.TestDispatcherVerticle;
@@ -133,10 +134,10 @@ public class ExternalDispatcherTest {
         SyncDispatcherSupport dispatcher = Mockito.spy(new SyncDispatcherSupport());
         WrappedDispatcherService service = new WrappedDispatcherService(vertx, dispatcher);
         EventProxy eventProxy = new EventProxy(TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100));
-        service.push(eventProxy, res -> {
+        service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isTrue();
-                Mockito.verify(dispatcher, Mockito.times(1)).push(Mockito.any(Event.class));
+                Mockito.verify(dispatcher, Mockito.times(1)).push(Mockito.any(PersistedDef.class));
             } catch (Exception e) {
                 Assertions.fail(e.getMessage());
             } finally {
@@ -151,10 +152,10 @@ public class ExternalDispatcherTest {
         SyncDispatcherSupport dispatcher = Mockito.spy(new SyncDispatcherSupport(true));
         WrappedDispatcherService service = new WrappedDispatcherService(vertx, dispatcher);
         EventProxy eventProxy = new EventProxy(TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100));
-        service.push(eventProxy, res -> {
+        service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isFalse();
-                Mockito.verify(dispatcher, Mockito.times(1)).push(Mockito.any(Event.class));
+                Mockito.verify(dispatcher, Mockito.times(1)).push(Mockito.any(PersistedDef.class));
             } catch (Exception e) {
                 Assertions.fail(e.getMessage());
             } finally {
@@ -169,11 +170,11 @@ public class ExternalDispatcherTest {
         AsyncDispatchSupport dispatcher = Mockito.spy(new AsyncDispatchSupport());
         WrappedAsyncDispatcherService service = new WrappedAsyncDispatcherService(dispatcher);
         EventProxy eventProxy = new EventProxy(TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100));
-        service.push(eventProxy, res -> {
+        service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isTrue();
                 Mockito.verify(dispatcher, Mockito.times(1))
-                        .pushAsync(Mockito.any(Event.class), Mockito.any(EventAsyncDispatchSupport.Handler.class));
+                        .pushAsync(Mockito.any(PersistedDef.class), Mockito.any(EventAsyncDispatchSupport.Handler.class));
             } catch (Exception e) {
                 Assertions.fail(e.getMessage());
             }
@@ -186,11 +187,11 @@ public class ExternalDispatcherTest {
         AsyncDispatchSupport dispatcher = Mockito.spy(new AsyncDispatchSupport(true));
         WrappedAsyncDispatcherService service = new WrappedAsyncDispatcherService(dispatcher);
         EventProxy eventProxy = new EventProxy(TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100));
-        service.push(eventProxy, res -> {
+        service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isFalse();
                 Mockito.verify(dispatcher, Mockito.times(1))
-                        .pushAsync(Mockito.any(Event.class), Mockito.any(EventAsyncDispatchSupport.Handler.class));
+                        .pushAsync(Mockito.any(PersistedDef.class), Mockito.any(EventAsyncDispatchSupport.Handler.class));
             } catch (Exception e) {
                 Assertions.fail(e.getMessage());
             }
@@ -305,14 +306,14 @@ public class ExternalDispatcherTest {
         }
 
         @Override
-        public void push(Event event) throws Exception {
+        public void push(PersistedDef event) throws Exception {
             if (throwError) {
                 throw new Exception();
             }
         }
 
         @Override
-        public void broadcast(Object message) throws Exception {
+        public void broadcast(PersistedDef message) throws Exception {
             if (throwError) {
                 throw new Exception();
             }
@@ -335,7 +336,7 @@ public class ExternalDispatcherTest {
         }
 
         @Override
-        public void pushAsync(Event event, Handler handler) {
+        public void pushAsync(PersistedDef event, Handler handler) {
             if (throwError) {
                 handler.onFail(new Exception());
             } else {
@@ -349,7 +350,7 @@ public class ExternalDispatcherTest {
         }
 
         @Override
-        public void broadcastAsync(Object message, Handler handler) {
+        public void broadcastAsync(PersistedDef message, Handler handler) {
             if (throwError) {
                 handler.onFail(new Exception());
             } else {

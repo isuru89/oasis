@@ -1,5 +1,6 @@
 package io.github.oasis.services.events.utils;
 
+import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.services.events.dispatcher.EventDispatcherService;
 import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.core.AsyncResult;
@@ -18,7 +19,7 @@ public class TestDispatcherService implements EventDispatcherService {
     }
 
     @Override
-    public EventDispatcherService push(EventProxy event, Handler<AsyncResult<JsonObject>> result) {
+    public EventDispatcherService pushEvent(EventProxy event, Handler<AsyncResult<JsonObject>> result) {
         if (returnSuccess) {
             result.handle(Future.succeededFuture(new JsonObject()
                     .put("success", true)
@@ -27,6 +28,11 @@ public class TestDispatcherService implements EventDispatcherService {
             result.handle(Future.failedFuture("Failed"));
         }
         return this;
+    }
+
+    @Override
+    public EventDispatcherService push(JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
+        return null;
     }
 
     @Override

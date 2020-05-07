@@ -21,6 +21,7 @@ package io.github.oasis.services.events.dispatcher;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -31,7 +32,7 @@ import io.vertx.core.json.JsonObject;
 /**
  * @author Isuru Weerarathna
  */
-public class WrappedDispatcherService implements EventDispatcherService {
+public class WrappedDispatcherService extends AbstractDispatcherService {
 
     private final JsonObject EMPTY = new JsonObject();
 
@@ -44,21 +45,27 @@ public class WrappedDispatcherService implements EventDispatcherService {
     }
 
     @Override
-    public EventDispatcherService push(EventProxy event, Handler<AsyncResult<JsonObject>> handler) {
-        handle(event, handler);
+    public EventDispatcherService pushEvent(EventProxy event, Handler<AsyncResult<JsonObject>> handler) {
+        handle(toPersistDef(event), handler);
         return this;
     }
 
     @Override
-    public EventDispatcherService broadcast(JsonObject obj, Handler<AsyncResult<JsonObject>> handler) {
-        broadcastSync(obj, handler);
+    public EventDispatcherService push(JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
+        handle(toPersistDef(message), handler);
         return this;
     }
 
-    private void broadcastSync(JsonObject event, Handler<AsyncResult<JsonObject>> handler) {
+    @Override
+    public EventDispatcherService broadcast(JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
+        broadcastSync(toPersistDef(message), handler);
+        return this;
+    }
+
+    private void broadcastSync(PersistedDef persistedDef, Handler<AsyncResult<JsonObject>> handler) {
         vertx.executeBlocking(future -> {
             try {
-                dispatcher.broadcast(event);
+                dispatcher.broadcast(persistedDef);
                 future.complete();
             } catch (Exception e) {
                 future.fail(e);
@@ -72,10 +79,10 @@ public class WrappedDispatcherService implements EventDispatcherService {
         });
     }
 
-    private void handle(Event event, Handler<AsyncResult<JsonObject>> handler) {
+    private void handle(PersistedDef persistedDef, Handler<AsyncResult<JsonObject>> handler) {
         vertx.executeBlocking(future -> {
             try {
-                dispatcher.push(event);
+                dispatcher.push(persistedDef);
                 future.complete();
             } catch (Exception e) {
                 future.fail(e);

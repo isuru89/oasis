@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.external.messages;
 
+import io.github.oasis.core.Event;
 import io.github.oasis.core.utils.Utils;
 
 import java.io.Serializable;
@@ -35,9 +36,22 @@ public class PersistedDef implements Serializable {
 
     private String type;
     private String impl;
+    private Scope scope;
     private Map<String, Object> data;
 
     public PersistedDef() {
+    }
+
+    public static PersistedDef fromEvent(Event event) {
+        PersistedDef def = new PersistedDef();
+        def.setType(PersistedDef.GAME_EVENT);
+        def.setScope(new PersistedDef.Scope(event.getGameId()));
+        def.setData(event.getAllFieldValues());
+        return def;
+    }
+
+    public Scope getScope() {
+        return scope;
     }
 
     public String getImpl() {
@@ -52,6 +66,22 @@ public class PersistedDef implements Serializable {
         return data;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setImpl(String impl) {
+        this.impl = impl;
+    }
+
+    public void setScope(Scope scope) {
+        this.scope = scope;
+    }
+
+    public void setData(Map<String, Object> data) {
+        this.data = data;
+    }
+
     public boolean isEvent() {
         return GAME_EVENT.equals(type);
     }
@@ -62,5 +92,24 @@ public class PersistedDef implements Serializable {
 
     public boolean isGameRemoved() {
         return GAME_REMOVED.equals(type);
+    }
+
+    public static class Scope implements Serializable {
+        private Integer gameId;
+
+        public Scope() {
+        }
+
+        public Scope(Integer gameId) {
+            this.gameId = gameId;
+        }
+
+        public Integer getGameId() {
+            return gameId;
+        }
+
+        public void setGameId(Integer gameId) {
+            this.gameId = gameId;
+        }
     }
 }

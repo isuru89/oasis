@@ -19,33 +19,128 @@
 
 package io.github.oasis.ext.rabbitstream;
 
-import io.github.oasis.core.Event;
-import io.github.oasis.core.external.EventAsyncDispatchSupport;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.messages.PersistedDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RabbitDispatcher implements EventAsyncDispatchSupport {
+public class RabbitDispatcher implements EventDispatchSupport {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RabbitDispatcher.class);
+
+    private static final String OPT_DURABLE = "durable";
+    private static final String OPT_AUTO_DELETE = "autoDelete";
+    private static final String OPT_TYPE = "type";
+    private static final String OPT_NAME = "name";
+
+    static final String DEF_EVENT_EXCHANGE = "oasis.event.exchange";
+    static final boolean DEF_EVENT_EXCHANGE_DURABLE = true;
+    static final boolean DEF_EVENT_EXCHANGE_AUTO_DEL = false;
+    static final String DEF_EVENT_EXCHANGE_TYPE = "direct";
+
+    static final String DEF_BC_EXCHANGE = "oasis.event.bc.exchange";
+    static final boolean DEF_BC_EXCHANGE_DURABLE = true;
+    static final boolean DEF_BC_EXCHANGE_AUTO_DEL = false;
+    static final String DEF_BC_EXCHANGE_TYPE = "fanout";
+
+    private static final String EMPTY_ROUTING_KEY = "";
+    private static final Map<String, Object> EMPTY_CONFIG = new HashMap<>();
+
+    private Connection connection;
+    private Channel channel;
+
+    private String gameExchangeName;
+    private String broadcastExchangeName;
+
+    private final Gson gson = new Gson();
 
     @Override
-    public void init(DispatcherContext context, Handler handler) {
+    public void init(DispatcherContext context) throws Exception {
+        LOG.info("Initializing RabbitMQ client...");
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost("localhost");
+        factory.setPort(5672);
+        factory.setAutomaticRecoveryEnabled(true);
 
+        connection = factory.newConnection();
+        channel = connection.createChannel();
+
+        initializeExchanges(channel, context);
     }
 
     @Override
-    public void broadcastAsync(Object message, Handler handler) {
-
+    public void push(PersistedDef message) throws Exception {
+        String routingKey = generateRoutingKey(message);
+        channel.basicPublish(gameExchangeName,
+                routingKey,
+                null,
+                gson.toJson(message).getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
-    public void pushAsync(Event event, Handler handler) {
-
+    public void broadcast(PersistedDef message) throws Exception {
+        channel.basicPublish(broadcastExchangeName,
+                EMPTY_ROUTING_KEY,
+                null,
+                gson.toJson(message).getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
     public void close() throws IOException {
+        if (channel != null) {
+            try {
+                channel.close();
+            } catch (TimeoutException e) {
+                LOG.warn("Failed to close channel!", e);
+            }
+        }
+        if (connection != null) {
+            connection.close();
+        }
+    }
 
+    @SuppressWarnings("unchecked")
+    void initializeExchanges(Channel channel, DispatcherContext context) throws IOException {
+        Map<String, Object> configs = context.getConfigs();
+        Map<String, Object> broadcastExchangeOptions = (Map<String, Object>) configs.getOrDefault("broadcastExchange", EMPTY_CONFIG);
+        LOG.debug("Broadcast Exchange Options: {}", broadcastExchangeOptions);
+        broadcastExchangeName = (String) broadcastExchangeOptions.getOrDefault(OPT_NAME, DEF_BC_EXCHANGE);
+        channel.exchangeDeclare(broadcastExchangeName,
+                DEF_BC_EXCHANGE_TYPE,
+                (boolean) broadcastExchangeOptions.getOrDefault(OPT_DURABLE, DEF_BC_EXCHANGE_DURABLE),
+                (boolean) broadcastExchangeOptions.getOrDefault(OPT_AUTO_DELETE, DEF_BC_EXCHANGE_AUTO_DEL),
+                null);
+
+        Map<String, Object> eventExchangeOptions = (Map<String, Object>) configs.getOrDefault("eventExchange", EMPTY_CONFIG);
+        LOG.debug("Event Exchange Options: {}", eventExchangeOptions);
+        gameExchangeName = (String) eventExchangeOptions.getOrDefault(OPT_NAME, DEF_EVENT_EXCHANGE);
+        channel.exchangeDeclare(gameExchangeName,
+                (String) eventExchangeOptions.getOrDefault(OPT_TYPE, DEF_EVENT_EXCHANGE_TYPE),
+                (boolean) eventExchangeOptions.getOrDefault(OPT_DURABLE, DEF_EVENT_EXCHANGE_DURABLE),
+                (boolean) eventExchangeOptions.getOrDefault(OPT_AUTO_DELETE, DEF_EVENT_EXCHANGE_AUTO_DEL),
+                null);
+    }
+
+    static String generateRoutingKey(PersistedDef def) {
+        PersistedDef.Scope scope = def.getScope();
+        if (Objects.nonNull(scope)) {
+            return "oasis.game." + scope.getGameId();
+        }
+        return def.getType();
     }
 }

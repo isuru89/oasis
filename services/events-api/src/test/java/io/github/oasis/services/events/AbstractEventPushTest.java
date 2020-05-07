@@ -88,7 +88,7 @@ public abstract class AbstractEventPushTest extends AbstractTest {
     protected void verifyPushTimes(int invocations) {
         sleepWell();
         ArgumentCaptor<EventProxy> eventCapture = ArgumentCaptor.forClass(EventProxy.class);
-        Mockito.verify(dispatcherService, Mockito.times(invocations)).push(eventCapture.capture(), Mockito.any());
+        Mockito.verify(dispatcherService, Mockito.times(invocations)).pushEvent(eventCapture.capture(), Mockito.any());
         if (invocations > 0) {
             for (EventProxy eventProxy : eventCapture.getAllValues()) {
                 assertTrue(Objects.nonNull(eventProxy.getExternalId()));
