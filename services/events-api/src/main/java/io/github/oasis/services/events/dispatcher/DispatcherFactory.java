@@ -19,6 +19,8 @@
 
 package io.github.oasis.services.events.dispatcher;
 
+import io.github.oasis.core.external.EventAsyncDispatchSupport;
+import io.github.oasis.core.external.EventDispatchSupport;
 import io.vertx.core.Verticle;
 import io.vertx.core.spi.VerticleFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +47,18 @@ public class DispatcherFactory implements VerticleFactory {
         String impl = StringUtils.substringAfter(type, OASIS_PREFIX);
         LOG.info("Creating dispatcher of type: {}", impl);
         try {
-            return (Verticle) classLoader.loadClass(impl).getDeclaredConstructor().newInstance();
+            Object instance = classLoader.loadClass(impl).getDeclaredConstructor().newInstance();
+            if (instance instanceof EventDispatchSupport) {
+                EventDispatchSupport dispatchSupport = (EventDispatchSupport) instance;
+                if (instance instanceof EventAsyncDispatchSupport) {
+                    return new DispatcherAsyncVerticle((EventAsyncDispatchSupport) instance);
+                }
+                return new DispatcherVerticle(dispatchSupport);
+            } else if (instance instanceof Verticle) {
+                return (Verticle) instance;
+            } else {
+                throw new IllegalArgumentException("Unknown dispatcher type provided! " + impl);
+            }
         } catch (ReflectiveOperationException e) {
             LOG.error("Cannot load provided dispatcher implementation!", e);
             throw e;

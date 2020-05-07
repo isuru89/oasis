@@ -149,6 +149,21 @@ public class RabbitMQDispatcherService implements EventDispatcherService {
         return this;
     }
 
+    @Override
+    public EventDispatcherService broadcast(JsonObject obj, Handler<AsyncResult<JsonObject>> handler) {
+        client.basicPublish(broadcastExchangeName,
+                "",
+                obj,
+                res -> {
+                    if (res.succeeded()) {
+                        handler.handle(Future.succeededFuture(new JsonObject()));
+                    } else {
+                        handler.handle(Future.failedFuture(res.cause()));
+                    }
+                });
+        return null;
+    }
+
     static String generateRoutingKey(EventProxy event) {
         return "oasis.game." + event.getGameId();
     }

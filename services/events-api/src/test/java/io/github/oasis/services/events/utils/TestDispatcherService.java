@@ -29,6 +29,11 @@ public class TestDispatcherService implements EventDispatcherService {
         return this;
     }
 
+    @Override
+    public EventDispatcherService broadcast(JsonObject obj, Handler<AsyncResult<JsonObject>> handler) {
+        return null;
+    }
+
     public void setReturnSuccess(boolean returnSuccess) {
         this.returnSuccess = returnSuccess;
     }

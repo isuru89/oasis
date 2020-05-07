@@ -24,7 +24,7 @@ import java.util.Objects;
 @ExtendWith(VertxExtension.class)
 public abstract class AbstractTest {
 
-    protected static final int TEST_PORT = 8010;
+    public static final int TEST_PORT = 8010;
 
     protected TestDispatcherService dispatcherService;
 

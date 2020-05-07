@@ -42,6 +42,8 @@ public interface EventDispatcherService {
     }
 
     @Fluent
-    EventDispatcherService push(EventProxy event, Handler<AsyncResult<JsonObject>> result);
+    EventDispatcherService push(EventProxy event, Handler<AsyncResult<JsonObject>> handler);
 
+    @Fluent
+    EventDispatcherService broadcast(JsonObject obj, Handler<AsyncResult<JsonObject>> handler);
 }
