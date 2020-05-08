@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine;
 
+import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.elements.milestones.MilestoneRule;
 import io.github.oasis.core.ID;
@@ -55,6 +56,8 @@ public class EngineMilestoneTest extends OasisEngineTest {
                 new MilestoneRule.Level(4, BigDecimal.valueOf(500))));
         rule.setFlags(Set.of(MilestoneRule.SKIP_NEGATIVE_VALUES));
 
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
         engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
@@ -91,6 +94,8 @@ public class EngineMilestoneTest extends OasisEngineTest {
                 new MilestoneRule.Level(2, BigDecimal.valueOf(200))));
         rule.setFlags(Set.of(MilestoneRule.TRACK_PENALTIES));
 
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
         engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();

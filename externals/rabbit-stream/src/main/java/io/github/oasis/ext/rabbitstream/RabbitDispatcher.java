@@ -48,12 +48,10 @@ public class RabbitDispatcher implements EventDispatchSupport {
     private static final String OPT_TYPE = "type";
     private static final String OPT_NAME = "name";
 
-    static final String DEF_EVENT_EXCHANGE = "oasis.event.exchange";
     static final boolean DEF_EVENT_EXCHANGE_DURABLE = true;
     static final boolean DEF_EVENT_EXCHANGE_AUTO_DEL = false;
     static final String DEF_EVENT_EXCHANGE_TYPE = "direct";
 
-    static final String DEF_BC_EXCHANGE = "oasis.event.bc.exchange";
     static final boolean DEF_BC_EXCHANGE_DURABLE = true;
     static final boolean DEF_BC_EXCHANGE_AUTO_DEL = false;
     static final String DEF_BC_EXCHANGE_TYPE = "fanout";
@@ -119,18 +117,16 @@ public class RabbitDispatcher implements EventDispatchSupport {
         Map<String, Object> configs = context.getConfigs();
         Map<String, Object> broadcastExchangeOptions = (Map<String, Object>) configs.getOrDefault("broadcastExchange", EMPTY_CONFIG);
         LOG.debug("Broadcast Exchange Options: {}", broadcastExchangeOptions);
-        broadcastExchangeName = (String) broadcastExchangeOptions.getOrDefault(OPT_NAME, DEF_BC_EXCHANGE);
-        channel.exchangeDeclare(broadcastExchangeName,
-                DEF_BC_EXCHANGE_TYPE,
+        channel.exchangeDeclare(RabbitConstants.BROADCAST_EXCHANGE,
+                RabbitConstants.BROADCAST_EXCHANGE_TYPE,
                 (boolean) broadcastExchangeOptions.getOrDefault(OPT_DURABLE, DEF_BC_EXCHANGE_DURABLE),
                 (boolean) broadcastExchangeOptions.getOrDefault(OPT_AUTO_DELETE, DEF_BC_EXCHANGE_AUTO_DEL),
                 null);
 
         Map<String, Object> eventExchangeOptions = (Map<String, Object>) configs.getOrDefault("eventExchange", EMPTY_CONFIG);
         LOG.debug("Event Exchange Options: {}", eventExchangeOptions);
-        gameExchangeName = (String) eventExchangeOptions.getOrDefault(OPT_NAME, DEF_EVENT_EXCHANGE);
-        channel.exchangeDeclare(gameExchangeName,
-                (String) eventExchangeOptions.getOrDefault(OPT_TYPE, DEF_EVENT_EXCHANGE_TYPE),
+        channel.exchangeDeclare(RabbitConstants.GAME_EXCHANGE,
+                RabbitConstants.GAME_EXCHANGE_TYPE,
                 (boolean) eventExchangeOptions.getOrDefault(OPT_DURABLE, DEF_EVENT_EXCHANGE_DURABLE),
                 (boolean) eventExchangeOptions.getOrDefault(OPT_AUTO_DELETE, DEF_EVENT_EXCHANGE_AUTO_DEL),
                 null);

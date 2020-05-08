@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine;
 
+import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.elements.ratings.RatingRule;
 import io.github.oasis.core.external.DbContext;
@@ -53,6 +54,8 @@ public class EngineRatingsTest extends OasisEngineTest {
                 new RatingRule.Rating(3, 1, checkGt(50), pointAward(1), "rating.points")
         ));
 
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
         engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
         engine.submitAll(e1, e2, e3);
         awaitTerminated();
@@ -103,6 +106,8 @@ public class EngineRatingsTest extends OasisEngineTest {
                 new RatingRule.Rating(3, 1, checkGt(50), pointAward(1), "rating.points")
         ));
 
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
         engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
         engine.submitAll(e1, e2, e3);
         awaitTerminated();

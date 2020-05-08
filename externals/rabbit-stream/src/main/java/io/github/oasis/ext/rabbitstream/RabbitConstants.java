@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,28 +17,18 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
-
-import io.github.oasis.core.elements.AbstractRule;
+package io.github.oasis.ext.rabbitstream;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RuleUpdatedMessage extends OasisRuleMessage {
+class RabbitConstants {
 
-    private AbstractRule rule;
+    static final String GAME_EXCHANGE = "oasis.game.exchange";
+    static final String BROADCAST_EXCHANGE = "oasis.broadcast.exchange";
 
-    public RuleUpdatedMessage(AbstractRule rule) {
-        this.rule = rule;
-    }
+    static final String GAME_EXCHANGE_TYPE = "direct";
+    static final String BROADCAST_EXCHANGE_TYPE = "fanout";
 
-    public AbstractRule getRule() {
-        return rule;
-    }
 
-    public static RuleUpdatedMessage create(int gameId, AbstractRule rule) {
-        RuleUpdatedMessage message = new RuleUpdatedMessage(rule);
-        message.setGameId(gameId);
-        return message;
-    }
 }

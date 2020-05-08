@@ -27,10 +27,10 @@ import com.typesafe.config.ConfigFactory;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.SourceFunction;
+import io.github.oasis.core.external.messages.OasisCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
-import io.github.oasis.core.external.messages.OasisCommand;
 
 /**
  * @author Isuru Weerarathna
@@ -57,7 +57,21 @@ public class OasisEngine implements SourceFunction {
 
     @Override
     public void submit(PersistedDef dto) {
+        Object message = DtoHandler.derive(dto, context);
+        if (message != null) {
+            supervisor.tell(message, supervisor);
+        }
+    }
 
+    @Override
+    public void submit(PersistedDef dto, AckCallback callback) {
+        Object message = DtoHandler.derive(dto, context);
+        if (message != null) {
+            supervisor.tell(message, supervisor);
+            callback.accepted();
+        } else {
+            callback.rejected();
+        }
     }
 
     @Override

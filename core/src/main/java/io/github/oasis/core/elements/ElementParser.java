@@ -30,6 +30,10 @@ public interface ElementParser extends Serializable {
 
     AbstractDef parse(PersistedDef persistedObj);
 
+    default AbstractRule parseToRule(PersistedDef dto) {
+        return convert(parse(dto));
+    }
+
     AbstractRule convert(AbstractDef definition);
 
 }

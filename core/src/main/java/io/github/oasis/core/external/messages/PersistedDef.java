@@ -24,6 +24,7 @@ import io.github.oasis.core.utils.Utils;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
@@ -31,8 +32,25 @@ import java.util.Map;
 public class PersistedDef implements Serializable {
 
     public static final String GAME_ADDED = "GAME.ADDED";
+    public static final String GAME_PAUSED = "GAME.PAUSED";
+    public static final String GAME_STARTED = "GAME.STARTED";
     public static final String GAME_REMOVED = "GAME.REMOVED";
+    public static final String GAME_UPDATED = "GAME.UPDATED";
     public static final String GAME_EVENT = "GAME.EVENT";
+    public static final String GAME_RULE_ADDED = "GAME.RULE.ADDED";
+    public static final String GAME_RULE_REMOVED = "GAME.RULE.REMOVED";
+    public static final String GAME_RULE_UPDATED = "GAME.RULE.UPDATED";
+
+    private static final Set<String> ALL_GAME_LIFECYCLE_TYPES = Set.of(
+            GAME_ADDED,
+            GAME_PAUSED,
+            GAME_STARTED,
+            GAME_REMOVED,
+            GAME_UPDATED);
+    private static final Set<String> ALL_RULE_TYPES = Set.of(
+            GAME_RULE_ADDED,
+            GAME_RULE_REMOVED,
+            GAME_RULE_UPDATED);
 
     private String type;
     private String impl;
@@ -86,8 +104,12 @@ public class PersistedDef implements Serializable {
         return GAME_EVENT.equals(type);
     }
 
-    public boolean isGameAdded() {
-        return GAME_ADDED.equals(type);
+    public boolean isGameLifecycleEvent() {
+        return ALL_GAME_LIFECYCLE_TYPES.contains(type);
+    }
+
+    public boolean isRuleEvent() {
+        return ALL_RULE_TYPES.contains(type);
     }
 
     public boolean isGameRemoved() {

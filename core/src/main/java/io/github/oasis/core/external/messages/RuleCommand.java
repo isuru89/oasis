@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,28 +17,47 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
+package io.github.oasis.core.external.messages;
 
 import io.github.oasis.core.elements.AbstractRule;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RuleUpdatedMessage extends OasisRuleMessage {
+public class RuleCommand implements OasisCommand {
 
+    private int gameId;
+    private RuleChangeType changeType;
     private AbstractRule rule;
-
-    public RuleUpdatedMessage(AbstractRule rule) {
-        this.rule = rule;
-    }
 
     public AbstractRule getRule() {
         return rule;
     }
 
-    public static RuleUpdatedMessage create(int gameId, AbstractRule rule) {
-        RuleUpdatedMessage message = new RuleUpdatedMessage(rule);
-        message.setGameId(gameId);
-        return message;
+    public void setRule(AbstractRule rule) {
+        this.rule = rule;
     }
+
+    public RuleChangeType getChangeType() {
+        return changeType;
+    }
+
+    public void setChangeType(RuleChangeType changeType) {
+        this.changeType = changeType;
+    }
+
+    public int getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(int gameId) {
+        this.gameId = gameId;
+    }
+
+    public enum RuleChangeType {
+        ADD,
+        UPDATE,
+        REMOVE
+    }
+
 }

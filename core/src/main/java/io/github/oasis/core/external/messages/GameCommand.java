@@ -43,9 +43,18 @@ public class GameCommand implements OasisCommand {
         this.gameId = gameId;
     }
 
+    public static GameCommand create(int gameId, GameLifecycle status) {
+        GameCommand cmd = new GameCommand();
+        cmd.setGameId(gameId);
+        cmd.setStatus(status);
+        return cmd;
+    }
+
     public enum GameLifecycle {
+        CREATE,
         START,
+        PAUSE,
         UPDATE,
-        END
+        REMOVE
     }
 }

@@ -29,9 +29,14 @@ import io.github.oasis.core.external.messages.PersistedDef;
 public interface SourceFunction {
 
     void submit(PersistedDef dto);
+    void submit(PersistedDef dto, AckCallback callback);
 
     void submit(OasisCommand command);
 
     void submit(Event event);
 
+    interface AckCallback {
+        void accepted();
+        void rejected();
+    }
 }

@@ -26,10 +26,30 @@ import java.io.Serializable;
  */
 public class GameContext implements Serializable {
 
+    public static final GameContext NOT_FOUND = new GameContext(-1, Long.MAX_VALUE);
+
     private int gameId;
+    private long startTime;
 
     public GameContext(int gameId) {
         this.gameId = gameId;
+    }
+
+    private GameContext(int gameId, long startTime) {
+        this.gameId = gameId;
+        this.startTime = startTime;
+    }
+
+    public boolean fallsWithinGamePeriod(long ts) {
+        return startTime <= ts;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 
     public int getGameId() {

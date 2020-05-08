@@ -31,7 +31,6 @@ import io.github.oasis.engine.factory.Parsers;
 import io.github.oasis.engine.factory.Processors;
 import io.github.oasis.engine.factory.Sinks;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,13 +58,17 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
             for (Class<? extends ElementModuleFactory> moduleFactory : moduleFactoryList) {
                 moduleFactory.getDeclaredConstructor().newInstance().init(this, configs);
             }
-        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+        } catch (ReflectiveOperationException e) {
             throw new OasisException(e.getMessage(), e);
         }
 
         parsers = Parsers.from(this);
         processors.init(this);
         sinks.init(this);
+    }
+
+    public Parsers getParsers() {
+        return parsers;
     }
 
     public List<ElementModule> getModuleList() {

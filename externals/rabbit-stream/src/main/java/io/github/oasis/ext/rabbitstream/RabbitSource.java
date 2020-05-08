@@ -48,7 +48,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author Isuru Weerarathna
  */
-public class RabbitSource implements SourceStreamSupport, DeliverCallback, CancelCallback, Closeable {
+public class RabbitSource implements SourceStreamSupport, Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitSource.class);
 
@@ -74,7 +74,7 @@ public class RabbitSource implements SourceStreamSupport, DeliverCallback, Cance
         String queue = "oasis.announcements." + id;
         LOG.info("Connecting to announcement queue {}", queue);
         channel.queueDeclare(queue, true, false, false, null);
-        channel.basicConsume(queue, false, this, this);
+        channel.basicConsume(queue, false, this::handleMessage, this::handleCancel);
     }
 
     @Override
@@ -122,17 +122,34 @@ public class RabbitSource implements SourceStreamSupport, DeliverCallback, Cance
         }
     }
 
-    @Override
-    public void handle(String consumerTag, Delivery message) {
+    public void handleMessage(String consumerTag, Delivery message) {
         String content = new String(message.getBody(), StandardCharsets.UTF_8);
         LOG.debug("Message received. {}", content);
         PersistedDef persistedDef = gson.fromJson(content, PersistedDef.class);
-        sourceRef.submit(persistedDef);
+        long deliveryTag = message.getEnvelope().getDeliveryTag();
+        sourceRef.submit(persistedDef, new SourceFunction.AckCallback() {
+            @Override
+            public void accepted() {
+                try {
+                    channel.basicAck(deliveryTag, false);
+                } catch (IOException e) {
+                    LOG.error("Failed to acknowledge message delivery! {}", deliveryTag, e);
+                }
+            }
+
+            @Override
+            public void rejected() {
+                try {
+                    channel.basicNack(deliveryTag, false, !message.getEnvelope().isRedeliver());
+                } catch (IOException e) {
+                    LOG.error("Failed to acknowledge message delivery! {}", deliveryTag, e);
+                }
+            }
+        });
     }
 
-    @Override
-    public void handle(String consumerTag) throws IOException {
-
+    public void handleCancel(String consumerTag) {
+        LOG.warn("Queue is deleted for consumer {}", consumerTag);
     }
 
     static class RabbitGameReader implements DeliverCallback, CancelCallback, Closeable {

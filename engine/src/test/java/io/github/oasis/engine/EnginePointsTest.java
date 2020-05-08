@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine;
 
+import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.element.points.PointRule;
 import io.github.oasis.core.ID;
@@ -54,6 +55,8 @@ public class EnginePointsTest extends OasisEngineTest {
         rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long)event.getFieldValue("value") - 50));
         rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
 
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
         engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
         engine.submitAll(e1, e2, e3, e4, e5);
         awaitTerminated();
@@ -171,6 +174,8 @@ public class EnginePointsTest extends OasisEngineTest {
         rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long) event.getFieldValue("value") - 50));
         rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
 
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
         engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
