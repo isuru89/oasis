@@ -113,7 +113,7 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
                     gameReader.close();
                 }
             }
-        } else if (gameCommand.getStatus() == GameCommand.GameLifecycle.END) {
+        } else if (gameCommand.getStatus() == GameCommand.GameLifecycle.REMOVE) {
             Closeable removedRef = consumers.remove(gameId);
             if (Objects.nonNull(removedRef)) {
                 LOG.info("Game consumer {} closed!", gameId);
