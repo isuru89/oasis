@@ -19,10 +19,11 @@
 
 package io.github.oasis.core.elements;
 
+import io.github.oasis.core.elements.matchers.EventTypeMatcherFactory;
 import io.github.oasis.core.exception.InvalidGameElementException;
-import io.github.oasis.core.utils.Texts;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
@@ -35,26 +36,45 @@ public abstract class AbstractDef implements Serializable {
     private String name;
     private String description;
 
-    private Serializable forEvents;
+    private Object event;
+    private Object events;
 
     private Set<String> flags;
-    private Serializable condition;
+    private Object condition;
 
     public void validate() throws InvalidGameElementException {
-        if (Texts.isEmpty(name)) {
-            throw new InvalidGameElementException("Element name cannot be empty!");
-        } else if (Objects.isNull(forEvents)) {
-            throw new InvalidGameElementException("Element must have at least one supported event type!");
-        }
+//        if (Texts.isEmpty(name)) {
+//            throw new InvalidGameElementException("Element name cannot be empty!");
+//        } else if (Objects.isNull(forEvents)) {
+//            throw new InvalidGameElementException("Element must have at least one supported event type!");
+//        }
     }
 
     protected AbstractRule toRule(AbstractRule source) {
         source.setName(getName());
         source.setDescription(getDescription());
         source.setFlags(Set.copyOf(getFlags()));
-        //source.setEventTypeMatcher(EventTypeMatcherFactory.create(forEvents));
-        //source.setCondition(EventExecutionFilterFactory.create(condition));
+        source.setEventTypeMatcher(deriveEventMatcher());
+        source.setCondition(EventExecutionFilterFactory.create(condition));
         return source;
+    }
+
+    @SuppressWarnings("unchecked")
+    private EventTypeMatcher deriveEventMatcher() {
+        if (Objects.nonNull(event)) {
+            return EventTypeMatcherFactory.createMatcher((String) event);
+        } else if (Objects.nonNull(events)) {
+            return EventTypeMatcherFactory.create((Collection<String>) events);
+        }
+        return null;
+    }
+
+    public Object getEvent() {
+        return event;
+    }
+
+    public void setEvent(Object event) {
+        this.event = event;
     }
 
     public String generateUniqueHash() {
@@ -85,14 +105,6 @@ public abstract class AbstractDef implements Serializable {
         this.description = description;
     }
 
-    public Serializable getForEvents() {
-        return forEvents;
-    }
-
-    public void setForEvents(Serializable forEvents) {
-        this.forEvents = forEvents;
-    }
-
     public Set<String> getFlags() {
         return flags;
     }
@@ -101,11 +113,19 @@ public abstract class AbstractDef implements Serializable {
         this.flags = flags;
     }
 
-    public Serializable getCondition() {
+    public Object getCondition() {
         return condition;
     }
 
-    public void setCondition(Serializable condition) {
+    public void setCondition(Object condition) {
         this.condition = condition;
+    }
+
+    public Object getEvents() {
+        return events;
+    }
+
+    public void setEvents(Object events) {
+        this.events = events;
     }
 }

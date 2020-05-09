@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,11 +17,9 @@
  * under the License.
  */
 
-package io.github.oasis.engine.factory;
+package io.github.oasis.core.elements;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.elements.EventBiValueResolver;
-import io.github.oasis.core.elements.EventValueResolver;
 import org.mvel2.MVEL;
 
 import java.io.Serializable;
@@ -35,8 +33,6 @@ import static io.github.oasis.core.VariableNames.EVENT_VAR;
  * @author Isuru Weerarathna
  */
 public class Scripting {
-
-
 
     public static <I extends Serializable, J extends Serializable> EventBiValueResolver<I, J> create(String scriptText,
                                                                                                      String firstParamName,

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -20,39 +20,22 @@
 package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.elements.AbstractDef;
+import io.github.oasis.core.elements.AbstractElementParser;
 import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.EventExecutionFilterFactory;
-import io.github.oasis.core.elements.Scripting;
-
-import java.math.BigDecimal;
-
-import static io.github.oasis.core.VariableNames.CONTEXT_VAR;
+import io.github.oasis.core.external.messages.PersistedDef;
 
 /**
  * @author Isuru Weerarathna
  */
-public class PointDef extends AbstractDef {
+public class PointParser extends AbstractElementParser {
 
-    private Object award;
-
-    public AbstractRule toRule() {
-        PointRule rule = new PointRule(generateUniqueHash());
-        super.toRule(rule);
-        rule.setCriteria(EventExecutionFilterFactory.ALWAYS_TRUE);
-        if (award instanceof Number) {
-            rule.setAmountToAward(BigDecimal.valueOf(((Number) award).doubleValue()));
-        } else {
-            rule.setAmountExpression(Scripting.create((String) award, CONTEXT_VAR));
-        }
-        return rule;
+    @Override
+    public AbstractDef parse(PersistedDef persistedObj) {
+        return loadFrom(persistedObj, PointDef.class);
     }
 
-
-    public Object getAward() {
-        return award;
-    }
-
-    public void setAward(Object award) {
-        this.award = award;
+    @Override
+    public AbstractRule convert(AbstractDef definition) {
+        return null;
     }
 }
