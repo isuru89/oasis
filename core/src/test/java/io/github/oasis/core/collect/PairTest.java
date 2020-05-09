@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,31 +17,31 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.core.collect;
 
-import io.github.oasis.core.elements.EventTypeMatcher;
-
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Isuru Weerarathna
  */
-public class AnyOfEventTypeMatcher implements EventTypeMatcher {
+@DisplayName("Pair Test")
+public class PairTest {
 
-    private final Set<String> against;
-
-    public AnyOfEventTypeMatcher(Set<String> against) {
-        this.against = against;
+    @Test
+    @DisplayName("Pair items")
+    void testPair() {
+        Pair<String, String> pair = Pair.of("a", "b");
+        Assertions.assertEquals("a", pair.getLeft());
+        Assertions.assertEquals("b", pair.getRight());
     }
 
-    @Override
-    public boolean matches(String eventType) {
-        return against.contains(eventType);
+    @Test
+    @DisplayName("Pair ToString")
+    void testStringify() {
+        Pair<String, String> pair = Pair.of("a", "b");
+        Assertions.assertTrue(pair.toString().startsWith("Pair"));
     }
 
-    public static AnyOfEventTypeMatcher create(String pattern) {
-        return new AnyOfEventTypeMatcher(Stream.of(pattern.split(",")).collect(Collectors.toSet()));
-    }
 }

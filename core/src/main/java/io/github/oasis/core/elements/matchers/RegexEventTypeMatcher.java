@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,30 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.core.elements.matchers;
 
 import io.github.oasis.core.elements.EventTypeMatcher;
 
-import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @author Isuru Weerarathna
  */
-public class MixedEventTypeMatcher implements EventTypeMatcher {
+public class RegexEventTypeMatcher implements EventTypeMatcher {
 
-    private final List<EventTypeMatcher> matchers;
+    private final Pattern matcher;
 
-    public MixedEventTypeMatcher(List<EventTypeMatcher> matchers) {
-        this.matchers = matchers;
+    public RegexEventTypeMatcher(Pattern pattern) {
+        this.matcher = pattern;
     }
 
     @Override
     public boolean matches(String eventType) {
-        for (EventTypeMatcher matcher : matchers) {
-            if (matcher.matches(eventType)) {
-                return true;
-            }
-        }
-        return false;
+        return matcher.matcher(eventType).matches();
+    }
+
+    public static RegexEventTypeMatcher create(String source) {
+        return new RegexEventTypeMatcher(Pattern.compile(source));
     }
 }

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,10 +17,9 @@
  * under the License.
  */
 
-package io.github.oasis.engine.model;
+package io.github.oasis.core.elements.matchers;
 
 import io.github.oasis.core.elements.EventTypeMatcher;
-import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.core.utils.Texts;
 
 import java.io.Serializable;
@@ -48,25 +47,18 @@ public final class EventTypeMatcherFactory {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static EventTypeMatcher create(Serializable source) {
-        if (source instanceof String) {
-            return createMatcher((String) source);
-        } else if (source instanceof Collection) {
-            Collection<String> items = (Collection<String>) source;
-            Optional<String> complicatedItem = items.stream()
-                    .filter(it -> it.startsWith(ANY_OF_PREFIX) || it.startsWith(REGEX_PREFIX))
-                    .findFirst();
-            if (complicatedItem.isPresent()) {
-                List<EventTypeMatcher> matchers = items.stream()
-                        .map(EventTypeMatcherFactory::createMatcher)
-                        .collect(Collectors.toList());
-                return new MixedEventTypeMatcher(matchers);
-            } else {
-                return createMatcher(items);
-            }
+    public static EventTypeMatcher create(Collection<String> items) {
+        Optional<String> complicatedItem = items.stream()
+                .filter(it -> it.startsWith(ANY_OF_PREFIX) || it.startsWith(REGEX_PREFIX))
+                .findFirst();
+        if (complicatedItem.isPresent()) {
+            List<EventTypeMatcher> matchers = items.stream()
+                    .map(EventTypeMatcherFactory::createMatcher)
+                    .collect(Collectors.toList());
+            return new MixedEventTypeMatcher(matchers);
+        } else {
+            return createMatcher(items);
         }
-        throw new IllegalArgumentException("Unknown event types!");
     }
 
     public static AnyOfEventTypeMatcher createMatcher(Collection<String> eventIds) {
