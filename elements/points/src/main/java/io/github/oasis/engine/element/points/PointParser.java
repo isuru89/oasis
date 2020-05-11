@@ -22,7 +22,13 @@ package io.github.oasis.engine.element.points;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractElementParser;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.EventExecutionFilterFactory;
+import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
+
+import java.math.BigDecimal;
+
+import static io.github.oasis.core.VariableNames.CONTEXT_VAR;
 
 /**
  * @author Isuru Weerarathna
@@ -36,6 +42,25 @@ public class PointParser extends AbstractElementParser {
 
     @Override
     public AbstractRule convert(AbstractDef definition) {
-        return null;
+        if (definition instanceof PointDef) {
+            return toRule((PointDef) definition);
+        }
+        throw new IllegalArgumentException("Unknown definition type! " + definition);
     }
+
+    private AbstractRule toRule(PointDef def) {
+        String id = def.generateUniqueHash();
+        PointRule rule = new PointRule(id);
+        AbstractDef.defToRule(def, rule);
+        rule.setCriteria(EventExecutionFilterFactory.ALWAYS_TRUE);
+        Object award = def.getAward();
+        if (award instanceof Number) {
+            rule.setAmountToAward(BigDecimal.valueOf(((Number) award).doubleValue()));
+        } else {
+            rule.setAmountExpression(Scripting.create((String) award, CONTEXT_VAR));
+        }
+        return rule;
+    }
+
+
 }

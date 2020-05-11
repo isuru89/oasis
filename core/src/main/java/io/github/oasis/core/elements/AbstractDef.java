@@ -42,20 +42,12 @@ public abstract class AbstractDef implements Serializable {
     private Set<String> flags;
     private Object condition;
 
-    public void validate() throws InvalidGameElementException {
-//        if (Texts.isEmpty(name)) {
-//            throw new InvalidGameElementException("Element name cannot be empty!");
-//        } else if (Objects.isNull(forEvents)) {
-//            throw new InvalidGameElementException("Element must have at least one supported event type!");
-//        }
-    }
-
-    protected AbstractRule toRule(AbstractRule source) {
-        source.setName(getName());
-        source.setDescription(getDescription());
-        source.setFlags(Set.copyOf(getFlags()));
-        source.setEventTypeMatcher(deriveEventMatcher());
-        source.setCondition(EventExecutionFilterFactory.create(condition));
+    public static AbstractRule defToRule(AbstractDef def, AbstractRule source) {
+        source.setName(def.getName());
+        source.setDescription(def.getDescription());
+        source.setFlags(Set.copyOf(def.getFlags()));
+        source.setEventTypeMatcher(def.deriveEventMatcher());
+        source.setCondition(EventExecutionFilterFactory.create(def.condition));
         return source;
     }
 

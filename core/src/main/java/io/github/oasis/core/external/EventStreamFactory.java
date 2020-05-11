@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,22 +17,14 @@
  * under the License.
  */
 
-package io.github.oasis.engine.element.points;
-
-import io.github.oasis.core.elements.AbstractDef;
+package io.github.oasis.core.external;
 
 /**
  * @author Isuru Weerarathna
  */
-public class PointDef extends AbstractDef {
+public interface EventStreamFactory {
 
-    private Object award;
+    SourceStreamSupport getEngineEventSource();
 
-    public Object getAward() {
-        return award;
-    }
-
-    public void setAward(Object award) {
-        this.award = award;
-    }
+    EventDispatchSupport getDispatcher();
 }

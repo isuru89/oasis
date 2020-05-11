@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,22 +17,27 @@
  * under the License.
  */
 
-package io.github.oasis.engine.element.points;
+package io.github.oasis.ext.rabbitstream;
 
-import io.github.oasis.core.elements.AbstractDef;
+import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventStreamFactory;
+import io.github.oasis.core.external.SourceStreamSupport;
 
 /**
  * @author Isuru Weerarathna
  */
-public class PointDef extends AbstractDef {
+public class RabbitStreamFactory implements EventStreamFactory {
 
-    private Object award;
+    private final RabbitSource source = new RabbitSource();
+    private final RabbitDispatcher dispatcher = new RabbitDispatcher();
 
-    public Object getAward() {
-        return award;
+    @Override
+    public SourceStreamSupport getEngineEventSource() {
+        return source;
     }
 
-    public void setAward(Object award) {
-        this.award = award;
+    @Override
+    public EventDispatchSupport getDispatcher() {
+        return dispatcher;
     }
 }

@@ -25,6 +25,7 @@ import akka.actor.Props;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.github.oasis.core.Event;
+import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.SourceFunction;
 import io.github.oasis.core.external.messages.OasisCommand;
@@ -48,7 +49,6 @@ public class OasisEngine implements SourceFunction {
 
     public void start() throws OasisException {
         Config config = ConfigFactory.load();
-
         context.init();
 
         oasisEngine = ActorSystem.create("oasis-engine", config);
@@ -96,6 +96,8 @@ public class OasisEngine implements SourceFunction {
 
     public static void main(String[] args) throws OasisException {
         EngineContext context = new EngineContext();
+        OasisConfigs configs = new OasisConfigs();
+        context.setConfigs(configs);
         new OasisEngine(context).start();
     }
 }

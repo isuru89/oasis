@@ -41,6 +41,7 @@ public class OasisConfigs implements Serializable {
     public static final String SIGNAL_SUPERVISOR_COUNT = "oasis.supervisors.signal";
     public static final String RULE_EXECUTOR_COUNT = "oasis.executors.rule";
     public static final String SIGNAL_EXECUTOR_COUNT = "oasis.executors.signal";
+    public static final String EVENT_STREAM_IMPL = "oasis.eventstream.impl";
 
     private final Map<String, Object> props = new HashMap<>();
 

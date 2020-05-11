@@ -1,5 +1,11 @@
 version: 1
 
+points:
+  - name: Question-Ask-Reputation
+    description: Awards 2 reputation when a question asked
+    event: stackoverflow.question.asked
+    award: 2
+
 badges:
   - name: First-Question
     description: Awards badge when user asks the very first question
@@ -72,6 +78,7 @@ badges:
     description: Awards when user scores 100+ daily.
     event: stackoverflow.points.awarded
     timeUnit: daily
+    valueExtractorExpression: "e.points"
     thresholds:
       - value: 200
         attribute: 1

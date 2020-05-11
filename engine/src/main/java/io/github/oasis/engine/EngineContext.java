@@ -27,17 +27,26 @@ import io.github.oasis.core.elements.Registrar;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.engine.factory.Parsers;
 import io.github.oasis.engine.factory.Processors;
 import io.github.oasis.engine.factory.Sinks;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.ServiceLoader;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
  */
 public class EngineContext implements RuntimeContextSupport, Registrar {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EngineContext.class);
 
     private OasisConfigs configs;
     private Db db;
@@ -47,12 +56,26 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
     private Processors processors;
     private Sinks sinks;
 
+    private EventStreamFactory streamFactory;
+
     private List<Class<? extends ElementModuleFactory>> moduleFactoryList = new ArrayList<>();
     private transient List<ElementModule> moduleList = new ArrayList<>();
 
     public void init() throws OasisException {
         processors = new Processors();
         sinks = new Sinks();
+
+        if (Objects.isNull(streamFactory)) {
+            String eventStreamImpl = configs.get(OasisConfigs.EVENT_STREAM_IMPL, null);
+            LOG.info("Event Stream Impl to use: " + eventStreamImpl);
+            ServiceLoader<EventStreamFactory> streamFactories = ServiceLoader.load(EventStreamFactory.class);
+            List<ServiceLoader.Provider<EventStreamFactory>> streamFactoryList = streamFactories.stream().collect(Collectors.toList());
+            LOG.info("Found event stream implementations: " + streamFactoryList.stream().map(f -> f.type().getName()).collect(Collectors.joining()));
+            streamFactoryList.stream()
+                    .filter(f -> f.type().getName().equals(eventStreamImpl))
+                    .findFirst()
+                    .ifPresent(impl -> streamFactory = impl.get());
+        }
 
         try {
             for (Class<? extends ElementModuleFactory> moduleFactory : moduleFactoryList) {
@@ -65,6 +88,14 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
         parsers = Parsers.from(this);
         processors.init(this);
         sinks.init(this);
+    }
+
+    public EventStreamFactory getStreamFactory() {
+        return streamFactory;
+    }
+
+    public void setStreamFactory(EventStreamFactory streamFactory) {
+        this.streamFactory = streamFactory;
     }
 
     public Parsers getParsers() {
