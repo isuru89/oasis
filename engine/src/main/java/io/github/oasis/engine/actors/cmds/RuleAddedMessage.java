@@ -41,4 +41,12 @@ public class RuleAddedMessage extends OasisRuleMessage {
         addedMessage.setGameId(gameId);
         return addedMessage;
     }
+
+    @Override
+    public String toString() {
+        return "RuleAdded{" +
+                "game=" + getGameId() + ", " +
+                "rule=" + rule +
+                '}';
+    }
 }

@@ -89,4 +89,7 @@ public final class Numbers {
         return val == null ? BigDecimal.ZERO : new BigDecimal(val);
     }
 
+    public static int ifNull(Integer val, int defaultValue) {
+        return val == null ? defaultValue : val;
+    }
 }

@@ -19,6 +19,10 @@
 
 package io.github.oasis.core.configs;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigException;
+import com.typesafe.config.ConfigFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -41,42 +45,60 @@ public class OasisConfigs implements Serializable {
     public static final String SIGNAL_SUPERVISOR_COUNT = "oasis.supervisors.signal";
     public static final String RULE_EXECUTOR_COUNT = "oasis.executors.rule";
     public static final String SIGNAL_EXECUTOR_COUNT = "oasis.executors.signal";
+    public static final String EVENT_STREAM_IMPL = "oasis.eventstream.impl";
+    public static final String OASIS_ENGINE_NAME = "oasis.name";
 
-    private final Map<String, Object> props = new HashMap<>();
+    private static final String DEFAULT_ENGINE_NAME = "oasis-engine";
 
-    public static OasisConfigs create(Map<String, Object> configMap) {
-        OasisConfigs configs = new OasisConfigs();
-        configs.props.putAll(configMap);
-        return configs;
+    private final Config props;
+
+    private OasisConfigs(Config configs) {
+        props = configs;
     }
 
-    public static OasisConfigs create(String... filePaths) throws IOException {
-        OasisConfigs configs = new OasisConfigs();
-        for (String filePath : filePaths) {
-            File file = new File(filePath);
-            if (file.exists()) {
-                try (InputStream inputStream = new FileInputStream(file)) {
-                    Properties properties = new Properties();
-                    properties.load(inputStream);
-                    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-                        configs.props.put(entry.toString(), entry);
-                    }
-                }
-            } else {
-                throw new FileNotFoundException("Input config file not found! " + filePath);
-            }
+    public static OasisConfigs create(Map<String, Object> configMap) {
+        Config config = ConfigFactory.parseMap(configMap);
+        return new OasisConfigs(config);
+    }
+
+    public static OasisConfigs create(String filePath) {
+        Config config = ConfigFactory.parseFile(new File(filePath));
+        return new OasisConfigs(config);
+    }
+
+    public static OasisConfigs defaultConfigs() {
+        Config config = ConfigFactory.load();
+        return new OasisConfigs(config);
+    }
+
+    public String getEngineName() {
+        try {
+            return props.getString(OASIS_ENGINE_NAME);
+        } catch (ConfigException.Missing missing) {
+            return DEFAULT_ENGINE_NAME;
         }
-        return configs;
+
     }
 
     public int getInt(String property, int defaultValue) {
-        return asInt(String.valueOf(props.getOrDefault(property, defaultValue)));
+        try {
+            return props.getInt(property);
+        } catch (ConfigException.Missing missing) {
+            return defaultValue;
+        }
     }
 
     public String get(String property, String defaultVal) {
-        return (String) props.getOrDefault(property, defaultVal);
+        try {
+            return props.getString(property);
+        } catch (ConfigException.Missing missing) {
+            return defaultVal;
+        }
     }
 
+    public Config getConfigRef() {
+        return props;
+    }
 
     public static class Builder {
         private final Map<String, Object> map = new HashMap<>();

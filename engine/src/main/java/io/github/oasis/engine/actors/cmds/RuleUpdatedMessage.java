@@ -35,4 +35,18 @@ public class RuleUpdatedMessage extends OasisRuleMessage {
     public AbstractRule getRule() {
         return rule;
     }
+
+    public static RuleUpdatedMessage create(int gameId, AbstractRule rule) {
+        RuleUpdatedMessage message = new RuleUpdatedMessage(rule);
+        message.setGameId(gameId);
+        return message;
+    }
+
+    @Override
+    public String toString() {
+        return "RuleUpdate{" +
+                "game=" + getGameId() + ", " +
+                "rule=" + rule +
+                '}';
+    }
 }

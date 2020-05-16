@@ -24,12 +24,14 @@ import java.util.Map;
 
 public interface Event extends Serializable {
 
-    String ID = "_id";
-    String USER = "_user";
-    String TIMESTAMP = "_ts";
-    String EVENT_TYPE = "_type";
-    String SOURCE = "_source";
-    String GAME = "_gameId";
+    String ID = "id";
+    String USER_ID = "userId";
+    String USER_NAME = "userName";
+    String TIMESTAMP = "ts";
+    String EVENT_TYPE = "type";
+    String TEAM_ID = "teamId";
+    String SOURCE_ID = "sourceId";
+    String GAME_ID = "gameId";
 
     Map<String, Object> getAllFieldValues();
 
@@ -59,6 +61,16 @@ public interface Event extends Serializable {
     long getTimestamp();
 
     /**
+     * Returns unique username of this event's user.
+     * Generally this will be user's email.
+     * Use this field to compare user with other user fields. {@link #getUser()} is
+     * only for internal purpose.
+     *
+     * @return username as a string.
+     */
+    String getUserName();
+
+    /**
      * Returns the owner user id of this event. There
      * can only be one user for an event. If there are multiple
      * users, you may split/duplicate this event as required.
@@ -75,16 +87,6 @@ public interface Event extends Serializable {
      * @return external reference id.
      */
     String getExternalId();
-
-    /**
-     * Return user id indicated by any other field. This is useful
-     * when an event is associated with several users, and will be called when
-     * framework needs to assign point(s) to this other user as well.
-     *
-     * @param fieldName user field name.
-     * @return other user id.
-     */
-    Long getUserId(String fieldName);
 
     /**
      * Returns the current team of the associated user of this event.

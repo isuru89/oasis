@@ -25,7 +25,6 @@ import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.elements.badges.rules.BadgeHistogramStreakNRule;
 import io.github.oasis.elements.badges.signals.HistogramBadgeRemovalSignal;
 import io.github.oasis.elements.badges.signals.HistogramBadgeSignal;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -221,7 +220,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        Assert.assertEquals(0, signals.size());
+        Assertions.assertEquals(0, signals.size());
     }
 
     @DisplayName("Single streak: No streaks due to non-existence buckets")
@@ -241,7 +240,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        Assert.assertEquals(0, signals.size());
+        Assertions.assertEquals(0, signals.size());
     }
 
     @DisplayName("Multiple streaks: Out-of-order breaks the latest streak in multiple streaks")
@@ -262,7 +261,7 @@ public class HistogramStreakTest extends AbstractRuleTest {
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        Assert.assertEquals(1, signals.size());
+        Assertions.assertEquals(1, signals.size());
         assertStrict(signals,
                 new HistogramBadgeSignal(ruleContext.getRule().getId(), e7, 3, ATTR_SILVER, 100, 200, e7.getExternalId()));
     }

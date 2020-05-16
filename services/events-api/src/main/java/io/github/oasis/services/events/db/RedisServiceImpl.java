@@ -17,6 +17,8 @@ import java.util.Objects;
  */
 public class RedisServiceImpl implements RedisService {
 
+    private static final String OASIS_USERS_KEY = "oasis.users";
+
     private RedisAPI api;
 
     public static RedisServiceImpl create(Redis redisClient, Handler<AsyncResult<RedisService>> resultHandler) {
@@ -30,7 +32,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public RedisService readUserInfo(String email, Handler<AsyncResult<UserInfo>> resultHandler) {
-        api.hget("oasis.users",
+        api.hget(OASIS_USERS_KEY,
                 email,
                 res -> {
                     if (res.succeeded()) {

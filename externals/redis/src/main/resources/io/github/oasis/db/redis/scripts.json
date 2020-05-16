@@ -1,0 +1,11 @@
+{
+  "O.INCRALL": {
+    "filename": "scripts/INCRALL.lua"
+  },
+  "O.ZINCRALL": {
+    "filename": "scripts/ZINCRALL.lua"
+  },
+  "O.HACQUIRE": {
+    "filename": "scripts/HACQUIRE.lua"
+  }
+}

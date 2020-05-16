@@ -20,33 +20,30 @@
 package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.elements.AbstractDef;
+import io.github.oasis.core.utils.Utils;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
 public class PointDef extends AbstractDef {
 
-    private Serializable award;
+    private Object award;
 
-//    public AbstractRule toRule() {
-//        PointRule rule = new PointRule(generateUniqueHash());
-//        super.toRule(rule);
-//        rule.setCriteria(EventExecutionFilterFactory.ALWAYS_TRUE);
-//        if (award instanceof Number) {
-//            rule.setAmountToAward(BigDecimal.valueOf(((Number) award).doubleValue()));
-//        } else {
-//            rule.setAmountExpression(Scripting.create((String) award, CONTEXT_VAR));
-//        }
-//        return rule;
-//    }
-
-    public Serializable getAward() {
+    public Object getAward() {
         return award;
     }
 
-    public void setAward(Serializable award) {
+    public void setAward(Object award) {
         this.award = award;
+    }
+
+    @Override
+    protected List<String> getSensitiveAttributes() {
+        List<String> base = new ArrayList<>(super.getSensitiveAttributes());
+        base.add(Utils.firstNonNullAsStr(award, EMPTY));
+        return base;
     }
 }

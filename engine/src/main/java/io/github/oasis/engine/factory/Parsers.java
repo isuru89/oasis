@@ -19,10 +19,10 @@
 
 package io.github.oasis.engine.factory;
 
-import io.github.oasis.core.PersistedDef;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.ElementParser;
+import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.EngineContext;
 
 import java.util.Map;
@@ -51,8 +51,17 @@ public class Parsers {
                 }));
     }
 
+    public AbstractRule parseToRule(PersistedDef dto) {
+        String type = dto.getImpl();
+        ElementParser elementParser = parserCache.get(type);
+        if (elementParser != null) {
+            return elementParser.parseToRule(dto);
+        }
+        throw new IllegalArgumentException("Unknown type");
+    }
+
     public AbstractDef parse(PersistedDef persistedObj) {
-        String type = persistedObj.getType();
+        String type = persistedObj.getImpl();
         ElementParser elementParser = parserCache.get(type);
         if (elementParser != null) {
             return elementParser.parse(persistedObj);

@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine;
 
+import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
 import io.github.oasis.core.ID;
@@ -48,6 +49,8 @@ public class EngineBadgesTest extends OasisEngineTest {
         rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
         rule.setRetainTime(10);
 
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
         engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
         engine.submitAll(e1, e2, e3, e4, e5, e6);
         awaitTerminated();

@@ -37,6 +37,8 @@ import java.util.Objects;
  */
 public class RedisAuthService implements AuthService {
 
+    private static final String SOURCE_KEY = "oasis.sources";
+
     private RedisAPI redis;
 
     public static RedisAuthService create(Redis client, Handler<AsyncResult<AuthService>> handler) {
@@ -50,7 +52,7 @@ public class RedisAuthService implements AuthService {
 
     @Override
     public AuthService readSource(String sourceId, Handler<AsyncResult<EventSource>> handler) {
-        redis.hget("oasis.sources",
+        redis.hget(SOURCE_KEY,
                 sourceId,
                 res -> {
                     if (res.succeeded()) {

@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine;
 
+import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.elements.challenges.ChallengeOverEvent;
 import io.github.oasis.elements.challenges.ChallengeRule;
@@ -60,6 +61,8 @@ public class EngineChallengesTest extends OasisEngineTest {
         rule.setWinnerCount(3);
         rule.setPointId("challenge.points");
 
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
         engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
         engine.submitAll(e1, e2, e3, e4, e5, e6);
         awaitTerminated();
@@ -177,6 +180,8 @@ public class EngineChallengesTest extends OasisEngineTest {
         rule.setPointId("challenge.points");
         rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS));
 
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
         engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8,
                 ChallengeOverEvent.createFor(e1.getGameId(), rule.getId()));
@@ -225,6 +230,8 @@ public class EngineChallengesTest extends OasisEngineTest {
         rule.setPointId("challenge.points");
         rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS));
 
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
         engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();

@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.actors.cmds;
 
+import io.github.oasis.core.external.messages.OasisCommand;
+
 /**
  * @author Isuru Weerarathna
  */

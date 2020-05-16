@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.events.dispatcher;
 
+import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
@@ -42,6 +43,11 @@ public interface EventDispatcherService {
     }
 
     @Fluent
-    EventDispatcherService push(EventProxy event, Handler<AsyncResult<JsonObject>> result);
+    EventDispatcherService pushEvent(EventProxy event, Handler<AsyncResult<JsonObject>> handler);
 
+    @Fluent
+    EventDispatcherService push(JsonObject message, Handler<AsyncResult<JsonObject>> handler);
+
+    @Fluent
+    EventDispatcherService broadcast(JsonObject obj, Handler<AsyncResult<JsonObject>> handler);
 }

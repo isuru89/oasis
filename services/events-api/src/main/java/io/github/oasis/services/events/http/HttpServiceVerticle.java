@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.events.http;
 
+import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.services.events.auth.AuthService;
 import io.github.oasis.services.events.auth.EventAuthHandler;
 import io.github.oasis.services.events.auth.EventAuthProvider;
@@ -189,7 +190,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
                 for (int gameId : gameIds) {
                     user.getTeamId(gameId).ifPresent(teamId -> {
                         EventProxy gameEvent = event.copyForGame(gameId, source.getSourceId(), user.getId(), teamId);
-                        dispatcherService.push(gameEvent, dispatcherRes -> {
+                        dispatcherService.pushEvent(gameEvent, dispatcherRes -> {
                             if (dispatcherRes.succeeded()) {
                                 LOG.info("Event published {}", dispatcherRes.result());
                             } else {

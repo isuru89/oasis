@@ -19,7 +19,7 @@
 
 package io.github.oasis.core.elements;
 
-import io.github.oasis.core.PersistedDef;
+import io.github.oasis.core.external.messages.PersistedDef;
 
 import java.io.Serializable;
 
@@ -29,6 +29,10 @@ import java.io.Serializable;
 public interface ElementParser extends Serializable {
 
     AbstractDef parse(PersistedDef persistedObj);
+
+    default AbstractRule parseToRule(PersistedDef dto) {
+        return convert(parse(dto));
+    }
 
     AbstractRule convert(AbstractDef definition);
 

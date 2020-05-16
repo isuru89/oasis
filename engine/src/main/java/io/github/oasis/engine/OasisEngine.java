@@ -25,15 +25,23 @@ import akka.actor.Props;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.github.oasis.core.Event;
+import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.external.EventStreamFactory;
+import io.github.oasis.core.external.SourceFunction;
+import io.github.oasis.core.external.messages.OasisCommand;
+import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
-import io.github.oasis.engine.actors.cmds.OasisCommand;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Isuru Weerarathna
  */
-public class OasisEngine {
+public class OasisEngine implements SourceFunction {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OasisEngine.class);
 
     private ActorSystem oasisEngine;
     private ActorRef supervisor;
@@ -45,18 +53,53 @@ public class OasisEngine {
     }
 
     public void start() throws OasisException {
-        Config config = ConfigFactory.load();
-
         context.init();
 
-        oasisEngine = ActorSystem.create("oasis-engine", config);
+        String engineName = context.getConfigs().getEngineName();
+        oasisEngine = ActorSystem.create(engineName, context.getConfigs().getConfigRef());
         supervisor = oasisEngine.actorOf(Props.create(OasisSupervisor.class, context), ActorNames.OASIS_SUPERVISOR);
+        LOG.info("Oasis engine initialization invoked...");
+
+        LOG.info("Bootstrapping event stream...");
+        bootstrapEventStream(oasisEngine);
     }
 
+    private void bootstrapEventStream(ActorSystem system) throws OasisException {
+        EventStreamFactory streamFactory = context.getStreamFactory();
+        try {
+            streamFactory.getEngineEventSource().init(context, this);
+        } catch (Exception e) {
+            LOG.error("Error initializing event stream! Shutting down engine...", e);
+            system.stop(ActorRef.noSender());
+            throw new OasisException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void submit(PersistedDef dto) {
+        Object message = DtoHandler.derive(dto, context);
+        if (message != null) {
+            supervisor.tell(message, supervisor);
+        }
+    }
+
+    @Override
+    public void submit(PersistedDef dto, AckCallback callback) {
+        Object message = DtoHandler.derive(dto, context);
+        if (message != null) {
+            supervisor.tell(message, supervisor);
+            callback.accepted();
+        } else {
+            callback.rejected();
+        }
+    }
+
+    @Override
     public void submit(OasisCommand command) {
         supervisor.tell(command, supervisor);
     }
 
+    @Override
     public void submit(Event event) {
         supervisor.tell(event, supervisor);
     }
@@ -73,6 +116,8 @@ public class OasisEngine {
 
     public static void main(String[] args) throws OasisException {
         EngineContext context = new EngineContext();
+        OasisConfigs configs = OasisConfigs.defaultConfigs();
+        context.setConfigs(configs);
         new OasisEngine(context).start();
     }
 }

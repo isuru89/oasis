@@ -23,6 +23,7 @@ import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.external.messages.OasisCommand;
 
 /**
  * @author Isuru Weerarathna

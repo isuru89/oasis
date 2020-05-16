@@ -1,0 +1,13 @@
+{
+  "distribution": 1000,
+  "events": [
+    ["stackoverflow.question.asked", 0.1],
+    ["stackoverflow.answer.accepted", 0.07],
+    ["stackoverflow.answer.upvoted", 0.35],
+    ["stackoverflow.answer.downvoted", 0.09],
+    ["stackoverflow.question.upvoted", 0.04],
+    ["stackoverflow.question.downvoted", 0.02],
+    ["stackoverflow.question.favourite", 0.07],
+    ["stackoverflow.question.favourite.remove", 0.001]
+  ]
+}

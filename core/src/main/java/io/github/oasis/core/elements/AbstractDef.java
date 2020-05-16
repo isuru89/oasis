@@ -19,46 +19,73 @@
 
 package io.github.oasis.core.elements;
 
+import io.github.oasis.core.elements.matchers.EventTypeMatcherFactory;
 import io.github.oasis.core.exception.InvalidGameElementException;
 import io.github.oasis.core.utils.Texts;
+import io.github.oasis.core.utils.Utils;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
  */
 public abstract class AbstractDef implements Serializable {
 
+    protected static final String EMPTY = "";
+
     private int id;
     private String name;
     private String description;
 
-    private Serializable forEvents;
+    private Object event;
+    private Object events;
 
     private Set<String> flags;
-    private Serializable condition;
+    private Object condition;
 
-    public void validate() throws InvalidGameElementException {
-        if (Texts.isEmpty(name)) {
-            throw new InvalidGameElementException("Element name cannot be empty!");
-        } else if (Objects.isNull(forEvents)) {
-            throw new InvalidGameElementException("Element must have at least one supported event type!");
-        }
-    }
-
-    protected AbstractRule toRule(AbstractRule source) {
-        source.setName(getName());
-        source.setDescription(getDescription());
-        source.setFlags(Set.copyOf(getFlags()));
-        //source.setEventTypeMatcher(EventTypeMatcherFactory.create(forEvents));
-        //source.setCondition(EventExecutionFilterFactory.create(condition));
+    public static AbstractRule defToRule(AbstractDef def, AbstractRule source) {
+        source.setName(def.getName());
+        source.setDescription(def.getDescription());
+        source.setFlags(Objects.isNull(def.flags) ? Set.of() : Set.copyOf(def.getFlags()));
+        source.setEventTypeMatcher(def.deriveEventMatcher());
+        source.setCondition(EventExecutionFilterFactory.create(def.condition));
         return source;
     }
 
-    public String generateUniqueHash() {
+    @SuppressWarnings("unchecked")
+    private EventTypeMatcher deriveEventMatcher() {
+        if (Objects.nonNull(event)) {
+            return EventTypeMatcherFactory.createMatcher((String) event);
+        } else if (Objects.nonNull(events)) {
+            return EventTypeMatcherFactory.create((Collection<String>) events);
+        }
         return null;
+    }
+
+    public Object getEvent() {
+        return event;
+    }
+
+    public void setEvent(Object event) {
+        this.event = event;
+    }
+
+    protected List<String> getSensitiveAttributes() {
+        return List.of(
+                Utils.firstNonNullAsStr(event, EMPTY),
+                Utils.firstNonNullAsStr(events, EMPTY),
+                Utils.firstNonNullAsStr(flags, EMPTY),
+                Utils.firstNonNullAsStr(condition, EMPTY)
+        );
+    }
+
+    public final String generateUniqueHash() {
+        return Texts.md5Digest(String.join("", getSensitiveAttributes()));
     }
 
     public int getId() {
@@ -85,14 +112,6 @@ public abstract class AbstractDef implements Serializable {
         this.description = description;
     }
 
-    public Serializable getForEvents() {
-        return forEvents;
-    }
-
-    public void setForEvents(Serializable forEvents) {
-        this.forEvents = forEvents;
-    }
-
     public Set<String> getFlags() {
         return flags;
     }
@@ -101,11 +120,19 @@ public abstract class AbstractDef implements Serializable {
         this.flags = flags;
     }
 
-    public Serializable getCondition() {
+    public Object getCondition() {
         return condition;
     }
 
-    public void setCondition(Serializable condition) {
+    public void setCondition(Object condition) {
         this.condition = condition;
+    }
+
+    public Object getEvents() {
+        return events;
+    }
+
+    public void setEvents(Object events) {
+        this.events = events;
     }
 }

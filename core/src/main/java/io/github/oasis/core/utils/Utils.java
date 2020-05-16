@@ -33,6 +33,26 @@ import java.util.UUID;
  */
 public class Utils {
 
+    public static Object firstNonNull(Object first, Object second) {
+        if (first != null) {
+            return first;
+        } else {
+            return second;
+        }
+    }
+
+    public static String firstNonNullAsStr(Object first, Object secod) {
+        return String.valueOf(firstNonNull(first, secod));
+    }
+
+    public static String bytesToHex(byte[] digest) {
+        StringBuilder hex = new StringBuilder();
+        for (byte b : digest) {
+            hex.append(String.format("%02x", b));
+        }
+        return hex.toString();
+    }
+
     public static byte[] getBytesFromUUID(UUID uuid) {
         ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
         bb.putLong(uuid.getMostSignificantBits());

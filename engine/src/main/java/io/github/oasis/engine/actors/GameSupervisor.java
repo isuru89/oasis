@@ -24,7 +24,7 @@ import akka.routing.Router;
 import io.github.oasis.engine.EngineContext;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.engine.actors.cmds.GameEventMessage;
-import io.github.oasis.engine.actors.cmds.OasisCommand;
+import io.github.oasis.core.external.messages.OasisCommand;
 import io.github.oasis.engine.actors.routers.UserRouting;
 
 import java.util.List;
