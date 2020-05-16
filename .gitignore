@@ -22,7 +22,7 @@ src/main/resources/io/github/isuru/oasis/db/.vscode/
 
 *.mv.db
 
-logs.log
+*.log
 
 node_modules/
 
