@@ -33,6 +33,8 @@ import io.github.oasis.core.elements.EventCreatable;
 import io.github.oasis.engine.model.Rules;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Signal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,6 +43,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Isuru Weerarathna
  */
 public class SignalSupervisor extends OasisBaseActor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SignalSupervisor.class);
 
     private static final AtomicInteger COUNTER = new AtomicInteger(0);
 
@@ -58,6 +62,7 @@ public class SignalSupervisor extends OasisBaseActor {
     @Override
     public void preStart() {
         int consumers = configs.getInt(OasisConfigs.SIGNAL_EXECUTOR_COUNT, CONSUMER_COUNT);
+        LOG.info("[{}] Signal Consumer count {}", myId, consumers);
         List<Routee> allRoutes = createChildRouteActorsOfType(SignalConsumer.class,
                 index -> ActorNames.SIGNAL_CONSUMER_PREFIX + index,
                 consumers);

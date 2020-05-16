@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,36 +17,35 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
+package io.github.oasis.simulations;
 
-import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.external.SourceStreamSupport;
+import io.github.oasis.simulations.impl.ManualSourceStream;
+
+import java.io.File;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RuleAddedMessage extends OasisRuleMessage {
+public class SimulationContext {
 
-    private AbstractRule rule;
+    private File gameDataDir;
 
-    public RuleAddedMessage(AbstractRule rule) {
-        this.rule = rule;
+    private ManualSourceStream sourceStreamSupport;
+
+    public File getGameDataDir() {
+        return gameDataDir;
     }
 
-    public AbstractRule getRule() {
-        return rule;
+    public void setGameDataDir(File gameDataDir) {
+        this.gameDataDir = gameDataDir;
     }
 
-    public static RuleAddedMessage create(int gameId, AbstractRule rule) {
-        RuleAddedMessage addedMessage = new RuleAddedMessage(rule);
-        addedMessage.setGameId(gameId);
-        return addedMessage;
+    public ManualSourceStream getSourceStreamSupport() {
+        return sourceStreamSupport;
     }
 
-    @Override
-    public String toString() {
-        return "RuleAdded{" +
-                "game=" + getGameId() + ", " +
-                "rule=" + rule +
-                '}';
+    public void setSourceStreamSupport(ManualSourceStream sourceStreamSupport) {
+        this.sourceStreamSupport = sourceStreamSupport;
     }
 }

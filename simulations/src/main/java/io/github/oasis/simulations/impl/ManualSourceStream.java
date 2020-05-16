@@ -17,20 +17,39 @@
  * under the License.
  */
 
-package io.github.oasis.core.elements;
+package io.github.oasis.simulations.impl;
 
+import io.github.oasis.core.context.RuntimeContextSupport;
+import io.github.oasis.core.external.SourceFunction;
+import io.github.oasis.core.external.SourceStreamSupport;
+import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
-import org.yaml.snakeyaml.Yaml;
+
+import java.io.IOException;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractElementParser implements ElementParser {
+public class ManualSourceStream implements SourceStreamSupport {
 
-    private final Yaml yaml = new Yaml();
+    private SourceFunction sourceFunction;
 
-    protected <T extends AbstractDef> T loadFrom(PersistedDef def, Class<T> clz) {
-        return yaml.loadAs(yaml.dump(def.getData()), clz);
+    @Override
+    public void init(RuntimeContextSupport context, SourceFunction source) throws Exception {
+        sourceFunction = source;
     }
 
+    public void send(PersistedDef persistedDef) {
+        sourceFunction.submit(persistedDef);
+    }
+
+    @Override
+    public void handleGameCommand(GameCommand gameCommand) throws IOException {
+
+    }
+
+    @Override
+    public void close() throws IOException {
+
+    }
 }

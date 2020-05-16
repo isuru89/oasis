@@ -70,17 +70,17 @@ public final class ChallengeOverEvent implements Event {
     }
 
     @Override
+    public String getUserName() {
+        return null;
+    }
+
+    @Override
     public long getUser() {
         return 0;
     }
 
     @Override
     public String getExternalId() {
-        return null;
-    }
-
-    @Override
-    public Long getUserId(String fieldName) {
         return null;
     }
 

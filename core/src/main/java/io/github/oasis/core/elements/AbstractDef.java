@@ -21,16 +21,22 @@ package io.github.oasis.core.elements;
 
 import io.github.oasis.core.elements.matchers.EventTypeMatcherFactory;
 import io.github.oasis.core.exception.InvalidGameElementException;
+import io.github.oasis.core.utils.Texts;
+import io.github.oasis.core.utils.Utils;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
  */
 public abstract class AbstractDef implements Serializable {
+
+    protected static final String EMPTY = "";
 
     private int id;
     private String name;
@@ -45,7 +51,7 @@ public abstract class AbstractDef implements Serializable {
     public static AbstractRule defToRule(AbstractDef def, AbstractRule source) {
         source.setName(def.getName());
         source.setDescription(def.getDescription());
-        source.setFlags(Set.copyOf(def.getFlags()));
+        source.setFlags(Objects.isNull(def.flags) ? Set.of() : Set.copyOf(def.getFlags()));
         source.setEventTypeMatcher(def.deriveEventMatcher());
         source.setCondition(EventExecutionFilterFactory.create(def.condition));
         return source;
@@ -69,8 +75,17 @@ public abstract class AbstractDef implements Serializable {
         this.event = event;
     }
 
-    public String generateUniqueHash() {
-        return null;
+    protected List<String> getSensitiveAttributes() {
+        return List.of(
+                Utils.firstNonNullAsStr(event, EMPTY),
+                Utils.firstNonNullAsStr(events, EMPTY),
+                Utils.firstNonNullAsStr(flags, EMPTY),
+                Utils.firstNonNullAsStr(condition, EMPTY)
+        );
+    }
+
+    public final String generateUniqueHash() {
+        return Texts.md5Digest(String.join("", getSensitiveAttributes()));
     }
 
     public int getId() {

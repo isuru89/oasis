@@ -89,6 +89,6 @@ public abstract class AbstractRule implements Serializable {
 
     @Override
     public String toString() {
-        return "{" + id + "}";
+        return "{" + id + ", name=" + name + "}";
     }
 }

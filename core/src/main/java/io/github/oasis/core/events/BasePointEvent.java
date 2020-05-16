@@ -89,11 +89,6 @@ public abstract class BasePointEvent implements Event {
     }
 
     @Override
-    public Long getUserId(String fieldName) {
-        return eventRef.getUserId(fieldName);
-    }
-
-    @Override
     public Long getTeam() {
         return eventRef.getTeam();
     }
@@ -108,4 +103,8 @@ public abstract class BasePointEvent implements Event {
         return eventRef.getGameId();
     }
 
+    @Override
+    public String getUserName() {
+        return eventRef.getUserName();
+    }
 }

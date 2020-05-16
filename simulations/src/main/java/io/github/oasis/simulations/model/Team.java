@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,36 +17,34 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
-
-import io.github.oasis.core.elements.AbstractRule;
+package io.github.oasis.simulations.model;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RuleAddedMessage extends OasisRuleMessage {
+public class Team {
 
-    private AbstractRule rule;
+    private long id;
+    private String name;
 
-    public RuleAddedMessage(AbstractRule rule) {
-        this.rule = rule;
+    public Team(long id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
-    public AbstractRule getRule() {
-        return rule;
+    public long getId() {
+        return id;
     }
 
-    public static RuleAddedMessage create(int gameId, AbstractRule rule) {
-        RuleAddedMessage addedMessage = new RuleAddedMessage(rule);
-        addedMessage.setGameId(gameId);
-        return addedMessage;
+    public void setId(long id) {
+        this.id = id;
     }
 
-    @Override
-    public String toString() {
-        return "RuleAdded{" +
-                "game=" + getGameId() + ", " +
-                "rule=" + rule +
-                '}';
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

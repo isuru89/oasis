@@ -28,6 +28,7 @@
         <module>engine</module>
         <module>elements</module>
         <module>services</module>
+        <module>simulations</module>
     </modules>
 
     <dependencies>
@@ -37,7 +38,11 @@
             <version>1.18.10</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+            <version>1.4.0</version>
+        </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>

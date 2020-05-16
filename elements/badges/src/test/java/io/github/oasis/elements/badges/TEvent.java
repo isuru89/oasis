@@ -41,26 +41,27 @@ public class TEvent implements Event {
     public static TEvent createKeyValue(long ts, String eventType, long value) {
         TEvent event = new TEvent();
         event.values.put("value", value);
-        event.values.put("type", eventType);
-        event.values.put("ts", ts);
-        event.values.put("game", GAME_ID);
-        event.values.put("user", USER_ID);
-        event.values.put("team", TEAM_ID);
-        event.values.put("sourceId", SOURCE_ID);
-        event.values.put("id", UUID.randomUUID().toString());
+        event.values.put(Event.EVENT_TYPE, eventType);
+        event.values.put(Event.TIMESTAMP, ts);
+        event.values.put(Event.GAME_ID, GAME_ID);
+        event.values.put(Event.USER_ID, USER_ID);
+        event.values.put(Event.TEAM_ID, TEAM_ID);
+        event.values.put(Event.SOURCE_ID, SOURCE_ID);
+        event.values.put(Event.ID, UUID.randomUUID().toString());
         return event;
     }
 
     public static TEvent createKeyValue(long user, long ts, String eventType, long value) {
         TEvent event = createKeyValue(ts, eventType, value);
-        event.values.put("user", user);
+        event.values.put(Event.USER_ID, user);
+        event.values.put(Event.USER_NAME, String.valueOf(user));
         return event;
     }
 
     public static TEvent createWithTeam(long user, long team, long ts, String eventType, long value) {
         TEvent event = createKeyValue(ts, eventType, value);
-        event.values.put("user", user);
-        event.values.put("team", team);
+        event.values.put(Event.USER_ID, user);
+        event.values.put(Event.TEAM_ID, team);
         return event;
     }
 
@@ -81,42 +82,42 @@ public class TEvent implements Event {
 
     @Override
     public String getEventType() {
-        return (String) values.get("type");
+        return (String) values.get(Event.EVENT_TYPE);
     }
 
     @Override
     public long getTimestamp() {
-        return (Long) values.get("ts");
+        return (Long) values.get(Event.TIMESTAMP);
+    }
+
+    @Override
+    public String getUserName() {
+        return (String) values.get(Event.USER_NAME);
     }
 
     @Override
     public long getUser() {
-        return (Long) values.get("user");
+        return (Long) values.get(Event.USER_ID);
     }
 
     @Override
     public String getExternalId() {
-        return (String) values.get("id");
-    }
-
-    @Override
-    public Long getUserId(String fieldName) {
-        return (Long) values.get("user");
+        return (String) values.get(Event.ID);
     }
 
     @Override
     public Long getTeam() {
-        return (Long) values.get("team");
+        return (Long) values.get(Event.TEAM_ID);
     }
 
     @Override
     public Integer getSource() {
-        return (Integer) values.get("sourceId");
+        return (Integer) values.get(Event.SOURCE_ID);
     }
 
     @Override
     public Integer getGameId() {
-        return (Integer) values.get("game");
+        return (Integer) values.get(Event.GAME_ID);
     }
 
     @Override

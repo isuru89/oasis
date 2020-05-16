@@ -19,6 +19,10 @@
 
 package io.github.oasis.core.utils;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -30,5 +34,14 @@ public class Texts {
 
     public static boolean isEmpty(String text) {
         return text == null || text.trim().isEmpty();
+    }
+
+    public static String md5Digest(String text) {
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            return Utils.bytesToHex(md5.digest(text.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("MD5 hash algorithm missing in JVM!", e);
+        }
     }
 }

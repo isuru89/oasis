@@ -20,6 +20,10 @@
 package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.elements.AbstractDef;
+import io.github.oasis.core.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -34,5 +38,12 @@ public class PointDef extends AbstractDef {
 
     public void setAward(Object award) {
         this.award = award;
+    }
+
+    @Override
+    protected List<String> getSensitiveAttributes() {
+        List<String> base = new ArrayList<>(super.getSensitiveAttributes());
+        base.add(Utils.firstNonNullAsStr(award, EMPTY));
+        return base;
     }
 }

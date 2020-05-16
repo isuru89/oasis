@@ -1,11 +1,5 @@
 version: 1
 
-points:
-  - name: Question-Ask-Reputation
-    description: Awards 2 reputation when a question asked
-    event: stackoverflow.question.asked
-    award: 2
-
 badges:
   - name: First-Question
     description: Awards badge when user asks the very first question

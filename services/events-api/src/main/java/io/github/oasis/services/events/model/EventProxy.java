@@ -31,8 +31,8 @@ import java.util.Map;
 @DataObject
 public class EventProxy implements Event {
 
-    private JsonObject ref;
-    private JsonObject data;
+    private final JsonObject ref;
+    private final JsonObject data;
 
     public JsonObject toJson() {
         return ref;
@@ -60,54 +60,54 @@ public class EventProxy implements Event {
 
     @Override
     public String getEventType() {
-        return ref.getString("type");
+        return ref.getString(Event.EVENT_TYPE);
     }
 
     @Override
     public long getTimestamp() {
-        return ref.getLong("ts");
+        return ref.getLong(Event.TIMESTAMP);
+    }
+
+    @Override
+    public String getUserName() {
+        return ref.getString(Event.USER_NAME);
     }
 
     @Override
     public long getUser() {
-        return ref.getLong("user");
+        return ref.getLong(Event.USER_ID);
     }
 
     @Override
     public String getExternalId() {
-        return ref.getString("id");
-    }
-
-    @Override
-    public Long getUserId(String fieldName) {
-        return null;
+        return ref.getString(Event.ID);
     }
 
     @Override
     public Long getTeam() {
-        return ref.getLong("team");
+        return ref.getLong(Event.TEAM_ID);
     }
 
     @Override
     public Integer getSource() {
-        return ref.getInteger("source");
+        return ref.getInteger(Event.SOURCE_ID);
     }
 
     @Override
     public Integer getGameId() {
-        return ref.getInteger("game");
+        return ref.getInteger(Event.GAME_ID);
     }
 
     public String getUserEmail() {
-        return ref.getString("email");
+        return getUserName();
     }
 
     public EventProxy copyForGame(int gameId, int sourceId, long userId, long teamId) {
         JsonObject event = toJson().copy()
-                .put("source", sourceId)
-                .put("team", teamId)
-                .put("user", userId)
-                .put("game", gameId);
+                .put(Event.SOURCE_ID, sourceId)
+                .put(Event.TEAM_ID, teamId)
+                .put(Event.USER_ID, userId)
+                .put(Event.GAME_ID, gameId);
         return new EventProxy(event);
     }
 

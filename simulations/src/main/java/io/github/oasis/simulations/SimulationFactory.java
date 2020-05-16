@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,36 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
+package io.github.oasis.simulations;
 
-import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventStreamFactory;
+import io.github.oasis.core.external.SourceStreamSupport;
 
 /**
  * @author Isuru Weerarathna
  */
-public class RuleAddedMessage extends OasisRuleMessage {
+public class SimulationFactory implements EventStreamFactory {
 
-    private AbstractRule rule;
+    private SourceStreamSupport sourceStreamSupport;
 
-    public RuleAddedMessage(AbstractRule rule) {
-        this.rule = rule;
-    }
-
-    public AbstractRule getRule() {
-        return rule;
-    }
-
-    public static RuleAddedMessage create(int gameId, AbstractRule rule) {
-        RuleAddedMessage addedMessage = new RuleAddedMessage(rule);
-        addedMessage.setGameId(gameId);
-        return addedMessage;
+    public SimulationFactory(SourceStreamSupport sourceStreamSupport) {
+        this.sourceStreamSupport = sourceStreamSupport;
     }
 
     @Override
-    public String toString() {
-        return "RuleAdded{" +
-                "game=" + getGameId() + ", " +
-                "rule=" + rule +
-                '}';
+    public SourceStreamSupport getEngineEventSource() {
+        return sourceStreamSupport;
+    }
+
+    @Override
+    public EventDispatchSupport getDispatcher() {
+        return null;
     }
 }

@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.events.utils;
 
+import io.github.oasis.core.Event;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Assertions;
@@ -80,10 +81,10 @@ public class TestUtils {
     }
 
     public static JsonObject aEvent(String email, long ts, String eventType, int value) {
-        return new JsonObject().put("email", email)
-                .put("id", UUID.randomUUID().toString())
-                .put("ts", ts)
-                .put("type", eventType)
+        return new JsonObject().put(Event.USER_NAME, email)
+                .put(Event.ID, UUID.randomUUID().toString())
+                .put(Event.TIMESTAMP, ts)
+                .put(Event.EVENT_TYPE, eventType)
                 .put("payload", new JsonObject().put("value", value));
     }
 

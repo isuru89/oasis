@@ -84,6 +84,7 @@ public class OasisEngineTest {
                 ChallengesModuleFactory.class,
                 BadgesModuleFactory.class
                 ));
+        context.setStreamFactory(new TestEventStreamFactory());
         context.setConfigs(oasisConfigs);
         context.setDb(dbPool);
         context.setEventStore(new RedisEventLoader(dbPool, oasisConfigs));

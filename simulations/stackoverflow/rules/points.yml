@@ -1,0 +1,42 @@
+version: 1
+
+points:
+  - name: Question-Ask-Reputation
+    description: Awards 2 reputation when a question asked
+    event: stackoverflow.question.asked
+    award: 2
+
+  - name: Answer-Accepted
+    description: Awards 15 reputations when an answer has been accepted
+    event: stackoverflow.answer.accepted
+    award: 15
+
+  - name: Answer-Upvoted
+    description: Awards 10 reputations when an answer has been up-voted
+    event: stackoverflow.answer.upvoted
+    award: 10
+
+  - name: Answer-DownVoted
+    description: Awards -2 reputations when an answer has been down-voted
+    event: stackoverflow.answer.downvoted
+    award: -2
+
+  - name: Question-Upvoted
+    description: Awards 10 reputations when a question has been up-voted
+    event: stackoverflow.question.upvoted
+    award: 10
+
+  - name: Question-DownVoted
+    description: Awards -2 reputations when a question has been down-voted
+    event: stackoverflow.question.downvoted
+    award: -2
+
+  - name: Question-Favourite
+    description: Awards 25 reputations when a question has been marked as favourite
+    event: stackoverflow.question.favourite
+    award: 25
+
+  - name: Question-UnFavourite
+    description: Awards -25 reputations when a question marked faourite has been removed
+    event: stackoverflow.question.favourite.remove
+    award: -25

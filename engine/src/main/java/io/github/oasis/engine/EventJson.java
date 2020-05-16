@@ -51,41 +51,41 @@ public class EventJson implements Event {
 
     @Override
     public String getEventType() {
-        return (String) ref.get("type");
+        return (String) ref.get(Event.EVENT_TYPE);
     }
 
     @Override
     public long getTimestamp() {
-        return (Long) ref.get("ts");
+        return (Long) ref.get(Event.TIMESTAMP);
+    }
+
+    @Override
+    public String getUserName() {
+        return (String) ref.get(Event.USER_NAME);
     }
 
     @Override
     public long getUser() {
-        return (Long) ref.get("user");
+        return (Long) ref.get(Event.USER_ID);
     }
 
     @Override
     public String getExternalId() {
-        return (String) ref.get("id");
-    }
-
-    @Override
-    public Long getUserId(String fieldName) {
-        return null;
+        return (String) ref.get(Event.ID);
     }
 
     @Override
     public Long getTeam() {
-        return (Long) ref.get("team");
+        return (Long) ref.get(Event.TEAM_ID);
     }
 
     @Override
     public Integer getSource() {
-        return (Integer) ref.get("source");
+        return (Integer) ref.get(Event.SOURCE_ID);
     }
 
     @Override
     public Integer getGameId() {
-        return (Integer) ref.get("game");
+        return (Integer) ref.get(Event.GAME_ID);
     }
 }
