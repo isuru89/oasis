@@ -37,6 +37,7 @@ class DtoHandler {
             return new EventJson(def.getData());
         } else if (def.isGameLifecycleEvent()) {
             GameCommand cmd = new GameCommand();
+            cmd.setMessageId(def.getMessageId());
             cmd.setGameId(def.getScope().getGameId());
             cmd.setStatus(toLifecycleType(def.getType()));
             return cmd;

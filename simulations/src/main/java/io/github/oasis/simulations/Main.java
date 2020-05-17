@@ -27,7 +27,6 @@ import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.OasisEngine;
 import io.github.oasis.engine.element.points.PointsModuleFactory;
-import io.github.oasis.simulations.impl.ManualSourceStream;
 
 import java.io.File;
 import java.util.List;
@@ -38,11 +37,8 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) throws OasisException {
-        ManualSourceStream sourceStreamSupport = new ManualSourceStream();
-        SimulationFactory factory = new SimulationFactory(sourceStreamSupport);
         OasisConfigs configs = OasisConfigs.defaultConfigs();
         EngineContext context = new EngineContext();
-        context.setStreamFactory(factory);
         context.setConfigs(configs);
         context.setModuleFactoryList(List.of(
                 PointsModuleFactory.class
@@ -56,7 +52,7 @@ public class Main {
 
         SimulationContext simulationContext = new SimulationContext();
         simulationContext.setGameDataDir(new File("./simulations/stackoverflow"));
-        simulationContext.setSourceStreamSupport(sourceStreamSupport);
+        simulationContext.setSourceStreamSupport(engine.getSourceStreamFactory().getEngineEventSource());
         Simulation simulation = new Simulation();
         simulation.run(simulationContext);
     }

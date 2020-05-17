@@ -17,21 +17,31 @@
  * under the License.
  */
 
-package io.github.oasis.core.external;
-
-import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.external.messages.GameCommand;
-
-import java.io.Closeable;
-import java.io.IOException;
+package io.github.oasis.core.external.messages;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface SourceStreamSupport extends Closeable {
+public class FailedGameCommand extends GameCommand {
 
-    void init(RuntimeContextSupport context, SourceFunction source) throws Exception;
+    private GameCommand original;
 
-    void handleGameCommand(GameCommand gameCommand);
+    public FailedGameCommand(GameCommand original) {
+        this.original = original;
+    }
 
+    @Override
+    public Object getMessageId() {
+        return original.getMessageId();
+    }
+
+    @Override
+    public GameLifecycle getStatus() {
+        return original.getStatus();
+    }
+
+    @Override
+    public int getGameId() {
+        return original.getGameId();
+    }
 }

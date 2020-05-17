@@ -45,7 +45,7 @@ public class SimulationContext {
         return sourceStreamSupport;
     }
 
-    public void setSourceStreamSupport(ManualSourceStream sourceStreamSupport) {
-        this.sourceStreamSupport = sourceStreamSupport;
+    public void setSourceStreamSupport(SourceStreamSupport sourceStreamSupport) {
+        this.sourceStreamSupport = (ManualSourceStream) sourceStreamSupport;
     }
 }

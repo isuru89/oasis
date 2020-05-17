@@ -29,6 +29,8 @@ import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.routers.GameRouting;
+import io.github.oasis.engine.ext.ExternalPartyImpl;
+import io.github.oasis.engine.ext.ExternalParty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,17 +102,23 @@ public class OasisSupervisor extends OasisBaseActor {
     private void gameSpecificCommand(GameCommand gameCommand) {
         GameCommand.GameLifecycle status = gameCommand.getStatus();
         int gameId = gameCommand.getGameId();
+        ExternalPartyImpl eventSource = ExternalParty.EXTERNAL_PARTY.get(getContext().getSystem());
         if (status == GameCommand.GameLifecycle.CREATE) {
+            createGameRuleRefNx(gameId);
             gamesRunning.add(gameId);
             contextMap.put(gameId, loadGameContext(gameId));
+            eventSource.ackGameStateChanged(gameCommand);
         } else if (status == GameCommand.GameLifecycle.REMOVE) {
             gamesRunning.remove(gameId);
             contextMap.remove(gameId);
+            eventSource.ackGameStateChanged(gameCommand);
         } else if (status == GameCommand.GameLifecycle.UPDATE) {
             if (gamesRunning.contains(gameId)) {
                 contextMap.put(gameId, loadGameContext(gameId));
+                eventSource.ackGameStateChanged(gameCommand);
             } else {
                 LOG.warn("No games by the id '{}' is running in the engine. Skipped game update.", gameId);
+                eventSource.nackGameStateChanged(gameCommand);
             }
         }
     }

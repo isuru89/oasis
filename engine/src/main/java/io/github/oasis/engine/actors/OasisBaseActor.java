@@ -32,6 +32,8 @@ import akka.routing.ActorRefRoutee;
 import akka.routing.Routee;
 import io.github.oasis.engine.EngineContext;
 import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.engine.ext.Rules;
+import io.github.oasis.engine.ext.RulesImpl;
 import scala.Option;
 
 import java.time.Duration;
@@ -86,5 +88,13 @@ public abstract class OasisBaseActor extends AbstractActor {
     @Override
     public SupervisorStrategy supervisorStrategy() {
         return RESTART_STRATEGY;
+    }
+
+    RulesImpl.GameRules getGameRuleRef(int gameId) {
+        return Rules.RULES_PROVIDER.get(getContext().getSystem()).forGame(gameId);
+    }
+
+    void createGameRuleRefNx(int gameId) {
+        Rules.RULES_PROVIDER.get(getContext().getSystem()).createIfNotExists(gameId);
     }
 }

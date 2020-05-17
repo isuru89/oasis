@@ -55,7 +55,7 @@ public class TestEventStreamFactory implements EventStreamFactory {
         }
 
         @Override
-        public void handleGameCommand(GameCommand gameCommand) throws IOException {
+        public void handleGameCommand(GameCommand gameCommand) {
 
         }
 

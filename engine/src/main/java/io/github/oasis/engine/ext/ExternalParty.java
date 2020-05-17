@@ -17,21 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.core.external;
+package io.github.oasis.engine.ext;
 
-import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.external.messages.GameCommand;
-
-import java.io.Closeable;
-import java.io.IOException;
+import akka.actor.AbstractExtensionId;
+import akka.actor.ExtendedActorSystem;
+import akka.actor.Extension;
+import akka.actor.ExtensionId;
+import akka.actor.ExtensionIdProvider;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface SourceStreamSupport extends Closeable {
+public class ExternalParty extends AbstractExtensionId<ExternalPartyImpl> implements ExtensionIdProvider {
 
-    void init(RuntimeContextSupport context, SourceFunction source) throws Exception;
+    public static final ExternalParty EXTERNAL_PARTY = new ExternalParty();
 
-    void handleGameCommand(GameCommand gameCommand);
+    private ExternalParty() {}
 
+    @Override
+    public ExternalPartyImpl createExtension(ExtendedActorSystem system) {
+        return new ExternalPartyImpl(system);
+    }
+
+    @Override
+    public ExtensionId<? extends Extension> lookup() {
+        return ExternalParty.EXTERNAL_PARTY;
+    }
 }

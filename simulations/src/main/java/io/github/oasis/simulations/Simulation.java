@@ -63,7 +63,7 @@ public class Simulation implements Closeable {
     private static final String SOURCE_NAME = "oasis.simulation.internal";
     private static final int SOURCE_ID = 1;
     private static final int GAME_ID = 1001;
-    public static final int TIME_RESOLUTION = 1800;
+    public static final int TIME_RESOLUTION = 84000;
 
     private final Gson gson = new Gson();
 

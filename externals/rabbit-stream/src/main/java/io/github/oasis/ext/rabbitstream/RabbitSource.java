@@ -27,6 +27,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
 import io.github.oasis.core.external.SourceStreamSupport;
+import io.github.oasis.core.external.messages.FailedGameCommand;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.context.RuntimeContextSupport;
@@ -78,6 +79,52 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
     }
 
     @Override
+    public void handleGameCommand(GameCommand gameCommand) {
+        if (gameCommand instanceof FailedGameCommand) {
+            silentNack((long) gameCommand.getMessageId());
+            return;
+        }
+
+        int gameId = gameCommand.getGameId();
+        LOG.info("Processing game command. [Game: {}, Status = {}]", gameId, gameCommand.getStatus());
+        if (gameCommand.getStatus() == GameCommand.GameLifecycle.START) {
+            RabbitGameReader gameReader = null;
+            try {
+                channel.basicAck((long) gameCommand.getMessageId(), false);
+                gameReader = new RabbitGameReader(connection.createChannel(), gameId, sourceRef);
+                consumers.put(gameId, gameReader);
+                gameReader.init();
+            } catch (IOException e) {
+                LOG.error("Error initializing RabbitMQ consumer for game {}!", gameId, e);
+                if (gameReader != null) {
+                    consumers.remove(gameId);
+                    silentClose(gameReader);
+                }
+            }
+        } else if (gameCommand.getStatus() == GameCommand.GameLifecycle.REMOVE) {
+            Closeable removedRef = consumers.remove(gameId);
+            silentAck((long) gameCommand.getMessageId());
+            if (Objects.nonNull(removedRef)) {
+                LOG.info("Game consumer {} closed!", gameId);
+                silentClose(removedRef);
+            }
+        }
+    }
+
+    public void handleMessage(String consumerTag, Delivery message) {
+        String content = new String(message.getBody(), StandardCharsets.UTF_8);
+        LOG.trace("Message received. {}", content);
+        PersistedDef persistedDef = gson.fromJson(content, PersistedDef.class);
+        long deliveryTag = message.getEnvelope().getDeliveryTag();
+        persistedDef.setMessageId(deliveryTag);
+        sourceRef.submit(persistedDef);
+    }
+
+    public void handleCancel(String consumerTag) {
+        LOG.warn("Queue is deleted for consumer {}", consumerTag);
+    }
+
+    @Override
     public void close() throws IOException {
         for (Closeable consumer : consumers.values()) {
             consumer.close();
@@ -96,60 +143,28 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
         }
     }
 
-    @Override
-    public void handleGameCommand(GameCommand gameCommand) throws IOException {
-        int gameId = gameCommand.getGameId();
-        LOG.info("Processing game command. [Game: {}, Status = {}]", gameId, gameCommand.getStatus());
-        if (gameCommand.getStatus() == GameCommand.GameLifecycle.START) {
-            RabbitGameReader gameReader = null;
-            try {
-                gameReader = new RabbitGameReader(connection.createChannel(), gameId, sourceRef);
-                consumers.put(gameId, gameReader);
-                gameReader.init();
-            } catch (IOException e) {
-                LOG.error("Error initializing RabbitMQ consumer for game {}!", gameId, e);
-                if (gameReader != null) {
-                    consumers.remove(gameId);
-                    gameReader.close();
-                }
-            }
-        } else if (gameCommand.getStatus() == GameCommand.GameLifecycle.REMOVE) {
-            Closeable removedRef = consumers.remove(gameId);
-            if (Objects.nonNull(removedRef)) {
-                LOG.info("Game consumer {} closed!", gameId);
-                removedRef.close();
-            }
+    private void silentAck(long deliveryId) {
+        try {
+            channel.basicAck(deliveryId, false);
+        } catch (IOException e) {
+            LOG.error("Unable to ACK the message with delivery id {}!", deliveryId, e);
         }
     }
 
-    public void handleMessage(String consumerTag, Delivery message) {
-        String content = new String(message.getBody(), StandardCharsets.UTF_8);
-        LOG.debug("Message received. {}", content);
-        PersistedDef persistedDef = gson.fromJson(content, PersistedDef.class);
-        long deliveryTag = message.getEnvelope().getDeliveryTag();
-        sourceRef.submit(persistedDef, new SourceFunction.AckCallback() {
-            @Override
-            public void accepted() {
-                try {
-                    channel.basicAck(deliveryTag, false);
-                } catch (IOException e) {
-                    LOG.error("Failed to acknowledge message delivery! {}", deliveryTag, e);
-                }
-            }
-
-            @Override
-            public void rejected() {
-                try {
-                    channel.basicNack(deliveryTag, false, !message.getEnvelope().isRedeliver());
-                } catch (IOException e) {
-                    LOG.error("Failed to acknowledge message delivery! {}", deliveryTag, e);
-                }
-            }
-        });
+    private void silentNack(long deliveryId) {
+        try {
+            channel.basicNack(deliveryId, false, true);
+        } catch (IOException e) {
+            LOG.error("Unable to NACK the message with delivery id {}!", deliveryId, e);
+        }
     }
 
-    public void handleCancel(String consumerTag) {
-        LOG.warn("Queue is deleted for consumer {}", consumerTag);
+    private void silentClose(Closeable closeable) {
+        try {
+            closeable.close();
+        } catch (IOException e) {
+            LOG.error("Unable to shutdown game channel! [{}]", closeable, e);
+        }
     }
 
     static class RabbitGameReader implements DeliverCallback, CancelCallback, Closeable {

@@ -22,8 +22,6 @@ package io.github.oasis.engine;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisException;
@@ -33,6 +31,7 @@ import io.github.oasis.core.external.messages.OasisCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
+import io.github.oasis.engine.ext.ExternalParty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,7 @@ public class OasisEngine implements SourceFunction {
     }
 
     private void bootstrapEventStream(ActorSystem system) throws OasisException {
-        EventStreamFactory streamFactory = context.getStreamFactory();
+        EventStreamFactory streamFactory = ExternalParty.EXTERNAL_PARTY.get(oasisEngine).getStreamFactory();
         try {
             streamFactory.getEngineEventSource().init(context, this);
         } catch (Exception e) {
@@ -73,6 +72,10 @@ public class OasisEngine implements SourceFunction {
             system.stop(ActorRef.noSender());
             throw new OasisException(e.getMessage(), e);
         }
+    }
+
+    public EventStreamFactory getSourceStreamFactory() {
+        return ExternalParty.EXTERNAL_PARTY.get(oasisEngine).getStreamFactory();
     }
 
     @Override

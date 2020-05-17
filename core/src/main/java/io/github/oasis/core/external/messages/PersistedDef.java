@@ -55,6 +55,7 @@ public class PersistedDef implements Serializable {
     private String type;
     private String impl;
     private Scope scope;
+    private Object messageId;
     private Map<String, Object> data;
 
     public PersistedDef() {
@@ -66,6 +67,14 @@ public class PersistedDef implements Serializable {
         def.setScope(new PersistedDef.Scope(event.getGameId()));
         def.setData(event.getAllFieldValues());
         return def;
+    }
+
+    public Object getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(Object messageId) {
+        this.messageId = messageId;
     }
 
     public Scope getScope() {

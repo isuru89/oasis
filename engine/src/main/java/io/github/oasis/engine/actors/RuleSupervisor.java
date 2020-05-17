@@ -33,7 +33,6 @@ import io.github.oasis.engine.actors.routers.UserRouting;
 import io.github.oasis.engine.model.ActorSignalCollector;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.RuleExecutionContext;
-import io.github.oasis.engine.model.Rules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +50,6 @@ public class RuleSupervisor extends OasisBaseActor {
 
     private static final int EXECUTORS = 3;
 
-    private Rules rules;
     private ActorRef signalExchanger;
     private ActorSignalCollector collector;
     private RuleExecutionContext ruleExecutionContext;
@@ -64,7 +62,6 @@ public class RuleSupervisor extends OasisBaseActor {
 
         signalExchanger = createSignalExchanger();
         collector = new ActorSignalCollector(signalExchanger);
-        rules = Rules.create();
         ruleExecutionContext = RuleExecutionContext.from(collector);
     }
 
@@ -83,8 +80,8 @@ public class RuleSupervisor extends OasisBaseActor {
     }
 
     private void beginAllChildren() {
-        signalExchanger.tell(new StartRuleExecutionCommand(myId, rules, ruleExecutionContext), getSelf());
-        executor.route(new StartRuleExecutionCommand(myId, rules,ruleExecutionContext), getSelf());
+        signalExchanger.tell(new StartRuleExecutionCommand(myId, ruleExecutionContext), getSelf());
+        executor.route(new StartRuleExecutionCommand(myId, ruleExecutionContext), getSelf());
     }
 
     private ActorRef createSignalExchanger() {

@@ -22,20 +22,21 @@ package io.github.oasis.simulations;
 import io.github.oasis.core.external.EventDispatchSupport;
 import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.core.external.SourceStreamSupport;
+import io.github.oasis.simulations.impl.ManualSourceStream;
 
 /**
  * @author Isuru Weerarathna
  */
 public class SimulationFactory implements EventStreamFactory {
 
-    private SourceStreamSupport sourceStreamSupport;
+    private ManualSourceStream sourceStreamSupport;
 
-    public SimulationFactory(SourceStreamSupport sourceStreamSupport) {
-        this.sourceStreamSupport = sourceStreamSupport;
+    public SimulationFactory() {
+        this.sourceStreamSupport = new ManualSourceStream();
     }
 
     @Override
-    public SourceStreamSupport getEngineEventSource() {
+    public ManualSourceStream getEngineEventSource() {
         return sourceStreamSupport;
     }
 

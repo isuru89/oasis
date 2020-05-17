@@ -17,21 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.core.external;
+package io.github.oasis.engine.ext;
 
-import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.external.messages.GameCommand;
+import akka.actor.AbstractExtensionId;
+import akka.actor.ExtendedActorSystem;
+import akka.actor.ExtensionIdProvider;
 
-import java.io.Closeable;
-import java.io.IOException;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface SourceStreamSupport extends Closeable {
+public class Rules extends AbstractExtensionId<RulesImpl> implements ExtensionIdProvider {
 
-    void init(RuntimeContextSupport context, SourceFunction source) throws Exception;
+    public static final Rules RULES_PROVIDER = new Rules();
 
-    void handleGameCommand(GameCommand gameCommand);
+    private Rules() {}
 
+    @Override
+    public RulesImpl createExtension(ExtendedActorSystem system) {
+        return new RulesImpl();
+    }
+
+    @Override
+    public Rules lookup() {
+        return Rules.RULES_PROVIDER;
+    }
 }
