@@ -47,6 +47,11 @@ import java.util.stream.Collectors;
 public class EventSource implements User {
 
     private static final String KEY_ALGORITHM = "RSA";
+    public static final String KEY = "key";
+    public static final String TOKEN = "token";
+    public static final String GAMES = "games";
+    public static final String ID = "id";
+    public static final String SIGNATURE_ALGORITHM = "SHA1withRSA";
 
     private JsonObject data;
     private List<Integer> gameIds;
@@ -54,9 +59,9 @@ public class EventSource implements User {
     private PublicKey publicKey;
 
     public static EventSource create(String token, JsonObject otherData) {
-        byte[] rawKey = Base64.getDecoder().decode(otherData.getString("key"));
+        byte[] rawKey = Base64.getDecoder().decode(otherData.getString(KEY));
         JsonObject data = new JsonObject()
-                .put("token", token)
+                .put(TOKEN, token)
                 .mergeIn(otherData);
         try {
             PublicKey publicKey = KeyFactory.getInstance(KEY_ALGORITHM)
@@ -70,12 +75,12 @@ public class EventSource implements User {
     public EventSource(JsonObject ref) {
         this.data = ref;
         try {
-            JsonArray games = ref.getJsonArray("games");
+            JsonArray games = ref.getJsonArray(GAMES);
             this.gameIds = games.stream()
                     .map(g -> Integer.parseInt(g.toString()))
                     .collect(Collectors.toList());
             this.publicKey = KeyFactory.getInstance(KEY_ALGORITHM)
-                    .generatePublic(new X509EncodedKeySpec(ref.getBinary("key")));
+                    .generatePublic(new X509EncodedKeySpec(ref.getBinary(KEY)));
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new IllegalArgumentException("Invalid key data!", e);
         }
@@ -92,7 +97,7 @@ public class EventSource implements User {
 
     public boolean verifyEvent(Buffer event, String providedSignatureB64) {
         try {
-            Signature verifier = Signature.getInstance("SHA1withRSA");
+            Signature verifier = Signature.getInstance(SIGNATURE_ALGORITHM);
             verifier.initVerify(publicKey);
             verifier.update(event.getBytes());
             return verifier.verify(Base64.getDecoder().decode(providedSignatureB64));
@@ -106,7 +111,7 @@ public class EventSource implements User {
     }
 
     public int getSourceId() {
-        return data.getInteger("id");
+        return data.getInteger(ID);
     }
 
     @Override
@@ -134,7 +139,7 @@ public class EventSource implements User {
     @Override
     public String toString() {
         return "EventSource{" +
-                "id=" + data.getValue("id") +
+                "id=" + getSourceId() +
                 '}';
     }
 }

@@ -45,25 +45,16 @@ public class RabbitDispatcher implements EventDispatchSupport {
 
     private static final String OPT_DURABLE = "durable";
     private static final String OPT_AUTO_DELETE = "autoDelete";
-    private static final String OPT_TYPE = "type";
-    private static final String OPT_NAME = "name";
 
     static final boolean DEF_EVENT_EXCHANGE_DURABLE = true;
     static final boolean DEF_EVENT_EXCHANGE_AUTO_DEL = false;
-    static final String DEF_EVENT_EXCHANGE_TYPE = "direct";
-
-    static final boolean DEF_BC_EXCHANGE_DURABLE = true;
-    static final boolean DEF_BC_EXCHANGE_AUTO_DEL = false;
-    static final String DEF_BC_EXCHANGE_TYPE = "fanout";
 
     private static final String EMPTY_ROUTING_KEY = "";
     private static final Map<String, Object> EMPTY_CONFIG = new HashMap<>();
+    public static final String OASIS_GAME_ROUTING_PREFIX = "oasis.game.";
 
     private Connection connection;
     private Channel channel;
-
-    private String gameExchangeName;
-    private String broadcastExchangeName;
 
     private final Gson gson = new Gson();
 
@@ -84,7 +75,7 @@ public class RabbitDispatcher implements EventDispatchSupport {
     @Override
     public void push(PersistedDef message) throws Exception {
         String routingKey = generateRoutingKey(message);
-        channel.basicPublish(gameExchangeName,
+        channel.basicPublish(RabbitConstants.GAME_EXCHANGE,
                 routingKey,
                 null,
                 gson.toJson(message).getBytes(StandardCharsets.UTF_8));
@@ -92,7 +83,7 @@ public class RabbitDispatcher implements EventDispatchSupport {
 
     @Override
     public void broadcast(PersistedDef message) throws Exception {
-        channel.basicPublish(broadcastExchangeName,
+        channel.basicPublish(RabbitConstants.ANNOUNCEMENT_EXCHANGE,
                 EMPTY_ROUTING_KEY,
                 null,
                 gson.toJson(message).getBytes(StandardCharsets.UTF_8));
@@ -115,14 +106,6 @@ public class RabbitDispatcher implements EventDispatchSupport {
     @SuppressWarnings("unchecked")
     void initializeExchanges(Channel channel, DispatcherContext context) throws IOException {
         Map<String, Object> configs = context.getConfigs();
-        Map<String, Object> broadcastExchangeOptions = (Map<String, Object>) configs.getOrDefault("broadcastExchange", EMPTY_CONFIG);
-        LOG.debug("Broadcast Exchange Options: {}", broadcastExchangeOptions);
-        channel.exchangeDeclare(RabbitConstants.BROADCAST_EXCHANGE,
-                RabbitConstants.BROADCAST_EXCHANGE_TYPE,
-                (boolean) broadcastExchangeOptions.getOrDefault(OPT_DURABLE, DEF_BC_EXCHANGE_DURABLE),
-                (boolean) broadcastExchangeOptions.getOrDefault(OPT_AUTO_DELETE, DEF_BC_EXCHANGE_AUTO_DEL),
-                null);
-
         Map<String, Object> eventExchangeOptions = (Map<String, Object>) configs.getOrDefault("eventExchange", EMPTY_CONFIG);
         LOG.debug("Event Exchange Options: {}", eventExchangeOptions);
         channel.exchangeDeclare(RabbitConstants.GAME_EXCHANGE,
@@ -130,13 +113,24 @@ public class RabbitDispatcher implements EventDispatchSupport {
                 (boolean) eventExchangeOptions.getOrDefault(OPT_DURABLE, DEF_EVENT_EXCHANGE_DURABLE),
                 (boolean) eventExchangeOptions.getOrDefault(OPT_AUTO_DELETE, DEF_EVENT_EXCHANGE_AUTO_DEL),
                 null);
+
+        LOG.debug("Declaring Oasis Announcements Exchange");
+        channel.exchangeDeclare(RabbitConstants.ANNOUNCEMENT_EXCHANGE,
+                RabbitConstants.ANNOUNCEMENT_EXCHANGE_TYPE,
+                true,
+                false,
+                null);
     }
 
     static String generateRoutingKey(PersistedDef def) {
         PersistedDef.Scope scope = def.getScope();
         if (Objects.nonNull(scope)) {
-            return "oasis.game." + scope.getGameId();
+            return generateRoutingKey(scope.getGameId());
         }
         return def.getType();
+    }
+
+    static String generateRoutingKey(int gameId) {
+        return OASIS_GAME_ROUTING_PREFIX + gameId;
     }
 }

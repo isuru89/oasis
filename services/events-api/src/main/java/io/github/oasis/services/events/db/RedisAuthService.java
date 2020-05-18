@@ -29,6 +29,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Redis;
 import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
@@ -37,7 +39,10 @@ import java.util.Objects;
  */
 public class RedisAuthService implements AuthService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RedisAuthService.class);
+
     private static final String SOURCE_KEY = "oasis.sources";
+    private static final String EMPTY = "";
 
     private RedisAPI redis;
 
@@ -45,9 +50,16 @@ public class RedisAuthService implements AuthService {
         return new RedisAuthService(client, handler);
     }
 
-    public RedisAuthService(Redis redisClient,Handler<AsyncResult<AuthService>> handler) {
+    public RedisAuthService(Redis redisClient, Handler<AsyncResult<AuthService>> handler) {
         this.redis = RedisAPI.api(redisClient);
-        handler.handle(Future.succeededFuture(this));
+        redis.hgetall(SOURCE_KEY, res -> {
+           if (res.succeeded()) {
+               LOG.info("Redis authentication handler verified.");
+               handler.handle(Future.succeededFuture(this));
+           } else {
+               handler.handle(Future.failedFuture(res.cause()));
+           }
+        });
     }
 
     @Override
@@ -58,18 +70,20 @@ public class RedisAuthService implements AuthService {
                     if (res.succeeded()) {
                         Response result = res.result();
                         if (Objects.isNull(result)) {
-                            handler.handle(Future.failedFuture(""));
+                            handler.handle(Future.failedFuture(EMPTY));
                             return;
                         }
                         try {
                             JsonObject sourceJson = (JsonObject) Json.decodeValue(result.toBuffer());
                             EventSource eventSource = EventSource.create(sourceId, sourceJson);
+                            LOG.info("Found event source {}", eventSource);
                             handler.handle(Future.succeededFuture(eventSource));
                         } catch (RuntimeException e) {
+                            LOG.error("Failed to retrieve source info {}!", sourceId, e);
                             handler.handle(Future.failedFuture(e));
                         }
                     } else {
-                        handler.handle(Future.failedFuture(""));
+                        handler.handle(Future.failedFuture(res.cause()));
                     }
         });
         return this;

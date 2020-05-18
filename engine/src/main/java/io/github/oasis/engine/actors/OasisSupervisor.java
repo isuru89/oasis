@@ -29,8 +29,8 @@ import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.routers.GameRouting;
-import io.github.oasis.engine.ext.ExternalPartyImpl;
 import io.github.oasis.engine.ext.ExternalParty;
+import io.github.oasis.engine.ext.ExternalPartyImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,6 +120,8 @@ public class OasisSupervisor extends OasisBaseActor {
                 LOG.warn("No games by the id '{}' is running in the engine. Skipped game update.", gameId);
                 eventSource.nackGameStateChanged(gameCommand);
             }
+        } else {
+            eventSource.ackGameStateChanged(gameCommand);
         }
     }
 

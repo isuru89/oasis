@@ -23,6 +23,10 @@ import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.core.json.JsonObject;
 
+import static io.github.oasis.core.external.messages.PersistedDef.FIELD_DATA;
+import static io.github.oasis.core.external.messages.PersistedDef.FIELD_IMPL;
+import static io.github.oasis.core.external.messages.PersistedDef.FIELD_TYPE;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -36,10 +40,10 @@ public abstract class AbstractDispatcherService implements EventDispatcherServic
 
     PersistedDef toPersistDef(JsonObject message) {
         PersistedDef def = new PersistedDef();
-        def.setType(message.getString("type"));
-        def.setImpl(message.getString("impl"));
+        def.setType(message.getString(FIELD_TYPE));
+        def.setImpl(message.getString(FIELD_IMPL));
         def.setScope(null);
-        def.setData(message.getJsonObject("data", EMPTY).getMap());
+        def.setData(message.getJsonObject(FIELD_DATA, EMPTY).getMap());
         return def;
     }
 }

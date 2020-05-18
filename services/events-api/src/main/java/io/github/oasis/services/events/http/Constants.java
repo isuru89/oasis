@@ -9,5 +9,12 @@ class Constants {
 
     static final String ROUTE_EVENT_PUSH = "/api/event";
     static final String ROUTE_BULK_EVENT_PUSH = "/api/events";
+    static final String ROUTE_PING = "/ping";
 
+
+    static final String PING_TZ = "tz";
+    static final String PING_HEALTH = "health";
+    static final String PING_OFFSET = "offset";
+
+    static final String PING_HEALTH_OK = "OK";
 }

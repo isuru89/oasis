@@ -24,6 +24,8 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.ElementParser;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.EngineContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Isuru Weerarathna
  */
 public class Parsers {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Parsers.class);
 
     private final Map<String, ElementParser> parserCache = new ConcurrentHashMap<>();
     private final Map<Class<? extends AbstractDef>, ElementParser> parserByClzCache = new ConcurrentHashMap<>();
@@ -48,6 +52,7 @@ public class Parsers {
                     ElementParser parser = mod.getParser();
                     parserCache.put(def.getName(), parser);
                     parserByClzCache.put(def, parser);
+                    LOG.info("Definition {} will be parsed with {}", def.getName(), parser.getClass().getName());
                 }));
     }
 

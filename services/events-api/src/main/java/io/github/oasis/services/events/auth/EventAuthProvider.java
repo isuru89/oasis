@@ -34,6 +34,9 @@ import org.slf4j.LoggerFactory;
  */
 public class EventAuthProvider implements AuthProvider {
 
+    static final String SOURCE_ID = "id";
+    static final String SOURCE_DIGEST = "digest";
+
     private static final Logger LOG = LoggerFactory.getLogger(EventAuthProvider.class);
 
     private static final HttpStatusException NO_SOURCE = new HttpStatusException(401);
@@ -46,12 +49,12 @@ public class EventAuthProvider implements AuthProvider {
 
     @Override
     public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> handler) {
-        String sourceId = authInfo.getString("id");
+        String sourceId = authInfo.getString(SOURCE_ID);
         authService.readSource(sourceId, res -> {
             if (res.succeeded()) {
                 handler.handle(Future.succeededFuture(res.result()));
             } else {
-                LOG.warn("Given event source does not exist!");
+                LOG.warn("Given event source does not exist! {}", sourceId);
                 handler.handle(Future.failedFuture(NO_SOURCE));
             }
         });

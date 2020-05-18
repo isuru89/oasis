@@ -21,6 +21,7 @@ package io.github.oasis.engine;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import io.github.oasis.core.EventJson;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
@@ -62,7 +63,7 @@ public class DtoHandlerTest {
     @Test
     @DisplayName("Parsing Game Add Messages")
     void testGameAddParsing() {
-        PersistedDef gameDef = createDef(PersistedDef.GAME_ADDED, null, GAME_ID);
+        PersistedDef gameDef = createDef(PersistedDef.GAME_CREATED, null, GAME_ID);
         GameCommand derived = (GameCommand) DtoHandler.derive(gameDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(GameCommand.GameLifecycle.CREATE, derived.getStatus());

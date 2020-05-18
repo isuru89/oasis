@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,104 +17,102 @@
  * under the License.
  */
 
-package io.github.oasis.services.events.model;
-
-import io.github.oasis.core.Event;
-import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.json.JsonObject;
+package io.github.oasis.core;
 
 import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
-@DataObject
-public class EventProxy implements Event {
+public class EventJson implements Event {
 
-    private final JsonObject ref;
-    private final JsonObject data;
+    private String id;
+    private String type;
+    private long ts;
+    private String userName;
+    private long userId;
+    private long teamId;
+    private int gameId;
+    private int sourceId;
 
-    public JsonObject toJson() {
-        return ref;
+    private Map<String, Object> ref;
+
+    public EventJson() {
     }
 
-    public EventProxy(JsonObject ref) {
+    public EventJson(Map<String, Object> ref) {
+        this.id = (String) ref.get(Event.ID);
+        this.type = (String) ref.get(Event.EVENT_TYPE);
+        this.userName = (String) ref.get(Event.USER_NAME);
+        this.ts = ((Number)ref.get(Event.TIMESTAMP)).longValue();
+        this.userId = ((Number)ref.get(Event.USER_ID)).longValue();
+        this.teamId = ((Number)ref.get(Event.TEAM_ID)).longValue();
+        this.sourceId = ((Number)ref.get(Event.SOURCE_ID)).intValue();
+        this.gameId = ((Number)ref.get(Event.GAME_ID)).intValue();
         this.ref = ref;
-        data = ref.getJsonObject("payload");
     }
 
     @Override
     public Map<String, Object> getAllFieldValues() {
-        return ref.getMap();
+        return ref;
     }
 
     @Override
     public void setFieldValue(String fieldName, Object value) {
-        data.put(fieldName, value);
+        ref.put(fieldName, value);
     }
 
     @Override
     public Object getFieldValue(String fieldName) {
-        return data.getValue(fieldName);
+        return ref.get(fieldName);
     }
 
     @Override
     public String getEventType() {
-        return ref.getString(Event.EVENT_TYPE);
+        return type;
     }
 
     @Override
     public long getTimestamp() {
-        return ref.getLong(Event.TIMESTAMP);
+        return ts;
     }
 
     @Override
     public String getUserName() {
-        return ref.getString(Event.USER_NAME);
+        return userName;
     }
 
     @Override
     public long getUser() {
-        return ref.getLong(Event.USER_ID);
+        return userId;
     }
 
     @Override
     public String getExternalId() {
-        return ref.getString(Event.ID);
+        return id;
     }
 
     @Override
     public Long getTeam() {
-        return ref.getLong(Event.TEAM_ID);
+        return teamId;
     }
 
     @Override
     public Integer getSource() {
-        return ref.getInteger(Event.SOURCE_ID);
+        return sourceId;
     }
 
     @Override
     public Integer getGameId() {
-        return ref.getInteger(Event.GAME_ID);
-    }
-
-    public String getUserEmail() {
-        return getUserName();
-    }
-
-    public EventProxy copyForGame(int gameId, int sourceId, long userId, long teamId) {
-        JsonObject event = toJson().copy()
-                .put(Event.SOURCE_ID, sourceId)
-                .put(Event.TEAM_ID, teamId)
-                .put(Event.USER_ID, userId)
-                .put(Event.GAME_ID, gameId);
-        return new EventProxy(event);
+        return gameId;
     }
 
     @Override
     public String toString() {
-        return "Event{" +
-                ref +
+        return "EventJson{" +
+                "id='" + id + '\'' +
+                ", type='" + type + '\'' +
+                ", ts=" + ts +
                 '}';
     }
 }

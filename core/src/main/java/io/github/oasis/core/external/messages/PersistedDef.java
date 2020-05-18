@@ -20,7 +20,6 @@
 package io.github.oasis.core.external.messages;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.utils.Utils;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -31,7 +30,11 @@ import java.util.Set;
  */
 public class PersistedDef implements Serializable {
 
-    public static final String GAME_ADDED = "GAME.ADDED";
+    public static final String FIELD_TYPE = "type";
+    public static final String FIELD_IMPL = "impl";
+    public static final String FIELD_DATA = "data";
+
+    public static final String GAME_CREATED = "GAME.CREATED";
     public static final String GAME_PAUSED = "GAME.PAUSED";
     public static final String GAME_STARTED = "GAME.STARTED";
     public static final String GAME_REMOVED = "GAME.REMOVED";
@@ -42,7 +45,7 @@ public class PersistedDef implements Serializable {
     public static final String GAME_RULE_UPDATED = "GAME.RULE.UPDATED";
 
     private static final Set<String> ALL_GAME_LIFECYCLE_TYPES = Set.of(
-            GAME_ADDED,
+            GAME_CREATED,
             GAME_PAUSED,
             GAME_STARTED,
             GAME_REMOVED,

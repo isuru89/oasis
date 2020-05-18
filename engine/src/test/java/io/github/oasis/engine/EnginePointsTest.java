@@ -19,11 +19,12 @@
 
 package io.github.oasis.engine;
 
+import io.github.oasis.core.Event;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.element.points.PointRule;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -44,11 +45,11 @@ public class EnginePointsTest extends OasisEngineTest {
 
     @Test
     public void testEnginePoints() {
-        TEvent e1 = TEvent.createKeyValue(U1, TS("2020-03-24 07:15"), EVT_A, 15);
-        TEvent e2 = TEvent.createKeyValue(U2, TS("2020-04-02 08:20"), EVT_A, 83);
-        TEvent e3 = TEvent.createKeyValue(U1, TS("2020-04-03 08:45"), EVT_A, 74);
-        TEvent e4 = TEvent.createKeyValue(U2, TS("2019-12-26 11:45"), EVT_A, 98);
-        TEvent e5 = TEvent.createKeyValue(U1, TS("2020-03-25 08:45"), EVT_A, 61);
+        Event e1 = TEvent.createKeyValue(U1, TS("2020-03-24 07:15"), EVT_A, 15);
+        Event e2 = TEvent.createKeyValue(U2, TS("2020-04-02 08:20"), EVT_A, 83);
+        Event e3 = TEvent.createKeyValue(U1, TS("2020-04-03 08:45"), EVT_A, 74);
+        Event e4 = TEvent.createKeyValue(U2, TS("2019-12-26 11:45"), EVT_A, 98);
+        Event e5 = TEvent.createKeyValue(U1, TS("2020-03-25 08:45"), EVT_A, 61);
 
         PointRule rule = new PointRule("test.point.rule");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
@@ -160,14 +161,14 @@ public class EnginePointsTest extends OasisEngineTest {
 
     @Test
     public void testEnginePointsTeamLeaderboards() {
-        TEvent e1 = TEvent.createWithTeam(U1, T2, TS("2019-12-27 07:15"), EVT_A, 55);
-        TEvent e2 = TEvent.createWithTeam(U2, T2, TS("2019-12-26 11:45"), EVT_A, 98);
-        TEvent e3 = TEvent.createWithTeam(U1, T1, TS("2019-12-26 07:15"), EVT_A, 56);
-        TEvent e4 = TEvent.createWithTeam(U2, T1, TS("2019-12-27 11:45"), EVT_A, 87);
-        TEvent e5 = TEvent.createWithTeam(U1, T2, TS("2020-04-02 07:15"), EVT_A, 61);
-        TEvent e6 = TEvent.createWithTeam(U2, T2, TS("2020-04-03 11:45"), EVT_A, 59);
-        TEvent e7 = TEvent.createWithTeam(U1, T1, TS("2020-04-02 07:15"), EVT_A, 83);
-        TEvent e8 = TEvent.createWithTeam(U2, T1, TS("2020-04-03 11:45"), EVT_A, 78);
+        Event e1 = TEvent.createWithTeam(U1, T2, TS("2019-12-27 07:15"), EVT_A, 55);
+        Event e2 = TEvent.createWithTeam(U2, T2, TS("2019-12-26 11:45"), EVT_A, 98);
+        Event e3 = TEvent.createWithTeam(U1, T1, TS("2019-12-26 07:15"), EVT_A, 56);
+        Event e4 = TEvent.createWithTeam(U2, T1, TS("2019-12-27 11:45"), EVT_A, 87);
+        Event e5 = TEvent.createWithTeam(U1, T2, TS("2020-04-02 07:15"), EVT_A, 61);
+        Event e6 = TEvent.createWithTeam(U2, T2, TS("2020-04-03 11:45"), EVT_A, 59);
+        Event e7 = TEvent.createWithTeam(U1, T1, TS("2020-04-02 07:15"), EVT_A, 83);
+        Event e8 = TEvent.createWithTeam(U2, T1, TS("2020-04-03 11:45"), EVT_A, 78);
 
         PointRule rule = new PointRule("test.point.rule");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));

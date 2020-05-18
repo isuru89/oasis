@@ -25,10 +25,10 @@ package io.github.oasis.ext.rabbitstream;
 class RabbitConstants {
 
     static final String GAME_EXCHANGE = "oasis.game.exchange";
-    static final String BROADCAST_EXCHANGE = "oasis.broadcast.exchange";
+    static final String ANNOUNCEMENT_EXCHANGE = "oasis.announcements";
 
+    static final String ANNOUNCEMENT_EXCHANGE_TYPE = "fanout";
     static final String GAME_EXCHANGE_TYPE = "direct";
-    static final String BROADCAST_EXCHANGE_TYPE = "fanout";
 
 
 }

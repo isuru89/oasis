@@ -22,6 +22,7 @@ package io.github.oasis.simulations;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.oasis.core.Event;
+import io.github.oasis.core.external.EventDispatchSupport;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.element.points.PointDef;
 import io.github.oasis.simulations.model.Game;
@@ -45,6 +46,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -60,18 +62,20 @@ import java.util.stream.Collectors;
  */
 public class Simulation implements Closeable {
 
-    private static final String SOURCE_NAME = "oasis.simulation.internal";
-    private static final int SOURCE_ID = 1;
-    private static final int GAME_ID = 1001;
-    public static final int TIME_RESOLUTION = 84000;
+    static final String SOURCE_NAME = "oasis.simulation.internal";
+    static final String SOURCE_TOKEN = UUID.randomUUID().toString().replace("-", "");
+    static final int SOURCE_ID = 1;
+    static final int GAME_ID = 1001;
+    static final int TIME_RESOLUTION = 84000 * 5;
 
-    private final Gson gson = new Gson();
+    protected final Gson gson = new Gson();
 
     private JedisPool dbPool;
-    private KeyPair sourceKeyPair;
+    protected KeyPair sourceKeyPair;
 
     private File gameRootDir;
-    private SimulationContext context;
+    protected SimulationContext context;
+    private EventDispatchSupport dispatcher;
 
     private List<User> users = new ArrayList<>();
     private List<String> acceptedEvents = new ArrayList<>();
@@ -79,6 +83,7 @@ public class Simulation implements Closeable {
     public void run(SimulationContext context) {
         try {
             this.context = context;
+            this.dispatcher = context.getDispatcher();
             gameRootDir = context.getGameDataDir();
 
             bootstrapDb();
@@ -90,6 +95,9 @@ public class Simulation implements Closeable {
             createTeams();
 
             createUsers();
+
+            dbPool.close();
+            Thread.sleep(3000);
 
             dispatchGameStart();
             dispatchRules();
@@ -112,11 +120,14 @@ public class Simulation implements Closeable {
         try (Jedis jedis = dbPool.getResource()) {
             sourceKeyPair = generateKeyPair();
             Map<String, Object> sourceMap = new HashMap<>();
-            sourceMap.put("key", sourceKeyPair.getPublic().getEncoded());
+            String key = Base64.getEncoder().encodeToString(sourceKeyPair.getPublic().getEncoded());
+            System.out.println(key);
+            sourceMap.put("token", SOURCE_TOKEN);
+            sourceMap.put("key", key);
             sourceMap.put("games", Collections.singletonList(GAME_ID));
             sourceMap.put("id", SOURCE_ID);
 
-            jedis.hset("oasis.sources", SOURCE_NAME, gson.toJson(sourceMap));
+            jedis.hset("oasis.sources", SOURCE_TOKEN, gson.toJson(sourceMap));
         }
     }
 
@@ -169,21 +180,33 @@ public class Simulation implements Closeable {
         return pairGenerator.generateKeyPair();
     }
 
-    private void dispatchGameStart() {
+    protected void announceGame(PersistedDef def) throws Exception {
+        this.dispatcher.broadcast(def);
+    }
+
+    protected void announceRule(PersistedDef def) throws Exception {
+        this.dispatcher.push(def);
+    }
+
+    protected void sendEvent(PersistedDef def) throws Exception {
+        this.dispatcher.push(def);
+    }
+
+    private void dispatchGameStart() throws Exception {
         PersistedDef.Scope scope = new PersistedDef.Scope(GAME_ID);
         PersistedDef gameCreatedDef = new PersistedDef();
-        gameCreatedDef.setType(PersistedDef.GAME_ADDED);
+        gameCreatedDef.setType(PersistedDef.GAME_CREATED);
         gameCreatedDef.setScope(scope);
-        context.getSourceStreamSupport().send(gameCreatedDef);
+        announceGame(gameCreatedDef);
 
         PersistedDef gameStartCmd = new PersistedDef();
         gameStartCmd.setType(PersistedDef.GAME_STARTED);
         gameStartCmd.setScope(scope);
-        context.getSourceStreamSupport().send(gameStartCmd);
+        announceGame(gameStartCmd);
     }
 
     @SuppressWarnings("unchecked")
-    private void dispatchRules() throws RuntimeException {
+    private void dispatchRules() throws Exception {
         Yaml yaml = new Yaml();
 
         PersistedDef.Scope scope = new PersistedDef.Scope(GAME_ID);
@@ -198,7 +221,7 @@ public class Simulation implements Closeable {
                 persistedDef.setScope(scope);
                 acceptedEvents.add((String) def.get("event"));
 
-                context.getSourceStreamSupport().send(persistedDef);
+                announceRule(persistedDef);
             }
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -206,7 +229,7 @@ public class Simulation implements Closeable {
     }
 
     @SuppressWarnings("unchecked")
-    private void dispatchEvents() throws IOException {
+    private void dispatchEvents() throws Exception {
         PersistedDef.Scope scope = new PersistedDef.Scope(GAME_ID);
         long startTime = LocalDate.of(2019, Month.JUNE, 1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         long endTime = LocalDate.of(2020, Month.APRIL, 30).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
@@ -243,7 +266,7 @@ public class Simulation implements Closeable {
             event.put(Event.TIMESTAMP, currTime);
             event.put(Event.USER_ID, userRef.getId());
             event.put(Event.USER_NAME, userRef.getEmail());
-            event.put(Event.TEAM_ID, userRef.getGames().get(String.valueOf(GAME_ID)).getTeamId());
+            event.put(Event.TEAM_ID, userRef.getGames().get(String.valueOf(GAME_ID)).getTeam());
 
             int eventIdx = random.nextInt(distribution);
             String eventType = distMap.floorEntry(eventIdx).getValue();
@@ -257,7 +280,7 @@ public class Simulation implements Closeable {
             def.setType(PersistedDef.GAME_EVENT);
             def.setScope(scope);
             def.setData(event);
-            context.getSourceStreamSupport().send(def);
+            sendEvent(def);
             events++;
         }
 

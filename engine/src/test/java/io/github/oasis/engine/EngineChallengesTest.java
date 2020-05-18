@@ -19,13 +19,14 @@
 
 package io.github.oasis.engine;
 
-import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.elements.challenges.ChallengeOverEvent;
-import io.github.oasis.elements.challenges.ChallengeRule;
-import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.elements.challenges.ChallengeOverEvent;
+import io.github.oasis.elements.challenges.ChallengeRule;
+import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -44,12 +45,12 @@ public class EngineChallengesTest extends OasisEngineTest {
 
     @Test
     public void testChallenges() {
-        TEvent e1 = TEvent.createKeyValue(U1, TS("2020-03-21 07:15"), EVT_A, 57);
-        TEvent e2 = TEvent.createKeyValue(U2, TS("2020-03-22 08:15"), EVT_A, 83);
-        TEvent e3 = TEvent.createKeyValue(U3, TS("2020-03-25 07:15"), EVT_A, 34);
-        TEvent e4 = TEvent.createKeyValue(U4, TS("2020-04-01 11:15"), EVT_A, 75);
-        TEvent e5 = TEvent.createKeyValue(U4, TS("2020-04-02 07:15"), EVT_A, 99);
-        TEvent e6 = TEvent.createKeyValue(U3, TS("2020-05-02 07:15"), EVT_A, 99);
+        Event e1 = TEvent.createKeyValue(U1, TS("2020-03-21 07:15"), EVT_A, 57);
+        Event e2 = TEvent.createKeyValue(U2, TS("2020-03-22 08:15"), EVT_A, 83);
+        Event e3 = TEvent.createKeyValue(U3, TS("2020-03-25 07:15"), EVT_A, 34);
+        Event e4 = TEvent.createKeyValue(U4, TS("2020-04-01 11:15"), EVT_A, 75);
+        Event e5 = TEvent.createKeyValue(U4, TS("2020-04-02 07:15"), EVT_A, 99);
+        Event e6 = TEvent.createKeyValue(U3, TS("2020-05-02 07:15"), EVT_A, 99);
 
         ChallengeRule rule = new ChallengeRule("test.challenge.rule");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
@@ -159,14 +160,14 @@ public class EngineChallengesTest extends OasisEngineTest {
 
     @Test
     public void testOutOfOrderChallenge() {
-        TEvent e1 = TEvent.createWithTeam(U1, 1, TS("2020-03-23 08:00"), EVT_A, 57);
-        TEvent e2 = TEvent.createWithTeam(U1, 2, TS("2020-03-24 08:00"), EVT_A, 83);
-        TEvent e3 = TEvent.createWithTeam(U3, 2, TS("2020-03-25 08:00"), EVT_A, 98);
-        TEvent e4 = TEvent.createWithTeam(U4, 2, TS("2020-03-26 08:00"), EVT_A, 75);
-        TEvent e5 = TEvent.createWithTeam(U1, 1, TS("2020-03-26 08:00"), EVT_A, 88);
-        TEvent e6 = TEvent.createWithTeam(U1, 1, TS("2020-04-02 08:00"), EVT_A, 71);
-        TEvent e7 = TEvent.createWithTeam(U5, 2, TS("2020-03-25 11:00"), EVT_A, 64);
-        TEvent e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
+        Event e1 = TEvent.createWithTeam(U1, 1, TS("2020-03-23 08:00"), EVT_A, 57);
+        Event e2 = TEvent.createWithTeam(U1, 2, TS("2020-03-24 08:00"), EVT_A, 83);
+        Event e3 = TEvent.createWithTeam(U3, 2, TS("2020-03-25 08:00"), EVT_A, 98);
+        Event e4 = TEvent.createWithTeam(U4, 2, TS("2020-03-26 08:00"), EVT_A, 75);
+        Event e5 = TEvent.createWithTeam(U1, 1, TS("2020-03-26 08:00"), EVT_A, 88);
+        Event e6 = TEvent.createWithTeam(U1, 1, TS("2020-04-02 08:00"), EVT_A, 71);
+        Event e7 = TEvent.createWithTeam(U5, 2, TS("2020-03-25 11:00"), EVT_A, 64);
+        Event e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
 
         ChallengeRule rule = new ChallengeRule("test.challenge.rule");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
@@ -209,14 +210,14 @@ public class EngineChallengesTest extends OasisEngineTest {
 
     @Test
     public void testOutOfOrderChallengeNoPointsUntil() {
-        TEvent e1 = TEvent.createWithTeam(U1, 1, TS("2020-03-23 08:00"), EVT_A, 57);
-        TEvent e2 = TEvent.createWithTeam(U1, 2, TS("2020-03-24 08:00"), EVT_A, 83);
-        TEvent e3 = TEvent.createWithTeam(U3, 2, TS("2020-03-25 08:00"), EVT_A, 98);
-        TEvent e4 = TEvent.createWithTeam(U1, 2, TS("2020-03-26 08:00"), EVT_A, 75);
-        TEvent e5 = TEvent.createWithTeam(U1, 1, TS("2020-03-26 08:00"), EVT_A, 88);
-        TEvent e6 = TEvent.createWithTeam(U1, 1, TS("2020-04-02 08:00"), EVT_A, 71);
-        TEvent e7 = TEvent.createWithTeam(U5, 2, TS("2020-03-25 11:00"), EVT_A, 64);
-        TEvent e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
+        Event e1 = TEvent.createWithTeam(U1, 1, TS("2020-03-23 08:00"), EVT_A, 57);
+        Event e2 = TEvent.createWithTeam(U1, 2, TS("2020-03-24 08:00"), EVT_A, 83);
+        Event e3 = TEvent.createWithTeam(U3, 2, TS("2020-03-25 08:00"), EVT_A, 98);
+        Event e4 = TEvent.createWithTeam(U1, 2, TS("2020-03-26 08:00"), EVT_A, 75);
+        Event e5 = TEvent.createWithTeam(U1, 1, TS("2020-03-26 08:00"), EVT_A, 88);
+        Event e6 = TEvent.createWithTeam(U1, 1, TS("2020-04-02 08:00"), EVT_A, 71);
+        Event e7 = TEvent.createWithTeam(U5, 2, TS("2020-03-25 11:00"), EVT_A, 64);
+        Event e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
 
         ChallengeRule rule = new ChallengeRule("test.challenge.rule");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));

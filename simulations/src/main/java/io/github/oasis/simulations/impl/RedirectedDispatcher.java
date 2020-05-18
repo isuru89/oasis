@@ -17,47 +17,41 @@
  * under the License.
  */
 
-package io.github.oasis.simulations;
+package io.github.oasis.simulations.impl;
 
 import io.github.oasis.core.external.EventDispatchSupport;
-import io.github.oasis.core.external.EventStreamFactory;
-import io.github.oasis.core.external.SourceStreamSupport;
-import io.github.oasis.simulations.impl.ManualSourceStream;
+import io.github.oasis.core.external.messages.PersistedDef;
 
-import java.io.File;
+import java.io.IOException;
 
 /**
  * @author Isuru Weerarathna
  */
-public class SimulationContext {
+public class RedirectedDispatcher implements EventDispatchSupport {
 
-    private File gameDataDir;
+    private ManualSourceStream sourceStreamSupport;
 
-    private EventDispatchSupport dispatcher;
-
-    private String apiUrl;
-
-    public String getApiUrl() {
-        return apiUrl;
+    public RedirectedDispatcher(ManualSourceStream sourceStreamSupport) {
+        this.sourceStreamSupport = sourceStreamSupport;
     }
 
-    public void setApiUrl(String apiUrl) {
-        this.apiUrl = apiUrl;
+    @Override
+    public void init(DispatcherContext context) throws Exception {
+
     }
 
-    public File getGameDataDir() {
-        return gameDataDir;
+    @Override
+    public void push(PersistedDef message) throws Exception {
+        sourceStreamSupport.send(message);
     }
 
-    public void setGameDataDir(File gameDataDir) {
-        this.gameDataDir = gameDataDir;
+    @Override
+    public void broadcast(PersistedDef message) throws Exception {
+
     }
 
-    public EventDispatchSupport getDispatcher() {
-        return dispatcher;
-    }
+    @Override
+    public void close() throws IOException {
 
-    public void setDispatcher(EventDispatchSupport dispatcher) {
-        this.dispatcher = dispatcher;
     }
 }

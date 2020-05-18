@@ -19,11 +19,12 @@
 
 package io.github.oasis.engine;
 
-import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.elements.milestones.MilestoneRule;
+import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
+import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.elements.milestones.MilestoneRule;
+import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -38,14 +39,14 @@ public class EngineMilestoneTest extends OasisEngineTest {
 
     @Test
     public void testMilestones() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 87);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 53);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
-        TEvent e4 = TEvent.createKeyValue(115, EVT_A, 11);
-        TEvent e5 = TEvent.createKeyValue(120, EVT_A, 84);
-        TEvent e6 = TEvent.createKeyValue(125, EVT_A, 92);
-        TEvent e7 = TEvent.createKeyValue(130, EVT_A, 100);
-        TEvent e8 = TEvent.createKeyValue(135, EVT_B, 120);
+        Event e1 = TEvent.createKeyValue(100, EVT_A, 87);
+        Event e2 = TEvent.createKeyValue(105, EVT_A, 53);
+        Event e3 = TEvent.createKeyValue(110, EVT_A, 34);
+        Event e4 = TEvent.createKeyValue(115, EVT_A, 11);
+        Event e5 = TEvent.createKeyValue(120, EVT_A, 84);
+        Event e6 = TEvent.createKeyValue(125, EVT_A, 92);
+        Event e7 = TEvent.createKeyValue(130, EVT_A, 100);
+        Event e8 = TEvent.createKeyValue(135, EVT_B, 120);
 
         MilestoneRule rule = new MilestoneRule("test.milestone.rule");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
@@ -78,14 +79,14 @@ public class EngineMilestoneTest extends OasisEngineTest {
 
     @Test
     public void testMilestonesPenalties() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 87);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 53);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
-        TEvent e4 = TEvent.createKeyValue(115, EVT_A, 11);
-        TEvent e5 = TEvent.createKeyValue(120, EVT_A, -84);
-        TEvent e6 = TEvent.createKeyValue(125, EVT_A, 92);
-        TEvent e7 = TEvent.createKeyValue(130, EVT_A, 100);
-        TEvent e8 = TEvent.createKeyValue(135, EVT_B, 120);
+        Event e1 = TEvent.createKeyValue(100, EVT_A, 87);
+        Event e2 = TEvent.createKeyValue(105, EVT_A, 53);
+        Event e3 = TEvent.createKeyValue(110, EVT_A, 34);
+        Event e4 = TEvent.createKeyValue(115, EVT_A, 11);
+        Event e5 = TEvent.createKeyValue(120, EVT_A, -84);
+        Event e6 = TEvent.createKeyValue(125, EVT_A, 92);
+        Event e7 = TEvent.createKeyValue(130, EVT_A, 100);
+        Event e8 = TEvent.createKeyValue(135, EVT_B, 120);
 
         MilestoneRule rule = new MilestoneRule("test.milestone.rule");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));

@@ -39,6 +39,9 @@ public class EventAuthHandler extends AuthHandlerImpl {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventAuthHandler.class);
 
+    private static final String SPACE = " ";
+    private static final String COLON = ":";
+
     private static final HttpStatusException UNAUTHORIZED = new HttpStatusException(401);
     private static final HttpStatusException BAD_HEADER = new HttpStatusException(401, "Bad Header provided");
 
@@ -67,13 +70,13 @@ public class EventAuthHandler extends AuthHandlerImpl {
             return;
         }
 
-        String[] parts = authorization.split(" ");
+        String[] parts = authorization.split(SPACE);
         if (parts.length != 2 || !parts[0].equals(BEARER)) {
             LOG.warn("No valid authorization header is provided!");
             handler.handle(Future.failedFuture(BAD_HEADER));
             return;
         }
-        String[] dataParts = parts[1].split(":");
+        String[] dataParts = parts[1].split(COLON);
         if (dataParts.length != 2) {
             LOG.warn("Authorization header is invalid!");
             handler.handle(Future.failedFuture(BAD_HEADER));
@@ -81,6 +84,8 @@ public class EventAuthHandler extends AuthHandlerImpl {
         }
         String digest = dataParts[1];
         context.put(AuthService.REQ_DIGEST, digest);
-        handler.handle(Future.succeededFuture(new JsonObject().put("id", dataParts[0]).put("digest", digest)));
+        handler.handle(Future.succeededFuture(new JsonObject()
+                .put(EventAuthProvider.SOURCE_ID, dataParts[0])
+                .put(EventAuthProvider.SOURCE_DIGEST, digest)));
     }
 }

@@ -49,6 +49,7 @@ import io.vertx.ext.web.handler.BodyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -59,6 +60,7 @@ import java.util.stream.Collectors;
 import static io.github.oasis.services.events.http.Constants.CONF_PORT;
 import static io.github.oasis.services.events.http.Constants.ROUTE_BULK_EVENT_PUSH;
 import static io.github.oasis.services.events.http.Constants.ROUTE_EVENT_PUSH;
+import static io.github.oasis.services.events.http.Constants.ROUTE_PING;
 
 /**
  * @author Isuru Weerarathna
@@ -77,6 +79,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
     private AuthService authService;
     private RedisService redisService;
     private EventDispatcherService dispatcherService;
+    private JsonObject pingResult;
 
     @Override
     public void start(Promise<Void> promise) {
@@ -93,7 +96,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
         server = vertx.createHttpServer(serverOptions);
 
         Router router = Router.router(vertx);
-        router.get("/ping")
+        router.get(ROUTE_PING)
                 .produces(APPLICATION_JSON)
                 .handler(this::ping);
         Route eventsRouter = router.route("/api/event*");
@@ -107,6 +110,12 @@ public class HttpServiceVerticle extends AbstractVerticle {
         router.put(ROUTE_BULK_EVENT_PUSH).handler(this::putEvents);
         router.put(ROUTE_EVENT_PUSH).handler(this::putEventHandler);
         server.requestHandler(router);
+
+        LOG.info("Setting up health check result");
+        pingResult = new JsonObject()
+                .put(Constants.PING_TZ, TimeZone.getDefault().getID())
+                .put(Constants.PING_OFFSET, TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 1000)
+                .put(Constants.PING_HEALTH, Constants.PING_HEALTH_OK);
 
         int port = httpConf.getInteger(CONF_PORT, DEF_PORT);
         server.listen(port, onListen -> {
@@ -126,9 +135,57 @@ public class HttpServiceVerticle extends AbstractVerticle {
         if (optHeader.isPresent() && eventSource.verifyEvent(ctx.getBody(), optHeader.get())) {
             ctx.next();
         } else {
-            LOG.warn("Payload verification failed!");
+            LOG.warn("[Source={}] Payload verification failed!", eventSource.getSourceId());
             ctx.fail(403, new IllegalArgumentException("xxx"));
         }
+    }
+
+    private void putEventHandler(RoutingContext context) {
+        Optional<EventProxy> eventPayload = getEventPayloadAsObject(context.getBody());
+        if (eventPayload.isEmpty()) {
+            LOG.warn("Event payload does not comply to the accepted format!");
+            context.fail(400);
+            return;
+        }
+        EventSource source = asEventSource(context.user());
+        EventProxy event = eventPayload.get();
+        LOG.info("[{}] Processing event {}", event.getExternalId(), event);
+        putEvent(event, source, res -> {
+            if (res.succeeded()) {
+                context.response().setStatusCode(202).end(new JsonObject().put("eventId", event.getExternalId()).toBuffer());
+            } else {
+                context.fail(400, res.cause());
+            }
+        });
+    }
+
+    private void putEvent(EventProxy event, EventSource source, Handler<AsyncResult<Boolean>> handler) {
+        String userEmail = event.getUserEmail();
+        redisService.readUserInfo(userEmail, res -> {
+            if (res.succeeded()) {
+                LOG.info("[{}] User {} exists in Oasis", event.getExternalId(), userEmail);
+                UserInfo user = res.result();
+                List<Integer> gameIds = source.getGameIds().stream()
+                        .filter(gId -> user.getTeamId(gId).isPresent())
+                        .collect(Collectors.toList());
+                for (int gameId : gameIds) {
+                    user.getTeamId(gameId).ifPresent(teamId -> {
+                        EventProxy gameEvent = event.copyForGame(gameId, source.getSourceId(), user.getId(), teamId);
+                        dispatcherService.pushEvent(gameEvent, dispatcherRes -> {
+                            if (dispatcherRes.succeeded()) {
+                                LOG.info("[{}] Event published.", event.getExternalId());
+                            } else {
+                                LOG.error("[{}] Unable to publish event!", event.getExternalId(), dispatcherRes.cause());
+                            }
+                        });
+                    });
+                }
+                handler.handle(Future.succeededFuture(true));
+            } else {
+                LOG.warn("[{}] User {} does not exist in Oasis!", event.getExternalId(), userEmail);
+                handler.handle(Future.failedFuture(NO_SUCH_USER_EXIST));
+            }
+        });
     }
 
     private void putEvents(RoutingContext context) {
@@ -160,59 +217,8 @@ public class HttpServiceVerticle extends AbstractVerticle {
         context.response().setStatusCode(202).end(new JsonObject().put("events", submittedEvents).toBuffer());
     }
 
-    private void putEventHandler(RoutingContext context) {
-        Optional<EventProxy> eventPayload = getEventPayloadAsObject(context.getBody());
-        if (eventPayload.isEmpty()) {
-            LOG.warn("Event payload does not comply to the accepted format!");
-            context.fail(400);
-            return;
-        }
-        EventSource source = asEventSource(context.user());
-        EventProxy event = eventPayload.get();
-        putEvent(event, source, res -> {
-            if (res.succeeded()) {
-                context.response().setStatusCode(202).end(new JsonObject().put("eventId", event.getExternalId()).toBuffer());
-            } else {
-                context.fail(400, res.cause());
-            }
-        });
-    }
-
-    private void putEvent(EventProxy event, EventSource source, Handler<AsyncResult<Boolean>> handler) {
-        String userEmail = event.getUserEmail();
-        redisService.readUserInfo(userEmail, res -> {
-            if (res.succeeded()) {
-                LOG.info("User {} exists in Oasis", userEmail);
-                UserInfo user = res.result();
-                List<Integer> gameIds = source.getGameIds().stream()
-                        .filter(gId -> user.getTeamId(gId).isPresent())
-                        .collect(Collectors.toList());
-                for (int gameId : gameIds) {
-                    user.getTeamId(gameId).ifPresent(teamId -> {
-                        EventProxy gameEvent = event.copyForGame(gameId, source.getSourceId(), user.getId(), teamId);
-                        dispatcherService.pushEvent(gameEvent, dispatcherRes -> {
-                            if (dispatcherRes.succeeded()) {
-                                LOG.info("Event published {}", dispatcherRes.result());
-                            } else {
-                                LOG.error("Unable to publish event! {}", gameEvent, dispatcherRes.cause());
-                            }
-                        });
-                    });
-                }
-                handler.handle(Future.succeededFuture(true));
-            } else {
-                LOG.warn("User {} does not exist in Oasis!", userEmail);
-                handler.handle(Future.failedFuture(NO_SUCH_USER_EXIST));
-            }
-        });
-    }
-
     private void ping(RoutingContext context) {
-        context.response().end(Json.encodeToBuffer(new JsonObject()
-            .put("tz", TimeZone.getDefault().getID())
-            .put("offset", TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 1000)
-            .put("health", "OK")
-        ));
+        context.response().end(Json.encodeToBuffer(pingResult));
     }
 
     private EventSource asEventSource(User user) {
