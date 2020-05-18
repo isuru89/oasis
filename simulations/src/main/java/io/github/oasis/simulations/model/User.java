@@ -64,18 +64,18 @@ public class User {
     }
 
     public static class UserGame {
-        private long teamId;
+        private long team;
 
         public UserGame(long teamId) {
-            this.teamId = teamId;
+            this.team = teamId;
         }
 
-        public long getTeamId() {
-            return teamId;
+        public long getTeam() {
+            return team;
         }
 
-        public void setTeamId(long teamId) {
-            this.teamId = teamId;
+        public void setTeam(long teamId) {
+            this.team = teamId;
         }
     }
 }

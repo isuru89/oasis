@@ -20,6 +20,7 @@
 package io.github.oasis.engine.model;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.EventJson;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,7 @@ import java.util.UUID;
 /**
  * @author Isuru Weerarathna
  */
-public class TEvent implements Event {
+public class TEvent extends EventJson {
 
     public static int SOURCE_ID = 1;
     public static int GAME_ID = 1;
@@ -38,31 +39,31 @@ public class TEvent implements Event {
 
     private Map<String, Object> values = new HashMap<>();
 
-    public static TEvent createKeyValue(long ts, String eventType, long value) {
-        TEvent event = new TEvent();
-        event.values.put("value", value);
-        event.values.put(Event.EVENT_TYPE, eventType);
-        event.values.put(Event.TIMESTAMP, ts);
-        event.values.put(Event.GAME_ID, GAME_ID);
-        event.values.put(Event.USER_ID, USER_ID);
-        event.values.put(Event.TEAM_ID, TEAM_ID);
-        event.values.put(Event.SOURCE_ID, SOURCE_ID);
-        event.values.put(Event.ID, UUID.randomUUID().toString());
-        return event;
+    public static EventJson createKeyValue(long ts, String eventType, long value) {
+        Map<String, Object> values = new HashMap<>();
+        values.put("value", value);
+        values.put(Event.EVENT_TYPE, eventType);
+        values.put(Event.TIMESTAMP, ts);
+        values.put(Event.GAME_ID, GAME_ID);
+        values.put(Event.USER_ID, USER_ID);
+        values.put(Event.TEAM_ID, TEAM_ID);
+        values.put(Event.SOURCE_ID, SOURCE_ID);
+        values.put(Event.ID, UUID.randomUUID().toString());
+        return new EventJson(values);
     }
 
-    public static TEvent createKeyValue(long user, long ts, String eventType, long value) {
-        TEvent event = createKeyValue(ts, eventType, value);
-        event.values.put(Event.USER_ID, user);
-        event.values.put(Event.USER_NAME, String.valueOf(user));
-        return event;
+    public static EventJson createKeyValue(long user, long ts, String eventType, long value) {
+        Map<String, Object> values = createKeyValue(ts, eventType, value).getAllFieldValues();
+        values.put(Event.USER_ID, user);
+        values.put(Event.USER_NAME, String.valueOf(user));
+        return new EventJson(values);
     }
 
-    public static TEvent createWithTeam(long user, long team, long ts, String eventType, long value) {
-        TEvent event = createKeyValue(ts, eventType, value);
-        event.values.put(Event.USER_ID, user);
-        event.values.put(Event.TEAM_ID, team);
-        return event;
+    public static EventJson createWithTeam(long user, long team, long ts, String eventType, long value) {
+        Map<String, Object> values = createKeyValue(ts, eventType, value).getAllFieldValues();
+        values.put(Event.USER_ID, user);
+        values.put(Event.TEAM_ID, team);
+        return new EventJson(values);
     }
 
     @Override

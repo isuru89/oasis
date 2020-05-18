@@ -32,6 +32,6 @@ public interface SourceStreamSupport extends Closeable {
 
     void init(RuntimeContextSupport context, SourceFunction source) throws Exception;
 
-    void handleGameCommand(GameCommand gameCommand) throws IOException;
+    void handleGameCommand(GameCommand gameCommand);
 
 }

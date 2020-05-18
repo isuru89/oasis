@@ -19,14 +19,15 @@
 
 package io.github.oasis.engine;
 
-import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.elements.ratings.RatingRule;
-import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.Event;
+import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventValueResolver;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.elements.ratings.RatingRule;
+import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -41,9 +42,9 @@ public class EngineRatingsTest extends OasisEngineTest {
 
     @Test
     public void testRatings() {
-        TEvent e1 = TEvent.createKeyValue(TS("2020-03-24 07:15"), EVT_A, 87);
-        TEvent e2 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 66);
-        TEvent e3 = TEvent.createKeyValue(TS("2020-03-24 20:15"), EVT_A, 54);
+        Event e1 = TEvent.createKeyValue(TS("2020-03-24 07:15"), EVT_A, 87);
+        Event e2 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 66);
+        Event e3 = TEvent.createKeyValue(TS("2020-03-24 20:15"), EVT_A, 54);
 
         RatingRule rule = new RatingRule("test.rating.rule");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
@@ -93,9 +94,9 @@ public class EngineRatingsTest extends OasisEngineTest {
 
     @Test
     public void testRatingsWithNetPoints() {
-        TEvent e1 = TEvent.createKeyValue(TS("2020-03-24 07:15"), EVT_A, 87);
-        TEvent e2 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 66);
-        TEvent e3 = TEvent.createKeyValue(TS("2020-03-24 20:15"), EVT_A, 68);
+        Event e1 = TEvent.createKeyValue(TS("2020-03-24 07:15"), EVT_A, 87);
+        Event e2 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 66);
+        Event e3 = TEvent.createKeyValue(TS("2020-03-24 20:15"), EVT_A, 68);
 
         RatingRule rule = new RatingRule("test.rating.rule");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));

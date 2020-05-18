@@ -31,9 +31,9 @@ import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.engine.ext.RulesImpl;
 import io.github.oasis.engine.factory.Processors;
 import io.github.oasis.engine.model.RuleExecutionContext;
-import io.github.oasis.engine.model.Rules;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -50,7 +50,6 @@ public class RuleExecutor extends OasisBaseActor {
     private final Map<String, AbstractProcessor<? extends AbstractRule, ? extends Signal>> cache = new HashMap<>();
 
     private String parentId;
-    private Rules rules;
 
     private final AbstractActor.Receive executing;
     private final AbstractActor.Receive starting;
@@ -79,6 +78,7 @@ public class RuleExecutor extends OasisBaseActor {
     }
 
     private void ruleModified(OasisRuleMessage message) {
+        RulesImpl.GameRules rules = getGameRuleRef(message.getGameId());
         if (message instanceof RuleAddedMessage) {
             rules.addRule(((RuleAddedMessage) message).getRule());
         } else if (message instanceof RuleRemovedMessage) {
@@ -89,7 +89,6 @@ public class RuleExecutor extends OasisBaseActor {
     }
 
     private void assignRules(StartRuleExecutionCommand command) {
-        this.rules = command.getRules();
         this.parentId = command.getParentId();
         this.ruleExecutionContext = RuleExecutionContext.from(engineContext, command.getRuleExecutionContext());
         log.info("[{}] Initialization from {}", myId, parentId);
@@ -97,9 +96,10 @@ public class RuleExecutor extends OasisBaseActor {
     }
 
     private void processEvent(EventMessage eventMessage) {
+        RulesImpl.GameRules rules = getGameRuleRef(eventMessage.getEvent().getGameId());
         Event event = eventMessage.getEvent();
         log.info("[{}#{}] Processing event {}", parentId, myId, event);
-        Iterator<AbstractRule> allRulesForEvent = this.rules.getAllRulesForEvent(event);
+        Iterator<AbstractRule> allRulesForEvent = rules.getAllRulesForEvent(event);
         while (allRulesForEvent.hasNext()) {
             AbstractRule rule = allRulesForEvent.next();
 

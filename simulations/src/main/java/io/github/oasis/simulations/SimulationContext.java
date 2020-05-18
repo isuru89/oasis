@@ -19,6 +19,8 @@
 
 package io.github.oasis.simulations;
 
+import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.core.external.SourceStreamSupport;
 import io.github.oasis.simulations.impl.ManualSourceStream;
 
@@ -31,7 +33,17 @@ public class SimulationContext {
 
     private File gameDataDir;
 
-    private ManualSourceStream sourceStreamSupport;
+    private EventDispatchSupport dispatcher;
+
+    private String apiUrl;
+
+    public String getApiUrl() {
+        return apiUrl;
+    }
+
+    public void setApiUrl(String apiUrl) {
+        this.apiUrl = apiUrl;
+    }
 
     public File getGameDataDir() {
         return gameDataDir;
@@ -41,11 +53,11 @@ public class SimulationContext {
         this.gameDataDir = gameDataDir;
     }
 
-    public ManualSourceStream getSourceStreamSupport() {
-        return sourceStreamSupport;
+    public EventDispatchSupport getDispatcher() {
+        return dispatcher;
     }
 
-    public void setSourceStreamSupport(ManualSourceStream sourceStreamSupport) {
-        this.sourceStreamSupport = sourceStreamSupport;
+    public void setDispatcher(EventDispatchSupport dispatcher) {
+        this.dispatcher = dispatcher;
     }
 }

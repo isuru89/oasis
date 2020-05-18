@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine;
 
+import io.github.oasis.core.EventJson;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
@@ -37,6 +38,7 @@ class DtoHandler {
             return new EventJson(def.getData());
         } else if (def.isGameLifecycleEvent()) {
             GameCommand cmd = new GameCommand();
+            cmd.setMessageId(def.getMessageId());
             cmd.setGameId(def.getScope().getGameId());
             cmd.setStatus(toLifecycleType(def.getType()));
             return cmd;
@@ -66,7 +68,7 @@ class DtoHandler {
 
     private static GameCommand.GameLifecycle toLifecycleType(String type) {
         switch (type) {
-            case PersistedDef.GAME_ADDED: return GameCommand.GameLifecycle.CREATE;
+            case PersistedDef.GAME_CREATED: return GameCommand.GameLifecycle.CREATE;
             case PersistedDef.GAME_PAUSED: return GameCommand.GameLifecycle.PAUSE;
             case PersistedDef.GAME_REMOVED: return GameCommand.GameLifecycle.REMOVE;
             case PersistedDef.GAME_STARTED: return GameCommand.GameLifecycle.START;

@@ -25,7 +25,16 @@ package io.github.oasis.core.external.messages;
 public class GameCommand implements OasisCommand {
 
     private int gameId;
+    private Object messageId;
     private GameLifecycle status;
+
+    public Object getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(Object messageId) {
+        this.messageId = messageId;
+    }
 
     public GameLifecycle getStatus() {
         return status;

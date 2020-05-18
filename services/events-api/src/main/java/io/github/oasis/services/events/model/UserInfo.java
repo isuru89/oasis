@@ -33,12 +33,17 @@ public class UserInfo {
 
     private static final JsonObject EMPTY = new JsonObject();
 
+    public static final String EMAIL = "email";
+    public static final String ID = "id";
+    public static final String GAMES = "games";
+    public static final String TEAM = "team";
+
     private JsonObject ref;
 
     public static UserInfo create(String email, JsonObject other) {
         return new UserInfo(new JsonObject()
                 .mergeIn(other)
-                .put("email", email));
+                .put(EMAIL, email));
     }
 
     public UserInfo(JsonObject ref) {
@@ -50,15 +55,15 @@ public class UserInfo {
     }
 
     public long getId() {
-        return ref.getLong("id");
+        return ref.getLong(ID);
     }
 
     public Optional<Long> getTeamId(int gameId) {
-        JsonObject games = ref.getJsonObject("games", EMPTY);
+        JsonObject games = ref.getJsonObject(GAMES, EMPTY);
         JsonObject gameInfo = games.getJsonObject(String.valueOf(gameId));
         if (Objects.isNull(gameInfo)) {
             return Optional.empty();
         }
-        return Optional.ofNullable(gameInfo.getLong("team"));
+        return Optional.ofNullable(gameInfo.getLong(TEAM));
     }
 }

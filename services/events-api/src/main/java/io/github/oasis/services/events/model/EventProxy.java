@@ -45,7 +45,7 @@ public class EventProxy implements Event {
 
     @Override
     public Map<String, Object> getAllFieldValues() {
-        return data.getMap();
+        return ref.getMap();
     }
 
     @Override

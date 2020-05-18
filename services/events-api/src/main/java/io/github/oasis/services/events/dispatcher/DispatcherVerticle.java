@@ -19,12 +19,14 @@
 
 package io.github.oasis.services.events.dispatcher;
 
+import com.google.gson.Gson;
 import io.github.oasis.core.external.EventDispatchSupport;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 import java.util.Map;
 
@@ -45,7 +47,7 @@ public class DispatcherVerticle extends AbstractVerticle {
     public void start() throws Exception {
         LOG.info("Initializing event dispatcher {}...", eventDispatcher.getClass().getName());
         JsonObject dispatcherConfigs = config().copy();
-        VertxDispatcherContext ctx = new VertxDispatcherContext(dispatcherConfigs.getMap());
+        VertxDispatcherContext ctx = new VertxDispatcherContext(configToMap(dispatcherConfigs));
         try {
             eventDispatcher.init(ctx);
             WrappedDispatcherService wrappedDispatcherService = new WrappedDispatcherService(vertx, eventDispatcher);
@@ -65,6 +67,11 @@ public class DispatcherVerticle extends AbstractVerticle {
         eventDispatcher.close();
     }
 
+    private Map<String, Object> configToMap(JsonObject config) {
+        Yaml yaml = new Yaml();
+        return yaml.load(config.toString());
+    }
+
     static class VertxDispatcherContext implements EventDispatchSupport.DispatcherContext {
 
         private Map<String, Object> configs;
@@ -77,5 +84,6 @@ public class DispatcherVerticle extends AbstractVerticle {
         public Map<String, Object> getConfigs() {
             return configs;
         }
+
     }
 }

@@ -30,9 +30,9 @@ import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.actors.routers.UserSignalRouting;
 import io.github.oasis.core.elements.EventCreatable;
-import io.github.oasis.engine.model.Rules;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.engine.ext.RulesImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,6 @@ public class SignalSupervisor extends OasisBaseActor {
     private static final int CONSUMER_COUNT = 2;
 
     private Router router;
-    private Rules rules;
 
     SignalSupervisor(EngineContext context) {
         super(context);
@@ -67,7 +66,7 @@ public class SignalSupervisor extends OasisBaseActor {
                 index -> ActorNames.SIGNAL_CONSUMER_PREFIX + index,
                 consumers);
         router = new Router(new UserSignalRouting(), allRoutes);
-        router.route(new StartRuleExecutionCommand(myId, null, null), getSelf());
+        router.route(new StartRuleExecutionCommand(myId, null), getSelf());
     }
 
     @Override
@@ -80,11 +79,11 @@ public class SignalSupervisor extends OasisBaseActor {
     }
 
     private void initializeRules(StartRuleExecutionCommand command) {
-        this.rules = command.getRules();
         this.parentId = command.getParentId();
     }
 
     private void handleRuleModificationMessage(OasisRuleMessage message) {
+        RulesImpl.GameRules rules = getGameRuleRef(message.getGameId());
         if (message instanceof RuleAddedMessage) {
             rules.addRule(((RuleAddedMessage) message).getRule());
         }

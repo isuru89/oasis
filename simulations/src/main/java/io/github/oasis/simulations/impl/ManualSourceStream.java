@@ -25,8 +25,6 @@ import io.github.oasis.core.external.SourceStreamSupport;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 
-import java.io.IOException;
-
 /**
  * @author Isuru Weerarathna
  */
@@ -35,7 +33,7 @@ public class ManualSourceStream implements SourceStreamSupport {
     private SourceFunction sourceFunction;
 
     @Override
-    public void init(RuntimeContextSupport context, SourceFunction source) throws Exception {
+    public void init(RuntimeContextSupport context, SourceFunction source) {
         sourceFunction = source;
     }
 
@@ -44,12 +42,12 @@ public class ManualSourceStream implements SourceStreamSupport {
     }
 
     @Override
-    public void handleGameCommand(GameCommand gameCommand) throws IOException {
+    public void handleGameCommand(GameCommand gameCommand) {
 
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
     }
 }

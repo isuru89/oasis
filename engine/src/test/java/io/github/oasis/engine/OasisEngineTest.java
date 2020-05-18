@@ -70,10 +70,7 @@ public class OasisEngineTest {
     @BeforeEach
     public void setup() throws IOException, OasisException {
         EngineContext context = new EngineContext();
-        OasisConfigs oasisConfigs = new OasisConfigs.Builder()
-                .withSupervisors(2, 1, 1)
-                .withExecutors(1, 2)
-                .build();
+        OasisConfigs oasisConfigs = OasisConfigs.defaultConfigs();
         dbPool = RedisDb.create(oasisConfigs);
         dbPool.init();
 
@@ -84,7 +81,6 @@ public class OasisEngineTest {
                 ChallengesModuleFactory.class,
                 BadgesModuleFactory.class
                 ));
-        context.setStreamFactory(new TestEventStreamFactory());
         context.setConfigs(oasisConfigs);
         context.setDb(dbPool);
         context.setEventStore(new RedisEventLoader(dbPool, oasisConfigs));

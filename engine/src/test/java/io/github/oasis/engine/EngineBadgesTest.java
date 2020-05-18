@@ -19,11 +19,12 @@
 
 package io.github.oasis.engine;
 
-import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
+import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
+import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
+import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -36,12 +37,12 @@ public class EngineBadgesTest extends OasisEngineTest {
 
     @Test
     public void testEngineBadges() {
-        TEvent e1 = TEvent.createKeyValue(TS("2020-03-23 11:15"), EVT_A, 75);
-        TEvent e2 = TEvent.createKeyValue(TS("2020-03-25 09:55"), EVT_A, 63);
-        TEvent e3 = TEvent.createKeyValue(TS("2020-03-31 14:15"), EVT_A, 57);
-        TEvent e4 = TEvent.createKeyValue(TS("2020-04-01 05:15"), EVT_A, 88);
-        TEvent e5 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 76);
-        TEvent e6 = TEvent.createKeyValue(TS("2020-04-05 11:15"), EVT_A, 26);
+        Event e1 = TEvent.createKeyValue(TS("2020-03-23 11:15"), EVT_A, 75);
+        Event e2 = TEvent.createKeyValue(TS("2020-03-25 09:55"), EVT_A, 63);
+        Event e3 = TEvent.createKeyValue(TS("2020-03-31 14:15"), EVT_A, 57);
+        Event e4 = TEvent.createKeyValue(TS("2020-04-01 05:15"), EVT_A, 88);
+        Event e5 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 76);
+        Event e6 = TEvent.createKeyValue(TS("2020-04-05 11:15"), EVT_A, 26);
 
         BadgeStreakNRule rule = new BadgeStreakNRule("test.badge.rule");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
