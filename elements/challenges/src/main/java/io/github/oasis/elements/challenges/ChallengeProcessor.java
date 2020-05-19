@@ -51,6 +51,11 @@ import static io.github.oasis.elements.challenges.ChallengeRule.REPEATABLE_WINNE
  */
 public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal> {
 
+    private static final String WINNERS = "winners";
+    private static final String COLON = ":";
+    private static final String MEMBER_PFX = "u";
+    private static final String MEMBER_FORMAT = "u%d:%s";
+
     public ChallengeProcessor(Db dbPool, RuleContext<ChallengeRule> ruleCtx) {
         super(dbPool, ruleCtx);
     }
@@ -91,7 +96,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
             return null;
         }
         Mapped map = db.MAP(ID.getGameChallengesKey(event.getGameId()));
-        String winnerCountKey = ID.getGameChallengeSubKey(rule.getId(), "winners");
+        String winnerCountKey = ID.getGameChallengeSubKey(rule.getId(), WINNERS);
         int position = map.incrementByOne(winnerCountKey);
         if (position > rule.getWinnerCount()) {
             map.decrementByOne(winnerCountKey);
@@ -154,15 +159,15 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
 
     private long getUserIdFormatInChallengeList(String member, ChallengeRule rule) {
         if (rule.hasFlag(REPEATABLE_WINNERS)) {
-            return Numbers.asLong(member.split(":")[0].substring(1));
+            return Numbers.asLong(member.split(COLON)[0].substring(1));
         }
         return Numbers.asLong(member.substring(1));
     }
 
     private String getMemberKeyFormatInChallengeList(Event event, ChallengeRule rule) {
-        String member = "u" + event.getUser();
+        String member = MEMBER_PFX + event.getUser();
         if (rule.hasFlag(REPEATABLE_WINNERS)) {
-            member = String.format("u%d:%s", event.getUser(), event.getExternalId());
+            member = String.format(MEMBER_FORMAT, event.getUser(), event.getExternalId());
         }
         return member;
     }

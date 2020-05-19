@@ -28,6 +28,8 @@ import java.security.NoSuchAlgorithmException;
  */
 public class Texts {
 
+    public static final String COLON = ":";
+
     public static String subStrPrefixAfter(String source, String prefix) {
         return source.substring(prefix.length());
     }

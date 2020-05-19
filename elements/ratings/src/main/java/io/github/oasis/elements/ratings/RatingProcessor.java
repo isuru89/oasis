@@ -42,6 +42,9 @@ import static io.github.oasis.core.utils.Numbers.asInt;
  */
 public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
 
+    private static final String RATING_SAVE_FORMAT = "%d:%d:%s";
+    private static final String COLON = ":";
+
     public RatingProcessor(Db dbPool, RuleContext<RatingRule> ruleCtx) {
         super(dbPool, ruleCtx);
     }
@@ -57,7 +60,7 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
         String userCurrentRating = ratingsMap.getValue(subRatingKey);
         int currRating = rule.getDefaultRating();
         if (userCurrentRating != null) {
-            String[] parts = userCurrentRating.split(":");
+            String[] parts = userCurrentRating.split(COLON);
             currRating = asInt(parts[0]);
         }
 
@@ -68,7 +71,7 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
                     long ts = event.getTimestamp();
                     String id = event.getExternalId();
                     BigDecimal score = deriveAwardedPoints(event, currRating, rating).setScale(Constants.SCALE, RoundingMode.HALF_UP);
-                    ratingsMap.setValue(subRatingKey, String.format("%d:%d:%s", newRating, ts, id));
+                    ratingsMap.setValue(subRatingKey, String.format(RATING_SAVE_FORMAT, newRating, ts, id));
                     Event copiedEvent = Utils.deepClone(event);
                     return List.of(
                             RatingChangedSignal.create(rule, copiedEvent, currRating, newRating),

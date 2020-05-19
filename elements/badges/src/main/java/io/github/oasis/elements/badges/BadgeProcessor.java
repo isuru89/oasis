@@ -35,6 +35,9 @@ import io.github.oasis.core.elements.RuleContext;
  * @author Isuru Weerarathna
  */
 public abstract class BadgeProcessor<R extends BadgeRule> extends AbstractProcessor<R, BadgeSignal> {
+
+    private static final String BADGE_HISTORY_FORMAT = "%d:%s:%d:%d";
+
     public BadgeProcessor(Db pool, RuleContext<R> ruleContext) {
         super(pool, ruleContext);
     }
@@ -50,7 +53,7 @@ public abstract class BadgeProcessor<R extends BadgeRule> extends AbstractProces
     @Override
     protected void beforeEmit(BadgeSignal signal, Event event, R rule, ExecutionContext context, DbContext db) {
         db.addToSorted(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), rule.getId()),
-                String.format("%d:%s:%d:%d", signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getAttribute()),
+                String.format(BADGE_HISTORY_FORMAT, signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getAttribute()),
                 signal.getStartTime());
         String userBadgesMeta = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
         Mapped map = db.MAP(userBadgesMeta);
