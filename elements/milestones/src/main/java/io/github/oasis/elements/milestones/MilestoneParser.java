@@ -22,7 +22,13 @@ package io.github.oasis.elements.milestones;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractElementParser;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
+
+import java.util.stream.Collectors;
+
+import static io.github.oasis.core.VariableNames.CONTEXT_VAR;
+import static io.github.oasis.core.VariableNames.RULE_VAR;
 
 /**
  * @author Isuru Weerarathna
@@ -35,6 +41,22 @@ public class MilestoneParser extends AbstractElementParser {
 
     @Override
     public AbstractRule convert(AbstractDef definition) {
-        return null;
+        if (definition instanceof MilestoneDef) {
+            return toRule((MilestoneDef) definition);
+        }
+        throw new IllegalArgumentException("Unknown definition type! " + definition);
+    }
+
+    private MilestoneRule toRule(MilestoneDef def) {
+        String id = def.generateUniqueHash();
+        MilestoneRule rule = new MilestoneRule(id);
+        AbstractDef.defToRule(def, rule);
+
+        rule.setValueExtractor(Scripting.create(def.getValueExtractor(), RULE_VAR, CONTEXT_VAR));
+        rule.setLevels(def.getLevels().stream()
+            .map(l -> new MilestoneRule.Level(l.getLevel(), l.getMilestone()))
+            .collect(Collectors.toList()));
+
+        return rule;
     }
 }
