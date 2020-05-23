@@ -69,6 +69,7 @@ public class ChallengeParser extends AbstractElementParser {
                 rule.setCustomAwardPoints(Scripting.create((String) pointAwards, Constants.VARIABLE_POSITION, VariableNames.RULE_VAR));
             }
         } else {
+            rule.setAwardPoints(BigDecimal.ZERO);
             rule.setCustomAwardPoints(null);
         }
 

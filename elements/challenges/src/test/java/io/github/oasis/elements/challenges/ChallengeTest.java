@@ -307,6 +307,10 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
                 new ChallengeOverSignal(rule.getId(), e5.asEventScope(), e5.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
         );
+
+        ChallengeWinSignal signal = (ChallengeWinSignal) signals.stream().filter(s -> s instanceof ChallengeWinSignal).findFirst().orElse(null);
+        Assertions.assertNotNull(signal);
+        Assertions.assertEquals(ChallengesSink.class, signal.sinkHandler());
     }
 
     @DisplayName("User Scoped: single challenge")

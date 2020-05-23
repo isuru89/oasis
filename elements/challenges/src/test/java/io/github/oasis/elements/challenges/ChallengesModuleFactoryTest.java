@@ -19,23 +19,24 @@
 
 package io.github.oasis.elements.challenges;
 
+import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.elements.Registrar;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 /**
  * @author Isuru Weerarathna
  */
-final class Constants {
+class ChallengesModuleFactoryTest {
 
-    static final long DEFAULT_START_TIME = 0L;
-    static final long DEFAULT_EXPIRE_TIME = Long.MAX_VALUE;
-    static final int DEFAULT_WINNER_COUNT = Integer.MAX_VALUE;
+    @Test
+    void init() {
+        Registrar registrar = Mockito.mock(Registrar.class);
+        OasisConfigs oasisConfigs = Mockito.mock(OasisConfigs.class);
 
-    static final String VARIABLE_POSITION = "position";
+        ChallengesModuleFactory factory = new ChallengesModuleFactory();
+        factory.init(registrar, oasisConfigs);
 
-    static final String DEF_SCOPE_TYPE = "type";
-    static final String DEF_SCOPE_ID = "id";
-
-    static final String DEFAULT_SCOPE_VALUE = "0";
-
-    static final ChallengeRule.ChallengeScope DEFAULT_SCOPE = ChallengeRule.ChallengeScope.GAME;
-
-    private Constants() {}
+        Mockito.verify(registrar, Mockito.times(1)).registerModule(Mockito.any());
+    }
 }
