@@ -19,9 +19,9 @@
 
 package io.github.oasis.elements.milestones;
 
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.EventBiValueResolver;
-import io.github.oasis.core.context.ExecutionContext;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,6 +38,8 @@ import java.util.TreeMap;
  */
 public class MilestoneRule extends AbstractRule {
 
+    private static final BigDecimal SMALL_DELTA = new BigDecimal("0.007");
+
     public static final String TRACK_PENALTIES = "TRACK_PENALTIES";
     public static final String SKIP_NEGATIVE_VALUES = "SKIP_NEGATIVE_VALUES";
 
@@ -51,7 +53,8 @@ public class MilestoneRule extends AbstractRule {
     }
 
     public Optional<Level> getNextLevel(BigDecimal currentValue) {
-        Map.Entry<BigDecimal, Level> levelEntry = levelMap.ceilingEntry(currentValue);
+        boolean exactValueContains = levelMap.containsKey(currentValue);
+        Map.Entry<BigDecimal, Level> levelEntry = levelMap.ceilingEntry(exactValueContains ? currentValue.add(SMALL_DELTA) : currentValue);
         if (levelEntry == null) {
             return Optional.empty();
         } else {
