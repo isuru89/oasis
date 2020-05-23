@@ -29,6 +29,8 @@ import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.utils.TimeOffset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -39,7 +41,13 @@ import java.util.UUID;
  */
 public class ChallengesSink extends AbstractSink {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ChallengesSink.class);
+
     private static final int WIN = 1;
+
+    private static final String ALL = "all";
+    private static final String ALL_PFX = ALL + COLON;
+    private static final String RULE_PFX = "rule" + COLON;
 
     public ChallengesSink(Db dbPool) {
         super(dbPool);
@@ -67,13 +75,13 @@ public class ChallengesSink extends AbstractSink {
 
             db.incrementAll(WIN,
                     challengeMapKey,
-                    Arrays.asList("all",
-                            "all:" + tcx.getYear(),
-                            "all:" + tcx.getQuarter(),
-                            "all:" + tcx.getMonth(),
-                            "all:" + tcx.getWeek(),
-                            "all:" + tcx.getDay(),
-                            "rule:" + signal.getRuleId()
+                    Arrays.asList(ALL,
+                            ALL_PFX + tcx.getYear(),
+                            ALL_PFX + tcx.getQuarter(),
+                            ALL_PFX + tcx.getMonth(),
+                            ALL_PFX + tcx.getWeek(),
+                            ALL_PFX + tcx.getDay(),
+                            RULE_PFX + signal.getRuleId()
                             ));
 
             // log

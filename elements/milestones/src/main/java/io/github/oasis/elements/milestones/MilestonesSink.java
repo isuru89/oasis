@@ -29,6 +29,8 @@ import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.utils.Numbers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -37,6 +39,15 @@ import java.util.Optional;
  * @author Isuru Weerarathna
  */
 public class MilestonesSink extends AbstractSink {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MilestonesSink.class);
+
+    private static final String CHANGED_VALUE = "changedvalue";
+    private static final String CURRENT_LEVEL = "currentlevel";
+    public static final String LEVEL_LAST_UPDATED = "levellastupdated";
+    public static final String COMPLETED = "completed";
+    public static final String NEXT_LEVEL = "nextlevel";
+    public static final String NEXT_LEVEL_VALUE = "nextlevelvalue";
 
     public MilestonesSink(Db dbPool) {
         super(dbPool);
@@ -54,21 +65,21 @@ public class MilestonesSink extends AbstractSink {
 
             Mapped milestoneMap = db.MAP(ID.getGameUserMilestonesSummary(gameId, userId));
 
-            String rulePfx = milestoneSignal.getRuleId() + ":";
-            milestoneMap.setValue(rulePfx + "changedvalue", signal.getCurrentScore().toString());
-            milestoneMap.setValue(rulePfx + "currentlevel", signal.getCurrentLevel());
-            milestoneMap.setValue(rulePfx + "levellastupdated", signal.getOccurredTimestamp());
+            String rulePfx = milestoneSignal.getRuleId() + COLON;
+            milestoneMap.setValue(rulePfx + CHANGED_VALUE, signal.getCurrentScore().toString());
+            milestoneMap.setValue(rulePfx + CURRENT_LEVEL, signal.getCurrentLevel());
+            milestoneMap.setValue(rulePfx + LEVEL_LAST_UPDATED, signal.getOccurredTimestamp());
 
             Optional<MilestoneRule.Level> nextLevelOpt = rule.getNextLevel(signal.getCurrentScore());
-            milestoneMap.setValue(rulePfx + "completed", String.valueOf(Numbers.asInt(nextLevelOpt.isEmpty())));
+            milestoneMap.setValue(rulePfx + COMPLETED, String.valueOf(Numbers.asInt(nextLevelOpt.isEmpty())));
             if (nextLevelOpt.isPresent()) {
                 MilestoneRule.Level nextLevel = nextLevelOpt.get();
-                milestoneMap.setValue(rulePfx + "nextlevel", nextLevel.getLevel());
-                milestoneMap.setValue(rulePfx + "nextlevelvalue", nextLevel.getMilestone().toString());
+                milestoneMap.setValue(rulePfx + NEXT_LEVEL, nextLevel.getLevel());
+                milestoneMap.setValue(rulePfx + NEXT_LEVEL_VALUE, nextLevel.getMilestone().toString());
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Error persisting milestone metrics!", e);
         }
     }
 }

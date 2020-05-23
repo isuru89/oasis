@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -19,29 +19,15 @@
 
 package io.github.oasis.elements.ratings;
 
-import io.github.oasis.core.EventScope;
-import io.github.oasis.core.elements.AbstractSink;
-import io.github.oasis.core.elements.Signal;
-
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractRatingSignal extends Signal {
+final class Constants {
 
-    private final int currentRating;
+    static final String VAR_RATING_AWARD_PREV_RATING = "previousRating";
 
-    public AbstractRatingSignal(String ruleId, EventScope eventScope, long occurredTs, int currentRating) {
-        super(ruleId, eventScope, occurredTs);
-        this.currentRating = currentRating;
-    }
+    static final String RATING_SAVE_FORMAT = "%d:%d:%s";
 
-    @Override
-    public Class<? extends AbstractSink> sinkHandler() {
-        return RatingsSink.class;
-    }
-
-    public int getCurrentRating() {
-        return currentRating;
-    }
+    private Constants() {}
 
 }

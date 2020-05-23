@@ -27,6 +27,8 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.utils.TimeOffset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -37,6 +39,8 @@ import java.util.Arrays;
  */
 public class PointsSink extends AbstractSink {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PointsSink.class);
+
     private static final String EMPTY = "";
 
     private static final String ALL = "all";
@@ -45,6 +49,11 @@ public class PointsSink extends AbstractSink {
     private static final String WEEKLY = "w";
     private static final String DAILY = "d";
     private static final String QUARTERLY = "q";
+
+    private static final String RULE_PFX = "rule:";
+    private static final String TEAM_PFX = "team:";
+    private static final String SOURCE_PFX = "source:";
+    private static final String ALL_PFX = ALL + COLON;
 
     public PointsSink(Db db) {
         super(db);
@@ -64,34 +73,34 @@ public class PointsSink extends AbstractSink {
 
             // by rule wise
             String pointId = signal.getRuleId();
-            String rulePfx = "rule:" + pointId;
+            String rulePfx = RULE_PFX + pointId;
 
             // by team wise
             long teamId = signal.getEventScope().getTeamId();
-            String teamPfx = "team:" + teamId;
+            String teamPfx = TEAM_PFX + teamId;
 
             // by source-wise
-            String sourcePfx = "source:" + signal.getEventScope().getSourceId();
+            String sourcePfx = SOURCE_PFX + signal.getEventScope().getSourceId();
 
             db.incrementAll(score, ID.getGameUserPointsSummary(gameId, userId),
-                Arrays.asList("all",
-                    "all:" + tcx.getYear(),
-                    "all:" + tcx.getMonth(),
-                    "all:" + tcx.getDay(),
-                    "all:" + tcx.getWeek(),
-                    "all:" + tcx.getQuarter(),
+                Arrays.asList(ALL,
+                    ALL_PFX + tcx.getYear(),
+                    ALL_PFX + tcx.getMonth(),
+                    ALL_PFX + tcx.getDay(),
+                    ALL_PFX + tcx.getWeek(),
+                    ALL_PFX + tcx.getQuarter(),
                     rulePfx,
-                    rulePfx + ":" + tcx.getYear(),
-                    rulePfx + ":" + tcx.getMonth(),
-                    rulePfx + ":" + tcx.getDay(),
-                    rulePfx + ":" + tcx.getWeek(),
-                    rulePfx + ":" + tcx.getQuarter(),
+                    rulePfx + COLON + tcx.getYear(),
+                    rulePfx + COLON + tcx.getMonth(),
+                    rulePfx + COLON + tcx.getDay(),
+                    rulePfx + COLON + tcx.getWeek(),
+                    rulePfx + COLON + tcx.getQuarter(),
                     teamPfx,
-                    teamPfx + ":" + tcx.getYear(),
-                    teamPfx + ":" + tcx.getMonth(),
-                    teamPfx + ":" + tcx.getDay(),
-                    teamPfx + ":" + tcx.getWeek(),
-                    teamPfx + ":" + tcx.getQuarter(),
+                    teamPfx + COLON + tcx.getYear(),
+                    teamPfx + COLON + tcx.getMonth(),
+                    teamPfx + COLON + tcx.getDay(),
+                    teamPfx + COLON + tcx.getWeek(),
+                    teamPfx + COLON + tcx.getQuarter(),
                     sourcePfx
                 )
             );
@@ -115,7 +124,7 @@ public class PointsSink extends AbstractSink {
                     ));
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Error persisting points!", e);
         }
     }
 }

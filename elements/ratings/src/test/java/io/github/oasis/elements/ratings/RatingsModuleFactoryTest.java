@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,22 +17,26 @@
  * under the License.
  */
 
-package io.github.oasis.db;
+package io.github.oasis.elements.ratings;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.elements.Registrar;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-public final class Utils {
+/**
+ * @author Isuru Weerarathna
+ */
+class RatingsModuleFactoryTest {
 
-    private static final Pattern JDBC_PATTERN = Pattern.compile("^(\\w+):(\\w+):.+");
+    @Test
+    void init() {
+        Registrar registrar = Mockito.mock(Registrar.class);
+        OasisConfigs oasisConfigs = Mockito.mock(OasisConfigs.class);
 
-    public static String captureDbName(String url) {
-        Matcher matcher = JDBC_PATTERN.matcher(url.trim());
-        if (matcher.find()) {
-            return matcher.group(2);
-        } else {
-            return "";
-        }
+        RatingsModuleFactory factory = new RatingsModuleFactory();
+        factory.init(registrar, oasisConfigs);
+
+        Mockito.verify(registrar, Mockito.times(1)).registerModule(Mockito.any());
     }
-
 }

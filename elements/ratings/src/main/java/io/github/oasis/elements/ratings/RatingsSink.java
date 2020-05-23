@@ -28,6 +28,8 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.ID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -35,6 +37,8 @@ import java.io.IOException;
  * @author Isuru Weerarathna
  */
 public class RatingsSink extends AbstractSink {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RatingsSink.class);
 
     public RatingsSink(Db dbPool) {
         super(dbPool);
@@ -44,21 +48,20 @@ public class RatingsSink extends AbstractSink {
     public void consume(Signal ratingSignal, AbstractRule ratingRule, ExecutionContext context) {
         try (DbContext db = dbPool.createContext()) {
             RatingChangedSignal signal = (RatingChangedSignal) ratingSignal;
-            RatingRule rule = (RatingRule) ratingRule;
 
             EventScope eventScope = ratingSignal.getEventScope();
             int gameId = eventScope.getGameId();
             long userId = eventScope.getUserId();
             Sorted sorted = db.SORTED(ID.getGameUserRatingsLog(gameId, userId));
 
-            String member = signal.getRuleId() + ":"
-                    + signal.getPreviousRating() + ":"
-                    + signal.getCurrentRating() + ":"
+            String member = signal.getRuleId() + COLON
+                    + signal.getPreviousRating() + COLON
+                    + signal.getCurrentRating() + COLON
                     + signal.getChangedEvent();
             sorted.add(member, signal.getOccurredTimestamp());
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Error persisting rating metrics!", e);
         }
     }
 }

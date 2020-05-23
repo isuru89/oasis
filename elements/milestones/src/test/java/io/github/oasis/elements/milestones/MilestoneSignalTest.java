@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,31 +17,24 @@
  * under the License.
  */
 
-package io.github.oasis.elements.ratings;
+package io.github.oasis.elements.milestones;
 
-import io.github.oasis.core.EventScope;
-import io.github.oasis.core.elements.AbstractSink;
-import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.EventJson;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractRatingSignal extends Signal {
+class MilestoneSignalTest {
 
-    private final int currentRating;
+    @Test
+    void sinkHandler() {
+        EventJson eventJson = new EventJson();
+        MilestoneSignal signal = new MilestoneSignal("rule-1", 1, 2, BigDecimal.TEN, eventJson);
 
-    public AbstractRatingSignal(String ruleId, EventScope eventScope, long occurredTs, int currentRating) {
-        super(ruleId, eventScope, occurredTs);
-        this.currentRating = currentRating;
+        Assertions.assertEquals(MilestonesSink.class, signal.sinkHandler());
     }
-
-    @Override
-    public Class<? extends AbstractSink> sinkHandler() {
-        return RatingsSink.class;
-    }
-
-    public int getCurrentRating() {
-        return currentRating;
-    }
-
 }

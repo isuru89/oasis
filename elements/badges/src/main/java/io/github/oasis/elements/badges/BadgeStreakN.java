@@ -54,6 +54,9 @@ import static io.github.oasis.core.utils.Numbers.isZero;
  */
 public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
 
+    private static final String ONE_DELIM = ":1:";
+    private static final String ZERO_DELIM = ":0:";
+
     public BadgeStreakN(Db pool, RuleContext<BadgeStreakNRule> ruleContext) {
         super(pool, ruleContext);
     }
@@ -64,14 +67,14 @@ public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
         Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
         if (rule.getCriteria().matches(event, rule, context)) {
-            String member = ts + ":1:" + event.getExternalId();
+            String member = ts + ONE_DELIM + event.getExternalId();
             sortedRange.add(member, ts);
             long rank = sortedRange.getRank(member);
             long start = Math.max(0, rank - rule.getMaxStreak());
             List<Record> tupleRange = sortedRange.getRangeByRankWithScores(start, rank + rule.getMaxStreak());
             return fold(tupleRange, event, rule, db);
         } else {
-            String member = ts + ":0:" + event.getExternalId();
+            String member = ts + ZERO_DELIM + event.getExternalId();
             sortedRange.add(member, ts);
             sortedRange.removeRangeByScore(0, ts - rule.getRetainTime());
             long rank = sortedRange.getRank(member);

@@ -26,6 +26,7 @@ import io.github.oasis.core.elements.EventExecutionFilter;
 import org.mvel2.MVEL;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -47,7 +48,10 @@ public class ScriptedEventFilter implements EventExecutionFilter {
 
     @Override
     public boolean matches(Event event, AbstractRule rule, ExecutionContext context) {
-        Map<String, Serializable> variables = Map.of("e", event, "rule", rule, "ctx", context);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("e", event.getAllFieldValues());
+        variables.put("rule", rule);
+        variables.put("ctx", context);
         Object result = MVEL.executeExpression(compiledExpression, variables);
         if (result instanceof Boolean) {
             return (boolean) result;

@@ -102,7 +102,8 @@ public class BadgeParser extends AbstractElementParser {
             AbstractDef.defToRule(def, temp);
             temp.setTimeUnit(toLongTimeUnit(def));
             temp.setCriteria(temp.getCondition());
-            temp.setThresholds(def.getThresholds().stream().map(BadgeDef.Threshold::toRuleThreshold).collect(Collectors.toList()));
+            temp.setThresholds(def.getThresholds().stream()
+                    .map(BadgeDef.Threshold::toRuleThreshold).collect(Collectors.toList()));
             temp.setValueResolver(Scripting.create((String) def.getValueExtractorExpression(), VariableNames.CONTEXT_VAR));
             rule = temp;
         } else if (PERIODIC_OCCURRENCES_KIND.equals(kind)) {
@@ -110,7 +111,8 @@ public class BadgeParser extends AbstractElementParser {
             AbstractDef.defToRule(def, temp);
             temp.setTimeUnit(toLongTimeUnit(def));
             temp.setCriteria(temp.getCondition());
-            temp.setThresholds(def.getThresholds().stream().map(BadgeDef.Threshold::toRuleThreshold).collect(Collectors.toList()));
+            temp.setThresholds(def.getThresholds().stream()
+                    .map(BadgeDef.Threshold::toRuleThreshold).collect(Collectors.toList()));
             rule = temp;
         } else if (PERIODIC_ACCUMULATIONS_STREAK_KIND.equals(kind)) {
             BadgeHistogramStreakNRule temp = new BadgeHistogramStreakNRule(id);

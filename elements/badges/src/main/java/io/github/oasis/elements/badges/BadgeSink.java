@@ -33,6 +33,8 @@ import io.github.oasis.elements.badges.signals.BadgeSignal;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.elements.badges.signals.StreakBadgeSignal;
 import io.github.oasis.elements.badges.signals.TemporalBadgeSignal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -40,6 +42,16 @@ import java.io.IOException;
  * @author Isuru Weerarathna
  */
 public class BadgeSink extends AbstractSink {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BadgeSink.class);
+
+    private static final String ALL = "all";
+    private static final String ALL_PFX = ALL + COLON;
+    private static final String RULE_PFX = "rule" + COLON;
+    private static final String ATTR_PFX = "attr" + COLON;
+
+    private static final String STREAK_BADGE_FORMAT = "%s:%d:%d";
+    private static final String GENERAL_BADGE_FORMAT = "%s:%d:%s";
 
     public BadgeSink(Db db) {
         super(db);
@@ -69,43 +81,41 @@ public class BadgeSink extends AbstractSink {
 
             TimeOffset tcx = new TimeOffset(ts, context.getUserTimeOffset());
 
-            badgesMap.incrementByInt("all", addition);
-            badgesMap.incrementByInt("all:" + tcx.getYear(), addition);
-            badgesMap.incrementByInt("all:" + tcx.getMonth(), addition);
-            badgesMap.incrementByInt("all:" + tcx.getDay(), addition);
-            badgesMap.incrementByInt("all:" + tcx.getWeek(), addition);
-            badgesMap.incrementByInt("all:" + tcx.getQuarter(), addition);
+            badgesMap.incrementByInt(ALL, addition);
+            badgesMap.incrementByInt(ALL_PFX + tcx.getYear(), addition);
+            badgesMap.incrementByInt(ALL_PFX + tcx.getMonth(), addition);
+            badgesMap.incrementByInt(ALL_PFX + tcx.getDay(), addition);
+            badgesMap.incrementByInt(ALL_PFX + tcx.getWeek(), addition);
+            badgesMap.incrementByInt(ALL_PFX + tcx.getQuarter(), addition);
 
             // by type + attr
-            String rulePfx = "rule:" + ruleId + ":" + signal.getAttribute();
+            String rulePfx = RULE_PFX + ruleId + COLON + signal.getAttribute();
             badgesMap.incrementByInt(rulePfx, addition);
-            badgesMap.incrementByInt(rulePfx + ":" + tcx.getYear(), addition);
-            badgesMap.incrementByInt(rulePfx + ":" + tcx.getMonth(), addition);
-            badgesMap.incrementByInt(rulePfx + ":" + tcx.getDay(), addition);
-            badgesMap.incrementByInt(rulePfx + ":" + tcx.getWeek(), addition);
-            badgesMap.incrementByInt(rulePfx + ":" + tcx.getQuarter(), addition);
+            badgesMap.incrementByInt(rulePfx + COLON + tcx.getYear(), addition);
+            badgesMap.incrementByInt(rulePfx + COLON + tcx.getMonth(), addition);
+            badgesMap.incrementByInt(rulePfx + COLON + tcx.getDay(), addition);
+            badgesMap.incrementByInt(rulePfx + COLON + tcx.getWeek(), addition);
+            badgesMap.incrementByInt(rulePfx + COLON + tcx.getQuarter(), addition);
 
             // by attr
-            String attrPfx = "attr:" + signal.getAttribute();
+            String attrPfx = ATTR_PFX + signal.getAttribute();
             badgesMap.incrementByInt(attrPfx, addition);
-            badgesMap.incrementByInt(attrPfx + ":" + tcx.getYear(), addition);
-            badgesMap.incrementByInt(attrPfx + ":" + tcx.getMonth(), addition);
-            badgesMap.incrementByInt(attrPfx + ":" + tcx.getDay(), addition);
-            badgesMap.incrementByInt(attrPfx + ":" + tcx.getWeek(), addition);
-            badgesMap.incrementByInt(attrPfx + ":" + tcx.getQuarter(), addition);
-
-
+            badgesMap.incrementByInt(attrPfx + COLON + tcx.getYear(), addition);
+            badgesMap.incrementByInt(attrPfx + COLON + tcx.getMonth(), addition);
+            badgesMap.incrementByInt(attrPfx + COLON + tcx.getDay(), addition);
+            badgesMap.incrementByInt(attrPfx + COLON + tcx.getWeek(), addition);
+            badgesMap.incrementByInt(attrPfx + COLON + tcx.getQuarter(), addition);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Error persisting badges metrics!", e);
         }
     }
 
     private String getBadgeKey(BadgeSignal signal) {
         if (signal instanceof TemporalBadgeSignal || signal instanceof StreakBadgeSignal) {
-            return String.format("%s:%d:%d", signal.getRuleId(), signal.getAttribute(), signal.getStartTime());
+            return String.format(STREAK_BADGE_FORMAT, signal.getRuleId(), signal.getAttribute(), signal.getStartTime());
         } else {
-            return String.format("%s:%d:%s", signal.getRuleId(), signal.getAttribute(), signal.getEndId());
+            return String.format(GENERAL_BADGE_FORMAT, signal.getRuleId(), signal.getAttribute(), signal.getEndId());
         }
     }
 }

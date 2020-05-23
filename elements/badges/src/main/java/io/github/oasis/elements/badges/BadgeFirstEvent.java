@@ -20,6 +20,7 @@
 package io.github.oasis.elements.badges;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.utils.Texts;
 import io.github.oasis.elements.badges.rules.BadgeFirstEventRule;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
 import io.github.oasis.core.external.Db;
@@ -29,6 +30,8 @@ import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.RuleContext;
 
 import java.util.List;
+
+import static io.github.oasis.core.utils.Texts.COLON;
 
 /**
  * Awards a badge when something occurs for the very first time.
@@ -47,7 +50,7 @@ public class BadgeFirstEvent extends BadgeProcessor<BadgeFirstEventRule> {
         long ts = event.getTimestamp();
         String id = event.getExternalId();
         String subKey = rule.getEventName();
-        String value = ts + ":" + id + ":" + System.currentTimeMillis();
+        String value = ts + COLON + id + COLON + System.currentTimeMillis();
         if (isFirstOne(db.setIfNotExistsInMap(key, subKey, value))) {
             return List.of(BadgeSignal.firstEvent(rule.getId(), event, rule.getAttributeId()));
         }

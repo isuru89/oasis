@@ -23,7 +23,11 @@ import io.github.oasis.core.elements.AbstractDef;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -33,7 +37,20 @@ public class MilestoneDef extends AbstractDef {
     private String valueExtractor;
     private List<MilestoneLevel> levels;
 
-//    @Override
+    @Override
+    protected List<String> getSensitiveAttributes() {
+        List<String> base = new ArrayList<>(super.getSensitiveAttributes());
+        base.add(valueExtractor);
+        if (Objects.nonNull(levels)) {
+            base.addAll(levels.stream()
+                    .sorted(Comparator.comparingInt(MilestoneLevel::getLevel))
+                    .flatMap(l -> l.getSensitiveAttributes().stream())
+                    .collect(Collectors.toList()));
+        }
+        return base;
+    }
+
+    //    @Override
 //    public AbstractRule toRule() {
 //        MilestoneRule rule = new MilestoneRule(generateUniqueHash());
 //        super.toRule(rule);
@@ -65,6 +82,10 @@ public class MilestoneDef extends AbstractDef {
     public static class MilestoneLevel implements Serializable {
         private int level;
         private BigDecimal milestone;
+
+        List<String> getSensitiveAttributes() {
+            return List.of(String.valueOf(level), milestone.toString());
+        }
 
         public int getLevel() {
             return level;

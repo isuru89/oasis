@@ -27,6 +27,8 @@ import io.github.oasis.core.context.ExecutionContext;
  */
 public abstract class AbstractSink {
 
+    protected static final String COLON = ":";
+
     protected Db dbPool;
 
     protected AbstractSink(Db dbPool) {

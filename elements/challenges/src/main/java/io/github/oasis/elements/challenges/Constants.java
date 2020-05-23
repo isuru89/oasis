@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,31 +17,25 @@
  * under the License.
  */
 
-package io.github.oasis.elements.ratings;
-
-import io.github.oasis.core.EventScope;
-import io.github.oasis.core.elements.AbstractSink;
-import io.github.oasis.core.elements.Signal;
+package io.github.oasis.elements.challenges;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractRatingSignal extends Signal {
+final class Constants {
 
-    private final int currentRating;
+    static final long DEFAULT_START_TIME = 0L;
+    static final long DEFAULT_EXPIRE_TIME = Long.MAX_VALUE;
+    static final int DEFAULT_WINNER_COUNT = Integer.MAX_VALUE;
 
-    public AbstractRatingSignal(String ruleId, EventScope eventScope, long occurredTs, int currentRating) {
-        super(ruleId, eventScope, occurredTs);
-        this.currentRating = currentRating;
-    }
+    static final String VARIABLE_POSITION = "position";
 
-    @Override
-    public Class<? extends AbstractSink> sinkHandler() {
-        return RatingsSink.class;
-    }
+    static final String DEF_SCOPE_TYPE = "type";
+    static final String DEF_SCOPE_ID = "id";
 
-    public int getCurrentRating() {
-        return currentRating;
-    }
+    static final String DEFAULT_SCOPE_VALUE = "0";
 
+    static final ChallengeRule.ChallengeScope DEFAULT_SCOPE = ChallengeRule.ChallengeScope.GAME;
+
+    private Constants() {}
 }

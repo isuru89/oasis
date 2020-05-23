@@ -22,12 +22,23 @@ package io.github.oasis.elements.ratings;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractElementParser;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.core.elements.EventExecutionFilterFactory;
+import io.github.oasis.core.elements.EventValueResolver;
+import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
+
+import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
  */
 public class RatingParser extends AbstractElementParser {
+
+    private static final EventValueResolver<Integer> ZERO_AWARD = (event, prevRating) -> BigDecimal.ZERO;
+
     @Override
     public AbstractDef parse(PersistedDef persistedObj) {
         return loadFrom(persistedObj, RatingDef.class);
@@ -35,6 +46,42 @@ public class RatingParser extends AbstractElementParser {
 
     @Override
     public AbstractRule convert(AbstractDef definition) {
-        return null;
+        if (definition instanceof RatingDef) {
+            return toRule((RatingDef) definition);
+        }
+        throw new IllegalArgumentException("Unknown definition type! " + definition);
+    }
+
+    private RatingRule toRule(RatingDef def) {
+        String id = def.generateUniqueHash();
+        RatingRule rule = new RatingRule(id);
+        AbstractDef.defToRule(def, rule);
+        rule.setDefaultRating(def.getDefaultRating());
+        if (Objects.nonNull(def.getRatings())) {
+            rule.setRatings(def.getRatings().stream()
+                    .map(rating -> {
+                        EventExecutionFilter criteria = EventExecutionFilterFactory.create(rating.getCriteria());
+
+                        return new RatingRule.Rating(rating.getPriority(),
+                                rating.getRating(),
+                                criteria,
+                                deriveAward(rating.getAward()),
+                                rating.getPointId());
+
+                    }).collect(Collectors.toList()));
+        }
+        return rule;
+    }
+
+    private EventValueResolver<Integer> deriveAward(Object award) {
+        if (Objects.isNull(award)) {
+            return ZERO_AWARD;
+        }
+
+        if (award instanceof Number) {
+            return (event, input) -> BigDecimal.valueOf(((Number) award).doubleValue());
+        } else {
+            return Scripting.create((String) award, Constants.VAR_RATING_AWARD_PREV_RATING);
+        }
     }
 }

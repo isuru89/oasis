@@ -92,4 +92,8 @@ public final class Numbers {
     public static int ifNull(Integer val, int defaultValue) {
         return val == null ? defaultValue : val;
     }
+
+    public static long ifNull(Long val, long defaultValue) {
+        return val == null ? defaultValue : val;
+    }
 }

@@ -22,11 +22,16 @@ package io.github.oasis.elements.badges;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventExecutionFilterFactory;
+import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.badges.rules.BadgeConditionalRule;
 import io.github.oasis.elements.badges.rules.BadgeTemporalRule;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -55,6 +60,35 @@ public class BadgeDef extends AbstractDef {
     private List<Condition> conditions;
     private List<Streak> streaks;
     private List<Threshold> thresholds;
+
+    @Override
+    protected List<String> getSensitiveAttributes() {
+        List<String> attrs = new ArrayList<>(super.getSensitiveAttributes());
+        attrs.add(Utils.firstNonNullAsStr(getAttribute(), EMPTY));
+        attrs.add(Utils.firstNonNullAsStr(getConsecutive(), EMPTY));
+        attrs.add(Utils.firstNonNullAsStr(getThreshold(), EMPTY));
+        attrs.add(Utils.firstNonNullAsStr(getTimeUnit(), EMPTY));
+        attrs.add(Utils.firstNonNullAsStr(getValueExtractorExpression(), EMPTY));
+
+        if (Objects.nonNull(conditions)) {
+            attrs.add(getConditions().stream()
+                    .sorted(Comparator.comparingInt(Condition::getPriority))
+                    .flatMap(c -> c.getSensitiveAttributes().stream())
+                    .collect(Collectors.joining()));
+        }
+        if (Objects.nonNull(streaks)) {
+            attrs.add(getStreaks().stream()
+                    .sorted(Comparator.comparingInt(Streak::getStreak))
+                    .flatMap(s -> s.getSensitiveAttributes().stream()).collect(Collectors.joining()));
+        }
+        if (Objects.nonNull(thresholds)) {
+            attrs.add(getThresholds().stream()
+                    .sorted(Comparator.comparing(Threshold::getValue))
+                    .flatMap(t -> t.getSensitiveAttributes().stream()).collect(Collectors.joining()));
+        }
+
+        return attrs;
+    }
 
     public Object getValueExtractorExpression() {
         return valueExtractorExpression;
@@ -140,6 +174,21 @@ public class BadgeDef extends AbstractDef {
         private Integer streak;
         private Integer attribute;
 
+        public Streak() {
+        }
+
+        public Streak(Integer streak, Integer attribute) {
+            this.streak = streak;
+            this.attribute = attribute;
+        }
+
+        private List<String> getSensitiveAttributes() {
+            return List.of(
+                    Utils.firstNonNullAsStr(getAttribute(), EMPTY),
+                    Utils.firstNonNullAsStr(getStreak(), EMPTY)
+            );
+        }
+
         public Integer getStreak() {
             return streak;
         }
@@ -160,6 +209,21 @@ public class BadgeDef extends AbstractDef {
     public static class Threshold {
         private BigDecimal value;
         private Integer attribute;
+
+        public Threshold() {
+        }
+
+        public Threshold(BigDecimal value, Integer attribute) {
+            this.value = value;
+            this.attribute = attribute;
+        }
+
+        private List<String> getSensitiveAttributes() {
+            return List.of(
+                    Utils.firstNonNullAsStr(getAttribute(), EMPTY),
+                    Utils.firstNonNullAsStr(getValue(), EMPTY)
+            );
+        }
 
         BadgeTemporalRule.Threshold toRuleThreshold() {
             return new BadgeTemporalRule.Threshold(attribute, value);
@@ -186,6 +250,23 @@ public class BadgeDef extends AbstractDef {
         private Integer priority;
         private Object condition;
         private Integer attribute;
+
+        public Condition() {
+        }
+
+        public Condition(Integer priority, Object condition, Integer attribute) {
+            this.priority = priority;
+            this.condition = condition;
+            this.attribute = attribute;
+        }
+
+        private List<String> getSensitiveAttributes() {
+            return List.of(
+                    Utils.firstNonNullAsStr(getPriority(), EMPTY),
+                    Utils.firstNonNullAsStr(getAttribute(), EMPTY),
+                    Utils.firstNonNullAsStr(getCondition(), EMPTY)
+            );
+        }
 
         BadgeConditionalRule.Condition toRuleCondition() {
             EventExecutionFilter filter = EventExecutionFilterFactory.create(condition);

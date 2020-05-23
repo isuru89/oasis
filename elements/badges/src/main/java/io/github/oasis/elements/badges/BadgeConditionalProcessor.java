@@ -49,6 +49,8 @@ import java.util.Optional;
  */
 public class BadgeConditionalProcessor extends BadgeProcessor<BadgeConditionalRule> {
 
+    public static final String ATTR_DELIMETER = ":attr:";
+
     public BadgeConditionalProcessor(Db pool, RuleContext<BadgeConditionalRule> ruleContext) {
         super(pool, ruleContext);
     }
@@ -67,7 +69,7 @@ public class BadgeConditionalProcessor extends BadgeProcessor<BadgeConditionalRu
             BadgeConditionalRule.Condition condition = first.get();
             int attrId = condition.getAttribute();
             String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
-            String attrKey = rule.getId() + ":attr:" + attrId;
+            String attrKey = rule.getId() + ATTR_DELIMETER + attrId;
             Mapped map = db.MAP(badgeMetaKey);
             long count = map.incrementByOne(attrKey);
             if (rule.getMaxAwardTimes() >= count) {

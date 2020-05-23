@@ -20,14 +20,14 @@
 package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Utils;
 
@@ -36,6 +36,8 @@ import java.math.RoundingMode;
 import java.util.List;
 
 import static io.github.oasis.core.utils.Numbers.asInt;
+import static io.github.oasis.core.utils.Texts.COLON;
+import static io.github.oasis.elements.ratings.Constants.RATING_SAVE_FORMAT;
 
 /**
  * @author Isuru Weerarathna
@@ -57,7 +59,7 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
         String userCurrentRating = ratingsMap.getValue(subRatingKey);
         int currRating = rule.getDefaultRating();
         if (userCurrentRating != null) {
-            String[] parts = userCurrentRating.split(":");
+            String[] parts = userCurrentRating.split(COLON);
             currRating = asInt(parts[0]);
         }
 
@@ -68,7 +70,7 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
                     long ts = event.getTimestamp();
                     String id = event.getExternalId();
                     BigDecimal score = deriveAwardedPoints(event, currRating, rating).setScale(Constants.SCALE, RoundingMode.HALF_UP);
-                    ratingsMap.setValue(subRatingKey, String.format("%d:%d:%s", newRating, ts, id));
+                    ratingsMap.setValue(subRatingKey, String.format(RATING_SAVE_FORMAT, newRating, ts, id));
                     Event copiedEvent = Utils.deepClone(event);
                     return List.of(
                             RatingChangedSignal.create(rule, copiedEvent, currRating, newRating),

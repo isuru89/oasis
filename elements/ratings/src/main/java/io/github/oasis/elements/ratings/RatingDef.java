@@ -20,9 +20,14 @@
 package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.elements.AbstractDef;
+import io.github.oasis.core.utils.Utils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -32,21 +37,18 @@ public class RatingDef extends AbstractDef {
     private int defaultRating;
     private List<ARatingDef> ratings;
 
-//    @Override
-//    public AbstractRule toRule() {
-//        RatingRule rule = new RatingRule(generateUniqueHash());
-//        super.toRule(rule);
-//        rule.setDefaultRating(defaultRating);
-//        rule.setRatings(ratings.stream().map(r -> {
-//            EventExecutionFilter criteria = EventExecutionFilterFactory.create(r.criteria);
-//            return new RatingRule.Rating(r.priority,
-//                    r.rating,
-//                    criteria,
-//                    r.awardResolver(),
-//                    r.pointId);
-//        }).collect(Collectors.toList()));
-//        return rule;
-//    }
+    @Override
+    protected List<String> getSensitiveAttributes() {
+        List<String> base = new ArrayList<>(super.getSensitiveAttributes());
+        base.add(String.valueOf(defaultRating));
+        if (Objects.nonNull(ratings)) {
+            base.addAll(ratings.stream()
+                    .sorted(Comparator.comparingInt(o -> o.priority))
+                    .flatMap(r -> r.getSensitiveAttributes().stream())
+                    .collect(Collectors.toList()));
+        }
+        return base;
+    }
 
     public List<ARatingDef> getRatings() {
         return ratings;
@@ -68,8 +70,8 @@ public class RatingDef extends AbstractDef {
         private int priority;
         private int rating;
         private String pointId;
-        private Serializable criteria;
-        private Serializable award;
+        private Object criteria;
+        private Object award;
 
 //        public EventValueResolver<Integer> awardResolver() {
 //            if (Objects.isNull(award)) {
@@ -81,6 +83,15 @@ public class RatingDef extends AbstractDef {
 //                return Scripting.create((String)award, "previousRating");
 //            }
 //        }
+
+        List<String> getSensitiveAttributes() {
+            return List.of(
+                    String.valueOf(priority),
+                    String.valueOf(rating),
+                    Utils.firstNonNullAsStr(criteria, EMPTY),
+                    Utils.firstNonNullAsStr(award, EMPTY)
+            );
+        }
 
         public int getPriority() {
             return priority;
@@ -106,19 +117,19 @@ public class RatingDef extends AbstractDef {
             this.pointId = pointId;
         }
 
-        public Serializable getCriteria() {
+        public Object getCriteria() {
             return criteria;
         }
 
-        public void setCriteria(Serializable criteria) {
+        public void setCriteria(Object criteria) {
             this.criteria = criteria;
         }
 
-        public Serializable getAward() {
+        public Object getAward() {
             return award;
         }
 
-        public void setAward(Serializable award) {
+        public void setAward(Object award) {
             this.award = award;
         }
     }

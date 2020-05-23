@@ -37,7 +37,7 @@ import java.util.Optional;
 @ToString(callSuper = true)
 public class RatingPointsSignal extends PointSignal implements EventCreatable {
 
-    private int currentRating;
+    private final int currentRating;
 
     public RatingPointsSignal(String ruleId, String pointId, int currentRating, BigDecimal points, Event causedEvent) {
         super(ruleId, pointId, points, causedEvent);

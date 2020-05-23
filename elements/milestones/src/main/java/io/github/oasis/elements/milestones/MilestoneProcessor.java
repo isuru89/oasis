@@ -43,6 +43,9 @@ import static io.github.oasis.core.utils.Numbers.isNegative;
  */
 public class MilestoneProcessor extends AbstractProcessor<MilestoneRule, MilestoneSignal> {
 
+    private static final String LAST_UPDATED = "%s:lastupdated";
+    private static final String LAST_EVENT = "%s:lastevent";
+
     public MilestoneProcessor(Db dbPool, RuleContext<MilestoneRule> ruleCtx) {
         super(dbPool, ruleCtx);
     }
@@ -63,9 +66,9 @@ public class MilestoneProcessor extends AbstractProcessor<MilestoneRule, Milesto
         }
         Mapped userMilestonesMap = db.MAP(ID.getGameUserMilestonesSummary(event.getGameId(), event.getUser()));
         userMilestonesMap.incrementByDecimal(rule.getId(), delta);
-        userMilestonesMap.setValues(String.format("%s:lastupdated", rule.getId()),
+        userMilestonesMap.setValues(String.format(LAST_UPDATED, rule.getId()),
                 String.valueOf(event.getTimestamp()),
-                String.format("%s:lastevent", rule.getId()),
+                String.format(LAST_EVENT, rule.getId()),
                 event.getExternalId());
 
         String milestoneKey = ID.getGameMilestoneKey(event.getGameId(), rule.getId());
