@@ -20,14 +20,14 @@
 package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Utils;
 
@@ -36,14 +36,13 @@ import java.math.RoundingMode;
 import java.util.List;
 
 import static io.github.oasis.core.utils.Numbers.asInt;
+import static io.github.oasis.core.utils.Texts.COLON;
+import static io.github.oasis.elements.ratings.Constants.RATING_SAVE_FORMAT;
 
 /**
  * @author Isuru Weerarathna
  */
 public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
-
-    private static final String RATING_SAVE_FORMAT = "%d:%d:%s";
-    private static final String COLON = ":";
 
     public RatingProcessor(Db dbPool, RuleContext<RatingRule> ruleCtx) {
         super(dbPool, ruleCtx);

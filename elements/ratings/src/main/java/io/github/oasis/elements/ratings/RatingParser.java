@@ -27,7 +27,6 @@ import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.EventValueResolver;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
-import io.github.oasis.engine.element.points.PointDef;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -37,6 +36,9 @@ import java.util.stream.Collectors;
  * @author Isuru Weerarathna
  */
 public class RatingParser extends AbstractElementParser {
+
+    private static final EventValueResolver<Integer> ZERO_AWARD = (event, prevRating) -> BigDecimal.ZERO;
+
     @Override
     public AbstractDef parse(PersistedDef persistedObj) {
         return loadFrom(persistedObj, RatingDef.class);
@@ -73,13 +75,13 @@ public class RatingParser extends AbstractElementParser {
 
     private EventValueResolver<Integer> deriveAward(Object award) {
         if (Objects.isNull(award)) {
-            return null;
+            return ZERO_AWARD;
         }
 
         if (award instanceof Number) {
             return (event, input) -> BigDecimal.valueOf(((Number) award).doubleValue());
         } else {
-            return Scripting.create((String) award, "previousRating");
+            return Scripting.create((String) award, Constants.VAR_RATING_AWARD_PREV_RATING);
         }
     }
 }

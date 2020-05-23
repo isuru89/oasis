@@ -145,6 +145,10 @@ public class RatingsTest extends AbstractRuleTest {
                 new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e2.getTimestamp(), e2),
                 new RatingPointsSignal(rule.getId(), POINT_ID, 2, asDecimal(10), e2)
         );
+
+        RatingChangedSignal signal = (RatingChangedSignal) signals.stream().filter(s -> s instanceof RatingChangedSignal).findFirst().orElse(null);
+        Assertions.assertNotNull(signal);
+        Assertions.assertEquals(RatingsSink.class, signal.sinkHandler());
     }
 
     @DisplayName("Rating stays after goes up")
