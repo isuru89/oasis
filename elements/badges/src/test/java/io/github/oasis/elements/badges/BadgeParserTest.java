@@ -24,14 +24,14 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.external.messages.PersistedDef;
-import io.github.oasis.elements.badges.rules.BadgeConditionalRule;
-import io.github.oasis.elements.badges.rules.BadgeFirstEventRule;
-import io.github.oasis.elements.badges.rules.BadgeHistogramCountStreakNRule;
-import io.github.oasis.elements.badges.rules.BadgeHistogramStreakNRule;
-import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalCountRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalStreakNRule;
+import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
+import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicOccurrencesRule;
+import io.github.oasis.elements.badges.rules.PeriodicOccurrencesStreakNRule;
+import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
+import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
+import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,9 +92,9 @@ class BadgeParserTest {
 
         AbstractRule abstractRule = parser.convert(def);
         Assertions.assertNotNull(abstractRule);
-        Assertions.assertTrue(abstractRule instanceof BadgeStreakNRule);
+        Assertions.assertTrue(abstractRule instanceof StreakNBadgeRule);
 
-        BadgeStreakNRule rule = (BadgeStreakNRule) abstractRule;
+        StreakNBadgeRule rule = (StreakNBadgeRule) abstractRule;
         Assertions.assertEquals(10, rule.getMaxStreak());
         Assertions.assertEquals(3, rule.getMinStreak());
         Assertions.assertNotNull(rule.getCriteria());
@@ -114,9 +114,9 @@ class BadgeParserTest {
 
         AbstractRule abstractRule = parser.convert(def);
         Assertions.assertNotNull(abstractRule);
-        Assertions.assertTrue(abstractRule instanceof BadgeFirstEventRule);
+        Assertions.assertTrue(abstractRule instanceof FirstEventBadgeRule);
 
-        BadgeFirstEventRule rule = (BadgeFirstEventRule) abstractRule;
+        FirstEventBadgeRule rule = (FirstEventBadgeRule) abstractRule;
         Assertions.assertEquals("event.a", rule.getEventName());
         Assertions.assertEquals(1, rule.getAttributeId());
     }
@@ -134,14 +134,14 @@ class BadgeParserTest {
 
         AbstractRule abstractRule = parser.convert(def);
         Assertions.assertNotNull(abstractRule);
-        Assertions.assertTrue(abstractRule instanceof BadgeConditionalRule);
+        Assertions.assertTrue(abstractRule instanceof ConditionalBadgeRule);
 
-        BadgeConditionalRule rule = (BadgeConditionalRule) abstractRule;
+        ConditionalBadgeRule rule = (ConditionalBadgeRule) abstractRule;
         Assertions.assertEquals(def.getMaxAwardTimes(), rule.getMaxAwardTimes());
         Assertions.assertEquals(def.getConditions().size(), rule.getConditions().size());
         // conditions must be ordered by priority
         Assertions.assertEquals(4, rule.getConditions().stream()
-                .map(BadgeConditionalRule.Condition::getPriority)
+                .map(ConditionalBadgeRule.Condition::getPriority)
                 .reduce(0, (val1, val2) -> {
                     Assertions.assertTrue(val1 < val2);
                     return val2;
@@ -164,9 +164,9 @@ class BadgeParserTest {
 
         AbstractRule abstractRule = parser.convert(def);
         Assertions.assertNotNull(abstractRule);
-        Assertions.assertTrue(abstractRule instanceof BadgeTemporalStreakNRule);
+        Assertions.assertTrue(abstractRule instanceof TimeBoundedStreakNRule);
 
-        BadgeTemporalStreakNRule rule = (BadgeTemporalStreakNRule) abstractRule;
+        TimeBoundedStreakNRule rule = (TimeBoundedStreakNRule) abstractRule;
         Assertions.assertEquals(84000, rule.getTimeUnit());
         Assertions.assertEquals(10, rule.getMaxStreak());
         Assertions.assertEquals(3, rule.getMinStreak());
@@ -200,9 +200,9 @@ class BadgeParserTest {
 
         AbstractRule abstractRule = parser.convert(def);
         Assertions.assertNotNull(abstractRule);
-        Assertions.assertTrue(abstractRule instanceof BadgeHistogramStreakNRule);
+        Assertions.assertTrue(abstractRule instanceof PeriodicStreakNRule);
 
-        BadgeHistogramStreakNRule rule = (BadgeHistogramStreakNRule) abstractRule;
+        PeriodicStreakNRule rule = (PeriodicStreakNRule) abstractRule;
         Assertions.assertEquals(3600, rule.getTimeUnit());
         Assertions.assertEquals(10, rule.getMaxStreak());
         Assertions.assertEquals(3, rule.getMinStreak());
@@ -235,9 +235,9 @@ class BadgeParserTest {
 
         AbstractRule abstractRule = parser.convert(def);
         Assertions.assertNotNull(abstractRule);
-        Assertions.assertTrue(abstractRule instanceof BadgeHistogramCountStreakNRule);
+        Assertions.assertTrue(abstractRule instanceof PeriodicOccurrencesStreakNRule);
 
-        BadgeHistogramCountStreakNRule rule = (BadgeHistogramCountStreakNRule) abstractRule;
+        PeriodicOccurrencesStreakNRule rule = (PeriodicOccurrencesStreakNRule) abstractRule;
         Assertions.assertEquals(3600, rule.getTimeUnit());
         Assertions.assertEquals(10, rule.getMaxStreak());
         Assertions.assertEquals(3, rule.getMinStreak());
@@ -271,16 +271,16 @@ class BadgeParserTest {
 
         AbstractRule abstractRule = parser.convert(def);
         Assertions.assertNotNull(abstractRule);
-        Assertions.assertTrue(abstractRule instanceof BadgeTemporalRule);
+        Assertions.assertTrue(abstractRule instanceof PeriodicBadgeRule);
 
-        BadgeTemporalRule rule = (BadgeTemporalRule) abstractRule;
+        PeriodicBadgeRule rule = (PeriodicBadgeRule) abstractRule;
         Assertions.assertEquals(1234, rule.getTimeUnit());
         Assertions.assertNotNull(rule.getValueResolver());
         Assertions.assertEquals(def.getThresholds().size(), rule.getThresholds().size());
 
         // thresholds must be in reverse order
         Assertions.assertEquals(new BigDecimal("100.0"), rule.getThresholds().stream()
-                .map(BadgeTemporalRule.Threshold::getValue)
+                .map(PeriodicBadgeRule.Threshold::getValue)
                 .reduce((val1, val2) -> {
                     System.out.println(val1 + ", " + val2);
                     assertTrue(val1.compareTo(val2) > 0);
@@ -302,9 +302,9 @@ class BadgeParserTest {
 
         AbstractRule abstractRule = parser.convert(def);
         Assertions.assertNotNull(abstractRule);
-        Assertions.assertTrue(abstractRule instanceof BadgeTemporalCountRule);
+        Assertions.assertTrue(abstractRule instanceof PeriodicOccurrencesRule);
 
-        BadgeTemporalCountRule rule = (BadgeTemporalCountRule) abstractRule;
+        PeriodicOccurrencesRule rule = (PeriodicOccurrencesRule) abstractRule;
         Assertions.assertEquals(1234, rule.getTimeUnit());
         Assertions.assertNotNull(rule.getValueResolver());
         Assertions.assertNotNull(rule.getCriteria());
@@ -313,7 +313,7 @@ class BadgeParserTest {
 
         // thresholds must be in reverse order
         Assertions.assertEquals(new BigDecimal("100.0"), rule.getThresholds().stream()
-                .map(BadgeTemporalRule.Threshold::getValue)
+                .map(PeriodicBadgeRule.Threshold::getValue)
                 .reduce((val1, val2) -> {
                     System.out.println(val1 + ", " + val2);
                     assertTrue(val1.compareTo(val2) > 0);

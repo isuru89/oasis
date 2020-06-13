@@ -31,7 +31,7 @@ import java.util.TreeMap;
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeStreakNRule extends BadgeRule {
+public class StreakNBadgeRule extends BadgeRule {
 
     private int maxStreak = 0;
     private int minStreak = Integer.MAX_VALUE;
@@ -48,7 +48,7 @@ public class BadgeStreakNRule extends BadgeRule {
         this.criteria = criteria;
     }
 
-    public BadgeStreakNRule(String id) {
+    public StreakNBadgeRule(String id) {
         super(id);
     }
 

@@ -25,19 +25,25 @@ import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.ElementModule;
 import io.github.oasis.core.elements.ElementParser;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.elements.ElementModule;
-import io.github.oasis.elements.badges.rules.BadgeConditionalRule;
-import io.github.oasis.elements.badges.rules.BadgeFirstEventRule;
-import io.github.oasis.elements.badges.rules.BadgeHistogramStreakNRule;
+import io.github.oasis.elements.badges.processors.BadgeFirstEvent;
+import io.github.oasis.elements.badges.processors.ConditionalBadgeProcessor;
+import io.github.oasis.elements.badges.processors.PeriodicBadgeProcessor;
+import io.github.oasis.elements.badges.processors.PeriodicStreakNBadge;
+import io.github.oasis.elements.badges.processors.StreakNBadgeProcessor;
+import io.github.oasis.elements.badges.processors.TimeBoundedStreakNBadge;
 import io.github.oasis.elements.badges.rules.BadgeRule;
-import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalStreakNRule;
+import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
+import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
+import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
+import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
 
 import java.util.List;
 
@@ -80,24 +86,24 @@ public class BadgesModule extends ElementModule {
     }
 
     private AbstractProcessor<? extends AbstractRule, ? extends Signal> createBadgeProcessor(Db db, BadgeRule rule, SignalCollector collector) {
-        if (rule instanceof BadgeFirstEventRule) {
-            RuleContext<BadgeFirstEventRule> ruleContext = new RuleContext<>((BadgeFirstEventRule) rule, collector);
+        if (rule instanceof FirstEventBadgeRule) {
+            var ruleContext = new RuleContext<>((FirstEventBadgeRule) rule, collector);
             return new BadgeFirstEvent(db, ruleContext);
-        } else if (rule instanceof BadgeConditionalRule) {
-            RuleContext<BadgeConditionalRule> ruleContext = new RuleContext<>((BadgeConditionalRule) rule, collector);
-            return new BadgeConditionalProcessor(db, ruleContext);
-        } else if (rule instanceof BadgeHistogramStreakNRule) {
-            RuleContext<BadgeHistogramStreakNRule> ruleContext = new RuleContext<>((BadgeHistogramStreakNRule) rule, collector);
-            return new BadgeHistogramStreakN(db, ruleContext);
-        } else if (rule instanceof BadgeTemporalStreakNRule) {
-            RuleContext<BadgeStreakNRule> ruleContext = new RuleContext<>((BadgeStreakNRule) rule, collector);
-            return new BadgeTemporalStreakN(db, ruleContext);
-        } else if (rule instanceof BadgeTemporalRule) {
-            RuleContext<BadgeTemporalRule> ruleContext = new RuleContext<>((BadgeTemporalRule) rule, collector);
-            return new BadgeTemporalProcessor(db, ruleContext);
-        } else if (rule instanceof BadgeStreakNRule) {
-            RuleContext<BadgeStreakNRule> ruleContext = new RuleContext<>((BadgeStreakNRule) rule, collector);
-            return new BadgeStreakN(db, ruleContext);
+        } else if (rule instanceof ConditionalBadgeRule) {
+            var ruleContext = new RuleContext<>((ConditionalBadgeRule) rule, collector);
+            return new ConditionalBadgeProcessor(db, ruleContext);
+        } else if (rule instanceof PeriodicStreakNRule) {
+            var ruleContext = new RuleContext<>((PeriodicStreakNRule) rule, collector);
+            return new PeriodicStreakNBadge(db, ruleContext);
+        } else if (rule instanceof TimeBoundedStreakNRule) {
+            var ruleContext = new RuleContext<>((StreakNBadgeRule) rule, collector);
+            return new TimeBoundedStreakNBadge(db, ruleContext);
+        } else if (rule instanceof PeriodicBadgeRule) {
+            var ruleContext = new RuleContext<>((PeriodicBadgeRule) rule, collector);
+            return new PeriodicBadgeProcessor(db, ruleContext);
+        } else if (rule instanceof StreakNBadgeRule) {
+            var ruleContext = new RuleContext<>((StreakNBadgeRule) rule, collector);
+            return new StreakNBadgeProcessor(db, ruleContext);
         }
         return null;
     }

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,20 +17,20 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges;
+package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
-import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
-import io.github.oasis.elements.badges.signals.BadgeSignal;
-import io.github.oasis.elements.badges.signals.StreakBadgeSignal;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.collect.Record;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Sorted;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.collect.Record;
-import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
+import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
+import io.github.oasis.elements.badges.signals.StreakBadgeSignal;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -52,17 +52,17 @@ import static io.github.oasis.core.utils.Numbers.isZero;
  *
  * @author Isuru Weerarathna
  */
-public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
+public class StreakNBadgeProcessor extends AbstractBadgeProcessor<StreakNBadgeRule> {
 
     private static final String ONE_DELIM = ":1:";
     private static final String ZERO_DELIM = ":0:";
 
-    public BadgeStreakN(Db pool, RuleContext<BadgeStreakNRule> ruleContext) {
+    public StreakNBadgeProcessor(Db pool, RuleContext<StreakNBadgeRule> ruleContext) {
         super(pool, ruleContext);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeStreakNRule rule, ExecutionContext context, DbContext db) {
+    public List<BadgeSignal> process(Event event, StreakNBadgeRule rule, ExecutionContext context, DbContext db) {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
@@ -84,7 +84,7 @@ public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
         }
     }
 
-    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, BadgeStreakNRule rule, DbContext db) {
+    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, StreakNBadgeRule rule, DbContext db) {
         List<BadgeSignal> signals = new ArrayList<>();
         List<Record> filteredTuples = tuples.stream()
                 .filter(t -> asLong(t.getMember().split(COLON)[0]) != ts)
@@ -113,7 +113,7 @@ public class BadgeStreakN extends BadgeProcessor<BadgeStreakNRule> {
         return signals;
     }
 
-    public List<BadgeSignal> fold(List<Record> tuples, Event event, BadgeStreakNRule rule, DbContext db) {
+    public List<BadgeSignal> fold(List<Record> tuples, Event event, StreakNBadgeRule rule, DbContext db) {
         Record start = null;
         int len = 0;
         List<BadgeSignal> signals = new ArrayList<>();

@@ -23,8 +23,8 @@ import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.utils.Utils;
-import io.github.oasis.elements.badges.rules.BadgeConditionalRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalRule;
+import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -225,8 +225,8 @@ public class BadgeDef extends AbstractDef {
             );
         }
 
-        BadgeTemporalRule.Threshold toRuleThreshold() {
-            return new BadgeTemporalRule.Threshold(attribute, value);
+        PeriodicBadgeRule.Threshold toRuleThreshold() {
+            return new PeriodicBadgeRule.Threshold(attribute, value);
         }
 
         public BigDecimal getValue() {
@@ -268,9 +268,9 @@ public class BadgeDef extends AbstractDef {
             );
         }
 
-        BadgeConditionalRule.Condition toRuleCondition() {
+        ConditionalBadgeRule.Condition toRuleCondition() {
             EventExecutionFilter filter = EventExecutionFilterFactory.create(condition);
-            return new BadgeConditionalRule.Condition(priority, filter, attribute);
+            return new ConditionalBadgeRule.Condition(priority, filter, attribute);
         }
 
         public Integer getPriority() {

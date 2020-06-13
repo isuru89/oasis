@@ -28,12 +28,12 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeConditionalRule extends BadgeRule {
+public class ConditionalBadgeRule extends BadgeRule {
 
     private int maxAwardTimes = Integer.MAX_VALUE;
     private List<Condition> conditions;
 
-    public BadgeConditionalRule(String id) {
+    public ConditionalBadgeRule(String id) {
         super(id);
     }
 

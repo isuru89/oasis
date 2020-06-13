@@ -19,34 +19,35 @@
 
 package io.github.oasis.elements.badges.rules;
 
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.core.elements.EventValueResolver;
+
+import java.math.BigDecimal;
+
 /**
  * @author Isuru Weerarathna
  */
+public class PeriodicOccurrencesStreakNRule extends PeriodicStreakNRule {
 
-public class BadgeFirstEventRule extends BadgeRule {
-
-    public static final int DEFAULT_ATTRIBUTE = 1;
-
-
-    private final String eventName;
-    private final int attributeId;
-
-    public BadgeFirstEventRule(String id, String eventName) {
-        this(id, eventName, DEFAULT_ATTRIBUTE);
-    }
-
-    public BadgeFirstEventRule(String id, String eventName, int attributeId) {
+    public PeriodicOccurrencesStreakNRule(String id) {
         super(id);
 
-        this.eventName = eventName;
-        this.attributeId = attributeId;
+        super.threshold = BigDecimal.ONE;
     }
 
-    public String getEventName() {
-        return eventName;
+    @Override
+    public void setValueResolver(EventValueResolver<ExecutionContext> valueResolver) {
+        throw new IllegalStateException("Use condition instead of value resolver!");
     }
 
-    public int getAttributeId() {
-        return attributeId;
+    public void setCondition(EventExecutionFilter condition) {
+        super.valueResolver = (event, ctx) -> {
+            if (condition.matches(event, this, ctx)) {
+                return BigDecimal.ONE;
+            } else {
+                return BigDecimal.ZERO;
+            }
+        };
     }
 }
