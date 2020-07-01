@@ -27,7 +27,7 @@ import io.github.oasis.core.elements.Registrar;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.EventReadWrite;
-import io.github.oasis.core.external.EventStreamFactory;
+import io.github.oasis.core.external.SignalSubscriptionSupport;
 import io.github.oasis.engine.factory.Parsers;
 import io.github.oasis.engine.factory.Processors;
 import io.github.oasis.engine.factory.Sinks;
@@ -36,10 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -57,7 +53,9 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
     private Sinks sinks;
 
     private List<Class<? extends ElementModuleFactory>> moduleFactoryList = new ArrayList<>();
-    private transient List<ElementModule> moduleList = new ArrayList<>();
+    private final transient List<ElementModule> moduleList = new ArrayList<>();
+
+    private SignalSubscriptionSupport signalSubscription;
 
     public void init() throws OasisException {
         processors = new Processors();
@@ -127,5 +125,13 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
     @Override
     public void registerModule(ElementModule module) {
         moduleList.add(module);
+    }
+
+    public SignalSubscriptionSupport getSignalSubscription() {
+        return signalSubscription;
+    }
+
+    public void setSignalSubscription(SignalSubscriptionSupport signalSubscription) {
+        this.signalSubscription = signalSubscription;
     }
 }
