@@ -19,35 +19,34 @@
 
 package io.github.oasis.elements.badges.rules;
 
-import io.github.oasis.core.elements.EventExecutionFilter;
-import io.github.oasis.core.elements.EventValueResolver;
-import io.github.oasis.core.context.ExecutionContext;
-
-import java.math.BigDecimal;
-
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeHistogramCountStreakNRule extends BadgeHistogramStreakNRule {
 
-    public BadgeHistogramCountStreakNRule(String id) {
+public class FirstEventBadgeRule extends BadgeRule {
+
+    public static final int DEFAULT_ATTRIBUTE = 1;
+
+
+    private final String eventName;
+    private final int attributeId;
+
+    public FirstEventBadgeRule(String id, String eventName) {
+        this(id, eventName, DEFAULT_ATTRIBUTE);
+    }
+
+    public FirstEventBadgeRule(String id, String eventName, int attributeId) {
         super(id);
 
-        super.threshold = BigDecimal.ONE;
+        this.eventName = eventName;
+        this.attributeId = attributeId;
     }
 
-    @Override
-    public void setValueResolver(EventValueResolver<ExecutionContext> valueResolver) {
-        throw new IllegalStateException("Use condition instead of value resolver!");
+    public String getEventName() {
+        return eventName;
     }
 
-    public void setCondition(EventExecutionFilter condition) {
-        super.valueResolver = (event, ctx) -> {
-            if (condition.matches(event, this, ctx)) {
-                return BigDecimal.ONE;
-            } else {
-                return BigDecimal.ZERO;
-            }
-        };
+    public int getAttributeId() {
+        return attributeId;
     }
 }

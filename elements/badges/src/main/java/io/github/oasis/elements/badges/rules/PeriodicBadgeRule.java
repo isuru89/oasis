@@ -19,9 +19,9 @@
 
 package io.github.oasis.elements.badges.rules;
 
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventValueResolver;
-import io.github.oasis.core.context.ExecutionContext;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -31,14 +31,14 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeTemporalRule extends BadgeRule {
+public class PeriodicBadgeRule extends BadgeRule {
 
     private long timeUnit;
     private EventExecutionFilter criteria;
     protected EventValueResolver<ExecutionContext> valueResolver;
     private List<Threshold> thresholds;
 
-    public BadgeTemporalRule(String id) {
+    public PeriodicBadgeRule(String id) {
         super(id);
     }
 

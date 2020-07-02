@@ -22,7 +22,8 @@ package io.github.oasis.elements.badges;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
-import io.github.oasis.elements.badges.rules.BadgeTemporalRule;
+import io.github.oasis.elements.badges.processors.PeriodicBadgeProcessor;
+import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.elements.badges.signals.TemporalBadgeSignal;
 import org.junit.jupiter.api.Assertions;
@@ -38,8 +39,8 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
-@DisplayName("Temporal Badges")
-public class TemporalBadgeTest extends AbstractRuleTest {
+@DisplayName("Periodic Threshold Badges")
+public class PeriodicBadgeTest extends AbstractRuleTest {
 
     private static final int ATTR_1 = 1;
     private static final int ATTR_2 = 2;
@@ -64,9 +65,9 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals);
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals);
         Assertions.assertEquals(0, ruleContext.getRule().getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         Assertions.assertEquals(0, signals.size());
@@ -83,10 +84,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         Assertions.assertEquals(0, signals.size());
@@ -103,10 +104,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE_B, 71);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         Assertions.assertEquals(0, signals.size());
@@ -123,10 +124,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -145,11 +146,11 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         rule.setCondition((event, ruleRef, ctx) -> (long)event.getFieldValue("value") < 50);
         Assertions.assertEquals(1, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -168,10 +169,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -191,10 +192,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(120, EVENT_TYPE, 43);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -214,10 +215,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(120, EVENT_TYPE, -43);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(1, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -242,10 +243,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         Assertions.assertEquals(0, signals.size());
@@ -262,10 +263,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE_B, 71);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         Assertions.assertEquals(0, signals.size());
@@ -282,10 +283,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -304,10 +305,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -327,10 +328,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -350,11 +351,11 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         rule.setCondition((event, ruleRef, ctx) -> (long) event.getFieldValue("value") >= 50);
         Assertions.assertEquals(3, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -373,10 +374,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -395,10 +396,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(155, EVENT_TYPE, 5);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4);
 
         System.out.println(signals);
@@ -418,10 +419,10 @@ public class TemporalBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(120, EVENT_TYPE, 13);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeTemporalRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        BadgeTemporalRule rule = ruleContext.getRule();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
+        PeriodicBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getThresholds().size());
-        BadgeTemporalProcessor processor = new BadgeTemporalProcessor(pool, ruleContext);
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
@@ -431,12 +432,12 @@ public class TemporalBadgeTest extends AbstractRuleTest {
                 new TemporalBadgeSignal(rule.getId(), e5, ATTR_1, 150, 200, e5.getTimestamp(), e5.getExternalId()));
     }
 
-    private BadgeTemporalRule.Threshold aT(int attr, long threshold) {
-        return new BadgeTemporalRule.Threshold(attr, BigDecimal.valueOf(threshold));
+    private PeriodicBadgeRule.Threshold aT(int attr, long threshold) {
+        return new PeriodicBadgeRule.Threshold(attr, BigDecimal.valueOf(threshold));
     }
 
-    private RuleContext<BadgeTemporalRule> createRule(long timeUnit, Collection<Signal> collection, BadgeTemporalRule.Threshold... thresholds) {
-        BadgeTemporalRule rule = new BadgeTemporalRule("test.temporal.badge");
+    private RuleContext<PeriodicBadgeRule> createRule(long timeUnit, Collection<Signal> collection, PeriodicBadgeRule.Threshold... thresholds) {
+        PeriodicBadgeRule rule = new PeriodicBadgeRule("test.temporal.badge");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVENT_TYPE));
         rule.setTimeUnit(timeUnit);
         rule.setValueResolver((e,c) -> new BigDecimal(e.getFieldValue("value").toString()));

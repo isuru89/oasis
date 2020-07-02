@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.actors.cmds;
 
+import io.github.oasis.engine.ext.RulesImpl;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -40,6 +42,10 @@ public class RuleRemovedMessage extends OasisRuleMessage {
         return message;
     }
 
+    @Override
+    public void applyTo(RulesImpl.GameRules gameRules) {
+        gameRules.removeRule(ruleId);
+    }
 
     @Override
     public String toString() {

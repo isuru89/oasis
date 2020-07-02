@@ -19,15 +19,17 @@
 
 package io.github.oasis.engine.actors;
 
-import io.github.oasis.engine.EngineContext;
-import io.github.oasis.engine.actors.cmds.SignalMessage;
-import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.external.SignalSubscriptionSupport;
+import io.github.oasis.engine.EngineContext;
+import io.github.oasis.engine.actors.cmds.SignalMessage;
+import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.factory.Sinks;
-import io.github.oasis.core.context.ExecutionContext;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -35,16 +37,21 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class SignalConsumer extends OasisBaseActor {
 
+    private static final String C = "C";
+    private static final String HASH = "#";
+
     private static final AtomicLong COUNTER = new AtomicLong(0L);
 
     private String logId;
-    private Sinks sinks;
+    private final Sinks sinks;
+    private final SignalSubscriptionSupport signalSubscription;
 
     public SignalConsumer(EngineContext context) {
         super(context);
 
         this.sinks = context.getSinks();
-        myId = "C" + COUNTER.incrementAndGet();
+        signalSubscription = context.getSignalSubscription();
+        myId = C + COUNTER.incrementAndGet();
         logId = myId;
     }
 
@@ -59,7 +66,7 @@ public class SignalConsumer extends OasisBaseActor {
     private void initializeMe(StartRuleExecutionCommand message) {
         parentId = message.getParentId();
         log.info("[{}] Initialization from {}", myId, parentId);
-        logId = parentId + "#" + myId;
+        logId = parentId + HASH + myId;
     }
 
     private void processSignal(SignalMessage signalMessage) {
@@ -70,5 +77,10 @@ public class SignalConsumer extends OasisBaseActor {
         AbstractSink sink = sinks.create(signal.sinkHandler());
         log.info("[{}] {} processing {} of rule {}", logId, sink, signal, rule);
         sink.consume(signal, rule, context);
+
+        if (Objects.nonNull(signalSubscription)) {
+            log.debug("[{}] {} notifying subscriber", logId, sink);
+            signalSubscription.notifyAfter(signal, rule, context);
+        }
     }
 }

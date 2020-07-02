@@ -26,15 +26,15 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.utils.Numbers;
-import io.github.oasis.elements.badges.rules.BadgeConditionalRule;
-import io.github.oasis.elements.badges.rules.BadgeFirstEventRule;
-import io.github.oasis.elements.badges.rules.BadgeHistogramCountStreakNRule;
-import io.github.oasis.elements.badges.rules.BadgeHistogramStreakNRule;
 import io.github.oasis.elements.badges.rules.BadgeRule;
-import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalCountRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalStreakNRule;
+import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
+import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicOccurrencesRule;
+import io.github.oasis.elements.badges.rules.PeriodicOccurrencesStreakNRule;
+import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
+import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
+import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
 
 import java.util.List;
 import java.util.Map;
@@ -73,16 +73,16 @@ public class BadgeParser extends AbstractElementParser {
         String id = def.generateUniqueHash();
         if (FIRST_EVENT_KIND.equals(kind)) {
             String event = (String) def.getEvent();
-            rule = new BadgeFirstEventRule(def.generateUniqueHash(), event, def.getAttribute());
+            rule = new FirstEventBadgeRule(def.generateUniqueHash(), event, def.getAttribute());
             AbstractDef.defToRule(def, rule);
         } else if (STREAK_N_KIND.equals(kind)) {
-            BadgeStreakNRule temp = new BadgeStreakNRule(id);
+            StreakNBadgeRule temp = new StreakNBadgeRule(id);
             AbstractDef.defToRule(def, temp);
             temp.setStreaks(toStreakMap(def.getStreaks()));
             temp.setCriteria(temp.getCondition());
             rule = temp;
         } else if (CONDITIONAL_KIND.equals(kind)) {
-            BadgeConditionalRule temp = new BadgeConditionalRule(id);
+            ConditionalBadgeRule temp = new ConditionalBadgeRule(id);
             AbstractDef.defToRule(def, temp);
             temp.setConditions(def.getConditions().stream()
                     .map(BadgeDef.Condition::toRuleCondition)
@@ -90,7 +90,7 @@ public class BadgeParser extends AbstractElementParser {
             temp.setMaxAwardTimes(Numbers.ifNull(def.getMaxAwardTimes(), Integer.MAX_VALUE));
             rule = temp;
         } else if (TIME_BOUNDED_STREAK_KIND.equals(kind)) {
-            BadgeTemporalStreakNRule temp = new BadgeTemporalStreakNRule(id);
+            TimeBoundedStreakNRule temp = new TimeBoundedStreakNRule(id);
             AbstractDef.defToRule(def, temp);
             temp.setStreaks(toStreakMap(def.getStreaks()));
             temp.setCriteria(temp.getCondition());
@@ -98,7 +98,7 @@ public class BadgeParser extends AbstractElementParser {
             temp.setTimeUnit(toLongTimeUnit(def));
             rule = temp;
         } else if (PERIODIC_ACCUMULATIONS_KIND.equals(kind)) {
-            BadgeTemporalRule temp = new BadgeTemporalRule(id);
+            PeriodicBadgeRule temp = new PeriodicBadgeRule(id);
             AbstractDef.defToRule(def, temp);
             temp.setTimeUnit(toLongTimeUnit(def));
             temp.setCriteria(temp.getCondition());
@@ -107,7 +107,7 @@ public class BadgeParser extends AbstractElementParser {
             temp.setValueResolver(Scripting.create((String) def.getValueExtractorExpression(), VariableNames.CONTEXT_VAR));
             rule = temp;
         } else if (PERIODIC_OCCURRENCES_KIND.equals(kind)) {
-            BadgeTemporalCountRule temp = new BadgeTemporalCountRule(id);
+            PeriodicOccurrencesRule temp = new PeriodicOccurrencesRule(id);
             AbstractDef.defToRule(def, temp);
             temp.setTimeUnit(toLongTimeUnit(def));
             temp.setCriteria(temp.getCondition());
@@ -115,7 +115,7 @@ public class BadgeParser extends AbstractElementParser {
                     .map(BadgeDef.Threshold::toRuleThreshold).collect(Collectors.toList()));
             rule = temp;
         } else if (PERIODIC_ACCUMULATIONS_STREAK_KIND.equals(kind)) {
-            BadgeHistogramStreakNRule temp = new BadgeHistogramStreakNRule(id);
+            PeriodicStreakNRule temp = new PeriodicStreakNRule(id);
             AbstractDef.defToRule(def, temp);
             temp.setConsecutive(def.getConsecutive());
             temp.setTimeUnit(toLongTimeUnit(def));
@@ -124,7 +124,7 @@ public class BadgeParser extends AbstractElementParser {
             temp.setStreaks(toStreakMap(def.getStreaks()));
             rule = temp;
         } else if (PERIODIC_OCCURRENCES_STREAK_KIND.equals(kind)) {
-            BadgeHistogramCountStreakNRule temp = new BadgeHistogramCountStreakNRule(id);
+            PeriodicOccurrencesStreakNRule temp = new PeriodicOccurrencesStreakNRule(id);
             AbstractDef.defToRule(def, temp);
             temp.setConsecutive(def.getConsecutive());
             temp.setTimeUnit(toLongTimeUnit(def));

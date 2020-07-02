@@ -19,8 +19,8 @@
 
 package io.github.oasis.elements.badges.rules;
 
-import io.github.oasis.core.elements.EventValueResolver;
 import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.EventValueResolver;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import java.util.TreeMap;
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeHistogramStreakNRule extends BadgeRule {
+public class PeriodicStreakNRule extends BadgeRule {
 
     private int maxStreak = 0;
     private int minStreak = Integer.MAX_VALUE;
@@ -44,7 +44,7 @@ public class BadgeHistogramStreakNRule extends BadgeRule {
     private boolean consecutive;
     protected BigDecimal threshold;
 
-    public BadgeHistogramStreakNRule(String id) {
+    public PeriodicStreakNRule(String id) {
         super(id);
     }
 

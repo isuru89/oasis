@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,18 +17,18 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges;
+package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.elements.badges.rules.BadgeConditionalRule;
-import io.github.oasis.elements.badges.signals.BadgeSignal;
-import io.github.oasis.elements.badges.signals.ConditionalBadgeSignal;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
+import io.github.oasis.elements.badges.signals.ConditionalBadgeSignal;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,26 +47,26 @@ import java.util.Optional;
  *
  * @author Isuru Weerarathna
  */
-public class BadgeConditionalProcessor extends BadgeProcessor<BadgeConditionalRule> {
+public class ConditionalBadgeProcessor extends AbstractBadgeProcessor<ConditionalBadgeRule> {
 
     public static final String ATTR_DELIMETER = ":attr:";
 
-    public BadgeConditionalProcessor(Db pool, RuleContext<BadgeConditionalRule> ruleContext) {
+    public ConditionalBadgeProcessor(Db pool, RuleContext<ConditionalBadgeRule> ruleContext) {
         super(pool, ruleContext);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeConditionalRule rule, ExecutionContext context, DbContext db) {
-        List<BadgeConditionalRule.Condition> conditions = rule.getConditions();
+    public List<BadgeSignal> process(Event event, ConditionalBadgeRule rule, ExecutionContext context, DbContext db) {
+        List<ConditionalBadgeRule.Condition> conditions = rule.getConditions();
         if (conditions.isEmpty()) {
             return null;
         }
 
-        Optional<BadgeConditionalRule.Condition> first = conditions.stream()
+        Optional<ConditionalBadgeRule.Condition> first = conditions.stream()
                 .filter(condition -> condition.getCondition().matches(event, rule, context))
                 .findFirst();
         if (first.isPresent()) {
-            BadgeConditionalRule.Condition condition = first.get();
+            ConditionalBadgeRule.Condition condition = first.get();
             int attrId = condition.getAttribute();
             String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
             String attrKey = rule.getId() + ATTR_DELIMETER + attrId;

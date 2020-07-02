@@ -19,28 +19,31 @@
 
 package io.github.oasis.elements.badges.rules;
 
-import io.github.oasis.core.elements.EventExecutionFilter;
-import io.github.oasis.core.elements.EventValueResolver;
-import io.github.oasis.core.context.ExecutionContext;
-
-import java.math.BigDecimal;
-
 /**
  * @author Isuru Weerarathna
  */
-public class BadgeTemporalCountRule extends BadgeTemporalRule {
-    public BadgeTemporalCountRule(String id) {
+public class TimeBoundedStreakNRule extends StreakNBadgeRule {
+
+    private long timeUnit;
+    private boolean consecutive = true;
+
+    public TimeBoundedStreakNRule(String id) {
         super(id);
     }
 
-    @Override
-    public void setCriteria(EventExecutionFilter criteria) {
-        super.setCriteria(criteria);
-        super.valueResolver = (event, ctx) -> BigDecimal.ONE;
+    public boolean isConsecutive() {
+        return consecutive;
     }
 
-    @Override
-    public void setValueResolver(EventValueResolver<ExecutionContext> valueResolver) {
-        throw new IllegalStateException("Use condition instead of value resolver!");
+    public void setConsecutive(boolean consecutive) {
+        this.consecutive = consecutive;
+    }
+
+    public long getTimeUnit() {
+        return timeUnit;
+    }
+
+    public void setTimeUnit(long timeUnit) {
+        this.timeUnit = timeUnit;
     }
 }

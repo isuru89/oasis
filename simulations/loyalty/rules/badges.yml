@@ -1,0 +1,46 @@
+version: 1
+
+badges:
+  - name: First-Purchase
+    description: First purchase done within the system
+    kind: firstEvent
+    event: order.accepted
+
+  - name: Big-Purchase-Streak
+    description: Do 3 or more consecutive big purchases without time bounded
+    kind: streak
+    event: order.accepted
+    condition: "e.total >= 50"
+    streak:
+      - streak: 2
+        attribute: 1
+      - streak: 3
+        attribute: 2
+      - streak: 5
+        attribute: 3
+
+  - name: Daily-Purchase-Streak
+    description: Do a purchase everyday for 3 or more days
+    kind: periodicOccurrencesStreak
+    event: order.accepted
+    timeUnit: daily
+    streak:
+      - streak: 3
+        attribute: 1
+      - streak: 5
+        attribute: 2
+      - streak: 10
+        attribute: 3
+
+  - name: Weekly-Purchase-Streak
+    description: Do a purchase everyweek for 4 or more weeks
+    kind: periodicOccurrencesStreak
+    event: order.accepted
+    timeUnit: weekly
+    streak:
+      - streak: 4
+        attribute: 1
+      - streak: 8
+        attribute: 2
+      - streak: 12
+        attribute: 3

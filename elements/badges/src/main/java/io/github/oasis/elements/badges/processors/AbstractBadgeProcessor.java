@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,28 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges;
+package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.elements.badges.rules.BadgeRule;
-import io.github.oasis.elements.badges.signals.BadgeSignal;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.elements.badges.StreakSupport;
+import io.github.oasis.elements.badges.rules.BadgeRule;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class BadgeProcessor<R extends BadgeRule> extends AbstractProcessor<R, BadgeSignal> {
+public abstract class AbstractBadgeProcessor<R extends BadgeRule> extends AbstractProcessor<R, BadgeSignal> {
 
     private static final String BADGE_HISTORY_FORMAT = "%d:%s:%d:%d";
 
-    public BadgeProcessor(Db pool, RuleContext<R> ruleContext) {
+    public AbstractBadgeProcessor(Db pool, RuleContext<R> ruleContext) {
         super(pool, ruleContext);
     }
 

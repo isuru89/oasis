@@ -22,7 +22,8 @@ package io.github.oasis.elements.badges;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
-import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
+import io.github.oasis.elements.badges.processors.StreakNBadgeProcessor;
+import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.elements.badges.signals.StreakBadgeSignal;
 import org.junit.jupiter.api.Assertions;
@@ -57,9 +58,9 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e2 = TEvent.createKeyValue(104, EVT_A, 63);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(singleStreak, signals::add);
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, signals::add);
         Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2);
 
         System.out.println(signals);
@@ -75,9 +76,9 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(106, EVT_A, 88);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(singleStreak, signals::add);
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, signals::add);
         Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4);
 
         System.out.println(signals);
@@ -93,9 +94,9 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(106, EVT_B, 21);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(singleStreak, signals::add);
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, signals::add);
         Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4);
 
         Assertions.assertEquals(0, signals.size());
@@ -110,9 +111,9 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(106, EVT_A, 21);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(singleStreak, signals::add);
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, signals::add);
         Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4);
 
         assertStrict(signals,
@@ -129,9 +130,9 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(106, EVT_A, 21);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(singleStreak, signals::add);
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, signals::add);
         Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         System.out.println(signals);
@@ -150,9 +151,9 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(106, EVT_A, 21);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(singleStreak, signals::add);
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, signals::add);
         Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         System.out.println(signals);
@@ -170,9 +171,9 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(106, EVT_A, 21);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(singleStreak, signals::add);
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, signals::add);
         Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         System.out.println(signals);
@@ -190,10 +191,10 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(106, EVT_A, 21);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(singleStreak, signals::add);
-        BadgeStreakNRule rule = ruleContext.getRule();
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, signals::add);
+        StreakNBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         assertStrict(signals,
@@ -210,10 +211,10 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(106, EVT_A, 21);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(singleStreak, signals::add);
-        BadgeStreakNRule rule = ruleContext.getRule();
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, signals::add);
+        StreakNBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(3, rule.getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         System.out.println(signals);
@@ -236,10 +237,10 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(107, EVT_A, 76);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(multiStreak, signalsRef::add);
-        BadgeStreakNRule rule = ruleContext.getRule();
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(multiStreak, signalsRef::add);
+        StreakNBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -260,10 +261,10 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(107, EVT_A, 26);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(multiStreak, signalsRef::add);
-        BadgeStreakNRule rule = ruleContext.getRule();
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(multiStreak, signalsRef::add);
+        StreakNBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -284,10 +285,10 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(101, EVT_A, 26);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(multiStreak, signalsRef::add);
-        BadgeStreakNRule rule = ruleContext.getRule();
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(multiStreak, signalsRef::add);
+        StreakNBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -310,10 +311,10 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(105, EVT_A, 26);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeStreakNRule> ruleContext = createRule(multiStreak, signalsRef::add);
-        BadgeStreakNRule rule = ruleContext.getRule();
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(multiStreak, signalsRef::add);
+        StreakNBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(5, rule.getMaxStreak());
-        BadgeStreakN streakN = new BadgeStreakN(pool, ruleContext);
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e6);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -323,8 +324,8 @@ public class BadgeStreakNTest extends AbstractRuleTest {
                 new BadgeRemoveSignal(rule.getId(), e3.asEventScope(), ATTR_SILVER, 100, 106, e1.getExternalId(), e3.getExternalId()));
     }
 
-    private RuleContext<BadgeStreakNRule> createRule(Map<Integer, Integer> streaks, Consumer<Signal> consumer) {
-        BadgeStreakNRule rule = new BadgeStreakNRule("abc");
+    private RuleContext<StreakNBadgeRule> createRule(Map<Integer, Integer> streaks, Consumer<Signal> consumer) {
+        StreakNBadgeRule rule = new StreakNBadgeRule("abc");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setStreaks(streaks);
         rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);

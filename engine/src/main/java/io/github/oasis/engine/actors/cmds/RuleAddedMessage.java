@@ -20,6 +20,7 @@
 package io.github.oasis.engine.actors.cmds;
 
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.engine.ext.RulesImpl;
 
 /**
  * @author Isuru Weerarathna
@@ -40,6 +41,11 @@ public class RuleAddedMessage extends OasisRuleMessage {
         RuleAddedMessage addedMessage = new RuleAddedMessage(rule);
         addedMessage.setGameId(gameId);
         return addedMessage;
+    }
+
+    @Override
+    public void applyTo(RulesImpl.GameRules gameRules) {
+        gameRules.addRule(rule);
     }
 
     @Override

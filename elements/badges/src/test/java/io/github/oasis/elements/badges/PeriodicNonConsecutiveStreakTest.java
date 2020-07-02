@@ -22,7 +22,8 @@ package io.github.oasis.elements.badges;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
-import io.github.oasis.elements.badges.rules.BadgeHistogramStreakNRule;
+import io.github.oasis.elements.badges.processors.PeriodicStreakNBadge;
+import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
 import io.github.oasis.elements.badges.signals.HistogramBadgeRemovalSignal;
 import io.github.oasis.elements.badges.signals.HistogramBadgeSignal;
 import org.junit.jupiter.api.Assertions;
@@ -39,8 +40,8 @@ import java.util.function.Consumer;
 /**
  * @author Isuru Weerarathna
  */
-@DisplayName("Non-consecutive Histogram Streaks")
-public class NCHistogramStreakTest extends AbstractRuleTest {
+@DisplayName("Periodic Non-consecutive Streaks")
+public class PeriodicNonConsecutiveStreakTest extends AbstractRuleTest {
 
     public static final String EVT_A = "a";
     public static final String EVT_B = "b";
@@ -64,8 +65,8 @@ public class NCHistogramStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(265, EVT_B, 11);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeHistogramStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
-        BadgeHistogramStreakN streakN = new BadgeHistogramStreakN(pool, ruleContext);
+        RuleContext<PeriodicStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
+        PeriodicStreakNBadge streakN = new PeriodicStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -85,8 +86,8 @@ public class NCHistogramStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(265, EVT_A, 11);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeHistogramStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
-        BadgeHistogramStreakN streakN = new BadgeHistogramStreakN(pool, ruleContext);
+        RuleContext<PeriodicStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
+        PeriodicStreakNBadge streakN = new PeriodicStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -107,8 +108,8 @@ public class NCHistogramStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(265, EVT_A, 80);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeHistogramStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
-        BadgeHistogramStreakN streakN = new BadgeHistogramStreakN(pool, ruleContext);
+        RuleContext<PeriodicStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
+        PeriodicStreakNBadge streakN = new PeriodicStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -130,8 +131,8 @@ public class NCHistogramStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(172, EVT_A, 20);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeHistogramStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
-        BadgeHistogramStreakN streakN = new BadgeHistogramStreakN(pool, ruleContext);
+        RuleContext<PeriodicStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
+        PeriodicStreakNBadge streakN = new PeriodicStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -153,13 +154,13 @@ public class NCHistogramStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(240, EVT_A, -90);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeHistogramStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
-        BadgeHistogramStreakN streakN = new BadgeHistogramStreakN(pool, ruleContext);
+        RuleContext<PeriodicStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
+        PeriodicStreakNBadge streakN = new PeriodicStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        BadgeHistogramStreakNRule rule = ruleContext.getRule();
+        PeriodicStreakNRule rule = ruleContext.getRule();
         assertStrict(signals,
                 new HistogramBadgeSignal(rule.getId(), e8, 3, ATTR_SILVER, 100, 250, e8.getExternalId()),
                 new HistogramBadgeRemovalSignal(rule.getId(), e8.asEventScope(), ATTR_SILVER, 100, 250));
@@ -175,8 +176,8 @@ public class NCHistogramStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(265, EVT_A, 80);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeHistogramStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
-        BadgeHistogramStreakN streakN = new BadgeHistogramStreakN(pool, ruleContext);
+        RuleContext<PeriodicStreakNRule> ruleContext = createRule(singleStreak, FIFTY, 80, signalsRef::add);
+        PeriodicStreakNBadge streakN = new PeriodicStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
@@ -198,13 +199,13 @@ public class NCHistogramStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(419, EVT_A, 84);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeHistogramStreakNRule> ruleContext = createRule(multiStreaks, FIFTY, 80, signalsRef::add);
-        BadgeHistogramStreakN streakN = new BadgeHistogramStreakN(pool, ruleContext);
+        RuleContext<PeriodicStreakNRule> ruleContext = createRule(multiStreaks, FIFTY, 80, signalsRef::add);
+        PeriodicStreakNBadge streakN = new PeriodicStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        BadgeHistogramStreakNRule rule = ruleContext.getRule();
+        PeriodicStreakNRule rule = ruleContext.getRule();
         assertStrict(signals,
                 new HistogramBadgeSignal(rule.getId(), e5, 3, ATTR_SILVER, 100, 250, e5.getExternalId()),
                 new HistogramBadgeSignal(rule.getId(), e7, 5, ATTR_GOLD, 100, 350, e7.getExternalId()));
@@ -223,21 +224,21 @@ public class NCHistogramStreakTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(253, EVT_A, -84);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<BadgeHistogramStreakNRule> ruleContext = createRule(multiStreaks, FIFTY, 80, signalsRef::add);
-        BadgeHistogramStreakN streakN = new BadgeHistogramStreakN(pool, ruleContext);
+        RuleContext<PeriodicStreakNRule> ruleContext = createRule(multiStreaks, FIFTY, 80, signalsRef::add);
+        PeriodicStreakNBadge streakN = new PeriodicStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8);
 
         Set<Signal> signals = mergeSignals(signalsRef);
         System.out.println(signals);
-        BadgeHistogramStreakNRule rule = ruleContext.getRule();
+        PeriodicStreakNRule rule = ruleContext.getRule();
         assertStrict(signals,
                 new HistogramBadgeSignal(rule.getId(), e5, 3, ATTR_SILVER, 100, 250, e5.getExternalId()),
                 new HistogramBadgeSignal(rule.getId(), e7, 5, ATTR_GOLD, 100, 350, e7.getExternalId()),
                 new HistogramBadgeRemovalSignal(rule.getId(), e8.asEventScope(), ATTR_GOLD, 100, 350));
     }
 
-    private RuleContext<BadgeHistogramStreakNRule> createRule(Map<Integer, Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
-        BadgeHistogramStreakNRule rule = new BadgeHistogramStreakNRule("test.histogram.streak");
+    private RuleContext<PeriodicStreakNRule> createRule(Map<Integer, Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
+        PeriodicStreakNRule rule = new PeriodicStreakNRule("test.histogram.streak");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setStreaks(streaks);
         rule.setConsecutive(false);

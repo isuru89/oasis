@@ -26,7 +26,8 @@ import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
-import io.github.oasis.elements.badges.rules.BadgeFirstEventRule;
+import io.github.oasis.elements.badges.processors.BadgeFirstEvent;
+import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -52,8 +53,8 @@ public class FirstEventTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_2, 14);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeFirstEventRule> ruleContext = createRule(EVT_1, signals, null);
-        BadgeFirstEventRule rule = ruleContext.getRule();
+        RuleContext<FirstEventBadgeRule> ruleContext = createRule(EVT_1, signals, null);
+        FirstEventBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(EVT_1, rule.getEventName());
         BadgeFirstEvent firstEvent = new BadgeFirstEvent(pool, ruleContext);
         submitOrder(firstEvent, e1, e2, e3);
@@ -71,8 +72,8 @@ public class FirstEventTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_1, 14);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeFirstEventRule> ruleContext = createRule(EVT_1, signals, null);
-        BadgeFirstEventRule rule = ruleContext.getRule();
+        RuleContext<FirstEventBadgeRule> ruleContext = createRule(EVT_1, signals, null);
+        FirstEventBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(EVT_1, rule.getEventName());
         BadgeFirstEvent firstEvent = new BadgeFirstEvent(pool, ruleContext);
         submitOrder(firstEvent, e1, e2, e3);
@@ -91,8 +92,8 @@ public class FirstEventTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_2, 14);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeFirstEventRule> ruleContext = createRule(EVT_1, signals, null);
-        BadgeFirstEventRule rule = ruleContext.getRule();
+        RuleContext<FirstEventBadgeRule> ruleContext = createRule(EVT_1, signals, null);
+        FirstEventBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(EVT_1, rule.getEventName());
         BadgeFirstEvent firstEvent = new BadgeFirstEvent(pool, ruleContext);
         submitOrder(firstEvent, e1, e2, e3);
@@ -111,8 +112,8 @@ public class FirstEventTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_1, 76);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeFirstEventRule> ruleContext = createRule(EVT_1, signals, null);
-        BadgeFirstEventRule rule = ruleContext.getRule();
+        RuleContext<FirstEventBadgeRule> ruleContext = createRule(EVT_1, signals, null);
+        FirstEventBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(EVT_1, rule.getEventName());
         BadgeFirstEvent firstEvent = new BadgeFirstEvent(pool, ruleContext);
         submitOrder(firstEvent, e1, e2, e3);
@@ -131,8 +132,8 @@ public class FirstEventTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_1, 76);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeFirstEventRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
-        BadgeFirstEventRule rule = ruleContext.getRule();
+        RuleContext<FirstEventBadgeRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
+        FirstEventBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(EVT_1, rule.getEventName());
         BadgeFirstEvent firstEvent = new BadgeFirstEvent(pool, ruleContext);
         submitOrder(firstEvent, e1, e2, e3);
@@ -151,8 +152,8 @@ public class FirstEventTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(157, EVT_2, 76);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeFirstEventRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
-        BadgeFirstEventRule rule = ruleContext.getRule();
+        RuleContext<FirstEventBadgeRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
+        FirstEventBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(EVT_1, rule.getEventName());
         BadgeFirstEvent firstEvent = new BadgeFirstEvent(pool, ruleContext);
         submitOrder(firstEvent, e1, e2, e3);
@@ -171,8 +172,8 @@ public class FirstEventTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_2, 76);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeFirstEventRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
-        BadgeFirstEventRule rule = ruleContext.getRule();
+        RuleContext<FirstEventBadgeRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
+        FirstEventBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(EVT_1, rule.getEventName());
         BadgeFirstEvent firstEvent = new BadgeFirstEvent(pool, ruleContext);
         submitOrder(firstEvent, e1, e2, e3);
@@ -191,7 +192,7 @@ public class FirstEventTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_2, 76);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeFirstEventRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
+        RuleContext<FirstEventBadgeRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
         Assertions.assertEquals(EVT_1, ruleContext.getRule().getEventName());
         BadgeFirstEvent firstEvent = new BadgeFirstEvent(pool, ruleContext);
         submitOrder(firstEvent, e1, e2, e3);
@@ -208,7 +209,7 @@ public class FirstEventTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_1, 11);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeFirstEventRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
+        RuleContext<FirstEventBadgeRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
         Assertions.assertEquals(EVT_1, ruleContext.getRule().getEventName());
         BadgeFirstEvent firstEvent = new BadgeFirstEvent(pool, ruleContext);
         submitOrder(firstEvent, e1, e2, e3);
@@ -225,8 +226,8 @@ public class FirstEventTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_1, 98);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<BadgeFirstEventRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
-        BadgeFirstEventRule rule = ruleContext.getRule();
+        RuleContext<FirstEventBadgeRule> ruleContext = createRule(EVT_1, signals, this::eventGreaterThan50);
+        FirstEventBadgeRule rule = ruleContext.getRule();
         Assertions.assertEquals(EVT_1, rule.getEventName());
         BadgeFirstEvent firstEvent = new BadgeFirstEvent(pool, ruleContext);
         submitOrder(firstEvent, e1, e2, e3);
@@ -241,8 +242,8 @@ public class FirstEventTest extends AbstractRuleTest {
         return (long) e.getFieldValue("value") >= 50;
     }
 
-    private RuleContext<BadgeFirstEventRule> createRule(String forEvent, List<Signal> collectTo, EventExecutionFilter predicate) {
-        BadgeFirstEventRule rule = new BadgeFirstEventRule("test.event", forEvent);
+    private RuleContext<FirstEventBadgeRule> createRule(String forEvent, List<Signal> collectTo, EventExecutionFilter predicate) {
+        FirstEventBadgeRule rule = new FirstEventBadgeRule("test.event", forEvent);
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_1));
         rule.setCondition(predicate);
         return new RuleContext<>(rule, fromConsumer(collectTo::add));

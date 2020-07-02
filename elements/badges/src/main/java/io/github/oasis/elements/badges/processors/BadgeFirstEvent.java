@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,17 +17,16 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges;
+package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.utils.Texts;
-import io.github.oasis.elements.badges.rules.BadgeFirstEventRule;
-import io.github.oasis.elements.badges.signals.BadgeSignal;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
 
 import java.util.List;
 
@@ -38,14 +37,14 @@ import static io.github.oasis.core.utils.Texts.COLON;
  *
  * @author Isuru Weerarathna
  */
-public class BadgeFirstEvent extends BadgeProcessor<BadgeFirstEventRule> {
+public class BadgeFirstEvent extends AbstractBadgeProcessor<FirstEventBadgeRule> {
 
-    public BadgeFirstEvent(Db pool, RuleContext<BadgeFirstEventRule> ruleContext) {
+    public BadgeFirstEvent(Db pool, RuleContext<FirstEventBadgeRule> ruleContext) {
         super(pool, ruleContext);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeFirstEventRule rule, ExecutionContext context, DbContext db) {
+    public List<BadgeSignal> process(Event event, FirstEventBadgeRule rule, ExecutionContext context, DbContext db) {
         String key = ID.getUserFirstEventsKey(event.getGameId(), event.getUser());
         long ts = event.getTimestamp();
         String id = event.getExternalId();

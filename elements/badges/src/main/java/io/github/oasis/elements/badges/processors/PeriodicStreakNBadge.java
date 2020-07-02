@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,21 +17,21 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges;
+package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.elements.badges.rules.BadgeHistogramStreakNRule;
-import io.github.oasis.elements.badges.signals.BadgeSignal;
-import io.github.oasis.elements.badges.signals.HistogramBadgeRemovalSignal;
-import io.github.oasis.elements.badges.signals.HistogramBadgeSignal;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.collect.Record;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.collect.Record;
-import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
+import io.github.oasis.elements.badges.signals.HistogramBadgeRemovalSignal;
+import io.github.oasis.elements.badges.signals.HistogramBadgeSignal;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -68,14 +68,14 @@ import static io.github.oasis.core.utils.Numbers.isThresholdCrossedUp;
  *
  * @author Isuru Weerarathna
  */
-public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNRule> {
+public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakNRule> {
 
-    public BadgeHistogramStreakN(Db pool, RuleContext<BadgeHistogramStreakNRule> ruleContext) {
+    public PeriodicStreakNBadge(Db pool, RuleContext<PeriodicStreakNRule> ruleContext) {
         super(pool, ruleContext);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeHistogramStreakNRule rule, ExecutionContext context, DbContext db) {
+    public List<BadgeSignal> process(Event event, PeriodicStreakNRule rule, ExecutionContext context, DbContext db) {
         String badgeKey = ID.getBadgeHistogramKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(badgeKey);
         long timestamp = event.getTimestamp() - (event.getTimestamp() % rule.getTimeUnit());
@@ -173,7 +173,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
         return null;
     }
 
-    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, BadgeHistogramStreakNRule rule, DbContext db) {
+    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, PeriodicStreakNRule rule, DbContext db) {
         List<BadgeSignal> signals = new ArrayList<>();
         List<Record> filteredTuples = tuples.stream().map(t -> {
             String[] parts = t.getMember().split(COLON);
@@ -209,7 +209,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
         return signals;
     }
 
-    public List<BadgeSignal> fold(List<Record> tuples, Event event, BadgeHistogramStreakNRule rule, DbContext db, boolean skipOldCheck) {
+    public List<BadgeSignal> fold(List<Record> tuples, Event event, PeriodicStreakNRule rule, DbContext db, boolean skipOldCheck) {
         List<BadgeSignal> signals = new ArrayList<>();
         List<List<Record>> partitions = splitPartitions(tuples, rule);
         if (partitions.isEmpty()) {
@@ -253,7 +253,7 @@ public class BadgeHistogramStreakN extends BadgeProcessor<BadgeHistogramStreakNR
         return signals;
     }
 
-    private List<List<Record>> splitPartitions(List<Record> tuples, BadgeHistogramStreakNRule options) {
+    private List<List<Record>> splitPartitions(List<Record> tuples, PeriodicStreakNRule options) {
         List<Record> currentPartition = new ArrayList<>();
         List<List<Record>> partitions = new ArrayList<>();
         for (Record tuple : tuples) {

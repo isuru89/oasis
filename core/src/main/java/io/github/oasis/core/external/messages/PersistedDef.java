@@ -42,6 +42,8 @@ public class PersistedDef implements Serializable {
     public static final String GAME_EVENT = "GAME.EVENT";
     public static final String GAME_RULE_ADDED = "GAME.RULE.ADDED";
     public static final String GAME_RULE_REMOVED = "GAME.RULE.REMOVED";
+    public static final String GAME_RULE_ACTIVATED = "GAME.RULE.ACTIVATED";
+    public static final String GAME_RULE_DEACTIVATED = "GAME.RULE.DEACTIVATED";
     public static final String GAME_RULE_UPDATED = "GAME.RULE.UPDATED";
 
     private static final Set<String> ALL_GAME_LIFECYCLE_TYPES = Set.of(
@@ -53,7 +55,9 @@ public class PersistedDef implements Serializable {
     private static final Set<String> ALL_RULE_TYPES = Set.of(
             GAME_RULE_ADDED,
             GAME_RULE_REMOVED,
-            GAME_RULE_UPDATED);
+            GAME_RULE_UPDATED,
+            GAME_RULE_ACTIVATED,
+            GAME_RULE_DEACTIVATED);
 
     private String type;
     private String impl;

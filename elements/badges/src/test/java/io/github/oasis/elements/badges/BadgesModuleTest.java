@@ -26,14 +26,20 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.elements.badges.rules.BadgeConditionalRule;
-import io.github.oasis.elements.badges.rules.BadgeFirstEventRule;
-import io.github.oasis.elements.badges.rules.BadgeHistogramCountStreakNRule;
-import io.github.oasis.elements.badges.rules.BadgeHistogramStreakNRule;
-import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalCountRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalStreakNRule;
+import io.github.oasis.elements.badges.processors.BadgeFirstEvent;
+import io.github.oasis.elements.badges.processors.ConditionalBadgeProcessor;
+import io.github.oasis.elements.badges.processors.PeriodicBadgeProcessor;
+import io.github.oasis.elements.badges.processors.PeriodicStreakNBadge;
+import io.github.oasis.elements.badges.processors.StreakNBadgeProcessor;
+import io.github.oasis.elements.badges.processors.TimeBoundedStreakNBadge;
+import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
+import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicOccurrencesRule;
+import io.github.oasis.elements.badges.rules.PeriodicOccurrencesStreakNRule;
+import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
+import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
+import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,15 +97,15 @@ class BadgesModuleTest {
 
         Mockito.when(contextSupport.getSignalCollector()).thenReturn(signalCollector);
 
-        BadgeFirstEventRule rule = Mockito.mock(BadgeFirstEventRule.class);
+        FirstEventBadgeRule rule = Mockito.mock(FirstEventBadgeRule.class);
         Assertions.assertTrue(module.createProcessor(rule, contextSupport) instanceof BadgeFirstEvent);
-        Assertions.assertTrue(module.createProcessor(Mockito.mock(BadgeConditionalRule.class), contextSupport) instanceof BadgeConditionalProcessor);
-        Assertions.assertTrue(module.createProcessor(Mockito.mock(BadgeStreakNRule.class), contextSupport) instanceof BadgeStreakN);
-        Assertions.assertTrue(module.createProcessor(Mockito.mock(BadgeTemporalRule.class), contextSupport) instanceof BadgeTemporalProcessor);
-        Assertions.assertTrue(module.createProcessor(Mockito.mock(BadgeTemporalCountRule.class), contextSupport) instanceof BadgeTemporalProcessor);
-        Assertions.assertTrue(module.createProcessor(Mockito.mock(BadgeTemporalStreakNRule.class), contextSupport) instanceof BadgeTemporalStreakN);
-        Assertions.assertTrue(module.createProcessor(Mockito.mock(BadgeHistogramStreakNRule.class), contextSupport) instanceof BadgeHistogramStreakN);
-        Assertions.assertTrue(module.createProcessor(Mockito.mock(BadgeHistogramCountStreakNRule.class), contextSupport) instanceof BadgeHistogramStreakN);
+        Assertions.assertTrue(module.createProcessor(Mockito.mock(ConditionalBadgeRule.class), contextSupport) instanceof ConditionalBadgeProcessor);
+        Assertions.assertTrue(module.createProcessor(Mockito.mock(StreakNBadgeRule.class), contextSupport) instanceof StreakNBadgeProcessor);
+        Assertions.assertTrue(module.createProcessor(Mockito.mock(PeriodicBadgeRule.class), contextSupport) instanceof PeriodicBadgeProcessor);
+        Assertions.assertTrue(module.createProcessor(Mockito.mock(PeriodicOccurrencesRule.class), contextSupport) instanceof PeriodicBadgeProcessor);
+        Assertions.assertTrue(module.createProcessor(Mockito.mock(TimeBoundedStreakNRule.class), contextSupport) instanceof TimeBoundedStreakNBadge);
+        Assertions.assertTrue(module.createProcessor(Mockito.mock(PeriodicStreakNRule.class), contextSupport) instanceof PeriodicStreakNBadge);
+        Assertions.assertTrue(module.createProcessor(Mockito.mock(PeriodicOccurrencesStreakNRule.class), contextSupport) instanceof PeriodicStreakNBadge);
     }
 
     @Test

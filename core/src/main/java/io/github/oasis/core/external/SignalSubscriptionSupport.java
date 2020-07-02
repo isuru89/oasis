@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,25 +17,27 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
+package io.github.oasis.core.external;
 
-import io.github.oasis.core.external.messages.OasisCommand;
-import io.github.oasis.engine.ext.RulesImpl;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Signal;
 
 /**
+ * Used to subscribe to signals emitted by engine.
+ * Useful when Oasis being used as a library.
+ *
  * @author Isuru Weerarathna
  */
-public abstract class OasisRuleMessage implements OasisCommand {
+public interface SignalSubscriptionSupport {
 
-    private int gameId;
+    /**
+     * Called when signal successfully handled by corresponding sink.
+     *
+     * @param signal signal instance.
+     * @param rule rule reference.
+     * @param executionContext execution context.
+     */
+    void notifyAfter(Signal signal, AbstractRule rule, ExecutionContext executionContext);
 
-    public int getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(int gameId) {
-        this.gameId = gameId;
-    }
-
-    public abstract void applyTo(RulesImpl.GameRules gameRules);
 }

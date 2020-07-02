@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,21 +17,21 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges;
+package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.elements.badges.rules.BadgeStreakNRule;
-import io.github.oasis.elements.badges.rules.BadgeTemporalStreakNRule;
-import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
-import io.github.oasis.elements.badges.signals.BadgeSignal;
-import io.github.oasis.elements.badges.signals.StreakBadgeSignal;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.collect.Record;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Sorted;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.collect.Record;
-import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
+import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
+import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
+import io.github.oasis.elements.badges.signals.StreakBadgeSignal;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -43,20 +43,21 @@ import java.util.TreeMap;
 
 import static io.github.oasis.core.utils.Numbers.asInt;
 import static io.github.oasis.core.utils.Numbers.asLong;
+import static io.github.oasis.core.utils.Texts.COLON;
 
 /**
  * Awards a badge when a condition fulfilled for a N number of times within a rolling time unit T.
  *
  * @author Isuru Weerarathna
  */
-public class BadgeTemporalStreakN extends BadgeStreakN {
-    public BadgeTemporalStreakN(Db pool, RuleContext<BadgeStreakNRule> ruleContext) {
+public class TimeBoundedStreakNBadge extends StreakNBadgeProcessor {
+    public TimeBoundedStreakNBadge(Db pool, RuleContext<StreakNBadgeRule> ruleContext) {
         super(pool, ruleContext);
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeStreakNRule ruleRef, ExecutionContext context, DbContext db) {
-        BadgeTemporalStreakNRule rule = (BadgeTemporalStreakNRule) ruleRef;
+    public List<BadgeSignal> process(Event event, StreakNBadgeRule ruleRef, ExecutionContext context, DbContext db) {
+        TimeBoundedStreakNRule rule = (TimeBoundedStreakNRule) ruleRef;
         if (rule.isConsecutive()) {
             return super.process(event, rule, context, db);
         } else {
@@ -64,7 +65,7 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
         }
     }
 
-    private List<BadgeSignal> nonConsecutiveAccept(Event event, BadgeTemporalStreakNRule rule, ExecutionContext context, DbContext db) {
+    private List<BadgeSignal> nonConsecutiveAccept(Event event, TimeBoundedStreakNRule rule, ExecutionContext context, DbContext db) {
         String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
@@ -73,13 +74,13 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
             String lastOffering = db.getValueFromMap(badgeMetaKey, rule.getId() + ":lasttime");  // <timestamp>:<streak>:<id>
             long lastTimeOffered = 0L;
             if (lastOffering != null) {
-                lastTimeOffered = asLong(lastOffering.split(":")[0]);
+                lastTimeOffered = asLong(lastOffering.split(COLON)[0]);
             }
             if (ts <= lastTimeOffered) {
                 return null;
             }
 
-            sortedRange.add(ts + ":" + event.getExternalId(), ts);
+            sortedRange.add(ts + COLON + event.getExternalId(), ts);
             long start = Math.max(ts - rule.getTimeUnit(), 0);
             List<Record> tupleRange = sortedRange.getRangeByScoreWithScores(start, ts + rule.getTimeUnit());
             return countFold(tupleRange, event, lastOffering, rule, db);
@@ -87,14 +88,14 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
         return null;
     }
 
-    private List<BadgeSignal> countFold(List<Record> tuplesAll, Event event, String lastOffering, BadgeTemporalStreakNRule rule, DbContext db) {
+    private List<BadgeSignal> countFold(List<Record> tuplesAll, Event event, String lastOffering, TimeBoundedStreakNRule rule, DbContext db) {
         List<BadgeSignal> signals = new ArrayList<>();
         int lastStreak = 0;
         long lastTs = 0L;
         long firstTs = 0L;
         String prevBadgeFirstId = null;
         if (lastOffering != null) {
-            String[] parts = lastOffering.split(":");
+            String[] parts = lastOffering.split(COLON);
             lastTs = asLong(parts[0]) + 1;
             lastStreak = asInt(parts[1]);
             firstTs = asLong(parts[2]);
@@ -111,7 +112,7 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
         countMap.put(0L, 0);
         countMap.put(firstTs, 0);
         countMap.put(lastTs, lastStreak);
-        tupleMap.put(firstTs, Record.create(lastTs + ":" + prevBadgeFirstId, firstTs * 1.0));
+        tupleMap.put(firstTs, Record.create(lastTs + COLON + prevBadgeFirstId, firstTs * 1.0));
         List<Integer> streakList = rule.getStreaks();
         int size = 0;
         for (Record record : tuplesAll) {
@@ -141,7 +142,7 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
                 if (startTuple == null) {
                     firstId = prevBadgeFirstId;
                 } else {
-                    firstId = startTuple.getMember().split(":")[1];
+                    firstId = startTuple.getMember().split(COLON)[1];
                 }
                 StreakBadgeSignal signal = new StreakBadgeSignal(rule.getId(),
                         event,
@@ -153,7 +154,10 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
                         tuple.getMember().split(":")[1]);
                 signals.add(signal);
                 db.setValueInMap(badgeMetaKey,
-                        rule.getId() + ":lasttime", ts + ":" + signal.getStreak() + ":" + signal.getStartTime() + ":" + signal.getStartId());
+                        rule.getId() + ":lasttime", ts
+                                + COLON + signal.getStreak()
+                                + COLON + signal.getStartTime()
+                                + COLON + signal.getStartId());
 
                 if (rule.isLastStreak(currStreak)) {
                     db.SORTED(ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId())).removeRangeByScore(0, ts);
@@ -196,9 +200,9 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
 
 
     @Override
-    public List<BadgeSignal> fold(List<Record> tuples, Event event, BadgeStreakNRule rule, DbContext db) {
+    public List<BadgeSignal> fold(List<Record> tuples, Event event, StreakNBadgeRule rule, DbContext db) {
         List<BadgeSignal> signals = new ArrayList<>();
-        BadgeTemporalStreakNRule options = (BadgeTemporalStreakNRule) rule;
+        TimeBoundedStreakNRule options = (TimeBoundedStreakNRule) rule;
         List<List<Record>> partitions = splitPartitions(tuples, options);
         if (partitions.isEmpty()) {
             return signals;
@@ -243,22 +247,22 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
     }
 
     @Override
-    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, BadgeStreakNRule rule, DbContext db) {
-        BadgeTemporalStreakNRule options = (BadgeTemporalStreakNRule) rule;
+    public List<BadgeSignal> unfold(List<Record> tuples, Event event, long ts, StreakNBadgeRule rule, DbContext db) {
+        TimeBoundedStreakNRule options = (TimeBoundedStreakNRule) rule;
         List<BadgeSignal> signals = new ArrayList<>();
         long startTs = Math.max(0, ts - options.getTimeUnit());
         String badgeSpecKey = ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), options.getId());
         List<Record> badgesInRange = db.SORTED(badgeSpecKey).getRangeByScoreWithScores(startTs, ts);
         if (!badgesInRange.isEmpty()) {
             badgesInRange.stream().filter(t -> {
-                String[] parts = t.getMember().split(":");
+                String[] parts = t.getMember().split(COLON);
                 long badgeEndTs = Long.parseLong(parts[0]);
                 if (badgeEndTs < ts) {
                     return false;
                 }
                 return parts[1].equals(options.getId());
             }).map(t -> {
-                String[] parts = t.getMember().split(":");
+                String[] parts = t.getMember().split(COLON);
                 return new BadgeRemoveSignal(options.getId(),
                         event.asEventScope(),
                         Integer.parseInt(parts[3]),
@@ -269,11 +273,11 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
         return signals;
     }
 
-    public List<List<Record>> splitPartitions(List<Record> tuples, BadgeTemporalStreakNRule options) {
+    public List<List<Record>> splitPartitions(List<Record> tuples, TimeBoundedStreakNRule options) {
         List<Record> currentPartition = new ArrayList<>();
         List<List<Record>> partitions = new ArrayList<>();
         for (Record tuple : tuples) {
-            String[] parts = tuple.getMember().split(":");
+            String[] parts = tuple.getMember().split(COLON);
             if ("1".equals(parts[1])) {
                 currentPartition.add(tuple);
             } else {
@@ -290,12 +294,12 @@ public class BadgeTemporalStreakN extends BadgeStreakN {
     }
 
     private long captureTsFromTuple(Record tuple) {
-        String[] parts = tuple.getMember().split(":");
+        String[] parts = tuple.getMember().split(COLON);
         return Long.parseLong(parts[0]);
     }
 
     private String captureEventIdFromTuple(Record tuple) {
-        String[] parts = tuple.getMember().split(":");
+        String[] parts = tuple.getMember().split(COLON);
         return parts[2];
     }
 

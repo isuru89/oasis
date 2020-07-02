@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,19 +17,19 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges;
+package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.elements.badges.rules.BadgeTemporalRule;
-import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
-import io.github.oasis.elements.badges.signals.BadgeSignal;
-import io.github.oasis.elements.badges.signals.TemporalBadgeSignal;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
+import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
+import io.github.oasis.elements.badges.signals.TemporalBadgeSignal;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -54,9 +54,9 @@ import static io.github.oasis.core.utils.Numbers.isThresholdCrossedUp;
  *
  * @author Isuru Weerarathna
  */
-public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
+public class PeriodicBadgeProcessor extends AbstractBadgeProcessor<PeriodicBadgeRule> {
 
-    public BadgeTemporalProcessor(Db pool, RuleContext<BadgeTemporalRule> ruleContext) {
+    public PeriodicBadgeProcessor(Db pool, RuleContext<PeriodicBadgeRule> ruleContext) {
         super(pool, ruleContext);
     }
 
@@ -66,7 +66,7 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, BadgeTemporalRule rule, ExecutionContext context, DbContext db) {
+    public List<BadgeSignal> process(Event event, PeriodicBadgeRule rule, ExecutionContext context, DbContext db) {
         BigDecimal value = resolveValueOfEvent(event, rule, context);
         String badgeKey = ID.getUserTemporalBadgeKey(event.getGameId(), event.getUser(), rule.getId());
         Mapped map = db.MAP(badgeKey);
@@ -76,7 +76,7 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
         BigDecimal updatedVal = map.incrementByDecimal(subKey, value);
         BigDecimal prevValue = updatedVal.subtract(value).setScale(SCALE, RoundingMode.HALF_UP);
         boolean increased = isIncreasedOrEqual(prevValue, updatedVal);
-        Optional<List<BadgeTemporalRule.Threshold>> crossedThreshold = getCrossedThreshold(prevValue, updatedVal, rule);
+        Optional<List<PeriodicBadgeRule.Threshold>> crossedThreshold = getCrossedThreshold(prevValue, updatedVal, rule);
         return crossedThreshold.map(thresholds ->
                 thresholds.stream()
                         .map(threshold -> increased
@@ -86,7 +86,7 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
                 .orElse(null);
     }
 
-    private BadgeSignal badgeCreation(BadgeTemporalRule rule, BadgeTemporalRule.Threshold threshold, Event event, long tsUnit) {
+    private BadgeSignal badgeCreation(PeriodicBadgeRule rule, PeriodicBadgeRule.Threshold threshold, Event event, long tsUnit) {
         return new TemporalBadgeSignal(rule.getId(),
                 event,
                 threshold.getAttribute(),
@@ -96,7 +96,7 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
                 event.getExternalId());
     }
 
-    private BadgeSignal badgeRemoval(BadgeTemporalRule rule, BadgeTemporalRule.Threshold threshold, Event event, long tsUnit) {
+    private BadgeSignal badgeRemoval(PeriodicBadgeRule rule, PeriodicBadgeRule.Threshold threshold, Event event, long tsUnit) {
         return new BadgeRemoveSignal(rule.getId(),
                 event.asEventScope(),
                 threshold.getAttribute(),
@@ -106,9 +106,9 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
                 event.getExternalId());
     }
 
-    private Optional<List<BadgeTemporalRule.Threshold>> getCrossedThreshold(BigDecimal prev, BigDecimal now, BadgeTemporalRule rule) {
-        List<BadgeTemporalRule.Threshold> thresholds = new LinkedList<>();
-        for (BadgeTemporalRule.Threshold threshold : rule.getThresholds()) {
+    private Optional<List<PeriodicBadgeRule.Threshold>> getCrossedThreshold(BigDecimal prev, BigDecimal now, PeriodicBadgeRule rule) {
+        List<PeriodicBadgeRule.Threshold> thresholds = new LinkedList<>();
+        for (PeriodicBadgeRule.Threshold threshold : rule.getThresholds()) {
             if (isThresholdCrossedUp(prev, now, threshold.getValue())) {
                 thresholds.add(threshold);
             } else if (isThresholdCrossedDown(prev, now, threshold.getValue())) {
@@ -118,11 +118,11 @@ public class BadgeTemporalProcessor extends BadgeProcessor<BadgeTemporalRule> {
         return thresholds.isEmpty() ? Optional.empty() : Optional.of(thresholds);
     }
 
-    private BigDecimal resolveValueOfEvent(Event event, BadgeTemporalRule rule, ExecutionContext context) {
+    private BigDecimal resolveValueOfEvent(Event event, PeriodicBadgeRule rule, ExecutionContext context) {
         return rule.getValueResolver().resolve(event, context).setScale(SCALE, RoundingMode.HALF_UP);
     }
 
-    private boolean isCriteriaSatisfied(Event event, BadgeTemporalRule rule, ExecutionContext context) {
+    private boolean isCriteriaSatisfied(Event event, PeriodicBadgeRule rule, ExecutionContext context) {
         return rule.getCriteria() == null || rule.getCriteria().matches(event, rule, context);
     }
 }

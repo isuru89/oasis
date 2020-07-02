@@ -21,16 +21,13 @@ package io.github.oasis.engine.actors;
 
 import akka.actor.AbstractActor;
 import io.github.oasis.core.Event;
-import io.github.oasis.engine.EngineContext;
-import io.github.oasis.engine.actors.cmds.EventMessage;
-import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.engine.actors.cmds.RuleRemovedMessage;
-import io.github.oasis.engine.actors.cmds.RuleUpdatedMessage;
-import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.engine.EngineContext;
+import io.github.oasis.engine.actors.cmds.EventMessage;
+import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
+import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.ext.RulesImpl;
 import io.github.oasis.engine.factory.Processors;
 import io.github.oasis.engine.model.RuleExecutionContext;
@@ -79,13 +76,7 @@ public class RuleExecutor extends OasisBaseActor {
 
     private void ruleModified(OasisRuleMessage message) {
         RulesImpl.GameRules rules = getGameRuleRef(message.getGameId());
-        if (message instanceof RuleAddedMessage) {
-            rules.addRule(((RuleAddedMessage) message).getRule());
-        } else if (message instanceof RuleRemovedMessage) {
-            rules.removeRule(((RuleRemovedMessage) message).getRuleId());
-        } else if (message instanceof RuleUpdatedMessage) {
-            rules.updateRule(((RuleUpdatedMessage) message).getRule());
-        }
+        message.applyTo(rules);
     }
 
     private void assignRules(StartRuleExecutionCommand command) {

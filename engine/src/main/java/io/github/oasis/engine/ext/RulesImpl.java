@@ -26,8 +26,8 @@ import io.github.oasis.core.elements.AbstractRule;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 /**
  * Allows accessing rules by actors.
@@ -62,8 +62,22 @@ public final class RulesImpl implements Extension {
             ruleMap.remove(ruleId);
         }
 
+        public void activateRule(String ruleId) {
+            AbstractRule rule = ruleMap.get(ruleId);
+            if (Objects.nonNull(rule)) {
+                rule.setActive(true);
+            }
+        }
+
+        public void deactivateRule(String ruleId) {
+            AbstractRule rule = ruleMap.get(ruleId);
+            if (Objects.nonNull(rule)) {
+                rule.setActive(false);
+            }
+        }
+
         public Iterator<AbstractRule> getAllRulesForEvent(Event event) {
-            return ruleMap.values().iterator();
+            return ruleMap.values().stream().filter(AbstractRule::isActive).iterator();
         }
     }
 }
