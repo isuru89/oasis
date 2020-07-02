@@ -17,18 +17,33 @@
  * under the License.
  */
 
-package io.github.oasis.core.elements;
+package io.github.oasis.core.elements.matchers;
 
-import java.io.Serializable;
+
+import io.github.oasis.core.elements.TimeRangeMatcher;
 
 /**
- * Base interface for matching events for rules.
+ * Compares timestamp for absolute time ranges. Start time
+ * inclusive, while end time is exclusive. Timezone is neglected.
  *
  * @author Isuru Weerarathna
  */
-@FunctionalInterface
-public interface EventTypeMatcher extends Serializable {
+public class AbsoluteTimeMatcher implements TimeRangeMatcher {
 
-    boolean matches(String eventType);
+    private final long startTime;
+    private final long endTime;
 
+    private AbsoluteTimeMatcher(long startTime, long endTime) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
+    public static AbsoluteTimeMatcher create(long start, long end) {
+        return new AbsoluteTimeMatcher(start, end);
+    }
+
+    @Override
+    public boolean isBetween(long timeMs, String timeZone) {
+        return timeMs >= startTime && timeMs < endTime;
+    }
 }

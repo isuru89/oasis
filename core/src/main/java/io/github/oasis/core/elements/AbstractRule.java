@@ -19,8 +19,12 @@
 
 package io.github.oasis.core.elements;
 
+import io.github.oasis.core.Event;
+import io.github.oasis.core.context.ExecutionContext;
+
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -33,6 +37,7 @@ public abstract class AbstractRule implements Serializable {
     private String description;
     private Set<String> flags = new HashSet<>();
     private EventTypeMatcher eventTypeMatcher;
+    private TimeRangeMatcher timeRangeMatcher;
     private EventExecutionFilter condition;
     private boolean active = true;
 
@@ -94,6 +99,21 @@ public abstract class AbstractRule implements Serializable {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public void setTimeRangeMatcher(TimeRangeMatcher timeRangeMatcher) {
+        this.timeRangeMatcher = timeRangeMatcher;
+    }
+
+    public boolean isEventFalls(Event event, ExecutionContext executionContext) {
+        // TODO: replace with IANA timezone name
+        return Objects.isNull(timeRangeMatcher) ||
+                timeRangeMatcher.isBetween(event.getTimestamp(), "UTC");
+    }
+
+    public boolean isConditionMatches(Event event, ExecutionContext executionContext) {
+        return Objects.isNull(condition) ||
+                condition.matches(event, this, executionContext);
     }
 
     @Override

@@ -17,18 +17,20 @@
  * under the License.
  */
 
-package io.github.oasis.core.elements;
-
-import java.io.Serializable;
+package io.github.oasis.core.exception;
 
 /**
- * Base interface for matching events for rules.
+ * Base class for every runtime exceptions throws from Oasis.
  *
  * @author Isuru Weerarathna
  */
-@FunctionalInterface
-public interface EventTypeMatcher extends Serializable {
+public class OasisRuntimeException extends RuntimeException {
 
-    boolean matches(String eventType);
+    public OasisRuntimeException(String message) {
+        super(message);
+    }
 
+    public OasisRuntimeException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
