@@ -34,6 +34,7 @@ public abstract class AbstractRule implements Serializable {
     private Set<String> flags = new HashSet<>();
     private EventTypeMatcher eventTypeMatcher;
     private EventExecutionFilter condition;
+    private boolean active = true;
 
     public AbstractRule(String id) {
         this.id = id;
@@ -85,6 +86,14 @@ public abstract class AbstractRule implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @Override

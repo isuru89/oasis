@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -19,40 +19,43 @@
 
 package io.github.oasis.engine.actors.cmds;
 
-import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.engine.ext.RulesImpl;
 
 /**
+ * Sends this message when a rule needs to deactivate temporarily (manually).
+ * If the existing rule is already inactive, this message
+ * will not have an effect.
+ *
  * @author Isuru Weerarathna
  */
-public class RuleUpdatedMessage extends OasisRuleMessage {
+public class RuleDeactivatedMessage extends OasisRuleMessage {
 
-    private AbstractRule rule;
+    private final String ruleId;
 
-    public RuleUpdatedMessage(AbstractRule rule) {
-        this.rule = rule;
+    public RuleDeactivatedMessage(String ruleId) {
+        this.ruleId = ruleId;
     }
 
-    public AbstractRule getRule() {
-        return rule;
+    public String getRuleId() {
+        return ruleId;
     }
 
-    public static RuleUpdatedMessage create(int gameId, AbstractRule rule) {
-        RuleUpdatedMessage message = new RuleUpdatedMessage(rule);
+    public static RuleDeactivatedMessage create(int gameId, String ruleId) {
+        RuleDeactivatedMessage message = new RuleDeactivatedMessage(ruleId);
         message.setGameId(gameId);
         return message;
     }
 
     @Override
     public void applyTo(RulesImpl.GameRules gameRules) {
-        gameRules.updateRule(rule);
+        gameRules.deactivateRule(ruleId);
     }
 
     @Override
     public String toString() {
-        return "RuleUpdate{" +
+        return "RuleDeactivated{" +
                 "game=" + getGameId() + ", " +
-                "rule=" + rule +
+                "rule=" + ruleId +
                 '}';
     }
 }

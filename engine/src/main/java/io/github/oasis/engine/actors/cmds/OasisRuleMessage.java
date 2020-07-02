@@ -20,6 +20,7 @@
 package io.github.oasis.engine.actors.cmds;
 
 import io.github.oasis.core.external.messages.OasisCommand;
+import io.github.oasis.engine.ext.RulesImpl;
 
 /**
  * @author Isuru Weerarathna
@@ -35,4 +36,6 @@ public abstract class OasisRuleMessage implements OasisCommand {
     public void setGameId(int gameId) {
         this.gameId = gameId;
     }
+
+    public abstract void applyTo(RulesImpl.GameRules gameRules);
 }
