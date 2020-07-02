@@ -1,0 +1,60 @@
+version: 1
+
+points:
+  - name: New-Registration
+    description: Awards points for user's registration to loyality program
+    event: user.registered
+    award: 100
+
+  - name: Customer-Referral
+    description: Customer will get points for referrals of another user
+    event: user.referred
+    award: 50
+
+  - name: Customer-Subscription
+    description: Customer will get points for subscribing to newsletter
+    event: user.subscription
+    award: 20
+
+  - name: General-Spending-Rule
+    description: Customer could receive points for order value
+    event: order.accepted
+    award: "e.total"
+
+  - name: Big-Purchase-Bonus
+    description: Customer receives bonus points for passing purchase limit
+    event: order.accepted
+    award: """
+        if (e.total >= 500) {
+          return (e.total - 500) * 10;
+        } else if (e.total >= 100) {
+          return (e.total - 100) * 3;
+        } else if (e.total >= 50) {
+          return (e.total - 50) * 2;
+        }
+        return 0;
+      """
+
+  - name: Multiply-Earned-Points
+    description: Customer could receive multiple points for product with specified SKU
+    event: order.accepted
+    award: """
+        foreach (item : e.items) {
+          if (item.sku == 'ITEM0001') {
+            return item.price * 2;
+          }
+        }
+        return 0;
+      """
+
+  - name: Multiply-By-Product-Labels
+    description: Customer could receive multiple points for product with specified labels
+    event: order.accepted
+    award: """
+        foreach (item : e.items) {
+          if (item.label == 'special') {
+            return item.price * 2;
+          }
+        }
+        return 0;
+      """
