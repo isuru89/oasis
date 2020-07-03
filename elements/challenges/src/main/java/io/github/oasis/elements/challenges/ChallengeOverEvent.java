@@ -98,4 +98,9 @@ public final class ChallengeOverEvent implements Event {
     public Integer getGameId() {
         return gameId;
     }
+
+    @Override
+    public String getTimeZone() {
+        return null;
+    }
 }

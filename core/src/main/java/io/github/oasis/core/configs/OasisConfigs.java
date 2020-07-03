@@ -24,16 +24,11 @@ import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-
-import static io.github.oasis.core.utils.Numbers.asInt;
 
 /**
  * @author Isuru Weerarathna
@@ -47,10 +42,14 @@ public class OasisConfigs implements Serializable {
     public static final String SIGNAL_EXECUTOR_COUNT = "oasis.executors.signal";
     public static final String EVENT_STREAM_IMPL = "oasis.eventstream.impl";
     public static final String OASIS_ENGINE_NAME = "oasis.name";
+    public static final String OASIS_ENGINE_TIMEZONE = "oasis.timeZone";
 
     private static final String DEFAULT_ENGINE_NAME = "oasis-engine";
 
     private final Config props;
+
+    private final ZoneId engineZoneId = ZoneId.systemDefault();
+    private int tzOffset = Integer.MAX_VALUE;
 
     private OasisConfigs(Config configs) {
         props = configs;
@@ -69,6 +68,21 @@ public class OasisConfigs implements Serializable {
     public static OasisConfigs defaultConfigs() {
         Config config = ConfigFactory.load();
         return new OasisConfigs(config);
+    }
+
+    public String getEngineTimezone() {
+        String zoneId = get(OASIS_ENGINE_TIMEZONE, engineZoneId.getId());
+        if (tzOffset == Integer.MAX_VALUE) {
+            tzOffset = ZoneId.of(zoneId).getRules().getOffset(Instant.now()).getTotalSeconds();
+        }
+        return zoneId;
+    }
+
+    public int getEngineTimeOffset() {
+        if (tzOffset == Integer.MAX_VALUE) {
+            getEngineTimezone();
+        }
+        return tzOffset;
     }
 
     public String getEngineName() {

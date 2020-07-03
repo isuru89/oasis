@@ -32,6 +32,7 @@ public interface Event extends Serializable {
     String TEAM_ID = "teamId";
     String SOURCE_ID = "sourceId";
     String GAME_ID = "gameId";
+    String TIMEZONE = "tz";
 
     Map<String, Object> getAllFieldValues();
 
@@ -108,6 +109,13 @@ public interface Event extends Serializable {
      * @return game id.
      */
     Integer getGameId();
+
+    /**
+     * Returns the timezone of this event belongs to.
+     *
+     * @return timezone string (as in IANA)
+     */
+    String getTimeZone();
 
     /**
      * Creates scope of this event using game id, source id and user id.

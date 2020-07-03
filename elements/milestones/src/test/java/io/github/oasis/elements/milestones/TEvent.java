@@ -121,6 +121,11 @@ public class TEvent implements Event {
     }
 
     @Override
+    public String getTimeZone() {
+        return (String) values.get(Event.TIMEZONE);
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hashCode(getExternalId());
     }

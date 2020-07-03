@@ -98,6 +98,11 @@ public class EventProxy implements Event {
         return ref.getInteger(Event.GAME_ID);
     }
 
+    @Override
+    public String getTimeZone() {
+        return ref.getString(Event.TIMEZONE);
+    }
+
     public String getUserEmail() {
         return getUserName();
     }

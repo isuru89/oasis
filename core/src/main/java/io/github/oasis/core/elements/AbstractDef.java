@@ -154,6 +154,15 @@ public abstract class AbstractDef implements Serializable {
         private Object from;
         private Object to;
 
+        public TimeRangeDef() {
+        }
+
+        public TimeRangeDef(String type, Object from, Object to) {
+            this.type = type;
+            this.from = from;
+            this.to = to;
+        }
+
         public String getType() {
             return type;
         }

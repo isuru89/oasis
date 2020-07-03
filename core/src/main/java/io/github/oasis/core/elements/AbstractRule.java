@@ -106,9 +106,8 @@ public abstract class AbstractRule implements Serializable {
     }
 
     public boolean isEventFalls(Event event, ExecutionContext executionContext) {
-        // TODO: replace with IANA timezone name
         return Objects.isNull(timeRangeMatcher) ||
-                timeRangeMatcher.isBetween(event.getTimestamp(), "UTC");
+                timeRangeMatcher.isBetween(event.getTimestamp(), event.getTimeZone());
     }
 
     public boolean isConditionMatches(Event event, ExecutionContext executionContext) {
