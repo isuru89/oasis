@@ -36,7 +36,7 @@ import static io.github.oasis.core.VariableNames.CONTEXT_VAR;
 public class PointParser extends AbstractElementParser {
 
     @Override
-    public AbstractDef parse(PersistedDef persistedObj) {
+    public PointDef parse(PersistedDef persistedObj) {
         return loadFrom(persistedObj, PointDef.class);
     }
 

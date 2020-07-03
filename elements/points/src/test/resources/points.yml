@@ -1,0 +1,43 @@
+version: 1
+
+points:
+  - name: Answer-Accepted
+    description: Awards 15 reputations when an answer has been accepted
+    event: stackoverflow.answer.accepted
+    award: 15
+
+  - name: Night-time-bonus
+    description: Awards +20 bonus for night time submission from midnight to 6am in the morning.
+    event: submission.accepted
+    timeRanges:
+      - type: time
+        from: "00:00"
+        to: "06:00"
+    award: 20
+
+  - name: Special-Seasonal-Award
+    description: Awards double bonus points for every purchase done on december
+    event: order.accepted
+    timeRanges:
+      - type: seasonal
+        from: "12-01"
+        to: "12-31"
+    award: "e.total * 2"
+
+  - name: General-Spending-Rule
+    description: Customer could receive points for order value
+    event: order.accepted
+    award: "e.total"
+
+  - name: Big-Purchase-Bonus
+    description: Customer receives bonus points for passing purchase limit
+    event: order.accepted
+    award: |
+        if (e.total >= 500) {
+          return (e.total - 500) * 10;
+        } else if (e.total >= 100) {
+          return (e.total - 100) * 3;
+        } else if (e.total >= 50) {
+          return (e.total - 50) * 2;
+        }
+        return 0;

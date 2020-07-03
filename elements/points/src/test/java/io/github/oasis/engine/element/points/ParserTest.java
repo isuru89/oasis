@@ -19,30 +19,55 @@
 
 package io.github.oasis.engine.element.points;
 
+import io.github.oasis.core.external.messages.PersistedDef;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
  */
 public class ParserTest {
 
+    private PointParser pointParser = new PointParser();
+
+    private Map<String, Object> loadGroupFile(String resourcePath) {
+        try (InputStream resourceAsStream = Thread.currentThread()
+                .getContextClassLoader().getResourceAsStream(resourcePath)) {
+            return new Yaml().load(resourceAsStream);
+        } catch (IOException e) {
+            Assertions.fail("Cannot load resource " + resourcePath);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private PersistedDef asPersistedDef(Map<String, Object> data) {
+        PersistedDef def = new PersistedDef();
+        def.setData(data);
+        def.setType(PersistedDef.GAME_RULE_ADDED);
+        def.setImpl(PointDef.class.getName());
+        return def;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<PointDef> parseAll(String resourcePath) {
+        Map<String, Object> map = loadGroupFile(resourcePath);
+        List<Map<String, Object>> items = (List<Map<String, Object>>) map.get("points");
+        return items.stream().map(this::asPersistedDef)
+                .map(def -> pointParser.parse(def))
+                .collect(Collectors.toList());
+    }
+
     @Test
     void testPointParser() {
-        Map<String, Object> data = Map.of(
-                "name", "Question-Ask-Reputation",
-                "description", "Awards 2 reputation when a question asked",
-                "event", "stackoverflow.question.asked",
-                "flags", List.of("a", "b", "c"),
-                "award", 2
-        );
-        Yaml yaml = new Yaml();
-
-        PointDef pointDef = yaml.loadAs(yaml.dump(data), PointDef.class);
-        System.out.println(pointDef);
+        List<PointDef> pointDefs = parseAll("points.yml");
+        System.out.println(pointDefs);
     }
 
 }
