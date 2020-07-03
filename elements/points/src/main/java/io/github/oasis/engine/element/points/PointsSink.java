@@ -19,13 +19,13 @@
 
 package io.github.oasis.engine.element.points;
 
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.utils.TimeOffset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ public class PointsSink extends AbstractSink {
             TimeOffset tcx = new TimeOffset(ts, context.getUserTimeOffset());
 
             // by rule wise
-            String pointId = signal.getRuleId();
+            String pointId = signal.getPointId();
             String rulePfx = RULE_PFX + pointId;
 
             // by team wise

@@ -30,7 +30,16 @@ import java.util.List;
  */
 public class PointDef extends AbstractDef {
 
+    private String pointId;
     private Object award;
+
+    public String getPointId() {
+        return pointId;
+    }
+
+    public void setPointId(String pointId) {
+        this.pointId = pointId;
+    }
 
     public Object getAward() {
         return award;

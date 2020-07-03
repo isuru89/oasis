@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.element.points;
 
+import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.external.messages.PersistedDef;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,14 +29,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
  */
 public class ParserTest {
 
-    private PointParser pointParser = new PointParser();
+    private final PointParser pointParser = new PointParser();
 
     private Map<String, Object> loadGroupFile(String resourcePath) {
         try (InputStream resourceAsStream = Thread.currentThread()
@@ -64,10 +69,57 @@ public class ParserTest {
                 .collect(Collectors.toList());
     }
 
+    private Optional<PointDef> findByName(List<PointDef> pointDefs, String name) {
+        return pointDefs.stream()
+                .filter(p -> name.equals(p.getName()))
+                .findFirst();
+    }
+
+    private boolean isNumber(Object value) {
+        return value instanceof Number;
+    }
+
+    private boolean isNonEmptyString(Object value) {
+        return value instanceof String && !((String) value).isBlank();
+    }
+
     @Test
     void testPointParser() {
         List<PointDef> pointDefs = parseAll("points.yml");
-        System.out.println(pointDefs);
+        findByName(pointDefs, "Answer-Accepted").ifPresent(answerAccepted -> {
+            assertTrue(isNonEmptyString(answerAccepted.getDescription()));
+            assertTrue(isNumber(answerAccepted.getAward()));
+            assertTrue(isNonEmptyString(answerAccepted.getEvent()));
+        });
+        findByName(pointDefs, "Night-time-bonus").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNumber(def.getAward()));
+            assertEquals(1, def.getTimeRanges().size());
+            AbstractDef.TimeRangeDef timeRangeDef = def.getTimeRanges().get(0);
+            assertEquals(AbstractDef.TIME_RANGE_TYPE_TIME, timeRangeDef.getType());
+            assertEquals("00:00", timeRangeDef.getFrom());
+            assertEquals("06:00", timeRangeDef.getTo());
+        });
+        findByName(pointDefs, "Special-Seasonal-Award").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNonEmptyString(def.getAward()));
+            assertEquals(1, def.getTimeRanges().size());
+            AbstractDef.TimeRangeDef timeRangeDef = def.getTimeRanges().get(0);
+            assertEquals(AbstractDef.TIME_RANGE_TYPE_SEASONAL, timeRangeDef.getType());
+            assertEquals("12-01", timeRangeDef.getFrom());
+            assertEquals("12-31", timeRangeDef.getTo());
+        });
+        findByName(pointDefs, "General-Spending-Rule").ifPresent(answerAccepted -> {
+            assertTrue(isNonEmptyString(answerAccepted.getDescription()));
+            assertTrue(isNonEmptyString(answerAccepted.getAward()));
+            assertTrue(isNonEmptyString(answerAccepted.getEvent()));
+        });
+        findByName(pointDefs, "Big-Purchase-Bonus").ifPresent(answerAccepted -> {
+            assertTrue(isNonEmptyString(answerAccepted.getDescription()));
+            assertTrue(isNonEmptyString(answerAccepted.getAward()));
+            assertTrue(isNonEmptyString(answerAccepted.getEvent()));
+            assertTrue(answerAccepted.getAward().toString().contains("\n"));
+        });
     }
 
 }

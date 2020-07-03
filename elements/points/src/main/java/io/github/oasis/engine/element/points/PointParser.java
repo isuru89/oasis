@@ -19,12 +19,9 @@
 
 package io.github.oasis.engine.element.points;
 
-import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.elements.AbstractElementParser;
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.EventExecutionFilterFactory;
-import io.github.oasis.core.elements.Scripting;
+import io.github.oasis.core.elements.*;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.utils.Utils;
 
 import java.math.BigDecimal;
 
@@ -52,6 +49,7 @@ public class PointParser extends AbstractElementParser {
         String id = def.generateUniqueHash();
         PointRule rule = new PointRule(id);
         AbstractDef.defToRule(def, rule);
+        rule.setPointId(Utils.firstNonNullAsStr(def.getPointId(), def.getName()));
         rule.setCriteria(EventExecutionFilterFactory.ALWAYS_TRUE);
         Object award = def.getAward();
         if (award instanceof Number) {

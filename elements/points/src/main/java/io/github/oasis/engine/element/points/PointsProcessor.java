@@ -20,11 +20,11 @@
 package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.elements.RuleContext;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -52,9 +52,9 @@ public class PointsProcessor extends AbstractProcessor<PointRule, PointSignal> {
     public List<PointSignal> process(Event event, PointRule rule, ExecutionContext context, DbContext db) {
         if (rule.isAwardBasedOnEvent()) {
             BigDecimal score = rule.getAmountExpression().resolve(event, context);
-            return Collections.singletonList(new PointSignal(rule.getId(), score, event));
+            return Collections.singletonList(new PointSignal(rule.getId(), rule.getPointId(), score, event));
         } else {
-            return Collections.singletonList(new PointSignal(rule.getId(), rule.getAmountToAward(), event));
+            return Collections.singletonList(new PointSignal(rule.getId(), rule.getPointId(), rule.getAmountToAward(), event));
         }
     }
 

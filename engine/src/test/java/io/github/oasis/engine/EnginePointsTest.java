@@ -70,7 +70,7 @@ public class EnginePointsTest extends OasisEngineTest {
         awaitTerminated();
 
         // total = 33 + 24 + 48 = 105
-        String rid = rule.getId();
+        String rid = rule.getPointId();
         long tid = e1.getTeam();
         RedisAssert.assertMap(dbPool,
                 ID.getGameUserPointsSummary(TEvent.GAME_ID, U1),
@@ -246,7 +246,7 @@ public class EnginePointsTest extends OasisEngineTest {
         awaitTerminated();
 
         // 11 + 1 + 24
-        String rid = rule.getId();
+        String rid = rule.getPointId();
         long tid = e1.getTeam();
         RedisAssert.assertMap(dbPool,
                 ID.getGameUserPointsSummary(TEvent.GAME_ID, U1),

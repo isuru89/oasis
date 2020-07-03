@@ -34,9 +34,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Set;
 
-import static io.github.oasis.engine.RedisAssert.assertKeyNotExist;
-import static io.github.oasis.engine.RedisAssert.assertSorted;
-import static io.github.oasis.engine.RedisAssert.ofSortedEntries;
+import static io.github.oasis.engine.RedisAssert.*;
 
 /**
  * @author Isuru Weerarathna
@@ -99,12 +97,12 @@ public class EngineChallengesTest extends OasisEngineTest {
                         "all:W202012", score,
                         "all:Y2020", score,
                         "all", score,
-                        "rule:test.challenge.rule:D20200321", score,
-                        "rule:test.challenge.rule:M202003", score,
-                        "rule:test.challenge.rule:Q202001", score,
-                        "rule:test.challenge.rule:W202012", score,
-                        "rule:test.challenge.rule:Y2020", score,
-                        "rule:test.challenge.rule", score,
+                        "rule:challenge.points:D20200321", score,
+                        "rule:challenge.points:M202003", score,
+                        "rule:challenge.points:Q202001", score,
+                        "rule:challenge.points:W202012", score,
+                        "rule:challenge.points:Y2020", score,
+                        "rule:challenge.points", score,
                         "source:1", score,
                         "team:1:D20200321", score,
                         "team:1:M202003", score,
@@ -121,12 +119,12 @@ public class EngineChallengesTest extends OasisEngineTest {
                         "all:W202012", score,
                         "all:Y2020", score,
                         "all", score,
-                        "rule:test.challenge.rule:D20200322", score,
-                        "rule:test.challenge.rule:M202003", score,
-                        "rule:test.challenge.rule:Q202001", score,
-                        "rule:test.challenge.rule:W202012", score,
-                        "rule:test.challenge.rule:Y2020", score,
-                        "rule:test.challenge.rule", score,
+                        "rule:challenge.points:D20200322", score,
+                        "rule:challenge.points:M202003", score,
+                        "rule:challenge.points:Q202001", score,
+                        "rule:challenge.points:W202012", score,
+                        "rule:challenge.points:Y2020", score,
+                        "rule:challenge.points", score,
                         "source:1", score,
                         "team:1:D20200322", score,
                         "team:1:M202003", score,
@@ -143,12 +141,12 @@ public class EngineChallengesTest extends OasisEngineTest {
                         "all:W202014", score,
                         "all:Y2020", score,
                         "all", score,
-                        "rule:test.challenge.rule:D20200401", score,
-                        "rule:test.challenge.rule:M202004", score,
-                        "rule:test.challenge.rule:Q202002", score,
-                        "rule:test.challenge.rule:W202014", score,
-                        "rule:test.challenge.rule:Y2020", score,
-                        "rule:test.challenge.rule", score,
+                        "rule:challenge.points:D20200401", score,
+                        "rule:challenge.points:M202004", score,
+                        "rule:challenge.points:Q202002", score,
+                        "rule:challenge.points:W202014", score,
+                        "rule:challenge.points:Y2020", score,
+                        "rule:challenge.points", score,
                         "source:1", score,
                         "team:1:D20200401", score,
                         "team:1:M202004", score,
