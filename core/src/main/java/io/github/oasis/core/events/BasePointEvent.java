@@ -107,4 +107,9 @@ public abstract class BasePointEvent implements Event {
     public String getUserName() {
         return eventRef.getUserName();
     }
+
+    @Override
+    public String getTimeZone() {
+        return eventRef.getTimeZone();
+    }
 }

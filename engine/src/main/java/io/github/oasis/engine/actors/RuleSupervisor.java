@@ -23,15 +23,15 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.routing.Routee;
 import akka.routing.Router;
-import io.github.oasis.engine.EngineContext;
 import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.actors.routers.UserRouting;
 import io.github.oasis.engine.model.ActorSignalCollector;
-import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.engine.model.RuleExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +54,8 @@ public class RuleSupervisor extends OasisBaseActor {
     private ActorSignalCollector collector;
     private RuleExecutionContext ruleExecutionContext;
     private Router executor;
+    private final String engineTimezone;
+    private final int engineTzOffset;
 
     public RuleSupervisor(EngineContext context) {
         super(context);
@@ -63,6 +65,9 @@ public class RuleSupervisor extends OasisBaseActor {
         signalExchanger = createSignalExchanger();
         collector = new ActorSignalCollector(signalExchanger);
         ruleExecutionContext = RuleExecutionContext.from(collector);
+
+        engineTimezone = context.getConfigs().getEngineTimezone();
+        engineTzOffset = context.getConfigs().getEngineTimeOffset();
     }
 
     @Override
@@ -121,7 +126,7 @@ public class RuleSupervisor extends OasisBaseActor {
 
     private void processEvent(GameEventMessage eventMessage) {
         executor.route(new EventMessage(eventMessage.getEvent(),
-                ExecutionContext.from(eventMessage.getGameContext()).withUserTz(0).build()),
+                ExecutionContext.from(eventMessage.getGameContext()).withUserTz(engineTzOffset, engineTimezone).build()),
                 getSelf());
     }
 

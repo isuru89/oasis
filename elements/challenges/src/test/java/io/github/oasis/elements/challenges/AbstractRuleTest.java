@@ -52,7 +52,7 @@ import java.util.function.Consumer;
  */
 public abstract class AbstractRuleTest {
 
-    protected ExecutionContext defaultContext = ExecutionContext.withUserTz(0);
+    protected ExecutionContext defaultContext = ExecutionContext.withUserTz(0, "UTC");
 
     protected static Db pool;
     protected static EventReadWrite eventReadWrite;

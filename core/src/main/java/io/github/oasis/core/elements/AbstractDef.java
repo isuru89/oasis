@@ -20,7 +20,7 @@
 package io.github.oasis.core.elements;
 
 import io.github.oasis.core.elements.matchers.EventTypeMatcherFactory;
-import io.github.oasis.core.exception.InvalidGameElementException;
+import io.github.oasis.core.elements.matchers.TimeRangeMatcherFactory;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Utils;
 
@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -37,6 +36,9 @@ import java.util.stream.Collectors;
 public abstract class AbstractDef implements Serializable {
 
     protected static final String EMPTY = "";
+
+    public static final String TIME_RANGE_TYPE_SEASONAL = "seasonal";
+    public static final String TIME_RANGE_TYPE_TIME = "time";
 
     private int id;
     private String name;
@@ -48,12 +50,15 @@ public abstract class AbstractDef implements Serializable {
     private Set<String> flags;
     private Object condition;
 
+    private List<TimeRangeDef> timeRanges;
+
     public static AbstractRule defToRule(AbstractDef def, AbstractRule source) {
         source.setName(def.getName());
         source.setDescription(def.getDescription());
         source.setFlags(Objects.isNull(def.flags) ? Set.of() : Set.copyOf(def.getFlags()));
         source.setEventTypeMatcher(def.deriveEventMatcher());
         source.setCondition(EventExecutionFilterFactory.create(def.condition));
+        source.setTimeRangeMatcher(TimeRangeMatcherFactory.create(def.timeRanges));
         return source;
     }
 
@@ -134,5 +139,52 @@ public abstract class AbstractDef implements Serializable {
 
     public void setEvents(Object events) {
         this.events = events;
+    }
+
+    public List<TimeRangeDef> getTimeRanges() {
+        return timeRanges;
+    }
+
+    public void setTimeRanges(List<TimeRangeDef> timeRanges) {
+        this.timeRanges = timeRanges;
+    }
+
+    public static class TimeRangeDef {
+        private String type;
+        private Object from;
+        private Object to;
+
+        public TimeRangeDef() {
+        }
+
+        public TimeRangeDef(String type, Object from, Object to) {
+            this.type = type;
+            this.from = from;
+            this.to = to;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public Object getFrom() {
+            return from;
+        }
+
+        public void setFrom(Object from) {
+            this.from = from;
+        }
+
+        public Object getTo() {
+            return to;
+        }
+
+        public void setTo(Object to) {
+            this.to = to;
+        }
     }
 }

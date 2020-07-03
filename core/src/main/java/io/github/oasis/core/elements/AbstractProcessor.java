@@ -21,6 +21,7 @@ package io.github.oasis.core.elements;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.EventReadWrite;
@@ -51,7 +52,7 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
     }
 
     public boolean isDenied(Event event, ExecutionContext context) {
-        return !isMatchEvent(event, rule) || unableToProcess(event, rule, context);
+        return !isMatchEvent(event, rule) || canSkip(event, rule, context);
     }
 
     @Override
@@ -70,7 +71,7 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
             }
             afterEmitAll(signals, event, rule, context, db);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new OasisRuntimeException("Error processing event #" + event.getExternalId() + "!", e);
         }
     }
 
@@ -122,12 +123,18 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
         return rule.getEventTypeMatcher().matches(event.getEventType());
     }
 
-    private boolean unableToProcess(Event event, AbstractRule rule, ExecutionContext context) {
-        EventExecutionFilter condition = rule.getCondition();
-        if (condition == null) {
-            return false;
-        }
-        return !condition.matches(event, rule, context);
+    /**
+     * Returns true if this event skippable. A skipped event will not be executed
+     * under the provided rule again ever.
+     *
+     * @param event event object.
+     * @param rule rule reference.
+     * @param context context instance.
+     * @return true if this event can be skipped.
+     */
+    private boolean canSkip(Event event, AbstractRule rule, ExecutionContext context) {
+        return !rule.isEventFalls(event, context)
+                || !rule.isConditionMatches(event, context);
     }
 
 }

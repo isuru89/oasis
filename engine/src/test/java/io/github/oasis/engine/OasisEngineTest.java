@@ -20,19 +20,17 @@
 package io.github.oasis.engine;
 
 import akka.actor.ActorRef;
-import io.github.oasis.engine.EngineContext;
 import io.github.oasis.core.configs.OasisConfigs;
-import io.github.oasis.engine.OasisEngine;
 import io.github.oasis.core.exception.OasisException;
-import io.github.oasis.elements.badges.BadgesModuleFactory;
-import io.github.oasis.elements.challenges.ChallengesModuleFactory;
-import io.github.oasis.elements.milestones.MilestonesModuleFactory;
-import io.github.oasis.engine.element.points.PointsModuleFactory;
-import io.github.oasis.elements.ratings.RatingsModuleFactory;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.db.redis.RedisEventLoader;
+import io.github.oasis.elements.badges.BadgesModuleFactory;
+import io.github.oasis.elements.challenges.ChallengesModuleFactory;
+import io.github.oasis.elements.milestones.MilestonesModuleFactory;
+import io.github.oasis.elements.ratings.RatingsModuleFactory;
+import io.github.oasis.engine.element.points.PointsModuleFactory;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,6 +101,10 @@ public class OasisEngineTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    protected long TSZ(String timeStr, String tz) {
+        return LocalDateTime.parse(timeStr, FORMATTER).atZone(ZoneId.of(tz)).toInstant().toEpochMilli();
     }
 
     protected long TS(String timeStr) {

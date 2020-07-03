@@ -24,14 +24,7 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.external.messages.PersistedDef;
-import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
-import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
-import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
-import io.github.oasis.elements.badges.rules.PeriodicOccurrencesRule;
-import io.github.oasis.elements.badges.rules.PeriodicOccurrencesStreakNRule;
-import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
-import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
-import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
+import io.github.oasis.elements.badges.rules.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -154,7 +147,7 @@ class BadgeParserTest {
         BadgeDef def = createBase();
         def.setKind(BadgeDef.TIME_BOUNDED_STREAK_KIND);
         def.setConsecutive(true);
-        def.setTimeUnit("84000");
+        def.setTimeUnit("daily");
         def.setCondition("e.data.value > 100");
         def.setStreaks(List.of(
                 new BadgeDef.Streak(3, 1),
@@ -167,7 +160,7 @@ class BadgeParserTest {
         Assertions.assertTrue(abstractRule instanceof TimeBoundedStreakNRule);
 
         TimeBoundedStreakNRule rule = (TimeBoundedStreakNRule) abstractRule;
-        Assertions.assertEquals(84000, rule.getTimeUnit());
+        Assertions.assertEquals(86400000, rule.getTimeUnit());
         Assertions.assertEquals(10, rule.getMaxStreak());
         Assertions.assertEquals(3, rule.getMinStreak());
         Assertions.assertEquals(2, rule.getAttributeForStreak(5));

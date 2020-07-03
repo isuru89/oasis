@@ -17,18 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.core.elements;
+package io.github.oasis.core.elements.matchers;
 
-import java.io.Serializable;
+
+import io.github.oasis.core.elements.TimeRangeMatcher;
+
+import java.util.List;
 
 /**
- * Base interface for matching events for rules.
+ * Compares timestamp for two time ranges within every day.
+ * No date (dd/mm) is considered. Only time portion.
  *
  * @author Isuru Weerarathna
  */
-@FunctionalInterface
-public interface EventTypeMatcher extends Serializable {
+public class AnyOfTimeRangeMatcher implements TimeRangeMatcher {
 
-    boolean matches(String eventType);
+    private final List<TimeRangeMatcher> matcherList;
 
+    public AnyOfTimeRangeMatcher(List<TimeRangeMatcher> matcherList) {
+        this.matcherList = matcherList;
+    }
+
+    @Override
+    public boolean isBetween(long timeMs, String timeZone) {
+        return matcherList.stream()
+                .anyMatch(mat -> mat.isBetween(timeMs, timeZone));
+    }
 }

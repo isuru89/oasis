@@ -27,6 +27,7 @@ import java.io.Serializable;
 public class ExecutionContext implements Serializable {
 
     private int userTimeOffset;
+    private String userTimeZone;
     private GameContext gameContext;
 
     public GameContext getGameContext() {
@@ -37,9 +38,14 @@ public class ExecutionContext implements Serializable {
         return userTimeOffset;
     }
 
-    public static ExecutionContext withUserTz(int offSet) {
+    public String getUserTimeZone() {
+        return userTimeZone;
+    }
+
+    public static ExecutionContext withUserTz(int offSet, String timeZone) {
         ExecutionContext context = new ExecutionContext();
         context.userTimeOffset = offSet;
+        context.userTimeZone = timeZone;
         return context;
     }
 
@@ -59,8 +65,9 @@ public class ExecutionContext implements Serializable {
             return this;
         }
 
-        public Builder withUserTz(int offSetInSeconds) {
+        public Builder withUserTz(int offSetInSeconds, String timeZone) {
             context.userTimeOffset = offSetInSeconds;
+            context.userTimeZone = timeZone;
             return this;
         }
     }

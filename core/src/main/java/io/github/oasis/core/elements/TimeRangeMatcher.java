@@ -19,16 +19,18 @@
 
 package io.github.oasis.core.elements;
 
-import java.io.Serializable;
-
 /**
- * Base interface for matching events for rules.
- *
  * @author Isuru Weerarathna
  */
 @FunctionalInterface
-public interface EventTypeMatcher extends Serializable {
+public interface TimeRangeMatcher {
 
-    boolean matches(String eventType);
+    /**
+     * Returns true if given time falls into any of ranges specified.
+     * @param timeMs epoch time in milliseconds
+     * @param timeZone timezone to check range for.
+     * @return whether time falls to the range or not.
+     */
+    boolean isBetween(long timeMs, String timeZone);
 
 }

@@ -34,6 +34,7 @@ public class EventJson implements Event {
     private long teamId;
     private int gameId;
     private int sourceId;
+    private String tz;
 
     private Map<String, Object> ref;
 
@@ -49,6 +50,7 @@ public class EventJson implements Event {
         this.teamId = ((Number)ref.get(Event.TEAM_ID)).longValue();
         this.sourceId = ((Number)ref.get(Event.SOURCE_ID)).intValue();
         this.gameId = ((Number)ref.get(Event.GAME_ID)).intValue();
+        this.tz = (String) ref.get((Event.TIMEZONE));
         this.ref = ref;
     }
 
@@ -105,6 +107,11 @@ public class EventJson implements Event {
     @Override
     public Integer getGameId() {
         return gameId;
+    }
+
+    @Override
+    public String getTimeZone() {
+        return tz;
     }
 
     @Override

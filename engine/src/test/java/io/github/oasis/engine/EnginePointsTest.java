@@ -21,7 +21,9 @@ package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
+import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
+import io.github.oasis.core.elements.matchers.TimeRangeMatcherFactory;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.element.points.PointRule;
@@ -29,6 +31,7 @@ import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static io.github.oasis.engine.RedisAssert.assertSorted;
 import static io.github.oasis.engine.RedisAssert.ofSortedEntries;
@@ -37,6 +40,10 @@ import static io.github.oasis.engine.RedisAssert.ofSortedEntries;
  * @author Isuru Weerarathna
  */
 public class EnginePointsTest extends OasisEngineTest {
+
+    private static final String U1_TZ = "America/Los_Angeles";
+    private static final String U2_TZ = "Asia/Colombo";
+    private static final String UTC = "UTC";
 
     private static final int U1 = 1;
     private static final int U2 = 2;
@@ -214,5 +221,81 @@ public class EnginePointsTest extends OasisEngineTest {
 
     }
 
+    @Test
+    public void testSeasonalPoints() {
+        Event e1 = TEvent.createKeyValueTz(U1, TSZ("2020-07-01 12:15", U1_TZ), EVT_A, 15, U1_TZ);
+        Event e2 = TEvent.createKeyValueTz(U1, TSZ("2020-07-02 08:45", U1_TZ), EVT_A, 74, U1_TZ);
+        Event e3 = TEvent.createKeyValueTz(U1, TSZ("2020-07-02 10:00", U1_TZ), EVT_A, 61, U1_TZ);
+        Event e4 = TEvent.createKeyValueTz(U1, TSZ("2020-07-02 13:00", U1_TZ), EVT_A, 51, U1_TZ);
+        Event e5 = TEvent.createKeyValueTz(U1, TSZ("2020-07-03 12:00", U1_TZ), EVT_A, 74, U1_TZ);
+        Event e6 = TEvent.createKeyValueTz(U2, TSZ("2020-07-02 11:45", UTC), EVT_A, 98, U2_TZ);
+        Event e7 = TEvent.createKeyValueTz(U2, TSZ("2020-07-02 06:20", UTC), EVT_A, 83, U2_TZ);
+        Event e8 = TEvent.createKeyValueTz(U2, TSZ("2020-07-02 14:20", UTC), EVT_A, 53, U2_TZ);
+
+        AbstractDef.TimeRangeDef rangeDef = new AbstractDef.TimeRangeDef(AbstractDef.TIME_RANGE_TYPE_TIME, "10:00", "13:00");
+        PointRule rule = new PointRule("test.point.rule");
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
+        rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long)event.getFieldValue("value") - 50));
+        rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
+        rule.setTimeRangeMatcher(TimeRangeMatcherFactory.create(List.of(rangeDef)));
+
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
+        awaitTerminated();
+
+        // 11 + 1 + 24
+        String rid = rule.getId();
+        long tid = e1.getTeam();
+        RedisAssert.assertMap(dbPool,
+                ID.getGameUserPointsSummary(TEvent.GAME_ID, U1),
+                RedisAssert.ofEntries("all", "36",
+                        "source:" + e1.getSource(), "36",
+                        "all:Y2020", "36",
+                        "all:Q202003", "36",
+                        "all:M202007", "36",
+                        "all:W202027", "36",
+                        "all:D20200702", "12",
+                        "all:D20200703", "24",
+                        "rule:" + rid, "36",
+                        "rule:"+rid+":Y2020", "36",
+                        "rule:"+rid+":Q202003", "36",
+                        "rule:"+rid+":M202007", "36",
+                        "rule:"+rid+":W202027", "36",
+                        "rule:"+rid+":D20200702", "12",
+                        "rule:"+rid+":D20200703", "24",
+                        "team:"+tid, "36",
+                        "team:"+tid+":Y2020", "36",
+                        "team:"+tid+":Q202003", "36",
+                        "team:"+tid+":M202007", "36",
+                        "team:"+tid+":W202027", "36",
+                        "team:"+tid+":D20200702", "12",
+                        "team:"+tid+":D20200703", "24"
+                ));
+
+        RedisAssert.assertMap(dbPool,
+                ID.getGameUserPointsSummary(TEvent.GAME_ID, U2),
+                RedisAssert.ofEntries("all", "33",
+                        "source:" + e1.getSource(), "33",
+                        "all:Y2020", "33",
+                        "all:Q202003", "33",
+                        "all:M202007", "33",
+                        "all:W202027", "33",
+                        "all:D20200702", "33",
+                        "rule:" + rid, "33",
+                        "rule:"+rid+":Y2020", "33",
+                        "rule:"+rid+":Q202003", "33",
+                        "rule:"+rid+":M202007", "33",
+                        "rule:"+rid+":W202027", "33",
+                        "rule:"+rid+":D20200702", "33",
+                        "team:"+tid, "33",
+                        "team:"+tid+":Y2020", "33",
+                        "team:"+tid+":Q202003", "33",
+                        "team:"+tid+":M202007", "33",
+                        "team:"+tid+":W202027", "33",
+                        "team:"+tid+":D20200702", "33"
+                ));
+    }
 
 }

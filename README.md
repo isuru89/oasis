@@ -12,20 +12,20 @@ _This project is still under development_
 Oasis, is an event-driven gamification framework having ability to define the game rules for events
 coming from your applications. This is inspired from Stackoverflow badge system, and extended into 
 supporting many game elements. Such as, Points, Badges, Leaderboards,
-Milestones, Challenges, and Races.
+Milestones, Challenges, and Races. 
 
 ## Features:
   * Different types of customizable gamification elements. (see below)
   * Near real-time status updates
   * Character driven game playing
-  * Team supports
+  * Team support
   * Narrative Play <To-be-implemented>
   * Cloud friendly
   
 ## Key Gamification Elements in Oasis
 
 ### Points
-This is the main type of element in Oasis. The points indicate a measurement about a user. Users
+This is 0one of the core element type in Oasis. The points indicate a measurement about a user. Users
 can accumulate points over the time as rules defined by the admin. Sometimes, points can be negative,
 and it called penalties. 
 
