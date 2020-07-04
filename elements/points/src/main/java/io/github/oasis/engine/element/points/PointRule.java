@@ -19,10 +19,10 @@
 
 package io.github.oasis.engine.element.points;
 
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventValueResolver;
-import io.github.oasis.core.context.ExecutionContext;
 
 import java.math.BigDecimal;
 
@@ -31,12 +31,20 @@ import java.math.BigDecimal;
  */
 public class PointRule extends AbstractRule {
 
+    private String pointId;
     private EventExecutionFilter criteria;
     private BigDecimal amountToAward;
     private EventValueResolver<ExecutionContext> amountExpression;
 
+    private BigDecimal capLimit;
+    private String capDuration;
+
     public PointRule(String id) {
         super(id);
+    }
+
+    public boolean isCapped() {
+        return capDuration != null && capLimit != null;
     }
 
     public boolean isAwardBasedOnEvent() {
@@ -65,5 +73,29 @@ public class PointRule extends AbstractRule {
 
     public void setAmountExpression(EventValueResolver<ExecutionContext> amountExpression) {
         this.amountExpression = amountExpression;
+    }
+
+    public String getPointId() {
+        return pointId;
+    }
+
+    public void setPointId(String pointId) {
+        this.pointId = pointId;
+    }
+
+    public BigDecimal getCapLimit() {
+        return capLimit;
+    }
+
+    public void setCapLimit(BigDecimal capLimit) {
+        this.capLimit = capLimit;
+    }
+
+    public String getCapDuration() {
+        return capDuration;
+    }
+
+    public void setCapDuration(String capDuration) {
+        this.capDuration = capDuration;
     }
 }

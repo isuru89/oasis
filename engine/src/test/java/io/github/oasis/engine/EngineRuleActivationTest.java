@@ -57,7 +57,7 @@ public class EngineRuleActivationTest extends OasisEngineTest {
         engine.submit(e5);
         awaitTerminated();
 
-        String rid = rule.getId();
+        String rid = rule.getPointId();
         long tid = e1.getTeam();
         RedisAssert.assertMap(dbPool,
                 ID.getGameUserPointsSummary(TEvent.GAME_ID, U1),

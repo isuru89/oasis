@@ -32,6 +32,8 @@ import org.yaml.snakeyaml.Yaml;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -61,12 +63,19 @@ class PointParserTest {
 
         AbstractDef parsedDef = parser.parse(def);
 
-        Assertions.assertTrue(parsedDef instanceof PointDef);
-        Assertions.assertEquals(pointDef.getId(), parsedDef.getId());
-        Assertions.assertEquals(pointDef.getName(), parsedDef.getName());
-        Assertions.assertEquals(pointDef.getDescription(), parsedDef.getDescription());
-        Assertions.assertEquals(pointDef.getEvent(), parsedDef.getEvent());
-        Assertions.assertEquals(pointDef.getAward(), ((PointDef) parsedDef).getAward());
+        assertTrue(parsedDef instanceof PointDef);
+        assertEquals(pointDef.getId(), parsedDef.getId());
+        assertEquals(pointDef.getName(), parsedDef.getName());
+        assertEquals(pointDef.getDescription(), parsedDef.getDescription());
+        assertEquals(pointDef.getEvent(), parsedDef.getEvent());
+        assertEquals(pointDef.getAward(), ((PointDef) parsedDef).getAward());
+    }
+
+    @Test
+    void testUnknownDef() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            parser.convert(null);
+        });
     }
 
     @Test
@@ -79,16 +88,17 @@ class PointParserTest {
 
         AbstractRule abstractRule = parser.convert(pointDef);
 
-        Assertions.assertTrue(abstractRule instanceof PointRule);
+        assertTrue(abstractRule instanceof PointRule);
         PointRule rule = (PointRule) abstractRule;
 
-        Assertions.assertNotNull(rule.getId());
-        Assertions.assertTrue(rule.getId().length() > 0);
-        Assertions.assertEquals(pointDef.getName(), rule.getName());
-        Assertions.assertFalse(rule.isAwardBasedOnEvent());
-        Assertions.assertEquals(new BigDecimal("10.0"), rule.getAmountToAward());
-        Assertions.assertEquals(EventExecutionFilterFactory.ALWAYS_TRUE, rule.getCriteria());
-        Assertions.assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
+        assertNotNull(rule.getId());
+        assertTrue(rule.getId().length() > 0);
+        assertEquals(pointDef.getName(), rule.getName());
+        assertEquals(pointDef.getName(), rule.getPointId());
+        assertFalse(rule.isAwardBasedOnEvent());
+        assertEquals(new BigDecimal("10.0"), rule.getAmountToAward());
+        assertEquals(EventExecutionFilterFactory.ALWAYS_TRUE, rule.getCriteria());
+        assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
     }
 
     @Test
@@ -101,15 +111,38 @@ class PointParserTest {
 
         AbstractRule abstractRule = parser.convert(pointDef);
 
-        Assertions.assertTrue(abstractRule instanceof PointRule);
+        assertTrue(abstractRule instanceof PointRule);
         PointRule rule = (PointRule) abstractRule;
 
-        Assertions.assertNotNull(rule.getId());
-        Assertions.assertEquals(pointDef.getName(), rule.getName());
-        Assertions.assertEquals(EventExecutionFilterFactory.ALWAYS_TRUE, rule.getCriteria());
-        Assertions.assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
-        Assertions.assertTrue(rule.isAwardBasedOnEvent());
-        Assertions.assertNotNull(rule.getAmountExpression());
+        assertNotNull(rule.getId());
+        assertEquals(pointDef.getName(), rule.getName());
+        assertEquals(EventExecutionFilterFactory.ALWAYS_TRUE, rule.getCriteria());
+        assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
+        assertTrue(rule.isAwardBasedOnEvent());
+        assertNotNull(rule.getAmountExpression());
+    }
+
+    @Test
+    void convertCustomPointId() {
+        PointDef pointDef = new PointDef();
+        pointDef.setId(1);
+        pointDef.setName("point-1");
+        pointDef.setAward("e.data.votes + 100");
+        pointDef.setEvent("event.a");
+        pointDef.setPointId("customPointId");
+
+        AbstractRule abstractRule = parser.convert(pointDef);
+
+        assertTrue(abstractRule instanceof PointRule);
+        PointRule rule = (PointRule) abstractRule;
+
+        assertNotNull(rule.getId());
+        assertEquals(pointDef.getName(), rule.getName());
+        assertEquals(pointDef.getPointId(), rule.getPointId());
+        assertEquals(EventExecutionFilterFactory.ALWAYS_TRUE, rule.getCriteria());
+        assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
+        assertTrue(rule.isAwardBasedOnEvent());
+        assertNotNull(rule.getAmountExpression());
     }
 
     @SuppressWarnings("unchecked")

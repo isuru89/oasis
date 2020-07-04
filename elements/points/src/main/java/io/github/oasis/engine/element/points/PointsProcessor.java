@@ -20,15 +20,20 @@
 package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.core.utils.Numbers;
+import io.github.oasis.core.utils.TimeOffset;
 
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+
+import static io.github.oasis.core.utils.Constants.COLON;
 
 /**
  * @author Isuru Weerarathna
@@ -50,12 +55,26 @@ public class PointsProcessor extends AbstractProcessor<PointRule, PointSignal> {
 
     @Override
     public List<PointSignal> process(Event event, PointRule rule, ExecutionContext context, DbContext db) {
+        BigDecimal score;
         if (rule.isAwardBasedOnEvent()) {
-            BigDecimal score = rule.getAmountExpression().resolve(event, context);
-            return Collections.singletonList(new PointSignal(rule.getId(), score, event));
+            score = rule.getAmountExpression().resolve(event, context);
         } else {
-            return Collections.singletonList(new PointSignal(rule.getId(), rule.getAmountToAward(), event));
+            score = rule.getAmountToAward();
         }
+
+        if (rule.isCapped()) {
+            String baseKey = ID.getGameUserPointsSummary(event.getGameId(), event.getUser());
+            TimeOffset tcx = new TimeOffset(event.getTimestamp(), context.getUserTimeZone());
+            String childKey = PointsSink.RULE_PFX + rule.getPointId() + COLON + tcx.getByType(rule.getCapDuration());
+            BigDecimal residue = db.incrementCapped(score, baseKey, childKey, rule.getCapLimit());
+            if (Numbers.isNegative(residue)) {
+                // cannot increment due to limit already exceeded. Hence skipping.
+                return null;
+            } else {
+                score = residue;
+            }
+        }
+        return Collections.singletonList(new PointSignal(rule.getId(), rule.getPointId(), score, event));
     }
 
     private boolean isCriteriaSatisfied(Event event, PointRule rule, ExecutionContext context) {

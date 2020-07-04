@@ -19,30 +19,119 @@
 
 package io.github.oasis.engine.element.points;
 
+import io.github.oasis.core.elements.AbstractDef;
+import io.github.oasis.core.external.messages.PersistedDef;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
  */
 public class ParserTest {
 
-    @Test
-    void testPointParser() {
-        Map<String, Object> data = Map.of(
-                "name", "Question-Ask-Reputation",
-                "description", "Awards 2 reputation when a question asked",
-                "event", "stackoverflow.question.asked",
-                "flags", List.of("a", "b", "c"),
-                "award", 2
-        );
-        Yaml yaml = new Yaml();
+    private final PointParser pointParser = new PointParser();
 
-        PointDef pointDef = yaml.loadAs(yaml.dump(data), PointDef.class);
-        System.out.println(pointDef);
+    private Map<String, Object> loadGroupFile(String resourcePath) {
+        try (InputStream resourceAsStream = Thread.currentThread()
+                .getContextClassLoader().getResourceAsStream(resourcePath)) {
+            return new Yaml().load(resourceAsStream);
+        } catch (IOException e) {
+            Assertions.fail("Cannot load resource " + resourcePath);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private PersistedDef asPersistedDef(Map<String, Object> data) {
+        PersistedDef def = new PersistedDef();
+        def.setData(data);
+        def.setType(PersistedDef.GAME_RULE_ADDED);
+        def.setImpl(PointDef.class.getName());
+        return def;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<PointDef> parseAll(String resourcePath) {
+        Map<String, Object> map = loadGroupFile(resourcePath);
+        List<Map<String, Object>> items = (List<Map<String, Object>>) map.get("points");
+        return items.stream().map(this::asPersistedDef)
+                .map(def -> pointParser.parse(def))
+                .collect(Collectors.toList());
+    }
+
+    private Optional<PointDef> findByName(List<PointDef> pointDefs, String name) {
+        return pointDefs.stream()
+                .filter(p -> name.equals(p.getName()))
+                .findFirst();
+    }
+
+    private boolean isNumber(Object value) {
+        return value instanceof Number;
+    }
+
+    private boolean isNonEmptyString(Object value) {
+        return value instanceof String && !((String) value).isBlank();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void testPointParser() {
+        List<PointDef> pointDefs = parseAll("points.yml");
+        findByName(pointDefs, "Answer-Accepted").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNumber(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
+            assertTrue(Objects.isNull(def.getLimit()));
+        });
+        findByName(pointDefs, "Night-time-bonus").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNumber(def.getAward()));
+            assertEquals(1, def.getTimeRanges().size());
+            AbstractDef.TimeRangeDef timeRangeDef = def.getTimeRanges().get(0);
+            assertEquals(AbstractDef.TIME_RANGE_TYPE_TIME, timeRangeDef.getType());
+            assertEquals("00:00", timeRangeDef.getFrom());
+            assertEquals("06:00", timeRangeDef.getTo());
+        });
+        findByName(pointDefs, "Special-Seasonal-Award").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNonEmptyString(def.getAward()));
+            assertEquals(1, def.getTimeRanges().size());
+            AbstractDef.TimeRangeDef timeRangeDef = def.getTimeRanges().get(0);
+            assertEquals(AbstractDef.TIME_RANGE_TYPE_SEASONAL, timeRangeDef.getType());
+            assertEquals("12-01", timeRangeDef.getFrom());
+            assertEquals("12-31", timeRangeDef.getTo());
+        });
+        findByName(pointDefs, "General-Spending-Rule").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNonEmptyString(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
+        });
+        findByName(pointDefs, "Big-Purchase-Bonus").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNonEmptyString(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
+            assertTrue(def.getAward().toString().contains("\n"));
+        });
+        findByName(pointDefs, "Questions-Asked-Limited").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNumber(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
+            assertTrue(Objects.nonNull(def.getLimit()));
+            Map<String, Object> limit = (Map<String, Object>) def.getLimit();
+            assertTrue(limit.containsKey("daily"));
+            assertTrue(isNumber(limit.get("daily")));
+        });
     }
 
 }

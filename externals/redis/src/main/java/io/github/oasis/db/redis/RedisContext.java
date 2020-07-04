@@ -38,6 +38,9 @@ public class RedisContext implements DbContext {
 
     private static final String INCRALL = "O.INCRALL";
     private static final String ZINCRALL = "O.ZINCRALL";
+    private static final String HINCRCAPPED = "O.INCRCAPPED";
+
+    private static final int TWO_KEYS = 2;
 
     private final Jedis jedis;
     private final RedisDb db;
@@ -152,6 +155,18 @@ public class RedisContext implements DbContext {
         allArgs.add(value.toString());
         String[] args = allArgs.toArray(new String[0]);
         runScript(ZINCRALL, args.length - 1, args);
+    }
+
+    @Override
+    public BigDecimal incrementCapped(BigDecimal value, String baseKey, String childKey, BigDecimal limit) {
+        List<String> allArgs = new ArrayList<>();
+        allArgs.add(baseKey);
+        allArgs.add(childKey);
+        allArgs.add(value.toString());
+        allArgs.add(limit.toString());
+        String[] args = allArgs.toArray(new String[0]);
+        Object result = runScript(HINCRCAPPED, TWO_KEYS, args);
+        return Numbers.asDecimal(result.toString());
     }
 
     private void incrementAll(String value, String baseKey, List<String> keys) {
