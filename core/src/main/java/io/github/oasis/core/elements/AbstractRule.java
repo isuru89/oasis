@@ -105,6 +105,10 @@ public abstract class AbstractRule implements Serializable {
         this.timeRangeMatcher = timeRangeMatcher;
     }
 
+    public TimeRangeMatcher getTimeRangeMatcher() {
+        return timeRangeMatcher;
+    }
+
     public boolean isEventFalls(Event event, ExecutionContext executionContext) {
         return Objects.isNull(timeRangeMatcher) ||
                 timeRangeMatcher.isBetween(event.getTimestamp(), event.getTimeZone());
