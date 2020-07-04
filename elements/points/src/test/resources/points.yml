@@ -4,11 +4,13 @@ points:
   - name: Answer-Accepted
     description: Awards 15 reputations when an answer has been accepted
     event: stackoverflow.answer.accepted
+    pointId: stackoverflow.reputation
     award: 15
 
   - name: Night-time-bonus
     description: Awards +20 bonus for night time submission from midnight to 6am in the morning.
     event: submission.accepted
+    pointId: marks
     timeRanges:
       - type: time
         from: "00:00"
@@ -18,6 +20,7 @@ points:
   - name: Special-Seasonal-Award
     description: Awards double bonus points for every purchase done on december
     event: order.accepted
+    pointId: star.points
     timeRanges:
       - type: seasonal
         from: "12-01"
@@ -27,11 +30,13 @@ points:
   - name: General-Spending-Rule
     description: Customer could receive points for order value
     event: order.accepted
+    pointId: star.points
     award: "e.total"
 
   - name: Big-Purchase-Bonus
     description: Customer receives bonus points for passing purchase limit
     event: order.accepted
+    pointId: star.points
     award: |
         if (e.total >= 500) {
           return (e.total - 500) * 10;
@@ -45,6 +50,7 @@ points:
   - name: Questions-Asked-Limited
     description: Awards 5 reputations when a question is asked
     event: stackoverflow.question.asked
+    pointId: stackoverflow.reputation
     limit:
       daily: 200
     award: 5
