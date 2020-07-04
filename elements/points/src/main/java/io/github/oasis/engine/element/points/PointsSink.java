@@ -50,10 +50,11 @@ public class PointsSink extends AbstractSink {
     private static final String DAILY = "d";
     private static final String QUARTERLY = "q";
 
-    private static final String RULE_PFX = "rule:";
     private static final String TEAM_PFX = "team:";
     private static final String SOURCE_PFX = "source:";
     private static final String ALL_PFX = ALL + COLON;
+
+    static final String RULE_PFX = "rule:";
 
     public PointsSink(Db db) {
         super(db);

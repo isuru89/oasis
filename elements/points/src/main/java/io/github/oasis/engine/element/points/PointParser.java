@@ -19,11 +19,17 @@
 
 package io.github.oasis.engine.element.points;
 
-import io.github.oasis.core.elements.*;
+import io.github.oasis.core.elements.AbstractDef;
+import io.github.oasis.core.elements.AbstractElementParser;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.EventExecutionFilterFactory;
+import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.utils.Utils;
 
 import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Objects;
 
 import static io.github.oasis.core.VariableNames.CONTEXT_VAR;
 
@@ -51,14 +57,27 @@ public class PointParser extends AbstractElementParser {
         AbstractDef.defToRule(def, rule);
         rule.setPointId(Utils.firstNonNullAsStr(def.getPointId(), def.getName()));
         rule.setCriteria(EventExecutionFilterFactory.ALWAYS_TRUE);
+
         Object award = def.getAward();
         if (award instanceof Number) {
             rule.setAmountToAward(BigDecimal.valueOf(((Number) award).doubleValue()));
         } else {
             rule.setAmountExpression(Scripting.create((String) award, CONTEXT_VAR));
         }
+
+        appendLimit(rule, def);
         return rule;
     }
 
+    @SuppressWarnings("unchecked")
+    private void appendLimit(PointRule rule, PointDef def) {
+        if (Objects.nonNull(def.getLimit())) {
+            Map<String, Object> limit = (Map<String, Object>) def.getLimit();
+            limit.forEach((unit, value) -> {
+                rule.setCapDuration(unit);
+                rule.setCapLimit(new BigDecimal(value.toString()));
+            });
+        }
+    }
 
 }

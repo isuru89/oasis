@@ -21,7 +21,11 @@ package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.elements.*;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.core.elements.EventValueResolver;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -171,6 +175,53 @@ public class PointsTest extends AbstractRuleTest {
         assertStrict(signals,
                 new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(11), e1),
                 new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(13), e3));
+    }
+
+    @DisplayName("Daily capped points")
+    @Test
+    public void testCappedPoints() {
+        TEvent e1 = TEvent.createKeyValue(1593577800000L, EVT_A, 67);
+        TEvent e2 = TEvent.createKeyValue(1593585000000L, EVT_A, 55);
+        TEvent e3 = TEvent.createKeyValue(1593592200000L, EVT_A, 81);
+        TEvent e4 = TEvent.createKeyValue(1593606600000L, EVT_A, 94);
+
+        List<Signal> signals = new ArrayList<>();
+        EventValueResolver<ExecutionContext> resolver = (event, input) -> BigDecimal.valueOf((long)event.getFieldValue("value"));
+        RuleContext<PointRule> ruleContext = createRule(resolver, this::greaterThan50, signals);
+        ruleContext.getRule().setCapDuration("daily");
+        ruleContext.getRule().setCapLimit(BigDecimal.valueOf(100));
+        PointsProcessor processor = new PointsProcessor(pool, ruleContext);
+        submitOrder(processor, e1, e2, e3, e4);
+
+        System.out.println(signals);
+        String pointId = ruleContext.getRule().getPointId();
+        assertStrict(signals,
+                new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(67), e1),
+                new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(33), e2));
+    }
+
+    @DisplayName("Daily capped points: exact limit")
+    @Test
+    public void testCappedPointsOnExactLimit() {
+        TEvent e1 = TEvent.createKeyValue(1593577800000L, EVT_A, 67);
+        TEvent e2 = TEvent.createKeyValue(1593585000000L, EVT_A, 33);
+        TEvent e3 = TEvent.createKeyValue(1593592200000L, EVT_A, 81);
+        TEvent e4 = TEvent.createKeyValue(1593606600000L, EVT_A, 94);
+
+        List<Signal> signals = new ArrayList<>();
+        EventValueResolver<ExecutionContext> resolver = (event, input) -> BigDecimal.valueOf((long)event.getFieldValue("value"));
+        RuleContext<PointRule> ruleContext = createRule(resolver, (event, rule, ctx) -> true, signals);
+        ruleContext.getRule().setPointId("test.point");
+        ruleContext.getRule().setCapDuration("daily");
+        ruleContext.getRule().setCapLimit(BigDecimal.valueOf(100));
+        PointsProcessor processor = new PointsProcessor(pool, ruleContext);
+        submitOrder(processor, e1, e2, e3, e4);
+
+        System.out.println(signals);
+        String pointId = ruleContext.getRule().getPointId();
+        assertStrict(signals,
+                new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(67), e1),
+                new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(33), e2));
     }
 
     private BigDecimal awards(Event event, ExecutionContext context) {

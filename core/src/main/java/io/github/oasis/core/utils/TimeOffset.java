@@ -43,6 +43,27 @@ public class TimeOffset {
         quarter = String.format("Q%d%02d", y, userTime.get(IsoFields.QUARTER_OF_YEAR));
     }
 
+    public TimeOffset(long ts, String timeZone) {
+        ZonedDateTime userTime = Timestamps.getUserSpecificTime(ts, timeZone);
+        int y = userTime.getYear();
+        year = "Y" + y;
+        month = String.format("M%s%02d", y, userTime.getMonth().getValue());
+        day = String.format("D%d%02d%02d", y, userTime.getMonth().getValue(), userTime.getDayOfMonth());
+        week = String.format("W%d%02d", y, userTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
+        quarter = String.format("Q%d%02d", y, userTime.get(IsoFields.QUARTER_OF_YEAR));
+    }
+
+    public String getByType(String timeType) {
+        char firstChar = Character.toUpperCase(timeType.charAt(0));
+        switch (firstChar) {
+            case 'D': return getDay();
+            case 'M': return getMonth();
+            case 'Q': return getQuarter();
+            case 'Y': return getYear();
+            default: return getWeek();
+        }
+    }
+
     public String getYear() {
         return year;
     }

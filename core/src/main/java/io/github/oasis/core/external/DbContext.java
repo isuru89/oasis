@@ -51,6 +51,7 @@ public interface DbContext extends Closeable {
     void incrementAll(int value, String baseKey, List<String> keys);
     void incrementAll(BigDecimal value, String baseKey, List<String> keys);
     void incrementAllInSorted(BigDecimal value, String commonMember, List<String> baseKeys);
+    BigDecimal incrementCapped(BigDecimal value, String baseKey, String childKey, BigDecimal limit);
     Object runScript(String scriptName, int noOfKeys, String... args);
 
 }

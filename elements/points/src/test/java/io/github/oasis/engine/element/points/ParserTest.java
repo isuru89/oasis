@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -84,12 +85,14 @@ public class ParserTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testPointParser() {
         List<PointDef> pointDefs = parseAll("points.yml");
-        findByName(pointDefs, "Answer-Accepted").ifPresent(answerAccepted -> {
-            assertTrue(isNonEmptyString(answerAccepted.getDescription()));
-            assertTrue(isNumber(answerAccepted.getAward()));
-            assertTrue(isNonEmptyString(answerAccepted.getEvent()));
+        findByName(pointDefs, "Answer-Accepted").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNumber(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
+            assertTrue(Objects.isNull(def.getLimit()));
         });
         findByName(pointDefs, "Night-time-bonus").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
@@ -109,16 +112,25 @@ public class ParserTest {
             assertEquals("12-01", timeRangeDef.getFrom());
             assertEquals("12-31", timeRangeDef.getTo());
         });
-        findByName(pointDefs, "General-Spending-Rule").ifPresent(answerAccepted -> {
-            assertTrue(isNonEmptyString(answerAccepted.getDescription()));
-            assertTrue(isNonEmptyString(answerAccepted.getAward()));
-            assertTrue(isNonEmptyString(answerAccepted.getEvent()));
+        findByName(pointDefs, "General-Spending-Rule").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNonEmptyString(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
         });
-        findByName(pointDefs, "Big-Purchase-Bonus").ifPresent(answerAccepted -> {
-            assertTrue(isNonEmptyString(answerAccepted.getDescription()));
-            assertTrue(isNonEmptyString(answerAccepted.getAward()));
-            assertTrue(isNonEmptyString(answerAccepted.getEvent()));
-            assertTrue(answerAccepted.getAward().toString().contains("\n"));
+        findByName(pointDefs, "Big-Purchase-Bonus").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNonEmptyString(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
+            assertTrue(def.getAward().toString().contains("\n"));
+        });
+        findByName(pointDefs, "Questions-Asked-Limited").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNumber(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
+            assertTrue(Objects.nonNull(def.getLimit()));
+            Map<String, Object> limit = (Map<String, Object>) def.getLimit();
+            assertTrue(limit.containsKey("daily"));
+            assertTrue(isNumber(limit.get("daily")));
         });
     }
 

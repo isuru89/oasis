@@ -32,6 +32,7 @@ public class PointDef extends AbstractDef {
 
     private String pointId;
     private Object award;
+    private Object limit;
 
     public String getPointId() {
         return pointId;
@@ -47,6 +48,14 @@ public class PointDef extends AbstractDef {
 
     public void setAward(Object award) {
         this.award = award;
+    }
+
+    public Object getLimit() {
+        return limit;
+    }
+
+    public void setLimit(Object limit) {
+        this.limit = limit;
     }
 
     @Override

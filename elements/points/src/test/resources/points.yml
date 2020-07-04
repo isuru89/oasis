@@ -41,3 +41,10 @@ points:
           return (e.total - 50) * 2;
         }
         return 0;
+
+  - name: Questions-Asked-Limited
+    description: Awards 5 reputations when a question is asked
+    event: stackoverflow.question.asked
+    limit:
+      daily: 200
+    award: 5
