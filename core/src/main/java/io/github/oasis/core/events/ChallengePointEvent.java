@@ -30,4 +30,8 @@ public class ChallengePointEvent extends BasePointEvent {
     public ChallengePointEvent(String pointId, String pointStoredKey, BigDecimal points, Event eventRef) {
         super(pointId, pointStoredKey, points, eventRef);
     }
+
+    public ChallengePointEvent(String pointId, BigDecimal points, Event eventRef) {
+        this(pointId, BasePointEvent.DEFAULT_POINTS_KEY, points, eventRef);
+    }
 }

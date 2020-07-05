@@ -31,4 +31,7 @@ public class RatingPointEvent extends BasePointEvent {
         super(pointId, pointStoredKey, points, eventRef);
     }
 
+    public RatingPointEvent(String pointId, BigDecimal points, Event eventRef) {
+        this(pointId, BasePointEvent.DEFAULT_POINTS_KEY, points, eventRef);
+    }
 }

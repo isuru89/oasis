@@ -30,6 +30,8 @@ import java.util.UUID;
  */
 public abstract class BasePointEvent implements Event {
 
+    public static final String DEFAULT_POINTS_KEY = "points";
+
     private String eventId;
     private String pointId;
     private String pointStoredKey;

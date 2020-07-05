@@ -21,16 +21,18 @@ package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.EventCreatable;
 import io.github.oasis.core.elements.Signal;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
  */
-public class PointSignal extends Signal {
+public class PointSignal extends Signal implements EventCreatable {
 
     private String pointId;
     private BigDecimal score;
@@ -104,5 +106,10 @@ public class PointSignal extends Signal {
         } else {
             return -1;
         }
+    }
+
+    @Override
+    public Optional<Event> generateEvent() {
+        return Optional.of(new PointEvent(pointId, score, eventRef));
     }
 }

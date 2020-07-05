@@ -20,14 +20,14 @@
 package io.github.oasis.elements.milestones;
 
 import io.github.oasis.core.EventScope;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.utils.Numbers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +42,8 @@ public class MilestonesSink extends AbstractSink {
 
     private static final Logger LOG = LoggerFactory.getLogger(MilestonesSink.class);
 
-    private static final String CHANGED_VALUE = "changedvalue";
-    private static final String CURRENT_LEVEL = "currentlevel";
+    public static final String CHANGED_VALUE = "changedvalue";
+    public static final String CURRENT_LEVEL = "currentlevel";
     public static final String LEVEL_LAST_UPDATED = "levellastupdated";
     public static final String COMPLETED = "completed";
     public static final String NEXT_LEVEL = "nextlevel";

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,20 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.core.elements;
+package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.events.BasePointEvent;
 
-import java.util.Optional;
+import java.math.BigDecimal;
 
 /**
- * An interface to indicate that an entity is capable of generating another
- * event. The engine will call this to spawn this new event.
+ * Represents an event related to the point signal.
  *
  * @author Isuru Weerarathna
  */
-public interface EventCreatable {
+public class PointEvent extends BasePointEvent {
 
-    Optional<Event> generateEvent();
+    public PointEvent(String pointId, BigDecimal points, Event eventRef) {
+        super(pointId, BasePointEvent.DEFAULT_POINTS_KEY, points, eventRef);
+    }
 
+    @Override
+    public String toString() {
+        return "PointEvent{" +
+                "id=" + getExternalId() + ", " +
+                "score=" + getPoints() +
+                "}";
+    }
 }

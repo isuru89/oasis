@@ -22,7 +22,6 @@ package io.github.oasis.core.elements.matchers;
 import io.github.oasis.core.elements.EventTypeMatcher;
 import io.github.oasis.core.utils.Texts;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +55,8 @@ public final class EventTypeMatcherFactory {
                     .map(EventTypeMatcherFactory::createMatcher)
                     .collect(Collectors.toList());
             return new MixedEventTypeMatcher(matchers);
+        } else if (items.size() == 1) {
+            return createMatcher(items.iterator().next());
         } else {
             return createMatcher(items);
         }

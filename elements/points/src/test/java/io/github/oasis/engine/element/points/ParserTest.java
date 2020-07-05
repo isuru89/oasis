@@ -43,6 +43,62 @@ public class ParserTest {
 
     private final PointParser pointParser = new PointParser();
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void testPointParser() {
+        List<PointDef> pointDefs = parseAll("points.yml");
+        findByName(pointDefs, "Answer-Accepted").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNumber(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
+            assertEquals("stackoverflow.reputation", def.getPointId());
+            assertTrue(Objects.isNull(def.getLimit()));
+        });
+        findByName(pointDefs, "Night-time-bonus").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNumber(def.getAward()));
+            assertEquals(1, def.getTimeRanges().size());
+            assertEquals("marks", def.getPointId());
+            AbstractDef.TimeRangeDef timeRangeDef = def.getTimeRanges().get(0);
+            assertEquals(AbstractDef.TIME_RANGE_TYPE_TIME, timeRangeDef.getType());
+            assertEquals("00:00", timeRangeDef.getFrom());
+            assertEquals("06:00", timeRangeDef.getTo());
+        });
+        findByName(pointDefs, "Special-Seasonal-Award").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNonEmptyString(def.getAward()));
+            assertEquals(1, def.getTimeRanges().size());
+            assertEquals("star.points", def.getPointId());
+            AbstractDef.TimeRangeDef timeRangeDef = def.getTimeRanges().get(0);
+            assertEquals(AbstractDef.TIME_RANGE_TYPE_SEASONAL, timeRangeDef.getType());
+            assertEquals("12-01", timeRangeDef.getFrom());
+            assertEquals("12-31", timeRangeDef.getTo());
+        });
+        findByName(pointDefs, "General-Spending-Rule").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNonEmptyString(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
+            assertEquals("star.points", def.getPointId());
+        });
+        findByName(pointDefs, "Big-Purchase-Bonus").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNonEmptyString(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
+            assertTrue(def.getAward().toString().contains("\n"));
+            assertEquals("star.points", def.getPointId());
+        });
+        findByName(pointDefs, "Questions-Asked-Limited").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertTrue(isNumber(def.getAward()));
+            assertTrue(isNonEmptyString(def.getEvent()));
+            assertTrue(Objects.nonNull(def.getLimit()));
+            assertEquals("stackoverflow.reputation", def.getPointId());
+            Map<String, Object> limit = (Map<String, Object>) def.getLimit();
+            assertTrue(limit.containsKey("daily"));
+            assertTrue(isNumber(limit.get("daily")));
+        });
+    }
+
     private Map<String, Object> loadGroupFile(String resourcePath) {
         try (InputStream resourceAsStream = Thread.currentThread()
                 .getContextClassLoader().getResourceAsStream(resourcePath)) {
@@ -82,56 +138,6 @@ public class ParserTest {
 
     private boolean isNonEmptyString(Object value) {
         return value instanceof String && !((String) value).isBlank();
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void testPointParser() {
-        List<PointDef> pointDefs = parseAll("points.yml");
-        findByName(pointDefs, "Answer-Accepted").ifPresent(def -> {
-            assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNumber(def.getAward()));
-            assertTrue(isNonEmptyString(def.getEvent()));
-            assertTrue(Objects.isNull(def.getLimit()));
-        });
-        findByName(pointDefs, "Night-time-bonus").ifPresent(def -> {
-            assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNumber(def.getAward()));
-            assertEquals(1, def.getTimeRanges().size());
-            AbstractDef.TimeRangeDef timeRangeDef = def.getTimeRanges().get(0);
-            assertEquals(AbstractDef.TIME_RANGE_TYPE_TIME, timeRangeDef.getType());
-            assertEquals("00:00", timeRangeDef.getFrom());
-            assertEquals("06:00", timeRangeDef.getTo());
-        });
-        findByName(pointDefs, "Special-Seasonal-Award").ifPresent(def -> {
-            assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNonEmptyString(def.getAward()));
-            assertEquals(1, def.getTimeRanges().size());
-            AbstractDef.TimeRangeDef timeRangeDef = def.getTimeRanges().get(0);
-            assertEquals(AbstractDef.TIME_RANGE_TYPE_SEASONAL, timeRangeDef.getType());
-            assertEquals("12-01", timeRangeDef.getFrom());
-            assertEquals("12-31", timeRangeDef.getTo());
-        });
-        findByName(pointDefs, "General-Spending-Rule").ifPresent(def -> {
-            assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNonEmptyString(def.getAward()));
-            assertTrue(isNonEmptyString(def.getEvent()));
-        });
-        findByName(pointDefs, "Big-Purchase-Bonus").ifPresent(def -> {
-            assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNonEmptyString(def.getAward()));
-            assertTrue(isNonEmptyString(def.getEvent()));
-            assertTrue(def.getAward().toString().contains("\n"));
-        });
-        findByName(pointDefs, "Questions-Asked-Limited").ifPresent(def -> {
-            assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNumber(def.getAward()));
-            assertTrue(isNonEmptyString(def.getEvent()));
-            assertTrue(Objects.nonNull(def.getLimit()));
-            Map<String, Object> limit = (Map<String, Object>) def.getLimit();
-            assertTrue(limit.containsKey("daily"));
-            assertTrue(isNumber(limit.get("daily")));
-        });
     }
 
 }

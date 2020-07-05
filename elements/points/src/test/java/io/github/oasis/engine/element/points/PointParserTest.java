@@ -22,6 +22,7 @@ package io.github.oasis.engine.element.points;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.EventExecutionFilterFactory;
+import io.github.oasis.core.elements.matchers.AnnualDateRangeMatcher;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.core.external.messages.PersistedDef;
 import org.junit.jupiter.api.Assertions;
@@ -30,9 +31,14 @@ import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
@@ -143,6 +149,62 @@ class PointParserTest {
         assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
         assertTrue(rule.isAwardBasedOnEvent());
         assertNotNull(rule.getAmountExpression());
+        assertNull(rule.getTimeRangeMatcher());
+    }
+
+    @Test
+    void convertWithTimeRanges() {
+        PointDef pointDef = new PointDef();
+        pointDef.setId(1);
+        pointDef.setName("point-1");
+        pointDef.setAward("e.data.votes + 100");
+        pointDef.setEvent("event.a");
+        pointDef.setPointId("customPointId");
+        pointDef.setTimeRanges(List.of(new AbstractDef.TimeRangeDef(AbstractDef.TIME_RANGE_TYPE_SEASONAL, "05-01", "05-31")));
+
+        AbstractRule abstractRule = parser.convert(pointDef);
+
+        assertTrue(abstractRule instanceof PointRule);
+        PointRule rule = (PointRule) abstractRule;
+
+        assertNotNull(rule.getId());
+        assertEquals(pointDef.getName(), rule.getName());
+        assertEquals(pointDef.getPointId(), rule.getPointId());
+        assertEquals(EventExecutionFilterFactory.ALWAYS_TRUE, rule.getCriteria());
+        assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
+        assertTrue(rule.isAwardBasedOnEvent());
+        assertNotNull(rule.getAmountExpression());
+        assertNotNull(rule.getTimeRangeMatcher());
+        assertTrue(rule.getTimeRangeMatcher() instanceof AnnualDateRangeMatcher);
+        assertNull(rule.getCapDuration());
+        assertNull(rule.getCapLimit());
+    }
+
+    @Test
+    void convertWithCappedPoints() {
+        PointDef pointDef = new PointDef();
+        pointDef.setId(1);
+        pointDef.setName("point-1");
+        pointDef.setAward("e.data.votes + 100");
+        pointDef.setEvent("event.a");
+        pointDef.setPointId("customPointId");
+        pointDef.setLimit(Map.of("daily", 200));
+
+        AbstractRule abstractRule = parser.convert(pointDef);
+
+        assertTrue(abstractRule instanceof PointRule);
+        PointRule rule = (PointRule) abstractRule;
+
+        assertNotNull(rule.getId());
+        assertEquals(pointDef.getName(), rule.getName());
+        assertEquals(pointDef.getPointId(), rule.getPointId());
+        assertEquals(EventExecutionFilterFactory.ALWAYS_TRUE, rule.getCriteria());
+        assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
+        assertTrue(rule.isAwardBasedOnEvent());
+        assertNotNull(rule.getAmountExpression());
+        assertNull(rule.getTimeRangeMatcher());
+        assertEquals("daily", rule.getCapDuration());
+        assertEquals(BigDecimal.valueOf(200), rule.getCapLimit());
     }
 
     @SuppressWarnings("unchecked")

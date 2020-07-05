@@ -81,7 +81,7 @@ public class RatingPointsSignal extends PointSignal implements EventCreatable {
     @Override
     public Optional<Event> generateEvent() {
         if (Objects.nonNull(getPointId())) {
-            return Optional.of(new RatingPointEvent(getPointId(), "points", getScore(), getEventRef()));
+            return Optional.of(new RatingPointEvent(getPointId(), getScore(), getEventRef()));
         } else {
             return Optional.empty();
         }

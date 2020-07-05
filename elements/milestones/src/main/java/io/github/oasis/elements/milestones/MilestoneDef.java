@@ -34,8 +34,19 @@ import java.util.stream.Collectors;
  */
 public class MilestoneDef extends AbstractDef {
 
+    private Object pointIds;
     private String valueExtractor;
     private List<MilestoneLevel> levels;
+
+    void initialize() {
+        if (Objects.isNull(getEvents()) && Objects.nonNull(pointIds)) {
+            super.setEvents(pointIds);
+        }
+    }
+
+    public boolean isPointBased() {
+        return Objects.nonNull(pointIds);
+    }
 
     @Override
     protected List<String> getSensitiveAttributes() {
@@ -77,6 +88,14 @@ public class MilestoneDef extends AbstractDef {
 
     public void setLevels(List<MilestoneLevel> levels) {
         this.levels = levels;
+    }
+
+    public Object getPointIds() {
+        return pointIds;
+    }
+
+    public void setPointIds(Object pointIds) {
+        this.pointIds = pointIds;
     }
 
     public static class MilestoneLevel implements Serializable {

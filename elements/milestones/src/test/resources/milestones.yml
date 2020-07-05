@@ -1,0 +1,43 @@
+version: 1
+
+milestones:
+  - name: Total-Reputations
+    description: Provides ranking through accumulated reputations
+    pointIds:
+      - stackoverflow.reputation
+    levels:
+      - level: 1
+        milestone: 1000
+      - level: 2
+        milestone: 5000
+      - level: 3
+        milestone: 10000
+      - level: 4
+        milestone: 50000
+      - level: 5
+        milestone: 100000
+
+  - name: Star-Points
+    description: Allow tiers for customers based on star points accumulated
+    pointIds:
+      - star.points
+      - coupan.points
+    levels:
+      - level: 1
+        milestone: 100
+      - level: 2
+        milestone: 1000
+      - level: 3
+        milestone: 10000
+
+  - name: Challenge-Win-Points
+    description: This milestone indicates direct accumulation through events
+    events:
+      - stackoverflow.bounty.awarded
+      - stackoverflow.answer.accepted
+    valueExtractor: "e.value"
+    levels:
+      - level: 1
+        milestone: 50
+      - level: 2
+        milestone: 100
