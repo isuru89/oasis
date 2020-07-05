@@ -49,7 +49,7 @@ public class ChallengePointsAwardedSignal extends PointSignal implements EventCr
     @Override
     public Optional<Event> generateEvent() {
         if (Objects.nonNull(getPointId())) {
-            return Optional.of(new ChallengePointEvent(getPointId(), "points", getScore(), getEventRef()));
+            return Optional.of(new ChallengePointEvent(getPointId(), getScore(), getEventRef()));
         } else {
             return Optional.empty();
         }

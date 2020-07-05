@@ -90,6 +90,10 @@ public class MilestoneRule extends AbstractRule {
         }
     }
 
+    List<Level> getLevels() {
+        return levels;
+    }
+
     public static class Level implements Comparable<Level> {
 
         static final Level LEVEL_ZERO = new Level(0, BigDecimal.ZERO);

@@ -19,9 +19,9 @@
 
 package io.github.oasis.engine;
 
+import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.collect.Record;
 import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
@@ -36,6 +36,8 @@ import java.util.stream.Collectors;
  * @author Isuru Weerarathna
  */
 public class RedisAssert {
+
+    public static final String ANY_VALUE = "~~any~~";
 
     public static void assertKeyNotExist(Db dbPool, String key) {
         try (DbContext db = dbPool.createContext()) {
@@ -136,6 +138,9 @@ public class RedisAssert {
             entries.forEach((k, v) -> {
                 if (!all.containsKey(k)) {
                     Assertions.fail("Key with entry " + k + " does not exist in db! " + k);
+                }
+                if (ANY_VALUE.equals(v)) {
+                    return;
                 }
                 Assertions.assertEquals(v, all.get(k), "Value is different for entry " + k);
             });
