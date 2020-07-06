@@ -193,16 +193,15 @@ public class EngineMilestoneTest extends OasisEngineTest {
 
         String rid = rule.getId();
         RedisAssert.assertMap(dbPool, ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
-                RedisAssert.ofEntries(rid, "293",
-                        rid + ":levellastupdated", String.valueOf(e7.getTimestamp()),
+                RedisAssert.ofEntries(rid, "7",
+                        rid + ":levellastupdated", String.valueOf(e5.getTimestamp()),
                         rid + ":lastupdated", String.valueOf(e7.getTimestamp()),
                         rid + ":lastevent", String.valueOf(e7.getExternalId()),
-                        rid + ":penalties", "-84",
-                        rid + ":changedvalue", "293.0",
-                        rid + ":currentlevel", "2",
-                        rid + ":completed", "1",
+                        rid + ":changedvalue", "5.0",
+                        rid + ":currentlevel", "1",
+                        rid + ":completed", "0",
                         rid + ":nextlevel", "2",
-                        rid + ":nextlevelvalue", "200"
+                        rid + ":nextlevelvalue", "10"
                 ));
     }
 
