@@ -63,7 +63,12 @@ public class MilestoneParser extends AbstractElementParser {
                 return BigDecimal.ZERO;
             });
         } else {
-            rule.setValueExtractor(Scripting.create(def.getValueExtractor(), RULE_VAR, CONTEXT_VAR));
+            Object valueExtractor = def.getValueExtractor();
+            if (valueExtractor instanceof String) {
+                rule.setValueExtractor(Scripting.create((String) valueExtractor, RULE_VAR, CONTEXT_VAR));
+            } else {
+                rule.setValueExtractor((event, input, otherInput) -> BigDecimal.ONE);
+            }
         }
 
         rule.setLevels(def.getLevels().stream()

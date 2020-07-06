@@ -168,5 +168,42 @@ public class EngineMilestoneTest extends OasisEngineTest {
                 ));
     }
 
+    @Test
+    public void testMilestonesByCount() {
+        Event e1 = TEvent.createKeyValue(100, EVT_A, 87);
+        Event e2 = TEvent.createKeyValue(105, EVT_A, 53);
+        Event e3 = TEvent.createKeyValue(110, EVT_A, 34);
+        Event e4 = TEvent.createKeyValue(115, EVT_A, 11);
+        Event e5 = TEvent.createKeyValue(120, EVT_A, 84);
+        Event e6 = TEvent.createKeyValue(125, EVT_A, 92);
+        Event e7 = TEvent.createKeyValue(130, EVT_A, 100);
+        Event e8 = TEvent.createKeyValue(135, EVT_B, 120);
+
+        MilestoneRule rule = new MilestoneRule("test.milestone.rule");
+        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
+        rule.setValueExtractor((event, rule1, ctx) -> BigDecimal.ONE);
+        rule.setLevels(Arrays.asList(new MilestoneRule.Level(1, BigDecimal.valueOf(5)),
+                new MilestoneRule.Level(2, BigDecimal.valueOf(10))));
+
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
+        awaitTerminated();
+
+        String rid = rule.getId();
+        RedisAssert.assertMap(dbPool, ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
+                RedisAssert.ofEntries(rid, "293",
+                        rid + ":levellastupdated", String.valueOf(e7.getTimestamp()),
+                        rid + ":lastupdated", String.valueOf(e7.getTimestamp()),
+                        rid + ":lastevent", String.valueOf(e7.getExternalId()),
+                        rid + ":penalties", "-84",
+                        rid + ":changedvalue", "293.0",
+                        rid + ":currentlevel", "2",
+                        rid + ":completed", "1",
+                        rid + ":nextlevel", "2",
+                        rid + ":nextlevelvalue", "200"
+                ));
+    }
 
 }

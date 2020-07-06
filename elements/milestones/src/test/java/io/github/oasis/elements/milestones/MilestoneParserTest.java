@@ -38,6 +38,7 @@ import java.util.Optional;
 
 import static io.github.oasis.elements.milestones.Utils.findByName;
 import static io.github.oasis.elements.milestones.Utils.isNonEmptyString;
+import static io.github.oasis.elements.milestones.Utils.isNumber;
 import static io.github.oasis.elements.milestones.Utils.parseAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -130,6 +131,25 @@ class MilestoneParserTest {
             assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
             assertTrue(rule.getEventTypeMatcher().matches("stackoverflow.reputation"));
             assertFalse(rule.getEventTypeMatcher().matches("unknown.reputation"));
+        });
+        findByName(defs, "Milestone-with-Event-Count").ifPresent(def -> {
+            assertTrue(isNonEmptyString(def.getDescription()));
+            assertNotNull(def.getEvent());
+            assertNull(def.getEvents());
+            assertNull(def.getPointIds());
+            assertNotNull(def.getLevels());
+            assertNotNull(def.getCondition());
+            assertTrue(isNumber(def.getValueExtractor()));
+
+            MilestoneRule rule = parser.convert(def);
+            assertNotNull(rule.getValueExtractor());
+            assertNotNull(rule.getEventTypeMatcher());
+            assertEquals(3, rule.getLevels().size());
+            assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
+            assertTrue(rule.getEventTypeMatcher().matches("stackoverflow.question.answered"));
+            assertFalse(rule.getEventTypeMatcher().matches("unknown.reputation"));
+            assertEquals(BigDecimal.ONE, rule.getValueExtractor().resolve(null, rule, null));
+            assertNotNull(rule.getCondition());
         });
     }
 

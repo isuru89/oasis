@@ -1,0 +1,15 @@
+version: 1
+
+milestones:
+  - name: Milestone-with-Event-Count
+    description: This is a milestone counting events based on a criteria.
+    event: event.a
+    condition: e.value >= 50
+    valueExtractor: 1
+    levels:
+      - level: 1
+        milestone: 5
+      - level: 2
+        milestone: 10
+      - level: 3
+        milestone: 15

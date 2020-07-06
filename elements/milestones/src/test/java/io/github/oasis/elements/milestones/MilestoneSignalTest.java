@@ -19,11 +19,15 @@
 
 package io.github.oasis.elements.milestones;
 
+import io.github.oasis.core.Event;
 import io.github.oasis.core.EventJson;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -36,5 +40,18 @@ class MilestoneSignalTest {
         MilestoneSignal signal = new MilestoneSignal("rule-1", 1, 2, BigDecimal.TEN, eventJson);
 
         Assertions.assertEquals(MilestonesSink.class, signal.sinkHandler());
+    }
+
+    @Test
+    void testEquality() {
+        Event event = TEvent.createKeyValue(Instant.now().toEpochMilli(), "event.a", 20);
+        MilestoneSignal signal1 = new MilestoneSignal("rule-1", 1, 2, BigDecimal.ONE, event);
+        MilestoneSignal signal2 = new MilestoneSignal("rule-1", 2, 3, BigDecimal.ONE, event);
+        MilestoneSignal signal3 = new MilestoneSignal("rule-1", 1, 2, BigDecimal.ONE, event);
+        Map<MilestoneSignal, MilestoneSignal> map = new HashMap<>();
+        map.put(signal1, signal1);
+        map.put(signal2, signal2);
+        map.put(signal3, signal3);
+        Assertions.assertEquals(2, map.size());
     }
 }
