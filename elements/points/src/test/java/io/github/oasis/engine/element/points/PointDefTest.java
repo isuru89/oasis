@@ -19,13 +19,33 @@
 
 package io.github.oasis.engine.element.points;
 
+import io.github.oasis.core.events.BasePointEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.time.Instant;
 
 /**
  * @author Isuru Weerarathna
  */
 class PointDefTest {
+
+    @Test
+    void testPointEventCreation() {
+        TEvent tEvent = TEvent.createKeyValue(Instant.now().toEpochMilli(), "event.a", 56);
+        PointEvent event = new PointEvent("my.points", BigDecimal.TEN, tEvent);
+
+        System.out.println(event.toString());
+        Assertions.assertTrue(event.toString().contains("id=my.points"));
+        Assertions.assertNotEquals(tEvent.getExternalId(), event.getExternalId());
+        Assertions.assertEquals(BasePointEvent.DEFAULT_POINTS_KEY, event.getPointStoredKey());
+        Assertions.assertEquals("my.points", event.getEventType());
+        Assertions.assertEquals("my.points", event.getPointId());
+        Assertions.assertEquals(tEvent.getTimestamp(), event.getTimestamp());
+        Assertions.assertEquals(tEvent.getGameId(), event.getGameId());
+        Assertions.assertEquals(tEvent.getSource(), event.getSource());
+    }
 
     @Test
     void testUniqueIDGenerationWhenAwardChanged() {

@@ -38,7 +38,7 @@ public class PointEvent extends BasePointEvent {
     @Override
     public String toString() {
         return "PointEvent{" +
-                "id=" + getExternalId() + ", " +
+                "id=" + getPointId() + ", " +
                 "score=" + getPoints() +
                 "}";
     }

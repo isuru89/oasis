@@ -52,6 +52,8 @@ public final class TimeRangeMatcherFactory {
             return AnnualDateRangeMatcher.create((String) def.getFrom(), (String) def.getTo());
         } else if (AbstractDef.TIME_RANGE_TYPE_TIME.equals(def.getType())) {
             return DailyTimeRangeMatcher.create((String) def.getFrom(), (String) def.getTo());
+        } else if (AbstractDef.TIME_RANGE_TYPE_WEEKLY.equals(def.getType())) {
+            return WeeklyTimeMatcher.create((String) def.getWhen());
         } else {
             return AbsoluteTimeMatcher.create((long) def.getFrom(), (long) def.getTo());
         }
