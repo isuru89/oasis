@@ -33,6 +33,14 @@ public abstract class ElementModule {
         return List.of();
     }
 
+    /**
+     * Returns list of accepted keys eligible for parsing definitions using this module.
+     * These keys are case-insensitive.
+     *
+     * @return list of keys supported
+     */
+    public abstract List<String> getSupportedDefinitionKeys();
+
     public ElementParser getParser() {
         return null;
     }

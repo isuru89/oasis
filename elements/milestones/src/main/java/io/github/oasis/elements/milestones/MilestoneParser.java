@@ -24,6 +24,7 @@ import io.github.oasis.core.elements.AbstractElementParser;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.events.BasePointEvent;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.utils.Utils;
 
 import java.math.BigDecimal;
 import java.util.stream.Collectors;
@@ -51,7 +52,7 @@ public class MilestoneParser extends AbstractElementParser {
     private MilestoneRule toRule(MilestoneDef def) {
         def.initialize();
 
-        String id = def.generateUniqueHash();
+        String id = Utils.firstNonNullAsStr(def.getId(), def.generateUniqueHash());
         MilestoneRule rule = new MilestoneRule(id);
         AbstractDef.defToRule(def, rule);
 

@@ -47,7 +47,7 @@ class RatingParserTest {
     @Test
     void convert() {
         RatingDef def = new RatingDef();
-        def.setId(1);
+        def.setId("RATING00001");
         def.setName("rating-1");
         def.setDefaultRating(1);
         def.setRatings(List.of(

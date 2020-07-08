@@ -52,7 +52,7 @@ public class PointParser extends AbstractElementParser {
     }
 
     private AbstractRule toRule(PointDef def) {
-        String id = def.generateUniqueHash();
+        String id = Utils.firstNonNullAsStr(def.getId(), def.generateUniqueHash());
         PointRule rule = new PointRule(id);
         AbstractDef.defToRule(def, rule);
         rule.setPointId(Utils.firstNonNullAsStr(def.getPointId(), def.getName()));

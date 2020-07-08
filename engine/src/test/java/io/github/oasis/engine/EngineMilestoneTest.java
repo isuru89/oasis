@@ -21,18 +21,13 @@ package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
-import io.github.oasis.core.events.BasePointEvent;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.elements.milestones.MilestoneRule;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.engine.element.points.PointRule;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -50,22 +45,15 @@ public class EngineMilestoneTest extends OasisEngineTest {
         Event e7 = TEvent.createKeyValue(130, EVT_A, 100);
         Event e8 = TEvent.createKeyValue(135, EVT_B, 120);
 
-        MilestoneRule rule = new MilestoneRule("test.milestone.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setValueExtractor((event, rule1, ctx) -> BigDecimal.valueOf((long)event.getFieldValue("value")));
-        rule.setLevels(Arrays.asList(new MilestoneRule.Level(1, BigDecimal.valueOf(100)),
-                new MilestoneRule.Level(2, BigDecimal.valueOf(200)),
-                new MilestoneRule.Level(3, BigDecimal.valueOf(300)),
-                new MilestoneRule.Level(4, BigDecimal.valueOf(500))));
-        rule.setFlags(Set.of(MilestoneRule.SKIP_NEGATIVE_VALUES));
+        GameDef gameDef = loadRulesFromResource("rules/milestone-basic.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
-        String rid = rule.getId();
+        String rid = "MILE000001";
         RedisAssert.assertMap(dbPool, ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(rid, "461",
                         rid + ":levellastupdated", String.valueOf(e6.getTimestamp()),
@@ -90,20 +78,15 @@ public class EngineMilestoneTest extends OasisEngineTest {
         Event e7 = TEvent.createKeyValue(130, EVT_A, 100);
         Event e8 = TEvent.createKeyValue(135, EVT_B, 120);
 
-        MilestoneRule rule = new MilestoneRule("test.milestone.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setValueExtractor((event, rule1, ctx) -> BigDecimal.valueOf((long)event.getFieldValue("value")));
-        rule.setLevels(Arrays.asList(new MilestoneRule.Level(1, BigDecimal.valueOf(100)),
-                new MilestoneRule.Level(2, BigDecimal.valueOf(200))));
-        rule.setFlags(Set.of(MilestoneRule.TRACK_PENALTIES));
+        GameDef gameDef = loadRulesFromResource("rules/milestones-penalties.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        List<AbstractRule> rules = submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
-        String rid = rule.getId();
+        String rid = findRuleByName(rules, "Milestone-with-Penalties").getId();
         RedisAssert.assertMap(dbPool, ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(rid, "293",
                         rid + ":levellastupdated", String.valueOf(e7.getTimestamp()),
@@ -129,32 +112,15 @@ public class EngineMilestoneTest extends OasisEngineTest {
         Event e7 = TEvent.createKeyValue(130, EVT_A, 100);
         Event e8 = TEvent.createKeyValue(135, EVT_B, 120);
 
-        PointRule pointRule = new PointRule("test.point.rule");
-        pointRule.setPointId("star.points");
-        pointRule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        pointRule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long)event.getFieldValue("value") - 50));
-        pointRule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
-
-        MilestoneRule rule = new MilestoneRule("test.milestone.point.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher("star.points"));
-        rule.setValueExtractor((event, rule1, ctx) -> {
-            if (event instanceof BasePointEvent) {
-                return ((BasePointEvent) event).getPoints();
-            }
-            return BigDecimal.ZERO;
-        });
-        rule.setLevels(Arrays.asList(new MilestoneRule.Level(1, BigDecimal.valueOf(100)),
-                new MilestoneRule.Level(2, BigDecimal.valueOf(200))));
-        rule.setFlags(Set.of(MilestoneRule.TRACK_PENALTIES));
+        GameDef gameDef = loadRulesFromResource("rules/milestones-from-points.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, pointRule));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        List<AbstractRule> rules = submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
-        String rid = rule.getId();
+        String rid = findRuleByName(rules, "Milestone-from-Points").getId();
         RedisAssert.assertMap(dbPool, ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(rid, "166",
                         rid + ":levellastupdated", String.valueOf(e6.getTimestamp()),
@@ -179,19 +145,15 @@ public class EngineMilestoneTest extends OasisEngineTest {
         Event e7 = TEvent.createKeyValue(130, EVT_A, 100);
         Event e8 = TEvent.createKeyValue(135, EVT_B, 120);
 
-        MilestoneRule rule = new MilestoneRule("test.milestone.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setValueExtractor((event, rule1, ctx) -> BigDecimal.ONE);
-        rule.setLevels(Arrays.asList(new MilestoneRule.Level(1, BigDecimal.valueOf(5)),
-                new MilestoneRule.Level(2, BigDecimal.valueOf(10))));
+        GameDef gameDef = loadRulesFromResource("rules/milestones-by-count.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        List<AbstractRule> rules = submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
-        String rid = rule.getId();
+        String rid = findRuleByName(rules, "Milestone-with-Event-Count").getId();
         RedisAssert.assertMap(dbPool, ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(rid, "7",
                         rid + ":levellastupdated", String.valueOf(e5.getTimestamp()),

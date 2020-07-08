@@ -24,7 +24,14 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.external.messages.PersistedDef;
-import io.github.oasis.elements.badges.rules.*;
+import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
+import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicOccurrencesRule;
+import io.github.oasis.elements.badges.rules.PeriodicOccurrencesStreakNRule;
+import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
+import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
+import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -317,7 +324,7 @@ class BadgeParserTest {
 
     private BadgeDef createBase() {
         BadgeDef def = new BadgeDef();
-        def.setId(1);
+        def.setId("BADGE00001");
         def.setName("badge-1");
         def.setEvent("event.a");
         return def;
@@ -325,7 +332,7 @@ class BadgeParserTest {
 
     private BadgeDef createFirstEvent() {
         BadgeDef def = new BadgeDef();
-        def.setId(1);
+        def.setId("BADGE00002");
         def.setKind(BadgeDef.FIRST_EVENT_KIND);
         def.setName("badge-1");
         def.setEvent("event.a");
@@ -335,7 +342,7 @@ class BadgeParserTest {
 
     private BadgeDef createStreak() {
         BadgeDef def = new BadgeDef();
-        def.setId(2);
+        def.setId("BADGE00003");
         def.setKind(BadgeDef.STREAK_N_KIND);
         def.setName("badge-2");
         def.setEvent("event.a");

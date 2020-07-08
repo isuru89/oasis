@@ -206,7 +206,7 @@ class MilestoneParserTest {
 
     private MilestoneDef createMilestone() {
         MilestoneDef def = new MilestoneDef();
-        def.setId(1);
+        def.setId("MILE00001");
         def.setName("milestone-1");
         def.setValueExtractor("e.data.value");
         def.setLevels(List.of(

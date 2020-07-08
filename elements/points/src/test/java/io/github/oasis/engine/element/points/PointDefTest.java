@@ -50,7 +50,7 @@ class PointDefTest {
     @Test
     void testUniqueIDGenerationWhenAwardChanged() {
         PointDef def1 = new PointDef();
-        def1.setId(1);
+        def1.setId("RULE0001");
         def1.setName("point-1");
         def1.setAward(23.0);
 
@@ -66,7 +66,7 @@ class PointDefTest {
     @Test
     void testSameIDGenerationWhenSameAward() {
         PointDef def1 = new PointDef();
-        def1.setId(1);
+        def1.setId("RULE00002");
         def1.setName("point-1");
         def1.setAward(23.0);
 

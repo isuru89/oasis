@@ -48,12 +48,17 @@ public class Parsers {
 
     private void init(EngineContext context) {
         context.getModuleList()
-                .forEach(mod -> mod.getSupportedDefinitions().forEach(def -> {
-                    ElementParser parser = mod.getParser();
-                    parserCache.put(def.getName(), parser);
-                    parserByClzCache.put(def, parser);
-                    LOG.info("Definition {} will be parsed with {}", def.getName(), parser.getClass().getName());
-                }));
+                .forEach(mod -> {
+                    mod.getSupportedDefinitions().forEach(def -> {
+                        ElementParser parser = mod.getParser();
+                        parserCache.put(def.getName(), parser);
+                        parserByClzCache.put(def, parser);
+                        LOG.info("Definition {} will be parsed with {}", def.getName(), parser.getClass().getName());
+                    });
+                    mod.getSupportedDefinitionKeys().forEach(key -> {
+                        parserCache.put(key.toLowerCase(), mod.getParser());
+                    });
+                });
     }
 
     public AbstractRule parseToRule(PersistedDef dto) {

@@ -27,6 +27,7 @@ import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.utils.Numbers;
+import io.github.oasis.core.utils.Utils;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -50,7 +51,7 @@ public class ChallengeParser extends AbstractElementParser {
     }
 
     private ChallengeRule toRule(ChallengeDef def) {
-        String id = def.generateUniqueHash();
+        String id = Utils.firstNonNullAsStr(def.getId(), def.generateUniqueHash());
         ChallengeRule rule = new ChallengeRule(id);
         AbstractDef.defToRule(def, rule);
 

@@ -144,7 +144,7 @@ class ChallengeParserTest {
 
     private ChallengeDef createTestChallenge() {
         ChallengeDef def = new ChallengeDef();
-        def.setId(1);
+        def.setId("CHAL00003");
         def.setName("challenge-1");
         def.setStartAt(System.currentTimeMillis());
         def.setExpireAt(LocalDate.of(2020, 12, 31).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());

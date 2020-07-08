@@ -25,10 +25,10 @@ import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.ElementModule;
 import io.github.oasis.core.elements.ElementParser;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
-import io.github.oasis.core.elements.ElementModule;
 
 import java.util.List;
 
@@ -37,12 +37,20 @@ import java.util.List;
  */
 public class MilestonesModule extends ElementModule {
 
+    private static final String MILESTONES = "milestones";
+
+    private final List<String> keysSupported = List.of(MILESTONES);
     private final List<Class<? extends AbstractSink>> sinks = List.of(MilestonesSink.class);
     private final ElementParser parser = new MilestoneParser();
 
     @Override
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
         return List.of(MilestoneDef.class);
+    }
+
+    @Override
+    public List<String> getSupportedDefinitionKeys() {
+        return keysSupported;
     }
 
     @Override

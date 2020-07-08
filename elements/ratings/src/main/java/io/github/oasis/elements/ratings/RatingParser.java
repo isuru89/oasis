@@ -27,6 +27,7 @@ import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.EventValueResolver;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.utils.Utils;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -53,7 +54,7 @@ public class RatingParser extends AbstractElementParser {
     }
 
     private RatingRule toRule(RatingDef def) {
-        String id = def.generateUniqueHash();
+        String id = Utils.firstNonNullAsStr(def.getId(), def.generateUniqueHash());
         RatingRule rule = new RatingRule(id);
         AbstractDef.defToRule(def, rule);
         rule.setDefaultRating(def.getDefaultRating());
