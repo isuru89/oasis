@@ -76,7 +76,7 @@ public class ChallengeParser extends AbstractElementParser {
 
         if (Objects.nonNull(def.getScope())) {
             String type = (String) def.getScope().getOrDefault(Constants.DEF_SCOPE_TYPE, Constants.DEFAULT_SCOPE.toString());
-            long scopeId = (long) def.getScope().getOrDefault(Constants.DEF_SCOPE_ID, Constants.DEFAULT_SCOPE_VALUE);
+            long scopeId = Long.parseLong(String.valueOf(def.getScope().getOrDefault(Constants.DEF_SCOPE_ID, Constants.DEFAULT_SCOPE_VALUE)));
             rule.setScope(ChallengeRule.ChallengeScope.valueOf(type));
             rule.setScopeId(scopeId);
         } else {

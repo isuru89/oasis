@@ -21,20 +21,18 @@ package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
+import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.elements.challenges.ChallengeOverEvent;
-import io.github.oasis.elements.challenges.ChallengeRule;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Set;
 
-import static io.github.oasis.engine.RedisAssert.*;
+import static io.github.oasis.engine.RedisAssert.assertKeyNotExist;
+import static io.github.oasis.engine.RedisAssert.assertSorted;
+import static io.github.oasis.engine.RedisAssert.ofSortedEntries;
 
 /**
  * @author Isuru Weerarathna
@@ -50,24 +48,16 @@ public class EngineChallengesTest extends OasisEngineTest {
         Event e5 = TEvent.createKeyValue(U4, TS("2020-04-02 07:15"), EVT_A, 99);
         Event e6 = TEvent.createKeyValue(U3, TS("2020-05-02 07:15"), EVT_A, 99);
 
-        ChallengeRule rule = new ChallengeRule("test.challenge.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setScope(ChallengeRule.ChallengeScope.GAME);
-        rule.setCustomAwardPoints((event, rank, ctx) -> BigDecimal.valueOf(100 * (3-rank+1)));
-        rule.setStartAt(TS("2020-03-01 07:15"));
-        rule.setExpireAt(TS("2020-05-01 07:15"));
-        rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
-        rule.setWinnerCount(3);
-        rule.setPointId("challenge.points");
+        GameDef gameDef = loadRulesFromResource("rules/challenges-basic.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3, e4, e5, e6);
         awaitTerminated();
 
         int gameId = e1.getGameId();
-        String rid = rule.getId();
+        String rid = "CHG000001";
         try (DbContext db = dbPool.createContext()) {
             System.out.println("u1" + db.MAP(ID.getGameUserPointsSummary(gameId, U1)).getAll());
             System.out.println("u2" + db.MAP(ID.getGameUserPointsSummary(gameId, U2)).getAll());
@@ -167,27 +157,17 @@ public class EngineChallengesTest extends OasisEngineTest {
         Event e7 = TEvent.createWithTeam(U5, 2, TS("2020-03-25 11:00"), EVT_A, 64);
         Event e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
 
-        ChallengeRule rule = new ChallengeRule("test.challenge.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setScope(ChallengeRule.ChallengeScope.TEAM);
-        rule.setScopeId(2);
-        rule.setCustomAwardPoints((event, rank, r) -> BigDecimal.valueOf(100 * (3-rank+1)));
-        rule.setStartAt(TS("2020-03-01 07:15"));
-        rule.setExpireAt(TS("2020-05-01 07:15"));
-        rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
-        rule.setWinnerCount(3);
-        rule.setPointId("challenge.points");
-        rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS));
+        GameDef gameDef = loadRulesFromResource("rules/challenges-outoforder.yml");
+        String ruleId = "CHG000001";
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8,
-                ChallengeOverEvent.createFor(e1.getGameId(), rule.getId()));
+                ChallengeOverEvent.createFor(e1.getGameId(), ruleId));
         awaitTerminated();
 
         int gameId = TEvent.GAME_ID;
-        String ruleId = rule.getId();
         assertSorted(dbPool,
                 ID.getGameChallengeKey(gameId, ruleId),
                 ofSortedEntries(
@@ -217,26 +197,16 @@ public class EngineChallengesTest extends OasisEngineTest {
         Event e7 = TEvent.createWithTeam(U5, 2, TS("2020-03-25 11:00"), EVT_A, 64);
         Event e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
 
-        ChallengeRule rule = new ChallengeRule("test.challenge.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setScope(ChallengeRule.ChallengeScope.TEAM);
-        rule.setScopeId(2);
-        rule.setCustomAwardPoints((event, rank, r) -> BigDecimal.valueOf(100 * (3-rank+1)));
-        rule.setStartAt(TS("2020-03-01 07:15"));
-        rule.setExpireAt(TS("2020-05-01 07:15"));
-        rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
-        rule.setWinnerCount(3);
-        rule.setPointId("challenge.points");
-        rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS));
+        GameDef gameDef = loadRulesFromResource("rules/challenges-outoforder.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
         int gameId = TEvent.GAME_ID;
-        String ruleId = rule.getId();
+        String ruleId = "CHG000001";
         assertSorted(dbPool,
                 ID.getGameChallengeKey(gameId, ruleId),
                 ofSortedEntries(

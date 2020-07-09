@@ -1,0 +1,15 @@
+version: 1
+
+badges:
+  - id: BDG00001
+    name: test.badge.rule
+    description: Awards badge if value is >= 50 for streaks
+    kind: streak
+    event: event.a
+    condition: e.value >= 50
+    timeUnit: 10
+    streaks:
+      - streak: 3
+        attribute: 10
+      - streak: 5
+        attribute: 20

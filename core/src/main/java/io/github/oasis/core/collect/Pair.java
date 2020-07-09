@@ -49,8 +49,8 @@ public class Pair<A extends Serializable, B extends Serializable> implements Ser
     @Override
     public String toString() {
         return "Pair{" +
-                "0=" + left +
-                ", 1=" + right +
+                "l=" + left +
+                ", r=" + right +
                 '}';
     }
 }

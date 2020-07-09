@@ -67,7 +67,6 @@ public class RedisAssert {
         try (DbContext db = dbPool.createContext()) {
             Map<String, Long> all = db.SORTED(sortedKey).getRefRangeByRankWithScores(0, Long.MAX_VALUE, refKey)
                     .stream().collect(Collectors.toMap(Record::getMember, Record::getScoreAsLong));
-            System.out.println(all);
             if (all.size() > entries.size()) {
                 Set<String> expected = entries.keySet();
                 Set<String> actual = all.keySet();

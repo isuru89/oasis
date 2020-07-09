@@ -1,0 +1,15 @@
+version: 1
+
+badges:
+  - id: BDG00001
+    name: Initial-Registration
+    description: Awards a badge when a user first registered within the application.
+    event: app.user.registered
+    kind: firstEvent
+
+  - id: BDG0002
+    name: First-Question-On-Topic
+    description: Awards a badge asking the first question for a topic.
+    event: app.question.asked
+    kind: firstEvent
+    condition: e.totalQuestions == 1
