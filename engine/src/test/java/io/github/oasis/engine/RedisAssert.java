@@ -122,7 +122,6 @@ public class RedisAssert {
     public static void assertMap(Db dbPool, String key, Map<String, String> entries) {
         try (DbContext db = dbPool.createContext()) {
             Map<String, String> all = db.MAP(key).getAll();
-            System.out.println(all.keySet());
             if (all.size() > entries.size()) {
                 Set<String> expected = entries.keySet();
                 Set<String> actual = all.keySet();

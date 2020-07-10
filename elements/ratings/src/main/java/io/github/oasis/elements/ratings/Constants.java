@@ -25,6 +25,7 @@ package io.github.oasis.elements.ratings;
 final class Constants {
 
     static final String VAR_RATING_AWARD_PREV_RATING = "previousRating";
+    static final String VAR_RATING_AWARD_CURR_RATING = "currentRating";
 
     static final String RATING_SAVE_FORMAT = "%d:%d:%s";
 

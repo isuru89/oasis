@@ -22,6 +22,7 @@ package io.github.oasis.elements.ratings;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractElementParser;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.EventBiValueResolver;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.EventValueResolver;
@@ -58,6 +59,7 @@ public class RatingParser extends AbstractElementParser {
         RatingRule rule = new RatingRule(id);
         AbstractDef.defToRule(def, rule);
         rule.setDefaultRating(def.getDefaultRating());
+        rule.setCommonPointAwards(deriveCommonAward(def.getAward()));
         if (Objects.nonNull(def.getRatings())) {
             rule.setRatings(def.getRatings().stream()
                     .map(rating -> {
@@ -66,7 +68,7 @@ public class RatingParser extends AbstractElementParser {
                         return new RatingRule.Rating(rating.getPriority(),
                                 rating.getRating(),
                                 criteria,
-                                deriveAward(rating.getAward()),
+                                deriveAward(rating.getAward(), rule),
                                 rating.getPointId());
 
                     }).collect(Collectors.toList()));
@@ -74,9 +76,25 @@ public class RatingParser extends AbstractElementParser {
         return rule;
     }
 
-    private EventValueResolver<Integer> deriveAward(Object award) {
+    private EventBiValueResolver<Integer, Integer> deriveCommonAward(Object award) {
         if (Objects.isNull(award)) {
-            return ZERO_AWARD;
+            return null;
+        }
+
+        if (award instanceof Number) {
+            return (event, input1, input2) -> BigDecimal.valueOf(((Number) award).doubleValue());
+        } else {
+            return Scripting.create((String) award, Constants.VAR_RATING_AWARD_PREV_RATING, Constants.VAR_RATING_AWARD_CURR_RATING);
+        }
+    }
+
+    private EventValueResolver<Integer> deriveAward(Object award, RatingRule ratingRule) {
+        if (Objects.isNull(award)) {
+            if (Objects.isNull(ratingRule.getCommonPointAwards())) {
+                return ZERO_AWARD;
+            } else {
+                return null;
+            }
         }
 
         if (award instanceof Number) {

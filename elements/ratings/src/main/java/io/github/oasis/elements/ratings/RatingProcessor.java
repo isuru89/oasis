@@ -69,7 +69,7 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
                 if (newRating != currRating) {
                     long ts = event.getTimestamp();
                     String id = event.getExternalId();
-                    BigDecimal score = deriveAwardedPoints(event, currRating, rating).setScale(Constants.SCALE, RoundingMode.HALF_UP);
+                    BigDecimal score = deriveAwardedPoints(event, currRating, rating, rule).setScale(Constants.SCALE, RoundingMode.HALF_UP);
                     ratingsMap.setValue(subRatingKey, String.format(RATING_SAVE_FORMAT, newRating, ts, id));
                     Event copiedEvent = Utils.deepClone(event);
                     return List.of(
@@ -83,9 +83,11 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
         return null;
     }
 
-    private BigDecimal deriveAwardedPoints(Event event, int prevRating, RatingRule.Rating rating) {
+    private BigDecimal deriveAwardedPoints(Event event, int prevRating, RatingRule.Rating rating, RatingRule rule) {
         if (rating.getPointAwards() != null) {
             return rating.getPointAwards().resolve(event, prevRating);
+        } else if (rule.getCommonPointAwards() != null) {
+            return rule.getCommonPointAwards().resolve(event, prevRating, rating.getRating());
         }
         return BigDecimal.ZERO;
     }

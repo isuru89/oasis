@@ -21,17 +21,10 @@ package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
-import io.github.oasis.core.elements.matchers.TimeRangeMatcherFactory;
+import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.engine.element.points.PointRule;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 import static io.github.oasis.engine.RedisAssert.assertSorted;
 import static io.github.oasis.engine.RedisAssert.ofSortedEntries;
@@ -58,19 +51,16 @@ public class EnginePointsTest extends OasisEngineTest {
         Event e4 = TEvent.createKeyValue(U2, TS("2019-12-26 11:45"), EVT_A, 98);
         Event e5 = TEvent.createKeyValue(U1, TS("2020-03-25 08:45"), EVT_A, 61);
 
-        PointRule rule = new PointRule("test.point.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long)event.getFieldValue("value") - 50));
-        rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
+        GameDef gameDef = loadRulesFromResource("rules/points-basic.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3, e4, e5);
         awaitTerminated();
 
         // total = 33 + 24 + 48 = 105
-        String rid = rule.getPointId();
+        String rid = "bonus.points";
         long tid = e1.getTeam();
         RedisAssert.assertMap(dbPool,
                 ID.getGameUserPointsSummary(TEvent.GAME_ID, U1),
@@ -177,14 +167,11 @@ public class EnginePointsTest extends OasisEngineTest {
         Event e7 = TEvent.createWithTeam(U1, T1, TS("2020-04-02 07:15"), EVT_A, 83);
         Event e8 = TEvent.createWithTeam(U2, T1, TS("2020-04-03 11:45"), EVT_A, 78);
 
-        PointRule rule = new PointRule("test.point.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long) event.getFieldValue("value") - 50));
-        rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
+        GameDef gameDef = loadRulesFromResource("rules/points-basic.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
@@ -232,21 +219,16 @@ public class EnginePointsTest extends OasisEngineTest {
         Event e7 = TEvent.createKeyValueTz(U2, TSZ("2020-07-02 06:20", UTC), EVT_A, 83, U2_TZ);
         Event e8 = TEvent.createKeyValueTz(U2, TSZ("2020-07-02 14:20", UTC), EVT_A, 53, U2_TZ);
 
-        AbstractDef.TimeRangeDef rangeDef = new AbstractDef.TimeRangeDef(AbstractDef.TIME_RANGE_TYPE_TIME, "10:00", "13:00");
-        PointRule rule = new PointRule("test.point.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setAmountExpression((event, rule1) -> BigDecimal.valueOf((long)event.getFieldValue("value") - 50));
-        rule.setCriteria((event, rule1, ctx) -> (long) event.getFieldValue("value") >= 50);
-        rule.setTimeRangeMatcher(TimeRangeMatcherFactory.create(List.of(rangeDef)));
+        GameDef gameDef = loadRulesFromResource("rules/points-timely.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
         // 11 + 1 + 24
-        String rid = rule.getPointId();
+        String rid = "timely.bonus.points";
         long tid = e1.getTeam();
         RedisAssert.assertMap(dbPool,
                 ID.getGameUserPointsSummary(TEvent.GAME_ID, U1),

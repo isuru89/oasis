@@ -22,7 +22,6 @@ package io.github.oasis.elements.ratings;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.utils.Utils;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -35,6 +34,7 @@ import java.util.stream.Collectors;
 public class RatingDef extends AbstractDef {
 
     private int defaultRating;
+    private Object award;
     private List<ARatingDef> ratings;
 
     @Override
@@ -48,6 +48,14 @@ public class RatingDef extends AbstractDef {
                     .collect(Collectors.toList()));
         }
         return base;
+    }
+
+    public Object getAward() {
+        return award;
+    }
+
+    public void setAward(Object award) {
+        this.award = award;
     }
 
     public List<ARatingDef> getRatings() {
@@ -72,17 +80,6 @@ public class RatingDef extends AbstractDef {
         private String pointId;
         private Object criteria;
         private Object award;
-
-//        public EventValueResolver<Integer> awardResolver() {
-//            if (Objects.isNull(award)) {
-//                return null;
-//            }
-//            if (award instanceof Number) {
-//                return (event, input) -> BigDecimal.valueOf(((Number) award).doubleValue());
-//            } else {
-//                return Scripting.create((String)award, "previousRating");
-//            }
-//        }
 
         List<String> getSensitiveAttributes() {
             return List.of(

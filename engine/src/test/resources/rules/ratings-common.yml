@@ -1,0 +1,22 @@
+version: 1
+
+ratings:
+  - id: RAT000001
+    name: Point-Rating
+    description: Awards points based on the value having. You also can describe common point award in rule level.
+    event: event.a
+    defaultRating: 1
+    award: (currentRating - previousRating) * 10
+    ratings:
+      - priority: 1
+        rating: 3
+        criteria: e.value >= 85
+        pointId: rating.points
+      - priority: 2
+        rating: 2
+        criteria: e.value >= 65
+        pointId: rating.points
+      - priority: 3
+        rating: 1
+        criteria: e.value >= 50
+        pointId: rating.points

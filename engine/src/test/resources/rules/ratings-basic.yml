@@ -1,0 +1,24 @@
+version: 1
+
+ratings:
+  - id: RAT000001
+    name: Point-Rating
+    description: Awards points based on the value having.
+    event: event.a
+    defaultRating: 1
+    ratings:
+      - priority: 1
+        rating: 3
+        criteria: e.value >= 85
+        pointId: rating.points
+        award: (3 - previousRating) * 10
+      - priority: 2
+        rating: 2
+        criteria: e.value >= 65
+        pointId: rating.points
+        award: (2 - previousRating) * 10
+      - priority: 3
+        rating: 1
+        criteria: e.value >= 50
+        pointId: rating.points
+        award: (1 - previousRating) * 10
