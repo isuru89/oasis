@@ -41,3 +41,17 @@ milestones:
         milestone: 50
       - level: 2
         milestone: 100
+
+  - name: Milestone-with-Event-Count
+    description: This is a milestone counting events based on a criteria.
+    event: stackoverflow.question.answered
+    condition: |
+      return e.answeredAt - e.askedAt <= 60 * 60 * 5
+    valueExtractor: 1
+    levels:
+      - level: 1
+        milestone: 5
+      - level: 2
+        milestone: 10
+      - level: 3
+        milestone: 15

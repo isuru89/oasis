@@ -27,14 +27,30 @@ import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Timestamps;
-import io.github.oasis.elements.badges.rules.*;
+import io.github.oasis.core.utils.Utils;
+import io.github.oasis.elements.badges.rules.BadgeRule;
+import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
+import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicOccurrencesRule;
+import io.github.oasis.elements.badges.rules.PeriodicOccurrencesStreakNRule;
+import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
+import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
+import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.github.oasis.elements.badges.BadgeDef.*;
+import static io.github.oasis.elements.badges.BadgeDef.CONDITIONAL_KIND;
+import static io.github.oasis.elements.badges.BadgeDef.FIRST_EVENT_KIND;
+import static io.github.oasis.elements.badges.BadgeDef.PERIODIC_ACCUMULATIONS_KIND;
+import static io.github.oasis.elements.badges.BadgeDef.PERIODIC_ACCUMULATIONS_STREAK_KIND;
+import static io.github.oasis.elements.badges.BadgeDef.PERIODIC_OCCURRENCES_KIND;
+import static io.github.oasis.elements.badges.BadgeDef.PERIODIC_OCCURRENCES_STREAK_KIND;
+import static io.github.oasis.elements.badges.BadgeDef.STREAK_N_KIND;
+import static io.github.oasis.elements.badges.BadgeDef.TIME_BOUNDED_STREAK_KIND;
 
 /**
  * @author Isuru Weerarathna
@@ -56,7 +72,7 @@ public class BadgeParser extends AbstractElementParser {
     private AbstractRule convertDef(BadgeDef def) {
         BadgeRule rule;
         String kind = def.getKind();
-        String id = def.generateUniqueHash();
+        String id = Utils.firstNonNullAsStr(def.getId(), def.generateUniqueHash());
         if (FIRST_EVENT_KIND.equals(kind)) {
             String event = (String) def.getEvent();
             rule = new FirstEventBadgeRule(def.generateUniqueHash(), event, def.getAttribute());

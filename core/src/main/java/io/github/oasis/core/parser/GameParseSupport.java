@@ -17,29 +17,27 @@
  * under the License.
  */
 
-package io.github.oasis.engine.element.points;
+package io.github.oasis.core.parser;
 
-import io.github.oasis.core.Event;
-import io.github.oasis.core.events.BasePointEvent;
-
-import java.math.BigDecimal;
+import io.github.oasis.core.elements.GameDef;
+import io.github.oasis.core.exception.OasisParseException;
 
 /**
- * Represents an event related to the point signal.
+ * Parses a game file and returns a game engine compatible instance.
+ *
+ * The version based parsing must be taken care by the corresponding implementation itself.
  *
  * @author Isuru Weerarathna
  */
-public class PointEvent extends BasePointEvent {
+public interface GameParseSupport {
 
-    public PointEvent(String pointId, BigDecimal points, Event eventRef) {
-        super(pointId, BasePointEvent.DEFAULT_POINTS_KEY, points, eventRef);
-    }
+    /**
+     * Parses the given input (any arbitrary format) and converts to a game definition instance.
+     *
+     * @param input filepath, input stream or any compatible.
+     * @return parsed game definition object.
+     * @throws OasisParseException throws when any error occurred while parsing.
+     */
+    GameDef parse(Object input) throws OasisParseException;
 
-    @Override
-    public String toString() {
-        return "PointEvent{" +
-                "id=" + getPointId() + ", " +
-                "score=" + getPoints() +
-                "}";
-    }
 }

@@ -151,6 +151,70 @@ public class RatingsTest extends AbstractRuleTest {
         Assertions.assertEquals(RatingsSink.class, signal.sinkHandler());
     }
 
+    @DisplayName("Common Award: Rating go up")
+    @Test
+    public void testCommonAwardGoUpRating() {
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 57);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 83);
+        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
+
+        List<Signal> signals = new ArrayList<>();
+        RuleContext<RatingRule> ruleContext = createRule(signals,
+                aRating(1, 3, checkGt(85), null),
+                aRating(2, 2, checkGt(65), null),
+                aRating(3, 1, checkGt(50), null)
+        );
+        RatingRule rule = ruleContext.getRule();
+        rule.setCommonPointAwards((event, prevRating, currRating) -> BigDecimal.valueOf((currRating - prevRating) * 10.0));
+        Assertions.assertEquals(3, rule.getRatings().size());
+        Assertions.assertEquals(DEF_RATING, rule.getDefaultRating());
+        RatingProcessor processor = new RatingProcessor(pool, ruleContext);
+        submitOrder(processor, e1, e2, e3);
+
+        System.out.println(signals);
+        assertStrict(signals,
+                new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e2.getTimestamp(), e2),
+                new RatingPointsSignal(rule.getId(), POINT_ID, 2, asDecimal(10), e2)
+        );
+
+        RatingChangedSignal signal = (RatingChangedSignal) signals.stream().filter(s -> s instanceof RatingChangedSignal).findFirst().orElse(null);
+        Assertions.assertNotNull(signal);
+        Assertions.assertEquals(RatingsSink.class, signal.sinkHandler());
+    }
+
+    @DisplayName("Overridden Award: Rating go up")
+    @Test
+    public void testOverriddenAwardGoUpRating() {
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 66);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 89);
+        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
+
+        List<Signal> signals = new ArrayList<>();
+        RuleContext<RatingRule> ruleContext = createRule(signals,
+                aRating(1, 3, checkGt(85), null),
+                aRating(2, 2, checkGt(65), (event, input) -> BigDecimal.valueOf(100)),
+                aRating(3, 1, checkGt(50), null)
+        );
+        RatingRule rule = ruleContext.getRule();
+        rule.setCommonPointAwards((event, prevRating, currRating) -> BigDecimal.valueOf((currRating - prevRating) * 10.0));
+        Assertions.assertEquals(3, rule.getRatings().size());
+        Assertions.assertEquals(DEF_RATING, rule.getDefaultRating());
+        RatingProcessor processor = new RatingProcessor(pool, ruleContext);
+        submitOrder(processor, e1, e2, e3);
+
+        System.out.println(signals);
+        assertStrict(signals,
+                new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e1.getTimestamp(), e1),
+                new RatingPointsSignal(rule.getId(), POINT_ID, 2, asDecimal(100), e1),
+                new RatingChangedSignal(rule.getId(), 2, 3, e2.getTimestamp(), e2),
+                new RatingPointsSignal(rule.getId(), POINT_ID, 3, asDecimal(10), e2)
+        );
+
+        RatingChangedSignal signal = (RatingChangedSignal) signals.stream().filter(s -> s instanceof RatingChangedSignal).findFirst().orElse(null);
+        Assertions.assertNotNull(signal);
+        Assertions.assertEquals(RatingsSink.class, signal.sinkHandler());
+    }
+
     @DisplayName("Rating stays after goes up")
     @Test
     public void testRatingStays() {

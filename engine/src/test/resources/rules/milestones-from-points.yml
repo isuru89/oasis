@@ -1,0 +1,20 @@
+version: 1
+
+points:
+  - name: Test-Point-Rule
+    description: Generates points if value is greater than 50
+    pointId: star.points
+    event: event.a
+    condition: "e.value >= 50"
+    award: "e.value - 50"
+
+milestones:
+  - name: Milestone-from-Points
+    description: This is a milestone which processes points.
+    pointIds:
+      - star.points
+    levels:
+      - level: 1
+        milestone: 100
+      - level: 2
+        milestone: 200

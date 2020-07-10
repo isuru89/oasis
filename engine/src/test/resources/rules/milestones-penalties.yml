@@ -1,0 +1,14 @@
+version: 1
+
+milestones:
+  - name: Milestone-with-Penalties
+    description: This is a milestone which counts the penalties too.
+    event: event.a
+    valueExtractor: e.value
+    flags:
+      - TRACK_PENALTIES
+    levels:
+      - level: 1
+        milestone: 100
+      - level: 2
+        milestone: 200

@@ -20,6 +20,7 @@
 package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.EventBiValueResolver;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventValueResolver;
 
@@ -33,6 +34,7 @@ import java.util.List;
 public class RatingRule extends AbstractRule {
 
     private int defaultRating;
+    private EventBiValueResolver<Integer, Integer> commonPointAwards;
     private List<Rating> ratings;
 
     public RatingRule(String id) {
@@ -54,6 +56,14 @@ public class RatingRule extends AbstractRule {
     public void setRatings(List<Rating> ratings) {
         this.ratings = new ArrayList<>(ratings);
         Collections.sort(this.ratings);
+    }
+
+    public EventBiValueResolver<Integer, Integer> getCommonPointAwards() {
+        return commonPointAwards;
+    }
+
+    public void setCommonPointAwards(EventBiValueResolver<Integer, Integer> commonPointAwards) {
+        this.commonPointAwards = commonPointAwards;
     }
 
     public static class Rating implements Comparable<Rating> {

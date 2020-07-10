@@ -17,29 +17,35 @@
  * under the License.
  */
 
-package io.github.oasis.engine.element.points;
+package io.github.oasis.core.elements;
 
-import io.github.oasis.core.Event;
-import io.github.oasis.core.events.BasePointEvent;
+import io.github.oasis.core.external.messages.PersistedDef;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Represents an event related to the point signal.
- *
  * @author Isuru Weerarathna
  */
-public class PointEvent extends BasePointEvent {
+public class GameDef {
 
-    public PointEvent(String pointId, BigDecimal points, Event eventRef) {
-        super(pointId, BasePointEvent.DEFAULT_POINTS_KEY, points, eventRef);
+    private int version;
+
+    private final List<PersistedDef> ruleDefinitions = new ArrayList<>();
+
+    public int getVersion() {
+        return version;
     }
 
-    @Override
-    public String toString() {
-        return "PointEvent{" +
-                "id=" + getPointId() + ", " +
-                "score=" + getPoints() +
-                "}";
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    public void addRuleDefinition(PersistedDef def) {
+        ruleDefinitions.add(def);
+    }
+
+    public List<PersistedDef> getRuleDefinitions() {
+        return ruleDefinitions;
     }
 }

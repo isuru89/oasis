@@ -55,6 +55,10 @@ public abstract class BasePointEvent implements Event {
         return points;
     }
 
+    public String getPointId() {
+        return pointId;
+    }
+
     @Override
     public Map<String, Object> getAllFieldValues() {
         return eventRef.getAllFieldValues();

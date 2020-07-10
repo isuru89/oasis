@@ -17,29 +17,17 @@
  * under the License.
  */
 
-package io.github.oasis.engine.element.points;
-
-import io.github.oasis.core.Event;
-import io.github.oasis.core.events.BasePointEvent;
-
-import java.math.BigDecimal;
+package io.github.oasis.core.exception;
 
 /**
- * Represents an event related to the point signal.
- *
  * @author Isuru Weerarathna
  */
-public class PointEvent extends BasePointEvent {
-
-    public PointEvent(String pointId, BigDecimal points, Event eventRef) {
-        super(pointId, BasePointEvent.DEFAULT_POINTS_KEY, points, eventRef);
+public class OasisParseException extends OasisException {
+    public OasisParseException(String message) {
+        super(message);
     }
 
-    @Override
-    public String toString() {
-        return "PointEvent{" +
-                "id=" + getPointId() + ", " +
-                "score=" + getPoints() +
-                "}";
+    public OasisParseException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

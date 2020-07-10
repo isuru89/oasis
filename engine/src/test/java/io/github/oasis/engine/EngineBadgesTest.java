@@ -21,14 +21,13 @@ package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -44,18 +43,15 @@ public class EngineBadgesTest extends OasisEngineTest {
         Event e5 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 76);
         Event e6 = TEvent.createKeyValue(TS("2020-04-05 11:15"), EVT_A, 26);
 
-        StreakNBadgeRule rule = new StreakNBadgeRule("test.badge.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setStreaks(Map.of(3, 10, 5, 20));
-        rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
-        rule.setRetainTime(10);
+        GameDef gameDef = loadRulesFromResource("rules/badges-basic.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        List<AbstractRule> rules = submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3, e4, e5, e6);
         awaitTerminated();
 
+        String rid = findRuleByName(rules, "test.badge.rule").getId();
         RedisAssert.assertMap(dbPool, ID.getGameUserBadgesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(
                         "all","2",
@@ -78,20 +74,19 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "attr:20:Q202001","1",
                         "attr:20:W202013","1",
                         "attr:20:Y2020","1",
-                        "rule:test.badge.rule:10","1",
-                        "rule:test.badge.rule:10:D20200331","1",
-                        "rule:test.badge.rule:10:M202003","1",
-                        "rule:test.badge.rule:10:Q202001","1",
-                        "rule:test.badge.rule:10:W202014","1",
-                        "rule:test.badge.rule:10:Y2020","1",
-                        "rule:test.badge.rule:20","1",
-                        "rule:test.badge.rule:20:D20200324","1",
-                        "rule:test.badge.rule:20:M202003","1",
-                        "rule:test.badge.rule:20:Q202001","1",
-                        "rule:test.badge.rule:20:W202013","1",
-                        "rule:test.badge.rule:20:Y2020","1"
+                        "rule:BDG00001:10","1",
+                        "rule:BDG00001:10:D20200331","1",
+                        "rule:BDG00001:10:M202003","1",
+                        "rule:BDG00001:10:Q202001","1",
+                        "rule:BDG00001:10:W202014","1",
+                        "rule:BDG00001:10:Y2020","1",
+                        "rule:BDG00001:20","1",
+                        "rule:BDG00001:20:D20200324","1",
+                        "rule:BDG00001:20:M202003","1",
+                        "rule:BDG00001:20:Q202001","1",
+                        "rule:BDG00001:20:W202013","1",
+                        "rule:BDG00001:20:Y2020","1"
                 ));
-        String rid = rule.getId();
         RedisAssert.assertSorted(dbPool, ID.getGameUserBadgesLog(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofSortedEntries(
                         rid + ":10:" + e1.getTimestamp(), e5.getTimestamp(),

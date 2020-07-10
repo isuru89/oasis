@@ -144,7 +144,7 @@ class ChallengeParserTest {
 
     private ChallengeDef createTestChallenge() {
         ChallengeDef def = new ChallengeDef();
-        def.setId(1);
+        def.setId("CHAL00003");
         def.setName("challenge-1");
         def.setStartAt(System.currentTimeMillis());
         def.setExpireAt(LocalDate.of(2020, 12, 31).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
@@ -153,7 +153,7 @@ class ChallengeParserTest {
         def.setCriteria("e.data.reputations > 200");
         def.setScope(Map.of(Constants.DEF_SCOPE_TYPE, ChallengeRule.ChallengeScope.TEAM.toString(),
                 Constants.DEF_SCOPE_ID, 1000L));
-        def.setPointAwards("100 * (50 - position + 1)");
+        def.setPointAwards("100 * (50 - rank + 1)");
 
         return def;
     }

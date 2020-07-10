@@ -21,19 +21,13 @@ package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.EventExecutionFilter;
-import io.github.oasis.core.elements.EventValueResolver;
-import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
+import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.elements.ratings.RatingRule;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Arrays;
 
 /**
  * @author Isuru Weerarathna
@@ -46,22 +40,14 @@ public class EngineRatingsTest extends OasisEngineTest {
         Event e2 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 66);
         Event e3 = TEvent.createKeyValue(TS("2020-03-24 20:15"), EVT_A, 54);
 
-        RatingRule rule = new RatingRule("test.rating.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setDefaultRating(1);
-        rule.setRatings(Arrays.asList(
-                new RatingRule.Rating(1, 3, checkGt(85), pointAward(3), "rating.points"),
-                new RatingRule.Rating(2, 2, checkGt(65), pointAward(2), "rating.points"),
-                new RatingRule.Rating(3, 1, checkGt(50), pointAward(1), "rating.points")
-        ));
+        GameDef gameDef = loadRulesFromResource("rules/ratings-basic.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3);
         awaitTerminated();
 
-        String rid = rule.getId();
         RedisAssert.assertMap(dbPool, ID.getGameUserPointsSummary(e1.getGameId(), e1.getUser()),
                 RedisAssert.ofEntries(
                         "all","0",
@@ -84,6 +70,8 @@ public class EngineRatingsTest extends OasisEngineTest {
                         "team:1:W202013","0",
                         "team:1:Y2020","0"
                 ));
+
+        String rid = "RAT000001";
         RedisAssert.assertSorted(dbPool, ID.getGameUserRatingsLog(e1.getGameId(), e1.getUser()),
                 RedisAssert.ofSortedEntries(
                         rid + ":1:3:" + e1.getExternalId(), e1.getTimestamp(),
@@ -98,18 +86,11 @@ public class EngineRatingsTest extends OasisEngineTest {
         Event e2 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 66);
         Event e3 = TEvent.createKeyValue(TS("2020-03-24 20:15"), EVT_A, 68);
 
-        RatingRule rule = new RatingRule("test.rating.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setDefaultRating(1);
-        rule.setRatings(Arrays.asList(
-                new RatingRule.Rating(1, 3, checkGt(85), pointAward(3), "rating.points"),
-                new RatingRule.Rating(2, 2, checkGt(65), pointAward(2), "rating.points"),
-                new RatingRule.Rating(3, 1, checkGt(50), pointAward(1), "rating.points")
-        ));
+        GameDef gameDef = loadRulesFromResource("rules/ratings-common.yml");
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        submitRules(engine, TEvent.GAME_ID, gameDef);
         engine.submitAll(e1, e2, e3);
         awaitTerminated();
 
@@ -118,7 +99,7 @@ public class EngineRatingsTest extends OasisEngineTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String rid = rule.getId();
+        String rid = "RAT000001";
         RedisAssert.assertSorted(dbPool, ID.getGameUserRatingsLog(e1.getGameId(), e1.getUser()),
                 RedisAssert.ofSortedEntries(
                         rid + ":1:3:" + e1.getExternalId(), e1.getTimestamp(),
@@ -147,15 +128,6 @@ public class EngineRatingsTest extends OasisEngineTest {
                         "team:1:Y2020","10"
                 ));
 
-    }
-
-
-    private EventValueResolver<Integer> pointAward(int currRating) {
-        return (event, prevRating) -> BigDecimal.valueOf((currRating - prevRating) * 10.0);
-    }
-
-    private EventExecutionFilter checkGt(long margin) {
-        return (e, r, ctx) -> (long) e.getFieldValue("value") >= margin;
     }
 
 }

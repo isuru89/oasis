@@ -57,7 +57,7 @@ class PointParserTest {
     @Test
     void parse() {
         PointDef pointDef = new PointDef();
-        pointDef.setId(1);
+        pointDef.setId("POINT00001");
         pointDef.setName("point-1");
         pointDef.setAward(10.0);
         pointDef.setEvent("event.a");
@@ -87,7 +87,7 @@ class PointParserTest {
     @Test
     void convertConstAward() {
         PointDef pointDef = new PointDef();
-        pointDef.setId(1);
+        pointDef.setId("POINT000002");
         pointDef.setName("point-1");
         pointDef.setAward(10.0);
         pointDef.setEvent("event.a");
@@ -110,7 +110,7 @@ class PointParserTest {
     @Test
     void convertDynamicAward() {
         PointDef pointDef = new PointDef();
-        pointDef.setId(1);
+        pointDef.setId("POINT00003");
         pointDef.setName("point-1");
         pointDef.setAward("e.data.votes + 100");
         pointDef.setEvent("event.a");
@@ -131,7 +131,7 @@ class PointParserTest {
     @Test
     void convertCustomPointId() {
         PointDef pointDef = new PointDef();
-        pointDef.setId(1);
+        pointDef.setId("POINT00004");
         pointDef.setName("point-1");
         pointDef.setAward("e.data.votes + 100");
         pointDef.setEvent("event.a");
@@ -155,7 +155,7 @@ class PointParserTest {
     @Test
     void convertWithTimeRanges() {
         PointDef pointDef = new PointDef();
-        pointDef.setId(1);
+        pointDef.setId("POINT000005");
         pointDef.setName("point-1");
         pointDef.setAward("e.data.votes + 100");
         pointDef.setEvent("event.a");
@@ -183,7 +183,7 @@ class PointParserTest {
     @Test
     void convertWithCappedPoints() {
         PointDef pointDef = new PointDef();
-        pointDef.setId(1);
+        pointDef.setId("POINT000007");
         pointDef.setName("point-1");
         pointDef.setAward("e.data.votes + 100");
         pointDef.setEvent("event.a");

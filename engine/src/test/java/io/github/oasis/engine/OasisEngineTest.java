@@ -21,24 +21,32 @@ package io.github.oasis.engine;
 
 import akka.actor.ActorRef;
 import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.db.redis.RedisEventLoader;
 import io.github.oasis.elements.badges.BadgesModuleFactory;
 import io.github.oasis.elements.challenges.ChallengesModuleFactory;
 import io.github.oasis.elements.milestones.MilestonesModuleFactory;
 import io.github.oasis.elements.ratings.RatingsModuleFactory;
+import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.element.points.PointsModuleFactory;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -114,6 +122,30 @@ public class OasisEngineTest {
     protected void submit(ActorRef actorRef, TEvent... events) {
         for (TEvent event : events) {
             actorRef.tell(event, actorRef);
+        }
+    }
+
+    protected AbstractRule findRuleByName(List<AbstractRule> rules, String name) {
+        return rules.stream().filter(rule -> rule.getName().equals(name)).findFirst().orElseThrow();
+    }
+
+    protected List<AbstractRule> submitRules(OasisEngine engine, int gameId, GameDef gameDef) {
+        List<PersistedDef> ruleDefinitions = gameDef.getRuleDefinitions();
+        List<AbstractRule> rules = new ArrayList<>();
+        for (PersistedDef def : ruleDefinitions) {
+            AbstractRule rule = engine.getContext().getParsers().parseToRule(def);
+            engine.submit(RuleAddedMessage.create(gameId, rule));
+            rules.add(rule);
+        }
+        return rules;
+    }
+
+    protected GameDef loadRulesFromResource(String location) {
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(location)) {
+            GameParserYaml parser = new GameParserYaml();
+            return parser.parse(is);
+        } catch (IOException | OasisParseException e) {
+            throw new IllegalArgumentException("Unable to parse classpath resource! " + location, e);
         }
     }
 

@@ -52,12 +52,20 @@ import java.util.List;
  */
 public class BadgesModule extends ElementModule {
 
+    private static final String BADGES = "badges";
+
+    private final List<String> keysSupported = List.of(BADGES);
     private final List<Class<? extends AbstractSink>> sinks = List.of(BadgeSink.class);
     private final ElementParser parser = new BadgeParser();
 
     @Override
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
         return List.of(BadgeDef.class);
+    }
+
+    @Override
+    public List<String> getSupportedDefinitionKeys() {
+        return keysSupported;
     }
 
     @Override

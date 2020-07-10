@@ -27,6 +27,7 @@ import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.utils.Numbers;
+import io.github.oasis.core.utils.Utils;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -50,7 +51,7 @@ public class ChallengeParser extends AbstractElementParser {
     }
 
     private ChallengeRule toRule(ChallengeDef def) {
-        String id = def.generateUniqueHash();
+        String id = Utils.firstNonNullAsStr(def.getId(), def.generateUniqueHash());
         ChallengeRule rule = new ChallengeRule(id);
         AbstractDef.defToRule(def, rule);
 
@@ -75,7 +76,7 @@ public class ChallengeParser extends AbstractElementParser {
 
         if (Objects.nonNull(def.getScope())) {
             String type = (String) def.getScope().getOrDefault(Constants.DEF_SCOPE_TYPE, Constants.DEFAULT_SCOPE.toString());
-            long scopeId = (long) def.getScope().getOrDefault(Constants.DEF_SCOPE_ID, Constants.DEFAULT_SCOPE_VALUE);
+            long scopeId = Long.parseLong(String.valueOf(def.getScope().getOrDefault(Constants.DEF_SCOPE_ID, Constants.DEFAULT_SCOPE_VALUE)));
             rule.setScope(ChallengeRule.ChallengeScope.valueOf(type));
             rule.setScopeId(scopeId);
         } else {

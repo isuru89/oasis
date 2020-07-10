@@ -23,25 +23,16 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import io.github.oasis.core.Event;
-import io.github.oasis.core.configs.OasisConfigs;
-import io.github.oasis.core.elements.ElementModuleFactory;
 import io.github.oasis.core.exception.OasisException;
-import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.core.external.SourceFunction;
 import io.github.oasis.core.external.messages.OasisCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
-import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
-import io.github.oasis.engine.element.points.PointsModuleFactory;
 import io.github.oasis.engine.ext.ExternalParty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.ServiceLoader;
-import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -119,5 +110,9 @@ public class OasisEngine implements SourceFunction {
         for (Object event : events) {
             submit(event);
         }
+    }
+
+    EngineContext getContext() {
+        return context;
     }
 }

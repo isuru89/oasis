@@ -28,12 +28,12 @@ final class Constants {
     static final long DEFAULT_EXPIRE_TIME = Long.MAX_VALUE;
     static final int DEFAULT_WINNER_COUNT = Integer.MAX_VALUE;
 
-    static final String VARIABLE_POSITION = "position";
+    static final String VARIABLE_POSITION = "rank";
 
     static final String DEF_SCOPE_TYPE = "type";
     static final String DEF_SCOPE_ID = "id";
 
-    static final String DEFAULT_SCOPE_VALUE = "0";
+    static final long DEFAULT_SCOPE_VALUE = 0;
 
     static final ChallengeRule.ChallengeScope DEFAULT_SCOPE = ChallengeRule.ChallengeScope.GAME;
 

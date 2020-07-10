@@ -17,6 +17,15 @@ points:
         to: "06:00"
     award: 20
 
+  - name: Thank-God-Its-Weekend
+    description: Awards +10 bonus for every order placed on Weekends,
+    event: order.accepted
+    pointId: star.points
+    timeRanges:
+      - type: weekly
+        when: "Friday,Saturday,Sunday"
+    award: 10
+
   - name: Special-Seasonal-Award
     description: Awards double bonus points for every purchase done on december
     event: order.accepted

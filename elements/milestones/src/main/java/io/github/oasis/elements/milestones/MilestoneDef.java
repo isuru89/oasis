@@ -20,6 +20,7 @@
 package io.github.oasis.elements.milestones;
 
 import io.github.oasis.core.elements.AbstractDef;
+import io.github.oasis.core.utils.Utils;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
 public class MilestoneDef extends AbstractDef {
 
     private Object pointIds;
-    private String valueExtractor;
+    private Object valueExtractor;
     private List<MilestoneLevel> levels;
 
     void initialize() {
@@ -51,7 +52,7 @@ public class MilestoneDef extends AbstractDef {
     @Override
     protected List<String> getSensitiveAttributes() {
         List<String> base = new ArrayList<>(super.getSensitiveAttributes());
-        base.add(valueExtractor);
+        base.add(Utils.firstNonNullAsStr(valueExtractor, EMPTY));
         if (Objects.nonNull(levels)) {
             base.addAll(levels.stream()
                     .sorted(Comparator.comparingInt(MilestoneLevel::getLevel))
@@ -61,24 +62,11 @@ public class MilestoneDef extends AbstractDef {
         return base;
     }
 
-    //    @Override
-//    public AbstractRule toRule() {
-//        MilestoneRule rule = new MilestoneRule(generateUniqueHash());
-//        super.toRule(rule);
-//
-//        rule.setValueExtractor(Scripting.create(valueExtractor,
-//                RULE_VAR, CONTEXT_VAR));
-//        rule.setLevels(levels.stream()
-//            .map(l -> new MilestoneRule.Level(l.level, l.milestone))
-//            .collect(Collectors.toList()));
-//        return rule;
-//    }
-
-    public String getValueExtractor() {
+    public Object getValueExtractor() {
         return valueExtractor;
     }
 
-    public void setValueExtractor(String valueExtractor) {
+    public void setValueExtractor(Object valueExtractor) {
         this.valueExtractor = valueExtractor;
     }
 

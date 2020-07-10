@@ -47,7 +47,7 @@ class RatingParserTest {
     @Test
     void convert() {
         RatingDef def = new RatingDef();
-        def.setId(1);
+        def.setId("RATING00001");
         def.setName("rating-1");
         def.setDefaultRating(1);
         def.setRatings(List.of(
@@ -95,6 +95,50 @@ class RatingParserTest {
         EventJson eventJson = new EventJson();
         Assertions.assertEquals(new BigDecimal("4.0"), fifthRating.getPointAwards().resolve(eventJson, 2));
         Assertions.assertEquals(new BigDecimal("20.0"), fifthRating.getPointAwards().resolve(eventJson, 10));
+    }
+
+    @Test
+    void convertWhenCommonAward() {
+        RatingDef def = new RatingDef();
+        def.setId("RATING00001");
+        def.setName("rating-1");
+        def.setDefaultRating(1);
+        def.setAward("(currentRating - previousRating) * 100");
+        def.setRatings(List.of(
+                aRatingDef(1, 1, "p1", 20, "e.data.value > 100"),
+                aRatingDef(3, 3, "p3", -20, "e.data.value < 0"),
+                aRatingDef(2, 2, "p2", 10, "e.data.value > 0 && e.data.value < 100"),
+                aRatingDef(4, 4, "p4", null, "e.data.value < -100"),
+                aRatingDef(5, 5, "p5", "previousRating * 2", "e.data.value > 10000")
+        ));
+
+        AbstractRule abstractRule = parser.convert(def);
+
+        Assertions.assertTrue(abstractRule instanceof RatingRule);
+        RatingRule rule = (RatingRule) abstractRule;
+        Assertions.assertEquals(def.getDefaultRating(), rule.getDefaultRating());
+        Assertions.assertEquals(def.getRatings().size(), rule.getRatings().size());
+        Assertions.assertNotNull(rule.getCommonPointAwards());
+        // ratings must be ordered by priority
+        Assertions.assertEquals(5, rule.getRatings().stream()
+                .map(RatingRule.Rating::getPriority)
+                .reduce(0, (val1, val2) -> {
+                    Assertions.assertTrue(val1 < val2);
+                    return val2;
+                })
+                .intValue());
+
+        RatingRule.Rating secondRating = rule.getRatings().stream().filter(rating -> rating.getPriority() == 2).findFirst().orElse(null);
+        Assertions.assertNotNull(secondRating);
+        Assertions.assertEquals(2, secondRating.getRating());
+        Assertions.assertEquals("p2", secondRating.getPointId());
+        Assertions.assertNotNull(secondRating.getCriteria());
+        Assertions.assertEquals(new BigDecimal("10.0"), secondRating.getPointAwards().resolve(null, 0));
+        Assertions.assertEquals(new BigDecimal("10.0"), secondRating.getPointAwards().resolve(null, 1));
+
+        RatingRule.Rating fourthRating = rule.getRatings().stream().filter(rating -> rating.getPriority() == 4).findFirst().orElse(null);
+        Assertions.assertNotNull(fourthRating);
+        Assertions.assertNull(fourthRating.getPointAwards());
     }
 
     private RatingDef.ARatingDef aRatingDef(int priority, int rating, String pointId, Object award, String criteria) {

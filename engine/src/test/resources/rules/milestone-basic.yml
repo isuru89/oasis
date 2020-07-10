@@ -1,0 +1,19 @@
+version: 1
+
+milestones:
+  - id: MILE000001
+    name: Milestone-Basic
+    description: This is a basic milestone which accumulates using event values.
+    event: event.a
+    valueExtractor: e.value
+    flags:
+      - SKIP_NEGATIVE_VALUES
+    levels:
+      - level: 1
+        milestone: 100
+      - level: 2
+        milestone: 200
+      - level: 3
+        milestone: 300
+      - level: 4
+        milestone: 500

@@ -1,0 +1,14 @@
+version: 1
+
+points:
+  - id: PNT00002
+    name: Time-Bonus
+    description: Awards bonus points when invoked between 10am - 1pm.
+    event: event.a
+    condition: e.value >= 50
+    timeRanges:
+      - type: time
+        from: "10:00"
+        to: "13:00"
+    award: e.value - 50
+    pointId: timely.bonus.points
