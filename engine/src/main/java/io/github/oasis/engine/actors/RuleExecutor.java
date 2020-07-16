@@ -28,6 +28,8 @@ import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
+import io.github.oasis.engine.ext.ExternalParty;
+import io.github.oasis.engine.ext.ExternalPartyImpl;
 import io.github.oasis.engine.ext.RulesImpl;
 import io.github.oasis.engine.factory.Processors;
 import io.github.oasis.engine.model.RuleExecutionContext;
@@ -54,6 +56,8 @@ public class RuleExecutor extends OasisBaseActor {
 
     private final Processors processors;
 
+    private ExternalPartyImpl eventSource;
+
     public RuleExecutor(EngineContext context) {
         super(context);
 
@@ -67,6 +71,13 @@ public class RuleExecutor extends OasisBaseActor {
                 .match(EventMessage.class, this::processEvent)
                 .match(OasisRuleMessage.class, this::ruleModified)
                 .build();
+    }
+
+    @Override
+    public void preStart() throws Exception {
+        super.preStart();
+
+        eventSource = ExternalParty.EXTERNAL_PARTY.get(getContext().getSystem());
     }
 
     @Override
@@ -91,15 +102,28 @@ public class RuleExecutor extends OasisBaseActor {
         Event event = eventMessage.getEvent();
         log.info("[{}#{}] Processing event {}", parentId, myId, event);
         Iterator<AbstractRule> allRulesForEvent = rules.getAllRulesForEvent(event);
-        while (allRulesForEvent.hasNext()) {
-            AbstractRule rule = allRulesForEvent.next();
+        try {
+            while (allRulesForEvent.hasNext()) {
+                AbstractRule rule = allRulesForEvent.next();
 
-            // create processor
-            AbstractProcessor<? extends AbstractRule, ? extends Signal> processor = cache.computeIfAbsent(rule.getId(),
-                    s -> processors.createProcessor(rule, ruleExecutionContext));
+                // create processor
+                AbstractProcessor<? extends AbstractRule, ? extends Signal> processor = cache.computeIfAbsent(rule.getId(),
+                        s -> processors.createProcessor(rule, ruleExecutionContext));
 
-            // execute processor using event
-            processor.accept(event, eventMessage.getContext());
+                // execute processor using event
+                processor.accept(event, eventMessage.getContext());
+            }
+
+            Object messageId = eventMessage.getExternalMessageId();
+            log.debug("[{}#{}] Acknowledging successful event for message id {}", parentId, myId, messageId);
+            eventSource.ackMessage(messageId);
+
+        } catch (Exception e) {
+            log.error("[{}#{}] Error occurred while processing event {}", parentId, myId, event, e);
+
+            Object messageId = eventMessage.getExternalMessageId();
+            log.debug("[{}#{}] Acknowledging failure event for message id {}", parentId, myId, messageId);
+            eventSource.nackMessage(messageId);
         }
     }
 

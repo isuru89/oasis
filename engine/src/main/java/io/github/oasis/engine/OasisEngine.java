@@ -30,6 +30,7 @@ import io.github.oasis.core.external.messages.OasisCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
+import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.ext.ExternalParty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,11 +100,17 @@ public class OasisEngine implements SourceFunction {
 
     @Override
     public void submit(Event event) {
-        supervisor.tell(event, supervisor);
+        supervisor.tell(new EventMessage(event, null, null), supervisor);
     }
 
     public void submit(Object message) {
-        supervisor.tell(message, supervisor);
+        if (message instanceof Event) {
+            submit((Event) message);
+        } else if (message instanceof OasisCommand) {
+            submit((OasisCommand) message);
+        } else {
+            supervisor.tell(message, supervisor);
+        }
     }
 
     public void submitAll(Object... events) {

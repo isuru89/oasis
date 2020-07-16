@@ -47,6 +47,16 @@ public class ManualSourceStream implements SourceStreamSupport {
     }
 
     @Override
+    public void ackMessage(Object messageId) {
+
+    }
+
+    @Override
+    public void nackMessage(Object messageId) {
+
+    }
+
+    @Override
     public void close() {
 
     }

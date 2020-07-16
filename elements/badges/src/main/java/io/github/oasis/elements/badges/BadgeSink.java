@@ -19,18 +19,19 @@
 
 package io.github.oasis.elements.badges;
 
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.utils.TimeOffset;
-import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
-import io.github.oasis.core.elements.Signal;
 import io.github.oasis.elements.badges.signals.StreakBadgeSignal;
 import io.github.oasis.elements.badges.signals.TemporalBadgeSignal;
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public class BadgeSink extends AbstractSink {
     }
 
     @Override
-    public void consume(Signal badgeSignal, AbstractRule rule, ExecutionContext context) {
+    public void consume(Signal badgeSignal, AbstractRule rule, ExecutionContext context) throws OasisRuntimeException {
         try (DbContext db = dbPool.createContext()) {
             BadgeSignal signal = (BadgeSignal) badgeSignal;
 
@@ -74,6 +75,7 @@ public class BadgeSink extends AbstractSink {
             boolean added = badgeLog.add(logMember, signal.getOccurredTimestamp());
 
             if (!added) {
+                LOG.info("Already added badge received! Skipping signal {}.", signal);
                 return;
             }
 
@@ -107,7 +109,7 @@ public class BadgeSink extends AbstractSink {
             badgesMap.incrementByInt(attrPfx + COLON + tcx.getQuarter(), addition);
 
         } catch (IOException e) {
-            LOG.error("Error persisting badges metrics!", e);
+            throw new OasisRuntimeException("Error occurred while processing badge signal!", e);
         }
     }
 

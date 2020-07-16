@@ -19,8 +19,9 @@
 
 package io.github.oasis.core.elements;
 
-import io.github.oasis.core.external.Db;
 import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.exception.OasisRuntimeException;
+import io.github.oasis.core.external.Db;
 
 /**
  * @author Isuru Weerarathna
@@ -35,7 +36,7 @@ public abstract class AbstractSink {
         this.dbPool = dbPool;
     }
 
-    public abstract void consume(Signal signal, AbstractRule rule, ExecutionContext context);
+    public abstract void consume(Signal signal, AbstractRule rule, ExecutionContext context) throws OasisRuntimeException;
 
     @Override
     public String toString() {

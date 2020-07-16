@@ -26,6 +26,7 @@ import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.context.GameContext;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.engine.EngineContext;
+import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.routers.GameRouting;
@@ -77,16 +78,17 @@ public class OasisSupervisor extends OasisBaseActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(Event.class, this::forwardEvent)
+                .match(EventMessage.class, this::forwardEvent)
                 .match(OasisRuleMessage.class, this::ruleSpecificCommand)
                 .match(GameCommand.class, this::gameSpecificCommand)
                 .build();
     }
 
-    private void forwardEvent(Event event) {
+    private void forwardEvent(EventMessage eventMessage) {
+        Event event = eventMessage.getEvent();
         GameContext gameContext = contextMap.computeIfAbsent(event.getGameId(), this::loadGameContext);
         if (gameContext != GameContext.NOT_FOUND || gameContext.fallsWithinGamePeriod(event.getTimestamp())) {
-            gameProcessors.route(new GameEventMessage(event, gameContext), getSelf());
+            gameProcessors.route(new GameEventMessage(event, gameContext, eventMessage.getExternalMessageId()), getSelf());
         }
     }
 

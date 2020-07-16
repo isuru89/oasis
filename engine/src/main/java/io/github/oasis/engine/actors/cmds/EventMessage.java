@@ -21,17 +21,18 @@ package io.github.oasis.engine.actors.cmds;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.external.messages.OasisCommand;
+import io.github.oasis.core.external.messages.AckableOasisMessage;
 
 /**
  * @author Isuru Weerarathna
  */
-public class EventMessage implements OasisCommand {
+public class EventMessage extends AckableOasisMessage {
 
     private Event event;
     private ExecutionContext context;
 
-    public EventMessage(Event event, ExecutionContext context) {
+    public EventMessage(Event event, ExecutionContext context, Object externalMessageId) {
+        super(externalMessageId);
         this.event = event;
         this.context = context;
     }

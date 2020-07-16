@@ -17,23 +17,23 @@
  * under the License.
  */
 
-package io.github.oasis.core.external;
-
-import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.external.messages.GameCommand;
-
-import java.io.Closeable;
+package io.github.oasis.core.external.messages;
 
 /**
+ * Acknowledgable oasis message class which can be used to requeue
+ * messages in case of processing failures.
+ *
  * @author Isuru Weerarathna
  */
-public interface SourceStreamSupport extends Closeable {
+public class AckableOasisMessage implements OasisCommand {
 
-    void init(RuntimeContextSupport context, SourceFunction source) throws Exception;
+    private Object externalMessageId;
 
-    void handleGameCommand(GameCommand gameCommand);
+    public AckableOasisMessage(Object externalMessageId) {
+        this.externalMessageId = externalMessageId;
+    }
 
-    void ackMessage(Object messageId);
-
-    void nackMessage(Object messageId);
+    public Object getExternalMessageId() {
+        return externalMessageId;
+    }
 }

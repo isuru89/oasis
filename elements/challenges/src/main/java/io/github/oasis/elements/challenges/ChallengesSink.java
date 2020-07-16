@@ -20,14 +20,15 @@
 package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.EventScope;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Sorted;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.utils.TimeOffset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,13 +55,15 @@ public class ChallengesSink extends AbstractSink {
     }
 
     @Override
-    public void consume(Signal challengeSignal, AbstractRule challengeRule, ExecutionContext context) {
+    public void consume(Signal challengeSignal, AbstractRule challengeRule, ExecutionContext context) throws OasisRuntimeException {
         if (challengeSignal instanceof ChallengeWinSignal) {
             handleChallengeWin(challengeSignal, challengeRule, context);
+        } else {
+            LOG.warn("Unknown type of signal received! [{}]", challengeSignal == null ? null : challengeSignal.getClass().getName());
         }
     }
 
-    private void handleChallengeWin(Signal challengeSignal, AbstractRule challengeRule, ExecutionContext context) {
+    private void handleChallengeWin(Signal challengeSignal, AbstractRule challengeRule, ExecutionContext context) throws OasisRuntimeException {
         try (DbContext db = dbPool.createContext()) {
             ChallengeWinSignal signal = (ChallengeWinSignal) challengeSignal;
             ChallengeRule rule = (ChallengeRule) challengeRule;
@@ -90,7 +93,7 @@ public class ChallengesSink extends AbstractSink {
             log.addRef(winId, wonAt, challengeMapKey, String.format("%s:%d:%s", rule.getId(), signal.getPosition(), signal.getWonEventId()));
 
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new OasisRuntimeException("Error while processing challenge signal!", e);
         }
     }
 }

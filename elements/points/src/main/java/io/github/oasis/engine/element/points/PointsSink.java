@@ -24,6 +24,7 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.utils.TimeOffset;
@@ -61,7 +62,7 @@ public class PointsSink extends AbstractSink {
     }
 
     @Override
-    public void consume(Signal pointSignal, AbstractRule rule, ExecutionContext context) {
+    public void consume(Signal pointSignal, AbstractRule rule, ExecutionContext context) throws OasisRuntimeException {
         try (DbContext db = dbPool.createContext()) {
             PointSignal signal = (PointSignal) pointSignal;
 
@@ -125,7 +126,7 @@ public class PointsSink extends AbstractSink {
                     ));
 
         } catch (IOException e) {
-            LOG.error("Error persisting points!", e);
+            throw new OasisRuntimeException("Error while processing point signal!", e);
         }
     }
 }

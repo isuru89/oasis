@@ -25,6 +25,7 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
@@ -54,7 +55,7 @@ public class MilestonesSink extends AbstractSink {
     }
 
     @Override
-    public void consume(Signal milestoneSignal, AbstractRule milestoneRule, ExecutionContext context) {
+    public void consume(Signal milestoneSignal, AbstractRule milestoneRule, ExecutionContext context) throws OasisRuntimeException {
         try (DbContext db = dbPool.createContext()) {
             MilestoneSignal signal = (MilestoneSignal) milestoneSignal;
             MilestoneRule rule = (MilestoneRule) milestoneRule;
@@ -73,13 +74,14 @@ public class MilestonesSink extends AbstractSink {
             Optional<MilestoneRule.Level> nextLevelOpt = rule.getNextLevel(signal.getCurrentScore());
             milestoneMap.setValue(rulePfx + COMPLETED, String.valueOf(Numbers.asInt(nextLevelOpt.isEmpty())));
             if (nextLevelOpt.isPresent()) {
+                LOG.debug("Next milestone level exist for signal {}", signal);
                 MilestoneRule.Level nextLevel = nextLevelOpt.get();
                 milestoneMap.setValue(rulePfx + NEXT_LEVEL, nextLevel.getLevel());
                 milestoneMap.setValue(rulePfx + NEXT_LEVEL_VALUE, nextLevel.getMilestone().toString());
             }
 
         } catch (IOException e) {
-            LOG.error("Error persisting milestone metrics!", e);
+            throw new OasisRuntimeException("Error while processing milestone signal!", e);
         }
     }
 }

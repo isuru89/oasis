@@ -19,16 +19,19 @@
 
 package io.github.oasis.engine.actors;
 
+import akka.pattern.CircuitBreaker;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.SignalSubscriptionSupport;
 import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.factory.Sinks;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -45,6 +48,7 @@ public class SignalConsumer extends OasisBaseActor {
     private String logId;
     private final Sinks sinks;
     private final SignalSubscriptionSupport signalSubscription;
+    private final CircuitBreaker breaker;
 
     public SignalConsumer(EngineContext context) {
         super(context);
@@ -53,13 +57,21 @@ public class SignalConsumer extends OasisBaseActor {
         signalSubscription = context.getSignalSubscription();
         myId = C + COUNTER.incrementAndGet();
         logId = myId;
+
+        this.breaker = new CircuitBreaker(
+                getContext().getDispatcher(),
+                getContext().getSystem().getScheduler(),
+                5,
+                Duration.ofSeconds(10),
+                Duration.ofMinutes(1)
+        );
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
                 .match(StartRuleExecutionCommand.class, this::initializeMe)
-                .match(SignalMessage.class, this::processSignal)
+                .match(SignalMessage.class, (msg) -> breaker.callWithSyncCircuitBreaker(() -> processSignal(msg)))
                 .build();
     }
 
@@ -69,18 +81,24 @@ public class SignalConsumer extends OasisBaseActor {
         logId = parentId + HASH + myId;
     }
 
-    private void processSignal(SignalMessage signalMessage) {
+    private boolean processSignal(SignalMessage signalMessage) {
         Signal signal = signalMessage.getSignal();
         AbstractRule rule = signalMessage.getRule();
         ExecutionContext context = signalMessage.getContext();
 
         AbstractSink sink = sinks.create(signal.sinkHandler());
         log.info("[{}] {} processing {} of rule {}", logId, sink, signal, rule);
-        sink.consume(signal, rule, context);
+        try {
+            sink.consume(signal, rule, context);
 
-        if (Objects.nonNull(signalSubscription)) {
-            log.debug("[{}] {} notifying subscriber", logId, sink);
-            signalSubscription.notifyAfter(signal, rule, context);
+            if (Objects.nonNull(signalSubscription)) {
+                log.debug("[{}] {} notifying subscriber", logId, sink);
+                signalSubscription.notifyAfter(signal, rule, context);
+            }
+            return true;
+        } catch (OasisRuntimeException e) {
+            log.error("[{}] {} error while sinking signal {}", logId, sink, signal, e);
+            throw e;
         }
     }
 }
