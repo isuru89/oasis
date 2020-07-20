@@ -24,6 +24,7 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.external.messages.RuleCommand;
+import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.actors.cmds.RuleRemovedMessage;
 import io.github.oasis.engine.actors.cmds.RuleUpdatedMessage;
@@ -35,7 +36,7 @@ class DtoHandler {
 
     static Object derive(PersistedDef def, EngineContext context) {
         if (def.isEvent()) {
-            return new EventJson(def.getData());
+            return new EventMessage(new EventJson(def.getData()), null, def.getMessageId());
         } else if (def.isGameLifecycleEvent()) {
             GameCommand cmd = new GameCommand();
             cmd.setMessageId(def.getMessageId());

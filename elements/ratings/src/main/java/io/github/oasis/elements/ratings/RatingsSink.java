@@ -20,16 +20,15 @@
 package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.EventScope;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Sorted;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -38,14 +37,12 @@ import java.io.IOException;
  */
 public class RatingsSink extends AbstractSink {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RatingsSink.class);
-
     public RatingsSink(Db dbPool) {
         super(dbPool);
     }
 
     @Override
-    public void consume(Signal ratingSignal, AbstractRule ratingRule, ExecutionContext context) {
+    public void consume(Signal ratingSignal, AbstractRule ratingRule, ExecutionContext context) throws OasisRuntimeException {
         try (DbContext db = dbPool.createContext()) {
             RatingChangedSignal signal = (RatingChangedSignal) ratingSignal;
 
@@ -61,7 +58,7 @@ public class RatingsSink extends AbstractSink {
             sorted.add(member, signal.getOccurredTimestamp());
 
         } catch (IOException e) {
-            LOG.error("Error persisting rating metrics!", e);
+            throw new OasisRuntimeException("Error while processing rating signal!", e);
         }
     }
 }

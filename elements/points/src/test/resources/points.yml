@@ -26,6 +26,17 @@ points:
         when: "Friday,Saturday,Sunday"
     award: 10
 
+  - name: Monthly-Last-Sale
+    description: Awards +5 bonus for every order placed on last week of every month,
+    event: order.accepted
+    pointId: star.points
+    timeRanges:
+      - type: custom
+        expression: |
+          YearMonth currMonth = YearMonth.of(ts.getYear(), ts.getMonth());
+          ts.getDayOfMonth() >= currMonth.lengthOfMonth() - 7
+    award: 10
+
   - name: Special-Seasonal-Award
     description: Awards double bonus points for every purchase done on december
     event: order.accepted

@@ -31,6 +31,8 @@ import io.github.oasis.core.external.messages.GameCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -62,6 +64,18 @@ public class ExternalPartyImpl implements Extension {
 
     public EventStreamFactory getStreamFactory() {
         return streamFactory;
+    }
+
+    public void ackMessage(Object messageId) {
+        if (Objects.nonNull(messageId)) {
+            sourceStreamSupport.ackMessage(messageId);
+        }
+    }
+
+    public void nackMessage(Object messageId) {
+        if (Objects.nonNull(messageId)) {
+            sourceStreamSupport.nackMessage(messageId);
+        }
     }
 
     public void ackGameStateChanged(GameCommand gameCommand) {

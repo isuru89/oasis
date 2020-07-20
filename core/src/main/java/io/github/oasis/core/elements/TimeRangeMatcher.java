@@ -19,11 +19,17 @@
 
 package io.github.oasis.core.elements;
 
+import java.io.Serializable;
+
 /**
+ * This interface provides a way to filter out events which belongs to
+ * a certain time range, so that only those event will be passed to rule
+ * execution.
+ *
  * @author Isuru Weerarathna
  */
 @FunctionalInterface
-public interface TimeRangeMatcher {
+public interface TimeRangeMatcher extends Serializable {
 
     /**
      * Returns true if given time falls into any of ranges specified.

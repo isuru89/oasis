@@ -28,4 +28,5 @@ public class VariableNames {
     public static final String EVENT_VAR = "e";
     public static final String RULE_VAR = "rule";
 
+    public static final String EVENT_TS_VAR = "ts";
 }

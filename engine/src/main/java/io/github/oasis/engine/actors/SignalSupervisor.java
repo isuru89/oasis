@@ -21,17 +21,17 @@ package io.github.oasis.engine.actors;
 
 import akka.routing.Routee;
 import akka.routing.Router;
-import io.github.oasis.engine.EngineContext;
 import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.EventCreatable;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.actors.routers.UserSignalRouting;
-import io.github.oasis.core.elements.EventCreatable;
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.Signal;
 import io.github.oasis.engine.ext.RulesImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +96,7 @@ public class SignalSupervisor extends OasisBaseActor {
 
         if (signal instanceof EventCreatable) {
             ((EventCreatable) signal).generateEvent()
-                    .ifPresent(event -> getContext().getParent().tell(new EventMessage(event, signalMessage.getContext()), getSelf()));
+                    .ifPresent(event -> getContext().getParent().tell(new EventMessage(event, signalMessage.getContext(), null), getSelf()));
         }
 
         router.route(signalMessage, getSelf());

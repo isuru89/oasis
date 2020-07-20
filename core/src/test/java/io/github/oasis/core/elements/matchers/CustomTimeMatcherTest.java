@@ -17,23 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.core.external;
+package io.github.oasis.core.elements.matchers;
 
-import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.external.messages.GameCommand;
-
-import java.io.Closeable;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface SourceStreamSupport extends Closeable {
+public class CustomTimeMatcherTest {
 
-    void init(RuntimeContextSupport context, SourceFunction source) throws Exception;
+    @Test
+    public void testCustomTimeMatcher() {
+        ScriptedTimeMatcher dayChecker = ScriptedTimeMatcher.create("ts.getDayOfWeek() == WEDNESDAY");
+        Assertions.assertTrue(dayChecker.isBetween(1594810800000L, "UTC"));
 
-    void handleGameCommand(GameCommand gameCommand);
+        ScriptedTimeMatcher monthChecked = ScriptedTimeMatcher.create("ts.getMonth() == JULY");
+        Assertions.assertTrue(monthChecked.isBetween(1594810800000L, "UTC"));
+    }
 
-    void ackMessage(Object messageId);
-
-    void nackMessage(Object messageId);
+    @Test
+    public void testWhenReturnInvalid() {
+        ScriptedTimeMatcher dayChecker = ScriptedTimeMatcher.create("var p = 0");
+        Assertions.assertFalse(dayChecker.isBetween(1594810800000L, "UTC"));
+    }
 }

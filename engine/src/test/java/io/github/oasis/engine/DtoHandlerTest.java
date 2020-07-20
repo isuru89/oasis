@@ -25,6 +25,7 @@ import io.github.oasis.core.EventJson;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
 import io.github.oasis.engine.actors.cmds.RuleRemovedMessage;
@@ -57,7 +58,8 @@ public class DtoHandlerTest {
         eventDef.setData(objToMap(TEvent.createKeyValue(System.currentTimeMillis(), "event.a", 100)));
         Object derived = DtoHandler.derive(eventDef, null);
         Assertions.assertNotNull(derived);
-        Assertions.assertEquals(EventJson.class.getName(), derived.getClass().getName());
+        Assertions.assertEquals(EventMessage.class.getName(), derived.getClass().getName());
+        Assertions.assertEquals(EventJson.class.getName(), ((EventMessage)derived).getEvent().getClass().getName());
     }
 
     @Test

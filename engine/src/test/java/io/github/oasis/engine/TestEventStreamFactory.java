@@ -60,6 +60,16 @@ public class TestEventStreamFactory implements EventStreamFactory {
         }
 
         @Override
+        public void ackMessage(Object messageId) {
+
+        }
+
+        @Override
+        public void nackMessage(Object messageId) {
+
+        }
+
+        @Override
         public void close() throws IOException {
 
         }

@@ -126,7 +126,8 @@ public class RuleSupervisor extends OasisBaseActor {
 
     private void processEvent(GameEventMessage eventMessage) {
         executor.route(new EventMessage(eventMessage.getEvent(),
-                ExecutionContext.from(eventMessage.getGameContext()).withUserTz(engineTzOffset, engineTimezone).build()),
+                    ExecutionContext.from(eventMessage.getGameContext()).withUserTz(engineTzOffset, engineTimezone).build(),
+                    eventMessage.getExternalMessageId()),
                 getSelf());
     }
 

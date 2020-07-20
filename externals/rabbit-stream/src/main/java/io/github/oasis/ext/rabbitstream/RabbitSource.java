@@ -26,21 +26,19 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
+import io.github.oasis.core.context.RuntimeContextSupport;
+import io.github.oasis.core.external.SourceFunction;
 import io.github.oasis.core.external.SourceStreamSupport;
 import io.github.oasis.core.external.messages.FailedGameCommand;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
-import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.external.SourceFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -115,6 +113,16 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
         } else {
             silentAck((long) gameCommand.getMessageId());
         }
+    }
+
+    @Override
+    public void ackMessage(Object messageId) {
+        silentAck((long) messageId);
+    }
+
+    @Override
+    public void nackMessage(Object messageId) {
+        silentNack((long) messageId);
     }
 
     public void handleMessage(String consumerTag, Delivery message) {
@@ -205,6 +213,7 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
             String content = new String(message.getBody(), StandardCharsets.UTF_8);
             LOG.info("Game event received! [{}]", content);
             PersistedDef persistedDef = gson.fromJson(content, PersistedDef.class);
+            persistedDef.setMessageId(message.getEnvelope().getDeliveryTag());
             sourceRef.submit(persistedDef);
         }
 
