@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -46,7 +47,7 @@ public class ParserTest {
     @Test
     @SuppressWarnings("unchecked")
     void testPointParser() {
-        List<PointDef> pointDefs = parseAll("points.yml");
+        List<PointDef> pointDefs = parseAll("points.yml", pointParser);
         findByName(pointDefs, "Answer-Accepted").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
             assertTrue(isNumber(def.getAward()));
@@ -97,9 +98,16 @@ public class ParserTest {
             assertTrue(limit.containsKey("daily"));
             assertTrue(isNumber(limit.get("daily")));
         });
+        findByName(pointDefs, "Monthly-Last-Sale").ifPresent(def -> {
+            assertNotNull(def.getTimeRanges());
+            assertEquals(1, def.getTimeRanges().size());
+            AbstractDef.TimeRangeDef rangeDef = def.getTimeRanges().get(0);
+            assertEquals("custom", rangeDef.getType());
+            assertTrue(isNonEmptyString(rangeDef.getExpression()));
+        });
     }
 
-    private Map<String, Object> loadGroupFile(String resourcePath) {
+    private static Map<String, Object> loadGroupFile(String resourcePath) {
         try (InputStream resourceAsStream = Thread.currentThread()
                 .getContextClassLoader().getResourceAsStream(resourcePath)) {
             return new Yaml().load(resourceAsStream);
@@ -109,7 +117,7 @@ public class ParserTest {
         }
     }
 
-    private PersistedDef asPersistedDef(Map<String, Object> data) {
+    private static PersistedDef asPersistedDef(Map<String, Object> data) {
         PersistedDef def = new PersistedDef();
         def.setData(data);
         def.setType(PersistedDef.GAME_RULE_ADDED);
@@ -118,15 +126,15 @@ public class ParserTest {
     }
 
     @SuppressWarnings("unchecked")
-    private List<PointDef> parseAll(String resourcePath) {
+    public static List<PointDef> parseAll(String resourcePath, PointParser pointParser) {
         Map<String, Object> map = loadGroupFile(resourcePath);
         List<Map<String, Object>> items = (List<Map<String, Object>>) map.get("points");
-        return items.stream().map(this::asPersistedDef)
-                .map(def -> pointParser.parse(def))
+        return items.stream().map(ParserTest::asPersistedDef)
+                .map(pointParser::parse)
                 .collect(Collectors.toList());
     }
 
-    private Optional<PointDef> findByName(List<PointDef> pointDefs, String name) {
+    public static Optional<PointDef> findByName(List<PointDef> pointDefs, String name) {
         return pointDefs.stream()
                 .filter(p -> name.equals(p.getName()))
                 .findFirst();

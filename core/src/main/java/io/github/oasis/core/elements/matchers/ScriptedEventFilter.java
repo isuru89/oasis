@@ -29,6 +29,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.github.oasis.core.VariableNames.CONTEXT_VAR;
+import static io.github.oasis.core.VariableNames.EVENT_VAR;
+import static io.github.oasis.core.VariableNames.RULE_VAR;
+
 /**
  * Event filter using a provided MVEL script.
  *
@@ -49,11 +53,11 @@ public class ScriptedEventFilter implements EventExecutionFilter {
     @Override
     public boolean matches(Event event, AbstractRule rule, ExecutionContext context) {
         Map<String, Object> variables = new HashMap<>();
-        variables.put("e", event.getAllFieldValues());
-        variables.put("rule", rule);
-        variables.put("ctx", context);
+        variables.put(EVENT_VAR, event.getAllFieldValues());
+        variables.put(RULE_VAR, rule);
+        variables.put(CONTEXT_VAR, context);
         Object result = MVEL.executeExpression(compiledExpression, variables);
-        if (result instanceof Boolean) {
+        if (result != null && Boolean.class.isAssignableFrom(result.getClass())) {
             return (boolean) result;
         }
         return false;

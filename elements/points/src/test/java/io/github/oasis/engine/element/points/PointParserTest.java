@@ -23,6 +23,7 @@ import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.matchers.AnnualDateRangeMatcher;
+import io.github.oasis.core.elements.matchers.ScriptedTimeMatcher;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.core.external.messages.PersistedDef;
 import org.junit.jupiter.api.Assertions;
@@ -205,6 +206,18 @@ class PointParserTest {
         assertNull(rule.getTimeRangeMatcher());
         assertEquals("daily", rule.getCapDuration());
         assertEquals(BigDecimal.valueOf(200), rule.getCapLimit());
+    }
+
+    @Test
+    void convertFromFile() {
+        List<PointDef> pointDefs = ParserTest.parseAll("points.yml", parser);
+        PointDef pointDef = ParserTest.findByName(pointDefs, "Monthly-Last-Sale").orElseThrow();
+        PointRule rule = (PointRule) parser.convert(pointDef);
+
+        assertNotNull(rule.getTimeRangeMatcher());
+        assertTrue(rule.getTimeRangeMatcher() instanceof ScriptedTimeMatcher);
+        assertTrue(rule.getTimeRangeMatcher().isBetween(1595588400000L, "UTC"));
+        assertFalse(rule.getTimeRangeMatcher().isBetween(1595502000000L, "UTC"));
     }
 
     @SuppressWarnings("unchecked")

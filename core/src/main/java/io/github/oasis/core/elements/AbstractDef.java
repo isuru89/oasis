@@ -40,6 +40,7 @@ public abstract class AbstractDef implements Serializable {
     public static final String TIME_RANGE_TYPE_SEASONAL = "seasonal";
     public static final String TIME_RANGE_TYPE_TIME = "time";
     public static final String TIME_RANGE_TYPE_WEEKLY = "weekly";
+    public static final String TIME_RANGE_TYPE_CUSTOM = "custom";
 
     private String id;
     private String name;
@@ -155,6 +156,7 @@ public abstract class AbstractDef implements Serializable {
         private Object from;
         private Object to;
         private Object when;
+        private Object expression;
 
         public TimeRangeDef() {
         }
@@ -168,6 +170,14 @@ public abstract class AbstractDef implements Serializable {
         public TimeRangeDef(String type, Object when) {
             this.type = type;
             this.when = when;
+        }
+
+        public Object getExpression() {
+            return expression;
+        }
+
+        public void setExpression(Object expression) {
+            this.expression = expression;
         }
 
         public Object getWhen() {
