@@ -19,9 +19,9 @@
 
 package io.github.oasis.services.events.dispatcher;
 
-import com.google.gson.Gson;
 import io.github.oasis.core.external.EventDispatchSupport;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceBinder;
 import org.slf4j.Logger;
@@ -44,21 +44,31 @@ public class DispatcherVerticle extends AbstractVerticle {
     }
 
     @Override
-    public void start() throws Exception {
+    public void start(Promise<Void> promise) {
         LOG.info("Initializing event dispatcher {}...", eventDispatcher.getClass().getName());
         JsonObject dispatcherConfigs = config().copy();
         VertxDispatcherContext ctx = new VertxDispatcherContext(configToMap(dispatcherConfigs));
-        try {
-            eventDispatcher.init(ctx);
-            WrappedDispatcherService wrappedDispatcherService = new WrappedDispatcherService(vertx, eventDispatcher);
-            ServiceBinder binder = new ServiceBinder(vertx);
-            binder.setAddress(EventDispatcherService.DISPATCHER_SERVICE_QUEUE)
-                    .register(EventDispatcherService.class, wrappedDispatcherService);
-            LOG.info("Dispatcher initialization successful!");
-        } catch (Exception e){
-            LOG.error("Dispatcher initialization Failed!", e);
-            throw e;
-        }
+
+        vertx.executeBlocking(onConnectPromise -> {
+            try {
+                eventDispatcher.init(ctx);
+                onConnectPromise.complete();
+            } catch (Exception e) {
+                onConnectPromise.fail(e);
+            }
+        }, res -> {
+            if (res.succeeded()) {
+                WrappedDispatcherService wrappedDispatcherService = new WrappedDispatcherService(vertx, eventDispatcher);
+                ServiceBinder binder = new ServiceBinder(vertx);
+                binder.setAddress(EventDispatcherService.DISPATCHER_SERVICE_QUEUE)
+                        .register(EventDispatcherService.class, wrappedDispatcherService);
+                LOG.info("Dispatcher initialization successful!");
+                promise.complete();
+            } else {
+                LOG.error("Failed to establish connection to RabbitMQ!", res.cause());
+                promise.fail(res.cause());
+            }
+        });
     }
 
     @Override

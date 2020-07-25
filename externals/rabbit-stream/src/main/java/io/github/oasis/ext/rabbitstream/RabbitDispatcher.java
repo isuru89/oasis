@@ -20,10 +20,10 @@
 package io.github.oasis.ext.rabbitstream;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.RecoveryDelayHandler;
 import io.github.oasis.core.external.EventDispatchSupport;
 import io.github.oasis.core.external.messages.PersistedDef;
 import org.slf4j.Logger;
@@ -35,6 +35,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
+
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_HOST;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_PASSWORD;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_PORT;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_RETRY_COUNT;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_RETRY_DELAY;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_USER;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_VIRTUAL_HOST;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.DEFAULT_HOST;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.DEFAULT_PORT;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.DEFAULT_RETRY_COUNT;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.DEFAULT_RETRY_DELAY;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.RETRY_SEED;
 
 /**
  * @author Isuru Weerarathna
@@ -60,16 +73,65 @@ public class RabbitDispatcher implements EventDispatchSupport {
 
     @Override
     public void init(DispatcherContext context) throws Exception {
+        Map<String, Object> configs = context.getConfigs();
         LOG.info("Initializing RabbitMQ client...");
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        factory.setPort(5672);
-        factory.setAutomaticRecoveryEnabled(true);
 
-        connection = factory.newConnection();
+        ConnectionFactory factory = createFactory(configs);
+
+        int maxRetries = (int) configs.getOrDefault(CONFIG_RETRY_COUNT, DEFAULT_RETRY_COUNT);
+        int delay = (int) configs.getOrDefault(CONFIG_RETRY_DELAY, DEFAULT_RETRY_DELAY);
+        retryRabbitConnection(RETRY_SEED, maxRetries, delay, factory);
         channel = connection.createChannel();
 
         initializeExchanges(channel, context);
+    }
+
+    /**
+     * Creates rabbit connection factory using given configuration map.
+     * @param configs configuration map
+     * @return a new rabbit connection factory.
+     */
+    private ConnectionFactory createFactory(Map<String, Object> configs) {
+        ConnectionFactory factory = new ConnectionFactory();
+
+        factory.setHost((String) configs.getOrDefault(CONFIG_HOST, DEFAULT_HOST));
+        factory.setPort((int) configs.getOrDefault(CONFIG_PORT, DEFAULT_PORT));
+
+        int maxRetries = (int) configs.getOrDefault(CONFIG_RETRY_COUNT, DEFAULT_RETRY_COUNT);
+        int delay = (int) configs.getOrDefault(CONFIG_RETRY_DELAY, DEFAULT_RETRY_DELAY);
+        factory.setNetworkRecoveryInterval(maxRetries);
+        factory.setRecoveryDelayHandler(new RecoveryDelayHandler.DefaultRecoveryDelayHandler(delay));
+        factory.setAutomaticRecoveryEnabled(true);
+        if (configs.containsKey(CONFIG_VIRTUAL_HOST)) {
+            factory.setVirtualHost((String) configs.get(CONFIG_VIRTUAL_HOST));
+        }
+        if (configs.containsKey(CONFIG_USER)) {
+            factory.setUsername((String) configs.get(CONFIG_USER));
+            factory.setPassword((String) configs.get(CONFIG_PASSWORD));
+        }
+        return factory;
+    }
+
+    private void retryRabbitConnection(int retry, int maxRetries, int delay, ConnectionFactory factory) throws IOException, TimeoutException {
+        try {
+            connection = factory.newConnection();
+        } catch (IOException | TimeoutException e) {
+            if (retry > maxRetries) {
+                LOG.error("RabbitMq connection establishment exhausted after {} failures! No more tries!", retry);
+                throw e;
+            }
+            LOG.error("Error occurred while connecting to RabbitMq! [Retry: {}] Retrying again after {}ms...", retry, delay, e);
+            sleepWell(delay);
+            retryRabbitConnection(retry + 1, maxRetries, delay, factory);
+        }
+    }
+
+    private void sleepWell(int delay) {
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            LOG.error("Error while sleeping interval while connecting to RabbitMQ!", e);
+        }
     }
 
     @Override

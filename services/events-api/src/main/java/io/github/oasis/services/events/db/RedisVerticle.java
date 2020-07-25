@@ -40,6 +40,9 @@ public class RedisVerticle extends AbstractVerticle {
 
     private Redis redisClient;
 
+    private int maxRetries = 1;
+    private int retryDelay = 5000;
+
     @Override
     public void start(Promise<Void> promise) {
         LOG.info("Starting Redis connection...");
@@ -48,14 +51,34 @@ public class RedisVerticle extends AbstractVerticle {
         RedisOptions configs = new RedisOptions(redisConfigs);
 
         redisClient = Redis.createClient(vertx, configs);
+        maxRetries = redisConfigs.getInteger("connectionRetries", 1);
+        retryDelay = redisConfigs.getInteger("connectionRetryDelay", 2000);
+
         redisClient.connect(onConnect -> {
             if (onConnect.succeeded()) {
                 bindAuthService(promise);
             } else {
                 LOG.error("Redis connection establishment failed!", onConnect.cause());
-                promise.fail(onConnect.cause());
+                retryConnection(1, promise, null);
             }
         });
+    }
+
+    private void retryConnection(int retry, Promise<Void> promise, Throwable error) {
+        if (retry > maxRetries) {
+            LOG.error("Redis connection establishment exhausted after {} failures! No more tries!", retry);
+            promise.fail(error);
+        } else {
+            vertx.setTimer(retryDelay, timer -> redisClient.connect(onConnect -> {
+                if (onConnect.succeeded()) {
+                    LOG.info("Redis connection successful. Initializing...");
+                    bindAuthService(promise);
+                } else {
+                    LOG.error("Redis connection establishment failed! [Retry: {}]", retry, onConnect.cause());
+                    retryConnection(retry + 1, promise, onConnect.cause());
+                }
+            }));
+        }
     }
 
     private void bindAuthService(Promise<Void> promise) {

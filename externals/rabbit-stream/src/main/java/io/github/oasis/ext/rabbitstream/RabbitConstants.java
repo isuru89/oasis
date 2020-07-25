@@ -24,11 +24,25 @@ package io.github.oasis.ext.rabbitstream;
  */
 class RabbitConstants {
 
+    static final int RETRY_SEED = 0;
+
     static final String GAME_EXCHANGE = "oasis.game.exchange";
     static final String ANNOUNCEMENT_EXCHANGE = "oasis.announcements";
 
     static final String ANNOUNCEMENT_EXCHANGE_TYPE = "fanout";
     static final String GAME_EXCHANGE_TYPE = "direct";
 
+    static final String CONFIG_HOST = "host";
+    static final String CONFIG_PORT = "port";
+    static final String CONFIG_VIRTUAL_HOST = "virtualHost";
+    static final String CONFIG_USER = "user";
+    static final String CONFIG_PASSWORD = "password";
+    static final String CONFIG_RETRY_COUNT = "connectionRetries";
+    static final String CONFIG_RETRY_DELAY = "connectionRetryDelay";
+
+    static final int DEFAULT_PORT = 5672;
+    static final String DEFAULT_HOST = "localhost";
+    static final int DEFAULT_RETRY_COUNT = 1;
+    static final int DEFAULT_RETRY_DELAY = 5000;
 
 }

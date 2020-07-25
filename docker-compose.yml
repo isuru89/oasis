@@ -1,81 +1,25 @@
 version: '3'
 
 services:
-#  oa-web:
-#    build:
-#      context: .
-#      dockerfile: buildscripts/Dockerfile-services
-#    ports:
-#      - "5885:5885"
-#    volumes:
-#      - "./configs:/usr/share/oasis/configs"
-#      - "./scripts:/usr/share/oasis/scripts"
-#      - "./data/logs/server:/usr/share/oasis/logs"
-#      - "./game/target/game.jar:/usr/share/oasis/ws/artifacts/game.jar"
-#      - "./data/flink:/usr/share/oasis/ws/execution"
-#    depends_on:
-#      - db
-##      - redis
-##      - rabbit
-#    networks:
-#      - frontend
-#      - backend
-
-#  oa-injector:
-#    build:
-#      context: .
-#      dockerfile: buildscripts/Dockerfile-injector
-#    volumes:
-#      - "./configs:/usr/share/oinjector/configs"
-#      - "./scripts:/usr/share/oinjector/scripts"
-#    depends_on:
-#      - db
-#      - rabbit
-#    networks:
-#      - backend
-
-#  flink:
-#    image: flink:1.5
-#    ports:
-#      - "8083:8081"
-#      - "6121:6121"
-#    volumes:
-#      - "./data/flink:/opt/flink/data"
-#      - "./data/logs/flink:/opt/flink/log"
-#      - "./buildscripts/flink/flink-conf.yaml:/opt/flink/conf/flink-conf.yaml"
-#    networks:
-#      - backend
-
   rabbit:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.7-management-alpine
     ports:
       - "5672:5672"
       - "15672:15672"
     volumes:
       - "./buildscripts/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
       - "./buildscripts/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json"
-      - "./data/rabbit:/var/lib/rabbitmq/mnesia"
-    networks:
-      - backend
+#      - "./data/rabbit:/var/lib/rabbitmq/mnesia"
 
-#  db:
-#    image: mysql:8
-#    volumes:
-#      - "./scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql"
-#      - "./data/db:/var/lib/mysql"
-#    environment:
-#      - MYSQL_DATABASE=oasis
-#      - MYSQL_ROOT_PASSWORD=root
-#      - MYSQL_USER=oasis
-#      - MYSQL_PASSWORD=oasis
-#    networks:
-#      - backend
+  redis:
+    image: redis:5
 
-#  redis:
-#    image: redis
-#    networks:
-#      - backend
-
-networks:
-  backend:
-  frontend:
+  events-api:
+    image: oasis/events-api
+    ports:
+      - "8050:8050"
+    volumes:
+      - "./buildscripts/events-api.conf:/etc/oasis/events-api.conf"
+    depends_on:
+      - redis
+      - rabbit
