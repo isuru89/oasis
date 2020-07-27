@@ -98,6 +98,7 @@
     </dependencies>
 
     <build>
+        <finalName>oasis-engine</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>

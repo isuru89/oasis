@@ -23,7 +23,6 @@ import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.RecoveryDelayHandler;
 import io.github.oasis.core.external.EventDispatchSupport;
 import io.github.oasis.core.external.messages.PersistedDef;
 import org.slf4j.Logger;
@@ -36,15 +35,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
-import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_HOST;
-import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_PASSWORD;
-import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_PORT;
 import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_RETRY_COUNT;
 import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_RETRY_DELAY;
-import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_USER;
-import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_VIRTUAL_HOST;
-import static io.github.oasis.ext.rabbitstream.RabbitConstants.DEFAULT_HOST;
-import static io.github.oasis.ext.rabbitstream.RabbitConstants.DEFAULT_PORT;
 import static io.github.oasis.ext.rabbitstream.RabbitConstants.DEFAULT_RETRY_COUNT;
 import static io.github.oasis.ext.rabbitstream.RabbitConstants.DEFAULT_RETRY_DELAY;
 import static io.github.oasis.ext.rabbitstream.RabbitConstants.RETRY_SEED;
@@ -76,7 +68,7 @@ public class RabbitDispatcher implements EventDispatchSupport {
         Map<String, Object> configs = context.getConfigs();
         LOG.info("Initializing RabbitMQ client...");
 
-        ConnectionFactory factory = createFactory(configs);
+        ConnectionFactory factory = FactoryInitializer.createFrom(configs);
 
         int maxRetries = (int) configs.getOrDefault(CONFIG_RETRY_COUNT, DEFAULT_RETRY_COUNT);
         int delay = (int) configs.getOrDefault(CONFIG_RETRY_DELAY, DEFAULT_RETRY_DELAY);
@@ -84,32 +76,6 @@ public class RabbitDispatcher implements EventDispatchSupport {
         channel = connection.createChannel();
 
         initializeExchanges(channel, context);
-    }
-
-    /**
-     * Creates rabbit connection factory using given configuration map.
-     * @param configs configuration map
-     * @return a new rabbit connection factory.
-     */
-    private ConnectionFactory createFactory(Map<String, Object> configs) {
-        ConnectionFactory factory = new ConnectionFactory();
-
-        factory.setHost((String) configs.getOrDefault(CONFIG_HOST, DEFAULT_HOST));
-        factory.setPort((int) configs.getOrDefault(CONFIG_PORT, DEFAULT_PORT));
-
-        int maxRetries = (int) configs.getOrDefault(CONFIG_RETRY_COUNT, DEFAULT_RETRY_COUNT);
-        int delay = (int) configs.getOrDefault(CONFIG_RETRY_DELAY, DEFAULT_RETRY_DELAY);
-        factory.setNetworkRecoveryInterval(maxRetries);
-        factory.setRecoveryDelayHandler(new RecoveryDelayHandler.DefaultRecoveryDelayHandler(delay));
-        factory.setAutomaticRecoveryEnabled(true);
-        if (configs.containsKey(CONFIG_VIRTUAL_HOST)) {
-            factory.setVirtualHost((String) configs.get(CONFIG_VIRTUAL_HOST));
-        }
-        if (configs.containsKey(CONFIG_USER)) {
-            factory.setUsername((String) configs.get(CONFIG_USER));
-            factory.setPassword((String) configs.get(CONFIG_PASSWORD));
-        }
-        return factory;
     }
 
     private void retryRabbitConnection(int retry, int maxRetries, int delay, ConnectionFactory factory) throws IOException, TimeoutException {
@@ -177,11 +143,7 @@ public class RabbitDispatcher implements EventDispatchSupport {
                 null);
 
         LOG.debug("Declaring Oasis Announcements Exchange");
-        channel.exchangeDeclare(RabbitConstants.ANNOUNCEMENT_EXCHANGE,
-                RabbitConstants.ANNOUNCEMENT_EXCHANGE_TYPE,
-                true,
-                false,
-                null);
+        RabbitUtils.declareAnnouncementExchange(channel);
     }
 
     static String generateRoutingKey(PersistedDef def) {

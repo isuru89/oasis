@@ -26,6 +26,8 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.external.SourceFunction;
 import io.github.oasis.core.external.SourceStreamSupport;
@@ -62,10 +64,9 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
     public void init(RuntimeContextSupport context, SourceFunction source) throws Exception {
         String id = UUID.randomUUID().toString();
         LOG.info("Rabbit consumer id: {}", id);
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        factory.setPort(5672);
-        factory.setAutomaticRecoveryEnabled(true);
+        Config configs = context.getConfigs().getConfigRef();
+        ConfigObject configRef = configs.getObject("oasis.eventstream.configs");
+        ConnectionFactory factory = FactoryInitializer.createFrom(configRef.toConfig());
         sourceRef = source;
 
         connection = factory.newConnection();
@@ -73,6 +74,7 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
 
         String queue = OASIS_ANNOUNCEMENTS + id;
         LOG.info("Connecting to announcement queue {}", queue);
+        RabbitUtils.declareAnnouncementExchange(channel);
         channel.queueDeclare(queue, true, true, false, null);
         channel.queueBind(queue, RabbitConstants.ANNOUNCEMENT_EXCHANGE, "*");
         channel.basicConsume(queue, false, this::handleMessage, this::handleCancel);

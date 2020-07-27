@@ -37,6 +37,11 @@ class RabbitConstants {
     static final String CONFIG_VIRTUAL_HOST = "virtualHost";
     static final String CONFIG_USER = "user";
     static final String CONFIG_PASSWORD = "password";
+    static final String CONFIG_SSL = "ssl";
+    static final String CONFIG_SSL_ENABLED = "enabled";
+    static final String CONFIG_SSL_PROTOCOL = "protocol";
+    static final String CONFIG_SSL_TRUSTALL = "trustAll";
+
     static final String CONFIG_RETRY_COUNT = "connectionRetries";
     static final String CONFIG_RETRY_DELAY = "connectionRetryDelay";
 
