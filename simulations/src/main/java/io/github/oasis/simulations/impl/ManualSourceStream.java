@@ -47,12 +47,12 @@ public class ManualSourceStream implements SourceStreamSupport {
     }
 
     @Override
-    public void ackMessage(Object messageId) {
+    public void ackMessage(int gameId, Object messageId) {
 
     }
 
     @Override
-    public void nackMessage(Object messageId) {
+    public void nackMessage(int gameId, Object messageId) {
 
     }
 

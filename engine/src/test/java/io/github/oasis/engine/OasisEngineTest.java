@@ -134,7 +134,7 @@ public class OasisEngineTest {
         List<AbstractRule> rules = new ArrayList<>();
         for (PersistedDef def : ruleDefinitions) {
             AbstractRule rule = engine.getContext().getParsers().parseToRule(def);
-            engine.submit(RuleAddedMessage.create(gameId, rule));
+            engine.submit(RuleAddedMessage.create(gameId, rule, null));
             rules.add(rule);
         }
         return rules;

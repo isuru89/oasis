@@ -33,7 +33,7 @@ public interface SourceStreamSupport extends Closeable {
 
     void handleGameCommand(GameCommand gameCommand);
 
-    void ackMessage(Object messageId);
+    void ackMessage(int gameId, Object messageId);
 
-    void nackMessage(Object messageId);
+    void nackMessage(int gameId, Object messageId);
 }

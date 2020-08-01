@@ -28,7 +28,8 @@ public class RuleRemovedMessage extends OasisRuleMessage {
 
     private String ruleId;
 
-    public RuleRemovedMessage(String ruleId) {
+    public RuleRemovedMessage(String ruleId, Object messageId) {
+        super(messageId);
         this.ruleId = ruleId;
     }
 
@@ -36,8 +37,8 @@ public class RuleRemovedMessage extends OasisRuleMessage {
         return ruleId;
     }
 
-    public static RuleRemovedMessage create(int gameId, String ruleId) {
-        RuleRemovedMessage message = new RuleRemovedMessage(ruleId);
+    public static RuleRemovedMessage create(int gameId, String ruleId, Object messageId) {
+        RuleRemovedMessage message = new RuleRemovedMessage(ruleId, messageId);
         message.setGameId(gameId);
         return message;
     }
@@ -51,7 +52,8 @@ public class RuleRemovedMessage extends OasisRuleMessage {
     public String toString() {
         return "RuleAdded{" +
                 "game=" + getGameId() + ", " +
-                "rule=" + ruleId +
+                "rule=" + ruleId + ", " +
+                "messageId=" + getExternalMessageId() +
                 '}';
     }
 }

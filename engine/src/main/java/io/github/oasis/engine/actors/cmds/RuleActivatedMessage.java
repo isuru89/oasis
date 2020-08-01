@@ -32,7 +32,8 @@ public class RuleActivatedMessage extends OasisRuleMessage {
 
     private final String ruleId;
 
-    public RuleActivatedMessage(String ruleId) {
+    public RuleActivatedMessage(String ruleId, Object messageId) {
+        super(messageId);
         this.ruleId = ruleId;
     }
 
@@ -40,8 +41,8 @@ public class RuleActivatedMessage extends OasisRuleMessage {
         return ruleId;
     }
 
-    public static RuleActivatedMessage create(int gameId, String ruleId) {
-        RuleActivatedMessage message = new RuleActivatedMessage(ruleId);
+    public static RuleActivatedMessage create(int gameId, String ruleId, Object messageId) {
+        RuleActivatedMessage message = new RuleActivatedMessage(ruleId, messageId);
         message.setGameId(gameId);
         return message;
     }
@@ -55,7 +56,8 @@ public class RuleActivatedMessage extends OasisRuleMessage {
     public String toString() {
         return "RuleActivated{" +
                 "game=" + getGameId() + ", " +
-                "rule=" + ruleId +
+                "rule=" + ruleId + ", " +
+                "messageId=" + getExternalMessageId() +
                 '}';
     }
 }

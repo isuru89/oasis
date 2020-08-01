@@ -29,7 +29,8 @@ public class RuleAddedMessage extends OasisRuleMessage {
 
     private AbstractRule rule;
 
-    public RuleAddedMessage(AbstractRule rule) {
+    public RuleAddedMessage(AbstractRule rule, Object messageId) {
+        super(messageId);
         this.rule = rule;
     }
 
@@ -37,8 +38,8 @@ public class RuleAddedMessage extends OasisRuleMessage {
         return rule;
     }
 
-    public static RuleAddedMessage create(int gameId, AbstractRule rule) {
-        RuleAddedMessage addedMessage = new RuleAddedMessage(rule);
+    public static RuleAddedMessage create(int gameId, AbstractRule rule, Object messageId) {
+        RuleAddedMessage addedMessage = new RuleAddedMessage(rule, messageId);
         addedMessage.setGameId(gameId);
         return addedMessage;
     }
@@ -52,7 +53,8 @@ public class RuleAddedMessage extends OasisRuleMessage {
     public String toString() {
         return "RuleAdded{" +
                 "game=" + getGameId() + ", " +
-                "rule=" + rule +
+                "rule=" + rule + ", " +
+                "messageId=" + getExternalMessageId() +
                 '}';
     }
 }

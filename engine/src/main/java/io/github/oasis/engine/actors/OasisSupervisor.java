@@ -96,6 +96,10 @@ public class OasisSupervisor extends OasisBaseActor {
         int gameId = ruleCommand.getGameId();
         if (gamesRunning.contains(gameId)) {
             gameProcessors.route(ruleCommand, getSelf());
+
+            LOG.info("Acknowledging rule message receive success {}", ruleCommand.getExternalMessageId());
+            ExternalParty.EXTERNAL_PARTY.get(getContext().getSystem())
+                    .ackMessage(ruleCommand.getGameId(), ruleCommand.getExternalMessageId());
         } else {
             LOG.warn("No games by the id '{}' is running in the engine. Skipped rule update.", gameId);
         }

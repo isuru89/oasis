@@ -132,6 +132,17 @@ public class PersistedDef implements Serializable {
         return GAME_REMOVED.equals(type);
     }
 
+    @Override
+    public String toString() {
+        return "PersistedDef{" +
+                "type='" + type + '\'' +
+                ", impl='" + impl + '\'' +
+                ", scope=" + scope +
+                ", messageId=" + messageId +
+                ", data=" + data +
+                '}';
+    }
+
     public static class Scope implements Serializable {
         private Integer gameId;
 
@@ -148,6 +159,13 @@ public class PersistedDef implements Serializable {
 
         public void setGameId(Integer gameId) {
             this.gameId = gameId;
+        }
+
+        @Override
+        public String toString() {
+            return "Scope{" +
+                    "gameId=" + gameId +
+                    '}';
         }
     }
 }

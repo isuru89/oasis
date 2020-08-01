@@ -66,15 +66,15 @@ public class ExternalPartyImpl implements Extension {
         return streamFactory;
     }
 
-    public void ackMessage(Object messageId) {
+    public void ackMessage(int gameId, Object messageId) {
         if (Objects.nonNull(messageId)) {
-            sourceStreamSupport.ackMessage(messageId);
+            sourceStreamSupport.ackMessage(gameId, messageId);
         }
     }
 
-    public void nackMessage(Object messageId) {
+    public void nackMessage(int gameId, Object messageId) {
         if (Objects.nonNull(messageId)) {
-            sourceStreamSupport.nackMessage(messageId);
+            sourceStreamSupport.nackMessage(gameId, messageId);
         }
     }
 
