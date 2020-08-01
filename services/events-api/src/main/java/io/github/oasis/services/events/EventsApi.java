@@ -20,26 +20,17 @@
 package io.github.oasis.services.events;
 
 import io.github.oasis.services.events.db.RedisVerticle;
-import io.github.oasis.services.events.dispatcher.DispatcherFactory;
 import io.github.oasis.services.events.http.HttpServiceVerticle;
-import io.vertx.config.ConfigRetriever;
-import io.vertx.config.ConfigRetrieverOptions;
-import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
-
-import static io.github.oasis.services.events.Constants.ENV_CONFIG_FILE;
 import static io.github.oasis.services.events.Constants.KEY_DISPATCHER;
 import static io.github.oasis.services.events.Constants.KEY_DISPATCHER_CONFIGS;
 import static io.github.oasis.services.events.Constants.KEY_DISPATCHER_IMPL;
-import static io.github.oasis.services.events.Constants.SYS_CONFIG_FILE;
 
 /**
  * @author Isuru Weerarathna
@@ -90,50 +81,4 @@ public class EventsApi extends AbstractVerticle {
                 .setHa(http.getBoolean("highAvailability", false))
                 .setConfig(http);
     }
-
-    public static void main(String[] args) {
-        ConfigStoreOptions envConfigs = new ConfigStoreOptions().setType("env");
-        ConfigStoreOptions jvmConfigs = new ConfigStoreOptions().setType("sys");
-        ConfigStoreOptions fileConfigs = new ConfigStoreOptions()
-                .setType("file")
-                .setFormat("hocon")
-                .setConfig(new JsonObject().put("path", resolveConfigFileLocation()));
-
-        ConfigRetrieverOptions retrieverOptions = new ConfigRetrieverOptions()
-                .addStore(jvmConfigs)
-                .addStore(envConfigs)
-                .addStore(fileConfigs);
-
-        deploy(retrieverOptions);
-    }
-
-    private static String resolveConfigFileLocation() {
-        String confPath = System.getenv(ENV_CONFIG_FILE);
-        if (Objects.nonNull(confPath) && !confPath.isEmpty()) {
-            return confPath;
-        }
-        confPath = System.getProperty(SYS_CONFIG_FILE);
-        if (Objects.nonNull(confPath) && !confPath.isEmpty()) {
-            return confPath;
-        }
-        return "application.conf";
-    }
-
-    public static void deploy(ConfigRetrieverOptions configOptions) {
-        Vertx vertx = Vertx.vertx();
-        ConfigRetriever retriever = ConfigRetriever.create(vertx, configOptions);
-
-        retriever.getConfig(configs -> {
-            vertx.registerVerticleFactory(new DispatcherFactory());
-
-            DeploymentOptions options = new DeploymentOptions().setConfig(configs.result());
-            vertx.deployVerticle(new EventsApi(), options, res -> {
-                if (!res.succeeded()) {
-                    LOG.warn("Shutting down Events API. Try again later!");
-                    vertx.close();
-                }
-            });
-        });
-    }
-
 }

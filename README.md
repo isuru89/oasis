@@ -17,10 +17,10 @@ Milestones, Challenges, and Races.
 ## Features:
   * Different types of customizable gamification elements. (see below)
   * Near real-time status updates
-  * Character driven game playing
   * Team support
+  * Character driven game playing <To-be-implemented>
   * Narrative Play <To-be-implemented>
-  * Cloud friendly
+  * Cloud friendly <To-be-implemented>
   
 ## Key Gamification Elements in Oasis
 

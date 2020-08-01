@@ -19,15 +19,19 @@
 
 package io.github.oasis.engine.actors.cmds;
 
-import io.github.oasis.core.external.messages.OasisCommand;
+import io.github.oasis.core.external.messages.AckableOasisMessage;
 import io.github.oasis.engine.ext.RulesImpl;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class OasisRuleMessage implements OasisCommand {
+public abstract class OasisRuleMessage extends AckableOasisMessage {
 
     private int gameId;
+
+    public OasisRuleMessage(Object externalMessageId) {
+        super(externalMessageId);
+    }
 
     public int getGameId() {
         return gameId;

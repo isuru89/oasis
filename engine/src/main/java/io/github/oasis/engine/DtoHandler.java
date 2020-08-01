@@ -47,12 +47,13 @@ class DtoHandler {
             int gameId = def.getScope().getGameId();
             RuleCommand.RuleChangeType ruleChangeType = toRuleChangeType(def.getType());
             AbstractRule rule = context.getParsers().parseToRule(def);
+            Object messageId = def.getMessageId();
             if (ruleChangeType == RuleCommand.RuleChangeType.ADD) {
-                return RuleAddedMessage.create(gameId, rule);
+                return RuleAddedMessage.create(gameId, rule, messageId);
             } else if (ruleChangeType == RuleCommand.RuleChangeType.REMOVE) {
-                return RuleRemovedMessage.create(gameId, rule.getId());
+                return RuleRemovedMessage.create(gameId, rule.getId(), messageId);
             } else {
-                return RuleUpdatedMessage.create(gameId, rule);
+                return RuleUpdatedMessage.create(gameId, rule, messageId);
             }
         }
         return null;

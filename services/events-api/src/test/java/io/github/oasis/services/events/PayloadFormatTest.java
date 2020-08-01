@@ -38,7 +38,7 @@ public class PayloadFormatTest extends AbstractEventPushTest {
     }
 
     @Test
-    @DisplayName("Payload as json array not accpeted")
+    @DisplayName("Payload as json array not accepted")
     void payloadContentTypeArrayIncorrect(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
         awaitRedisInitialization(vertx, testContext, createKnownSource(keyPair));

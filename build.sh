@@ -1,10 +1,22 @@
 #!bin/bash
 
-mvn clean install
+echo "==============================================================================="
+echo "Building Oasis..."
+echo "==============================================================================="
+mvn install -DskipTests
 
-mkdir -p data/db
-mkdir -p data/rabbit
-mkdir -p data/flink/chk && mkdir -p data/flink/share && mkdir -p data/flink/uploads && mkdir -p data/flink/svp
+echo "==============================================================================="
+echo "Building Events API Docker Image..."
+echo "==============================================================================="
+cd services/events-api
+docker build -t oasis/events-api .
+
+cd ../..
+
+echo "==============================================================================="
+echo "Starting Oasis..."
+echo "==============================================================================="
+docker-compose up
 
 
 

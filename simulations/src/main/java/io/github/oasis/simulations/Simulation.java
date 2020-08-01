@@ -105,6 +105,8 @@ public class Simulation implements Closeable {
 
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            dispatchGameEnd();
         }
     }
 
@@ -203,6 +205,19 @@ public class Simulation implements Closeable {
         gameStartCmd.setType(PersistedDef.GAME_STARTED);
         gameStartCmd.setScope(scope);
         announceGame(gameStartCmd);
+    }
+
+    private void dispatchGameEnd() {
+        PersistedDef.Scope scope = new PersistedDef.Scope(GAME_ID);
+        PersistedDef gameRemoved = new PersistedDef();
+        gameRemoved.setType(PersistedDef.GAME_REMOVED);
+        gameRemoved.setScope(scope);
+        try {
+            Thread.sleep(2000);
+            announceGame(gameRemoved);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @SuppressWarnings("unchecked")

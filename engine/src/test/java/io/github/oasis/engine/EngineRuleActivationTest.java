@@ -51,9 +51,9 @@ public class EngineRuleActivationTest extends OasisEngineTest {
 
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
         engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule));
+        engine.submit(RuleAddedMessage.create(TEvent.GAME_ID, rule, null));
         engine.submitAll(e1, e2, e3, e4);
-        engine.submit(RuleDeactivatedMessage.create(TEvent.GAME_ID, rule.getId()));
+        engine.submit(RuleDeactivatedMessage.create(TEvent.GAME_ID, rule.getId(), null));
         engine.submit(e5);
         awaitTerminated();
 

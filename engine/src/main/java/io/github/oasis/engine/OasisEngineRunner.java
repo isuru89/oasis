@@ -24,6 +24,8 @@ import io.github.oasis.core.elements.ElementModuleFactory;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.db.redis.RedisDb;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
@@ -34,6 +36,8 @@ import java.util.stream.Collectors;
  * @author Isuru Weerarathna
  */
 public class OasisEngineRunner {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OasisEngineRunner.class);
 
     public static void main(String[] args) throws OasisException {
         EngineContext context = new EngineContext();
@@ -53,6 +57,7 @@ public class OasisEngineRunner {
         context.setModuleFactoryList(ServiceLoader.load(ElementModuleFactory.class)
                 .stream()
                 .map(ServiceLoader.Provider::type)
+                .peek(factory -> LOG.info("Found element factory: {}", factory.getName()))
                 .collect(Collectors.toList()));
     }
 

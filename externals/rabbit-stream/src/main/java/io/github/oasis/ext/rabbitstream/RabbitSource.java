@@ -26,6 +26,8 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.external.SourceFunction;
 import io.github.oasis.core.external.SourceStreamSupport;
@@ -54,18 +56,17 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
 
     private Connection connection;
     private Channel channel;
-    private Map<Integer, Closeable> consumers = new HashMap<>();
+    private final Map<Integer, RabbitGameReader> consumers = new HashMap<>();
     private SourceFunction sourceRef;
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     @Override
     public void init(RuntimeContextSupport context, SourceFunction source) throws Exception {
         String id = UUID.randomUUID().toString();
         LOG.info("Rabbit consumer id: {}", id);
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        factory.setPort(5672);
-        factory.setAutomaticRecoveryEnabled(true);
+        Config configs = context.getConfigs().getConfigRef();
+        ConfigObject configRef = configs.getObject("oasis.eventstream.configs");
+        ConnectionFactory factory = FactoryInitializer.createFrom(configRef.toConfig());
         sourceRef = source;
 
         connection = factory.newConnection();
@@ -73,6 +74,7 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
 
         String queue = OASIS_ANNOUNCEMENTS + id;
         LOG.info("Connecting to announcement queue {}", queue);
+        RabbitUtils.declareAnnouncementExchange(channel);
         channel.queueDeclare(queue, true, true, false, null);
         channel.queueBind(queue, RabbitConstants.ANNOUNCEMENT_EXCHANGE, "*");
         channel.basicConsume(queue, false, this::handleMessage, this::handleCancel);
@@ -91,11 +93,14 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
         if (gameCommand.getStatus() == GameCommand.GameLifecycle.START) {
             RabbitGameReader gameReader = null;
             try {
-                channel.basicAck((long) gameCommand.getMessageId(), false);
+                closeGameIfRunning(gameId);
+
                 gameReader = new RabbitGameReader(connection.createChannel(), gameId, sourceRef);
                 consumers.put(gameId, gameReader);
                 LOG.info("Subscribing to game {} event channel.", gameId);
                 gameReader.init();
+                channel.basicAck((long) gameCommand.getMessageId(), false);
+
             } catch (IOException e) {
                 LOG.error("Error initializing RabbitMQ consumer for game {}!", gameId, e);
                 if (gameReader != null) {
@@ -116,18 +121,18 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
     }
 
     @Override
-    public void ackMessage(Object messageId) {
-        silentAck((long) messageId);
+    public void ackMessage(int gameId, Object messageId) {
+        silentAck(gameId, (long) messageId);
     }
 
     @Override
-    public void nackMessage(Object messageId) {
-        silentNack((long) messageId);
+    public void nackMessage(int gameId, Object messageId) {
+        silentNack(gameId, (long) messageId);
     }
 
     public void handleMessage(String consumerTag, Delivery message) {
         String content = new String(message.getBody(), StandardCharsets.UTF_8);
-        LOG.trace("Message received. {}", content);
+        LOG.debug("Message received. {}", content);
         PersistedDef persistedDef = gson.fromJson(content, PersistedDef.class);
         long deliveryTag = message.getEnvelope().getDeliveryTag();
         persistedDef.setMessageId(deliveryTag);
@@ -136,6 +141,13 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
 
     public void handleCancel(String consumerTag) {
         LOG.warn("Queue is deleted for consumer {}", consumerTag);
+    }
+
+    public void closeGameIfRunning(int gameId) throws IOException {
+        if (consumers.containsKey(gameId)) {
+            consumers.get(gameId).close();
+            consumers.remove(gameId);
+        }
     }
 
     @Override
@@ -159,6 +171,7 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
 
     private void silentAck(long deliveryId) {
         try {
+            LOG.debug("Acknowledging message {}", deliveryId);
             channel.basicAck(deliveryId, false);
         } catch (IOException e) {
             LOG.error("Unable to ACK the message with delivery id {}!", deliveryId, e);
@@ -167,10 +180,19 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
 
     private void silentNack(long deliveryId) {
         try {
+            LOG.warn("NAcking message {}", deliveryId);
             channel.basicNack(deliveryId, false, true);
         } catch (IOException e) {
             LOG.error("Unable to NACK the message with delivery id {}!", deliveryId, e);
         }
+    }
+
+    private void silentAck(int gameId, long deliveryId) {
+        consumers.get(gameId).silentAck(deliveryId);
+    }
+
+    private void silentNack(int gameId, long deliveryId) {
+        consumers.get(gameId).silentNack(deliveryId);
     }
 
     private void silentClose(Closeable closeable) {
@@ -183,10 +205,10 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
 
     static class RabbitGameReader implements DeliverCallback, CancelCallback, Closeable {
 
-        private Gson gson = new Gson();
+        private final Gson gson = new Gson();
 
-        private Channel channel;
-        private SourceFunction sourceRef;
+        private final Channel channel;
+        private final SourceFunction sourceRef;
         private final int gameId;
 
         RabbitGameReader(Channel channel, int gameId, SourceFunction sourceRef) {
@@ -200,7 +222,7 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
             LOG.info("Connecting to queue {} for game events", queue);
             channel.queueDeclare(queue, true, true, false, null);
             channel.queueBind(queue, RabbitConstants.GAME_EXCHANGE, RabbitDispatcher.generateRoutingKey(gameId));
-            channel.basicConsume(queue, true, this, this);
+            channel.basicConsume(queue, false, this, this);
         }
 
         @Override
@@ -210,11 +232,40 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
 
         @Override
         public void handle(String consumerTag, Delivery message) {
+            long deliveryTag = message.getEnvelope().getDeliveryTag();
+            if (message.getEnvelope().isRedeliver()) {
+                try {
+                    LOG.warn("Message redelivered again for processing. Rejecting {}", deliveryTag);
+                    channel.basicNack(deliveryTag, false, false);
+                } catch (IOException e) {
+                    LOG.error("Error while rejecting redelivered message!", e);
+                }
+                return;
+            }
+
             String content = new String(message.getBody(), StandardCharsets.UTF_8);
-            LOG.info("Game event received! [{}]", content);
             PersistedDef persistedDef = gson.fromJson(content, PersistedDef.class);
-            persistedDef.setMessageId(message.getEnvelope().getDeliveryTag());
+            persistedDef.setMessageId(deliveryTag);
+            LOG.info("Game event received in channel {}! [{}]", channel, persistedDef);
             sourceRef.submit(persistedDef);
+        }
+
+        private void silentAck(long deliveryId) {
+            try {
+                LOG.debug("Acknowledging message {} {}", deliveryId, channel);
+                channel.basicAck(deliveryId, false);
+            } catch (IOException e) {
+                LOG.error("Unable to ACK the event message with delivery id {}!", deliveryId, e);
+            }
+        }
+
+        private void silentNack(long deliveryId) {
+            try {
+                LOG.warn("NAcking message {} {}", deliveryId, channel);
+                channel.basicNack(deliveryId, false, false);
+            } catch (Exception e) {
+                LOG.error("Unable to NACK the message with delivery id {}!", deliveryId, e);
+            }
         }
 
         @Override

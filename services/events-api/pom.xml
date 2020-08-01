@@ -74,6 +74,7 @@
     </dependencies>
 
     <build>
+        <finalName>oasis-events-api</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -97,6 +98,21 @@
                             <directory>${project.basedir}/src/main/generated</directory>
                         </fileset>
                     </filesets>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>io.github.oasis.services.events.Main</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
         </plugins>

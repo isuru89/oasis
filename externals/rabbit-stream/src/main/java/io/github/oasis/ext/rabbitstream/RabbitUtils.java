@@ -17,23 +17,23 @@
  * under the License.
  */
 
-package io.github.oasis.core.external;
+package io.github.oasis.ext.rabbitstream;
 
-import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.external.messages.GameCommand;
+import com.rabbitmq.client.Channel;
 
-import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface SourceStreamSupport extends Closeable {
+class RabbitUtils {
 
-    void init(RuntimeContextSupport context, SourceFunction source) throws Exception;
+    static void declareAnnouncementExchange(Channel channel) throws IOException {
+        channel.exchangeDeclare(RabbitConstants.ANNOUNCEMENT_EXCHANGE,
+                RabbitConstants.ANNOUNCEMENT_EXCHANGE_TYPE,
+                true,
+                false,
+                null);
+    }
 
-    void handleGameCommand(GameCommand gameCommand);
-
-    void ackMessage(int gameId, Object messageId);
-
-    void nackMessage(int gameId, Object messageId);
 }

@@ -21,20 +21,16 @@ package io.github.oasis.simulations;
 
 import io.github.oasis.core.external.messages.PersistedDef;
 
-import java.net.Authenticator;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.time.Duration;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * @author Isuru Weerarathna
@@ -61,6 +57,7 @@ public class SimulationWithApi extends Simulation {
 
     @Override
     protected void sendEvent(PersistedDef def) throws Exception {
+        System.out.println(">>> sending event " + def);
         Map<String, Object> body = Map.of("data", def.getData());
         String msg = gson.toJson(body);
         String signature = signPayload(msg);
@@ -73,7 +70,14 @@ public class SimulationWithApi extends Simulation {
                 .build();
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
-                .thenAccept(System.out::println);
+                .thenAccept(System.out::println)
+                .exceptionally(new Function<Throwable, Void>() {
+                    @Override
+                    public Void apply(Throwable throwable) {
+                        throwable.printStackTrace();
+                        return null;
+                    }
+                });
 
     }
 
