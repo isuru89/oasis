@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges;
+package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.context.ExecutionContext;
@@ -26,7 +26,7 @@ import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
-import io.github.oasis.elements.badges.processors.BadgeFirstEvent;
+import io.github.oasis.elements.badges.TEvent;
 import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
 import org.junit.jupiter.api.Assertions;

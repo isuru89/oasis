@@ -38,6 +38,10 @@ public class Texts {
         return text == null || text.trim().isEmpty();
     }
 
+    public static boolean isNotEmpty(String text) {
+        return !isEmpty(text);
+    }
+
     public static String md5Digest(String text) {
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");

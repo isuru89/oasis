@@ -69,7 +69,7 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
                     ruleContext.getCollector().accept(signal, context, rule);
                 });
             }
-            afterEmitAll(signals, event, rule, context, db);
+            afterEmitAll(signals, event, rule, context, db, ruleContext.getCollector());
         } catch (Exception e) {
             throw new OasisRuntimeException("Error processing event #" + event.getExternalId() + "!", e);
         }
@@ -104,8 +104,10 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
      * @param event event caused to trigger.
      * @param rule rule reference.
      * @param db db context.
+     * @param collector signal collector instance.
      */
-    protected void afterEmitAll(List<S> signals, Event event, R rule, ExecutionContext context, DbContext db) {
+    protected void afterEmitAll(List<S> signals, Event event, R rule, ExecutionContext context, DbContext db,
+                                SignalCollector collector) {
         // do nothing.
     }
 

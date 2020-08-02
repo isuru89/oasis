@@ -57,6 +57,9 @@ public class BadgeDef extends AbstractDef {
     private BigDecimal threshold;
     private Object valueExtractorExpression;
 
+    private String pointId;
+    private Object pointAwards;
+
     private List<Condition> conditions;
     private List<Streak> streaks;
     private List<Threshold> thresholds;
@@ -69,6 +72,7 @@ public class BadgeDef extends AbstractDef {
         attrs.add(Utils.firstNonNullAsStr(getThreshold(), EMPTY));
         attrs.add(Utils.firstNonNullAsStr(getTimeUnit(), EMPTY));
         attrs.add(Utils.firstNonNullAsStr(getValueExtractorExpression(), EMPTY));
+        attrs.add(Utils.firstNonNullAsStr(getPointAwards(), EMPTY));
 
         if (Objects.nonNull(conditions)) {
             attrs.add(getConditions().stream()
@@ -170,9 +174,26 @@ public class BadgeDef extends AbstractDef {
         this.thresholds = thresholds;
     }
 
+    public String getPointId() {
+        return pointId;
+    }
+
+    public void setPointId(String pointId) {
+        this.pointId = pointId;
+    }
+
+    public Object getPointAwards() {
+        return pointAwards;
+    }
+
+    public void setPointAwards(Object pointAwards) {
+        this.pointAwards = pointAwards;
+    }
+
     public static class Streak {
         private Integer streak;
         private Integer attribute;
+        private Object pointAwards;
 
         public Streak() {
         }
@@ -187,6 +208,14 @@ public class BadgeDef extends AbstractDef {
                     Utils.firstNonNullAsStr(getAttribute(), EMPTY),
                     Utils.firstNonNullAsStr(getStreak(), EMPTY)
             );
+        }
+
+        public Object getPointAwards() {
+            return pointAwards;
+        }
+
+        public void setPointAwards(Object pointAwards) {
+            this.pointAwards = pointAwards;
         }
 
         public Integer getStreak() {
@@ -209,6 +238,7 @@ public class BadgeDef extends AbstractDef {
     public static class Threshold {
         private BigDecimal value;
         private Integer attribute;
+        private Object pointAwards;
 
         public Threshold() {
         }
@@ -226,7 +256,15 @@ public class BadgeDef extends AbstractDef {
         }
 
         PeriodicBadgeRule.Threshold toRuleThreshold() {
-            return new PeriodicBadgeRule.Threshold(attribute, value);
+            return new PeriodicBadgeRule.Threshold(attribute, value, Utils.toBigDecimal(pointAwards));
+        }
+
+        public Object getPointAwards() {
+            return pointAwards;
+        }
+
+        public void setPointAwards(Object pointAwards) {
+            this.pointAwards = pointAwards;
         }
 
         public BigDecimal getValue() {
@@ -250,6 +288,7 @@ public class BadgeDef extends AbstractDef {
         private Integer priority;
         private Object condition;
         private Integer attribute;
+        private Object pointAwards;
 
         public Condition() {
         }
@@ -270,7 +309,15 @@ public class BadgeDef extends AbstractDef {
 
         ConditionalBadgeRule.Condition toRuleCondition() {
             EventExecutionFilter filter = EventExecutionFilterFactory.create(condition);
-            return new ConditionalBadgeRule.Condition(priority, filter, attribute);
+            return new ConditionalBadgeRule.Condition(priority, filter, attribute, Utils.toBigDecimal(pointAwards));
+        }
+
+        public Object getPointAwards() {
+            return pointAwards;
+        }
+
+        public void setPointAwards(Object pointAwards) {
+            this.pointAwards = pointAwards;
         }
 
         public Integer getPriority() {

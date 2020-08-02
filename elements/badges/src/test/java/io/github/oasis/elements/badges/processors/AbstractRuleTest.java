@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,10 +17,11 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges;
+package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
+import io.github.oasis.core.collect.Pair;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
@@ -29,6 +30,7 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.EventReadWrite;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.db.redis.RedisEventLoader;
+import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -46,6 +48,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -142,6 +145,12 @@ public abstract class AbstractRuleTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    protected Map<Integer, StreakNBadgeRule.StreakProps> toStreakMap(Map<Integer, Integer> streaks) {
+        return streaks.entrySet().stream()
+                .map(e -> Pair.of(e.getKey(), e.getValue()))
+                .collect(Collectors.toMap(Pair::getLeft, pair -> new StreakNBadgeRule.StreakProps(pair.getRight())));
     }
 
 }

@@ -32,6 +32,7 @@ import io.github.oasis.elements.badges.rules.PeriodicOccurrencesStreakNRule;
 import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,24 @@ class BadgeParserTest {
     @BeforeEach
     void beforeEach() {
         parser = new BadgeParser();
+    }
+
+    @Test
+    void parseFromYml() {
+        List<BadgeDef> badgeDefs = TestUtils.parseAll("badge-first-event.yml", parser);
+        TestUtils.findByName(badgeDefs, "Initial-Registration").ifPresent(def -> {
+            Assertions.assertEquals("BDG00001", def.getId());
+            Assertions.assertTrue(StringUtils.isNotBlank(def.getDescription()));
+            Assertions.assertNotNull(def.getEvent());
+            Assertions.assertNull(def.getEvents());
+            Assertions.assertEquals("firstEvent", def.getKind());
+        });
+        TestUtils.findByName(badgeDefs, "Initial-Registration-With-Points").ifPresent(def -> {
+            Assertions.assertEquals("BDG00003", def.getId());
+            Assertions.assertEquals("firstEvent", def.getKind());
+            Assertions.assertNotNull(def.getPointId());
+            Assertions.assertEquals(50, def.getPointAwards());
+        });
     }
 
     @Test

@@ -13,3 +13,11 @@ badges:
     event: app.question.asked
     kind: firstEvent
     condition: e.totalQuestions == 1
+
+  - id: BDG00003
+    name: Initial-Registration-With-Points
+    description: Awards a badge when a user first registered within the application.
+    event: app.user.registered
+    kind: firstEvent
+    pointId: star.points
+    pointAwards: 50

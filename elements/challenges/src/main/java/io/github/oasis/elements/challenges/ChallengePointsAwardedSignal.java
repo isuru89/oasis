@@ -21,7 +21,6 @@ package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.EventCreatable;
-import io.github.oasis.core.events.ChallengePointEvent;
 import io.github.oasis.engine.element.points.PointSignal;
 
 import java.math.BigDecimal;

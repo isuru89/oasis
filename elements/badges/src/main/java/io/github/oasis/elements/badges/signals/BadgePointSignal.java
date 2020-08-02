@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,21 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.core.events;
+package io.github.oasis.elements.badges.signals;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.engine.element.points.PointSignal;
 
 import java.math.BigDecimal;
 
 /**
  * @author Isuru Weerarathna
  */
-public class ChallengePointEvent extends BasePointEvent {
-    public ChallengePointEvent(String pointId, String pointStoredKey, BigDecimal points, Event eventRef) {
-        super(pointId, pointStoredKey, points, eventRef);
+public class BadgePointSignal extends PointSignal {
+    public BadgePointSignal(String pointId, BigDecimal score, Event eventRef) {
+        super(pointId, pointId, score, eventRef);
     }
 
-    public ChallengePointEvent(String pointId, BigDecimal points, Event eventRef) {
-        this(pointId, BasePointEvent.DEFAULT_POINTS_KEY, points, eventRef);
+
+    @Override
+    public String toString() {
+        return "BadgePointSignal{" +
+                "pointId='" + getPointId() + '\'' +
+                ", score=" + getScore() +
+                ", eventRef=" + getEventRef() +
+                '}';
     }
 }

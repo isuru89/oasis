@@ -20,12 +20,15 @@
 package io.github.oasis.elements.badges.rules;
 
 import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -33,12 +36,31 @@ import java.util.TreeMap;
  */
 public class StreakNBadgeRule extends BadgeRule {
 
+    static final StreakProps DEFAULT_STREAK_PROPS = new StreakProps(0);
+
     private int maxStreak = 0;
     private int minStreak = Integer.MAX_VALUE;
     private List<Integer> orderedStreakList;
-    private NavigableMap<Integer, Integer> streakAttrMap;
+    private NavigableMap<Integer, StreakProps> streakProps;
     private EventExecutionFilter criteria;
     private long retainTime;
+
+    @Override
+    public void derivePointsInTo(BadgeSignal signal) {
+        int attrId = signal.getAttribute();
+        Map.Entry<Integer, StreakNBadgeRule.StreakProps> matchedStreak = streakProps.entrySet().stream()
+                .filter(entry -> entry.getValue().getAttribute() == attrId)
+                .findFirst()
+                .orElse(null);
+
+        if (matchedStreak != null) {
+            if (Objects.nonNull(matchedStreak.getValue().getPoints())) {
+                signal.setPointAwards(getPointId(), matchedStreak.getValue().getPoints());
+            } else {
+                super.derivePointsInTo(signal);
+            }
+        }
+    }
 
     public EventExecutionFilter getCriteria() {
         return criteria;
@@ -61,17 +83,17 @@ public class StreakNBadgeRule extends BadgeRule {
     }
 
     public int findOnGoingStreak(int currStreak) {
-        Integer streak = streakAttrMap.floorKey(currStreak);
+        Integer streak = streakProps.floorKey(currStreak);
         return streak == null ? 0 : streak;
     }
 
     public int getAttributeForStreak(int streak) {
-        return streakAttrMap.getOrDefault(streak, 0);
+        return streakProps.getOrDefault(streak, DEFAULT_STREAK_PROPS).getAttribute();
     }
 
-    public void setStreaks(Map<Integer, Integer> streaks) {
-        this.streakAttrMap = new TreeMap<>(streaks);
-        this.streakAttrMap.put(0, 0);
+    public void setStreaks(Map<Integer, StreakProps> streaks) {
+        this.streakProps = new TreeMap<>(streaks);
+        this.streakProps.put(0, DEFAULT_STREAK_PROPS);
         for (Integer streak : streaks.keySet()) {
             maxStreak = Math.max(streak, maxStreak);
             minStreak = Math.min(streak, minStreak);
@@ -96,4 +118,25 @@ public class StreakNBadgeRule extends BadgeRule {
         return orderedStreakList;
     }
 
+    public static class StreakProps {
+        private final int attribute;
+        private final BigDecimal points;
+
+        public StreakProps(int attribute) {
+            this(attribute, null);
+        }
+
+        public StreakProps(int attribute, BigDecimal points) {
+            this.attribute = attribute;
+            this.points = points;
+        }
+
+        public int getAttribute() {
+            return attribute;
+        }
+
+        public BigDecimal getPoints() {
+            return points;
+        }
+    }
 }

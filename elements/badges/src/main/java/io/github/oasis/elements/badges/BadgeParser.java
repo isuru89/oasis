@@ -26,6 +26,7 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.utils.Numbers;
+import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Timestamps;
 import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.badges.rules.BadgeRule;
@@ -57,7 +58,7 @@ import static io.github.oasis.elements.badges.BadgeDef.TIME_BOUNDED_STREAK_KIND;
  */
 public class BadgeParser extends AbstractElementParser {
     @Override
-    public AbstractDef parse(PersistedDef persistedObj) {
+    public BadgeDef parse(PersistedDef persistedObj) {
         return loadFrom(persistedObj, BadgeDef.class);
     }
 
@@ -136,11 +137,22 @@ public class BadgeParser extends AbstractElementParser {
         } else {
             throw new IllegalArgumentException("Unknown badge kind! " + kind);
         }
+
+        setPointDetails(def, rule);
+
         return rule;
     }
 
-    private Map<Integer, Integer> toStreakMap(List<BadgeDef.Streak> streaks) {
-        return streaks.stream().collect(Collectors.toMap(BadgeDef.Streak::getStreak, BadgeDef.Streak::getAttribute));
+    private void setPointDetails(BadgeDef def, BadgeRule rule) {
+        if (!Texts.isEmpty(def.getPointId())) {
+            rule.setPointId(def.getPointId());
+            rule.setPointAwards(Utils.toBigDecimal(def.getPointAwards()));
+        }
+    }
+
+    private Map<Integer, StreakNBadgeRule.StreakProps> toStreakMap(List<BadgeDef.Streak> streaks) {
+        return streaks.stream().collect(Collectors.toMap(BadgeDef.Streak::getStreak,
+                streak -> new StreakNBadgeRule.StreakProps(streak.getAttribute(), Utils.toBigDecimal(streak.getPointAwards()))));
     }
 
     private long toLongTimeUnit(BadgeDef def) {

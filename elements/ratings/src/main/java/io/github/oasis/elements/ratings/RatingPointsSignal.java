@@ -22,7 +22,6 @@ package io.github.oasis.elements.ratings;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.EventCreatable;
 import io.github.oasis.core.elements.Signal;
-import io.github.oasis.core.events.RatingPointEvent;
 import io.github.oasis.engine.element.points.PointSignal;
 import lombok.ToString;
 
