@@ -47,16 +47,8 @@ public class RuleExecutionContext implements RuleExecutionContextSupport, Serial
         return signalCollector;
     }
 
-    public RuntimeContextSupport getEngineContext() {
-        return engineContext;
-    }
-
     public static RuleExecutionContext from(EngineContext engineContext, RuleExecutionContext other) {
         return new RuleExecutionContext(other.getSignalCollector(), engineContext);
-    }
-
-    public static RuleExecutionContext from(EngineContext engineContext, SignalCollector collector) {
-        return new RuleExecutionContext(collector, engineContext);
     }
 
     public static RuleExecutionContext from(SignalCollector collector) {

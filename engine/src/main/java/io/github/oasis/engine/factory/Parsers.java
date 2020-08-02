@@ -19,7 +19,6 @@
 
 package io.github.oasis.engine.factory;
 
-import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.ElementParser;
 import io.github.oasis.core.external.messages.PersistedDef;
@@ -38,7 +37,6 @@ public class Parsers {
     private static final Logger LOG = LoggerFactory.getLogger(Parsers.class);
 
     private final Map<String, ElementParser> parserCache = new ConcurrentHashMap<>();
-    private final Map<Class<? extends AbstractDef>, ElementParser> parserByClzCache = new ConcurrentHashMap<>();
 
     public static Parsers from(EngineContext context) {
         Parsers parsers = new Parsers();
@@ -52,12 +50,9 @@ public class Parsers {
                     mod.getSupportedDefinitions().forEach(def -> {
                         ElementParser parser = mod.getParser();
                         parserCache.put(def.getName(), parser);
-                        parserByClzCache.put(def, parser);
                         LOG.info("Definition {} will be parsed with {}", def.getName(), parser.getClass().getName());
                     });
-                    mod.getSupportedDefinitionKeys().forEach(key -> {
-                        parserCache.put(key.toLowerCase(), mod.getParser());
-                    });
+                    mod.getSupportedDefinitionKeys().forEach(key -> parserCache.put(key.toLowerCase(), mod.getParser()));
                 });
     }
 
@@ -68,23 +63,6 @@ public class Parsers {
             return elementParser.parseToRule(dto);
         }
         throw new IllegalArgumentException("Unknown type");
-    }
-
-    public AbstractDef parse(PersistedDef persistedObj) {
-        String type = persistedObj.getImpl();
-        ElementParser elementParser = parserCache.get(type);
-        if (elementParser != null) {
-            return elementParser.parse(persistedObj);
-        }
-        throw new IllegalArgumentException("Unknown type");
-    }
-
-    public AbstractRule createRuleFrom(AbstractDef definition) {
-        ElementParser elementParser = parserByClzCache.get(definition.getClass());
-        if (elementParser != null) {
-            return elementParser.convert(definition);
-        }
-        throw new IllegalArgumentException("Unknown definition to convert!");
     }
 
 }

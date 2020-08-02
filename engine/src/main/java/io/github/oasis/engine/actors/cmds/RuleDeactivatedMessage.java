@@ -32,19 +32,13 @@ public class RuleDeactivatedMessage extends OasisRuleMessage {
 
     private final String ruleId;
 
-    public RuleDeactivatedMessage(String ruleId, Object messageId) {
+    RuleDeactivatedMessage(String ruleId, Object messageId) {
         super(messageId);
         this.ruleId = ruleId;
     }
 
     public String getRuleId() {
         return ruleId;
-    }
-
-    public static RuleDeactivatedMessage create(int gameId, String ruleId, Object messageId) {
-        RuleDeactivatedMessage message = new RuleDeactivatedMessage(ruleId, messageId);
-        message.setGameId(gameId);
-        return message;
     }
 
     @Override
