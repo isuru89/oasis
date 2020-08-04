@@ -19,9 +19,16 @@
 
 package io.github.oasis.core.utils;
 
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.MonthDay;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Isuru Weerarathna
@@ -31,6 +38,8 @@ public class Timestamps {
     static final long DAILY = Duration.ofDays(1).toMillis();
     static final long HOURLY = Duration.ofHours(1).toMillis();
     static final long WEEKLY = Duration.ofDays(7).toMillis();
+
+    private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("([0-9]+)\\s*([a-zA-Z]+)");
 
     public static Optional<MonthDay> toMonthDay(String text) {
         if (Objects.nonNull(text)) {
@@ -67,6 +76,24 @@ public class Timestamps {
     public static long parseTimeUnit(String timeUnitStr) {
         if (Texts.isEmpty(timeUnitStr)) {
             return 0;
+        }
+
+        Matcher matcher = TIMESTAMP_PATTERN.matcher(timeUnitStr);
+        if (matcher.matches()) {
+            String amount = matcher.group(1);
+            String type = matcher.group(2).toLowerCase();
+
+            int amountTotal = Texts.isEmpty(amount) ? 1 : Integer.parseInt(amount);
+            if (type.startsWith("d")) {
+                return Duration.ofDays(amountTotal).toMillis();
+            } else if (type.startsWith("h")) {
+                return Duration.ofHours(amountTotal).toMillis();
+            } else if (type.startsWith("w")) {
+                return Duration.ofDays(7 * amountTotal).toMillis();
+            } else if (type.startsWith("m")) {
+                return Duration.ofMinutes(amountTotal).toMillis();
+            }
+            throw new IllegalArgumentException("Unknown time unit string! [" + timeUnitStr + "]");
         }
 
         String timeunit = timeUnitStr.toLowerCase();

@@ -1,0 +1,38 @@
+version: 1
+
+badges:
+  - id: BDG-C0001
+    name: Question-Quality
+    description: Awards badges based on how many scores got for the question
+    event: question.scored
+    kind: conditional
+    conditions:
+      - priority: 1
+        attribute: 30
+        condition: "e.score >= 100"
+      - priority: 2
+        attribute: 20
+        condition: "e.score >= 25"
+      - priority: 3
+        attribute: 10
+        condition: "e.score >= 10"
+
+  - id: BDG-C0002
+    name: Question-Views-With-Points
+    description: Awards badges based on how many scores got for the question and also awards points.
+    event: question.viewed
+    kind: conditional
+    pointId: reputation
+    conditions:
+      - priority: 1
+        attribute: 30
+        condition: "e.views >= 10000"
+        pointAwards: 50
+      - priority: 2
+        attribute: 20
+        condition: "e.views >= 2500"
+        pointAwards: 20
+      - priority: 3
+        attribute: 10
+        condition: "e.views >= 1000"
+        pointAwards: 10
