@@ -30,6 +30,7 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.utils.TimeOffset;
+import io.github.oasis.elements.badges.rules.BadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
 import io.github.oasis.elements.badges.signals.StreakBadgeSignal;
@@ -38,6 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
@@ -59,9 +63,10 @@ public class BadgeSink extends AbstractSink {
     }
 
     @Override
-    public void consume(Signal badgeSignal, AbstractRule rule, ExecutionContext context) throws OasisRuntimeException {
+    public List<Signal> consume(Signal badgeSignal, AbstractRule badgeRule, ExecutionContext context) throws OasisRuntimeException {
         try (DbContext db = dbPool.createContext()) {
             BadgeSignal signal = (BadgeSignal) badgeSignal;
+            BadgeRule rule = (BadgeRule) badgeRule;
 
             long userId = signal.getEventScope().getUserId();
             int gameId = signal.getEventScope().getGameId();
@@ -76,7 +81,7 @@ public class BadgeSink extends AbstractSink {
 
             if (!added) {
                 LOG.info("Already added badge received! Skipping signal {}.", signal);
-                return;
+                return null;
             }
 
             Mapped badgesMap = db.MAP(ID.getGameUserBadgesSummary(gameId, userId));
@@ -108,9 +113,16 @@ public class BadgeSink extends AbstractSink {
             badgesMap.incrementByInt(attrPfx + COLON + tcx.getWeek(), addition);
             badgesMap.incrementByInt(attrPfx + COLON + tcx.getQuarter(), addition);
 
+            rule.derivePointsInTo(signal);
+            Optional<Signal> signalOpt = signal.createSignal(BadgeSignal.BadgeRefEvent.create(signal));
+            if (signalOpt.isPresent()) {
+                return Collections.singletonList(signalOpt.get());
+            }
+
         } catch (IOException e) {
             throw new OasisRuntimeException("Error occurred while processing badge signal!", e);
         }
+        return null;
     }
 
     private String getBadgeKey(BadgeSignal signal) {

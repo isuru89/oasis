@@ -23,6 +23,8 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.Db;
 
+import java.util.List;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -30,13 +32,26 @@ public abstract class AbstractSink {
 
     protected static final String COLON = ":";
 
+    public static final int MODIFIED_NOTHING = 0;
+    public static final int MODIFIED = 1;
+
     protected Db dbPool;
 
     protected AbstractSink(Db dbPool) {
         this.dbPool = dbPool;
     }
 
-    public abstract void consume(Signal signal, AbstractRule rule, ExecutionContext context) throws OasisRuntimeException;
+    /**
+     * Process the given signal and persist it.
+     * Returns a new list of signals to be appended to the sink queue.
+     *
+     * @param signal signal instance.
+     * @param rule rule reference.
+     * @param context execution context.
+     * @return new list of signals to process, if any.
+     * @throws OasisRuntimeException any exception thrown while processing.
+     */
+    public abstract List<Signal> consume(Signal signal, AbstractRule rule, ExecutionContext context) throws OasisRuntimeException;
 
     @Override
     public String toString() {

@@ -25,7 +25,6 @@ import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.elements.badges.TEvent;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule.StreakProps;
-import io.github.oasis.elements.badges.signals.BadgePointSignal;
 import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.elements.badges.signals.StreakBadgeSignal;
 import org.junit.jupiter.api.Assertions;
@@ -146,8 +145,7 @@ public class BadgeStreakNTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new StreakBadgeSignal(ruleContext.getRule().getId(), e3, 3, ATTR_SILVER, 100, 105, e1.getExternalId(), e3.getExternalId()),
-                new BadgePointSignal(POINT_ID, new BigDecimal("50"), e3)
+                new StreakBadgeSignal(ruleContext.getRule().getId(), e3, 3, ATTR_SILVER, 100, 105, e1.getExternalId(), e3.getExternalId())
         );
     }
 
@@ -190,9 +188,7 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         System.out.println(signals);
         assertStrict(signals,
                 new StreakBadgeSignal(ruleContext.getRule().getId(), e3, 3, ATTR_SILVER, 100, 105, e1.getExternalId(), e3.getExternalId()),
-                new BadgeRemoveSignal(ruleContext.getRule().getId(), e3.asEventScope(), ATTR_SILVER, 100, 105, e1.getExternalId(), e3.getExternalId()),
-                new BadgePointSignal(POINT_ID, BigDecimal.valueOf(-50), e4),
-                new BadgePointSignal(POINT_ID, BigDecimal.valueOf(50), e3)
+                new BadgeRemoveSignal(ruleContext.getRule().getId(), e3.asEventScope(), ATTR_SILVER, 100, 105, e1.getExternalId(), e3.getExternalId())
         );
     }
 

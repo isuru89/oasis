@@ -20,13 +20,9 @@
 package io.github.oasis.elements.badges;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.EventJson;
-import io.github.oasis.core.EventScope;
 import io.github.oasis.core.events.BasePointEvent;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Awards points for badges.
@@ -40,21 +36,6 @@ public class BadgePointsEvent extends BasePointEvent {
 
     public BadgePointsEvent(String pointId, BigDecimal points, Event eventRef) {
         super(pointId, BadgePointsEvent.DEFAULT_POINTS_KEY, points, eventRef);
-    }
-
-    public static class BadgeEventRef extends EventJson {
-
-        public BadgeEventRef(Map<String, Object> ref) {
-            super(ref);
-        }
-
-        public static BadgeEventRef from(String eventId, long timestamp, EventScope scope) {
-            Map<String, Object> json = new HashMap<>();
-            json.put(Event.ID, eventId);
-            json.put(Event.USER_ID, scope.getUserId());
-            json.put(Event.TEAM_ID, scope.getTeamId());
-            return new BadgeEventRef(json);
-        }
     }
 
 }

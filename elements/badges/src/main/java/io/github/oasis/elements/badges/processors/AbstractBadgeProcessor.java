@@ -58,8 +58,6 @@ public abstract class AbstractBadgeProcessor<R extends BadgeRule> extends Abstra
 
     @Override
     protected void beforeEmit(BadgeSignal signal, Event event, R rule, ExecutionContext context, DbContext db) {
-        rule.derivePointsInTo(signal);
-
         db.addToSorted(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), rule.getId()),
                 String.format(BADGE_HISTORY_FORMAT, signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getAttribute()),
                 signal.getStartTime());

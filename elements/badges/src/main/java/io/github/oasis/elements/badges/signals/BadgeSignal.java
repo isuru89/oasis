@@ -20,6 +20,7 @@
 package io.github.oasis.elements.badges.signals;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.EventJson;
 import io.github.oasis.core.EventScope;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.EventCreatable;
@@ -32,8 +33,11 @@ import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author Isuru Weerarathna
@@ -89,7 +93,7 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
     @Override
     public Optional<Event> generateEvent() {
         if (Texts.isNotEmpty(pointId) && points != null) {
-            return Optional.of(new BadgePointsEvent(pointId, points, null));
+            return Optional.of(new BadgePointsEvent(pointId, points, BadgeRefEvent.create(this)));
         }
         return Optional.empty();
     }
@@ -174,4 +178,22 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
         }
     }
 
+    public static class BadgeRefEvent extends EventJson {
+
+        public BadgeRefEvent(Map<String, Object> ref) {
+            super(ref);
+        }
+
+        public static BadgeRefEvent create(BadgeSignal signal) {
+            Map<String, Object> data = new HashMap<>();
+            data.put(Event.ID, UUID.randomUUID().toString());
+            data.put(Event.TEAM_ID, signal.getEventScope().getTeamId());
+            data.put(Event.USER_ID, signal.getEventScope().getUserId());
+            data.put(Event.EVENT_TYPE, signal.getPointId());
+            data.put(Event.GAME_ID, signal.getEventScope().getGameId());
+            data.put(Event.SOURCE_ID, signal.getEventScope().getSourceId());
+            data.put(Event.TIMESTAMP, signal.getEndTime());
+            return new BadgeRefEvent(data);
+        }
+    }
 }
