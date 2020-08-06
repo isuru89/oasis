@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,10 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
+package io.github.oasis.elements.badges.signals;
+
+import io.github.oasis.core.Event;
+import io.github.oasis.engine.element.points.PointSignal;
+
+import java.math.BigDecimal;
 
 /**
  * @author Isuru Weerarathna
  */
-public class Begin implements OasisLifecycleCommand {
+public class BadgePointSignal extends PointSignal {
+    public BadgePointSignal(String pointId, BigDecimal score, Event eventRef) {
+        super(pointId, pointId, score, eventRef);
+    }
+
+
+    @Override
+    public String toString() {
+        return "BadgePointSignal{" +
+                "pointId='" + getPointId() + '\'' +
+                ", score=" + getScore() +
+                ", eventRef=" + getEventRef() +
+                '}';
+    }
 }

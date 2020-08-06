@@ -35,7 +35,7 @@ import io.github.oasis.elements.badges.BadgesModuleFactory;
 import io.github.oasis.elements.challenges.ChallengesModuleFactory;
 import io.github.oasis.elements.milestones.MilestonesModuleFactory;
 import io.github.oasis.elements.ratings.RatingsModuleFactory;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
+import io.github.oasis.engine.actors.cmds.Messages;
 import io.github.oasis.engine.element.points.PointsModuleFactory;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.AfterEach;
@@ -134,7 +134,7 @@ public class OasisEngineTest {
         List<AbstractRule> rules = new ArrayList<>();
         for (PersistedDef def : ruleDefinitions) {
             AbstractRule rule = engine.getContext().getParsers().parseToRule(def);
-            engine.submit(RuleAddedMessage.create(gameId, rule, null));
+            engine.submit(Messages.createRuleAddMessage(gameId, rule, null));
             rules.add(rule);
         }
         return rules;

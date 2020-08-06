@@ -29,7 +29,7 @@ import com.rabbitmq.client.Delivery;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.external.SourceFunction;
+import io.github.oasis.core.external.MessageReceiver;
 import io.github.oasis.core.external.SourceStreamSupport;
 import io.github.oasis.core.external.messages.FailedGameCommand;
 import io.github.oasis.core.external.messages.GameCommand;
@@ -57,11 +57,11 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
     private Connection connection;
     private Channel channel;
     private final Map<Integer, RabbitGameReader> consumers = new HashMap<>();
-    private SourceFunction sourceRef;
+    private MessageReceiver sourceRef;
     private final Gson gson = new Gson();
 
     @Override
-    public void init(RuntimeContextSupport context, SourceFunction source) throws Exception {
+    public void init(RuntimeContextSupport context, MessageReceiver source) throws Exception {
         String id = UUID.randomUUID().toString();
         LOG.info("Rabbit consumer id: {}", id);
         Config configs = context.getConfigs().getConfigRef();
@@ -208,10 +208,10 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
         private final Gson gson = new Gson();
 
         private final Channel channel;
-        private final SourceFunction sourceRef;
+        private final MessageReceiver sourceRef;
         private final int gameId;
 
-        RabbitGameReader(Channel channel, int gameId, SourceFunction sourceRef) {
+        RabbitGameReader(Channel channel, int gameId, MessageReceiver sourceRef) {
             this.gameId = gameId;
             this.channel = channel;
             this.sourceRef = sourceRef;

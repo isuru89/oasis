@@ -20,26 +20,39 @@
 package io.github.oasis.elements.badges.signals;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.EventJson;
 import io.github.oasis.core.EventScope;
-import io.github.oasis.elements.badges.BadgeSink;
 import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.EventCreatable;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.elements.SignalCreatable;
+import io.github.oasis.core.utils.Texts;
+import io.github.oasis.elements.badges.BadgePointsEvent;
+import io.github.oasis.elements.badges.BadgeSink;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author Isuru Weerarathna
  */
 @ToString
-public class BadgeSignal extends Signal {
+public class BadgeSignal extends Signal implements EventCreatable, SignalCreatable {
 
-    private long startTime;
-    private long endTime;
-    private String startId;
-    private String endId;
-    private int attribute;
+    private final long startTime;
+    private final long endTime;
+    private final String startId;
+    private final String endId;
+    private final int attribute;
+
+    private String pointId;
+    private BigDecimal points;
 
     public BadgeSignal(String ruleId,
                 EventScope eventScope,
@@ -72,9 +85,38 @@ public class BadgeSignal extends Signal {
     }
 
     public static BadgeSignal firstEvent(String ruleId, Event causedEvent, int attributeId) {
-        return new BadgeSignal(ruleId, causedEvent,causedEvent.getTimestamp(),  attributeId,
+        return new BadgeSignal(ruleId, causedEvent, causedEvent.getTimestamp(), attributeId,
                 causedEvent.getTimestamp(), causedEvent.getTimestamp(),
                 causedEvent.getExternalId(), causedEvent.getExternalId());
+    }
+
+    @Override
+    public Optional<Event> generateEvent() {
+        if (Texts.isNotEmpty(pointId) && points != null) {
+            return Optional.of(new BadgePointsEvent(pointId, points, BadgeRefEvent.create(this)));
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Signal> createSignal(Event causedEvent) {
+        if (Texts.isNotEmpty(pointId) && points != null) {
+            return Optional.of(new BadgePointSignal(pointId, points, causedEvent));
+        }
+        return Optional.empty();
+    }
+
+    public void setPointAwards(String pointId, BigDecimal value) {
+        this.pointId = pointId;
+        this.points = value;
+    }
+
+    public String getPointId() {
+        return pointId;
+    }
+
+    public BigDecimal getPoints() {
+        return points;
     }
 
     public long getStartTime() {
@@ -121,14 +163,37 @@ public class BadgeSignal extends Signal {
 
     @Override
     public int compareTo(Signal o) {
-        return Comparator
-                .comparingLong(BadgeSignal::getStartTime)
-                .thenComparing(Signal::getEventScope)
-                .thenComparing(BadgeSignal::getAttribute)
-                .thenComparing(BadgeSignal::getRuleId)
-                .thenComparingLong(BadgeSignal::getEndTime)
-                .thenComparing(BadgeSignal::getStartId)
-                .thenComparing(BadgeSignal::getEndId)
-                .compare(this, (BadgeSignal) o);
+        if (o instanceof BadgeSignal) {
+            return Comparator
+                    .comparingLong(BadgeSignal::getStartTime)
+                    .thenComparing(Signal::getEventScope)
+                    .thenComparing(BadgeSignal::getAttribute)
+                    .thenComparing(BadgeSignal::getRuleId)
+                    .thenComparingLong(BadgeSignal::getEndTime)
+                    .thenComparing(BadgeSignal::getStartId)
+                    .thenComparing(BadgeSignal::getEndId)
+                    .compare(this, (BadgeSignal) o);
+        } else {
+            return -1;
+        }
+    }
+
+    public static class BadgeRefEvent extends EventJson {
+
+        public BadgeRefEvent(Map<String, Object> ref) {
+            super(ref);
+        }
+
+        public static BadgeRefEvent create(BadgeSignal signal) {
+            Map<String, Object> data = new HashMap<>();
+            data.put(Event.ID, UUID.randomUUID().toString());
+            data.put(Event.TEAM_ID, signal.getEventScope().getTeamId());
+            data.put(Event.USER_ID, signal.getEventScope().getUserId());
+            data.put(Event.EVENT_TYPE, signal.getPointId());
+            data.put(Event.GAME_ID, signal.getEventScope().getGameId());
+            data.put(Event.SOURCE_ID, signal.getEventScope().getSourceId());
+            data.put(Event.TIMESTAMP, signal.getEndTime());
+            return new BadgeRefEvent(data);
+        }
     }
 }

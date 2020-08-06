@@ -126,12 +126,12 @@ public class RedisAssert {
                 Set<String> expected = entries.keySet();
                 Set<String> actual = all.keySet();
                 actual.removeAll(expected);
-                Assertions.fail("More entries (#" + actual.size() + ") are in db than expected! " + actual);
+                Assertions.fail("More entries (#" + actual.size() + ") are in db than expected in key " + key + "! " + actual);
             } else if (all.size() < entries.size()) {
                 Set<String> expected = entries.keySet();
                 Set<String> actual = all.keySet();
                 expected.removeAll(actual);
-                Assertions.fail("Expected entries (#" + expected.size() + ") are not in db! " + expected);
+                Assertions.fail("Expected entries (#" + expected.size() + ") are not in db key " + key + "! " + expected);
             }
 
             entries.forEach((k, v) -> {

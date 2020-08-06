@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
@@ -51,6 +52,13 @@ public class Utils {
             hex.append(String.format("%02x", b));
         }
         return hex.toString();
+    }
+
+    public static BigDecimal toBigDecimal(Object value) {
+        if (value != null) {
+            return new BigDecimal(value.toString());
+        }
+        return null;
     }
 
     public static byte[] getBytesFromUUID(UUID uuid) {

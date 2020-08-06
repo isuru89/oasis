@@ -19,8 +19,13 @@
 
 package io.github.oasis.elements.badges.signals;
 
+import io.github.oasis.core.Event;
 import io.github.oasis.core.EventScope;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.utils.Texts;
 import lombok.ToString;
+
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
@@ -44,5 +49,13 @@ public class BadgeRemoveSignal extends BadgeSignal {
                 prevBadge.getEndTime(),
                 prevBadge.getStartId(),
                 prevBadge.getEndId());
+    }
+
+    @Override
+    public Optional<Signal> createSignal(Event causedEvent) {
+        if (Texts.isNotEmpty(getPointId()) && getPoints() != null) {
+            return Optional.of(new BadgePointSignal(getPointId(), getPoints().negate(), causedEvent));
+        }
+        return Optional.empty();
     }
 }

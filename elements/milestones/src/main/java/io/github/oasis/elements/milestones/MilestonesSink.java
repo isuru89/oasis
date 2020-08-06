@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -55,7 +56,7 @@ public class MilestonesSink extends AbstractSink {
     }
 
     @Override
-    public void consume(Signal milestoneSignal, AbstractRule milestoneRule, ExecutionContext context) throws OasisRuntimeException {
+    public List<Signal> consume(Signal milestoneSignal, AbstractRule milestoneRule, ExecutionContext context) throws OasisRuntimeException {
         try (DbContext db = dbPool.createContext()) {
             MilestoneSignal signal = (MilestoneSignal) milestoneSignal;
             MilestoneRule rule = (MilestoneRule) milestoneRule;
@@ -83,5 +84,6 @@ public class MilestonesSink extends AbstractSink {
         } catch (IOException e) {
             throw new OasisRuntimeException("Error while processing milestone signal!", e);
         }
+        return null;
     }
 }

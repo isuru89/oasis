@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,12 +17,12 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges;
+package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
-import io.github.oasis.elements.badges.processors.PeriodicStreakNBadge;
+import io.github.oasis.elements.badges.TEvent;
 import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
 import io.github.oasis.elements.badges.signals.HistogramBadgeRemovalSignal;
 import io.github.oasis.elements.badges.signals.HistogramBadgeSignal;
@@ -240,7 +240,7 @@ public class PeriodicNonConsecutiveStreakTest extends AbstractRuleTest {
     private RuleContext<PeriodicStreakNRule> createRule(Map<Integer, Integer> streaks, long timeunit, long threshold, Consumer<Signal> consumer) {
         PeriodicStreakNRule rule = new PeriodicStreakNRule("test.histogram.streak");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setStreaks(streaks);
+        rule.setStreaks(toStreakMap(streaks));
         rule.setConsecutive(false);
         rule.setThreshold(BigDecimal.valueOf(threshold));
         rule.setTimeUnit(timeunit);

@@ -29,19 +29,13 @@ public class RuleUpdatedMessage extends OasisRuleMessage {
 
     private AbstractRule rule;
 
-    public RuleUpdatedMessage(AbstractRule rule, Object messageId) {
+    RuleUpdatedMessage(AbstractRule rule, Object messageId) {
         super(messageId);
         this.rule = rule;
     }
 
     public AbstractRule getRule() {
         return rule;
-    }
-
-    public static RuleUpdatedMessage create(int gameId, AbstractRule rule, Object messageId) {
-        RuleUpdatedMessage message = new RuleUpdatedMessage(rule, messageId);
-        message.setGameId(gameId);
-        return message;
     }
 
     @Override

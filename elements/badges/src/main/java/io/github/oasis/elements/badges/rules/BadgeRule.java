@@ -20,13 +20,43 @@
 package io.github.oasis.elements.badges.rules;
 
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.utils.Texts;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
+
+import java.math.BigDecimal;
 
 /**
  * @author Isuru Weerarathna
  */
 public abstract class BadgeRule extends AbstractRule {
 
+    private String pointId;
+    private BigDecimal pointAwards;
+
     public BadgeRule(String id) {
         super(id);
+    }
+
+    public void derivePointsInTo(BadgeSignal signal) {
+        if (Texts.isEmpty(pointId) || pointAwards == null) {
+            return;
+        }
+        signal.setPointAwards(pointId, pointAwards);
+    }
+
+    public String getPointId() {
+        return pointId;
+    }
+
+    public void setPointId(String pointId) {
+        this.pointId = pointId;
+    }
+
+    public BigDecimal getPointAwards() {
+        return pointAwards;
+    }
+
+    public void setPointAwards(BigDecimal pointAwards) {
+        this.pointAwards = pointAwards;
     }
 }

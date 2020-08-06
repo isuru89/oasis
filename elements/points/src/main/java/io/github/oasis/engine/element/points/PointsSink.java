@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -62,7 +63,7 @@ public class PointsSink extends AbstractSink {
     }
 
     @Override
-    public void consume(Signal pointSignal, AbstractRule rule, ExecutionContext context) throws OasisRuntimeException {
+    public List<Signal> consume(Signal pointSignal, AbstractRule rule, ExecutionContext context) throws OasisRuntimeException {
         try (DbContext db = dbPool.createContext()) {
             PointSignal signal = (PointSignal) pointSignal;
 
@@ -128,5 +129,6 @@ public class PointsSink extends AbstractSink {
         } catch (IOException e) {
             throw new OasisRuntimeException("Error while processing point signal!", e);
         }
+        return null;
     }
 }

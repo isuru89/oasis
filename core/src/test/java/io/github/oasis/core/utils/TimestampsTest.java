@@ -22,6 +22,8 @@ package io.github.oasis.core.utils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -40,7 +42,14 @@ public class TimestampsTest {
         Assertions.assertEquals(Timestamps.HOURLY, Timestamps.parseTimeUnit("hourly"));
         Assertions.assertEquals(Timestamps.HOURLY, Timestamps.parseTimeUnit("Hourly"));
 
+        Assertions.assertEquals(Duration.ofDays(30).toMillis(), Timestamps.parseTimeUnit("30 days"));
+        Assertions.assertEquals(Duration.ofDays(1).toMillis(), Timestamps.parseTimeUnit("1d"));
+        Assertions.assertEquals(Duration.ofDays(14).toMillis(), Timestamps.parseTimeUnit("2 weeks"));
+        Assertions.assertEquals(Duration.ofHours(5).toMillis(), Timestamps.parseTimeUnit("5hours"));
+        Assertions.assertEquals(Duration.ofMinutes(30).toMillis(), Timestamps.parseTimeUnit("30mins"));
+
         Assertions.assertThrows(IllegalArgumentException.class, () -> Timestamps.parseTimeUnit("abc"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Timestamps.parseTimeUnit("30sec"));
     }
 
 }

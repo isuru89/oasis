@@ -25,7 +25,7 @@ import akka.actor.Props;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.EventStreamFactory;
-import io.github.oasis.core.external.SourceFunction;
+import io.github.oasis.core.external.MessageReceiver;
 import io.github.oasis.core.external.messages.OasisCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.actors.ActorNames;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Isuru Weerarathna
  */
-public class OasisEngine implements SourceFunction {
+public class OasisEngine implements MessageReceiver {
 
     private static final Logger LOG = LoggerFactory.getLogger(OasisEngine.class);
 
@@ -76,20 +76,9 @@ public class OasisEngine implements SourceFunction {
 
     @Override
     public void submit(PersistedDef dto) {
-        Object message = DtoHandler.derive(dto, context);
+        Object message = DefinitionReader.derive(dto, context);
         if (message != null) {
             supervisor.tell(message, supervisor);
-        }
-    }
-
-    @Override
-    public void submit(PersistedDef dto, AckCallback callback) {
-        Object message = DtoHandler.derive(dto, context);
-        if (message != null) {
-            supervisor.tell(message, supervisor);
-            callback.accepted();
-        } else {
-            callback.rejected();
         }
     }
 

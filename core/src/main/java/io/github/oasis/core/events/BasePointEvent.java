@@ -118,4 +118,15 @@ public abstract class BasePointEvent implements Event {
     public String getTimeZone() {
         return eventRef.getTimeZone();
     }
+
+    @Override
+    public String toString() {
+        return "BasePointEvent{" +
+                "eventId='" + eventId + '\'' +
+                ", pointId='" + pointId + '\'' +
+                ", points=" + points +
+                ", eventRef=" + eventRef +
+                ", pointStoredKey='" + pointStoredKey + '\'' +
+                '}';
+    }
 }

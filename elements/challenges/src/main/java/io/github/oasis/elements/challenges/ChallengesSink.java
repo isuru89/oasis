@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -55,12 +56,13 @@ public class ChallengesSink extends AbstractSink {
     }
 
     @Override
-    public void consume(Signal challengeSignal, AbstractRule challengeRule, ExecutionContext context) throws OasisRuntimeException {
+    public List<Signal> consume(Signal challengeSignal, AbstractRule challengeRule, ExecutionContext context) throws OasisRuntimeException {
         if (challengeSignal instanceof ChallengeWinSignal) {
             handleChallengeWin(challengeSignal, challengeRule, context);
         } else {
             LOG.warn("Unknown type of signal received! [{}]", challengeSignal == null ? null : challengeSignal.getClass().getName());
         }
+        return null;
     }
 
     private void handleChallengeWin(Signal challengeSignal, AbstractRule challengeRule, ExecutionContext context) throws OasisRuntimeException {

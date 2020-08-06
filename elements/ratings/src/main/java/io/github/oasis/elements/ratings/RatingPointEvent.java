@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,21 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.core.events;
+package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.events.BasePointEvent;
 
 import java.math.BigDecimal;
 
 /**
  * @author Isuru Weerarathna
  */
-public class ChallengePointEvent extends BasePointEvent {
-    public ChallengePointEvent(String pointId, String pointStoredKey, BigDecimal points, Event eventRef) {
+public class RatingPointEvent extends BasePointEvent {
+    public RatingPointEvent(String pointId, String pointStoredKey, BigDecimal points, Event eventRef) {
         super(pointId, pointStoredKey, points, eventRef);
     }
 
-    public ChallengePointEvent(String pointId, BigDecimal points, Event eventRef) {
+    public RatingPointEvent(String pointId, BigDecimal points, Event eventRef) {
         this(pointId, BasePointEvent.DEFAULT_POINTS_KEY, points, eventRef);
     }
 }

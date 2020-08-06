@@ -22,11 +22,13 @@ package io.github.oasis.elements.badges.rules;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventValueResolver;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
@@ -40,6 +42,23 @@ public class PeriodicBadgeRule extends BadgeRule {
 
     public PeriodicBadgeRule(String id) {
         super(id);
+    }
+
+    @Override
+    public void derivePointsInTo(BadgeSignal signal) {
+        int attrId = signal.getAttribute();
+        Threshold matchedThreshold = thresholds.stream()
+                .filter(threshold -> threshold.getAttribute() == attrId)
+                .findFirst()
+                .orElse(null);
+
+        if (matchedThreshold != null) {
+            if (Objects.nonNull(matchedThreshold.getPointAwards())) {
+                signal.setPointAwards(getPointId(), matchedThreshold.getPointAwards());
+            } else {
+                super.derivePointsInTo(signal);
+            }
+        }
     }
 
     public EventExecutionFilter getCriteria() {
@@ -78,10 +97,20 @@ public class PeriodicBadgeRule extends BadgeRule {
     public static class Threshold implements Comparable<Threshold> {
         private final int attribute;
         private final BigDecimal value;
+        private final BigDecimal pointAwards;
 
         public Threshold(int attribute, BigDecimal value) {
+            this(attribute, value, null);
+        }
+
+        public Threshold(int attribute, BigDecimal value, BigDecimal pointAwards) {
             this.attribute = attribute;
             this.value = value;
+            this.pointAwards = pointAwards;
+        }
+
+        public BigDecimal getPointAwards() {
+            return pointAwards;
         }
 
         public int getAttribute() {

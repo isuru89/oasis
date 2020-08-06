@@ -29,7 +29,7 @@ import java.io.Closeable;
  */
 public interface SourceStreamSupport extends Closeable {
 
-    void init(RuntimeContextSupport context, SourceFunction source) throws Exception;
+    void init(RuntimeContextSupport context, MessageReceiver source) throws Exception;
 
     void handleGameCommand(GameCommand gameCommand);
 

@@ -115,8 +115,10 @@ public class RuleExecutor extends OasisBaseActor {
             }
 
             Object messageId = eventMessage.getExternalMessageId();
-            log.info("[{}#{}] Acknowledging successful event for message id {} {}", parentId, myId, messageId, event);
-            eventSource.ackMessage(event.getGameId(), messageId);
+            if (messageId != null) {
+                log.info("[{}#{}] Acknowledging successful event for message id {} {}", parentId, myId, messageId, event);
+                eventSource.ackMessage(event.getGameId(), messageId);
+            }
 
         } catch (Exception e) {
             log.error(e,"[{}#{}] Error occurred while processing event {}", parentId, myId, event);

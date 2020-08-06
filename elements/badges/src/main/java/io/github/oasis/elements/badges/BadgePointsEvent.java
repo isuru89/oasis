@@ -17,26 +17,25 @@
  * under the License.
  */
 
-package io.github.oasis.core.external;
+package io.github.oasis.elements.badges;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.external.messages.OasisCommand;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.events.BasePointEvent;
+
+import java.math.BigDecimal;
 
 /**
+ * Awards points for badges.
+ *
  * @author Isuru Weerarathna
  */
-public interface SourceFunction {
-
-    void submit(PersistedDef dto);
-    void submit(PersistedDef dto, AckCallback callback);
-
-    void submit(OasisCommand command);
-
-    void submit(Event event);
-
-    interface AckCallback {
-        void accepted();
-        void rejected();
+public class BadgePointsEvent extends BasePointEvent {
+    public BadgePointsEvent(String pointId, String pointStoredKey, BigDecimal points, Event eventRef) {
+        super(pointId, pointStoredKey, points, eventRef);
     }
+
+    public BadgePointsEvent(String pointId, BigDecimal points, Event eventRef) {
+        super(pointId, BadgePointsEvent.DEFAULT_POINTS_KEY, points, eventRef);
+    }
+
 }

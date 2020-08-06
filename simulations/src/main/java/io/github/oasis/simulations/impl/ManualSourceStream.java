@@ -20,7 +20,7 @@
 package io.github.oasis.simulations.impl;
 
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.external.SourceFunction;
+import io.github.oasis.core.external.MessageReceiver;
 import io.github.oasis.core.external.SourceStreamSupport;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
@@ -30,10 +30,10 @@ import io.github.oasis.core.external.messages.PersistedDef;
  */
 public class ManualSourceStream implements SourceStreamSupport {
 
-    private SourceFunction sourceFunction;
+    private MessageReceiver sourceFunction;
 
     @Override
-    public void init(RuntimeContextSupport context, SourceFunction source) {
+    public void init(RuntimeContextSupport context, MessageReceiver source) {
         sourceFunction = source;
     }
 

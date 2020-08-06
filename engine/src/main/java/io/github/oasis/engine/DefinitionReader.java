@@ -25,14 +25,13 @@ import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.external.messages.RuleCommand;
 import io.github.oasis.engine.actors.cmds.EventMessage;
-import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
-import io.github.oasis.engine.actors.cmds.RuleRemovedMessage;
-import io.github.oasis.engine.actors.cmds.RuleUpdatedMessage;
+import io.github.oasis.engine.actors.cmds.Messages;
+import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 
 /**
  * @author Isuru Weerarathna
  */
-class DtoHandler {
+class DefinitionReader {
 
     static Object derive(PersistedDef def, EngineContext context) {
         if (def.isEvent()) {
@@ -44,19 +43,23 @@ class DtoHandler {
             cmd.setStatus(toLifecycleType(def.getType()));
             return cmd;
         } else if (def.isRuleEvent()) {
-            int gameId = def.getScope().getGameId();
-            RuleCommand.RuleChangeType ruleChangeType = toRuleChangeType(def.getType());
-            AbstractRule rule = context.getParsers().parseToRule(def);
-            Object messageId = def.getMessageId();
-            if (ruleChangeType == RuleCommand.RuleChangeType.ADD) {
-                return RuleAddedMessage.create(gameId, rule, messageId);
-            } else if (ruleChangeType == RuleCommand.RuleChangeType.REMOVE) {
-                return RuleRemovedMessage.create(gameId, rule.getId(), messageId);
-            } else {
-                return RuleUpdatedMessage.create(gameId, rule, messageId);
-            }
+            return readRuleMessage(def, context);
         }
         return null;
+    }
+
+    private static OasisRuleMessage readRuleMessage(PersistedDef def, EngineContext context) {
+        int gameId = def.getScope().getGameId();
+        RuleCommand.RuleChangeType ruleChangeType = toRuleChangeType(def.getType());
+        AbstractRule rule = context.getParsers().parseToRule(def);
+        Object messageId = def.getMessageId();
+        if (ruleChangeType == RuleCommand.RuleChangeType.ADD) {
+            return Messages.createRuleAddMessage(gameId, rule, messageId);
+        } else if (ruleChangeType == RuleCommand.RuleChangeType.REMOVE) {
+            return Messages.createRuleRemoveMessage(gameId, rule.getId(), messageId);
+        } else {
+            return Messages.createRuleUpdateMessage(gameId, rule, messageId);
+        }
     }
 
     private static RuleCommand.RuleChangeType toRuleChangeType(String type) {

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,13 +17,12 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges;
+package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
-import io.github.oasis.elements.badges.processors.StreakNBadgeProcessor;
-import io.github.oasis.elements.badges.processors.TimeBoundedStreakNBadge;
+import io.github.oasis.elements.badges.TEvent;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
 import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
@@ -256,7 +255,7 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
     private RuleContext<StreakNBadgeRule> createRule(Map<Integer, Integer> streaks, long timeUnit, Consumer<Signal> consumer) {
         TimeBoundedStreakNRule rule = new TimeBoundedStreakNRule("test.temporal.streak");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVENT_TYPE));
-        rule.setStreaks(streaks);
+        rule.setStreaks(toStreakMap(streaks));
         rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
         rule.setRetainTime(100);
         rule.setTimeUnit(timeUnit);

@@ -22,7 +22,7 @@ package io.github.oasis.engine;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.external.EventDispatchSupport;
 import io.github.oasis.core.external.EventStreamFactory;
-import io.github.oasis.core.external.SourceFunction;
+import io.github.oasis.core.external.MessageReceiver;
 import io.github.oasis.core.external.SourceStreamSupport;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
@@ -50,7 +50,7 @@ public class TestEventStreamFactory implements EventStreamFactory {
     private static class TestStreamSupport implements SourceStreamSupport {
 
         @Override
-        public void init(RuntimeContextSupport context, SourceFunction source) throws Exception {
+        public void init(RuntimeContextSupport context, MessageReceiver source) throws Exception {
 
         }
 

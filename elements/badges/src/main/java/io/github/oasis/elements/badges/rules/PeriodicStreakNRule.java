@@ -21,12 +21,14 @@ package io.github.oasis.elements.badges.rules;
 
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.EventValueResolver;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -37,7 +39,7 @@ public class PeriodicStreakNRule extends BadgeRule {
     private int maxStreak = 0;
     private int minStreak = Integer.MAX_VALUE;
     private List<Integer> orderedStreakList;
-    private Map<Integer, Integer> streakMap;
+    private Map<Integer, StreakNBadgeRule.StreakProps> streakMap;
     private long timeUnit;
     protected EventValueResolver<ExecutionContext> valueResolver;
 
@@ -46,6 +48,23 @@ public class PeriodicStreakNRule extends BadgeRule {
 
     public PeriodicStreakNRule(String id) {
         super(id);
+    }
+
+    @Override
+    public void derivePointsInTo(BadgeSignal signal) {
+        int attrId = signal.getAttribute();
+        Map.Entry<Integer, StreakNBadgeRule.StreakProps> matchedStreak = streakMap.entrySet().stream()
+                .filter(entry -> entry.getValue().getAttribute() == attrId)
+                .findFirst()
+                .orElse(null);
+
+        if (matchedStreak != null) {
+            if (Objects.nonNull(matchedStreak.getValue().getPoints())) {
+                signal.setPointAwards(getPointId(), matchedStreak.getValue().getPoints());
+            } else {
+                super.derivePointsInTo(signal);
+            }
+        }
     }
 
     public EventValueResolver<ExecutionContext> getValueResolver() {
@@ -85,10 +104,10 @@ public class PeriodicStreakNRule extends BadgeRule {
     }
 
     public int findAttributeOfStreak(int streak) {
-        return streakMap.getOrDefault(streak, 0);
+        return streakMap.getOrDefault(streak, StreakNBadgeRule.DEFAULT_STREAK_PROPS).getAttribute();
     }
 
-    public void setStreaks(Map<Integer, Integer> streaks) {
+    public void setStreaks(Map<Integer, StreakNBadgeRule.StreakProps> streaks) {
         this.streakMap = new TreeMap<>(streaks);
         this.orderedStreakList = new ArrayList<>(streaks.keySet());
         this.orderedStreakList.sort(Comparator.naturalOrder());

@@ -45,7 +45,7 @@ import java.util.UUID;
  * @author Isuru Weerarathna
  */
 @DisplayName("Message Transformation")
-public class DtoHandlerTest {
+public class DefinitionReaderTest {
 
     private static final int GAME_ID = 1;
     private final Gson gson = new Gson();
@@ -56,7 +56,7 @@ public class DtoHandlerTest {
     void testEventParsing() {
         PersistedDef eventDef = createDef(PersistedDef.GAME_EVENT, null, GAME_ID);
         eventDef.setData(objToMap(TEvent.createKeyValue(System.currentTimeMillis(), "event.a", 100)));
-        Object derived = DtoHandler.derive(eventDef, null);
+        Object derived = DefinitionReader.derive(eventDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(EventMessage.class.getName(), derived.getClass().getName());
         Assertions.assertEquals(EventJson.class.getName(), ((EventMessage)derived).getEvent().getClass().getName());
@@ -66,7 +66,7 @@ public class DtoHandlerTest {
     @DisplayName("Parsing Game Add Messages")
     void testGameAddParsing() {
         PersistedDef gameDef = createDef(PersistedDef.GAME_CREATED, null, GAME_ID);
-        GameCommand derived = (GameCommand) DtoHandler.derive(gameDef, null);
+        GameCommand derived = (GameCommand) DefinitionReader.derive(gameDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(GameCommand.GameLifecycle.CREATE, derived.getStatus());
         Assertions.assertEquals(GAME_ID, derived.getGameId());
@@ -76,7 +76,7 @@ public class DtoHandlerTest {
     @DisplayName("Parsing Game Remove Messages")
     void testGameRemoveParsing() {
         PersistedDef gameDef = createDef(PersistedDef.GAME_REMOVED, null, GAME_ID);
-        GameCommand derived = (GameCommand) DtoHandler.derive(gameDef, null);
+        GameCommand derived = (GameCommand) DefinitionReader.derive(gameDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(GameCommand.GameLifecycle.REMOVE, derived.getStatus());
         Assertions.assertEquals(GAME_ID, derived.getGameId());
@@ -86,7 +86,7 @@ public class DtoHandlerTest {
     @DisplayName("Parsing Game Update Messages")
     void testGameUpdateParsing() {
         PersistedDef gameDef = createDef(PersistedDef.GAME_UPDATED, null, GAME_ID);
-        GameCommand derived = (GameCommand) DtoHandler.derive(gameDef, null);
+        GameCommand derived = (GameCommand) DefinitionReader.derive(gameDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(GameCommand.GameLifecycle.UPDATE, derived.getStatus());
         Assertions.assertEquals(GAME_ID, derived.getGameId());
@@ -96,7 +96,7 @@ public class DtoHandlerTest {
     @DisplayName("Parsing Game Start Messages")
     void testGameStartParsing() {
         PersistedDef gameDef = createDef(PersistedDef.GAME_STARTED, null, GAME_ID);
-        GameCommand derived = (GameCommand) DtoHandler.derive(gameDef, null);
+        GameCommand derived = (GameCommand) DefinitionReader.derive(gameDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(GameCommand.GameLifecycle.START, derived.getStatus());
         Assertions.assertEquals(GAME_ID, derived.getGameId());
@@ -106,7 +106,7 @@ public class DtoHandlerTest {
     @DisplayName("Parsing Game Pause Messages")
     void testGamePauseParsing() {
         PersistedDef gameDef = createDef(PersistedDef.GAME_PAUSED, null, GAME_ID);
-        GameCommand derived = (GameCommand) DtoHandler.derive(gameDef, null);
+        GameCommand derived = (GameCommand) DefinitionReader.derive(gameDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(GameCommand.GameLifecycle.PAUSE, derived.getStatus());
         Assertions.assertEquals(GAME_ID, derived.getGameId());
@@ -122,7 +122,7 @@ public class DtoHandlerTest {
         Mockito.when(context.getParsers()).thenReturn(parsers);
 
         PersistedDef ruleDef = createDef(PersistedDef.GAME_RULE_ADDED, "any", GAME_ID);
-        OasisRuleMessage derived = (OasisRuleMessage) DtoHandler.derive(ruleDef, context);
+        OasisRuleMessage derived = (OasisRuleMessage) DefinitionReader.derive(ruleDef, context);
         Assertions.assertNotNull(derived);
         Assertions.assertTrue(derived instanceof RuleAddedMessage, "should be rule added message!");
         Assertions.assertEquals(GAME_ID, derived.getGameId());
@@ -139,7 +139,7 @@ public class DtoHandlerTest {
         Mockito.when(context.getParsers()).thenReturn(parsers);
 
         PersistedDef ruleDef = createDef(PersistedDef.GAME_RULE_UPDATED, "any", GAME_ID);
-        OasisRuleMessage derived = (OasisRuleMessage) DtoHandler.derive(ruleDef, context);
+        OasisRuleMessage derived = (OasisRuleMessage) DefinitionReader.derive(ruleDef, context);
         Assertions.assertNotNull(derived);
         Assertions.assertTrue(derived instanceof RuleUpdatedMessage, "should be rule updated message!");
         Assertions.assertEquals(GAME_ID, derived.getGameId());
@@ -156,7 +156,7 @@ public class DtoHandlerTest {
         Mockito.when(context.getParsers()).thenReturn(parsers);
 
         PersistedDef ruleDef = createDef(PersistedDef.GAME_RULE_REMOVED, "any", GAME_ID);
-        OasisRuleMessage derived = (OasisRuleMessage) DtoHandler.derive(ruleDef, context);
+        OasisRuleMessage derived = (OasisRuleMessage) DefinitionReader.derive(ruleDef, context);
         Assertions.assertNotNull(derived);
         Assertions.assertTrue(derived instanceof RuleRemovedMessage, "should be rule removed message!");
         Assertions.assertEquals(GAME_ID, derived.getGameId());
@@ -167,7 +167,7 @@ public class DtoHandlerTest {
     @DisplayName("Parsing unknown message")
     void testUnknownMessage() {
         PersistedDef def = createDef("unknown", "any", 2);
-        Object derive = DtoHandler.derive(def, null);
+        Object derive = DefinitionReader.derive(def, null);
         Assertions.assertNull(derive);
     }
 

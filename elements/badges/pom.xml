@@ -11,4 +11,11 @@
 
     <artifactId>oasis-mod-badges</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.github.oasis</groupId>
+            <artifactId>oasis-mod-points</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

@@ -20,10 +20,13 @@
 package io.github.oasis.elements.badges.rules;
 
 import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.elements.badges.signals.BadgeSignal;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
@@ -35,6 +38,23 @@ public class ConditionalBadgeRule extends BadgeRule {
 
     public ConditionalBadgeRule(String id) {
         super(id);
+    }
+
+    @Override
+    public void derivePointsInTo(BadgeSignal signal) {
+        int attrId = signal.getAttribute();
+        Condition matchedCondition = conditions.stream()
+                .filter(condition -> condition.getAttribute() == attrId)
+                .findFirst()
+                .orElse(null);
+
+        if (matchedCondition != null) {
+            if (Objects.nonNull(matchedCondition.getPointAwards())) {
+                signal.setPointAwards(getPointId(), matchedCondition.getPointAwards());
+            } else {
+                super.derivePointsInTo(signal);
+            }
+        }
     }
 
     public int getMaxAwardTimes() {
@@ -55,14 +75,20 @@ public class ConditionalBadgeRule extends BadgeRule {
     }
 
     public static class Condition implements Comparable<Condition> {
-        private int priority;
-        private EventExecutionFilter condition;
-        private int attribute;
+        private final int priority;
+        private final EventExecutionFilter condition;
+        private final int attribute;
+        private final BigDecimal pointAwards;
 
         public Condition(int priority, EventExecutionFilter condition, int attribute) {
+            this(priority, condition, attribute, null);
+        }
+
+        public Condition(int priority, EventExecutionFilter condition, int attribute, BigDecimal pointAwards) {
             this.priority = priority;
             this.condition = condition;
             this.attribute = attribute;
+            this.pointAwards = pointAwards;
         }
 
         public int getPriority() {
@@ -75,6 +101,10 @@ public class ConditionalBadgeRule extends BadgeRule {
 
         public int getAttribute() {
             return attribute;
+        }
+
+        public BigDecimal getPointAwards() {
+            return pointAwards;
         }
 
         @Override

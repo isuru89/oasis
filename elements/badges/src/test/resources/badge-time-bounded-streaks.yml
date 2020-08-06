@@ -1,0 +1,41 @@
+version: 1
+
+badges:
+  - id: BDG-TBS0001
+    name: Question-Score-Streak
+    description: Awards badges when a question is up voted consecutively within 1 day
+    kind: streak
+    event: question.voted
+    consecutive: true
+    timeUnit: 1d      // 1 day period
+    condition: "e.upvote == true"  // if condition become falsy, then streak will break.
+    streaks:
+      - streak: 5
+        attribute: 10
+      - streak: 10
+        attribute: 20
+      - streak: 20
+        attribute: 30
+
+  - id: BDG-TBS0002
+    name: Loyality-Customer
+    description: Awards badges and points when a customer buys $500 or more worth items in separate days but within a month.
+    kind: streak
+    event: order.accepted
+    consecutive: false
+    timeRanges:
+      - type: weekly
+        when: "SATURDAY,SUNDAY"
+    condition: e.total >= 500
+    timeUnit: 30 days
+    pointId: star.points
+    streaks:
+      - streak: 3
+        attribute: 10
+        pointAwards: 100
+      - streak: 5
+        attribute: 20
+        pointAwards: 250
+      - streak: 10
+        attribute: 30
+        pointAwards: 500

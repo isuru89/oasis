@@ -31,6 +31,7 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Sorted;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -42,7 +43,7 @@ public class RatingsSink extends AbstractSink {
     }
 
     @Override
-    public void consume(Signal ratingSignal, AbstractRule ratingRule, ExecutionContext context) throws OasisRuntimeException {
+    public List<Signal> consume(Signal ratingSignal, AbstractRule ratingRule, ExecutionContext context) throws OasisRuntimeException {
         try (DbContext db = dbPool.createContext()) {
             RatingChangedSignal signal = (RatingChangedSignal) ratingSignal;
 
@@ -60,5 +61,6 @@ public class RatingsSink extends AbstractSink {
         } catch (IOException e) {
             throw new OasisRuntimeException("Error while processing rating signal!", e);
         }
+        return null;
     }
 }

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,32 +17,19 @@
  * under the License.
  */
 
-package io.github.oasis.engine.actors.cmds;
+package io.github.oasis.core.elements;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.elements.AbstractProcessor;
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.Signal;
-import io.github.oasis.core.external.messages.OasisCommand;
+
+import java.util.Optional;
 
 /**
+ * Represents an ability to create a new signal from an event or even in a existing signal.
+ *
  * @author Isuru Weerarathna
  */
-public class EventRequest implements OasisCommand {
+public interface SignalCreatable {
 
-    private Event event;
-    private AbstractProcessor<? extends AbstractRule, ? extends Signal> processor;
+    Optional<Signal> createSignal(Event causedEvent);
 
-    public EventRequest(Event event, AbstractProcessor<? extends AbstractRule, ? extends Signal> processor) {
-        this.event = event;
-        this.processor = processor;
-    }
-
-    public Event getEvent() {
-        return event;
-    }
-
-    public AbstractProcessor<? extends AbstractRule, ? extends Signal> getProcessor() {
-        return processor;
-    }
 }

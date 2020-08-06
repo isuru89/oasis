@@ -1,0 +1,35 @@
+version: 1
+
+badges:
+  - id: BDG-PS0001
+    name: Daily-Reputations
+    description: Accumulates user reputation and awards badges if user scores 200+ reputation for minimum 5 consecutive days.
+    kind: periodicAccumulationStreak
+    event: reputation.changed
+    threshold: 200
+    timeUnit: daily
+    consecutive: true
+    valueExtractorExpression: e.reputations
+    streaks:
+      - streak: 5         // 5 consecutive days
+        attribute: 10
+      - streak: 7         // 7 consecutive days
+        attribute: 20
+      - streak: 10        // 10 consecutive days
+        attribute: 30
+
+  - id: BDG-PS0002
+    name: Daily-Logins
+    description: Awards badges if user logs in daily for month
+    kind: periodicOccurrencesStreak
+    event: user.login
+    threshold: 1
+    timeUnit: daily
+    consecutive: true
+    streaks:
+      - streak: 30
+        attribute: 10
+      - streak: 60
+        attribute: 20
+      - streak: 100
+        attribute: 30
