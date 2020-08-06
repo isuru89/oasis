@@ -100,7 +100,7 @@ public class EngineBadgesTest extends OasisEngineTest {
         Event e1 = TEvent.createKeyValue(TS("2020-03-23 11:15"), EVT_A, 75);
         Event e2 = TEvent.createKeyValue(TS("2020-03-25 09:55"), EVT_A, 63);
         Event e3 = TEvent.createKeyValue(TS("2020-03-31 14:15"), EVT_A, 57);
-        Event e4 = TEvent.createKeyValue(TS("2020-04-01 05:15"), EVT_A, 88);
+        Event e4 = TEvent.createKeyValue(TS("2020-04-01 09:15"), EVT_A, 88);
         Event e5 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 76);
         Event e6 = TEvent.createKeyValue(TS("2020-04-05 11:15"), EVT_A, 26);
 
@@ -162,22 +162,31 @@ public class EngineBadgesTest extends OasisEngineTest {
                 RedisAssert.ofEntries("all", "150",
                         "source:" + e1.getSource(), "150",
                         "all:Y2020", "150",
-                        "all:Q202001", "150",
-                        "all:M202003", "150",
+                        "all:Q202001", "50",
+                        "all:Q202002", "100",
+                        "all:M202003", "50",
+                        "all:M202004", "100",
                         "all:W202014", "150",
-                        "all:D20200331", "150",
+                        "all:D20200331", "50",
+                        "all:D20200401", "100",
                         "rule:"+pid, "150",
                         "rule:"+pid+":Y2020", "150",
-                        "rule:"+pid+":Q202001", "150",
-                        "rule:"+pid+":M202003", "150",
+                        "rule:"+pid+":Q202001", "50",
+                        "rule:"+pid+":Q202002", "100",
+                        "rule:"+pid+":M202003", "50",
+                        "rule:"+pid+":M202004", "100",
                         "rule:"+pid+":W202014", "150",
-                        "rule:"+pid+":D20200331", "150",
+                        "rule:"+pid+":D20200331", "50",
+                        "rule:"+pid+":D20200401", "100",
                         "team:"+tid, "150",
                         "team:"+tid+":Y2020", "150",
-                        "team:"+tid+":Q202001", "150",
-                        "team:"+tid+":M202003", "150",
+                        "team:"+tid+":Q202001", "50",
+                        "team:"+tid+":Q202002", "100",
+                        "team:"+tid+":M202003", "50",
+                        "team:"+tid+":M202004", "100",
                         "team:"+tid+":W202014", "150",
-                        "team:"+tid+":D20200331", "150"
+                        "team:"+tid+":D20200331", "50",
+                        "team:"+tid+":D20200401", "100"
                 ));
     }
 
