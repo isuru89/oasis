@@ -23,14 +23,12 @@ import io.github.oasis.core.Event;
 import io.github.oasis.core.EventScope;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.utils.Texts;
-import lombok.ToString;
 
 import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
  */
-@ToString
 public class BadgeRemoveSignal extends BadgeSignal {
     public BadgeRemoveSignal(String ruleId, EventScope event, int attribute, long st, long et, String sid, String eid) {
         super(ruleId, event, st, attribute, st, et, sid, eid);
@@ -57,5 +55,16 @@ public class BadgeRemoveSignal extends BadgeSignal {
             return Optional.of(new BadgePointSignal(getPointId(), getPoints().negate(), causedEvent));
         }
         return Optional.empty();
+    }
+
+    @Override
+    public String toString() {
+        return "BadgeRemoveSignal{" +
+                "startTime=" + getStartTime() + ", " +
+                "endTime=" + getEndTime() + ", " +
+                "startId=" + getStartId() + ", " +
+                "endId=" + getEndId() + ", " +
+                "attribute=" + getAttribute() +
+                "}";
     }
 }

@@ -1,0 +1,18 @@
+version: 1
+
+badges:
+  - id: BDG00003
+    name: test.badge.remove.points.rule
+    description: Awards badge and points if value is >= 50 for streaks
+    kind: streak
+    event: event.a
+    condition: e.value >= 50
+    pointId: star.points
+    timeUnit: 30d
+    streaks:
+      - streak: 3
+        attribute: 10
+        pointAwards: 50
+      - streak: 5
+        attribute: 20
+        pointAwards: 100
