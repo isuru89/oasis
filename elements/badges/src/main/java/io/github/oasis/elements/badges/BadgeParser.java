@@ -23,6 +23,7 @@ import io.github.oasis.core.VariableNames;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractElementParser;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.utils.Numbers;
@@ -83,6 +84,8 @@ public class BadgeParser extends AbstractElementParser {
             AbstractDef.defToRule(def, temp);
             temp.setStreaks(toStreakMap(def.getStreaks()));
             temp.setCriteria(temp.getCondition());
+            temp.setCondition(EventExecutionFilterFactory.ALWAYS_TRUE);
+            temp.setRetainTime(toLongTimeUnit(def));
             rule = temp;
         } else if (CONDITIONAL_KIND.equals(kind)) {
             ConditionalBadgeRule temp = new ConditionalBadgeRule(id);

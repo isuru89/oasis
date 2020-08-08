@@ -99,7 +99,7 @@ public class RedisAssert {
                 Set<String> expected = entries.keySet();
                 Set<String> actual = all.keySet();
                 actual.removeAll(expected);
-                Assertions.fail("More entries (#" + actual.size() + ") are in db than expected! " + actual);
+                Assertions.fail("More entries (#" + actual.size() + ") are in db than expected! [key=" + key + "] " + actual);
             } else if (all.size() < entries.size()) {
                 Set<String> expected = entries.keySet();
                 Set<String> actual = all.keySet();
@@ -111,7 +111,7 @@ public class RedisAssert {
                 if (!all.containsKey(k)) {
                     Assertions.fail("Sorted member " + k + " does not exist in db! " + k);
                 }
-                Assertions.assertEquals(v, all.get(k), "Expected score is different!");
+                Assertions.assertEquals(v, all.get(k), "Expected score is different! key=" + k);
             });
 
         } catch (IOException e) {

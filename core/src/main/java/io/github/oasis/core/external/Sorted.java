@@ -55,5 +55,5 @@ public interface Sorted {
 
     Optional<String> getMemberByScore(long score);
 
-    void remove(String member);
+    boolean remove(String member);
 }

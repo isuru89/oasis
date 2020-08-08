@@ -20,8 +20,8 @@
 package io.github.oasis.db.redis;
 
 import io.github.oasis.core.collect.Pair;
-import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.collect.Record;
+import io.github.oasis.core.external.Sorted;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
@@ -158,7 +158,8 @@ public class RedisSortedSet implements Sorted {
     }
 
     @Override
-    public void remove(String member) {
-        jedis.zrem(baseKey, member);
+    public boolean remove(String member) {
+        Long result = jedis.zrem(baseKey, member);
+        return result != null && result > 0;
     }
 }

@@ -67,21 +67,27 @@ public class BadgeSink extends AbstractSink {
         try (DbContext db = dbPool.createContext()) {
             BadgeSignal signal = (BadgeSignal) badgeSignal;
             BadgeRule rule = (BadgeRule) badgeRule;
+            boolean isRemoval = signal instanceof BadgeRemoveSignal;
 
             long userId = signal.getEventScope().getUserId();
             int gameId = signal.getEventScope().getGameId();
             long ts = signal.getOccurredTimestamp();
             String ruleId = signal.getRuleId();
-            int addition = signal instanceof BadgeRemoveSignal ? -1 : 1;
+            int addition = isRemoval ? -1 : 1;
 
             // badge log
             Sorted badgeLog = db.SORTED(ID.getGameUserBadgesLog(gameId, userId));
-            String logMember = getBadgeKey(signal);
-            boolean added = badgeLog.add(logMember, signal.getOccurredTimestamp());
 
-            if (!added) {
-                LOG.info("Already added badge received! Skipping signal {}.", signal);
-                return null;
+            if (isRemoval) {
+                removeFromBadgeLog(signal, badgeLog);
+            } else {
+                String logMember = getBadgeKey(signal);
+                boolean added = badgeLog.add(logMember, signal.getOccurredTimestamp());
+
+                if (!added) {
+                    LOG.info("Already added badge received! Skipping signal {}.", signal);
+                    return null;
+                }
             }
 
             Mapped badgesMap = db.MAP(ID.getGameUserBadgesSummary(gameId, userId));
@@ -116,13 +122,23 @@ public class BadgeSink extends AbstractSink {
             rule.derivePointsInTo(signal);
             Optional<Signal> signalOpt = signal.createSignal(BadgeSignal.BadgeRefEvent.create(signal));
             if (signalOpt.isPresent()) {
-                return Collections.singletonList(signalOpt.get());
+                Signal bSignal = signalOpt.get();
+                LOG.info("Created new signal: {}", bSignal);
+                return Collections.singletonList(bSignal);
             }
 
         } catch (IOException e) {
             throw new OasisRuntimeException("Error occurred while processing badge signal!", e);
         }
         return null;
+    }
+
+    private void removeFromBadgeLog(BadgeSignal signal, Sorted badgeLog) {
+        String ruleId = signal.getRuleId();
+        int attributeId = signal.getAttribute();
+        if (!badgeLog.remove(String.format(STREAK_BADGE_FORMAT, ruleId, attributeId, signal.getStartTime()))) {
+            badgeLog.remove(String.format(GENERAL_BADGE_FORMAT, ruleId, attributeId, signal.getEndId()));
+        }
     }
 
     private String getBadgeKey(BadgeSignal signal) {

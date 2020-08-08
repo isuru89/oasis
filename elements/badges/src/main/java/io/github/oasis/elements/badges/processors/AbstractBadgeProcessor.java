@@ -25,7 +25,6 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.RuleContext;
-import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
@@ -33,9 +32,6 @@ import io.github.oasis.elements.badges.StreakSupport;
 import io.github.oasis.elements.badges.rules.BadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
@@ -87,17 +83,5 @@ public abstract class AbstractBadgeProcessor<R extends BadgeRule> extends Abstra
             }
             map.setValue(endTimeKey, Math.max(signal.getEndTime(), val));
         }
-    }
-
-    @Override
-    protected void afterEmitAll(List<BadgeSignal> signals, Event event, R rule, ExecutionContext context, DbContext db, SignalCollector collector) {
-        if (Objects.isNull(signals)) {
-            return;
-        }
-
-        signals.stream().map(signal -> signal.createSignal(event))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .forEach(signal -> collector.accept(signal, context, rule));
     }
 }
