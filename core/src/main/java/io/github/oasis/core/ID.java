@@ -19,6 +19,8 @@
 
 package io.github.oasis.core;
 
+import io.github.oasis.core.utils.Texts;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -29,7 +31,7 @@ public final class ID {
     }
 
     public static String getGameLeaderboard(int gameId, String trait, String duration) {
-        if (duration.isEmpty()) {
+        if (Texts.isEmpty(duration)) {
             return String.format("g%d:leaderboard:%s", gameId, trait);
         } else {
             return String.format("g%d:leaderboard:%s:%s", gameId, trait, duration);
@@ -37,7 +39,7 @@ public final class ID {
     }
 
     public static String getGameTeamLeaderboard(int gameId, long teamId, String trait, String duration) {
-        if (duration.isEmpty()) {
+        if (Texts.isEmpty(duration)) {
             return String.format("g%d:t%d:leaderboard:%s", gameId, teamId, trait);
         } else {
             return String.format("g%d:t%d:leaderboard:%s:%s", gameId, teamId, trait, duration);
