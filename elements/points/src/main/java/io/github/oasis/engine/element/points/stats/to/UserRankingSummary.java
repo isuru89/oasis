@@ -67,13 +67,19 @@ public class UserRankingSummary {
     public static class RankInfo {
         private int rank;
         private BigDecimal score;
+        private Long total;
 
         public RankInfo() {
         }
 
-        public RankInfo(int rank, BigDecimal score) {
+        public RankInfo(int rank, BigDecimal score, Long total) {
             this.rank = rank;
             this.score = score;
+            this.total = total;
+        }
+
+        public long getTotal() {
+            return total;
         }
 
         public int getRank() {

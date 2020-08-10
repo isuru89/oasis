@@ -135,7 +135,7 @@ public final class ID {
     }
 
     public static String getUserBadgesMetaKey(int gameId, long userId) {
-        return String.format("u%d:g%d:bgmeta", gameId, userId);
+        return String.format("u%d:g%d:bgmeta", userId, gameId);
     }
 
 }

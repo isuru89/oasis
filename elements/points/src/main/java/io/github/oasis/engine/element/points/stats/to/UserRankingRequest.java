@@ -28,8 +28,40 @@ public class UserRankingRequest {
 
     private Integer gameId;
     private Long userId;
+    private Integer teamId;
 
     private LocalDate date;
+
+    private boolean includeTotalCount = false;
+    private boolean descendingOrder = true;
+
+    public boolean isTeamScoped() {
+        return teamId != null;
+    }
+
+    public Integer getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Integer teamId) {
+        this.teamId = teamId;
+    }
+
+    public boolean isIncludeTotalCount() {
+        return includeTotalCount;
+    }
+
+    public void setIncludeTotalCount(boolean includeTotalCount) {
+        this.includeTotalCount = includeTotalCount;
+    }
+
+    public boolean isDescendingOrder() {
+        return descendingOrder;
+    }
+
+    public void setDescendingOrder(boolean descendingOrder) {
+        this.descendingOrder = descendingOrder;
+    }
 
     public LocalDate getDate() {
         return date;

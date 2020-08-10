@@ -30,6 +30,8 @@ import io.github.oasis.engine.element.points.stats.to.LeaderboardRequest;
 import io.github.oasis.engine.element.points.stats.to.LeaderboardSummary;
 import io.github.oasis.engine.element.points.stats.to.UserPointSummary;
 import io.github.oasis.engine.element.points.stats.to.UserPointsRequest;
+import io.github.oasis.engine.element.points.stats.to.UserRankingRequest;
+import io.github.oasis.engine.element.points.stats.to.UserRankingSummary;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -167,6 +169,9 @@ public class EnginePointsTest extends OasisEngineTest {
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200403"), ofSortedEntries(U1, 24));
 
         PointStats stats = new PointStats(dbPool);
+        String pkg = PointStats.class.getPackageName().replace('.', '/');
+        dbPool.registerScripts(pkg, Thread.currentThread().getContextClassLoader());
+
         UserPointsRequest request = new UserPointsRequest();
         request.setGameId(gameId);
         request.setUserId(Long.parseLong(String.valueOf(U1)));
@@ -184,6 +189,31 @@ public class EnginePointsTest extends OasisEngineTest {
         System.out.println(gson.toJson(userPoints));
         Assertions.assertEquals(BigDecimal.valueOf(35), userPoints.getTotalPoints());
         Assertions.assertEquals(2, userPoints.getStats().get("rule").getRecords().size());
+
+        {
+            UserRankingRequest rankingRequest = new UserRankingRequest();
+            rankingRequest.setGameId(gameId);
+            rankingRequest.setUserId(Long.parseLong(String.valueOf(U1)));
+            rankingRequest.setDate(LocalDate.parse("2020-03-25"));
+
+            UserRankingSummary userRankings = (UserRankingSummary) stats.getUserRankings(rankingRequest);
+            System.out.println(gson.toJson(userRankings));
+            Assertions.assertNotNull(userRankings.getRankings());
+            Assertions.assertEquals(6, userRankings.getRankings().size());
+            Assertions.assertTrue(userRankings.getRankings().containsKey("all"));
+            Assertions.assertTrue(userRankings.getRankings().containsKey("M202003"));
+            Assertions.assertTrue(userRankings.getRankings().containsKey("D20200325"));
+            Assertions.assertTrue(userRankings.getRankings().containsKey("Q202001"));
+            Assertions.assertTrue(userRankings.getRankings().containsKey("Y2020"));
+            Assertions.assertTrue(userRankings.getRankings().containsKey("W202013"));
+
+            rankingRequest.setUserId(Long.parseLong(String.valueOf(U2)));
+            userRankings = (UserRankingSummary) stats.getUserRankings(rankingRequest);
+            System.out.println(gson.toJson(userRankings));
+            Assertions.assertEquals(2, userRankings.getRankings().size());
+            Assertions.assertTrue(userRankings.getRankings().containsKey("all"));
+            Assertions.assertTrue(userRankings.getRankings().containsKey("Y2020"));
+        }
     }
 
     @Test

@@ -34,16 +34,25 @@ import io.github.oasis.engine.element.points.stats.to.LeaderboardSummary;
 import io.github.oasis.engine.element.points.stats.to.UserPointSummary;
 import io.github.oasis.engine.element.points.stats.to.UserPointsRequest;
 import io.github.oasis.engine.element.points.stats.to.UserPointsRequest.PointsFilterScope;
+import io.github.oasis.engine.element.points.stats.to.UserRankingRequest;
+import io.github.oasis.engine.element.points.stats.to.UserRankingSummary;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static io.github.oasis.core.utils.Constants.COLON;
 
 /**
  * @author Isuru Weerarathna
  */
 public class PointStats {
+
+    private static final String LEADERBOARD_RANK = "O.PLEADRANKS";
+    private static final String LEADERBOARD_RANK_REVERSE = "O.PLEADRANKSREV";
+    private static final String WITH_CARDINALITY = "withcard";
 
     private Db pool;
 
@@ -123,6 +132,51 @@ public class PointStats {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public Object getUserRankings(UserRankingRequest request) throws Exception {
+        try (DbContext db = pool.createContext()) {
+
+            String[] keysToRead = Stream.of(TimeScope.values())
+                    .map(timeScope -> {
+                        String trait = timeScope.getTrait();
+                        String duration = timeScope == TimeScope.ALL ? null : Timestamps.formatKey(request.getDate(), timeScope);
+                        if (request.isTeamScoped()) {
+                            return ID.getGameTeamLeaderboard(request.getGameId(), request.getTeamId(), trait, duration);
+                        }
+                        return ID.getGameLeaderboard(request.getGameId(), trait, duration);
+                    })
+                    .toArray(String[]::new);
+
+            UserRankingSummary summary = new UserRankingSummary();
+            summary.setGameId(request.getGameId());
+            summary.setUserId(request.getUserId());
+
+            String[] inputArray = new String[keysToRead.length + 2];
+            inputArray[0] = String.valueOf(request.getUserId());
+            inputArray[inputArray.length - 1] = request.isIncludeTotalCount() ? WITH_CARDINALITY : "";
+            System.arraycopy(keysToRead, 0, inputArray, 1, keysToRead.length);
+            String scriptToRun = request.isDescendingOrder() ? LEADERBOARD_RANK_REVERSE : LEADERBOARD_RANK;
+            List<Object> values = (List<Object>) db.runScript(scriptToRun, inputArray.length - 1, inputArray);
+            for (int i = 0; i < values.size(); i += 3) {
+                Object rankVal = values.get(i);
+                if (rankVal == null) {
+                    continue;
+                }
+
+                int keyIdx = i / 3;
+                String[] parts = keysToRead[keyIdx].split(COLON);
+                int rank = rankVal instanceof Number ? ((Number) rankVal).intValue() : Numbers.asInt(String.valueOf(rankVal));
+                BigDecimal score = new BigDecimal(String.valueOf(values.get(i + 1)));
+                Object totalVal = values.get(i + 2);
+                Long total = totalVal instanceof Number ? ((Number) totalVal).longValue() : null;
+
+                summary.addRankingDetail(parts[parts.length - 1], new UserRankingSummary.RankInfo(rank + 1, score, total));
+            }
+
+            return summary;
+        }
+    }
+
     void appendToSummary(UserPointSummary summary, PointsFilterScope filterScope, List<String> keys, List<String> values) {
         UserPointSummary.StatResults results = new UserPointSummary.StatResults();
         for (int i = 0; i < keys.size(); i++) {
@@ -145,16 +199,16 @@ public class PointStats {
         if (range != null) {
             List<String> timeRanges = Timestamps.timeUnitsWithinRange(range.getFrom(), range.getTo(), range.getType());
             if (Utils.isNotEmpty(filterScope.getValues())) {
-                return timeRanges.stream().flatMap(tr -> filterScope.getValues().stream().map(val -> val + ":" + tr))
-                        .map(val -> prefix + ":" + val)
+                return timeRanges.stream().flatMap(tr -> filterScope.getValues().stream().map(val -> val + COLON + tr))
+                        .map(val -> prefix + COLON + val)
                         .collect(Collectors.toList());
             } else {
-                return timeRanges.stream().map(val -> prefix + ":" + val).collect(Collectors.toList());
+                return timeRanges.stream().map(val -> prefix + COLON + val).collect(Collectors.toList());
             }
 
         } else if (Utils.isNotEmpty(filterScope.getValues())) {
             return filterScope.getValues().stream()
-                    .map(val -> prefix + ":" + val)
+                    .map(val -> prefix + COLON + val)
                     .collect(Collectors.toList());
         }
 
