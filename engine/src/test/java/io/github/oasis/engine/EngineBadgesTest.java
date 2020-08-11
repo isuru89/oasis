@@ -19,23 +19,31 @@
 
 package io.github.oasis.engine;
 
+import com.google.gson.Gson;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.elements.badges.stats.BadgeStats;
+import io.github.oasis.elements.badges.stats.to.UserBadgeRequest;
+import io.github.oasis.elements.badges.stats.to.UserBadgeSummary;
 import io.github.oasis.engine.model.TEvent;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
  */
 public class EngineBadgesTest extends OasisEngineTest {
 
+    private final Gson gson = new Gson();
+
     @Test
-    public void testEngineBadges() {
+    public void testEngineBadges() throws Exception {
         Event e1 = TEvent.createKeyValue(TS("2020-03-23 11:15"), EVT_A, 75);
         Event e2 = TEvent.createKeyValue(TS("2020-03-25 09:55"), EVT_A, 63);
         Event e3 = TEvent.createKeyValue(TS("2020-03-31 14:15"), EVT_A, 57);
@@ -74,6 +82,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "attr:20:Q202001","1",
                         "attr:20:W202013","1",
                         "attr:20:Y2020","1",
+                        "rule:BDG00001","2",
                         "rule:BDG00001:10","1",
                         "rule:BDG00001:10:D20200331","1",
                         "rule:BDG00001:10:M202003","1",
@@ -92,6 +101,34 @@ public class EngineBadgesTest extends OasisEngineTest {
                         rid + ":10:" + e1.getTimestamp(), e5.getTimestamp(),
                         rid + ":20:" + e1.getTimestamp(), e5.getTimestamp()
                 ));
+
+        BadgeStats stats = new BadgeStats(dbPool);
+        UserBadgeRequest request = new UserBadgeRequest();
+        request.setGameId(TEvent.GAME_ID);
+        request.setUserId(TEvent.USER_ID);
+        request.setAttributeFilters(Set.of(10, 20, 30));
+
+        UserBadgeSummary badgeSummary = (UserBadgeSummary) stats.getBadgeSummary(request);
+        System.out.println(gson.toJson(badgeSummary));
+        Assertions.assertEquals(2, badgeSummary.getTotalBadges());
+        Assertions.assertEquals(3, badgeSummary.getStats().size());
+        Assertions.assertEquals(1, badgeSummary.getStats().get("10").getCount());
+        Assertions.assertEquals(1, badgeSummary.getStats().get("20").getCount());
+
+        request.setRuleFilters(Set.of(rid));
+        badgeSummary = (UserBadgeSummary) stats.getBadgeSummary(request);
+        System.out.println(gson.toJson(badgeSummary));
+        Assertions.assertEquals(1, badgeSummary.getStats().size());
+        Assertions.assertTrue(badgeSummary.getStats().containsKey("BDG00001"));
+        Assertions.assertTrue(badgeSummary.getStats().get("BDG00001") instanceof UserBadgeSummary.RuleSummaryStat);
+        UserBadgeSummary.RuleSummaryStat ruleSummaryStat = (UserBadgeSummary.RuleSummaryStat) badgeSummary.getStats().get("BDG00001");
+        Assertions.assertEquals(3, ruleSummaryStat.getAttributes().size());
+        Assertions.assertTrue(ruleSummaryStat.getAttributes().containsKey("10"));
+        Assertions.assertTrue(ruleSummaryStat.getAttributes().containsKey("20"));
+        Assertions.assertTrue(ruleSummaryStat.getAttributes().containsKey("30"));
+        Assertions.assertEquals(1, ruleSummaryStat.getAttributes().get("10").getCount());
+        Assertions.assertEquals(1, ruleSummaryStat.getAttributes().get("20").getCount());
+        Assertions.assertEquals(0, ruleSummaryStat.getAttributes().get("30").getCount());
     }
 
 
@@ -135,6 +172,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "attr:20:Q202001","1",
                         "attr:20:W202013","1",
                         "attr:20:Y2020","1",
+                        "rule:BDG00002","2",
                         "rule:BDG00002:10","1",
                         "rule:BDG00002:10:D20200331","1",
                         "rule:BDG00002:10:M202003","1",
@@ -227,6 +265,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "attr:10:W202013","0",
                         "attr:10:W202014","1",
                         "attr:10:Y2020","1",
+                        "rule:BDG00003","1",
                         "rule:BDG00003:10","1",
                         "rule:BDG00003:10:D20200323","-1",
                         "rule:BDG00003:10:D20200324","1",

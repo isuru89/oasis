@@ -103,6 +103,7 @@ public class BadgeSink extends AbstractSink {
 
             // by type + attr
             String rulePfx = RULE_PFX + ruleId + COLON + signal.getAttribute();
+            badgesMap.incrementByInt(RULE_PFX + ruleId, addition);
             badgesMap.incrementByInt(rulePfx, addition);
             badgesMap.incrementByInt(rulePfx + COLON + tcx.getYear(), addition);
             badgesMap.incrementByInt(rulePfx + COLON + tcx.getMonth(), addition);
