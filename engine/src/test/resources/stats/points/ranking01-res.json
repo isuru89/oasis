@@ -1,0 +1,30 @@
+{
+  "gameId": 1,
+  "userId": 1,
+  "rankings": {
+    "all": {
+      "rank": 2,
+      "score": 35
+    },
+    "M202003": {
+      "rank": 1,
+      "score": 11
+    },
+    "D20200325": {
+      "rank": 1,
+      "score": 11
+    },
+    "Q202001": {
+      "rank": 1,
+      "score": 11
+    },
+    "Y2020": {
+      "rank": 1,
+      "score": 35
+    },
+    "W202013": {
+      "rank": 1,
+      "score": 11
+    }
+  }
+}

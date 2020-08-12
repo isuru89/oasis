@@ -1,0 +1,15 @@
+{
+  "gameId": 1,
+  "records": [
+    {
+      "rank": 1,
+      "userId": 2,
+      "score": 33.0
+    },
+    {
+      "rank": 2,
+      "userId": 1,
+      "score": 12.0
+    }
+  ]
+}

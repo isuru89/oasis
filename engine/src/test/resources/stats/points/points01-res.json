@@ -1,0 +1,19 @@
+{
+  "gameId": 1,
+  "userId": 1,
+  "totalPoints": 35,
+  "stats": {
+    "rule": {
+      "records": [
+        {
+          "key": "rule:bonus.points:D20200325",
+          "value": 11
+        },
+        {
+          "key": "rule:bonus.points:D20200403",
+          "value": 24
+        }
+      ]
+    }
+  }
+}

@@ -19,12 +19,10 @@
 
 package io.github.oasis.engine;
 
-import com.google.gson.Gson;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.core.model.TimeScope;
 import io.github.oasis.engine.element.points.stats.PointStats;
 import io.github.oasis.engine.element.points.stats.to.LeaderboardRequest;
 import io.github.oasis.engine.element.points.stats.to.LeaderboardSummary;
@@ -33,12 +31,7 @@ import io.github.oasis.engine.element.points.stats.to.UserPointsRequest;
 import io.github.oasis.engine.element.points.stats.to.UserRankingRequest;
 import io.github.oasis.engine.element.points.stats.to.UserRankingSummary;
 import io.github.oasis.engine.model.TEvent;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
 
 import static io.github.oasis.engine.RedisAssert.assertSorted;
 import static io.github.oasis.engine.RedisAssert.ofSortedEntries;
@@ -172,52 +165,21 @@ public class EnginePointsTest extends OasisEngineTest {
         String pkg = PointStats.class.getPackageName().replace('.', '/');
         dbPool.registerScripts(pkg, Thread.currentThread().getContextClassLoader());
 
-        UserPointsRequest request = new UserPointsRequest();
-        request.setGameId(gameId);
-        request.setUserId(Long.parseLong(String.valueOf(U1)));
+        compareStatReqRes("stats/points/points01-req.json", UserPointsRequest.class,
+                "stats/points/points01-res.json", UserPointSummary.class,
+                req -> (UserPointSummary) stats.getUserPoints(req));
 
-        UserPointsRequest.PointsFilterScope filter = new UserPointsRequest.PointsFilterScope();
-        filter.setType(UserPointsRequest.ScopedTypes.RULE);
-        filter.setRefId("rule");
-        filter.setValues(Collections.singletonList("bonus.points"));
-        UserPointsRequest.PointRange range = new UserPointsRequest.PointRange(TimeScope.DAILY, LocalDate.parse("2020-03-01"), LocalDate.parse("2020-04-30"));
-        filter.setRange(range);
-        request.setFilters(Collections.singletonList(filter));
+        compareStatReqRes("stats/points/ranking01-req.json", UserRankingRequest.class,
+                "stats/points/ranking01-res.json", UserRankingSummary.class,
+                req -> (UserRankingSummary) stats.getUserRankings(req));
 
-        UserPointSummary userPoints = (UserPointSummary) stats.getUserPoints(request);
-        Gson gson = new Gson();
-        System.out.println(gson.toJson(userPoints));
-        Assertions.assertEquals(BigDecimal.valueOf(35), userPoints.getTotalPoints());
-        Assertions.assertEquals(2, userPoints.getStats().get("rule").getRecords().size());
-
-        {
-            UserRankingRequest rankingRequest = new UserRankingRequest();
-            rankingRequest.setGameId(gameId);
-            rankingRequest.setUserId(Long.parseLong(String.valueOf(U1)));
-            rankingRequest.setDate(LocalDate.parse("2020-03-25"));
-
-            UserRankingSummary userRankings = (UserRankingSummary) stats.getUserRankings(rankingRequest);
-            System.out.println(gson.toJson(userRankings));
-            Assertions.assertNotNull(userRankings.getRankings());
-            Assertions.assertEquals(6, userRankings.getRankings().size());
-            Assertions.assertTrue(userRankings.getRankings().containsKey("all"));
-            Assertions.assertTrue(userRankings.getRankings().containsKey("M202003"));
-            Assertions.assertTrue(userRankings.getRankings().containsKey("D20200325"));
-            Assertions.assertTrue(userRankings.getRankings().containsKey("Q202001"));
-            Assertions.assertTrue(userRankings.getRankings().containsKey("Y2020"));
-            Assertions.assertTrue(userRankings.getRankings().containsKey("W202013"));
-
-            rankingRequest.setUserId(Long.parseLong(String.valueOf(U2)));
-            userRankings = (UserRankingSummary) stats.getUserRankings(rankingRequest);
-            System.out.println(gson.toJson(userRankings));
-            Assertions.assertEquals(2, userRankings.getRankings().size());
-            Assertions.assertTrue(userRankings.getRankings().containsKey("all"));
-            Assertions.assertTrue(userRankings.getRankings().containsKey("Y2020"));
-        }
+        compareStatReqRes("stats/points/ranking02-req.json", UserRankingRequest.class,
+                "stats/points/ranking02-res.json", UserRankingSummary.class,
+                req -> (UserRankingSummary) stats.getUserRankings(req));
     }
 
     @Test
-    public void testEnginePointsTeamLeaderboards() throws Exception {
+    public void testEnginePointsTeamLeaderboards() {
         Event e1 = TEvent.createWithTeam(U1, T2, TS("2019-12-27 07:15"), EVT_A, 55);
         Event e2 = TEvent.createWithTeam(U2, T2, TS("2019-12-26 11:45"), EVT_A, 98);
         Event e3 = TEvent.createWithTeam(U1, T1, TS("2019-12-26 07:15"), EVT_A, 56);
@@ -266,33 +228,23 @@ public class EnginePointsTest extends OasisEngineTest {
         assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20200402"), ofSortedEntries(U1, 11));
         assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20200403"), ofSortedEntries(U2, 9));
 
-        LeaderboardRequest request = new LeaderboardRequest();
-        request.setGameId(gameId);
-        request.setTeamId(T1);
-        request.setTimeRange(TimeScope.ALL);
-
         PointStats stats = new PointStats(dbPool);
-        LeaderboardSummary leaderboard = (LeaderboardSummary) stats.getLeaderboard(request);
-        Gson gson = new Gson();
-        System.out.println(gson.toJson(leaderboard));
-        Assertions.assertEquals(2, leaderboard.getRecords().size());
-        Assertions.assertTrue(leaderboard.getRecords().get(0).getScore().compareTo(leaderboard.getRecords().get(1).getScore()) > 0);
 
-        request.setDescendingOrder(false);
-        leaderboard = (LeaderboardSummary) stats.getLeaderboard(request);
-        System.out.println(gson.toJson(leaderboard));
-        Assertions.assertEquals(2, leaderboard.getRecords().size());
-        Assertions.assertTrue(leaderboard.getRecords().get(0).getScore().compareTo(leaderboard.getRecords().get(1).getScore()) < 0);
+        compareStatReqRes("stats/leaderboard/team-basic-req.json", LeaderboardRequest.class,
+                "stats/leaderboard/team-basic-res.json", LeaderboardSummary.class,
+                req -> (LeaderboardSummary) stats.getLeaderboard(req));
 
-        request.setOffset(2);
-        leaderboard = (LeaderboardSummary) stats.getLeaderboard(request);
-        System.out.println(gson.toJson(leaderboard));
-        Assertions.assertEquals(1, leaderboard.getRecords().size());
+        compareStatReqRes("stats/leaderboard/team-descorder-req.json", LeaderboardRequest.class,
+                "stats/leaderboard/team-descorder-res.json", LeaderboardSummary.class,
+                req -> (LeaderboardSummary) stats.getLeaderboard(req));
 
+        compareStatReqRes("stats/leaderboard/team-offset-req.json", LeaderboardRequest.class,
+                "stats/leaderboard/team-offset-res.json", LeaderboardSummary.class,
+                req -> (LeaderboardSummary) stats.getLeaderboard(req));
     }
 
     @Test
-    public void testSeasonalPoints() throws Exception {
+    public void testSeasonalPoints() {
         Event e1 = TEvent.createKeyValueTz(U1, TSZ("2020-07-01 12:15", U1_TZ), EVT_A, 15, U1_TZ);
         Event e2 = TEvent.createKeyValueTz(U1, TSZ("2020-07-02 08:45", U1_TZ), EVT_A, 74, U1_TZ);
         Event e3 = TEvent.createKeyValueTz(U1, TSZ("2020-07-02 10:00", U1_TZ), EVT_A, 61, U1_TZ);
@@ -362,23 +314,15 @@ public class EnginePointsTest extends OasisEngineTest {
                         "team:"+tid+":D20200702", "33"
                 ));
 
-        LeaderboardRequest request = new LeaderboardRequest();
-        request.setGameId(TEvent.GAME_ID);
-        request.setTimeRange(TimeScope.ALL);
-
         PointStats stats = new PointStats(dbPool);
-        LeaderboardSummary leaderboard = (LeaderboardSummary) stats.getLeaderboard(request);
-        Gson gson = new Gson();
-        System.out.println(gson.toJson(leaderboard));
-        Assertions.assertEquals(2, leaderboard.getRecords().size());
-        Assertions.assertTrue(leaderboard.getRecords().get(0).getScore().compareTo(leaderboard.getRecords().get(1).getScore()) > 0);
 
-        request.setTimeRange(TimeScope.DAILY);
-        request.setTime("20200702");
-        leaderboard = (LeaderboardSummary) stats.getLeaderboard(request);
-        System.out.println(gson.toJson(leaderboard));
-        Assertions.assertEquals(2, leaderboard.getRecords().size());
-        Assertions.assertTrue(leaderboard.getRecords().get(0).getScore().compareTo(leaderboard.getRecords().get(1).getScore()) > 0);
+        compareStatReqRes("stats/leaderboard/game-all-req.json", LeaderboardRequest.class,
+                "stats/leaderboard/game-all-res.json", LeaderboardSummary.class,
+                req -> (LeaderboardSummary) stats.getLeaderboard(req));
+
+        compareStatReqRes("stats/leaderboard/game-daily-req.json", LeaderboardRequest.class,
+                "stats/leaderboard/game-daily-res.json", LeaderboardSummary.class,
+                req -> (LeaderboardSummary) stats.getLeaderboard(req));
     }
 
 }
