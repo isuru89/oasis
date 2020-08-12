@@ -26,6 +26,8 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.elements.badges.stats.BadgeStats;
+import io.github.oasis.elements.badges.stats.to.UserBadgeLog;
+import io.github.oasis.elements.badges.stats.to.UserBadgeLogRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeSummary;
 import io.github.oasis.engine.model.TEvent;
@@ -129,8 +131,18 @@ public class EngineBadgesTest extends OasisEngineTest {
         Assertions.assertEquals(1, ruleSummaryStat.getAttributes().get("10").getCount());
         Assertions.assertEquals(1, ruleSummaryStat.getAttributes().get("20").getCount());
         Assertions.assertEquals(0, ruleSummaryStat.getAttributes().get("30").getCount());
-    }
 
+        // check badge log
+        UserBadgeLogRequest logRequest = new UserBadgeLogRequest();
+        logRequest.setGameId(TEvent.GAME_ID);
+        logRequest.setUserId(TEvent.USER_ID);
+        logRequest.setTimeFrom(0L);
+        logRequest.setTimeTo(System.currentTimeMillis());
+
+        UserBadgeLog userBadgeLog = (UserBadgeLog) stats.getBadgeLog(logRequest);
+        System.out.println(gson.toJson(userBadgeLog));
+        Assertions.assertEquals(2, userBadgeLog.getLog().size());
+    }
 
     @Test
     public void testEngineBadgesWithPoints() {

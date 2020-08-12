@@ -20,12 +20,17 @@
 package io.github.oasis.elements.badges.stats;
 
 import io.github.oasis.core.ID;
+import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Utils;
+import io.github.oasis.elements.badges.stats.to.UserBadgeLog;
+import io.github.oasis.elements.badges.stats.to.UserBadgeLog.BadgeLogRecord;
+import io.github.oasis.elements.badges.stats.to.UserBadgeLogRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeSummary;
 
@@ -93,6 +98,39 @@ public class BadgeStats {
             }
 
             return summary;
+        }
+    }
+
+    public Object getBadgeLog(UserBadgeLogRequest request) throws Exception {
+        try (DbContext db = dbPool.createContext()) {
+
+            String badgeLogKey = ID.getGameUserBadgesLog(request.getGameId(), request.getUserId());
+
+            Sorted badgeLog = db.SORTED(badgeLogKey);
+            List<Record> rangeRecords = badgeLog.getRangeByScoreWithScores(request.getTimeFrom(), request.getTimeTo());
+            List<BadgeLogRecord> logRecords = new ArrayList<>();
+
+            for (Record record : rangeRecords) {
+                long awardedTime = record.getScoreAsLong();
+                String[] parts = record.getMember().split(Constants.COLON);
+
+                if (parts.length < 2) {
+                    continue;
+                }
+
+                if (parts[2].contains("-")) {
+                    logRecords.add(new BadgeLogRecord(parts[0], Numbers.asInt(parts[1]), parts[2], awardedTime));
+                } else {
+                    logRecords.add(new BadgeLogRecord(parts[0], Numbers.asInt(parts[1]), Numbers.asLong(parts[2]), awardedTime));
+                }
+            }
+
+            UserBadgeLog userBadgeLog = new UserBadgeLog();
+            userBadgeLog.setGameId(request.getGameId());
+            userBadgeLog.setUserId(request.getUserId());
+            userBadgeLog.setLog(logRecords);
+
+            return userBadgeLog;
         }
     }
 }
