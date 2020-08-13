@@ -19,7 +19,6 @@
 
 package io.github.oasis.engine;
 
-import com.google.gson.Gson;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.AbstractRule;
@@ -31,21 +30,17 @@ import io.github.oasis.elements.badges.stats.to.UserBadgeLogRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeSummary;
 import io.github.oasis.engine.model.TEvent;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
  */
 public class EngineBadgesTest extends OasisEngineTest {
 
-    private final Gson gson = new Gson();
-
     @Test
-    public void testEngineBadges() throws Exception {
+    public void testEngineBadges() {
         Event e1 = TEvent.createKeyValue(TS("2020-03-23 11:15"), EVT_A, 75);
         Event e2 = TEvent.createKeyValue(TS("2020-03-25 09:55"), EVT_A, 63);
         Event e3 = TEvent.createKeyValue(TS("2020-03-31 14:15"), EVT_A, 57);
@@ -105,43 +100,18 @@ public class EngineBadgesTest extends OasisEngineTest {
                 ));
 
         BadgeStats stats = new BadgeStats(dbPool);
-        UserBadgeRequest request = new UserBadgeRequest();
-        request.setGameId(TEvent.GAME_ID);
-        request.setUserId(TEvent.USER_ID);
-        request.setAttributeFilters(Set.of(10, 20, 30));
 
-        UserBadgeSummary badgeSummary = (UserBadgeSummary) stats.getBadgeSummary(request);
-        System.out.println(gson.toJson(badgeSummary));
-        Assertions.assertEquals(2, badgeSummary.getTotalBadges());
-        Assertions.assertEquals(3, badgeSummary.getStats().size());
-        Assertions.assertEquals(1, badgeSummary.getStats().get("10").getCount());
-        Assertions.assertEquals(1, badgeSummary.getStats().get("20").getCount());
+        compareStatReqRes("stats/badges/summary-attr-req.json", UserBadgeRequest.class,
+                "stats/badges/summary-attr-res.json", UserBadgeSummary.class,
+                req ->(UserBadgeSummary) stats.getBadgeSummary(req));
 
-        request.setRuleFilters(Set.of(rid));
-        badgeSummary = (UserBadgeSummary) stats.getBadgeSummary(request);
-        System.out.println(gson.toJson(badgeSummary));
-        Assertions.assertEquals(1, badgeSummary.getStats().size());
-        Assertions.assertTrue(badgeSummary.getStats().containsKey("BDG00001"));
-        Assertions.assertTrue(badgeSummary.getStats().get("BDG00001") instanceof UserBadgeSummary.RuleSummaryStat);
-        UserBadgeSummary.RuleSummaryStat ruleSummaryStat = (UserBadgeSummary.RuleSummaryStat) badgeSummary.getStats().get("BDG00001");
-        Assertions.assertEquals(3, ruleSummaryStat.getAttributes().size());
-        Assertions.assertTrue(ruleSummaryStat.getAttributes().containsKey("10"));
-        Assertions.assertTrue(ruleSummaryStat.getAttributes().containsKey("20"));
-        Assertions.assertTrue(ruleSummaryStat.getAttributes().containsKey("30"));
-        Assertions.assertEquals(1, ruleSummaryStat.getAttributes().get("10").getCount());
-        Assertions.assertEquals(1, ruleSummaryStat.getAttributes().get("20").getCount());
-        Assertions.assertEquals(0, ruleSummaryStat.getAttributes().get("30").getCount());
+        compareStatReqRes("stats/badges/summary-rules-req.json", UserBadgeRequest.class,
+                "stats/badges/summary-rules-res.json", UserBadgeSummary.class,
+                req ->(UserBadgeSummary) stats.getBadgeSummary(req));
 
-        // check badge log
-        UserBadgeLogRequest logRequest = new UserBadgeLogRequest();
-        logRequest.setGameId(TEvent.GAME_ID);
-        logRequest.setUserId(TEvent.USER_ID);
-        logRequest.setTimeFrom(0L);
-        logRequest.setTimeTo(System.currentTimeMillis());
-
-        UserBadgeLog userBadgeLog = (UserBadgeLog) stats.getBadgeLog(logRequest);
-        System.out.println(gson.toJson(userBadgeLog));
-        Assertions.assertEquals(2, userBadgeLog.getLog().size());
+        compareStatReqRes("stats/badges/log-req.json", UserBadgeLogRequest.class,
+                "stats/badges/log-res.json", UserBadgeLog.class,
+                req ->(UserBadgeLog) stats.getBadgeLog(req));
     }
 
     @Test
