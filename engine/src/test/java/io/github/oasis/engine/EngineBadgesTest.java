@@ -39,14 +39,16 @@ import java.util.List;
  */
 public class EngineBadgesTest extends OasisEngineTest {
 
+    private static final String UTC = "UTC";
+
     @Test
     public void testEngineBadges() {
-        Event e1 = TEvent.createKeyValue(TS("2020-03-23 11:15"), EVT_A, 75);
-        Event e2 = TEvent.createKeyValue(TS("2020-03-25 09:55"), EVT_A, 63);
-        Event e3 = TEvent.createKeyValue(TS("2020-03-31 14:15"), EVT_A, 57);
-        Event e4 = TEvent.createKeyValue(TS("2020-04-01 05:15"), EVT_A, 88);
-        Event e5 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 76);
-        Event e6 = TEvent.createKeyValue(TS("2020-04-05 11:15"), EVT_A, 26);
+        Event e1 = TEvent.createKeyValue(TSZ("2020-03-23 11:15", UTC), EVT_A, 75);
+        Event e2 = TEvent.createKeyValue(TSZ("2020-03-25 09:55", UTC), EVT_A, 63);
+        Event e3 = TEvent.createKeyValue(TSZ("2020-03-31 14:15", UTC), EVT_A, 57);
+        Event e4 = TEvent.createKeyValue(TSZ("2020-04-01 07:15", UTC), EVT_A, 88);
+        Event e5 = TEvent.createKeyValue(TSZ("2020-03-24 11:15", UTC), EVT_A, 76);
+        Event e6 = TEvent.createKeyValue(TSZ("2020-04-05 11:15", UTC), EVT_A, 26);
 
         GameDef gameDef = loadRulesFromResource("rules/badges-basic.yml");
 
