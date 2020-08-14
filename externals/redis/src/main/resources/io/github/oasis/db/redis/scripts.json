@@ -10,5 +10,8 @@
   },
   "O.INCRCAPPED": {
     "filename": "scripts/INCRCAPPED.lua"
+  },
+  "O.HVALUEMOVE": {
+    "filename": "scripts/HVALUEMOV.lua"
   }
 }

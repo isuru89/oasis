@@ -1,0 +1,18 @@
+{
+  "gameId": 1,
+  "userId": 0,
+  "log": [
+    {
+      "badgeId": "BDG00001",
+      "attribute": 10,
+      "streakStartedAt": 1584962100000,
+      "awardedAt": 1585048500000
+    },
+    {
+      "badgeId": "BDG00001",
+      "attribute": 20,
+      "streakStartedAt": 1584962100000,
+      "awardedAt": 1585048500000
+    }
+  ]
+}

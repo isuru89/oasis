@@ -20,6 +20,10 @@
 package io.github.oasis.engine;
 
 import akka.actor.ActorRef;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonParser;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
@@ -38,11 +42,15 @@ import io.github.oasis.elements.ratings.RatingsModuleFactory;
 import io.github.oasis.engine.actors.cmds.Messages;
 import io.github.oasis.engine.element.points.PointsModuleFactory;
 import io.github.oasis.engine.model.TEvent;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -55,6 +63,11 @@ import java.util.List;
 public class OasisEngineTest {
 
     static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+    protected final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDate.class,
+                    (JsonDeserializer<LocalDate>) (json, typeOfT, context) -> LocalDate.parse(json.getAsString()))
+            .create();
 
     private static final String TEST_SYSTEM = "test-oasis-system";
 
@@ -147,6 +160,34 @@ public class OasisEngineTest {
         } catch (IOException | OasisParseException e) {
             throw new IllegalArgumentException("Unable to parse classpath resource! " + location, e);
         }
+    }
+
+    protected <T, R> void compareStatReqRes(String reqJsonFile, Class<T> reqClz,
+                                            String resJsonFile, Class<R> resClz,
+                                         TestExecutorFunction<T, R> executable) {
+        ClassLoader clzLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            String reqStr = IOUtils.resourceToString(reqJsonFile, StandardCharsets.UTF_8, clzLoader);
+            String resStr = IOUtils.resourceToString(resJsonFile, StandardCharsets.UTF_8, clzLoader);
+
+            T input = gson.fromJson(reqStr, reqClz);
+            System.out.println("Request: " + gson.toJson(input));
+            R result = executable.run(input);
+            String resJsonStr = gson.toJson(result);
+            System.out.println("Expected Response: " + gson.toJson(gson.fromJson(resStr, resClz)));
+            System.out.println("Actual Response: " + resJsonStr);
+            Assertions.assertEquals(JsonParser.parseString(resStr), JsonParser.parseString(resJsonStr));
+
+        } catch (Exception e) {
+            Assertions.fail("Should not fail when comparing req/res jsons!", e);
+        }
+    }
+
+    @FunctionalInterface
+    public interface TestExecutorFunction<T, R> {
+
+        R run(T input) throws Exception;
+
     }
 
 }

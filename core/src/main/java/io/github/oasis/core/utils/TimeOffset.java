@@ -27,6 +27,11 @@ import java.time.temporal.IsoFields;
  */
 public class TimeOffset {
 
+    static final String DAY_PATTERN = "D%d%02d%02d";
+    static final String MONTH_PATTERN = "M%s%02d";
+    static final String WEEK_PATTERN = "W%d%02d";
+    static final String QUARTER_PATTERN = "Q%d%02d";
+
     private String year;
     private String month;
     private String day;
@@ -37,20 +42,20 @@ public class TimeOffset {
         ZonedDateTime userTime = Timestamps.getUserSpecificTime(ts, offset);
         int y = userTime.getYear();
         year = "Y" + y;
-        month = String.format("M%s%02d", y, userTime.getMonth().getValue());
-        day = String.format("D%d%02d%02d", y, userTime.getMonth().getValue(), userTime.getDayOfMonth());
-        week = String.format("W%d%02d", y, userTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
-        quarter = String.format("Q%d%02d", y, userTime.get(IsoFields.QUARTER_OF_YEAR));
+        month = String.format(MONTH_PATTERN, y, userTime.getMonth().getValue());
+        day = String.format(DAY_PATTERN, y, userTime.getMonth().getValue(), userTime.getDayOfMonth());
+        week = String.format(WEEK_PATTERN, y, userTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
+        quarter = String.format(QUARTER_PATTERN, y, userTime.get(IsoFields.QUARTER_OF_YEAR));
     }
 
     public TimeOffset(long ts, String timeZone) {
         ZonedDateTime userTime = Timestamps.getUserSpecificTime(ts, timeZone);
         int y = userTime.getYear();
         year = "Y" + y;
-        month = String.format("M%s%02d", y, userTime.getMonth().getValue());
-        day = String.format("D%d%02d%02d", y, userTime.getMonth().getValue(), userTime.getDayOfMonth());
-        week = String.format("W%d%02d", y, userTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
-        quarter = String.format("Q%d%02d", y, userTime.get(IsoFields.QUARTER_OF_YEAR));
+        month = String.format(MONTH_PATTERN, y, userTime.getMonth().getValue());
+        day = String.format(DAY_PATTERN, y, userTime.getMonth().getValue(), userTime.getDayOfMonth());
+        week = String.format(WEEK_PATTERN, y, userTime.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
+        quarter = String.format(QUARTER_PATTERN, y, userTime.get(IsoFields.QUARTER_OF_YEAR));
     }
 
     public String getByType(String timeType) {

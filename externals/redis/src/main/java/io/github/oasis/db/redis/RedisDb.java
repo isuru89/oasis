@@ -23,6 +23,8 @@ import com.github.cliftonlabs.json_simple.Jsoner;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -39,6 +41,8 @@ import java.util.stream.Collectors;
  * @author Isuru Weerarathna
  */
 public class RedisDb implements Db {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RedisDb.class);
 
     private JedisPool pool;
     private final Map<String, RedisScript> scriptReferenceMap = new ConcurrentHashMap<>();
@@ -61,31 +65,51 @@ public class RedisDb implements Db {
         return new RedisDb(pool);
     }
 
-    @SuppressWarnings("unchecked")
+
     @Override
     public void init() {
         String basePath = RedisDb.class.getPackageName().replace('.', '/');
-        String path = basePath + "/scripts.json";
 
         try {
-            Map<String, Object> meta = (Map<String, Object>) Jsoner.deserialize(readClassPathEntry(path));
-            try (Jedis jedis = pool.getResource()) {
-                for (Map.Entry<String, Object> entry : meta.entrySet()) {
-                    Map<String, Object> ref = (Map<String, Object>) entry.getValue();
-                    String content = readClassPathEntry(basePath + '/' + ref.get("filename"));
-                    String hash = jedis.scriptLoad(content);
-                    RedisScript script = new RedisScript(hash);
-                    scriptReferenceMap.put(entry.getKey(), script);
-                }
-            }
-
+            loadScriptsIn(basePath, Thread.currentThread().getContextClassLoader());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Error loading redis scripts in " + basePath + "!", e);
+            throw new IllegalStateException("Unable to load required redis scripts!");
         }
     }
 
-    private String readClassPathEntry(String entry) throws IOException {
-        try (InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(entry);
+    @Override
+    public void registerScripts(String baseClzPath, ClassLoader classLoader) throws IOException {
+        try {
+            loadScriptsIn(baseClzPath, classLoader);
+        } catch (Exception e) {
+            if (e instanceof IOException) {
+                throw (IOException) e;
+            }
+            throw new IOException(e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void loadScriptsIn(String basePath, ClassLoader classLoader) throws Exception {
+        String path = basePath + "/scripts.json";
+
+        Map<String, Object> meta = (Map<String, Object>) Jsoner.deserialize(readClassPathEntry(path, classLoader));
+        try (Jedis jedis = pool.getResource()) {
+            for (Map.Entry<String, Object> entry : meta.entrySet()) {
+                Map<String, Object> ref = (Map<String, Object>) entry.getValue();
+                LOG.info("Loading script " + basePath + '/' + ref.get("filename"));
+                String content = readClassPathEntry(basePath + '/' + ref.get("filename"), classLoader);
+                String hash = jedis.scriptLoad(content);
+                LOG.info("Script loaded {} with hash {}", ref.get("filename"), hash);
+                RedisScript script = new RedisScript(hash);
+                scriptReferenceMap.put(entry.getKey(), script);
+            }
+        }
+    }
+
+    private String readClassPathEntry(String entry, ClassLoader classLoader) throws IOException {
+        try (InputStream resourceAsStream = classLoader.getResourceAsStream(entry);
              BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream))) {
 
             return reader.lines().collect(Collectors.joining("\n"));

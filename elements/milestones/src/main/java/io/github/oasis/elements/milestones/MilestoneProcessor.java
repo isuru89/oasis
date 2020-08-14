@@ -20,13 +20,14 @@
 package io.github.oasis.elements.milestones;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.ID;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.utils.Constants;
 
 import java.math.BigDecimal;
@@ -34,9 +35,9 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Objects;
 
+import static io.github.oasis.core.utils.Numbers.isNegative;
 import static io.github.oasis.elements.milestones.MilestoneRule.SKIP_NEGATIVE_VALUES;
 import static io.github.oasis.elements.milestones.MilestoneRule.TRACK_PENALTIES;
-import static io.github.oasis.core.utils.Numbers.isNegative;
 
 /**
  * @author Isuru Weerarathna
@@ -72,8 +73,8 @@ public class MilestoneProcessor extends AbstractProcessor<MilestoneRule, Milesto
                 event.getExternalId());
 
         String milestoneKey = ID.getGameMilestoneKey(event.getGameId(), rule.getId());
-        Mapped gameMilestoneMap = db.MAP(milestoneKey);
-        BigDecimal updatedValue = gameMilestoneMap.incrementByDecimal(ID.getUserKeyUnderGameMilestone(event.getUser()), delta);
+        Sorted gameMilestoneMap = db.SORTED(milestoneKey);
+        BigDecimal updatedValue = gameMilestoneMap.incrementScore(ID.getUserKeyUnderGameMilestone(event.getUser()), delta);
         if (rule.hasFlag(TRACK_PENALTIES) && isNegative(delta)) {
             userMilestonesMap.incrementByDecimal(String.format("%s:penalties", rule.getId()), delta);
         }

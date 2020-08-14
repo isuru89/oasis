@@ -41,6 +41,7 @@ public interface Sorted {
     List<Record> getRangeByScoreWithScores(long from, long to);
     List<Record> getRangeByScoreWithScores(BigDecimal from, BigDecimal to);
     List<Record> getRangeByRankWithScores(long from, long to);
+    List<Record> getRevRangeByRankWithScores(long from, long to);
     List<Record> getRefRangeByRankWithScores(long from, long to, String refKey);
 
     BigDecimal incrementScore(String member, BigDecimal byScore);

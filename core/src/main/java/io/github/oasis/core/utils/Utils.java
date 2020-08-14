@@ -27,6 +27,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -67,6 +68,10 @@ public class Utils {
         bb.putLong(uuid.getLeastSignificantBits());
 
         return bb.array();
+    }
+
+    public static boolean isNotEmpty(Collection<?> collection) {
+        return collection != null && !collection.isEmpty();
     }
 
     @SuppressWarnings("unchecked")

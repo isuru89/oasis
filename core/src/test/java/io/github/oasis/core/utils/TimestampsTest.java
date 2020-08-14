@@ -19,10 +19,13 @@
 
 package io.github.oasis.core.utils;
 
+import io.github.oasis.core.model.TimeScope;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -52,4 +55,129 @@ public class TimestampsTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> Timestamps.parseTimeUnit("30sec"));
     }
 
+    @Test
+    public void testRangeDays() {
+        List<String> dates = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-06-25"), LocalDate.parse("2020-07-10"), TimeScope.DAILY);
+        Assertions.assertEquals(16, dates.size());
+        Assertions.assertTrue(dates.contains("D20200625"));
+        Assertions.assertTrue(dates.contains("D20200710"));
+
+        // same day
+        dates = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-07-30"), LocalDate.parse("2020-07-30"), TimeScope.DAILY);
+        Assertions.assertEquals(1, dates.size());
+        Assertions.assertTrue(dates.contains("D20200730"));
+
+        // across years
+        dates = Timestamps.timeUnitsWithinRange(LocalDate.parse("2019-12-30"), LocalDate.parse("2020-01-07"), TimeScope.DAILY);
+        Assertions.assertEquals(9, dates.size());
+        Assertions.assertTrue(dates.contains("D20191230"));
+        Assertions.assertTrue(dates.contains("D20200107"));
+    }
+
+    @Test
+    public void testRangeWeeks() {
+        List<String> weeks = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-05-25"), LocalDate.parse("2020-07-10"), TimeScope.WEEKLY);
+        Assertions.assertEquals(7, weeks.size());
+        Assertions.assertTrue(weeks.contains("W202022"));
+        Assertions.assertTrue(weeks.contains("W202028"));
+
+        // within same week
+        weeks = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-07-07"), LocalDate.parse("2020-07-10"), TimeScope.WEEKLY);
+        Assertions.assertEquals(1, weeks.size());
+        Assertions.assertTrue(weeks.contains("W202028"));
+
+        // across years
+        weeks = Timestamps.timeUnitsWithinRange(LocalDate.parse("2019-12-01"), LocalDate.parse("2020-01-31"), TimeScope.WEEKLY);
+        System.out.println(weeks);
+        Assertions.assertEquals(9, weeks.size());
+        Assertions.assertTrue(weeks.contains("W201948"));
+        Assertions.assertTrue(weeks.contains("W202004"));
+    }
+
+    @Test
+    public void testRangeMonths() {
+        List<String> months = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-05-25"), LocalDate.parse("2020-07-10"), TimeScope.MONTHLY);
+        System.out.println(months);
+        Assertions.assertEquals(3, months.size());
+        Assertions.assertTrue(months.contains("M202005"));
+        Assertions.assertTrue(months.contains("M202006"));
+        Assertions.assertTrue(months.contains("M202007"));
+
+        // within same month
+        months = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-07-07"), LocalDate.parse("2020-07-10"), TimeScope.MONTHLY);
+        Assertions.assertEquals(1, months.size());
+        Assertions.assertTrue(months.contains("M202007"));
+
+        // within same month range
+        months = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-07-01"), LocalDate.parse("2020-07-31"), TimeScope.MONTHLY);
+        Assertions.assertEquals(1, months.size());
+        Assertions.assertTrue(months.contains("M202007"));
+
+        // across years
+        months = Timestamps.timeUnitsWithinRange(LocalDate.parse("2019-12-01"), LocalDate.parse("2020-01-31"), TimeScope.MONTHLY);
+        Assertions.assertEquals(2, months.size());
+        Assertions.assertTrue(months.contains("M201912"));
+        Assertions.assertTrue(months.contains("M202001"));
+    }
+
+    @Test
+    public void testRangeYears() {
+        List<String> years = Timestamps.timeUnitsWithinRange(LocalDate.parse("2019-05-25"), LocalDate.parse("2020-07-10"), TimeScope.YEARLY);
+        System.out.println(years);
+        Assertions.assertEquals(2, years.size());
+        Assertions.assertTrue(years.contains("Y2019"));
+        Assertions.assertTrue(years.contains("Y2020"));
+
+        // within same year
+        years = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-07-07"), LocalDate.parse("2020-07-10"), TimeScope.YEARLY);
+        Assertions.assertEquals(1, years.size());
+        Assertions.assertTrue(years.contains("Y2020"));
+
+        // within same year range
+        years = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-12-31"), TimeScope.YEARLY);
+        Assertions.assertEquals(1, years.size());
+        Assertions.assertTrue(years.contains("Y2020"));
+
+        // across several years
+        years = Timestamps.timeUnitsWithinRange(LocalDate.parse("2019-12-01"), LocalDate.parse("2020-01-31"), TimeScope.YEARLY);
+        Assertions.assertEquals(2, years.size());
+        Assertions.assertTrue(years.contains("Y2019"));
+        Assertions.assertTrue(years.contains("Y2020"));
+    }
+
+    @Test
+    public void testRangeQuarters() {
+        List<String> quarters = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-03-25"), LocalDate.parse("2020-07-10"), TimeScope.QUARTERLY);
+        System.out.println(quarters);
+        Assertions.assertEquals(3, quarters.size());
+        Assertions.assertTrue(quarters.contains("Q202001"));
+        Assertions.assertTrue(quarters.contains("Q202002"));
+        Assertions.assertTrue(quarters.contains("Q202003"));
+
+        // within same year
+        quarters = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-07-07"), LocalDate.parse("2020-07-10"), TimeScope.QUARTERLY);
+        Assertions.assertEquals(1, quarters.size());
+        Assertions.assertTrue(quarters.contains("Q202003"));
+
+        // within same quarter range
+        quarters = Timestamps.timeUnitsWithinRange(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-03-31"), TimeScope.QUARTERLY);
+        Assertions.assertEquals(1, quarters.size());
+        Assertions.assertTrue(quarters.contains("Q202001"));
+
+        // across several years
+        quarters = Timestamps.timeUnitsWithinRange(LocalDate.parse("2019-12-01"), LocalDate.parse("2020-01-31"), TimeScope.QUARTERLY);
+        Assertions.assertEquals(2, quarters.size());
+        Assertions.assertTrue(quarters.contains("Q201904"));
+        Assertions.assertTrue(quarters.contains("Q202001"));
+    }
+
+    @Test
+    public void testFormatKey() {
+        Assertions.assertEquals("D20200731", Timestamps.formatKey(LocalDate.parse("2020-07-31"), TimeScope.DAILY));
+        Assertions.assertEquals("M202007", Timestamps.formatKey(LocalDate.parse("2020-07-31"), TimeScope.MONTHLY));
+        Assertions.assertEquals("Q202003", Timestamps.formatKey(LocalDate.parse("2020-07-31"), TimeScope.QUARTERLY));
+        Assertions.assertEquals("W202031", Timestamps.formatKey(LocalDate.parse("2020-07-31"), TimeScope.WEEKLY));
+        Assertions.assertEquals("Y2020", Timestamps.formatKey(LocalDate.parse("2020-07-31"), TimeScope.YEARLY));
+        Assertions.assertNull(Timestamps.formatKey(LocalDate.parse("2020-07-31"), TimeScope.ALL));
+    }
 }

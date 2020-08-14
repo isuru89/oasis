@@ -110,6 +110,14 @@ public class RedisSortedSet implements Sorted {
     }
 
     @Override
+    public List<Record> getRevRangeByRankWithScores(long from, long to) {
+        return jedis.zrevrangeWithScores(baseKey, from, to)
+                .stream()
+                .map(tuple -> new Record(tuple.getElement(), tuple.getScore()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Record> getRefRangeByRankWithScores(long from, long to, String refKey) {
         Set<Tuple> tuples = jedis.zrangeWithScores(baseKey, from, to);
         String[] memberIdArray = tuples.stream().map(Tuple::getElement).toArray(String[]::new);

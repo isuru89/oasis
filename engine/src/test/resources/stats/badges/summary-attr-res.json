@@ -1,0 +1,19 @@
+{
+  "gameId": 1,
+  "userId": 0,
+  "totalBadges": 2,
+  "stats": {
+    "30": {
+      "attribute": 30,
+      "count": 0
+    },
+    "20": {
+      "attribute": 20,
+      "count": 1
+    },
+    "10": {
+      "attribute": 10,
+      "count": 1
+    }
+  }
+}

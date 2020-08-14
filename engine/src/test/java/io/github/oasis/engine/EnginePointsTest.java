@@ -23,6 +23,13 @@ import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.engine.element.points.stats.PointStats;
+import io.github.oasis.engine.element.points.stats.to.LeaderboardRequest;
+import io.github.oasis.engine.element.points.stats.to.LeaderboardSummary;
+import io.github.oasis.engine.element.points.stats.to.UserPointSummary;
+import io.github.oasis.engine.element.points.stats.to.UserPointsRequest;
+import io.github.oasis.engine.element.points.stats.to.UserRankingRequest;
+import io.github.oasis.engine.element.points.stats.to.UserRankingSummary;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +51,7 @@ public class EnginePointsTest extends OasisEngineTest {
     private static final int T2 = 200;
 
     @Test
-    public void testEnginePoints() {
+    public void testEnginePoints() throws Exception {
         Event e1 = TEvent.createKeyValue(U1, TS("2020-03-24 07:15"), EVT_A, 15);
         Event e2 = TEvent.createKeyValue(U2, TS("2020-04-02 08:20"), EVT_A, 83);
         Event e3 = TEvent.createKeyValue(U1, TS("2020-04-03 08:45"), EVT_A, 74);
@@ -154,6 +161,21 @@ public class EnginePointsTest extends OasisEngineTest {
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200402"), ofSortedEntries(U2, 33));
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200403"), ofSortedEntries(U1, 24));
 
+        PointStats stats = new PointStats(dbPool);
+        String pkg = PointStats.class.getPackageName().replace('.', '/');
+        dbPool.registerScripts(pkg, Thread.currentThread().getContextClassLoader());
+
+        compareStatReqRes("stats/points/points01-req.json", UserPointsRequest.class,
+                "stats/points/points01-res.json", UserPointSummary.class,
+                req -> (UserPointSummary) stats.getUserPoints(req));
+
+        compareStatReqRes("stats/points/ranking01-req.json", UserRankingRequest.class,
+                "stats/points/ranking01-res.json", UserRankingSummary.class,
+                req -> (UserRankingSummary) stats.getUserRankings(req));
+
+        compareStatReqRes("stats/points/ranking02-req.json", UserRankingRequest.class,
+                "stats/points/ranking02-res.json", UserRankingSummary.class,
+                req -> (UserRankingSummary) stats.getUserRankings(req));
     }
 
     @Test
@@ -206,6 +228,19 @@ public class EnginePointsTest extends OasisEngineTest {
         assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20200402"), ofSortedEntries(U1, 11));
         assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20200403"), ofSortedEntries(U2, 9));
 
+        PointStats stats = new PointStats(dbPool);
+
+        compareStatReqRes("stats/leaderboard/team-basic-req.json", LeaderboardRequest.class,
+                "stats/leaderboard/team-basic-res.json", LeaderboardSummary.class,
+                req -> (LeaderboardSummary) stats.getLeaderboard(req));
+
+        compareStatReqRes("stats/leaderboard/team-descorder-req.json", LeaderboardRequest.class,
+                "stats/leaderboard/team-descorder-res.json", LeaderboardSummary.class,
+                req -> (LeaderboardSummary) stats.getLeaderboard(req));
+
+        compareStatReqRes("stats/leaderboard/team-offset-req.json", LeaderboardRequest.class,
+                "stats/leaderboard/team-offset-res.json", LeaderboardSummary.class,
+                req -> (LeaderboardSummary) stats.getLeaderboard(req));
     }
 
     @Test
@@ -278,6 +313,16 @@ public class EnginePointsTest extends OasisEngineTest {
                         "team:"+tid+":W202027", "33",
                         "team:"+tid+":D20200702", "33"
                 ));
+
+        PointStats stats = new PointStats(dbPool);
+
+        compareStatReqRes("stats/leaderboard/game-all-req.json", LeaderboardRequest.class,
+                "stats/leaderboard/game-all-res.json", LeaderboardSummary.class,
+                req -> (LeaderboardSummary) stats.getLeaderboard(req));
+
+        compareStatReqRes("stats/leaderboard/game-daily-req.json", LeaderboardRequest.class,
+                "stats/leaderboard/game-daily-res.json", LeaderboardSummary.class,
+                req -> (LeaderboardSummary) stats.getLeaderboard(req));
     }
 
 }

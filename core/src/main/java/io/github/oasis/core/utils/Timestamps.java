@@ -19,16 +19,28 @@
 
 package io.github.oasis.core.utils;
 
+import io.github.oasis.core.model.TimeScope;
+
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.MonthDay;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.IsoFields;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Isuru Weerarathna
@@ -40,6 +52,7 @@ public class Timestamps {
     static final long WEEKLY = Duration.ofDays(7).toMillis();
 
     private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("([0-9]+)\\s*([a-zA-Z]+)");
+    private static final int NO_DAYS_PER_WEEK = 7;
 
     public static Optional<MonthDay> toMonthDay(String text) {
         if (Objects.nonNull(text)) {
@@ -89,7 +102,7 @@ public class Timestamps {
             } else if (type.startsWith("h")) {
                 return Duration.ofHours(amountTotal).toMillis();
             } else if (type.startsWith("w")) {
-                return Duration.ofDays(7 * amountTotal).toMillis();
+                return Duration.ofDays(NO_DAYS_PER_WEEK * amountTotal).toMillis();
             } else if (type.startsWith("m")) {
                 return Duration.ofMinutes(amountTotal).toMillis();
             }
@@ -106,4 +119,73 @@ public class Timestamps {
         }
         throw new IllegalArgumentException("Unknown time unit string! [" + timeUnitStr + "]");
     }
+
+    public static String formatKey(LocalDate date, TimeScope scope) {
+        switch (scope) {
+            case DAILY: return String.format(TimeOffset.DAY_PATTERN, date.getYear(), date.getMonth().getValue(), date.getDayOfMonth());
+            case WEEKLY: return String.format(TimeOffset.WEEK_PATTERN, date.getYear(), date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
+            case YEARLY: return "Y" + date.getYear();
+            case MONTHLY: return String.format(TimeOffset.MONTH_PATTERN, date.getYear(), date.getMonth().getValue());
+            case QUARTERLY: return String.format(TimeOffset.QUARTER_PATTERN, date.getYear(), date.get(IsoFields.QUARTER_OF_YEAR));
+            default: return null;
+        }
+    }
+
+
+    public static List<String> timeUnitsWithinRange(LocalDate startTime, LocalDate endTime, TimeScope timeScope) {
+        if (timeScope == TimeScope.DAILY) {
+            return daysBetween(startTime, endTime);
+        } else if (timeScope == TimeScope.WEEKLY) {
+            return weeksBetween(startTime, endTime);
+        } else if (timeScope == TimeScope.MONTHLY) {
+            return monthsBetween(startTime, endTime);
+        } else if (timeScope == TimeScope.YEARLY) {
+            return yearsBetween(startTime, endTime);
+        } else if (timeScope == TimeScope.QUARTERLY) {
+            return quartersBetween(startTime, endTime);
+        }
+        throw new IllegalArgumentException("Unknown timescope type!");
+    }
+
+    private static List<String> daysBetween(LocalDate startDate, LocalDate endDate) {
+        return Stream.iterate(startDate, date -> date.plusDays(1))
+                .limit(ChronoUnit.DAYS.between(startDate, endDate) + 1)
+                .map(date -> String.format(TimeOffset.DAY_PATTERN, date.getYear(), date.getMonth().getValue(), date.getDayOfMonth()))
+                .collect(Collectors.toList());
+    }
+
+    private static List<String> monthsBetween(LocalDate startDate, LocalDate endDate) {
+        List<String> months = new ArrayList<>();
+        YearMonth startRange = YearMonth.from(startDate);
+        YearMonth endRange = YearMonth.from(endDate).plusMonths(1);
+        for (YearMonth tmp = startRange; tmp.isBefore(endRange); tmp = tmp.plusMonths(1)) {
+            months.add(String.format(TimeOffset.MONTH_PATTERN, tmp.getYear(), tmp.getMonth().getValue()));
+        }
+        return months;
+    }
+
+    private static List<String> yearsBetween(LocalDate startDate, LocalDate endDate) {
+        return Stream.iterate(startDate, date -> date.plusYears(1))
+                .limit(endDate.getYear() - startDate.getYear() + 1)
+                .map(date -> "Y" + date.getYear())
+                .collect(Collectors.toList());
+    }
+
+    private static List<String> weeksBetween(LocalDate startDate, LocalDate endDate) {
+        return Stream.iterate(startDate, date -> date.plusWeeks(1))
+                .limit(ChronoUnit.WEEKS.between(startDate, endDate) + 1)
+                .map(date -> String.format(TimeOffset.WEEK_PATTERN, date.getYear(), date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)))
+                .collect(Collectors.toList());
+    }
+
+    private static List<String> quartersBetween(LocalDate startDate, LocalDate endDate) {
+        Set<String> quarters = new HashSet<>();
+        YearMonth startRange = YearMonth.from(startDate);
+        YearMonth endRange = YearMonth.from(endDate);
+        for (YearMonth tmp = startRange; tmp.isBefore(endRange) || tmp.equals(endRange); tmp = tmp.plusMonths(1)) {
+            quarters.add(String.format(TimeOffset.QUARTER_PATTERN, tmp.getYear(), tmp.get(IsoFields.QUARTER_OF_YEAR)));
+        }
+        return new ArrayList<>(quarters);
+    }
+
 }

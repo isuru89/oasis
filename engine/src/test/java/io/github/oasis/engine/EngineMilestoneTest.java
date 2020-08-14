@@ -19,14 +19,20 @@
 
 package io.github.oasis.engine;
 
+import com.google.gson.Gson;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.elements.milestones.stats.MilestoneStats;
+import io.github.oasis.elements.milestones.stats.to.UserMilestoneRequest;
+import io.github.oasis.elements.milestones.stats.to.UserMilestoneSummary;
 import io.github.oasis.engine.model.TEvent;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -34,8 +40,10 @@ import java.util.List;
  */
 public class EngineMilestoneTest extends OasisEngineTest {
 
+    private final Gson gson = new Gson();
+
     @Test
-    public void testMilestones() {
+    public void testMilestones() throws Exception {
         Event e1 = TEvent.createKeyValue(100, EVT_A, 87);
         Event e2 = TEvent.createKeyValue(105, EVT_A, 53);
         Event e3 = TEvent.createKeyValue(110, EVT_A, 34);
@@ -65,6 +73,24 @@ public class EngineMilestoneTest extends OasisEngineTest {
                         rid + ":nextlevel", "4",
                         rid + ":nextlevelvalue", "500"
                 ));
+
+        MilestoneStats stats = new MilestoneStats(dbPool);
+        UserMilestoneRequest request = new UserMilestoneRequest();
+        request.setGameId(TEvent.GAME_ID);
+        request.setUserId(TEvent.USER_ID);
+        request.setMilestoneIds(List.of(rid));
+
+        UserMilestoneSummary summary = (UserMilestoneSummary) stats.getUserMilestoneSummary(request);
+        System.out.println(gson.toJson(summary));
+        Assertions.assertEquals(1, summary.getMilestones().size());
+        UserMilestoneSummary.MilestoneSummary milestoneSummary = summary.getMilestones().get(rid);
+        Assertions.assertEquals(3, milestoneSummary.getCurrentLevel());
+        Assertions.assertEquals(BigDecimal.valueOf(461), milestoneSummary.getCurrentValue());
+        Assertions.assertEquals(BigDecimal.valueOf(500), milestoneSummary.getNextLevelValue());
+        Assertions.assertEquals(4, milestoneSummary.getNextLevel());
+        Assertions.assertEquals(e7.getExternalId(), milestoneSummary.getLastCausedEventId());
+        Assertions.assertEquals(e6.getTimestamp(), milestoneSummary.getLastLevelUpdatedAt());
+        Assertions.assertEquals(e7.getTimestamp(), milestoneSummary.getLastUpdatedAt());
     }
 
     @Test

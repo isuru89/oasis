@@ -24,6 +24,11 @@ import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.elements.badges.stats.BadgeStats;
+import io.github.oasis.elements.badges.stats.to.UserBadgeLog;
+import io.github.oasis.elements.badges.stats.to.UserBadgeLogRequest;
+import io.github.oasis.elements.badges.stats.to.UserBadgeRequest;
+import io.github.oasis.elements.badges.stats.to.UserBadgeSummary;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -34,14 +39,16 @@ import java.util.List;
  */
 public class EngineBadgesTest extends OasisEngineTest {
 
+    private static final String UTC = "UTC";
+
     @Test
     public void testEngineBadges() {
-        Event e1 = TEvent.createKeyValue(TS("2020-03-23 11:15"), EVT_A, 75);
-        Event e2 = TEvent.createKeyValue(TS("2020-03-25 09:55"), EVT_A, 63);
-        Event e3 = TEvent.createKeyValue(TS("2020-03-31 14:15"), EVT_A, 57);
-        Event e4 = TEvent.createKeyValue(TS("2020-04-01 05:15"), EVT_A, 88);
-        Event e5 = TEvent.createKeyValue(TS("2020-03-24 11:15"), EVT_A, 76);
-        Event e6 = TEvent.createKeyValue(TS("2020-04-05 11:15"), EVT_A, 26);
+        Event e1 = TEvent.createKeyValue(TSZ("2020-03-23 11:15", UTC), EVT_A, 75);
+        Event e2 = TEvent.createKeyValue(TSZ("2020-03-25 09:55", UTC), EVT_A, 63);
+        Event e3 = TEvent.createKeyValue(TSZ("2020-03-31 14:15", UTC), EVT_A, 57);
+        Event e4 = TEvent.createKeyValue(TSZ("2020-04-01 07:15", UTC), EVT_A, 88);
+        Event e5 = TEvent.createKeyValue(TSZ("2020-03-24 11:15", UTC), EVT_A, 76);
+        Event e6 = TEvent.createKeyValue(TSZ("2020-04-05 11:15", UTC), EVT_A, 26);
 
         GameDef gameDef = loadRulesFromResource("rules/badges-basic.yml");
 
@@ -74,6 +81,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "attr:20:Q202001","1",
                         "attr:20:W202013","1",
                         "attr:20:Y2020","1",
+                        "rule:BDG00001","2",
                         "rule:BDG00001:10","1",
                         "rule:BDG00001:10:D20200331","1",
                         "rule:BDG00001:10:M202003","1",
@@ -92,8 +100,21 @@ public class EngineBadgesTest extends OasisEngineTest {
                         rid + ":10:" + e1.getTimestamp(), e5.getTimestamp(),
                         rid + ":20:" + e1.getTimestamp(), e5.getTimestamp()
                 ));
-    }
 
+        BadgeStats stats = new BadgeStats(dbPool);
+
+        compareStatReqRes("stats/badges/summary-attr-req.json", UserBadgeRequest.class,
+                "stats/badges/summary-attr-res.json", UserBadgeSummary.class,
+                req ->(UserBadgeSummary) stats.getBadgeSummary(req));
+
+        compareStatReqRes("stats/badges/summary-rules-req.json", UserBadgeRequest.class,
+                "stats/badges/summary-rules-res.json", UserBadgeSummary.class,
+                req ->(UserBadgeSummary) stats.getBadgeSummary(req));
+
+        compareStatReqRes("stats/badges/log-req.json", UserBadgeLogRequest.class,
+                "stats/badges/log-res.json", UserBadgeLog.class,
+                req ->(UserBadgeLog) stats.getBadgeLog(req));
+    }
 
     @Test
     public void testEngineBadgesWithPoints() {
@@ -135,6 +156,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "attr:20:Q202001","1",
                         "attr:20:W202013","1",
                         "attr:20:Y2020","1",
+                        "rule:BDG00002","2",
                         "rule:BDG00002:10","1",
                         "rule:BDG00002:10:D20200331","1",
                         "rule:BDG00002:10:M202003","1",
@@ -227,6 +249,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "attr:10:W202013","0",
                         "attr:10:W202014","1",
                         "attr:10:Y2020","1",
+                        "rule:BDG00003","1",
                         "rule:BDG00003:10","1",
                         "rule:BDG00003:10:D20200323","-1",
                         "rule:BDG00003:10:D20200324","1",
