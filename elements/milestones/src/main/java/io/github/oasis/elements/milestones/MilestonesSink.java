@@ -81,6 +81,17 @@ public class MilestonesSink extends AbstractSink {
                 milestoneMap.setValue(rulePfx + NEXT_LEVEL_VALUE, nextLevel.getMilestone().toString());
             }
 
+            String[] args = new String[]{
+                    ID.getGameMilestoneSummaryKey(gameId, milestoneRule.getId()),
+                    "level:" + signal.getCurrentLevel(),
+                    "level:" + signal.getPreviousLevel(),
+                    String.format("team:%d:level:%d", signal.getEventScope().getTeamId(), signal.getCurrentLevel()),
+                    String.format("team:%d:level:%d", signal.getEventScope().getTeamId(), signal.getPreviousLevel()),
+                    "1",
+                    "-1"
+            };
+            db.runScript("O.HVALUEMOVE", 5, args);
+
         } catch (IOException e) {
             throw new OasisRuntimeException("Error while processing milestone signal!", e);
         }

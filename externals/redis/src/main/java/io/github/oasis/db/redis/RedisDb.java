@@ -98,8 +98,10 @@ public class RedisDb implements Db {
         try (Jedis jedis = pool.getResource()) {
             for (Map.Entry<String, Object> entry : meta.entrySet()) {
                 Map<String, Object> ref = (Map<String, Object>) entry.getValue();
+                LOG.info("Loading script " + basePath + '/' + ref.get("filename"));
                 String content = readClassPathEntry(basePath + '/' + ref.get("filename"), classLoader);
                 String hash = jedis.scriptLoad(content);
+                LOG.info("Script loaded {} with hash {}", ref.get("filename"), hash);
                 RedisScript script = new RedisScript(hash);
                 scriptReferenceMap.put(entry.getKey(), script);
             }

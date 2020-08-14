@@ -114,6 +114,10 @@ public final class ID {
         return String.format("g%d:ms:%s", gameId, milestoneId);
     }
 
+    public static String getGameMilestoneSummaryKey(int gameId, String milestoneId) {
+        return String.format("g%d:ms:%s:summary", gameId, milestoneId);
+    }
+
     public static String getUserFirstEventsKey(int gameId, long userId) {
         return String.format("u%d:g%d:firstevents", userId, gameId);
     }
