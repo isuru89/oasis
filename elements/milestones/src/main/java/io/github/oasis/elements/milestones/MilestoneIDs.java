@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,21 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.core.external;
-
-import io.github.oasis.core.exception.OasisException;
-
-import java.io.Closeable;
+package io.github.oasis.elements.milestones;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface Db extends Closeable {
+public final class MilestoneIDs {
 
-    void init();
+    public static String getGameUserMilestonesSummary(int gameId, long userId) {
+        return String.format("g%d:u%d:milestones", gameId, userId);
+    }
 
-   void registerScripts(String baseClzPath, ClassLoader classLoader) throws OasisException;
+    public static String getUserGameMilestonesKey(int gameId, long userId) {
+        return String.format("u%d:g%d:milestones", userId, gameId);
+    }
 
-    DbContext createContext();
+    public static String getGameMilestoneKey(int gameId, String milestoneId) {
+        return String.format("g%d:ms:%s", gameId, milestoneId);
+    }
 
+    public static String getGameMilestoneSummaryKey(int gameId, String milestoneId) {
+        return String.format("g%d:ms:%s:summary", gameId, milestoneId);
+    }
+
+    private MilestoneIDs() {}
 }

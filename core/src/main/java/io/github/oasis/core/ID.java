@@ -46,10 +46,6 @@ public final class ID {
         }
     }
 
-    public static String getGameUserMilestonesSummary(int gameId, long userId) {
-        return String.format("g%d:u%d:milestones", gameId, userId);
-    }
-
     public static String getGameUseChallengesSummary(int gameId, long userId) {
         return String.format("g%d:u%d:challenges", gameId, userId);
     }
@@ -104,18 +100,6 @@ public final class ID {
 
     public static String getPenaltiesUserKeyUnderGameMilestone(long userId) {
         return String.format("u%d:penalties", userId);
-    }
-
-    public static String getUserGameMilestonesKey(int gameId, long userId) {
-        return String.format("u%d:g%d:milestones", userId, gameId);
-    }
-
-    public static String getGameMilestoneKey(int gameId, String milestoneId) {
-        return String.format("g%d:ms:%s", gameId, milestoneId);
-    }
-
-    public static String getGameMilestoneSummaryKey(int gameId, String milestoneId) {
-        return String.format("g%d:ms:%s:summary", gameId, milestoneId);
     }
 
     public static String getUserFirstEventsKey(int gameId, long userId) {

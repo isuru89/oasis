@@ -20,10 +20,10 @@
 package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.elements.milestones.MilestoneIDs;
 import io.github.oasis.elements.milestones.stats.MilestoneStats;
 import io.github.oasis.elements.milestones.stats.to.GameMilestoneRequest;
 import io.github.oasis.elements.milestones.stats.to.GameMilestoneResponse;
@@ -59,7 +59,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
         awaitTerminated();
 
         String rid = "MILE000001";
-        RedisAssert.assertMap(dbPool, ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertMap(dbPool, MilestoneIDs.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(rid, "461",
                         rid + ":levellastupdated", String.valueOf(e6.getTimestamp()),
                         rid + ":lastupdated", String.valueOf(e7.getTimestamp()),
@@ -83,7 +83,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
     }
 
     @Test
-    public void testMilestoneMultiUsers() throws Exception {
+    public void testMilestoneMultiUsers() {
         Event e1 = TEvent.createKeyValue(U1,100, EVT_A, 87);
         Event e2 = TEvent.createKeyValue(U4, 105, EVT_A, 53);
         Event e3 = TEvent.createKeyValue(U3,110, EVT_A, 34);
@@ -128,7 +128,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
         awaitTerminated();
 
         String rid = findRuleByName(rules, "Milestone-with-Penalties").getId();
-        RedisAssert.assertMap(dbPool, ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertMap(dbPool, MilestoneIDs.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(rid, "293",
                         rid + ":levellastupdated", String.valueOf(e7.getTimestamp()),
                         rid + ":lastupdated", String.valueOf(e7.getTimestamp()),
@@ -162,7 +162,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
         awaitTerminated();
 
         String rid = findRuleByName(rules, "Milestone-from-Points").getId();
-        RedisAssert.assertMap(dbPool, ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertMap(dbPool, MilestoneIDs.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(rid, "166",
                         rid + ":levellastupdated", String.valueOf(e6.getTimestamp()),
                         rid + ":lastupdated", String.valueOf(e7.getTimestamp()),
@@ -195,7 +195,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
         awaitTerminated();
 
         String rid = findRuleByName(rules, "Milestone-with-Event-Count").getId();
-        RedisAssert.assertMap(dbPool, ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertMap(dbPool, MilestoneIDs.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(rid, "7",
                         rid + ":levellastupdated", String.valueOf(e5.getTimestamp()),
                         rid + ":lastupdated", String.valueOf(e7.getTimestamp()),

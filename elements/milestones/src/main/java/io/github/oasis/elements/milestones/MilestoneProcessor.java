@@ -65,14 +65,14 @@ public class MilestoneProcessor extends AbstractProcessor<MilestoneRule, Milesto
         if (rule.hasFlag(SKIP_NEGATIVE_VALUES) && isNegative(delta)) {
             return null;
         }
-        Mapped userMilestonesMap = db.MAP(ID.getGameUserMilestonesSummary(event.getGameId(), event.getUser()));
+        Mapped userMilestonesMap = db.MAP(MilestoneIDs.getGameUserMilestonesSummary(event.getGameId(), event.getUser()));
         userMilestonesMap.incrementByDecimal(rule.getId(), delta);
         userMilestonesMap.setValues(String.format(LAST_UPDATED, rule.getId()),
                 String.valueOf(event.getTimestamp()),
                 String.format(LAST_EVENT, rule.getId()),
                 event.getExternalId());
 
-        String milestoneKey = ID.getGameMilestoneKey(event.getGameId(), rule.getId());
+        String milestoneKey = MilestoneIDs.getGameMilestoneKey(event.getGameId(), rule.getId());
         Sorted gameMilestoneMap = db.SORTED(milestoneKey);
         BigDecimal updatedValue = gameMilestoneMap.incrementScore(ID.getUserKeyUnderGameMilestone(event.getUser()), delta);
         if (rule.hasFlag(TRACK_PENALTIES) && isNegative(delta)) {

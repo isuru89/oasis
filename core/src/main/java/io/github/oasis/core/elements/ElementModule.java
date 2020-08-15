@@ -21,6 +21,7 @@ package io.github.oasis.core.elements;
 
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
+import io.github.oasis.core.exception.OasisException;
 
 import java.util.List;
 
@@ -28,6 +29,14 @@ import java.util.List;
  * @author Isuru Weerarathna
  */
 public abstract class ElementModule {
+
+    /**
+     * Called just before engine or service is to be initialized.
+     * @param context running context.
+     * @throws OasisException any exception thrown while loading.
+     */
+    public void init(RuntimeContextSupport context) throws OasisException {
+    }
 
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
         return List.of();

@@ -106,12 +106,6 @@ public class UserPointsRequest {
         public PointRange() {
         }
 
-        public PointRange(TimeScope type, LocalDate from, LocalDate to) {
-            this.type = type;
-            this.from = from;
-            this.to = to;
-        }
-
         public TimeScope getType() {
             return type;
         }

@@ -19,11 +19,11 @@
 
 package io.github.oasis.elements.milestones.stats;
 
-import io.github.oasis.core.ID;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.utils.Numbers;
+import io.github.oasis.elements.milestones.MilestoneIDs;
 import io.github.oasis.elements.milestones.stats.to.GameMilestoneRequest;
 import io.github.oasis.elements.milestones.stats.to.GameMilestoneResponse;
 import io.github.oasis.elements.milestones.stats.to.GameMilestoneResponse.UserMilestoneRecord;
@@ -62,7 +62,7 @@ public class MilestoneStats {
                 Map<String, GameMilestoneResponse.MilestoneSummary> summaryMap = new HashMap<>();
 
                 for (String milestoneId : request.getMilestoneIds()) {
-                    String mainKey = ID.getGameMilestoneSummaryKey(request.getGameId(), milestoneId);
+                    String mainKey = MilestoneIDs.getGameMilestoneSummaryKey(request.getGameId(), milestoneId);
                     for (Integer attr : request.getAttributeIds()) {
                         subKeys.add("level:" + attr);
                         for (Integer teamId : request.getTeamIds()) {
@@ -95,7 +95,7 @@ public class MilestoneStats {
                 response.setSummaries(summaryMap);
 
             } else if (request.isMultiUserRequest()) {
-                String milestoneLog = ID.getGameMilestoneKey(request.getGameId(), request.getMilestoneId());
+                String milestoneLog = MilestoneIDs.getGameMilestoneKey(request.getGameId(), request.getMilestoneId());
                 List<String> args = new ArrayList<>();
                 args.add(milestoneLog);
                 args.addAll(request.getUserIds().stream().map(String::valueOf).collect(Collectors.toList()));
@@ -122,7 +122,7 @@ public class MilestoneStats {
     public Object getUserMilestoneSummary(UserMilestoneRequest request) throws Exception {
         try (DbContext db = dbPool.createContext()) {
 
-            String key = ID.getGameUserMilestonesSummary(request.getGameId(), request.getUserId());
+            String key = MilestoneIDs.getGameUserMilestonesSummary(request.getGameId(), request.getUserId());
             Mapped milestoneDetails = db.MAP(key);
 
             Map<String, UserMilestoneSummary.MilestoneSummary> milestoneSummaryMap = new HashMap<>();

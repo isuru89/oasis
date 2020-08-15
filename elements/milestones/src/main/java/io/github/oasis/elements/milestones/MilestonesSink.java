@@ -20,7 +20,6 @@
 package io.github.oasis.elements.milestones;
 
 import io.github.oasis.core.EventScope;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
@@ -65,7 +64,7 @@ public class MilestonesSink extends AbstractSink {
             int gameId = eventScope.getGameId();
             long userId = eventScope.getUserId();
 
-            Mapped milestoneMap = db.MAP(ID.getGameUserMilestonesSummary(gameId, userId));
+            Mapped milestoneMap = db.MAP(MilestoneIDs.getGameUserMilestonesSummary(gameId, userId));
 
             String rulePfx = milestoneSignal.getRuleId() + COLON;
             milestoneMap.setValue(rulePfx + CHANGED_VALUE, signal.getCurrentScore().toString());
@@ -82,7 +81,7 @@ public class MilestonesSink extends AbstractSink {
             }
 
             String[] args = new String[]{
-                    ID.getGameMilestoneSummaryKey(gameId, milestoneRule.getId()),
+                    MilestoneIDs.getGameMilestoneSummaryKey(gameId, milestoneRule.getId()),
                     "level:" + signal.getCurrentLevel(),
                     "level:" + signal.getPreviousLevel(),
                     String.format("team:%d:level:%d", signal.getEventScope().getTeamId(), signal.getCurrentLevel()),

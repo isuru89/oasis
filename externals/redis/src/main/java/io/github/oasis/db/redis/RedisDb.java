@@ -21,6 +21,8 @@ package io.github.oasis.db.redis;
 
 import com.github.cliftonlabs.json_simple.Jsoner;
 import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.exception.OasisDbException;
+import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import org.slf4j.Logger;
@@ -44,7 +46,7 @@ public class RedisDb implements Db {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisDb.class);
 
-    private JedisPool pool;
+    private final JedisPool pool;
     private final Map<String, RedisScript> scriptReferenceMap = new ConcurrentHashMap<>();
 
     private RedisDb(JedisPool pool) {
@@ -79,14 +81,14 @@ public class RedisDb implements Db {
     }
 
     @Override
-    public void registerScripts(String baseClzPath, ClassLoader classLoader) throws IOException {
+    public void registerScripts(String baseClzPath, ClassLoader classLoader) throws OasisException {
         try {
             loadScriptsIn(baseClzPath, classLoader);
         } catch (Exception e) {
-            if (e instanceof IOException) {
-                throw (IOException) e;
+            if (e instanceof OasisException) {
+                throw (OasisException) e;
             }
-            throw new IOException(e.getMessage(), e);
+            throw new OasisException(e.getMessage(), e);
         }
     }
 
@@ -97,13 +99,19 @@ public class RedisDb implements Db {
         Map<String, Object> meta = (Map<String, Object>) Jsoner.deserialize(readClassPathEntry(path, classLoader));
         try (Jedis jedis = pool.getResource()) {
             for (Map.Entry<String, Object> entry : meta.entrySet()) {
+                String scriptName = entry.getKey();
+                if (scriptReferenceMap.containsKey(scriptName)) {
+                    throw new OasisDbException("Script already exists by name '" + scriptName + "'!");
+                }
+
                 Map<String, Object> ref = (Map<String, Object>) entry.getValue();
-                LOG.info("Loading script " + basePath + '/' + ref.get("filename"));
-                String content = readClassPathEntry(basePath + '/' + ref.get("filename"), classLoader);
+                String scriptFullPath = basePath + '/' + ref.get("filename");
+                LOG.info("Loading script {}...", scriptFullPath);
+                String content = readClassPathEntry(scriptFullPath, classLoader);
                 String hash = jedis.scriptLoad(content);
-                LOG.info("Script loaded {} with hash {}", ref.get("filename"), hash);
+                LOG.debug("Script loaded {} with hash {}", scriptFullPath, hash);
                 RedisScript script = new RedisScript(hash);
-                scriptReferenceMap.put(entry.getKey(), script);
+                scriptReferenceMap.put(scriptName, script);
             }
         }
     }
@@ -133,7 +141,7 @@ public class RedisDb implements Db {
     }
 
     static class RedisScript {
-        private String sha;
+        private final String sha;
 
         RedisScript(String sha) {
             this.sha = sha;
