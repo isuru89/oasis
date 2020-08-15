@@ -20,6 +20,7 @@
 package io.github.oasis.engine.element.points.stats;
 
 import io.github.oasis.core.ID;
+import io.github.oasis.core.api.AbstractStatsApiController;
 import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
@@ -48,23 +49,18 @@ import static io.github.oasis.core.utils.Constants.COLON;
 /**
  * @author Isuru Weerarathna
  */
-public class PointStats {
+public class PointStats extends AbstractStatsApiController {
 
     private static final String LEADERBOARD_RANK = "O.PLEADRANKS";
     private static final String LEADERBOARD_RANK_REVERSE = "O.PLEADRANKSREV";
     private static final String WITH_CARDINALITY = "withcard";
 
-    private Db pool;
-
     public PointStats(Db pool) {
-        this.pool = pool;
-    }
-
-    public PointStats() {
+        super(pool);
     }
 
     public Object getUserPoints(UserPointsRequest request) throws Exception {
-        try (DbContext db = pool.createContext()) {
+        try (DbContext db = getDbPool().createContext()) {
 
             String key = ID.getGameUserPointsSummary(request.getGameId(), request.getUserId());
 
@@ -92,7 +88,7 @@ public class PointStats {
     }
 
     public Object getLeaderboard(LeaderboardRequest request) throws Exception {
-        try (DbContext db = pool.createContext()) {
+        try (DbContext db = getDbPool().createContext()) {
 
             String leadKey;
             String trait = request.getTimeRange() == TimeScope.ALL
@@ -134,7 +130,7 @@ public class PointStats {
 
     @SuppressWarnings("unchecked")
     public Object getUserRankings(UserRankingRequest request) throws Exception {
-        try (DbContext db = pool.createContext()) {
+        try (DbContext db = getDbPool().createContext()) {
 
             String[] keysToRead = Stream.of(TimeScope.values())
                     .map(timeScope -> {

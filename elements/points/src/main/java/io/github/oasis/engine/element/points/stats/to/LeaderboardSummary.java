@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
+import io.github.oasis.core.api.AbstractStatsApiResponse;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,23 +28,14 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
-public class LeaderboardSummary {
+public class LeaderboardSummary extends AbstractStatsApiResponse {
 
-    private Integer gameId;
     private Integer teamId;
 
     private List<LeaderboardRecord> records = new ArrayList<>();
 
     public void addRecord(LeaderboardRecord record) {
         records.add(record);
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
     }
 
     public Integer getTeamId() {

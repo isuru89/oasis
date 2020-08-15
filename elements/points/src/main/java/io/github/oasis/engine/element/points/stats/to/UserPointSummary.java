@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
+import io.github.oasis.core.api.AbstractStatsApiResponse;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,22 +30,13 @@ import java.util.Map;
 /**
  * @author Isuru Weerarathna
  */
-public class UserPointSummary {
+public class UserPointSummary extends AbstractStatsApiResponse {
 
-    private Integer gameId;
     private Long userId;
 
     private BigDecimal totalPoints;
 
     private Map<String, StatResults> stats;
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
 
     public Long getUserId() {
         return userId;
@@ -74,7 +67,7 @@ public class UserPointSummary {
 
     public static class StatResults {
 
-        private List<PointRecord> records = new ArrayList<>();
+        private final List<PointRecord> records = new ArrayList<>();
 
         public void addPointRecord(String key, BigDecimal value) {
             records.add(new PointRecord(key, value));

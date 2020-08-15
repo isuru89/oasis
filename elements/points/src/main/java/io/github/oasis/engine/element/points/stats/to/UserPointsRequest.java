@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
+import io.github.oasis.core.api.AbstractStatsApiRequest;
 import io.github.oasis.core.model.TimeScope;
 
 import java.time.LocalDate;
@@ -27,20 +28,11 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
-public class UserPointsRequest {
+public class UserPointsRequest extends AbstractStatsApiRequest {
 
-    private Integer gameId;
     private Long userId;
 
     private List<PointsFilterScope> filters;
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
 
     public Long getUserId() {
         return userId;

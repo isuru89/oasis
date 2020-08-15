@@ -19,14 +19,14 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
+import io.github.oasis.core.api.AbstractStatsApiRequest;
 import io.github.oasis.core.model.TimeScope;
 
 /**
  * @author Isuru Weerarathna
  */
-public class LeaderboardRequest {
+public class LeaderboardRequest extends AbstractStatsApiRequest {
 
-    private Integer gameId;
     private Integer teamId;
 
     private TimeScope timeRange;
@@ -64,14 +64,6 @@ public class LeaderboardRequest {
 
     public void setLimit(int limit) {
         this.limit = limit;
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
     }
 
     public Integer getTeamId() {

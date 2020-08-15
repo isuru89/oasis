@@ -19,14 +19,15 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
+import io.github.oasis.core.api.AbstractStatsApiRequest;
+
 import java.time.LocalDate;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserRankingRequest {
+public class UserRankingRequest extends AbstractStatsApiRequest {
 
-    private Integer gameId;
     private Long userId;
     private Integer teamId;
 
@@ -69,14 +70,6 @@ public class UserRankingRequest {
 
     public void setDate(LocalDate date) {
         this.date = date;
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
     }
 
     public Long getUserId() {

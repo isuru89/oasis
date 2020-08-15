@@ -19,6 +19,8 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
+import io.github.oasis.core.api.AbstractStatsApiResponse;
+
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,9 +28,8 @@ import java.util.Map;
 /**
  * @author Isuru Weerarathna
  */
-public class UserRankingSummary {
+public class UserRankingSummary extends AbstractStatsApiResponse {
 
-    private Integer gameId;
     private Long userId;
 
     private Map<String, RankInfo> rankings;
@@ -38,14 +39,6 @@ public class UserRankingSummary {
             rankings = new HashMap<>();
         }
         rankings.put(key, value);
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
     }
 
     public Long getUserId() {
