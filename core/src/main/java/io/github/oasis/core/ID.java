@@ -99,7 +99,7 @@ public final class ID {
     }
 
     public static String getUserKeyUnderGameMilestone(long userId) {
-        return String.format("u%d", userId);
+        return String.valueOf(userId);
     }
 
     public static String getPenaltiesUserKeyUnderGameMilestone(long userId) {

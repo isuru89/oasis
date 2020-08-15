@@ -9,7 +9,8 @@ points:
     award: "e.value - 50"
 
 milestones:
-  - name: Milestone-from-Points
+  - id: MILE00003
+    name: Milestone-from-Points
     description: This is a milestone which processes points.
     pointIds:
       - star.points

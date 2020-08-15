@@ -19,20 +19,19 @@
 
 package io.github.oasis.engine;
 
-import com.google.gson.Gson;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.elements.milestones.stats.MilestoneStats;
+import io.github.oasis.elements.milestones.stats.to.GameMilestoneRequest;
+import io.github.oasis.elements.milestones.stats.to.GameMilestoneResponse;
 import io.github.oasis.elements.milestones.stats.to.UserMilestoneRequest;
 import io.github.oasis.elements.milestones.stats.to.UserMilestoneSummary;
 import io.github.oasis.engine.model.TEvent;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -40,17 +39,15 @@ import java.util.List;
  */
 public class EngineMilestoneTest extends OasisEngineTest {
 
-    private final Gson gson = new Gson();
-
     @Test
-    public void testMilestones() throws Exception {
+    public void testMilestones() {
         Event e1 = TEvent.createKeyValue(100, EVT_A, 87);
         Event e2 = TEvent.createKeyValue(105, EVT_A, 53);
         Event e3 = TEvent.createKeyValue(110, EVT_A, 34);
         Event e4 = TEvent.createKeyValue(115, EVT_A, 11);
         Event e5 = TEvent.createKeyValue(120, EVT_A, 84);
         Event e6 = TEvent.createKeyValue(125, EVT_A, 92);
-        Event e7 = TEvent.createKeyValue(130, EVT_A, 100);
+        Event e7 = TEvent.createKeyValue(130, EVT_A, 100, "9b1132ea-0aaa-4724-bf2b-bc128ca57fea");
         Event e8 = TEvent.createKeyValue(135, EVT_B, 120);
 
         GameDef gameDef = loadRulesFromResource("rules/milestone-basic.yml");
@@ -75,22 +72,40 @@ public class EngineMilestoneTest extends OasisEngineTest {
                 ));
 
         MilestoneStats stats = new MilestoneStats(dbPool);
-        UserMilestoneRequest request = new UserMilestoneRequest();
-        request.setGameId(TEvent.GAME_ID);
-        request.setUserId(TEvent.USER_ID);
-        request.setMilestoneIds(List.of(rid));
 
-        UserMilestoneSummary summary = (UserMilestoneSummary) stats.getUserMilestoneSummary(request);
-        System.out.println(gson.toJson(summary));
-        Assertions.assertEquals(1, summary.getMilestones().size());
-        UserMilestoneSummary.MilestoneSummary milestoneSummary = summary.getMilestones().get(rid);
-        Assertions.assertEquals(3, milestoneSummary.getCurrentLevel());
-        Assertions.assertEquals(BigDecimal.valueOf(461), milestoneSummary.getCurrentValue());
-        Assertions.assertEquals(BigDecimal.valueOf(500), milestoneSummary.getNextLevelValue());
-        Assertions.assertEquals(4, milestoneSummary.getNextLevel());
-        Assertions.assertEquals(e7.getExternalId(), milestoneSummary.getLastCausedEventId());
-        Assertions.assertEquals(e6.getTimestamp(), milestoneSummary.getLastLevelUpdatedAt());
-        Assertions.assertEquals(e7.getTimestamp(), milestoneSummary.getLastUpdatedAt());
+        compareStatReqRes("stats/milestones/user-req.json", UserMilestoneRequest.class,
+                "stats/milestones/user-res.json", UserMilestoneSummary.class,
+                req -> (UserMilestoneSummary) stats.getUserMilestoneSummary(req));
+
+        compareStatReqRes("stats/milestones/game-summary-req.json", GameMilestoneRequest.class,
+                "stats/milestones/game-summary-res.json", GameMilestoneResponse.class,
+                req -> (GameMilestoneResponse)stats.getGameMilestoneSummary(req));
+    }
+
+    @Test
+    public void testMilestoneMultiUsers() throws Exception {
+        Event e1 = TEvent.createKeyValue(U1,100, EVT_A, 87);
+        Event e2 = TEvent.createKeyValue(U4, 105, EVT_A, 53);
+        Event e3 = TEvent.createKeyValue(U3,110, EVT_A, 34);
+        Event e4 = TEvent.createKeyValue(U1,115, EVT_A, 11);
+        Event e5 = TEvent.createKeyValue(U2, 120, EVT_A, 84);
+        Event e6 = TEvent.createKeyValue(U5,125, EVT_A, 92);
+        Event e7 = TEvent.createKeyValue(U3, 130, EVT_A, 100);
+        Event e8 = TEvent.createKeyValue(U4,135, EVT_A, 120);
+
+        GameDef gameDef = loadRulesFromResource("rules/milestone-basic.yml");
+
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
+        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
+        submitRules(engine, TEvent.GAME_ID, gameDef);
+        engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
+        awaitTerminated();
+
+        MilestoneStats stats = new MilestoneStats(dbPool);
+
+        compareStatReqRes("stats/milestones/game-users-req.json", GameMilestoneRequest.class,
+                "stats/milestones/game-users-res.json", GameMilestoneResponse.class,
+                req -> (GameMilestoneResponse) stats.getGameMilestoneSummary(req));
     }
 
     @Test

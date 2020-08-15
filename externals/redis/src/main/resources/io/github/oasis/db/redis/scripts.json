@@ -13,5 +13,8 @@
   },
   "O.HVALUEMOVE": {
     "filename": "scripts/HVALUEMOV.lua"
+  },
+  "O.ZMRANKSCORE": {
+    "filename": "scripts/ZMRANKSCORE.lua"
   }
 }
