@@ -165,14 +165,14 @@ public class EngineChallengesTest extends OasisEngineTest {
 
     @Test
     public void testOutOfOrderChallenge() {
-        Event e1 = TEvent.createWithTeam(U1, 1, TS("2020-03-23 08:00"), EVT_A, 57);
-        Event e2 = TEvent.createWithTeam(U1, 2, TS("2020-03-24 08:00"), EVT_A, 83);
-        Event e3 = TEvent.createWithTeam(U3, 2, TS("2020-03-25 08:00"), EVT_A, 98);
-        Event e4 = TEvent.createWithTeam(U4, 2, TS("2020-03-26 08:00"), EVT_A, 75);
-        Event e5 = TEvent.createWithTeam(U1, 1, TS("2020-03-26 08:00"), EVT_A, 88);
-        Event e6 = TEvent.createWithTeam(U1, 1, TS("2020-04-02 08:00"), EVT_A, 71);
-        Event e7 = TEvent.createWithTeam(U5, 2, TS("2020-03-25 11:00"), EVT_A, 64);
-        Event e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
+        Event e1 = TEvent.createWithTeam(U1, 1, TSZ("2020-03-23 08:00", "UTC"), EVT_A, 57);
+        Event e2 = TEvent.createWithTeam(U1, 2, TSZ("2020-03-24 08:00", "UTC"), EVT_A, 83);
+        Event e3 = TEvent.createWithTeam(U3, 2, TSZ("2020-03-25 08:00", "UTC"), EVT_A, 98);
+        Event e4 = TEvent.createWithTeam(U4, 2, TSZ("2020-03-26 08:00", "UTC"), EVT_A, 75);
+        Event e5 = TEvent.createWithTeam(U1, 1, TSZ("2020-03-26 08:00", "UTC"), EVT_A, 88);
+        Event e6 = TEvent.createWithTeam(U1, 1, TSZ("2020-04-02 08:00", "UTC"), EVT_A, 71);
+        Event e7 = TEvent.createWithTeam(U5, 2, TSZ("2020-03-25 11:00", "UTC"), EVT_A, 64);
+        Event e8 = TEvent.createWithTeam(U4, 2, TSZ("2020-04-03 08:00", "UTC"), EVT_A, 50);
 
         GameDef gameDef = loadRulesFromResource("rules/challenges-outoforder.yml");
         String ruleId = "CHG000001";

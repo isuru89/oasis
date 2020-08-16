@@ -7,21 +7,21 @@
       "latestWinners": [
         {
           "userId": 3,
-          "wonAt": 1585103400000
+          "wonAt": 1585123200000
         },
         {
           "userId": 5,
-          "wonAt": 1585114200000
+          "wonAt": 1585134000000
         },
         {
           "userId": 4,
-          "wonAt": 1585189800000
+          "wonAt": 1585209600000
         }
       ],
       "firstWinners": [
         {
           "userId": 1,
-          "wonAt": 1585017000000
+          "wonAt": 1585036800000
         }
       ]
     }
