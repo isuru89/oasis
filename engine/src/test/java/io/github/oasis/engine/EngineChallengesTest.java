@@ -19,7 +19,6 @@
 
 package io.github.oasis.engine;
 
-import com.google.gson.Gson;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.GameDef;
@@ -27,6 +26,8 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.elements.challenges.ChallengeOverEvent;
 import io.github.oasis.elements.challenges.stats.ChallengeStats;
+import io.github.oasis.elements.challenges.stats.to.GameChallengeRequest;
+import io.github.oasis.elements.challenges.stats.to.GameChallengesSummary;
 import io.github.oasis.elements.challenges.stats.to.UserChallengeRequest;
 import io.github.oasis.elements.challenges.stats.to.UserChallengesLog;
 import io.github.oasis.engine.model.TEvent;
@@ -44,10 +45,8 @@ import static io.github.oasis.engine.RedisAssert.ofSortedEntries;
  */
 public class EngineChallengesTest extends OasisEngineTest {
 
-    private final Gson gson = new Gson();
-
     @Test
-    public void testChallenges() throws Exception {
+    public void testChallenges() {
         Event e1 = TEvent.createKeyValue(U1, TSZ("2020-03-21 07:15", "UTC"), EVT_A, 57, UUID.fromString("90f50601-86e9-483c-aa75-6f8d80466d79"));
         Event e2 = TEvent.createKeyValue(U2, TSZ("2020-03-22 08:15", "UTC"), EVT_A, 83, UUID.fromString("a0d05445-a007-4ab7-9999-6d81f29d889c"));
         Event e3 = TEvent.createKeyValue(U3, TSZ("2020-03-25 07:15", "UTC"), EVT_A, 34);
@@ -205,6 +204,13 @@ public class EngineChallengesTest extends OasisEngineTest {
 
         ChallengeStats stats = new ChallengeStats(dbPool);
 
+        compareStatReqRes("stats/challenges/game-summary-req.json", GameChallengeRequest.class,
+                "stats/challenges/game-summary-res.json", GameChallengesSummary.class,
+                req -> (GameChallengesSummary) stats.getGameChallengesSummary(req));
+
+        compareStatReqRes("stats/challenges/game-summary-custom-req.json", GameChallengeRequest.class,
+                "stats/challenges/game-summary-custom-res.json", GameChallengesSummary.class,
+                req -> (GameChallengesSummary) stats.getGameChallengesSummary(req));
     }
 
     @Test

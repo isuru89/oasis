@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.challenges.stats.to;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,16 +47,70 @@ public class GameChallengesSummary {
         this.challenges = challenges;
     }
 
+    public static class ChallengeWinner {
+        private Long userId;
+        private long wonAt;
+
+        public ChallengeWinner(Long userId, long wonAt) {
+            this.userId = userId;
+            this.wonAt = wonAt;
+        }
+
+        public Long getUserId() {
+            return userId;
+        }
+
+        public void setUserId(Long userId) {
+            this.userId = userId;
+        }
+
+        public long getWonAt() {
+            return wonAt;
+        }
+
+        public void setWonAt(long wonAt) {
+            this.wonAt = wonAt;
+        }
+    }
+
     public static class ChallengeSummary {
         private String challengeId;
-        private int count;
+        private int winnerCount;
+
+        private List<ChallengeWinner> winners;
+        private List<ChallengeWinner> latestWinners;
+        private List<ChallengeWinner> firstWinners;
 
         public ChallengeSummary() {
         }
 
         public ChallengeSummary(String challengeId, int count) {
             this.challengeId = challengeId;
-            this.count = count;
+            this.winnerCount = count;
+        }
+
+        public List<ChallengeWinner> getWinners() {
+            return winners;
+        }
+
+        public void setWinners(List<ChallengeWinner> winners) {
+            this.winners = winners;
+        }
+
+        public List<ChallengeWinner> getLatestWinners() {
+            return latestWinners;
+        }
+
+        public void setLatestWinners(List<ChallengeWinner> latestWinners) {
+            this.latestWinners = latestWinners;
+        }
+
+        public List<ChallengeWinner> getFirstWinners() {
+            return firstWinners;
+        }
+
+        public void setFirstWinners(List<ChallengeWinner> firstWinners) {
+            this.firstWinners = firstWinners;
         }
 
         public String getChallengeId() {
@@ -66,12 +121,12 @@ public class GameChallengesSummary {
             this.challengeId = challengeId;
         }
 
-        public int getCount() {
-            return count;
+        public int getWinnerCount() {
+            return winnerCount;
         }
 
-        public void setCount(int count) {
-            this.count = count;
+        public void setWinnerCount(int winnerCount) {
+            this.winnerCount = winnerCount;
         }
     }
 

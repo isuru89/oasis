@@ -23,6 +23,7 @@ import io.github.oasis.core.ID;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Utils;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -70,7 +72,27 @@ public class ChallengeStats {
                 for (int i = 0; i < values.size(); i++) {
                     String[] parts = subKeys.get(i).split("[:]");
 
-                    summaryMap.put(parts[0], new ChallengeSummary(parts[0], Numbers.asInt(values.get(i))));
+                    ChallengeSummary theChallenge = new ChallengeSummary(parts[0], Numbers.asInt(values.get(i)));
+                    Sorted winnerLog = db.SORTED(ID.getGameChallengeKey(request.getGameId(), parts[0]));
+
+                    if (request.isCustomRange()) {
+                        theChallenge.setWinners(winnerLog
+                                .getRangeByRankWithScores(request.getRankStart() - 1, request.getRankEnd() < 0 ? request.getRankEnd() : request.getRankEnd() - 1)
+                                .stream().map(rec -> new GameChallengesSummary.ChallengeWinner(parseUserId(rec.getMember()), rec.getScoreAsLong()))
+                                .collect(Collectors.toList()));
+                    } else {
+                        theChallenge.setLatestWinners(winnerLog.getRangeByRankWithScores(-1 * request.getLatestWinnerCount(), -1)
+                                .stream().map(rec -> new GameChallengesSummary.ChallengeWinner(parseUserId(rec.getMember()), rec.getScoreAsLong()))
+                                .collect(Collectors.toList()));
+
+                        if (Objects.nonNull(request.getFirstWinnerCount())) {
+                            theChallenge.setFirstWinners(winnerLog.getRangeByRankWithScores(0, request.getFirstWinnerCount() - 1)
+                                    .stream().map(rec -> new GameChallengesSummary.ChallengeWinner(parseUserId(rec.getMember()), rec.getScoreAsLong()))
+                                    .collect(Collectors.toList()));
+                        }
+                    }
+
+                    summaryMap.put(parts[0], theChallenge);
                 }
             }
 
@@ -113,4 +135,10 @@ public class ChallengeStats {
         }
     }
 
+    private Long parseUserId(String val) {
+        if (val.startsWith("u")) {
+            return Numbers.asLong(val.substring(1));
+        }
+        return Numbers.asLong(val);
+    }
 }

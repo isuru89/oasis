@@ -4,7 +4,11 @@
     "CHG000001": {
       "challengeId": "CHG000001",
       "winnerCount": 4,
-      "latestWinners": [
+      "winners": [
+        {
+          "userId": 1,
+          "wonAt": 1585017000000
+        },
         {
           "userId": 3,
           "wonAt": 1585103400000
@@ -16,12 +20,6 @@
         {
           "userId": 4,
           "wonAt": 1585189800000
-        }
-      ],
-      "firstWinners": [
-        {
-          "userId": 1,
-          "wonAt": 1585017000000
         }
       ]
     }

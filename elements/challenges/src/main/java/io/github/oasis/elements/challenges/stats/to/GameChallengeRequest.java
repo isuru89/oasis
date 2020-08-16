@@ -30,6 +30,47 @@ public class GameChallengeRequest {
 
     private Set<String> challengeIds;
 
+    private Integer rankStart;
+    private Integer rankEnd;
+    private Integer latestWinnerCount = 1;
+    private Integer firstWinnerCount;
+
+    public boolean isCustomRange() {
+        return rankStart != null && rankEnd != null;
+    }
+
+    public Integer getRankStart() {
+        return rankStart;
+    }
+
+    public void setRankStart(Integer rankStart) {
+        this.rankStart = rankStart;
+    }
+
+    public Integer getRankEnd() {
+        return rankEnd;
+    }
+
+    public void setRankEnd(Integer rankEnd) {
+        this.rankEnd = rankEnd;
+    }
+
+    public Integer getLatestWinnerCount() {
+        return latestWinnerCount;
+    }
+
+    public void setLatestWinnerCount(Integer latestWinnerCount) {
+        this.latestWinnerCount = latestWinnerCount;
+    }
+
+    public Integer getFirstWinnerCount() {
+        return firstWinnerCount;
+    }
+
+    public void setFirstWinnerCount(Integer firstWinnerCount) {
+        this.firstWinnerCount = firstWinnerCount;
+    }
+
     public Integer getGameId() {
         return gameId;
     }
