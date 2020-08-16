@@ -48,12 +48,12 @@ public class EngineChallengesTest extends OasisEngineTest {
 
     @Test
     public void testChallenges() throws Exception {
-        Event e1 = TEvent.createKeyValue(U1, TS("2020-03-21 07:15"), EVT_A, 57, UUID.fromString("90f50601-86e9-483c-aa75-6f8d80466d79"));
-        Event e2 = TEvent.createKeyValue(U2, TS("2020-03-22 08:15"), EVT_A, 83, UUID.fromString("a0d05445-a007-4ab7-9999-6d81f29d889c"));
-        Event e3 = TEvent.createKeyValue(U3, TS("2020-03-25 07:15"), EVT_A, 34);
-        Event e4 = TEvent.createKeyValue(U4, TS("2020-04-01 11:15"), EVT_A, 75);
-        Event e5 = TEvent.createKeyValue(U4, TS("2020-04-02 07:15"), EVT_A, 99);
-        Event e6 = TEvent.createKeyValue(U3, TS("2020-05-02 07:15"), EVT_A, 99);
+        Event e1 = TEvent.createKeyValue(U1, TSZ("2020-03-21 07:15", "UTC"), EVT_A, 57, UUID.fromString("90f50601-86e9-483c-aa75-6f8d80466d79"));
+        Event e2 = TEvent.createKeyValue(U2, TSZ("2020-03-22 08:15", "UTC"), EVT_A, 83, UUID.fromString("a0d05445-a007-4ab7-9999-6d81f29d889c"));
+        Event e3 = TEvent.createKeyValue(U3, TSZ("2020-03-25 07:15", "UTC"), EVT_A, 34);
+        Event e4 = TEvent.createKeyValue(U4, TSZ("2020-04-01 11:15", "UTC"), EVT_A, 75);
+        Event e5 = TEvent.createKeyValue(U4, TSZ("2020-04-02 07:15", "UTC"), EVT_A, 99);
+        Event e6 = TEvent.createKeyValue(U3, TSZ("2020-05-02 07:15", "UTC"), EVT_A, 99);
 
         GameDef gameDef = loadRulesFromResource("rules/challenges-basic.yml");
 
@@ -158,6 +158,7 @@ public class EngineChallengesTest extends OasisEngineTest {
         compareStatReqRes("stats/challenges/user-log-req.json", UserChallengeRequest.class,
                 "stats/challenges/user-log-res.json", UserChallengesLog.class,
                 req -> (UserChallengesLog) stats.getUserChallengeLog(req));
+
         compareStatReqRes("stats/challenges/user-log-bytime-req.json", UserChallengeRequest.class,
                 "stats/challenges/user-log-bytime-res.json", UserChallengesLog.class,
                 req -> (UserChallengesLog) stats.getUserChallengeLog(req));
