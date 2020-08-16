@@ -19,16 +19,21 @@
 
 package io.github.oasis.engine;
 
+import com.google.gson.Gson;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.elements.challenges.ChallengeOverEvent;
+import io.github.oasis.elements.challenges.stats.ChallengeStats;
+import io.github.oasis.elements.challenges.stats.to.UserChallengeRequest;
+import io.github.oasis.elements.challenges.stats.to.UserChallengesLog;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import static io.github.oasis.engine.RedisAssert.assertKeyNotExist;
 import static io.github.oasis.engine.RedisAssert.assertSorted;
@@ -39,10 +44,12 @@ import static io.github.oasis.engine.RedisAssert.ofSortedEntries;
  */
 public class EngineChallengesTest extends OasisEngineTest {
 
+    private final Gson gson = new Gson();
+
     @Test
-    public void testChallenges() {
-        Event e1 = TEvent.createKeyValue(U1, TS("2020-03-21 07:15"), EVT_A, 57);
-        Event e2 = TEvent.createKeyValue(U2, TS("2020-03-22 08:15"), EVT_A, 83);
+    public void testChallenges() throws Exception {
+        Event e1 = TEvent.createKeyValue(U1, TS("2020-03-21 07:15"), EVT_A, 57, UUID.fromString("90f50601-86e9-483c-aa75-6f8d80466d79"));
+        Event e2 = TEvent.createKeyValue(U2, TS("2020-03-22 08:15"), EVT_A, 83, UUID.fromString("a0d05445-a007-4ab7-9999-6d81f29d889c"));
         Event e3 = TEvent.createKeyValue(U3, TS("2020-03-25 07:15"), EVT_A, 34);
         Event e4 = TEvent.createKeyValue(U4, TS("2020-04-01 11:15"), EVT_A, 75);
         Event e5 = TEvent.createKeyValue(U4, TS("2020-04-02 07:15"), EVT_A, 99);
@@ -144,6 +151,16 @@ public class EngineChallengesTest extends OasisEngineTest {
                         "team:1:W202014", score,
                         "team:1:Y2020", score,
                         "team:1", score));
+
+
+        ChallengeStats stats = new ChallengeStats(dbPool);
+
+        compareStatReqRes("stats/challenges/user-log-req.json", UserChallengeRequest.class,
+                "stats/challenges/user-log-res.json", UserChallengesLog.class,
+                req -> (UserChallengesLog) stats.getUserChallengeLog(req));
+        compareStatReqRes("stats/challenges/user-log-bytime-req.json", UserChallengeRequest.class,
+                "stats/challenges/user-log-bytime-res.json", UserChallengesLog.class,
+                req -> (UserChallengesLog) stats.getUserChallengeLog(req));
     }
 
     @Test
@@ -184,6 +201,9 @@ public class EngineChallengesTest extends OasisEngineTest {
                         U5, 100));
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200324"), ofSortedEntries(U1, 300));
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200325"), ofSortedEntries(U5, 100, U3, 200));
+
+        ChallengeStats stats = new ChallengeStats(dbPool);
+
     }
 
     @Test

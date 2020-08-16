@@ -29,6 +29,8 @@ import io.github.oasis.core.elements.ElementModule;
 import io.github.oasis.core.elements.ElementParser;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.elements.challenges.stats.ChallengeStats;
 
 import java.util.List;
 
@@ -42,6 +44,11 @@ public class ChallengesModule extends ElementModule {
     private final List<String> keysSupported = List.of(CHALLENGES);
     private final List<Class<? extends AbstractSink>> sinks = List.of(ChallengesSink.class);
     private final ElementParser parser = new ChallengeParser();
+
+    @Override
+    public void init(RuntimeContextSupport context) throws OasisException {
+        loadScriptsUnderPackage(context.getDb(), ChallengeStats.class, Thread.currentThread().getContextClassLoader());
+    }
 
     @Override
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {

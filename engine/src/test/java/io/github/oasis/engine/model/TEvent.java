@@ -63,6 +63,14 @@ public class TEvent extends EventJson {
         return new EventJson(values);
     }
 
+    public static EventJson createKeyValue(long user, long ts, String eventType, long value, UUID eventId) {
+        Map<String, Object> values = createKeyValue(ts, eventType, value).getAllFieldValues();
+        values.put(Event.USER_ID, user);
+        values.put(Event.USER_NAME, String.valueOf(user));
+        values.put(Event.ID, eventId.toString());
+        return new EventJson(values);
+    }
+
     public static EventJson createKeyValueTz(long user, long ts, String eventType, long value, String tz) {
         Map<String, Object> values = createKeyValue(ts, eventType, value).getAllFieldValues();
         values.put(Event.USER_ID, user);

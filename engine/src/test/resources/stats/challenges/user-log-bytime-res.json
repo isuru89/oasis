@@ -1,0 +1,12 @@
+{
+  "gameId": 1,
+  "userId": 2,
+  "winnings": [
+    {
+      "challengeId": "CHG000001",
+      "rank": 2,
+      "wonAt": 1584845100000,
+      "causedEventId": "a0d05445-a007-4ab7-9999-6d81f29d889c"
+    }
+  ]
+}
