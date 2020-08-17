@@ -17,20 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.core.api;
+package io.github.oasis.core.services.helpers;
+
+import io.github.oasis.core.Team;
+import io.github.oasis.core.User;
+import io.github.oasis.core.exception.OasisException;
+
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractStatsApiRequest {
+public interface OasisContextHelperSupport {
 
-    private Integer gameId;
+    Map<String, User> readUsersByIdStrings(Collection<String> userIds) throws OasisException;
+    Map<Long, User> readUsersByIds(Collection<Long> userIds) throws OasisException;
 
-    public Integer getGameId() {
-        return gameId;
-    }
+    User readUser(long userId) throws OasisException;
+    User readUser(String userId) throws OasisException;
 
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
+    Map<String, Team> readTeamsByIdStrings(Collection<String> teamIds) throws OasisException;
+    Map<Integer, Team> readTeamsById(Collection<Integer> teamIds) throws OasisException;
+
+    Team readTeam(String teamId) throws OasisException;
+    Team readTeam(int teamId) throws OasisException;
+
 }

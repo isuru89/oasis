@@ -17,22 +17,20 @@
  * under the License.
  */
 
-package io.github.oasis.core.api;
+package io.github.oasis.core.services.annotations;
 
-import io.github.oasis.core.external.Db;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractStatsApiController {
-
-    private final Db dbPool;
-
-    public AbstractStatsApiController(Db dbPool) {
-        this.dbPool = dbPool;
-    }
-
-    public Db getDbPool() {
-        return dbPool;
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@RestController
+public @interface OasisQueryService {
 }

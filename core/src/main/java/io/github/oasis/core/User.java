@@ -17,22 +17,23 @@
  * under the License.
  */
 
-package io.github.oasis.core.api;
+package io.github.oasis.core;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractStatsApiResponse implements Serializable {
+@Getter
+@Setter
+@AllArgsConstructor
+public class User implements Serializable {
 
-    private Integer gameId;
+    private long userId;
+    private String displayName;
 
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
 }
