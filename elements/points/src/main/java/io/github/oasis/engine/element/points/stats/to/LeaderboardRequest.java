@@ -19,12 +19,16 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
-import io.github.oasis.core.api.AbstractStatsApiRequest;
 import io.github.oasis.core.model.TimeScope;
+import io.github.oasis.core.services.AbstractStatsApiRequest;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class LeaderboardRequest extends AbstractStatsApiRequest {
 
     private Integer teamId;
@@ -42,51 +46,4 @@ public class LeaderboardRequest extends AbstractStatsApiRequest {
         return teamId != null;
     }
 
-    public boolean isDescendingOrder() {
-        return descendingOrder;
-    }
-
-    public void setDescendingOrder(boolean descendingOrder) {
-        this.descendingOrder = descendingOrder;
-    }
-
-    public int getOffset() {
-        return offset;
-    }
-
-    public void setOffset(int offset) {
-        this.offset = offset;
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
-    public void setLimit(int limit) {
-        this.limit = limit;
-    }
-
-    public Integer getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(Integer teamId) {
-        this.teamId = teamId;
-    }
-
-    public TimeScope getTimeRange() {
-        return timeRange;
-    }
-
-    public void setTimeRange(TimeScope timeRange) {
-        this.timeRange = timeRange;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
 }

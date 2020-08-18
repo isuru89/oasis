@@ -19,13 +19,17 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
-import io.github.oasis.core.api.AbstractStatsApiRequest;
+import io.github.oasis.core.services.AbstractStatsApiRequest;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class UserRankingRequest extends AbstractStatsApiRequest {
 
     private Long userId;
@@ -38,45 +42,5 @@ public class UserRankingRequest extends AbstractStatsApiRequest {
 
     public boolean isTeamScoped() {
         return teamId != null;
-    }
-
-    public Integer getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(Integer teamId) {
-        this.teamId = teamId;
-    }
-
-    public boolean isIncludeTotalCount() {
-        return includeTotalCount;
-    }
-
-    public void setIncludeTotalCount(boolean includeTotalCount) {
-        this.includeTotalCount = includeTotalCount;
-    }
-
-    public boolean isDescendingOrder() {
-        return descendingOrder;
-    }
-
-    public void setDescendingOrder(boolean descendingOrder) {
-        this.descendingOrder = descendingOrder;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 }

@@ -19,7 +19,9 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
-import io.github.oasis.core.api.AbstractStatsApiResponse;
+import io.github.oasis.core.services.AbstractStatsApiResponse;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -28,6 +30,8 @@ import java.util.Map;
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class UserRankingSummary extends AbstractStatsApiResponse {
 
     private Long userId;
@@ -41,54 +45,17 @@ public class UserRankingSummary extends AbstractStatsApiResponse {
         rankings.put(key, value);
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Map<String, RankInfo> getRankings() {
-        return rankings;
-    }
-
-    public void setRankings(Map<String, RankInfo> rankings) {
-        this.rankings = rankings;
-    }
-
+    @Getter
+    @Setter
     public static class RankInfo {
         private int rank;
         private BigDecimal score;
         private Long total;
 
-        public RankInfo() {
-        }
-
         public RankInfo(int rank, BigDecimal score, Long total) {
             this.rank = rank;
             this.score = score;
             this.total = total;
-        }
-
-        public long getTotal() {
-            return total;
-        }
-
-        public int getRank() {
-            return rank;
-        }
-
-        public void setRank(int rank) {
-            this.rank = rank;
-        }
-
-        public BigDecimal getScore() {
-            return score;
-        }
-
-        public void setScore(BigDecimal score) {
-            this.score = score;
         }
     }
 

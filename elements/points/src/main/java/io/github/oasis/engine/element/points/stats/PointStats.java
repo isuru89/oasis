@@ -20,13 +20,17 @@
 package io.github.oasis.engine.element.points.stats;
 
 import io.github.oasis.core.ID;
-import io.github.oasis.core.api.AbstractStatsApiController;
 import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.model.TimeScope;
+import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.annotations.OasisQueryService;
+import io.github.oasis.core.services.annotations.OasisStatEndPoint;
+import io.github.oasis.core.services.annotations.QueryPayload;
+import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Timestamps;
 import io.github.oasis.core.utils.Utils;
@@ -49,17 +53,19 @@ import static io.github.oasis.core.utils.Constants.COLON;
 /**
  * @author Isuru Weerarathna
  */
-public class PointStats extends AbstractStatsApiController {
+@OasisQueryService
+public class PointStats extends AbstractStatsApiService {
 
     private static final String LEADERBOARD_RANK = "O.PLEADRANKS";
     private static final String LEADERBOARD_RANK_REVERSE = "O.PLEADRANKSREV";
     private static final String WITH_CARDINALITY = "withcard";
 
-    public PointStats(Db pool) {
-        super(pool);
+    public PointStats(Db pool, OasisContextHelperSupport contextSupport) {
+        super(pool, contextSupport);
     }
 
-    public Object getUserPoints(UserPointsRequest request) throws Exception {
+    @OasisStatEndPoint(path = "/elements/points/summary")
+    public Object getUserPoints(@QueryPayload UserPointsRequest request) throws Exception {
         try (DbContext db = getDbPool().createContext()) {
 
             String key = ID.getGameUserPointsSummary(request.getGameId(), request.getUserId());
@@ -87,7 +93,8 @@ public class PointStats extends AbstractStatsApiController {
         }
     }
 
-    public Object getLeaderboard(LeaderboardRequest request) throws Exception {
+    @OasisStatEndPoint(path = "/elements/points/leaderboard/summary")
+    public Object getLeaderboard(@QueryPayload LeaderboardRequest request) throws Exception {
         try (DbContext db = getDbPool().createContext()) {
 
             String leadKey;
@@ -128,8 +135,9 @@ public class PointStats extends AbstractStatsApiController {
         }
     }
 
+    @OasisStatEndPoint(path = "/elements/points/rankings/summary")
     @SuppressWarnings("unchecked")
-    public Object getUserRankings(UserRankingRequest request) throws Exception {
+    public Object getUserRankings(@QueryPayload UserRankingRequest request) throws Exception {
         try (DbContext db = getDbPool().createContext()) {
 
             String[] keysToRead = Stream.of(TimeScope.values())

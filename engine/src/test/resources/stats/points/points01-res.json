@@ -2,7 +2,7 @@
   "gameId": 1,
   "userId": 1,
   "totalPoints": 35,
-  "stats": {
+  "points": {
     "rule": {
       "records": [
         {

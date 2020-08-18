@@ -17,44 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.engine.element.points.stats.to;
+package io.github.oasis.engine.element.points.stats;
 
-import io.github.oasis.core.services.AbstractStatsApiResponse;
-import lombok.Getter;
-import lombok.Setter;
+import io.github.oasis.core.services.AbstractAdminApiService;
+import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.OasisServiceApiFactory;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class LeaderboardSummary extends AbstractStatsApiResponse {
+public class PointsServiceApiFactory extends OasisServiceApiFactory {
 
-    private Integer teamId;
+    private final List<Class<? extends AbstractStatsApiService>> apis = List.of(PointStats.class);
 
-    private List<LeaderboardRecord> records = new ArrayList<>();
-
-    public void addRecord(LeaderboardRecord record) {
-        records.add(record);
+    @Override
+    public List<Class<? extends AbstractStatsApiService>> getStatsApiServices() {
+        return apis;
     }
 
-    @Getter
-    @Setter
-    public static class LeaderboardRecord {
-
-        private int rank;
-        private Long userId;
-        private BigDecimal score;
-
-        public LeaderboardRecord(int rank, Long userId, BigDecimal score) {
-            this.rank = rank;
-            this.userId = userId;
-            this.score = score;
-        }
+    @Override
+    public List<Class<? extends AbstractAdminApiService>> getAdminApiServices() {
+        return null;
     }
-
 }

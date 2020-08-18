@@ -39,7 +39,7 @@ public class PointStatTest {
 
     @BeforeEach
     public void beforeEach() {
-        stats = new PointStats(null);
+        stats = new PointStats(null, null);
     }
 
     @Test

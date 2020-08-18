@@ -161,7 +161,7 @@ public class EnginePointsTest extends OasisEngineTest {
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200402"), ofSortedEntries(U2, 33));
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200403"), ofSortedEntries(U1, 24));
 
-        PointStats stats = new PointStats(dbPool);
+        PointStats stats = new PointStats(dbPool, null);
 
         compareStatReqRes("stats/points/points01-req.json", UserPointsRequest.class,
                 "stats/points/points01-res.json", UserPointSummary.class,
@@ -226,7 +226,7 @@ public class EnginePointsTest extends OasisEngineTest {
         assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20200402"), ofSortedEntries(U1, 11));
         assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20200403"), ofSortedEntries(U2, 9));
 
-        PointStats stats = new PointStats(dbPool);
+        PointStats stats = new PointStats(dbPool, null);
 
         compareStatReqRes("stats/leaderboard/team-basic-req.json", LeaderboardRequest.class,
                 "stats/leaderboard/team-basic-res.json", LeaderboardSummary.class,
@@ -312,7 +312,7 @@ public class EnginePointsTest extends OasisEngineTest {
                         "team:"+tid+":D20200702", "33"
                 ));
 
-        PointStats stats = new PointStats(dbPool);
+        PointStats stats = new PointStats(dbPool, null);
 
         compareStatReqRes("stats/leaderboard/game-all-req.json", LeaderboardRequest.class,
                 "stats/leaderboard/game-all-res.json", LeaderboardSummary.class,

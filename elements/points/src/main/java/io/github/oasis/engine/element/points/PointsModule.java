@@ -50,8 +50,7 @@ public class PointsModule extends ElementModule {
     public void init(RuntimeContextSupport context) throws OasisException {
         Db db = context.getDb();
 
-        String pkg = PointStats.class.getPackageName().replace('.', '/');
-        db.registerScripts(pkg, Thread.currentThread().getContextClassLoader());
+        loadScriptsUnderPackage(db, PointStats.class, Thread.currentThread().getContextClassLoader());
     }
 
     @Override
