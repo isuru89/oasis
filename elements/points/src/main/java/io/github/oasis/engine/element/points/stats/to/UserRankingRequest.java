@@ -22,6 +22,7 @@ package io.github.oasis.engine.element.points.stats.to;
 import io.github.oasis.core.services.AbstractStatsApiRequest;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
@@ -30,6 +31,7 @@ import java.time.LocalDate;
  */
 @Getter
 @Setter
+@ToString
 public class UserRankingRequest extends AbstractStatsApiRequest {
 
     private Long userId;

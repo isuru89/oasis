@@ -30,6 +30,8 @@ import io.github.oasis.core.services.AbstractStatsApiService;
 import io.github.oasis.core.services.annotations.OasisQueryService;
 import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
+import io.github.oasis.core.services.exceptions.ApiQueryException;
+import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Timestamps;
@@ -42,6 +44,7 @@ import io.github.oasis.engine.element.points.stats.to.UserPointsRequest.PointsFi
 import io.github.oasis.engine.element.points.stats.to.UserRankingRequest;
 import io.github.oasis.engine.element.points.stats.to.UserRankingSummary;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
@@ -65,7 +68,9 @@ public class PointStats extends AbstractStatsApiService {
     }
 
     @OasisStatEndPoint(path = "/elements/points/summary")
-    public Object getUserPoints(@QueryPayload UserPointsRequest request) throws Exception {
+    public Object getUserPoints(@QueryPayload UserPointsRequest request) throws OasisApiException {
+        Validators.checkPointRequest(request);
+
         try (DbContext db = getDbPool().createContext()) {
 
             String key = ID.getGameUserPointsSummary(request.getGameId(), request.getUserId());
@@ -90,11 +95,13 @@ public class PointStats extends AbstractStatsApiService {
             }
 
             return summary;
+        } catch (IOException e) {
+            throw new ApiQueryException("Error while querying for points summary!", e);
         }
     }
 
     @OasisStatEndPoint(path = "/elements/points/leaderboard/summary")
-    public Object getLeaderboard(@QueryPayload LeaderboardRequest request) throws Exception {
+    public Object getLeaderboard(@QueryPayload LeaderboardRequest request) throws OasisApiException {
         try (DbContext db = getDbPool().createContext()) {
 
             String leadKey;
@@ -132,12 +139,14 @@ public class PointStats extends AbstractStatsApiService {
             }
 
             return summary;
+        } catch (IOException e) {
+            throw new ApiQueryException("Error while querying for leaderboard records!", e);
         }
     }
 
     @OasisStatEndPoint(path = "/elements/points/rankings/summary")
     @SuppressWarnings("unchecked")
-    public Object getUserRankings(@QueryPayload UserRankingRequest request) throws Exception {
+    public Object getUserRankings(@QueryPayload UserRankingRequest request) throws OasisApiException {
         try (DbContext db = getDbPool().createContext()) {
 
             String[] keysToRead = Stream.of(TimeScope.values())
@@ -178,6 +187,8 @@ public class PointStats extends AbstractStatsApiService {
             }
 
             return summary;
+        } catch (IOException e) {
+            throw new ApiQueryException("Error while querying for user ranking summary!", e);
         }
     }
 

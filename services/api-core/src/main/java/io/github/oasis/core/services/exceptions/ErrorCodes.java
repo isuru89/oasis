@@ -17,35 +17,14 @@
  * under the License.
  */
 
-package io.github.oasis.engine.element.points.stats.to;
-
-import io.github.oasis.core.model.TimeScope;
-import io.github.oasis.core.services.AbstractStatsApiRequest;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+package io.github.oasis.core.services.exceptions;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-@ToString
-public class LeaderboardRequest extends AbstractStatsApiRequest {
+public final class ErrorCodes {
 
-    private Integer teamId;
+    public static final String GENERIC_ELEMENT_QUERY_FAILURE = "E40001";
 
-    private TimeScope timeRange;
-
-    private String time;
-
-    private boolean descendingOrder = true;
-
-    private int offset = 1;
-    private int limit = 20;
-
-    public boolean isTeamScoped() {
-        return teamId != null;
-    }
-
+    private ErrorCodes() {}
 }

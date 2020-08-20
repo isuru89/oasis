@@ -23,6 +23,7 @@ import io.github.oasis.core.model.TimeScope;
 import io.github.oasis.core.services.AbstractStatsApiRequest;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.List;
  */
 @Getter
 @Setter
+@ToString
 public class UserPointsRequest extends AbstractStatsApiRequest {
 
     private Long userId;

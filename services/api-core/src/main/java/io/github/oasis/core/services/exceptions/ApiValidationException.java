@@ -17,35 +17,15 @@
  * under the License.
  */
 
-package io.github.oasis.engine.element.points.stats.to;
+package io.github.oasis.core.services.exceptions;
 
-import io.github.oasis.core.model.TimeScope;
-import io.github.oasis.core.services.AbstractStatsApiRequest;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import org.springframework.http.HttpStatus;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-@ToString
-public class LeaderboardRequest extends AbstractStatsApiRequest {
-
-    private Integer teamId;
-
-    private TimeScope timeRange;
-
-    private String time;
-
-    private boolean descendingOrder = true;
-
-    private int offset = 1;
-    private int limit = 20;
-
-    public boolean isTeamScoped() {
-        return teamId != null;
+public class ApiValidationException extends OasisApiException {
+    public ApiValidationException(String errorCode, String message) {
+        super(errorCode, HttpStatus.BAD_REQUEST.value(), message);
     }
-
 }
