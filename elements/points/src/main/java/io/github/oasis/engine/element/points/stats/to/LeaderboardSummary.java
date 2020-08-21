@@ -48,12 +48,14 @@ public class LeaderboardSummary extends AbstractStatsApiResponse {
 
         private int rank;
         private Long userId;
+        private String displayName;
         private BigDecimal score;
 
-        public LeaderboardRecord(int rank, Long userId, BigDecimal score) {
+        public LeaderboardRecord(int rank, Long userId, String displayName, BigDecimal score) {
             this.rank = rank;
             this.userId = userId;
             this.score = score;
+            this.displayName = displayName;
         }
     }
 

@@ -95,6 +95,12 @@
             <version>2.6.4</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.github.oasis.services.stats</groupId>
+            <artifactId>stats-api</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

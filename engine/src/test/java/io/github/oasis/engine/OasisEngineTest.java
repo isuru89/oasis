@@ -24,6 +24,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonParser;
+import io.github.oasis.core.ID;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
@@ -33,6 +34,8 @@ import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.parser.GameParserYaml;
+import io.github.oasis.core.services.api.beans.OasisContextHelper;
+import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.db.redis.RedisEventLoader;
 import io.github.oasis.elements.badges.BadgesModuleFactory;
@@ -85,6 +88,7 @@ public class OasisEngineTest {
     protected OasisEngine engine;
 
     protected Db dbPool;
+    protected OasisContextHelperSupport contextHelperSupport;
 
     @BeforeEach
     public void setup() throws IOException, OasisException {
@@ -92,6 +96,8 @@ public class OasisEngineTest {
         OasisConfigs oasisConfigs = OasisConfigs.defaultConfigs();
         dbPool = RedisDb.create(oasisConfigs);
         dbPool.init();
+
+        contextHelperSupport = new OasisContextHelper(dbPool);
 
         context.setModuleFactoryList(List.of(
                 RatingsModuleFactory.class,
@@ -108,6 +114,11 @@ public class OasisEngineTest {
 
         try (DbContext db = dbPool.createContext()) {
             db.allKeys("*").forEach(db::removeKey);
+            db.setValueInMap(ID.ALL_USERS_NAMES, "1", "Jakob Floyd");
+            db.setValueInMap(ID.ALL_USERS_NAMES, "2", "Thierry Hines");
+            db.setValueInMap(ID.ALL_USERS_NAMES, "3", "Ray Glenn");
+            db.setValueInMap(ID.ALL_USERS_NAMES, "4", "Lilia Stewart");
+            db.setValueInMap(ID.ALL_USERS_NAMES, "5", "Archer Roberts");
         }
     }
 

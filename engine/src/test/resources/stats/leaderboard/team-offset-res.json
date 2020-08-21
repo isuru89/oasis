@@ -1,1 +1,12 @@
-{"gameId":1,"teamId":100,"records":[{"rank":2,"userId":2,"score":65.0}]}
+{
+  "gameId": 1,
+  "teamId": 100,
+  "records": [
+    {
+      "rank": 2,
+      "userId": 2,
+      "displayName": "Thierry Hines",
+      "score": 65.0
+    }
+  ]
+}
