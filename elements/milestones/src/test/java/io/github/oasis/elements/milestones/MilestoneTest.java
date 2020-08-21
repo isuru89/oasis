@@ -20,7 +20,6 @@
 package io.github.oasis.elements.milestones;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.EventBiValueResolver;
 import io.github.oasis.core.elements.RuleContext;
@@ -320,7 +319,7 @@ public class MilestoneTest extends AbstractRuleTest {
         assertStrict(signals,
                 new MilestoneSignal(rule.getId(), L_0, L_1, BigDecimal.valueOf(187.0), e1));
 
-        assertRedisHashMapValue(ID.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
+        assertRedisHashMapValue(MilestoneIDs.getGameUserMilestonesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 rule.getId() + ":penalties",
                 "-98");
     }

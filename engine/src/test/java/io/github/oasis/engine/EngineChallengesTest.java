@@ -25,10 +25,16 @@ import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.elements.challenges.ChallengeOverEvent;
+import io.github.oasis.elements.challenges.stats.ChallengeStats;
+import io.github.oasis.elements.challenges.stats.to.GameChallengeRequest;
+import io.github.oasis.elements.challenges.stats.to.GameChallengesSummary;
+import io.github.oasis.elements.challenges.stats.to.UserChallengeRequest;
+import io.github.oasis.elements.challenges.stats.to.UserChallengesLog;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import static io.github.oasis.engine.RedisAssert.assertKeyNotExist;
 import static io.github.oasis.engine.RedisAssert.assertSorted;
@@ -41,12 +47,12 @@ public class EngineChallengesTest extends OasisEngineTest {
 
     @Test
     public void testChallenges() {
-        Event e1 = TEvent.createKeyValue(U1, TS("2020-03-21 07:15"), EVT_A, 57);
-        Event e2 = TEvent.createKeyValue(U2, TS("2020-03-22 08:15"), EVT_A, 83);
-        Event e3 = TEvent.createKeyValue(U3, TS("2020-03-25 07:15"), EVT_A, 34);
-        Event e4 = TEvent.createKeyValue(U4, TS("2020-04-01 11:15"), EVT_A, 75);
-        Event e5 = TEvent.createKeyValue(U4, TS("2020-04-02 07:15"), EVT_A, 99);
-        Event e6 = TEvent.createKeyValue(U3, TS("2020-05-02 07:15"), EVT_A, 99);
+        Event e1 = TEvent.createKeyValue(U1, TSZ("2020-03-21 07:15", "UTC"), EVT_A, 57, UUID.fromString("90f50601-86e9-483c-aa75-6f8d80466d79"));
+        Event e2 = TEvent.createKeyValue(U2, TSZ("2020-03-22 08:15", "UTC"), EVT_A, 83, UUID.fromString("a0d05445-a007-4ab7-9999-6d81f29d889c"));
+        Event e3 = TEvent.createKeyValue(U3, TSZ("2020-03-25 07:15", "UTC"), EVT_A, 34);
+        Event e4 = TEvent.createKeyValue(U4, TSZ("2020-04-01 11:15", "UTC"), EVT_A, 75);
+        Event e5 = TEvent.createKeyValue(U4, TSZ("2020-04-02 07:15", "UTC"), EVT_A, 99);
+        Event e6 = TEvent.createKeyValue(U3, TSZ("2020-05-02 07:15", "UTC"), EVT_A, 99);
 
         GameDef gameDef = loadRulesFromResource("rules/challenges-basic.yml");
 
@@ -144,18 +150,29 @@ public class EngineChallengesTest extends OasisEngineTest {
                         "team:1:W202014", score,
                         "team:1:Y2020", score,
                         "team:1", score));
+
+
+        ChallengeStats stats = new ChallengeStats(dbPool);
+
+        compareStatReqRes("stats/challenges/user-log-req.json", UserChallengeRequest.class,
+                "stats/challenges/user-log-res.json", UserChallengesLog.class,
+                req -> (UserChallengesLog) stats.getUserChallengeLog(req));
+
+        compareStatReqRes("stats/challenges/user-log-bytime-req.json", UserChallengeRequest.class,
+                "stats/challenges/user-log-bytime-res.json", UserChallengesLog.class,
+                req -> (UserChallengesLog) stats.getUserChallengeLog(req));
     }
 
     @Test
     public void testOutOfOrderChallenge() {
-        Event e1 = TEvent.createWithTeam(U1, 1, TS("2020-03-23 08:00"), EVT_A, 57);
-        Event e2 = TEvent.createWithTeam(U1, 2, TS("2020-03-24 08:00"), EVT_A, 83);
-        Event e3 = TEvent.createWithTeam(U3, 2, TS("2020-03-25 08:00"), EVT_A, 98);
-        Event e4 = TEvent.createWithTeam(U4, 2, TS("2020-03-26 08:00"), EVT_A, 75);
-        Event e5 = TEvent.createWithTeam(U1, 1, TS("2020-03-26 08:00"), EVT_A, 88);
-        Event e6 = TEvent.createWithTeam(U1, 1, TS("2020-04-02 08:00"), EVT_A, 71);
-        Event e7 = TEvent.createWithTeam(U5, 2, TS("2020-03-25 11:00"), EVT_A, 64);
-        Event e8 = TEvent.createWithTeam(U4, 2, TS("2020-04-03 08:00"), EVT_A, 50);
+        Event e1 = TEvent.createWithTeam(U1, 1, TSZ("2020-03-23 08:00", "UTC"), EVT_A, 57);
+        Event e2 = TEvent.createWithTeam(U1, 2, TSZ("2020-03-24 08:00", "UTC"), EVT_A, 83);
+        Event e3 = TEvent.createWithTeam(U3, 2, TSZ("2020-03-25 08:00", "UTC"), EVT_A, 98);
+        Event e4 = TEvent.createWithTeam(U4, 2, TSZ("2020-03-26 08:00", "UTC"), EVT_A, 75);
+        Event e5 = TEvent.createWithTeam(U1, 1, TSZ("2020-03-26 08:00", "UTC"), EVT_A, 88);
+        Event e6 = TEvent.createWithTeam(U1, 1, TSZ("2020-04-02 08:00", "UTC"), EVT_A, 71);
+        Event e7 = TEvent.createWithTeam(U5, 2, TSZ("2020-03-25 11:00", "UTC"), EVT_A, 64);
+        Event e8 = TEvent.createWithTeam(U4, 2, TSZ("2020-04-03 08:00", "UTC"), EVT_A, 50);
 
         GameDef gameDef = loadRulesFromResource("rules/challenges-outoforder.yml");
         String ruleId = "CHG000001";
@@ -184,6 +201,16 @@ public class EngineChallengesTest extends OasisEngineTest {
                         U5, 100));
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200324"), ofSortedEntries(U1, 300));
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200325"), ofSortedEntries(U5, 100, U3, 200));
+
+        ChallengeStats stats = new ChallengeStats(dbPool);
+
+        compareStatReqRes("stats/challenges/game-summary-req.json", GameChallengeRequest.class,
+                "stats/challenges/game-summary-res.json", GameChallengesSummary.class,
+                req -> (GameChallengesSummary) stats.getGameChallengesSummary(req));
+
+        compareStatReqRes("stats/challenges/game-summary-custom-req.json", GameChallengeRequest.class,
+                "stats/challenges/game-summary-custom-res.json", GameChallengesSummary.class,
+                req -> (GameChallengesSummary) stats.getGameChallengesSummary(req));
     }
 
     @Test

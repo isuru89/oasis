@@ -29,6 +29,9 @@ import io.github.oasis.core.elements.ElementModule;
 import io.github.oasis.core.elements.ElementParser;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.engine.element.points.stats.PointStats;
 
 import java.util.List;
 
@@ -42,6 +45,13 @@ public class PointsModule extends ElementModule {
     private final List<String> keysSupported = List.of(POINTS);
     private final List<Class<? extends AbstractSink>> sinks = List.of(PointsSink.class);
     private final ElementParser parser = new PointParser();
+
+    @Override
+    public void init(RuntimeContextSupport context) throws OasisException {
+        Db db = context.getDb();
+
+        loadScriptsUnderPackage(db, PointStats.class, Thread.currentThread().getContextClassLoader());
+    }
 
     @Override
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {

@@ -19,6 +19,11 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
+import io.github.oasis.core.services.AbstractStatsApiResponse;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,78 +33,37 @@ import java.util.Map;
 /**
  * @author Isuru Weerarathna
  */
-public class UserPointSummary {
+@Getter
+@Setter
+public class UserPointSummary extends AbstractStatsApiResponse {
 
-    private Integer gameId;
     private Long userId;
 
     private BigDecimal totalPoints;
 
-    private Map<String, StatResults> stats;
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Map<String, StatResults> getStats() {
-        return stats;
-    }
+    private Map<String, StatResults> points;
 
     public void addSummary(String statName, StatResults results) {
-        if (stats == null) {
-            stats = new HashMap<>();
+        if (points == null) {
+            points = new HashMap<>();
         }
-        stats.put(statName, results);
+        points.put(statName, results);
     }
 
-    public BigDecimal getTotalPoints() {
-        return totalPoints;
-    }
-
-    public void setTotalPoints(BigDecimal totalPoints) {
-        this.totalPoints = totalPoints;
-    }
-
+    @Getter
     public static class StatResults {
 
-        private List<PointRecord> records = new ArrayList<>();
+        private final List<PointRecord> records = new ArrayList<>();
 
         public void addPointRecord(String key, BigDecimal value) {
             records.add(new PointRecord(key, value));
         }
-
-        public List<PointRecord> getRecords() {
-            return records;
-        }
     }
 
+    @Getter
+    @AllArgsConstructor
     public static class PointRecord {
-        private String key;
-        private BigDecimal value;
-
-        public PointRecord(String key, BigDecimal value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public BigDecimal getValue() {
-            return value;
-        }
+        private final String key;
+        private final BigDecimal value;
     }
 }

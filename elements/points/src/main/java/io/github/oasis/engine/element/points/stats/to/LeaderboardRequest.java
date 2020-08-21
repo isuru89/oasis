@@ -20,13 +20,19 @@
 package io.github.oasis.engine.element.points.stats.to;
 
 import io.github.oasis.core.model.TimeScope;
+import io.github.oasis.core.services.AbstractStatsApiRequest;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author Isuru Weerarathna
  */
-public class LeaderboardRequest {
+@Getter
+@Setter
+@ToString
+public class LeaderboardRequest extends AbstractStatsApiRequest {
 
-    private Integer gameId;
     private Integer teamId;
 
     private TimeScope timeRange;
@@ -42,59 +48,4 @@ public class LeaderboardRequest {
         return teamId != null;
     }
 
-    public boolean isDescendingOrder() {
-        return descendingOrder;
-    }
-
-    public void setDescendingOrder(boolean descendingOrder) {
-        this.descendingOrder = descendingOrder;
-    }
-
-    public int getOffset() {
-        return offset;
-    }
-
-    public void setOffset(int offset) {
-        this.offset = offset;
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
-    public void setLimit(int limit) {
-        this.limit = limit;
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Integer getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(Integer teamId) {
-        this.teamId = teamId;
-    }
-
-    public TimeScope getTimeRange() {
-        return timeRange;
-    }
-
-    public void setTimeRange(TimeScope timeRange) {
-        this.timeRange = timeRange;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
 }

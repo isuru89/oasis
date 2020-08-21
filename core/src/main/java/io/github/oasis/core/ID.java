@@ -26,6 +26,9 @@ import io.github.oasis.core.utils.Texts;
  */
 public final class ID {
 
+    public static final String ALL_USERS_NAMES = "oasis:users:names";
+    public static final String ALL_TEAMS_NAMES = "oasis:teams:names";
+
     public static String getGameUserPointsSummary(int gameId, long userId) {
         return String.format("g%d:u%d:points", gameId, userId);
     }
@@ -44,10 +47,6 @@ public final class ID {
         } else {
             return String.format("g%d:t%d:leaderboard:%s:%s", gameId, teamId, trait, duration);
         }
-    }
-
-    public static String getGameUserMilestonesSummary(int gameId, long userId) {
-        return String.format("g%d:u%d:milestones", gameId, userId);
     }
 
     public static String getGameUseChallengesSummary(int gameId, long userId) {
@@ -99,23 +98,11 @@ public final class ID {
     }
 
     public static String getUserKeyUnderGameMilestone(long userId) {
-        return String.format("u%d", userId);
+        return String.valueOf(userId);
     }
 
     public static String getPenaltiesUserKeyUnderGameMilestone(long userId) {
         return String.format("u%d:penalties", userId);
-    }
-
-    public static String getUserGameMilestonesKey(int gameId, long userId) {
-        return String.format("u%d:g%d:milestones", userId, gameId);
-    }
-
-    public static String getGameMilestoneKey(int gameId, String milestoneId) {
-        return String.format("g%d:ms:%s", gameId, milestoneId);
-    }
-
-    public static String getGameMilestoneSummaryKey(int gameId, String milestoneId) {
-        return String.format("g%d:ms:%s:summary", gameId, milestoneId);
     }
 
     public static String getUserFirstEventsKey(int gameId, long userId) {

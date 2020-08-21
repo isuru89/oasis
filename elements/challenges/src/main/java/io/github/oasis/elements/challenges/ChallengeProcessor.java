@@ -20,19 +20,19 @@
 package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.ID;
 import io.github.oasis.core.collect.Pair;
+import io.github.oasis.core.collect.Record;
+import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.EventBiValueResolver;
+import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.EventReadWrite;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
-import io.github.oasis.core.elements.EventBiValueResolver;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.ID;
-import io.github.oasis.core.collect.Record;
-import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Numbers;
 
@@ -127,6 +127,10 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
             winnerSet.remove(member);
             return null;
         }
+
+        Mapped map = db.MAP(ID.getGameChallengesKey(event.getGameId()));
+        String winnerCountKey = ID.getGameChallengeSubKey(rule.getId(), WINNERS);
+        map.incrementByOne(winnerCountKey);
 
         String gameChallengeEventsKey = ID.getGameChallengeEventsKey(event.getGameId(), rule.getId());
         db.setValueInMap(gameChallengeEventsKey, member, event.getExternalId());

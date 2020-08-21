@@ -1,7 +1,8 @@
 version: 1
 
 milestones:
-  - name: Milestone-with-Penalties
+  - id: MILE00004
+    name: Milestone-with-Penalties
     description: This is a milestone which counts the penalties too.
     event: event.a
     valueExtractor: e.value

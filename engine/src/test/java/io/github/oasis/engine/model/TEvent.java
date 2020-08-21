@@ -40,6 +40,10 @@ public class TEvent extends EventJson {
     private Map<String, Object> values = new HashMap<>();
 
     public static EventJson createKeyValue(long ts, String eventType, long value) {
+        return createKeyValue(ts, eventType, value, UUID.randomUUID().toString());
+    }
+
+    public static EventJson createKeyValue(long ts, String eventType, long value, String eventId) {
         Map<String, Object> values = new HashMap<>();
         values.put("value", value);
         values.put(Event.EVENT_TYPE, eventType);
@@ -48,7 +52,7 @@ public class TEvent extends EventJson {
         values.put(Event.USER_ID, USER_ID);
         values.put(Event.TEAM_ID, TEAM_ID);
         values.put(Event.SOURCE_ID, SOURCE_ID);
-        values.put(Event.ID, UUID.randomUUID().toString());
+        values.put(Event.ID, eventId);
         return new EventJson(values);
     }
 
@@ -56,6 +60,14 @@ public class TEvent extends EventJson {
         Map<String, Object> values = createKeyValue(ts, eventType, value).getAllFieldValues();
         values.put(Event.USER_ID, user);
         values.put(Event.USER_NAME, String.valueOf(user));
+        return new EventJson(values);
+    }
+
+    public static EventJson createKeyValue(long user, long ts, String eventType, long value, UUID eventId) {
+        Map<String, Object> values = createKeyValue(ts, eventType, value).getAllFieldValues();
+        values.put(Event.USER_ID, user);
+        values.put(Event.USER_NAME, String.valueOf(user));
+        values.put(Event.ID, eventId.toString());
         return new EventJson(values);
     }
 

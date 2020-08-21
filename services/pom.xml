@@ -5,7 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
+        <module>api-core</module>
         <module>events-api</module>
+	    <module>stats-api</module>
     </modules>
 
     <parent>

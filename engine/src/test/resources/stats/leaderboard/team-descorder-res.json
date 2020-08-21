@@ -5,11 +5,13 @@
     {
       "rank": 1,
       "userId": 1,
+      "displayName": "Jakob Floyd",
       "score": 39.0
     },
     {
       "rank": 2,
       "userId": 2,
+      "displayName": "Thierry Hines",
       "score": 65.0
     }
   ]

@@ -20,6 +20,10 @@
 package io.github.oasis.engine.element.points.stats.to;
 
 import io.github.oasis.core.model.TimeScope;
+import io.github.oasis.core.services.AbstractStatsApiRequest;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,114 +31,30 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
-public class UserPointsRequest {
+@Getter
+@Setter
+@ToString
+public class UserPointsRequest extends AbstractStatsApiRequest {
 
-    private Integer gameId;
     private Long userId;
 
     private List<PointsFilterScope> filters;
 
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public List<PointsFilterScope> getFilters() {
-        return filters;
-    }
-
-    public void setFilters(List<PointsFilterScope> filters) {
-        this.filters = filters;
-    }
-
+    @Getter
+    @Setter
     public static class PointsFilterScope {
-
         private String refId;
         private ScopedTypes type;
         private List<String> values;
         private PointRange range;
-
-        public String getRefId() {
-            return refId;
-        }
-
-        public void setRefId(String refId) {
-            this.refId = refId;
-        }
-
-        public ScopedTypes getType() {
-            return type;
-        }
-
-        public void setType(ScopedTypes type) {
-            this.type = type;
-        }
-
-        public List<String> getValues() {
-            return values;
-        }
-
-        public void setValues(List<String> values) {
-            this.values = values;
-        }
-
-        public PointRange getRange() {
-            return range;
-        }
-
-        public void setRange(PointRange range) {
-            this.range = range;
-        }
     }
 
+    @Getter
+    @Setter
     public static class PointRange {
         private TimeScope type;
         private LocalDate from;
         private LocalDate to;
-
-        public PointRange() {
-        }
-
-        public PointRange(TimeScope type, LocalDate from, LocalDate to) {
-            this.type = type;
-            this.from = from;
-            this.to = to;
-        }
-
-        public TimeScope getType() {
-            return type;
-        }
-
-        public void setType(TimeScope type) {
-            this.type = type;
-        }
-
-        public LocalDate getFrom() {
-            return from;
-        }
-
-        public void setFrom(LocalDate from) {
-            this.from = from;
-        }
-
-        public LocalDate getTo() {
-            return to;
-        }
-
-        public void setTo(LocalDate to) {
-            this.to = to;
-        }
     }
 
     public enum ScopedTypes {

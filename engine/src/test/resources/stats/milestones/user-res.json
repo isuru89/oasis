@@ -1,0 +1,17 @@
+{
+  "gameId": 1,
+  "userId": 0,
+  "milestones": {
+    "MILE000001": {
+      "milestoneId": "MILE000001",
+      "currentValue": 461,
+      "currentLevel": 3,
+      "completed": false,
+      "nextLevel": 4,
+      "nextLevelValue": 500,
+      "lastLevelUpdatedAt": 125,
+      "lastCausedEventId": "9b1132ea-0aaa-4724-bf2b-bc128ca57fea",
+      "lastUpdatedAt": 130
+    }
+  }
+}

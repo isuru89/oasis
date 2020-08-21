@@ -1,0 +1,29 @@
+{
+  "gameId": 1,
+  "challenges": {
+    "CHG000001": {
+      "challengeId": "CHG000001",
+      "winnerCount": 4,
+      "latestWinners": [
+        {
+          "userId": 3,
+          "wonAt": 1585123200000
+        },
+        {
+          "userId": 5,
+          "wonAt": 1585134000000
+        },
+        {
+          "userId": 4,
+          "wonAt": 1585209600000
+        }
+      ],
+      "firstWinners": [
+        {
+          "userId": 1,
+          "wonAt": 1585036800000
+        }
+      ]
+    }
+  }
+}

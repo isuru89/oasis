@@ -70,6 +70,11 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
             throw new OasisException(e.getMessage(), e);
         }
 
+        // initialize modules before anything
+        for (ElementModule module : moduleList) {
+            module.init(this);
+        }
+
         parsers = Parsers.from(this);
         processors.init(this);
         sinks.init(this);

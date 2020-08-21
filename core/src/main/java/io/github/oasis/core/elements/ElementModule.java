@@ -21,6 +21,8 @@ package io.github.oasis.core.elements;
 
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
+import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.external.Db;
 
 import java.util.List;
 
@@ -28,6 +30,14 @@ import java.util.List;
  * @author Isuru Weerarathna
  */
 public abstract class ElementModule {
+
+    /**
+     * Called just before engine or service is to be initialized.
+     * @param context running context.
+     * @throws OasisException any exception thrown while loading.
+     */
+    public void init(RuntimeContextSupport context) throws OasisException {
+    }
 
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
         return List.of();
@@ -50,4 +60,16 @@ public abstract class ElementModule {
     public abstract AbstractSink createSink(Class<? extends AbstractSink> sinkReq, RuntimeContextSupport context);
 
     public abstract AbstractProcessor<? extends AbstractRule, ? extends Signal> createProcessor(AbstractRule rule, RuleExecutionContextSupport ruleExecutionContext);
+
+    /**
+     * Loads scripts package under the given class.
+     * @param db db instance to refer.
+     * @param clz clz to derive package.
+     * @param classLoader classloader to load class.
+     * @throws OasisException any exception thrown while loading scripts.
+     */
+    protected void loadScriptsUnderPackage(Db db, Class<?> clz, ClassLoader classLoader) throws OasisException {
+        String pkg = clz.getPackageName().replace('.', '/');
+        db.registerScripts(pkg, classLoader);
+    }
 }

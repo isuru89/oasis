@@ -1,7 +1,8 @@
 version: 1
 
 milestones:
-  - name: Milestone-with-Event-Count
+  - id: MILE00002
+    name: Milestone-with-Event-Count
     description: This is a milestone counting events based on a criteria.
     event: event.a
     valueExtractor: 1

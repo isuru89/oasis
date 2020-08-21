@@ -51,7 +51,7 @@ public class EnginePointsTest extends OasisEngineTest {
     private static final int T2 = 200;
 
     @Test
-    public void testEnginePoints() throws Exception {
+    public void testEnginePoints() {
         Event e1 = TEvent.createKeyValue(U1, TS("2020-03-24 07:15"), EVT_A, 15);
         Event e2 = TEvent.createKeyValue(U2, TS("2020-04-02 08:20"), EVT_A, 83);
         Event e3 = TEvent.createKeyValue(U1, TS("2020-04-03 08:45"), EVT_A, 74);
@@ -161,9 +161,7 @@ public class EnginePointsTest extends OasisEngineTest {
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200402"), ofSortedEntries(U2, 33));
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200403"), ofSortedEntries(U1, 24));
 
-        PointStats stats = new PointStats(dbPool);
-        String pkg = PointStats.class.getPackageName().replace('.', '/');
-        dbPool.registerScripts(pkg, Thread.currentThread().getContextClassLoader());
+        PointStats stats = new PointStats(dbPool, contextHelperSupport);
 
         compareStatReqRes("stats/points/points01-req.json", UserPointsRequest.class,
                 "stats/points/points01-res.json", UserPointSummary.class,
@@ -228,7 +226,7 @@ public class EnginePointsTest extends OasisEngineTest {
         assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20200402"), ofSortedEntries(U1, 11));
         assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20200403"), ofSortedEntries(U2, 9));
 
-        PointStats stats = new PointStats(dbPool);
+        PointStats stats = new PointStats(dbPool, contextHelperSupport);
 
         compareStatReqRes("stats/leaderboard/team-basic-req.json", LeaderboardRequest.class,
                 "stats/leaderboard/team-basic-res.json", LeaderboardSummary.class,
@@ -314,7 +312,7 @@ public class EnginePointsTest extends OasisEngineTest {
                         "team:"+tid+":D20200702", "33"
                 ));
 
-        PointStats stats = new PointStats(dbPool);
+        PointStats stats = new PointStats(dbPool, contextHelperSupport);
 
         compareStatReqRes("stats/leaderboard/game-all-req.json", LeaderboardRequest.class,
                 "stats/leaderboard/game-all-res.json", LeaderboardSummary.class,

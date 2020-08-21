@@ -19,6 +19,10 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
+import io.github.oasis.core.services.AbstractStatsApiResponse;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +30,10 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
-public class LeaderboardSummary {
+@Getter
+@Setter
+public class LeaderboardSummary extends AbstractStatsApiResponse {
 
-    private Integer gameId;
     private Integer teamId;
 
     private List<LeaderboardRecord> records = new ArrayList<>();
@@ -37,64 +42,20 @@ public class LeaderboardSummary {
         records.add(record);
     }
 
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Integer getTeamId() {
-        return teamId;
-    }
-
-    public void setTeamId(Integer teamId) {
-        this.teamId = teamId;
-    }
-
-    public List<LeaderboardRecord> getRecords() {
-        return records;
-    }
-
-    public void setRecords(List<LeaderboardRecord> records) {
-        this.records = records;
-    }
-
+    @Getter
+    @Setter
     public static class LeaderboardRecord {
 
         private int rank;
         private Long userId;
+        private String displayName;
         private BigDecimal score;
 
-        public LeaderboardRecord(int rank, Long userId, BigDecimal score) {
+        public LeaderboardRecord(int rank, Long userId, String displayName, BigDecimal score) {
             this.rank = rank;
             this.userId = userId;
             this.score = score;
-        }
-
-        public int getRank() {
-            return rank;
-        }
-
-        public void setRank(int rank) {
-            this.rank = rank;
-        }
-
-        public Long getUserId() {
-            return userId;
-        }
-
-        public void setUserId(Long userId) {
-            this.userId = userId;
-        }
-
-        public BigDecimal getScore() {
-            return score;
-        }
-
-        public void setScore(BigDecimal score) {
-            this.score = score;
+            this.displayName = displayName;
         }
     }
 

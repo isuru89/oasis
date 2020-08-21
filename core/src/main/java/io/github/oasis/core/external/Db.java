@@ -19,8 +19,9 @@
 
 package io.github.oasis.core.external;
 
+import io.github.oasis.core.exception.OasisException;
+
 import java.io.Closeable;
-import java.io.IOException;
 
 /**
  * @author Isuru Weerarathna
@@ -29,7 +30,7 @@ public interface Db extends Closeable {
 
     void init();
 
-   void registerScripts(String baseClzPath, ClassLoader classLoader) throws IOException;
+   void registerScripts(String baseClzPath, ClassLoader classLoader) throws OasisException;
 
     DbContext createContext();
 

@@ -74,6 +74,10 @@ public class Utils {
         return collection != null && !collection.isEmpty();
     }
 
+    public static boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
+    }
+
     @SuppressWarnings("unchecked")
     public static <T extends Serializable> T fromSerializedContent(byte[] data) {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
