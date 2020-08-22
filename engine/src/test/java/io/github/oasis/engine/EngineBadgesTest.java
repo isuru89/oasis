@@ -22,7 +22,9 @@ package io.github.oasis.engine;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.GameDef;
+import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.elements.badges.stats.BadgeStats;
 import io.github.oasis.elements.badges.stats.to.UserBadgeLog;
@@ -32,7 +34,10 @@ import io.github.oasis.elements.badges.stats.to.UserBadgeSummary;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -40,6 +45,26 @@ import java.util.List;
 public class EngineBadgesTest extends OasisEngineTest {
 
     private static final String UTC = "UTC";
+
+    @Override
+    public void setupDbBefore(DbContext db) throws IOException {
+        super.setupDbBefore(db);
+
+        String attrId = ID.getGameAttributesInfoKey(TEvent.GAME_ID);
+        List<AttributeInfo> attributeInfos = Arrays.asList(
+                new AttributeInfo(10, "Bronze", 100),
+                new AttributeInfo(20, "Silver", 50),
+                new AttributeInfo(30, "Gold", 20),
+                new AttributeInfo(40, "Platinum", 10)
+        );
+
+        for (AttributeInfo attr : attributeInfos) {
+            db.setValueInMap(attrId, attr.getId() + ":name", attr.getName());
+            db.setValueInMap(attrId, attr.getId() + ":order", String.valueOf(attr.getOrder()));
+        }
+        String allAttrs = attributeInfos.stream().map(attr -> String.valueOf(attr.getId())).collect(Collectors.joining(","));
+        db.setValueInMap(attrId, "attributes", allAttrs);
+    }
 
     @Test
     public void testEngineBadges() {
@@ -101,7 +126,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         rid + ":20:" + e1.getTimestamp(), e5.getTimestamp()
                 ));
 
-        BadgeStats stats = new BadgeStats(dbPool);
+        BadgeStats stats = new BadgeStats(dbPool, contextHelperSupport);
 
         compareStatReqRes("stats/badges/summary-attr-req.json", UserBadgeRequest.class,
                 "stats/badges/summary-attr-res.json", UserBadgeSummary.class,

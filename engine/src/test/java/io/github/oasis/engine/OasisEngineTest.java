@@ -119,7 +119,13 @@ public class OasisEngineTest {
             db.setValueInMap(ID.ALL_USERS_NAMES, "3", "Ray Glenn");
             db.setValueInMap(ID.ALL_USERS_NAMES, "4", "Lilia Stewart");
             db.setValueInMap(ID.ALL_USERS_NAMES, "5", "Archer Roberts");
+
+            setupDbBefore(db);
         }
+    }
+
+    public void setupDbBefore(DbContext db) throws IOException {
+
     }
 
     @AfterEach
@@ -156,8 +162,11 @@ public class OasisEngineTest {
     protected List<AbstractRule> submitRules(OasisEngine engine, int gameId, GameDef gameDef) {
         List<PersistedDef> ruleDefinitions = gameDef.getRuleDefinitions();
         List<AbstractRule> rules = new ArrayList<>();
+        DbContext db = dbPool.createContext();
         for (PersistedDef def : ruleDefinitions) {
             AbstractRule rule = engine.getContext().getParsers().parseToRule(def);
+            db.setValueInMap(ID.getBasicElementDefKeyForGame(gameId), rule.getId() + ":name", rule.getName());
+            db.setValueInMap(ID.getBasicElementDefKeyForGame(gameId), rule.getId() + ":description", rule.getDescription());
             engine.submit(Messages.createRuleAddMessage(gameId, rule, null));
             rules.add(rule);
         }

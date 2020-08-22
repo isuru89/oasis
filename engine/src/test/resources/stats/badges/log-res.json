@@ -1,18 +1,38 @@
 {
-  "gameId": 1,
   "userId": 0,
   "log": [
     {
       "badgeId": "BDG00001",
+      "badgeMetadata": {
+        "id": "BDG00001",
+        "name": "test.badge.rule",
+        "description": "Awards badge if value is >= 50 for streaks"
+      },
       "attribute": 10,
+      "attributeMetadata": {
+        "id": 10,
+        "name": "Bronze",
+        "order": 100
+      },
       "streakStartedAt": 1584962100000,
       "awardedAt": 1585048500000
     },
     {
       "badgeId": "BDG00001",
+      "badgeMetadata": {
+        "id": "BDG00001",
+        "name": "test.badge.rule",
+        "description": "Awards badge if value is >= 50 for streaks"
+      },
       "attribute": 20,
+      "attributeMetadata": {
+        "id": 20,
+        "name": "Silver",
+        "order": 50
+      },
       "streakStartedAt": 1584962100000,
       "awardedAt": 1585048500000
     }
-  ]
+  ],
+  "gameId": 1
 }

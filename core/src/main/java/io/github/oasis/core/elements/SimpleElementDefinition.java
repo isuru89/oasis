@@ -17,22 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges.stats.to;
+package io.github.oasis.core.elements;
 
-import io.github.oasis.core.services.AbstractStatsApiRequest;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+
+import java.io.Serializable;
 
 /**
+ * Represents a lightweight element definitions with basic metadata set.
+ *
  * @author Isuru Weerarathna
  */
 @Getter
 @Setter
-public class UserBadgeLogRequest extends AbstractStatsApiRequest {
+@AllArgsConstructor
+@ToString
+public class SimpleElementDefinition implements Serializable {
 
-    private Long userId;
-
-    private Long timeFrom;
-    private Long timeTo;
+    private String id;
+    private String name;
+    private String description;
 
 }

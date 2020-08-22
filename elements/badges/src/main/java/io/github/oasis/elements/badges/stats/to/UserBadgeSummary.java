@@ -19,19 +19,27 @@
 
 package io.github.oasis.elements.badges.stats.to;
 
+import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.services.AbstractStatsApiResponse;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserBadgeSummary {
+@Getter
+@Setter
+public class UserBadgeSummary extends AbstractStatsApiResponse {
 
-    private Integer gameId;
     private Long userId;
 
     private int totalBadges;
 
+    // Rule wise badge summary stored here.
     private Map<String, BaseSummaryStat> stats;
 
     public void addSummaryStat(String attributeKey, BaseSummaryStat stat) {
@@ -41,7 +49,7 @@ public class UserBadgeSummary {
         stats.put(attributeKey, stat);
     }
 
-    public void addRuleSummary(String ruleId, int totalCount, Long lastWonAt) {
+    public RuleSummaryStat addRuleSummary(String ruleId, int totalCount, Long lastWonAt) {
         if (stats == null) {
             stats = new HashMap<>();
         }
@@ -50,15 +58,17 @@ public class UserBadgeSummary {
             RuleSummaryStat ruleSummaryStat = (RuleSummaryStat) stats.get(ruleId);
             ruleSummaryStat.setCount(totalCount);
             ruleSummaryStat.setLastWonAt(lastWonAt);
+            return ruleSummaryStat;
         } else {
             RuleSummaryStat ruleSummaryStat = new RuleSummaryStat();
             ruleSummaryStat.setCount(totalCount);
             ruleSummaryStat.setLastWonAt(lastWonAt);
             stats.put(ruleId, ruleSummaryStat);
+            return ruleSummaryStat;
         }
     }
 
-    public void addRuleStat(String ruleId, int attribute, AttributeSummaryStat stat) {
+    public RuleSummaryStat addRuleStat(String ruleId, int attribute, AttributeSummaryStat stat) {
         if (stats == null) {
             stats = new HashMap<>();
         }
@@ -66,45 +76,17 @@ public class UserBadgeSummary {
         if (stats.containsKey(ruleId)) {
             RuleSummaryStat ruleSummaryStat = (RuleSummaryStat) stats.get(ruleId);
             ruleSummaryStat.addAttributeStat(String.valueOf(attribute), stat);
+            return ruleSummaryStat;
         } else {
             RuleSummaryStat ruleSummaryStat = new RuleSummaryStat();
             ruleSummaryStat.addAttributeStat(String.valueOf(attribute), stat);
             stats.put(ruleId, ruleSummaryStat);
+            return ruleSummaryStat;
         }
     }
 
-    public int getTotalBadges() {
-        return totalBadges;
-    }
-
-    public void setTotalBadges(int totalBadges) {
-        this.totalBadges = totalBadges;
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Map<String, BaseSummaryStat> getStats() {
-        return stats;
-    }
-
-    public void setStats(Map<String, BaseSummaryStat> stats) {
-        this.stats = stats;
-    }
-
+    @Getter
+    @Setter
     public static class BaseSummaryStat {
         private int count;
         private Long lastWonAt;
@@ -116,32 +98,15 @@ public class UserBadgeSummary {
             this.count = count;
             this.lastWonAt = lastWonAt;
         }
-
-        public int getCount() {
-            return count;
-        }
-
-        public void setCount(int count) {
-            this.count = count;
-        }
-
-        public Long getLastWonAt() {
-            return lastWonAt;
-        }
-
-        public void setLastWonAt(Long lastWonAt) {
-            this.lastWonAt = lastWonAt;
-        }
     }
 
+    @Getter
+    @Setter
     public static class RuleSummaryStat extends BaseSummaryStat {
+        private SimpleElementDefinition badgeMetadata;
         private Map<String, AttributeSummaryStat> attributes;
 
         public RuleSummaryStat() {
-        }
-
-        public RuleSummaryStat(int count, Long lastWonAt) {
-            super(count, lastWonAt);
         }
 
         public void addAttributeStat(String attrKey, AttributeSummaryStat stat) {
@@ -150,30 +115,17 @@ public class UserBadgeSummary {
             }
             attributes.put(attrKey, stat);
         }
-
-        public Map<String, AttributeSummaryStat> getAttributes() {
-            return attributes;
-        }
     }
 
+    @Getter
     public static class AttributeSummaryStat extends BaseSummaryStat {
-        private int attribute;
+        private final int attribute;
+        private final AttributeInfo attributeMetadata;
 
-        public AttributeSummaryStat() {
-            super();
-        }
-
-        public AttributeSummaryStat(int attribute, int count, Long lastWonAt) {
+        public AttributeSummaryStat(int attribute, AttributeInfo attributeInfo, int count, Long lastWonAt) {
             super(count, lastWonAt);
             this.attribute = attribute;
-        }
-
-        public int getAttribute() {
-            return attribute;
-        }
-
-        public void setAttribute(int attribute) {
-            this.attribute = attribute;
+            this.attributeMetadata = attributeInfo;
         }
     }
 

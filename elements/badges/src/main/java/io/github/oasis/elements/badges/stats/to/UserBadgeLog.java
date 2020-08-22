@@ -19,45 +19,32 @@
 
 package io.github.oasis.elements.badges.stats.to;
 
+import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.services.AbstractAdminApiResponse;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserBadgeLog {
+@Getter
+@Setter
+public class UserBadgeLog extends AbstractAdminApiResponse {
 
-    private Integer gameId;
     private Long userId;
 
     private List<BadgeLogRecord> log;
 
-    public List<BadgeLogRecord> getLog() {
-        return log;
-    }
-
-    public void setLog(List<BadgeLogRecord> log) {
-        this.log = log;
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
+    @Getter
+    @Setter
     public static class BadgeLogRecord {
         private String badgeId;
+        private SimpleElementDefinition badgeMetadata;
         private int attribute;
+        private AttributeInfo attributeMetadata;
         private long streakStartedAt;
         private String causedEventId;
         private long awardedAt;
@@ -73,46 +60,6 @@ public class UserBadgeLog {
             this.badgeId = badgeId;
             this.attribute = attribute;
             this.streakStartedAt = streakStartedAt;
-            this.awardedAt = awardedAt;
-        }
-
-        public String getBadgeId() {
-            return badgeId;
-        }
-
-        public void setBadgeId(String badgeId) {
-            this.badgeId = badgeId;
-        }
-
-        public int getAttribute() {
-            return attribute;
-        }
-
-        public void setAttribute(int attribute) {
-            this.attribute = attribute;
-        }
-
-        public long getStreakStartedAt() {
-            return streakStartedAt;
-        }
-
-        public void setStreakStartedAt(long streakStartedAt) {
-            this.streakStartedAt = streakStartedAt;
-        }
-
-        public String getCausedEventId() {
-            return causedEventId;
-        }
-
-        public void setCausedEventId(String causedEventId) {
-            this.causedEventId = causedEventId;
-        }
-
-        public long getAwardedAt() {
-            return awardedAt;
-        }
-
-        public void setAwardedAt(long awardedAt) {
             this.awardedAt = awardedAt;
         }
     }

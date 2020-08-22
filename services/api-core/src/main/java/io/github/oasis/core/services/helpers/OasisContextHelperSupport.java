@@ -21,6 +21,8 @@ package io.github.oasis.core.services.helpers;
 
 import io.github.oasis.core.Team;
 import io.github.oasis.core.User;
+import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
 
 import java.util.Collection;
@@ -43,4 +45,7 @@ public interface OasisContextHelperSupport {
     Team readTeam(String teamId) throws OasisException;
     Team readTeam(int teamId) throws OasisException;
 
+    SimpleElementDefinition readElementDefinition(int gameId, String id) throws OasisException;
+    Map<String, SimpleElementDefinition> readElementDefinitions(int gameId, Collection<String> ids) throws OasisException;
+    Map<Integer, AttributeInfo> readAttributeInfo(int gameId) throws OasisException;
 }
