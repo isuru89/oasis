@@ -19,14 +19,18 @@
 
 package io.github.oasis.elements.challenges.stats.to;
 
+import io.github.oasis.core.services.AbstractStatsApiRequest;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
  */
-public class GameChallengeRequest {
-
-    private Integer gameId;
+@Getter
+@Setter
+public class GameChallengeRequest extends AbstractStatsApiRequest {
 
     private Set<String> challengeIds;
 
@@ -37,53 +41,5 @@ public class GameChallengeRequest {
 
     public boolean isCustomRange() {
         return rankStart != null && rankEnd != null;
-    }
-
-    public Integer getRankStart() {
-        return rankStart;
-    }
-
-    public void setRankStart(Integer rankStart) {
-        this.rankStart = rankStart;
-    }
-
-    public Integer getRankEnd() {
-        return rankEnd;
-    }
-
-    public void setRankEnd(Integer rankEnd) {
-        this.rankEnd = rankEnd;
-    }
-
-    public Integer getLatestWinnerCount() {
-        return latestWinnerCount;
-    }
-
-    public void setLatestWinnerCount(Integer latestWinnerCount) {
-        this.latestWinnerCount = latestWinnerCount;
-    }
-
-    public Integer getFirstWinnerCount() {
-        return firstWinnerCount;
-    }
-
-    public void setFirstWinnerCount(Integer firstWinnerCount) {
-        this.firstWinnerCount = firstWinnerCount;
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Set<String> getChallengeIds() {
-        return challengeIds;
-    }
-
-    public void setChallengeIds(Set<String> challengeIds) {
-        this.challengeIds = challengeIds;
     }
 }

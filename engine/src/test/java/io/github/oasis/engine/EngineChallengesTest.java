@@ -152,7 +152,7 @@ public class EngineChallengesTest extends OasisEngineTest {
                         "team:1", score));
 
 
-        ChallengeStats stats = new ChallengeStats(dbPool);
+        ChallengeStats stats = new ChallengeStats(dbPool, contextHelperSupport);
 
         compareStatReqRes("stats/challenges/user-log-req.json", UserChallengeRequest.class,
                 "stats/challenges/user-log-res.json", UserChallengesLog.class,
@@ -202,7 +202,7 @@ public class EngineChallengesTest extends OasisEngineTest {
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200324"), ofSortedEntries(U1, 300));
         assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200325"), ofSortedEntries(U5, 100, U3, 200));
 
-        ChallengeStats stats = new ChallengeStats(dbPool);
+        ChallengeStats stats = new ChallengeStats(dbPool, contextHelperSupport);
 
         compareStatReqRes("stats/challenges/game-summary-req.json", GameChallengeRequest.class,
                 "stats/challenges/game-summary-res.json", GameChallengesSummary.class,

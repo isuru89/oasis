@@ -17,35 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.elements.challenges.stats.to;
+package io.github.oasis.elements.challenges.stats;
 
-import io.github.oasis.core.services.AbstractStatsApiRequest;
-import lombok.Getter;
-import lombok.Setter;
+import io.github.oasis.core.services.AbstractAdminApiService;
+import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.OasisServiceApiFactory;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class UserChallengeRequest extends AbstractStatsApiRequest {
+public class ChallengeServiceApiFactory extends OasisServiceApiFactory {
 
-    private Long userId;
+    private final List<Class<? extends AbstractStatsApiService>> statsApi = List.of(ChallengeStats.class);
 
-    private Long startTime;
-    private Long endTime;
-
-    private boolean descendingOrder = true;
-
-    private Integer offset;
-    private Integer limit;
-
-    public boolean isBasedOnTimeRange() {
-        return startTime != null && endTime != null;
+    @Override
+    public List<Class<? extends AbstractStatsApiService>> getStatsApiServices() {
+        return statsApi;
     }
 
-    public boolean isBasedOnRanking() {
-        return offset != null && limit != null;
+    @Override
+    public List<Class<? extends AbstractAdminApiService>> getAdminApiServices() {
+        return null;
     }
-
 }
