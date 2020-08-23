@@ -1,9 +1,14 @@
 {
-  "gameId": 1,
   "userId": 0,
+  "gameId": 1,
   "milestones": {
     "MILE000001": {
       "milestoneId": "MILE000001",
+      "milestoneMetadata": {
+        "id": "MILE000001",
+        "name": "Milestone-Basic",
+        "description": "This is a basic milestone which accumulates using event values."
+      },
       "currentValue": 461,
       "currentLevel": 3,
       "completed": false,

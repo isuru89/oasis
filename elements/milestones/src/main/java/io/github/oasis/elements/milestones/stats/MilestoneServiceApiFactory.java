@@ -17,38 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.elements.milestones.stats.to;
+package io.github.oasis.elements.milestones.stats;
 
-import io.github.oasis.core.services.AbstractStatsApiRequest;
-import io.github.oasis.core.utils.Texts;
-import io.github.oasis.core.utils.Utils;
-import lombok.Getter;
-import lombok.Setter;
+import io.github.oasis.core.services.AbstractAdminApiService;
+import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.OasisServiceApiFactory;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class GameMilestoneRequest extends AbstractStatsApiRequest {
+public class MilestoneServiceApiFactory extends OasisServiceApiFactory {
 
-    // summary related attributes
-    private Set<String> milestoneIds;
-    private Set<Integer> teamIds;
-    private Set<Integer> attributeIds;
+    private final List<Class<? extends AbstractStatsApiService>> statApis = List.of(MilestoneStats.class);
 
-    // range related attributes
-    private String milestoneId;
-    private Set<Long> userIds;
-
-    public boolean hasSummaryDetails() {
-        return Utils.isNotEmpty(milestoneIds) && Utils.isNotEmpty(attributeIds);
+    @Override
+    public List<Class<? extends AbstractStatsApiService>> getStatsApiServices() {
+        return statApis;
     }
 
-    public boolean isMultiUserRequest() {
-        return Texts.isNotEmpty(milestoneId) && Utils.isNotEmpty(userIds);
+    @Override
+    public List<Class<? extends AbstractAdminApiService>> getAdminApiServices() {
+        return null;
     }
-
 }

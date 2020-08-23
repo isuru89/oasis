@@ -19,9 +19,16 @@
 
 package io.github.oasis.elements.milestones.stats;
 
+import io.github.oasis.core.User;
+import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.annotations.OasisQueryService;
+import io.github.oasis.core.services.annotations.OasisStatEndPoint;
+import io.github.oasis.core.services.annotations.QueryPayload;
+import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.elements.milestones.MilestoneIDs;
 import io.github.oasis.elements.milestones.stats.to.GameMilestoneRequest;
@@ -41,25 +48,27 @@ import static io.github.oasis.core.utils.Constants.COLON;
 /**
  * @author Isuru Weerarathna
  */
-public class MilestoneStats {
+@OasisQueryService
+public class MilestoneStats extends AbstractStatsApiService {
 
     public static final String ZMRANKSCORE = "O.ZMRANKSCORE";
 
-    private final Db dbPool;
-
-    public MilestoneStats(Db dbPool) {
-        this.dbPool = dbPool;
+    public MilestoneStats(Db dbPool, OasisContextHelperSupport contextSupport) {
+        super(dbPool, contextSupport);
     }
 
+    @OasisStatEndPoint(path = "/elements/milestones/game")
     @SuppressWarnings("unchecked")
-    public Object getGameMilestoneSummary(GameMilestoneRequest request) throws Exception {
-        try (DbContext db = dbPool.createContext()) {
+    public Object getGameMilestoneSummary(@QueryPayload GameMilestoneRequest request) throws Exception {
+        try (DbContext db = getDbPool().createContext()) {
 
             GameMilestoneResponse response = new GameMilestoneResponse();
 
             if (request.hasSummaryDetails()) {
                 List<String> subKeys = new ArrayList<>();
                 Map<String, GameMilestoneResponse.MilestoneSummary> summaryMap = new HashMap<>();
+
+                Map<String, SimpleElementDefinition> milestoneDefs = getContextHelper().readElementDefinitions(request.getGameId(), request.getMilestoneIds());
 
                 for (String milestoneId : request.getMilestoneIds()) {
                     String mainKey = MilestoneIDs.getGameMilestoneSummaryKey(request.getGameId(), milestoneId);
@@ -72,6 +81,7 @@ public class MilestoneStats {
 
                     GameMilestoneResponse.MilestoneSummary summary = new GameMilestoneResponse.MilestoneSummary();
                     summary.setMilestoneId(milestoneId);
+                    summary.setMilestoneMetadata(milestoneDefs.get(milestoneId));
                     Map<String, Long> allCounts = new HashMap<>();
                     Map<String, Map<String, Long>> byTeamCounts = new HashMap<>();
 
@@ -101,11 +111,14 @@ public class MilestoneStats {
                 args.addAll(request.getUserIds().stream().map(String::valueOf).collect(Collectors.toList()));
 
                 List<Object> values = (List<Object>) db.runScript(ZMRANKSCORE, args.size(), args.toArray(new String[0]));
+                Map<Long, User> userMap = getContextHelper().readUsersByIds(request.getUserIds());
+
                 List<UserMilestoneRecord> records = new ArrayList<>();
                 for (int i = 0; i < values.size(); i += 2) {
                     long userId = Numbers.asLong(args.get(i / 2 + 1));
                     if (values.get(i) != null) {
                         records.add(new UserMilestoneRecord(userId,
+                                userMap.get(userId),
                                 Numbers.asLong((Long) values.get(i)) + 1,
                                 Numbers.asDecimal((String) values.get(i + 1)))
                         );
@@ -119,13 +132,16 @@ public class MilestoneStats {
         }
     }
 
-    public Object getUserMilestoneSummary(UserMilestoneRequest request) throws Exception {
-        try (DbContext db = dbPool.createContext()) {
+    @OasisStatEndPoint(path = "/elements/milestones/user/summary")
+    public Object getUserMilestoneSummary(@QueryPayload UserMilestoneRequest request) throws Exception {
+        try (DbContext db = getDbPool().createContext()) {
 
             String key = MilestoneIDs.getGameUserMilestonesSummary(request.getGameId(), request.getUserId());
             Mapped milestoneDetails = db.MAP(key);
 
             Map<String, UserMilestoneSummary.MilestoneSummary> milestoneSummaryMap = new HashMap<>();
+
+            Map<String, SimpleElementDefinition> milestoneDefs = getContextHelper().readElementDefinitions(request.getGameId(), request.getMilestoneIds());
 
             for (String milestoneId : request.getMilestoneIds()) {
                 String[] subKeys = new String[]{
@@ -146,6 +162,7 @@ public class MilestoneStats {
 
                 UserMilestoneSummary.MilestoneSummary milestoneSummary = new UserMilestoneSummary.MilestoneSummary();
                 milestoneSummary.setMilestoneId(milestoneId);
+                milestoneSummary.setMilestoneMetadata(milestoneDefs.get(milestoneId));
                 milestoneSummary.setCurrentValue(Numbers.asDecimal(values.get(0)));
                 milestoneSummary.setCurrentLevel(Numbers.asInt(values.get(1)));
                 milestoneSummary.setCompleted(Numbers.asInt(values.get(2)) > 0);

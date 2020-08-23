@@ -19,45 +19,30 @@
 
 package io.github.oasis.elements.milestones.stats.to;
 
+import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.services.AbstractStatsApiResponse;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserMilestoneSummary {
+@Getter
+@Setter
+public class UserMilestoneSummary extends AbstractStatsApiResponse {
 
-    private Integer gameId;
     private Long userId;
 
     private Map<String, MilestoneSummary> milestones;
 
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Map<String, MilestoneSummary> getMilestones() {
-        return milestones;
-    }
-
-    public void setMilestones(Map<String, MilestoneSummary> milestones) {
-        this.milestones = milestones;
-    }
-
+    @Getter
+    @Setter
     public static class MilestoneSummary {
         private String milestoneId;
+        private SimpleElementDefinition milestoneMetadata;
         private BigDecimal currentValue;
         private int currentLevel;
         private boolean completed;
@@ -66,78 +51,6 @@ public class UserMilestoneSummary {
         private long lastLevelUpdatedAt;
         private String lastCausedEventId;
         private long lastUpdatedAt;
-
-        public BigDecimal getCurrentValue() {
-            return currentValue;
-        }
-
-        public void setCurrentValue(BigDecimal currentValue) {
-            this.currentValue = currentValue;
-        }
-
-        public String getMilestoneId() {
-            return milestoneId;
-        }
-
-        public void setMilestoneId(String milestoneId) {
-            this.milestoneId = milestoneId;
-        }
-
-        public int getCurrentLevel() {
-            return currentLevel;
-        }
-
-        public void setCurrentLevel(int currentLevel) {
-            this.currentLevel = currentLevel;
-        }
-
-        public boolean isCompleted() {
-            return completed;
-        }
-
-        public void setCompleted(boolean completed) {
-            this.completed = completed;
-        }
-
-        public int getNextLevel() {
-            return nextLevel;
-        }
-
-        public void setNextLevel(int nextLevel) {
-            this.nextLevel = nextLevel;
-        }
-
-        public BigDecimal getNextLevelValue() {
-            return nextLevelValue;
-        }
-
-        public void setNextLevelValue(BigDecimal nextLevelValue) {
-            this.nextLevelValue = nextLevelValue;
-        }
-
-        public long getLastLevelUpdatedAt() {
-            return lastLevelUpdatedAt;
-        }
-
-        public void setLastLevelUpdatedAt(long lastLevelUpdatedAt) {
-            this.lastLevelUpdatedAt = lastLevelUpdatedAt;
-        }
-
-        public long getLastUpdatedAt() {
-            return lastUpdatedAt;
-        }
-
-        public void setLastUpdatedAt(long lastUpdatedAt) {
-            this.lastUpdatedAt = lastUpdatedAt;
-        }
-
-        public String getLastCausedEventId() {
-            return lastCausedEventId;
-        }
-
-        public void setLastCausedEventId(String lastCausedEventId) {
-            this.lastCausedEventId = lastCausedEventId;
-        }
     }
 
 }

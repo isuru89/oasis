@@ -3,16 +3,28 @@
   "records": [
     {
       "userId": 1,
+      "userMetadata": {
+        "userId": 1,
+        "displayName": "Jakob Floyd"
+      },
       "rank": 3,
       "score": 98
     },
     {
       "userId": 2,
+      "userMetadata": {
+        "userId": 2,
+        "displayName": "Thierry Hines"
+      },
       "rank": 1,
       "score": 84
     },
     {
       "userId": 3,
+      "userMetadata": {
+        "userId": 3,
+        "displayName": "Ray Glenn"
+      },
       "rank": 4,
       "score": 134
     }
