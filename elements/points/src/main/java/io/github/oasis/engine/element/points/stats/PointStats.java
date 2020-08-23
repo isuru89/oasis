@@ -143,7 +143,7 @@ public class PointStats extends AbstractStatsApiService {
                 summary.addRecord(new LeaderboardSummary.LeaderboardRecord(
                         request.getOffset() + i,
                         Long.parseLong(record.getMember()),
-                        userNameMap.get(record.getMember()).getDisplayName(),
+                        userNameMap.get(record.getMember()),
                         BigDecimal.valueOf(record.getScore())));
             }
 
