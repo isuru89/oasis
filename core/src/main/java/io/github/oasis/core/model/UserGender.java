@@ -17,23 +17,15 @@
  * under the License.
  */
 
-package io.github.oasis.core;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.io.Serializable;
+package io.github.oasis.core.model;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-@AllArgsConstructor
-public class User implements Serializable {
+public enum UserGender {
 
-    private long userId;
-    private String displayName;
+    MALE,
+    FEMALE,
+    UNKNOWN
 
 }

@@ -17,19 +17,34 @@
  * under the License.
  */
 
-package io.github.oasis.elements.milestones.stats;
+package io.github.oasis.core.services.api.controllers.admin;
 
-import io.github.oasis.core.services.OasisServiceApiFactory;
-import io.github.oasis.core.services.ServiceRegistrar;
-
+import io.github.oasis.core.services.api.controllers.AbstractController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Isuru Weerarathna
  */
-public class MilestoneServiceApiFactory extends OasisServiceApiFactory {
+@RestController
+@RequestMapping(
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
+public class UserController extends AbstractController {
 
-    @Override
-    public void initialize(ServiceRegistrar registrar) {
-        registrar.registerStatsService(MilestoneStats.class);
+    void registerUser() {
     }
+
+    void readUserProfile() {}
+    void browseUsers() {}
+    void updateUser() {}
+    void deactivateUser() {}
+
+    void addTeam() {}
+    void updateTeam() {}
+
+    void addUserToTeam() {}
+    void addUsersToTeam() {}
 }

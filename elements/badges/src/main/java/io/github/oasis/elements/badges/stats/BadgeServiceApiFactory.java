@@ -19,26 +19,16 @@
 
 package io.github.oasis.elements.badges.stats;
 
-import io.github.oasis.core.services.AbstractAdminApiService;
-import io.github.oasis.core.services.AbstractStatsApiService;
 import io.github.oasis.core.services.OasisServiceApiFactory;
-
-import java.util.List;
+import io.github.oasis.core.services.ServiceRegistrar;
 
 /**
  * @author Isuru Weerarathna
  */
 public class BadgeServiceApiFactory extends OasisServiceApiFactory {
 
-    private final List<Class<? extends AbstractStatsApiService>> statApis = List.of(BadgeStats.class);
-
     @Override
-    public List<Class<? extends AbstractStatsApiService>> getStatsApiServices() {
-        return statApis;
-    }
-
-    @Override
-    public List<Class<? extends AbstractAdminApiService>> getAdminApiServices() {
-        return null;
+    public void initialize(ServiceRegistrar registrar) {
+        registrar.registerStatsService(BadgeStats.class);
     }
 }

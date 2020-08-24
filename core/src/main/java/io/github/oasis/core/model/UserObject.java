@@ -17,19 +17,26 @@
  * under the License.
  */
 
-package io.github.oasis.elements.milestones.stats;
+package io.github.oasis.core.model;
 
-import io.github.oasis.core.services.OasisServiceApiFactory;
-import io.github.oasis.core.services.ServiceRegistrar;
+import io.github.oasis.core.UserMetadata;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDate;
 
 /**
  * @author Isuru Weerarathna
  */
-public class MilestoneServiceApiFactory extends OasisServiceApiFactory {
+@Getter
+@Setter
+public class UserObject extends UserMetadata {
 
-    @Override
-    public void initialize(ServiceRegistrar registrar) {
-        registrar.registerStatsService(MilestoneStats.class);
+    private String email;
+    private LocalDate birthday;
+    private UserGender gender;
+
+    public UserObject(long userId, String displayName) {
+        super(userId, displayName);
     }
 }

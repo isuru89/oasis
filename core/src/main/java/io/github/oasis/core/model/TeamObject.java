@@ -17,19 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.elements.milestones.stats;
+package io.github.oasis.core.model;
 
-import io.github.oasis.core.services.OasisServiceApiFactory;
-import io.github.oasis.core.services.ServiceRegistrar;
-
+import io.github.oasis.core.TeamMetadata;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Isuru Weerarathna
  */
-public class MilestoneServiceApiFactory extends OasisServiceApiFactory {
+@Getter
+@Setter
+public class TeamObject extends TeamMetadata {
 
-    @Override
-    public void initialize(ServiceRegistrar registrar) {
-        registrar.registerStatsService(MilestoneStats.class);
+    private String avatarUrl;
+
+    public TeamObject(int teamId, String name) {
+        super(teamId, name);
     }
 }

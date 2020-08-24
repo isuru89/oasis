@@ -17,19 +17,17 @@
  * under the License.
  */
 
-package io.github.oasis.elements.milestones.stats;
+package io.github.oasis.engine.element.points.stats;
 
-import io.github.oasis.core.services.OasisServiceApiFactory;
-import io.github.oasis.core.services.ServiceRegistrar;
-
+import io.github.oasis.core.services.annotations.RepresentsElementType;
+import io.github.oasis.core.services.impl.BaseElementCRUDSupport;
 
 /**
  * @author Isuru Weerarathna
  */
-public class MilestoneServiceApiFactory extends OasisServiceApiFactory {
-
-    @Override
-    public void initialize(ServiceRegistrar registrar) {
-        registrar.registerStatsService(MilestoneStats.class);
+@RepresentsElementType("points")
+public class PointsCRUD extends BaseElementCRUDSupport {
+    public PointsCRUD() {
+        super("points");
     }
 }

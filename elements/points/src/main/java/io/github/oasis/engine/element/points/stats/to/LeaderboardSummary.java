@@ -19,7 +19,7 @@
 
 package io.github.oasis.engine.element.points.stats.to;
 
-import io.github.oasis.core.User;
+import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.services.AbstractStatsApiResponse;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,10 +49,10 @@ public class LeaderboardSummary extends AbstractStatsApiResponse {
 
         private int rank;
         private Long userId;
-        private User userMetadata;
+        private UserMetadata userMetadata;
         private BigDecimal score;
 
-        public LeaderboardRecord(int rank, Long userId, User userMetadata, BigDecimal score) {
+        public LeaderboardRecord(int rank, Long userId, UserMetadata userMetadata, BigDecimal score) {
             this.rank = rank;
             this.userId = userId;
             this.score = score;

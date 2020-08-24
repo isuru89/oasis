@@ -17,6 +17,7 @@
     <modules>
         <module>redis</module>
         <module>rabbit-stream</module>
+        <module>db-mongo</module>
     </modules>
 
     <dependencies>

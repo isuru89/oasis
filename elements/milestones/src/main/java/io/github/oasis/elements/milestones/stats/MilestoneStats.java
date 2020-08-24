@@ -19,7 +19,7 @@
 
 package io.github.oasis.elements.milestones.stats;
 
-import io.github.oasis.core.User;
+import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
@@ -111,7 +111,7 @@ public class MilestoneStats extends AbstractStatsApiService {
                 args.addAll(request.getUserIds().stream().map(String::valueOf).collect(Collectors.toList()));
 
                 List<Object> values = (List<Object>) db.runScript(ZMRANKSCORE, args.size(), args.toArray(new String[0]));
-                Map<Long, User> userMap = getContextHelper().readUsersByIds(request.getUserIds());
+                Map<Long, UserMetadata> userMap = getContextHelper().readUsersByIds(request.getUserIds());
 
                 List<UserMilestoneRecord> records = new ArrayList<>();
                 for (int i = 0; i < values.size(); i += 2) {

@@ -19,7 +19,7 @@
 
 package io.github.oasis.elements.milestones.stats.to;
 
-import io.github.oasis.core.User;
+import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractStatsApiResponse;
 import lombok.Getter;
@@ -43,11 +43,11 @@ public class GameMilestoneResponse extends AbstractStatsApiResponse {
     @Setter
     public static class UserMilestoneRecord {
         private long userId;
-        private User userMetadata;
+        private UserMetadata userMetadata;
         private long rank;
         private BigDecimal score;
 
-        public UserMilestoneRecord(long userId, User userMetadata, long rank, BigDecimal score) {
+        public UserMilestoneRecord(long userId, UserMetadata userMetadata, long rank, BigDecimal score) {
             this.userId = userId;
             this.rank = rank;
             this.score = score;

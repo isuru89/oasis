@@ -19,26 +19,17 @@
 
 package io.github.oasis.engine.element.points.stats;
 
-import io.github.oasis.core.services.AbstractAdminApiService;
-import io.github.oasis.core.services.AbstractStatsApiService;
 import io.github.oasis.core.services.OasisServiceApiFactory;
-
-import java.util.List;
+import io.github.oasis.core.services.ServiceRegistrar;
 
 /**
  * @author Isuru Weerarathna
  */
 public class PointsServiceApiFactory extends OasisServiceApiFactory {
 
-    private final List<Class<? extends AbstractStatsApiService>> apis = List.of(PointStats.class);
-
     @Override
-    public List<Class<? extends AbstractStatsApiService>> getStatsApiServices() {
-        return apis;
-    }
-
-    @Override
-    public List<Class<? extends AbstractAdminApiService>> getAdminApiServices() {
-        return null;
+    public void initialize(ServiceRegistrar registrar) {
+        registrar.registerStatsService(PointStats.class);
+        registrar.registerElementCRUD(PointsCRUD.class);
     }
 }

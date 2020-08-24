@@ -17,19 +17,25 @@
  * under the License.
  */
 
-package io.github.oasis.elements.milestones.stats;
+package io.github.oasis.core.elements;
 
-import io.github.oasis.core.services.OasisServiceApiFactory;
-import io.github.oasis.core.services.ServiceRegistrar;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
-public class MilestoneServiceApiFactory extends OasisServiceApiFactory {
+@Getter
+@Setter
+public class ElementDef implements Serializable {
 
-    @Override
-    public void initialize(ServiceRegistrar registrar) {
-        registrar.registerStatsService(MilestoneStats.class);
-    }
+    private String type;
+    private String impl;
+    private Integer gameId;
+    private String id;
+    private Map<String, Object> data;
+
 }

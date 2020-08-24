@@ -17,23 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.core;
+package io.github.oasis.core.services.api.to;
 
-import lombok.AllArgsConstructor;
+import io.github.oasis.core.elements.AttributeInfo;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
 @Getter
 @Setter
-@AllArgsConstructor
-public class Team implements Serializable {
+public class GameObjectRequest implements Serializable {
 
-    private int teamId;
+    private Integer id;
+
     private String name;
+    private String motto;
+    private String description;
+
+    private List<AttributeInfo> attributes;
 
 }

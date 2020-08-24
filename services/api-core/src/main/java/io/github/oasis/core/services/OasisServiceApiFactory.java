@@ -19,29 +19,11 @@
 
 package io.github.oasis.core.services;
 
-import java.util.List;
-
 /**
  * @author Isuru Weerarathna
  */
 public abstract class OasisServiceApiFactory {
 
-    /**
-     * Should return set of classes which represent services under stats api.
-     * These services are responsible of querying and provide game element
-     * related statistics.
-     *
-     * @return list of stats service classes.
-     */
-    public abstract List<Class<? extends AbstractStatsApiService>> getStatsApiServices();
-
-    /**
-     * Should return set of classes which represent services under admin api.
-     * These services are responsible of manipulation of game elements under a game.
-     *
-     * @return list of admin service classes.
-     */
-    public abstract List<Class<? extends AbstractAdminApiService>> getAdminApiServices();
-
+    public abstract void initialize(ServiceRegistrar registrar);
 
 }

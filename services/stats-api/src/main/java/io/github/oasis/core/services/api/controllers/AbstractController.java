@@ -17,19 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.elements.milestones.stats;
-
-import io.github.oasis.core.services.OasisServiceApiFactory;
-import io.github.oasis.core.services.ServiceRegistrar;
-
+package io.github.oasis.core.services.api.controllers;
 
 /**
  * @author Isuru Weerarathna
  */
-public class MilestoneServiceApiFactory extends OasisServiceApiFactory {
-
-    @Override
-    public void initialize(ServiceRegistrar registrar) {
-        registrar.registerStatsService(MilestoneStats.class);
-    }
+public class AbstractController {
 }

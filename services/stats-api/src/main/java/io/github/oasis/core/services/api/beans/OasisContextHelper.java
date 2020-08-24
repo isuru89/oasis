@@ -20,8 +20,8 @@
 package io.github.oasis.core.services.api.beans;
 
 import io.github.oasis.core.ID;
-import io.github.oasis.core.Team;
-import io.github.oasis.core.User;
+import io.github.oasis.core.TeamMetadata;
+import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
@@ -55,7 +55,7 @@ public class OasisContextHelper implements OasisContextHelperSupport {
     }
 
     @Override
-    public Map<String, User> readUsersByIdStrings(Collection<String> userIds) throws OasisException {
+    public Map<String, UserMetadata> readUsersByIdStrings(Collection<String> userIds) throws OasisException {
         try (DbContext db = dbPool.createContext()) {
 
             if (Utils.isEmpty(userIds)) {
@@ -64,7 +64,7 @@ public class OasisContextHelper implements OasisContextHelperSupport {
 
             String[] keys = userIds.toArray(String[]::new);
             List<String> valuesFromMap = db.getValuesFromMap(ID.ALL_USERS_NAMES, keys);
-            Map<String, User> userMap = new HashMap<>();
+            Map<String, UserMetadata> userMap = new HashMap<>();
             for (int i = 0; i < keys.length; i++) {
                 String userId = keys[i];
                 userMap.put(userId, createUserFromValue(Numbers.asLong(userId), valuesFromMap.get(i)));
@@ -77,12 +77,12 @@ public class OasisContextHelper implements OasisContextHelperSupport {
     }
 
     @Override
-    public Map<Long, User> readUsersByIds(Collection<Long> userIds) throws OasisException {
+    public Map<Long, UserMetadata> readUsersByIds(Collection<Long> userIds) throws OasisException {
         try (DbContext db = dbPool.createContext()) {
 
             String[] keys = userIds.stream().map(String::valueOf).toArray(String[]::new);
             List<String> valuesFromMap = db.getValuesFromMap(ID.ALL_USERS_NAMES, keys);
-            Map<Long, User> userMap = new HashMap<>();
+            Map<Long, UserMetadata> userMap = new HashMap<>();
             for (int i = 0; i < keys.length; i++) {
                 long userId = Numbers.asLong(keys[i]);
                 userMap.put(userId, createUserFromValue(userId, valuesFromMap.get(i)));
@@ -95,7 +95,7 @@ public class OasisContextHelper implements OasisContextHelperSupport {
     }
 
     @Override
-    public User readUser(long userId) throws OasisException {
+    public UserMetadata readUser(long userId) throws OasisException {
         try (DbContext db = dbPool.createContext()) {
 
             String userValue = db.getValueFromMap(ID.ALL_USERS_NAMES, String.valueOf(userId));
@@ -107,22 +107,22 @@ public class OasisContextHelper implements OasisContextHelperSupport {
     }
 
     @Override
-    public User readUser(String userId) throws OasisException {
+    public UserMetadata readUser(String userId) throws OasisException {
         return readUser(Numbers.asLong(userId));
     }
 
     @Override
-    public Map<String, Team> readTeamsByIdStrings(Collection<String> teamIds) throws OasisException {
+    public Map<String, TeamMetadata> readTeamsByIdStrings(Collection<String> teamIds) throws OasisException {
         return null;
     }
 
     @Override
-    public Map<Integer, Team> readTeamsById(Collection<Integer> teamIds) throws OasisException {
+    public Map<Integer, TeamMetadata> readTeamsById(Collection<Integer> teamIds) throws OasisException {
         try (DbContext db = dbPool.createContext()) {
 
             String[] keys = teamIds.stream().map(String::valueOf).toArray(String[]::new);
             List<String> valuesFromMap = db.getValuesFromMap(ID.ALL_TEAMS_NAMES, keys);
-            Map<Integer, Team> teamMap = new HashMap<>();
+            Map<Integer, TeamMetadata> teamMap = new HashMap<>();
             for (int i = 0; i < keys.length; i++) {
                 int userId = Numbers.asInt(keys[i]);
                 teamMap.put(userId, createTeamFromValue(userId, valuesFromMap.get(i)));
@@ -135,12 +135,12 @@ public class OasisContextHelper implements OasisContextHelperSupport {
     }
 
     @Override
-    public Team readTeam(String teamId) throws OasisException {
+    public TeamMetadata readTeam(String teamId) throws OasisException {
         return null;
     }
 
     @Override
-    public Team readTeam(int teamId) throws OasisException {
+    public TeamMetadata readTeam(int teamId) throws OasisException {
         return null;
     }
 
@@ -209,11 +209,11 @@ public class OasisContextHelper implements OasisContextHelperSupport {
         }
     }
 
-    private User createUserFromValue(long id, String val) {
-        return new User(id, val);
+    private UserMetadata createUserFromValue(long id, String val) {
+        return new UserMetadata(id, val);
     }
 
-    private Team createTeamFromValue(int id, String val) {
-        return new Team(id, val);
+    private TeamMetadata createTeamFromValue(int id, String val) {
+        return new TeamMetadata(id, val);
     }
 }

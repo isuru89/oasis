@@ -17,35 +17,40 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.exceptions;
+package io.github.oasis.core.services.impl;
 
+import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.services.ElementCRUDSupport;
 
 /**
  * @author Isuru Weerarathna
  */
-public class OasisApiException extends OasisException {
+public class BaseElementCRUDSupport implements ElementCRUDSupport {
 
-    private final String errorCode;
-    private final int statusCode;
+    private final String elementType;
 
-    public OasisApiException(String errorCode, int statusCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
-        this.statusCode = statusCode;
+    public BaseElementCRUDSupport(String elementType) {
+        this.elementType = elementType;
     }
 
-    public OasisApiException(String errorCode, int statusCode, String message, Throwable cause) {
-        super(message, cause);
-        this.errorCode = errorCode;
-        this.statusCode = statusCode;
+    @Override
+    public ElementDef readElementDefinition(int gameId, String id) throws OasisException {
+        return null;
     }
 
-    public String getErrorCode() {
-        return errorCode;
+    @Override
+    public ElementDef updateElementDefinition(int gameId, String id, ElementDef replacement) throws OasisException {
+        return null;
     }
 
-    public int getStatusCode() {
-        return statusCode;
+    @Override
+    public ElementDef addElementDefinition(int gameId, String id, ElementDef replacement) throws OasisException {
+        return null;
+    }
+
+    @Override
+    public ElementDef deleteElementDefinition(int gameId, String id) throws OasisException {
+        return null;
     }
 }

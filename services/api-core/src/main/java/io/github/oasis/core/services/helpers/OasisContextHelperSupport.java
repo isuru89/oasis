@@ -19,8 +19,8 @@
 
 package io.github.oasis.core.services.helpers;
 
-import io.github.oasis.core.Team;
-import io.github.oasis.core.User;
+import io.github.oasis.core.TeamMetadata;
+import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
@@ -33,17 +33,17 @@ import java.util.Map;
  */
 public interface OasisContextHelperSupport {
 
-    Map<String, User> readUsersByIdStrings(Collection<String> userIds) throws OasisException;
-    Map<Long, User> readUsersByIds(Collection<Long> userIds) throws OasisException;
+    Map<String, UserMetadata> readUsersByIdStrings(Collection<String> userIds) throws OasisException;
+    Map<Long, UserMetadata> readUsersByIds(Collection<Long> userIds) throws OasisException;
 
-    User readUser(long userId) throws OasisException;
-    User readUser(String userId) throws OasisException;
+    UserMetadata readUser(long userId) throws OasisException;
+    UserMetadata readUser(String userId) throws OasisException;
 
-    Map<String, Team> readTeamsByIdStrings(Collection<String> teamIds) throws OasisException;
-    Map<Integer, Team> readTeamsById(Collection<Integer> teamIds) throws OasisException;
+    Map<String, TeamMetadata> readTeamsByIdStrings(Collection<String> teamIds) throws OasisException;
+    Map<Integer, TeamMetadata> readTeamsById(Collection<Integer> teamIds) throws OasisException;
 
-    Team readTeam(String teamId) throws OasisException;
-    Team readTeam(int teamId) throws OasisException;
+    TeamMetadata readTeam(String teamId) throws OasisException;
+    TeamMetadata readTeam(int teamId) throws OasisException;
 
     SimpleElementDefinition readElementDefinition(int gameId, String id) throws OasisException;
     Map<String, SimpleElementDefinition> readElementDefinitions(int gameId, Collection<String> ids) throws OasisException;

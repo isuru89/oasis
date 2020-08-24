@@ -20,7 +20,7 @@
 package io.github.oasis.engine.element.points.stats;
 
 import io.github.oasis.core.ID;
-import io.github.oasis.core.User;
+import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
@@ -136,7 +136,7 @@ public class PointStats extends AbstractStatsApiService {
             }
 
             List<String> userIds = records.stream().map(Record::getMember).collect(Collectors.toList());
-            Map<String, User> userNameMap = getContextHelper().readUsersByIdStrings(userIds);
+            Map<String, UserMetadata> userNameMap = getContextHelper().readUsersByIdStrings(userIds);
 
             for (int i = 0; i < records.size(); i++) {
                 Record record = records.get(i);
