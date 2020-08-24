@@ -46,7 +46,7 @@ import java.util.List;
 )
 public class GamesController extends AbstractController {
 
-    private final OasisRepository repository;
+    private OasisRepository repository;
 
     @GetMapping(path = "/admin/games")
     public List<Game> listAllGames() {
@@ -82,10 +82,5 @@ public class GamesController extends AbstractController {
     public Game updateGame(@PathVariable("gameId") int gameId) {
         return repository.deleteGame(gameId);
     }
-
-    public GamesController(OasisRepository repository) {
-        this.repository = repository;
-    }
-
 
 }
