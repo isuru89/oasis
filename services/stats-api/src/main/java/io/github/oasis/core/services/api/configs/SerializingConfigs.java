@@ -17,29 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.core.services;
+package io.github.oasis.core.services.api.configs;
 
-import io.github.oasis.core.external.Db;
-import io.github.oasis.core.services.helpers.OasisMetadataSupport;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.time.LocalDate;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractStatsApiService {
+@Configuration
+public class SerializingConfigs {
 
-    private final Db dbPool;
-    private final OasisMetadataSupport contextHelper;
-
-    public AbstractStatsApiService(Db dbPool, OasisMetadataSupport contextHelper) {
-        this.dbPool = dbPool;
-        this.contextHelper = contextHelper;
+    @Bean
+    public Gson createSerializer() {
+        return new GsonBuilder()
+                .registerTypeAdapter(LocalDate.class,
+                        (JsonDeserializer<LocalDate>) (json, typeOfT, context) -> LocalDate.parse(json.getAsString()))
+                .create();
     }
 
-    public Db getDbPool() {
-        return dbPool;
-    }
-
-    public OasisMetadataSupport getContextHelper() {
-        return contextHelper;
-    }
 }

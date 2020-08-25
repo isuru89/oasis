@@ -61,11 +61,12 @@ public class GamesController extends AbstractController {
         game.setDescription(request.getDescription());
         game.setMotto(request.getMotto());
 
+        Game addedGame = repository.addNewGame(game);
+
         for (AttributeInfo attributeInfo : request.getAttributes()) {
-            repository.addAttribute(attributeInfo);
+            repository.addAttribute(addedGame.getId(), attributeInfo);
         }
-        
-        return repository.addNewGame(game);
+        return addedGame;
     }
 
     @GetMapping(path = "/admin/games/{gameId}")

@@ -32,7 +32,7 @@ import io.github.oasis.core.services.AbstractStatsApiService;
 import io.github.oasis.core.services.annotations.OasisQueryService;
 import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
-import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
+import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Utils;
@@ -59,7 +59,7 @@ public class BadgeStats extends AbstractStatsApiService {
 
     private final Map<Integer, Map<Integer, AttributeInfo>> gameAttributes = new ConcurrentHashMap<>();
 
-    public BadgeStats(Db dbPool, OasisContextHelperSupport contextSupport) {
+    public BadgeStats(Db dbPool, OasisMetadataSupport contextSupport) {
         super(dbPool, contextSupport);
     }
 

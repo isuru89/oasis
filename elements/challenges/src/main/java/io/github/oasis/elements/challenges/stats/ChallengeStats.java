@@ -29,7 +29,7 @@ import io.github.oasis.core.services.AbstractStatsApiService;
 import io.github.oasis.core.services.annotations.OasisQueryService;
 import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
-import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
+import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Utils;
@@ -55,7 +55,7 @@ public class ChallengeStats extends AbstractStatsApiService {
 
     private static final String SCRIPT_CHALLENGE_LOG = "O.CHLNGLOG";
 
-    public ChallengeStats(Db dbPool, OasisContextHelperSupport contextSupport) {
+    public ChallengeStats(Db dbPool, OasisMetadataSupport contextSupport) {
         super(dbPool, contextSupport);
     }
 

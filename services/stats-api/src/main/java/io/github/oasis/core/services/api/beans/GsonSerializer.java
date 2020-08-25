@@ -17,29 +17,31 @@
  * under the License.
  */
 
-package io.github.oasis.core.services;
+package io.github.oasis.core.services.api.beans;
 
-import io.github.oasis.core.external.Db;
-import io.github.oasis.core.services.helpers.OasisMetadataSupport;
+import com.google.gson.Gson;
+import io.github.oasis.core.services.SerializationSupport;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractStatsApiService {
+@Component("gson")
+public class GsonSerializer implements SerializationSupport {
 
-    private final Db dbPool;
-    private final OasisMetadataSupport contextHelper;
+    private final Gson gson;
 
-    public AbstractStatsApiService(Db dbPool, OasisMetadataSupport contextHelper) {
-        this.dbPool = dbPool;
-        this.contextHelper = contextHelper;
+    public GsonSerializer(Gson gson) {
+        this.gson = gson;
     }
 
-    public Db getDbPool() {
-        return dbPool;
+    @Override
+    public <T> T deserialize(String data, Class<T> clz) {
+        return gson.fromJson(data, clz);
     }
 
-    public OasisMetadataSupport getContextHelper() {
-        return contextHelper;
+    @Override
+    public String serialize(Object data) {
+        return gson.toJson(data);
     }
 }

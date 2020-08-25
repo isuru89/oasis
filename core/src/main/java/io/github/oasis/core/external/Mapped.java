@@ -32,6 +32,8 @@ public interface Mapped {
 
     Map<String, String> getAll();
 
+    boolean existKey(String key);
+
     String getValue(String key);
     default int getValueAsInt(String key) {
         return Numbers.asInt(getValue(key));

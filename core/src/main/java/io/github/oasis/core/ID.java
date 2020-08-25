@@ -26,8 +26,16 @@ import io.github.oasis.core.utils.Texts;
  */
 public final class ID {
 
+    public static final String OASIS_ID_STORAGE = "oasis:ids";
+    public static final String ALL_GAMES = "oasis:games";
+    public static final String ALL_USERS = "oasis:users";
+    public static final String ALL_TEAMS = "oasis:teams";
+    public static final String ALL_TEAMS_INDEX = "oasis:teams:index";
+    public static final String ALL_USERSS_INDEX = "oasis:users:index";
+    public static final String ALL_USERS_TEAMS = "oasis:users:teams";
     public static final String ALL_USERS_NAMES = "oasis:users:names";
     public static final String ALL_TEAMS_NAMES = "oasis:teams:names";
+    public static final String ALL_TEAMS_USERS = "oasis:teams:users";
     public static final String ALL_BASIC_ELEMENT_DEFINITIONS = "oasis:g%d:element:defs";
     public static final String ALL_ATTRIBUTE_DEFINITIONS = "oasis:g%d:attributes:defs";
 

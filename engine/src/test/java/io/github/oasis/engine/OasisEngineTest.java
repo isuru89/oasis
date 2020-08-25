@@ -34,8 +34,8 @@ import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.parser.GameParserYaml;
-import io.github.oasis.core.services.api.beans.OasisContextHelper;
-import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
+import io.github.oasis.core.services.api.beans.GsonSerializer;
+import io.github.oasis.core.services.api.beans.RedisRepository;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.db.redis.RedisEventLoader;
 import io.github.oasis.elements.badges.BadgesModuleFactory;
@@ -88,7 +88,7 @@ public class OasisEngineTest {
     protected OasisEngine engine;
 
     protected Db dbPool;
-    protected OasisContextHelperSupport contextHelperSupport;
+    protected RedisRepository metadataSupport;
 
     @BeforeEach
     public void setup() throws IOException, OasisException {
@@ -97,7 +97,7 @@ public class OasisEngineTest {
         dbPool = RedisDb.create(oasisConfigs);
         dbPool.init();
 
-        contextHelperSupport = new OasisContextHelper(dbPool);
+        metadataSupport = new RedisRepository(dbPool, new GsonSerializer(gson));
 
         context.setModuleFactoryList(List.of(
                 RatingsModuleFactory.class,

@@ -19,27 +19,13 @@
 
 package io.github.oasis.core.services;
 
-import io.github.oasis.core.external.Db;
-import io.github.oasis.core.services.helpers.OasisMetadataSupport;
-
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractStatsApiService {
+public interface SerializationSupport {
 
-    private final Db dbPool;
-    private final OasisMetadataSupport contextHelper;
+    <T> T deserialize(String data, Class<T> clz);
 
-    public AbstractStatsApiService(Db dbPool, OasisMetadataSupport contextHelper) {
-        this.dbPool = dbPool;
-        this.contextHelper = contextHelper;
-    }
+    String serialize(Object data);
 
-    public Db getDbPool() {
-        return dbPool;
-    }
-
-    public OasisMetadataSupport getContextHelper() {
-        return contextHelper;
-    }
 }

@@ -44,10 +44,13 @@ public interface OasisRepository {
     UserObject updateUser(long userId, UserObject updatedUser);
     UserObject deleteUser(long userId);
 
+    TeamObject addTeam(TeamObject teamObject);
     TeamObject readTeam(int teamId);
     TeamObject updateTeam(int teamId, TeamObject updatedTeam);
+    boolean existTeam(String teamName);
     List<TeamObject> searchTeam(String teamName, int offset, int maxRecords);
 
+    void removeUserFromTeam(long userId, int teamId);
     void addUserToTeam(long userId, int teamId);
     List<TeamObject> getUserTeams(long userId);
     List<UserObject> getTeamUsers(int teamId);
@@ -57,8 +60,8 @@ public interface OasisRepository {
     ElementDef deleteElement(int gameId, String id);
     ElementDef readElement(int gameId, String id);
 
-    AttributeInfo addAttribute(AttributeInfo newAttribute);
-    List<AttributeInfo> listAllAttributes();
+    AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute);
+    List<AttributeInfo> listAllAttributes(int gameId);
 
 
 }

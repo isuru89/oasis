@@ -31,19 +31,19 @@ import java.util.Map;
 /**
  * @author Isuru Weerarathna
  */
-public interface OasisContextHelperSupport {
+public interface OasisMetadataSupport {
 
     Map<String, UserMetadata> readUsersByIdStrings(Collection<String> userIds) throws OasisException;
     Map<Long, UserMetadata> readUsersByIds(Collection<Long> userIds) throws OasisException;
 
-    UserMetadata readUser(long userId) throws OasisException;
-    UserMetadata readUser(String userId) throws OasisException;
+    UserMetadata readUserMetadata(long userId) throws OasisException;
+    UserMetadata readUserMetadata(String userId) throws OasisException;
 
     Map<String, TeamMetadata> readTeamsByIdStrings(Collection<String> teamIds) throws OasisException;
     Map<Integer, TeamMetadata> readTeamsById(Collection<Integer> teamIds) throws OasisException;
 
-    TeamMetadata readTeam(String teamId) throws OasisException;
-    TeamMetadata readTeam(int teamId) throws OasisException;
+    TeamMetadata readTeamMetadata(String teamId) throws OasisException;
+    TeamMetadata readTeamMetadata(int teamId) throws OasisException;
 
     SimpleElementDefinition readElementDefinition(int gameId, String id) throws OasisException;
     Map<String, SimpleElementDefinition> readElementDefinitions(int gameId, Collection<String> ids) throws OasisException;

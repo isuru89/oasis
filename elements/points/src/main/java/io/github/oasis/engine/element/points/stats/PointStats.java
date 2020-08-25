@@ -34,7 +34,7 @@ import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
 import io.github.oasis.core.services.exceptions.ApiQueryException;
 import io.github.oasis.core.services.exceptions.OasisApiException;
-import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
+import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Timestamps;
 import io.github.oasis.core.utils.Utils;
@@ -66,7 +66,7 @@ public class PointStats extends AbstractStatsApiService {
     private static final String LEADERBOARD_RANK_REVERSE = "O.PLEADRANKSREV";
     private static final String WITH_CARDINALITY = "withcard";
 
-    public PointStats(Db pool, OasisContextHelperSupport contextSupport) {
+    public PointStats(Db pool, OasisMetadataSupport contextSupport) {
         super(pool, contextSupport);
     }
 

@@ -53,6 +53,11 @@ public class RedisHashSet implements Mapped {
     }
 
     @Override
+    public boolean existKey(String key) {
+        return jedis.hexists(baseKey, key);
+    }
+
+    @Override
     public String getValue(String key) {
         return jedis.hget(baseKey, key);
     }
