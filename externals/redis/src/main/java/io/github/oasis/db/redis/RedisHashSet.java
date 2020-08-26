@@ -19,9 +19,14 @@
 
 package io.github.oasis.db.redis;
 
+import io.github.oasis.core.collect.Pair;
 import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.utils.Numbers;
+import io.github.oasis.core.utils.Texts;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.ScanResult;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -29,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static io.github.oasis.core.utils.Numbers.asDecimal;
 import static io.github.oasis.core.utils.Numbers.asInt;
@@ -130,5 +136,25 @@ public class RedisHashSet implements Mapped {
     @Override
     public boolean setIfNotExists(String key, String value) {
         return Numbers.isFirstOne(jedis.hsetnx(baseKey, key, value));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public PaginatedResult<Pair<String, String>> search(String pattern, int count) {
+        return search(pattern, count, null);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public PaginatedResult<Pair<String, String>> search(String pattern, int count, String cursor) {
+        ScanParams params = new ScanParams();
+        params.count(count);
+        params.match(pattern);
+        String cur = Texts.isEmpty(cursor) ? "0" : cursor;
+        ScanResult<Map.Entry<String, String>> scanResult = jedis.hscan(baseKey, cur, params);
+        List<Pair<String, String>> records = scanResult.getResult().stream()
+                .map(entry -> Pair.of(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+        return new PaginatedResult<>(scanResult.isCompleteIteration() ? null : scanResult.getCursor(), records);
     }
 }

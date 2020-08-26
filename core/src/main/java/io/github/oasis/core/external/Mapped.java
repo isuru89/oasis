@@ -69,6 +69,9 @@ public interface Mapped {
 
     List<String> getValues(String... keys);
 
+    <T> PaginatedResult<T> search(String pattern, int count, String cursor);
+    <T> PaginatedResult<T> search(String pattern, int count);
+
     /**
      * Returns true if key did not exist and newly created.
      *

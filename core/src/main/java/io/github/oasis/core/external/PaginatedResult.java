@@ -17,25 +17,34 @@
  * under the License.
  */
 
-package io.github.oasis.core;
+package io.github.oasis.core.external;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import io.github.oasis.core.utils.Texts;
 
-import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-@ToString
-@AllArgsConstructor
-public class TeamMetadata implements Serializable {
+public class PaginatedResult<T> {
 
-    private int teamId;
-    private String name;
+    private final String nextCursor;
+    private final List<T> records;
 
+    public PaginatedResult(String nextCursor, List<T> records) {
+        this.nextCursor = nextCursor;
+        this.records = records;
+    }
+
+    public String getNextCursor() {
+        return nextCursor;
+    }
+
+    public boolean isCompleted() {
+        return Texts.isEmpty(nextCursor);
+    }
+
+    public List<T> getRecords() {
+        return records;
+    }
 }

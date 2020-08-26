@@ -20,6 +20,7 @@
 package io.github.oasis.core.external;
 
 import io.github.oasis.core.Game;
+import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.model.TeamObject;
@@ -36,6 +37,7 @@ public interface OasisRepository {
     Game updateGame(int gameId, Game game);
     Game readGame(int gameId);
     Game deleteGame(int gameId);
+    boolean existsGame(String gameName);
     List<Game> listGames();
 
     UserObject readUser(long userId);
@@ -48,7 +50,7 @@ public interface OasisRepository {
     TeamObject readTeam(int teamId);
     TeamObject updateTeam(int teamId, TeamObject updatedTeam);
     boolean existTeam(String teamName);
-    List<TeamObject> searchTeam(String teamName, int offset, int maxRecords);
+    PaginatedResult<TeamMetadata> searchTeam(String teamName, String offset, int maxRecords);
 
     void removeUserFromTeam(long userId, int teamId);
     void addUserToTeam(long userId, int teamId);

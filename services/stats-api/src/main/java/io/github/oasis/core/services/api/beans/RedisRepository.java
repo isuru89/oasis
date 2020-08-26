@@ -23,15 +23,18 @@ import io.github.oasis.core.Game;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.UserMetadata;
+import io.github.oasis.core.collect.Pair;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserObject;
 import io.github.oasis.core.services.SerializationSupport;
@@ -43,6 +46,7 @@ import io.github.oasis.core.utils.Utils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +63,12 @@ import static io.github.oasis.core.utils.Constants.COMMA;
 @Component
 public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
+    private static final String ALL_PATTERN = "*";
+
+    private static final String INCR_GAME_KEY = "games";
+    private static final String INCR_USER_KEY = "users";
+    private static final String INCR_TEAM_KEY = "teams";
+
     private final Db dbPool;
     private final SerializationSupport serializationSupport;
 
@@ -70,11 +80,16 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public Game addNewGame(Game game) {
         return withDbContext(db -> {
-            int gameId = db.MAP(ID.OASIS_ID_STORAGE).incrementByOne("games");
+            if (existsGame(game.getName())) {
+                throw new OasisDbException("Game by given name '" + game.getName() + "' already exists!");
+            }
+
+            int gameId = db.MAP(ID.OASIS_ID_STORAGE).incrementByOne(INCR_GAME_KEY);
             game.setId(gameId);
 
             String gameIdStr = String.valueOf(gameId);
             db.setValueInMap(ID.ALL_GAMES, gameIdStr, serializationSupport.serialize(game));
+            updateGameIndex(game, null, db);
             return game;
         });
     }
@@ -82,8 +97,19 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public Game updateGame(int gameId, Game game) {
         return withDbContext(db -> {
+            Game existingGame = readGame(gameId);
+            if (existingGame == null) {
+                throw new OasisRuntimeException("No game exist by given id!");
+            }
+            if (gameId != existingGame.getId() || gameId != game.getId()) {
+                throw new OasisRuntimeException("Game id is not allowed to modify!");
+            }
+
+            String prevName = existingGame.getName();
+
             String gameIdStr = String.valueOf(gameId);
             db.setValueInMap(ID.ALL_GAMES, gameIdStr, serializationSupport.serialize(game));
+            updateGameIndex(game, prevName, db);
             return game;
         });
     }
@@ -92,6 +118,9 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     public Game readGame(int gameId) {
         return withDbContext(db -> {
             String gameStr = db.getValueFromMap(ID.ALL_GAMES, String.valueOf(gameId));
+            if (Texts.isEmpty(gameStr)) {
+                throw new OasisRuntimeException("No game is found by id " + gameId + "!");
+            }
             return serializationSupport.deserialize(gameStr, Game.class);
         });
     }
@@ -102,14 +131,37 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
             Mapped gamesMap = db.MAP(ID.ALL_GAMES);
             String subKey = String.valueOf(gameId);
             String gameStr = gamesMap.getValue(subKey);
+            if (Texts.isEmpty(gameStr)) {
+                throw new OasisDbException("No game exist by given id " + gameId + "!");
+            }
+
             gamesMap.remove(subKey);
-            return serializationSupport.deserialize(gameStr, Game.class);
+            Game deletedGame = serializationSupport.deserialize(gameStr, Game.class);
+            db.removeKeyFromMap(ID.ALL_GAMES_INDEX, deletedGame.getName());
+            return deletedGame;
         });
     }
 
     @Override
+    public boolean existsGame(String gameName) {
+        return withDbContext(db -> db.MAP(ID.ALL_GAMES_INDEX).existKey(gameName));
+    }
+
+    @Override
     public List<Game> listGames() {
-        return null;
+        return withDbContext(db -> {
+            List<Game> games = new ArrayList<>();
+            Mapped gamesMap = db.MAP(ID.ALL_GAMES);
+            PaginatedResult<Pair<String, String>> searchResult;
+            do {
+                searchResult = gamesMap.search(ALL_PATTERN, 50);
+                games.addAll(searchResult.getRecords().stream()
+                        .map(rec -> serializationSupport.deserialize(rec.getRight(), Game.class))
+                        .collect(Collectors.toList()));
+
+            } while (!searchResult.isCompleted());
+            return games;
+        });
     }
 
     @Override
@@ -166,7 +218,16 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
     @Override
     public Map<String, TeamMetadata> readTeamsByIdStrings(Collection<String> teamIds) {
-        return null;
+        return withDbContext(db -> {
+            String[] keys = teamIds.stream().map(String::valueOf).toArray(String[]::new);
+            List<String> valuesFromMap = db.getValuesFromMap(ID.ALL_TEAMS_NAMES, keys);
+            Map<String, TeamMetadata> teamMap = new HashMap<>();
+            for (int i = 0; i < keys.length; i++) {
+                int teamId = Numbers.asInt(keys[i]);
+                teamMap.put(keys[i], createTeamFromValue(teamId, valuesFromMap.get(i)));
+            }
+            return teamMap;
+        });
     }
 
     @Override
@@ -196,7 +257,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public UserObject addUser(UserObject newUser) {
         return withDbContext(db -> {
-            long userId = db.MAP(ID.OASIS_ID_STORAGE).incrementBy("users", 1L);
+            long userId = db.MAP(ID.OASIS_ID_STORAGE).incrementBy(INCR_USER_KEY, 1L);
             String userIdStr = String.valueOf(userId);
             newUser.setUserId(userId);
             db.setValueInMap(ID.ALL_USERS, userIdStr, serializationSupport.serialize(newUser));
@@ -229,11 +290,12 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public TeamObject addTeam(TeamObject teamObject) {
         return withDbContext(db -> {
-            int teamId = db.MAP(ID.OASIS_ID_STORAGE).incrementByOne("teams");
+            int teamId = db.MAP(ID.OASIS_ID_STORAGE).incrementByOne(INCR_TEAM_KEY);
             String teamIdStr = String.valueOf(teamId);
             teamObject.setTeamId(teamId);
             db.setValueInMap(ID.ALL_TEAMS, teamIdStr, serializationSupport.serialize(teamObject));
             updateTeamMetadata(teamObject, db);
+            updateTeamIndex(teamObject, null, db);
             return teamObject;
         });
     }
@@ -302,8 +364,16 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public TeamObject updateTeam(int teamId, TeamObject updatedTeam) {
         return withDbContext(db -> {
+            String value = db.getValueFromMap(ID.ALL_TEAMS, String.valueOf(teamId));
+            String prevName = null;
+            if (Texts.isNotEmpty(value)) {
+                TeamObject readTeam = serializationSupport.deserialize(value, TeamObject.class);
+                prevName = readTeam.getName();
+            }
+
             db.setValueInMap(ID.ALL_TEAMS, String.valueOf(teamId), serializationSupport.serialize(updatedTeam));
             updateTeamMetadata(updatedTeam, db);
+            updateTeamIndex(updatedTeam, prevName, db);
             return updatedTeam;
         });
     }
@@ -314,8 +384,22 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public List<TeamObject> searchTeam(String teamName, int offset, int maxRecords) {
-        return null;
+    public PaginatedResult<TeamMetadata> searchTeam(String teamName, String cursor, int maxRecords) {
+        return withDbContext(db -> {
+            String searchPattern = "*" + teamName + "*";
+            Mapped gamesMap = db.MAP(ID.ALL_TEAMS_INDEX);
+            String cur = Texts.isEmpty(cursor) ? null : cursor;
+            PaginatedResult<Pair<String, String>> searchResult = gamesMap.search(searchPattern, maxRecords, cur);
+
+            List<String> teamIds = searchResult.getRecords().stream()
+                    .map(Pair::getRight)
+                    .collect(Collectors.toList());
+
+            List<TeamMetadata> list = new ArrayList<>(readTeamsByIdStrings(teamIds).values());
+            return new PaginatedResult<>(
+                    Texts.isEmpty(searchResult.getNextCursor()) ? null : searchResult.getNextCursor(),
+                    list);
+        });
     }
 
     @Override
@@ -418,7 +502,8 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
     @Override
     public List<AttributeInfo> listAllAttributes(int gameId) {
-        return null;
+        Map<Integer, AttributeInfo> attributeInfoMap = readAttributeInfo(gameId);
+        return new ArrayList<>(attributeInfoMap.values());
     }
 
 
@@ -433,6 +518,24 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     private void updateTeamMetadata(TeamObject teamObject, DbContext db) {
         TeamMetadata teamMetadata = new TeamMetadata(teamObject.getTeamId(), teamObject.getName());
         db.setValueInMap(ID.ALL_TEAMS_NAMES, String.valueOf(teamMetadata.getTeamId()), teamMetadata.getName());
+    }
+
+    private void updateTeamIndex(TeamObject teamObject, String prevName, DbContext db) {
+        if (!teamObject.getName().equals(prevName)) {
+            if (prevName != null) {
+                db.removeKeyFromMap(ID.ALL_TEAMS_INDEX, prevName);
+            }
+            db.setValueInMap(ID.ALL_TEAMS_INDEX, teamObject.getName(), String.valueOf(teamObject.getTeamId()));
+        }
+    }
+
+    private void updateGameIndex(Game game, String prevName, DbContext db) {
+        if (!game.getName().equals(prevName)) {
+            if (prevName != null) {
+                db.removeKeyFromMap(ID.ALL_GAMES_INDEX, prevName);
+            }
+            db.setValueInMap(ID.ALL_GAMES_INDEX, game.getName(), String.valueOf(game.getId()));
+        }
     }
 
     private void updateUserMetadata(UserObject userObject, DbContext db) {

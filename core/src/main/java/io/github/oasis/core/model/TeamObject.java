@@ -19,7 +19,6 @@
 
 package io.github.oasis.core.model;
 
-import io.github.oasis.core.TeamMetadata;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,11 +27,17 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class TeamObject extends TeamMetadata {
+public class TeamObject {
 
+    private Integer teamId;
+    private String name;
     private String avatarUrl;
 
+    public TeamObject() {
+    }
+
     public TeamObject(int teamId, String name) {
-        super(teamId, name);
+        this.teamId = teamId;
+        this.name = name;
     }
 }
