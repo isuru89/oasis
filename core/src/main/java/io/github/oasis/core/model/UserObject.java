@@ -19,7 +19,6 @@
 
 package io.github.oasis.core.model;
 
-import io.github.oasis.core.UserMetadata;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,13 +29,13 @@ import java.time.LocalDate;
  */
 @Getter
 @Setter
-public class UserObject extends UserMetadata {
+public class UserObject {
+
+    private Long userId;
+    private String displayName;
 
     private String email;
     private LocalDate birthday;
     private UserGender gender;
 
-    public UserObject(long userId, String displayName) {
-        super(userId, displayName);
-    }
 }

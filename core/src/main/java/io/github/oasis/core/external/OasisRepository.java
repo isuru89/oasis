@@ -43,6 +43,7 @@ public interface OasisRepository {
     UserObject readUser(long userId);
     UserObject readUser(String email);
     UserObject addUser(UserObject newUser);
+    boolean existsUser(String email);
     UserObject updateUser(long userId, UserObject updatedUser);
     UserObject deleteUser(long userId);
 

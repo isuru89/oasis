@@ -22,12 +22,14 @@ package io.github.oasis.core.services.api.beans;
 import com.google.gson.Gson;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
+import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.model.UserObject;
 import io.github.oasis.core.services.api.configs.SerializingConfigs;
 import io.github.oasis.db.redis.RedisDb;
 import org.junit.jupiter.api.AfterAll;
@@ -40,6 +42,7 @@ import org.junit.jupiter.api.function.Executable;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -160,18 +163,128 @@ class RedisRepositoryTest {
 
     @Test
     void readUser() {
+        long userId = redisRepository.addUser(createUser("john@oasis.com", "John Doe")).getUserId();
+        long user2Id = redisRepository.addUser(createUser("alice@oasis.com", "Alice Lena")).getUserId();
+
+        UserObject userById = redisRepository.readUser(userId);
+        UserObject userByEmail = redisRepository.readUser("john@oasis.com");
+        Assertions.assertEquals(userById.getUserId(), userId);
+        Assertions.assertEquals(userById.getUserId(), userByEmail.getUserId());
+        Assertions.assertEquals(userById.getEmail(), userByEmail.getEmail());
+        Assertions.assertEquals(userById.getDisplayName(), userByEmail.getDisplayName());
+
+        // read metadata
+        UserMetadata userMetadata = redisRepository.readUserMetadata(userId);
+        Assertions.assertEquals(userById.getDisplayName(), userMetadata.getDisplayName());
+        Assertions.assertEquals(userById.getUserId(), userMetadata.getUserId());
+        Assertions.assertEquals(userById.getDisplayName(), redisRepository.readUserMetadata(String.valueOf(userId)).getDisplayName());
+
+        Map<Long, UserMetadata> userMap = redisRepository.readUsersByIds(List.of(userId, user2Id));
+        Assertions.assertEquals(2, userMap.size());
+
+        // non existing user
+        assertError(() -> redisRepository.readUser(999));
+        // non-existing email
+        assertError(() -> redisRepository.readUser("unknown@oasis.com"));
     }
 
     @Test
-    void testReadUser() {
+    void addUser() {
+        long userId = redisRepository.addUser(createUser("john@oasis.com", "John Doe")).getUserId();
+
+        // no duplicate emails
+        assertError(() -> redisRepository.addUser(createUser("john@oasis.com", "Other John")));
+
+        long user2Id = redisRepository.addUser(createUser("alice@oasis.com", "Alice Lena")).getUserId();
+        Assertions.assertEquals(user2Id, userId + 1);
+    }
+
+    @Test
+    void updateUser() {
+        long userId = redisRepository.addUser(createUser("john@oasis.com", "John Doe")).getUserId();
+        UserObject userObject = redisRepository.readUser(userId);
+        Assertions.assertNotNull(userObject);
+        Assertions.assertEquals("john@oasis.com", userObject.getEmail());
+        Assertions.assertEquals("John Doe", userObject.getDisplayName());
+
+        UserMetadata userMetadata = redisRepository.readUserMetadata(userId);
+        Assertions.assertEquals("John Doe", userMetadata.getDisplayName());
+
+        // changing email and try to save should fail
+        userObject.setEmail("john1@oasis.com");
+        assertError(() -> redisRepository.updateUser(userId, userObject));
+
+        // impersonating users should fail
+        redisRepository.addUser(createUser("bob@oasis.com", "Bob Hopkins"));
+        userObject.setEmail("bob@oasis.com");
+        assertError(() -> redisRepository.updateUser(userId, userObject));
+
+        userObject.setEmail("john@oasis.com");
+        userObject.setDisplayName("John Changed");
+        redisRepository.updateUser(userId, userObject);
+        Assertions.assertEquals("John Changed", redisRepository.readUser(userId).getDisplayName());
+
+        // metadata should also change
+        Assertions.assertEquals("John Changed", redisRepository.readUserMetadata(userId).getDisplayName());
+    }
+
+    @Test
+    void deleteUser() {
+        long userId = redisRepository.addUser(createUser("john@oasis.com", "John Doe")).getUserId();
+        Assertions.assertTrue(redisRepository.existsUser("john@oasis.com"));
+
+        UserObject userObject = redisRepository.deleteUser(userId);
+        Assertions.assertEquals("John Doe", userObject.getDisplayName());
+
+        Assertions.assertFalse(redisRepository.existsUser("john@oasis.com"));
+
+        UserMetadata userMetadata = redisRepository.readUserMetadata(userId);
+        Assertions.assertNull(userMetadata.getDisplayName());
+    }
+
+    @Test
+    void addTeam() {
+        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
+        Integer team2Id = redisRepository.addTeam(createTeam("Avengers")).getTeamId();
+        Assertions.assertTrue(teamId > 0);
+        Assertions.assertEquals(team2Id, teamId + 1);
+
+        // should not be able to add same team again
+        assertError(() -> redisRepository.addTeam(createTeam("Warriors")));
+        assertError(() -> redisRepository.addTeam(createTeam("warriors")));
+    }
+
+    @Test
+    void readTeam() {
+        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
+        Assertions.assertEquals("Warriors", redisRepository.readTeam(teamId).getName());
+
+        // non-exist team id
+        assertError(() -> redisRepository.readTeam(999));
     }
 
     @Test
     void readTeamsByIdStrings() {
+        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
+        Integer team2Id = redisRepository.addTeam(createTeam("Avengers")).getTeamId();
+
+        // read metadata
+        Map<Integer, TeamMetadata> teamMap = redisRepository.readTeamsById(List.of(teamId, team2Id));
+        Assertions.assertEquals(2, teamMap.size());
+        Assertions.assertEquals("Warriors", teamMap.get(teamId).getName());
+        Assertions.assertEquals("Avengers", teamMap.get(team2Id).getName());
     }
 
     @Test
     void readTeamsById() {
+        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
+        Integer team2Id = redisRepository.addTeam(createTeam("Avengers")).getTeamId();
+
+        // read metadata
+        Map<String, TeamMetadata> teamMap = redisRepository.readTeamsByIdStrings(List.of(String.valueOf(teamId), String.valueOf(team2Id)));
+        Assertions.assertEquals(2, teamMap.size());
+        Assertions.assertEquals("Warriors", teamMap.get(String.valueOf(teamId)).getName());
+        Assertions.assertEquals("Avengers", teamMap.get(String.valueOf(team2Id)).getName());
     }
 
     @Test
@@ -183,43 +296,29 @@ class RedisRepositoryTest {
     }
 
     @Test
-    void addUser() {
-    }
-
-    @Test
-    void updateUser() {
-    }
-
-    @Test
-    void deleteUser() {
-    }
-
-    @Test
-    void addTeam() {
-    }
-
-    @Test
-    void readTeam() {
-    }
-
-    @Test
-    void readElementDefinition() {
-    }
-
-    @Test
-    void readElementDefinitions() {
-    }
-
-    @Test
-    void readAttributeInfo() {
-    }
-
-    @Test
     void updateTeam() {
+        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
+        TeamObject teamObject = redisRepository.readTeam(teamId);
+        Assertions.assertEquals("Warriors", teamObject.getName());
+
+        Assertions.assertTrue(redisRepository.existTeam("warriors"));
+
+        teamObject.setName("New Warriors");
+        redisRepository.updateTeam(teamId, teamObject);
+
+        teamObject = redisRepository.readTeam(teamId);
+        Assertions.assertEquals("New Warriors", teamObject.getName());
+
+        Assertions.assertFalse(redisRepository.existTeam("warriors"));
+        Assertions.assertTrue(redisRepository.existTeam("New warriors"));
     }
 
     @Test
     void existTeam() {
+        redisRepository.addTeam(createTeam("Warriors"));
+
+        Assertions.assertTrue(redisRepository.existTeam("Warriors"));
+        Assertions.assertTrue(redisRepository.existTeam("warriors"));
     }
 
     @Test
@@ -247,6 +346,28 @@ class RedisRepositoryTest {
 
     @Test
     void addUserToTeam() {
+        long u1 = redisRepository.addUser(createUser("john@oasis.com", "John Doe")).getUserId();
+        long u2 = redisRepository.addUser(createUser("alice@oasis.com", "Alice Lee")).getUserId();
+        long u3 = redisRepository.addUser(createUser("bob@oasis.com", "Bob Hopkins")).getUserId();
+
+        int t1 = redisRepository.addTeam(createTeam("sunrise warrior")).getTeamId();
+        int t2 = redisRepository.addTeam(createTeam("musketeers")).getTeamId();
+        int t3 = redisRepository.addTeam(createTeam("avengers")).getTeamId();
+
+        redisRepository.addUserToTeam(u1, t1);
+        redisRepository.addUserToTeam(u1, t2);
+
+        List<TeamObject> userTeams = redisRepository.getUserTeams(u1);
+        Assertions.assertEquals(2, userTeams.size());
+        Assertions.assertTrue(userTeams.stream().anyMatch(t -> t.getName().equals("sunrise warrior")));
+        Assertions.assertTrue(userTeams.stream().anyMatch(t -> t.getName().equals("musketeers")));
+        Assertions.assertFalse(userTeams.stream().anyMatch(t -> t.getName().equals("avengers")));
+
+        Assertions.assertTrue(redisRepository.getUserTeams(u2).isEmpty());
+
+        // add user to same team
+        redisRepository.addUserToTeam(u1, t2);
+        Assertions.assertEquals(2, redisRepository.getUserTeams(u1).size());
     }
 
     @Test
@@ -255,6 +376,29 @@ class RedisRepositoryTest {
 
     @Test
     void getTeamUsers() {
+        long u1 = redisRepository.addUser(createUser("john@oasis.com", "John Doe")).getUserId();
+        long u2 = redisRepository.addUser(createUser("alice@oasis.com", "Alice Lee")).getUserId();
+        long u3 = redisRepository.addUser(createUser("bob@oasis.com", "Bob Hopkins")).getUserId();
+
+        int t1 = redisRepository.addTeam(createTeam("sunrise warrior")).getTeamId();
+        int t2 = redisRepository.addTeam(createTeam("musketeers")).getTeamId();
+        int t3 = redisRepository.addTeam(createTeam("avengers")).getTeamId();
+
+        redisRepository.addUserToTeam(u1, t1);
+        redisRepository.addUserToTeam(u1, t2);
+        redisRepository.addUserToTeam(u3, t2);
+
+        List<UserObject> teamUsers = redisRepository.getTeamUsers(t2);
+        Assertions.assertEquals(2, teamUsers.size());
+        Assertions.assertTrue(teamUsers.stream().anyMatch(u -> u.getEmail().equals("john@oasis.com")));
+        Assertions.assertTrue(teamUsers.stream().anyMatch(u -> u.getEmail().equals("bob@oasis.com")));
+        Assertions.assertFalse(teamUsers.stream().anyMatch(u -> u.getEmail().equals("alice@oasis.com")));
+
+        // no users team
+        Assertions.assertTrue(redisRepository.getTeamUsers(t3).isEmpty());
+
+        // non-existing team
+        assertError(() -> redisRepository.getTeamUsers(999));
     }
 
     @Test
@@ -274,11 +418,30 @@ class RedisRepositoryTest {
     }
 
     @Test
+    void readElementDefinition() {
+    }
+
+    @Test
+    void readElementDefinitions() {
+    }
+
+    @Test
+    void readAttributeInfo() {
+    }
+
+    @Test
     void addAttribute() {
     }
 
     @Test
     void listAllAttributes() {
+    }
+
+    private UserObject createUser(String email, String name) {
+        UserObject userObject = new UserObject();
+        userObject.setDisplayName(name);
+        userObject.setEmail(email);
+        return userObject;
     }
 
     private TeamObject createTeam(String name) {
