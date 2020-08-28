@@ -179,7 +179,7 @@ public class BadgeStats extends AbstractStatsApiService {
 
     private Map<Integer, AttributeInfo> loadGameAttributesFromDb(int gameId) {
         try {
-            return getContextHelper().readAttributeInfo(gameId);
+            return getContextHelper().readAttributesInfo(gameId);
         } catch (OasisException e) {
             throw new RuntimeException("Cannot load attributes!", e);
         }

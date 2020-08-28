@@ -63,6 +63,11 @@ public class RedisContext implements DbContext {
     }
 
     @Override
+    public boolean mapKeyExists(String baseKey, String subKey) {
+        return jedis.hexists(baseKey, subKey);
+    }
+
+    @Override
     public Set<String> allKeys(String pattern) {
         return jedis.keys(pattern);
     }

@@ -44,13 +44,15 @@ public interface OasisRepository {
     UserObject readUser(String email);
     UserObject addUser(UserObject newUser);
     boolean existsUser(String email);
+    boolean existsUser(long userId);
     UserObject updateUser(long userId, UserObject updatedUser);
     UserObject deleteUser(long userId);
 
     TeamObject addTeam(TeamObject teamObject);
     TeamObject readTeam(int teamId);
     TeamObject updateTeam(int teamId, TeamObject updatedTeam);
-    boolean existTeam(String teamName);
+    boolean existsTeam(String teamName);
+    boolean existsTeam(int teamId);
     PaginatedResult<TeamMetadata> searchTeam(String teamName, String offset, int maxRecords);
 
     void removeUserFromTeam(long userId, int teamId);

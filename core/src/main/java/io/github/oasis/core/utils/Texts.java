@@ -29,6 +29,7 @@ import java.security.NoSuchAlgorithmException;
 public class Texts {
 
     public static final String COLON = ":";
+    private static final String EMPTY = "";
 
     public static String subStrPrefixAfter(String source, String prefix) {
         return source.substring(prefix.length());
@@ -40,6 +41,14 @@ public class Texts {
 
     public static boolean isNotEmpty(String text) {
         return !isEmpty(text);
+    }
+
+    public static String orDefault(String text) {
+        return orDefault(text, EMPTY);
+    }
+
+    public static String orDefault(String text, String defaultValueIfEmpty) {
+        return text == null ? defaultValueIfEmpty : text;
     }
 
     public static String md5Digest(String text) {

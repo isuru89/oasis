@@ -24,15 +24,17 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonParser;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.GameDef;
+import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.model.UserObject;
 import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.core.services.api.beans.GsonSerializer;
 import io.github.oasis.core.services.api.beans.RedisRepository;
@@ -114,11 +116,12 @@ public class OasisEngineTest {
 
         try (DbContext db = dbPool.createContext()) {
             db.allKeys("*").forEach(db::removeKey);
-            db.setValueInMap(ID.ALL_USERS_NAMES, "1", "Jakob Floyd");
-            db.setValueInMap(ID.ALL_USERS_NAMES, "2", "Thierry Hines");
-            db.setValueInMap(ID.ALL_USERS_NAMES, "3", "Ray Glenn");
-            db.setValueInMap(ID.ALL_USERS_NAMES, "4", "Lilia Stewart");
-            db.setValueInMap(ID.ALL_USERS_NAMES, "5", "Archer Roberts");
+
+            metadataSupport.addUser(new UserObject(1, "Jakob Floyd", "jakob@oasis.io"));
+            metadataSupport.addUser(new UserObject(2, "Thierry Hines", "thierry@oasis.io"));
+            metadataSupport.addUser(new UserObject(3, "Ray Glenn", "ray@oasis.io"));
+            metadataSupport.addUser(new UserObject(4, "Lilia Stewart", "lilia@oasis.io"));
+            metadataSupport.addUser(new UserObject(5, "Archer Roberts", "archer@oasis.io"));
 
             setupDbBefore(db);
         }
@@ -162,11 +165,15 @@ public class OasisEngineTest {
     protected List<AbstractRule> submitRules(OasisEngine engine, int gameId, GameDef gameDef) {
         List<PersistedDef> ruleDefinitions = gameDef.getRuleDefinitions();
         List<AbstractRule> rules = new ArrayList<>();
-        DbContext db = dbPool.createContext();
         for (PersistedDef def : ruleDefinitions) {
             AbstractRule rule = engine.getContext().getParsers().parseToRule(def);
-            db.setValueInMap(ID.getBasicElementDefKeyForGame(gameId), rule.getId() + ":name", rule.getName());
-            db.setValueInMap(ID.getBasicElementDefKeyForGame(gameId), rule.getId() + ":description", rule.getDescription());
+            ElementDef elementDef = new ElementDef();
+            elementDef.setId(rule.getId());
+            elementDef.setType(def.getType());
+            elementDef.setData(def.getData());
+            elementDef.setGameId(gameId);
+            elementDef.setMetadata(new SimpleElementDefinition(rule.getId(), rule.getName(), rule.getDescription()));
+            metadataSupport.addNewElement(gameId, elementDef);
             engine.submit(Messages.createRuleAddMessage(gameId, rule, null));
             rules.add(rule);
         }

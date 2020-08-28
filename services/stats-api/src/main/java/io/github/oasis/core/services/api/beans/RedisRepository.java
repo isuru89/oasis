@@ -39,7 +39,6 @@ import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserObject;
 import io.github.oasis.core.services.SerializationSupport;
 import io.github.oasis.core.services.helpers.OasisMetadataSupport;
-import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Utils;
@@ -68,6 +67,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     private static final String INCR_GAME_KEY = "games";
     private static final String INCR_USER_KEY = "users";
     private static final String INCR_TEAM_KEY = "teams";
+    public static final String ALL_ATTRIBUTES_KEY = "attributes";
 
     private final Db dbPool;
     private final SerializationSupport serializationSupport;
@@ -98,9 +98,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     public Game updateGame(int gameId, Game game) {
         return withDbContext(db -> {
             Game existingGame = readGame(gameId);
-            if (existingGame == null) {
-                throw new OasisRuntimeException("No game exist by given id!");
-            }
             if (gameId != existingGame.getId() || gameId != game.getId()) {
                 throw new OasisRuntimeException("Game id is not allowed to modify!");
             }
@@ -144,7 +141,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
     @Override
     public boolean existsGame(String gameName) {
-        return withDbContext(db -> db.MAP(ID.ALL_GAMES_INDEX).existKey(gameName));
+        return withDbContext(db -> db.mapKeyExists(ID.ALL_GAMES_INDEX, gameName));
     }
 
     @Override
@@ -176,7 +173,9 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
             Map<String, UserMetadata> userMap = new HashMap<>();
             for (int i = 0; i < keys.length; i++) {
                 String userId = keys[i];
-                userMap.put(userId, createUserFromValue(Numbers.asLong(userId), valuesFromMap.get(i)));
+                if (Texts.isNotEmpty(valuesFromMap.get(i))) {
+                    userMap.put(userId, createUserFromValue(Numbers.asLong(userId), valuesFromMap.get(i)));
+                }
             }
             return userMap;
         });
@@ -265,18 +264,25 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
     @Override
     public TeamMetadata readTeamMetadata(String teamId) {
-        return null;
+        return withDbContext(db -> {
+            String valuesFromMap = db.getValueFromMap(ID.ALL_TEAMS_NAMES, teamId);
+            if (Texts.isEmpty(valuesFromMap)) {
+                return null;
+            }
+
+            return createTeamFromValue(Integer.parseInt(teamId), valuesFromMap);
+        });
     }
 
     @Override
     public TeamMetadata readTeamMetadata(int teamId) {
-        return null;
+        return readTeamMetadata(String.valueOf(teamId));
     }
 
     @Override
     public UserObject addUser(UserObject newUser) {
         return withDbContext(db -> {
-            if (db.MAP(ID.ALL_USERS_INDEX).existKey(newUser.getEmail())) {
+            if (db.mapKeyExists(ID.ALL_USERS_INDEX, newUser.getEmail())) {
                 throw new OasisRuntimeException("User by email already exist!");
             }
 
@@ -292,7 +298,12 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
     @Override
     public boolean existsUser(String email) {
-        return withDbContext(db -> db.MAP(ID.ALL_USERS_INDEX).existKey(email));
+        return withDbContext(db -> db.mapKeyExists(ID.ALL_USERS_INDEX, email));
+    }
+
+    @Override
+    public boolean existsUser(long userId) {
+        return withDbContext(db -> existUser(userId, db));
     }
 
     @Override
@@ -316,6 +327,11 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         return withDbContext(db -> {
             String userIdStr = String.valueOf(userId);
             String userVal = db.getValueFromMap(ID.ALL_USERS, userIdStr);
+
+            if (Texts.isEmpty(userVal)) {
+                throw new OasisRuntimeException("No user exist by given id!");
+            }
+
             db.removeKeyFromMap(ID.ALL_USERS_NAMES, userIdStr);
             db.removeKeyFromMap(ID.ALL_USERS, userIdStr);
             UserObject userObject = serializationSupport.deserialize(userVal, UserObject.class);
@@ -327,7 +343,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public TeamObject addTeam(TeamObject teamObject) {
         return withDbContext(db -> {
-            if (existTeam(teamObject.getName())) {
+            if (existsTeam(teamObject.getName())) {
                 throw new OasisRuntimeException("A team is already exist by given name!");
             }
 
@@ -353,59 +369,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public SimpleElementDefinition readElementDefinition(int gameId, String id) {
-        return withDbContext(db -> {
-            String baseKey = ID.getBasicElementDefKeyForGame(gameId);
-            List<String> valuesFromMap = db.getValuesFromMap(baseKey,
-                    id + Constants.COLON + "name",
-                    id + Constants.COLON + "description");
-
-            return new SimpleElementDefinition(id, valuesFromMap.get(0), valuesFromMap.get(1));
-        });
-    }
-
-    @Override
-    public Map<String, SimpleElementDefinition> readElementDefinitions(int gameId, Collection<String> ids) {
-        return withDbContext(db -> {
-            String baseKey = ID.getBasicElementDefKeyForGame(gameId);
-            List<String> subKeys = ids.stream().flatMap(id -> Stream.of(id + ":name", id + ":description"))
-                    .collect(Collectors.toList());
-
-            List<String> elementValues = db.getValuesFromMap(baseKey, subKeys.toArray(new String[0]));
-            Map<String, SimpleElementDefinition> defs = new HashMap<>();
-            for (int i = 0; i < subKeys.size(); i += 2) {
-                String ruleId = subKeys.get(i).split(Constants.COLON)[0];
-                defs.put(ruleId, new SimpleElementDefinition(ruleId, elementValues.get(i), elementValues.get(i + 1)));
-            }
-            return defs;
-        });
-    }
-
-    @Override
-    public Map<Integer, AttributeInfo> readAttributeInfo(int gameId) {
-        return withDbContext(db -> {
-            String baseKey = ID.getGameAttributesInfoKey(gameId);
-            String attributes = db.getValueFromMap(baseKey, "attributes");
-            if (Texts.isEmpty(attributes)) {
-                return new HashMap<>();
-            }
-
-            List<String> attrKeys = Stream.of(attributes.split(",")).distinct().collect(Collectors.toList());
-            String[] subKeys = attrKeys.stream()
-                    .flatMap(attr -> Stream.of(attr + ":name", attr + ":order"))
-                    .toArray(String[]::new);
-
-            List<String> elementValues = db.getValuesFromMap(baseKey, subKeys);
-            Map<Integer, AttributeInfo> defs = new HashMap<>();
-            for (int i = 0; i < subKeys.length; i += 2) {
-                int attrId = Numbers.asInt(subKeys[i].split(Constants.COLON)[0]);
-                defs.put(attrId, new AttributeInfo(attrId, elementValues.get(i), Numbers.asInt(elementValues.get(i + 1))));
-            }
-            return defs;
-        });
-    }
-
-    @Override
     public TeamObject updateTeam(int teamId, TeamObject updatedTeam) {
         return withDbContext(db -> {
             String value = db.getValueFromMap(ID.ALL_TEAMS, String.valueOf(teamId));
@@ -423,8 +386,13 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public boolean existTeam(String teamName) {
-        return withDbContext(db -> db.MAP(ID.ALL_TEAMS_INDEX).existKey(teamName.toLowerCase()));
+    public boolean existsTeam(String teamName) {
+        return withDbContext(db -> db.mapKeyExists(ID.ALL_TEAMS_INDEX, teamName.toLowerCase()));
+    }
+
+    @Override
+    public boolean existsTeam(int teamId) {
+        return withDbContext(db -> existTeam(teamId, db));
     }
 
     @Override
@@ -449,15 +417,23 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public void removeUserFromTeam(long userId, int teamId) {
         withDbContext(db -> {
-            String currentUserTeams = db.getValueFromMap(ID.ALL_USERS_TEAMS, String.valueOf(userId));
-            String currentTeamUsers = db.getValueFromMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId));
-            Set<String> userTeamsSet = Stream.of(currentUserTeams.split(COMMA)).collect(Collectors.toSet());
+            if (!existUser(userId, db)) {
+                throw new OasisRuntimeException("Provided user id does not exist!");
+            } else if (!existTeam(teamId, db)) {
+                throw new OasisRuntimeException("Provided team id does not exist!");
+            }
+
+            String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, String.valueOf(userId)));
+            String currentTeamUsers = Texts.orDefault(db.getValueFromMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId)));
+            Set<String> userTeamsSet = splitToSet(currentUserTeams);
             if (userTeamsSet.remove(String.valueOf(teamId))) {
-                Set<String> teamUserSet = Stream.of(currentTeamUsers.split(COMMA)).collect(Collectors.toSet());
+                Set<String> teamUserSet = splitToSet(currentTeamUsers);
                 if (teamUserSet.remove(String.valueOf(userId))) {
                     db.setValueInMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId), String.join(COMMA, teamUserSet));
                 }
                 db.setValueInMap(ID.ALL_USERS_TEAMS, String.valueOf(userId), String.join(COMMA, userTeamsSet));
+            } else {
+                throw new OasisRuntimeException("Given team id was not associated with user id!");
             }
             return null;
         });
@@ -466,13 +442,11 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public void addUserToTeam(long userId, int teamId) {
         withDbContext(db -> {
-            String currentUserTeams = db.getValueFromMap(ID.ALL_USERS_TEAMS, String.valueOf(userId));
-            String currentTeamUsers = db.getValueFromMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId));
-            String currUserTeams = Texts.isEmpty(currentUserTeams) ? "" : currentUserTeams;
-            String currTeamUsers = Texts.isEmpty(currentTeamUsers) ? "" : currentTeamUsers;
-            Set<String> userTeamsSet = Stream.of(currUserTeams.split(COMMA)).filter(Texts::isNotEmpty).collect(Collectors.toSet());
+            String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, String.valueOf(userId)));
+            String currentTeamUsers = Texts.orDefault(db.getValueFromMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId)));
+            Set<String> userTeamsSet = splitToSet(currentUserTeams);
             if (userTeamsSet.add(String.valueOf(teamId))) {
-                Set<String> teamUserSet = Stream.of(currTeamUsers.split(COMMA)).filter(Texts::isNotEmpty).collect(Collectors.toSet());
+                Set<String> teamUserSet = splitToSet(currentTeamUsers);
                 if (teamUserSet.add(String.valueOf(userId))) {
                     db.setValueInMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId), String.join(COMMA, teamUserSet));
                 }
@@ -485,13 +459,12 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public List<TeamObject> getUserTeams(long userId) {
         return withDbContext(db -> {
-            if (Texts.isEmpty(db.getValueFromMap(ID.ALL_USERS, String.valueOf(userId)))) {
+            if (!existUser(userId, db)) {
                 throw new OasisRuntimeException("No user is found by given id!");
             }
 
-            String currentUserTeams = db.getValueFromMap(ID.ALL_USERS_TEAMS, String.valueOf(userId));
-            String currTeams = Texts.isEmpty(currentUserTeams) ? "" : currentUserTeams;
-            List<String> userTeamsList = Stream.of(currTeams.split(COMMA)).filter(Texts::isNotEmpty).collect(Collectors.toList());
+            String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, String.valueOf(userId)));
+            List<String> userTeamsList = Stream.of(currentUserTeams.split(COMMA)).filter(Texts::isNotEmpty).collect(Collectors.toList());
             return userTeamsList.stream().map(userTeam -> {
                 String teamJson = db.getValueFromMap(ID.ALL_TEAMS, userTeam);
                 return serializationSupport.deserialize(teamJson, TeamObject.class);
@@ -502,13 +475,12 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public List<UserObject> getTeamUsers(int teamId) {
         return withDbContext(db -> {
-            if (Texts.isEmpty(db.getValueFromMap(ID.ALL_TEAMS, String.valueOf(teamId)))) {
+            if (!existTeam(teamId, db)) {
                 throw new OasisRuntimeException("No team is found by given id!");
             }
 
-            String currentTeamUsers = db.getValueFromMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId));
-            String currUsers = Texts.isEmpty(currentTeamUsers) ? "" : currentTeamUsers;
-            List<String> teamUserList = Stream.of(currUsers.split(COMMA)).filter(Texts::isNotEmpty).collect(Collectors.toList());
+            String currentTeamUsers = Texts.orDefault(db.getValueFromMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId)));
+            List<String> teamUserList = Stream.of(currentTeamUsers.split(COMMA)).filter(Texts::isNotEmpty).collect(Collectors.toList());
             return teamUserList.stream().map(userTeam -> {
                 String userJson = db.getValueFromMap(ID.ALL_USERS, userTeam);
                 return serializationSupport.deserialize(userJson, UserObject.class);
@@ -518,22 +490,100 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
     @Override
     public ElementDef addNewElement(int gameId, ElementDef elementDef) {
-        return null;
+        return withDbContext(db -> {
+            String id = elementDef.getId();
+            String baseKey = ID.getDetailedElementDefKeyForGame(gameId);
+            elementDef.setGameId(gameId);
+
+            if (db.mapKeyExists(baseKey, id)) {
+                throw new OasisRuntimeException("Element by given id already exists!");
+            }
+
+            db.setValueInMap(baseKey, id, serializationSupport.serialize(elementDef));
+            updateElementMetadata(elementDef, db);
+            return elementDef;
+        });
     }
 
     @Override
     public ElementDef updateElement(int gameId, String id, ElementDef elementDef) {
-        return null;
+        return withDbContext(db -> {
+            if (!id.equals(elementDef.getId())) {
+                throw new OasisRuntimeException("Provided id and element id mismatches!");
+            }
+            String baseKey = ID.getDetailedElementDefKeyForGame(gameId);
+
+            if (!db.mapKeyExists(baseKey, id)) {
+                throw new OasisRuntimeException("Element by given id does not exist!");
+            }
+
+            db.setValueInMap(baseKey, id, serializationSupport.serialize(elementDef));
+            updateElementMetadata(elementDef, db);
+            return elementDef;
+        });
     }
 
     @Override
     public ElementDef deleteElement(int gameId, String id) {
-        return null;
+        return withDbContext(db -> {
+            String baseKey = ID.getDetailedElementDefKeyForGame(gameId);
+
+            String valueFromMap = db.getValueFromMap(baseKey, id);
+            if (Texts.isEmpty(valueFromMap)) {
+                throw new OasisRuntimeException("Element by given id does not exist!");
+            }
+
+            db.removeKeyFromMap(baseKey, id);
+            db.removeKeyFromMap(ID.getBasicElementDefKeyForGame(gameId), id);
+            return serializationSupport.deserialize(valueFromMap, ElementDef.class);
+        });
     }
 
     @Override
     public ElementDef readElement(int gameId, String id) {
-        return null;
+        return withDbContext(db -> {
+            String baseKey = ID.getDetailedElementDefKeyForGame(gameId);
+
+            String valueFromMap = db.getValueFromMap(baseKey, id);
+            if (Texts.isEmpty(valueFromMap)) {
+                throw new OasisRuntimeException("Element by given id does not exist!");
+            }
+
+            return serializationSupport.deserialize(valueFromMap, ElementDef.class);
+        });
+    }
+
+    @Override
+    public SimpleElementDefinition readElementDefinition(int gameId, String id) {
+        return withDbContext(db -> {
+            String baseKey = ID.getBasicElementDefKeyForGame(gameId);
+            String metadata = db.getValueFromMap(baseKey, id);
+
+            if (Texts.isEmpty(metadata)) {
+                return null;
+            }
+            SimpleElementDefinition def = serializationSupport.deserialize(metadata, SimpleElementDefinition.class);
+            def.setId(id);
+            return def;
+        });
+    }
+
+    @Override
+    public Map<String, SimpleElementDefinition> readElementDefinitions(int gameId, Collection<String> ids) {
+        return withDbContext(db -> {
+            String baseKey = ID.getBasicElementDefKeyForGame(gameId);
+
+            List<String> elementValues = db.getValuesFromMap(baseKey, ids.toArray(new String[0]));
+            Map<String, SimpleElementDefinition> defs = new HashMap<>();
+            System.out.println(elementValues);
+            for (String value : elementValues) {
+                SimpleElementDefinition def = serializationSupport.deserialize(value, SimpleElementDefinition.class);
+                if (def != null) {
+                    defs.put(def.getId(), def);
+                }
+            }
+            return defs;
+        });
     }
 
     @Override
@@ -541,27 +591,65 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         return withDbContext(db -> {
             String baseKey = ID.getGameAttributesInfoKey(gameId);
             String attrId = String.valueOf(newAttribute.getId());
-            String attributes = db.getValueFromMap(baseKey, "attributes");
+            String attributes = db.getValueFromMap(baseKey, ALL_ATTRIBUTES_KEY);
             if (Texts.isEmpty(attributes)) {
-                db.setValueInMap(baseKey, "attributes", attrId);
+                db.setValueInMap(baseKey, ALL_ATTRIBUTES_KEY, attrId);
             } else {
-                Set<String> attrs = Stream.of(attributes.split(COMMA)).collect(Collectors.toSet());
-                attrs.add(attrId);
-                db.setValueInMap(baseKey, "attributes", String.join(COMMA, attrs));
+                Set<String> attrs = splitToSet(attributes);
+                if (!attrs.add(attrId)) {
+                    throw new OasisRuntimeException("Attribute already exist by given id!");
+                }
+                db.setValueInMap(baseKey, ALL_ATTRIBUTES_KEY, String.join(COMMA, attrs));
             }
 
-            db.setValueInMap(baseKey, attrId + ":name", newAttribute.getName());
-            db.setValueInMap(baseKey, attrId + ":order", String.valueOf(newAttribute.getOrder()));
+            db.setValueInMap(baseKey, attrId, serializationSupport.serialize(newAttribute));
             return newAttribute;
         });
     }
 
     @Override
+    public Map<Integer, AttributeInfo> readAttributesInfo(int gameId) {
+        return withDbContext(db -> {
+            String baseKey = ID.getGameAttributesInfoKey(gameId);
+            String attributes = db.getValueFromMap(baseKey, ALL_ATTRIBUTES_KEY);
+            if (Texts.isEmpty(attributes)) {
+                return new HashMap<>();
+            }
+
+            List<String> elementValues = db.getValuesFromMap(baseKey, Stream.of(attributes.split(COMMA))
+                    .distinct().toArray(String[]::new));
+            Map<Integer, AttributeInfo> defs = new HashMap<>();
+            for (String elementValue : elementValues) {
+                AttributeInfo attributeInfo = serializationSupport.deserialize(elementValue, AttributeInfo.class);
+                defs.put(attributeInfo.getId(), attributeInfo);
+            }
+            return defs;
+        });
+    }
+
+    @Override
     public List<AttributeInfo> listAllAttributes(int gameId) {
-        Map<Integer, AttributeInfo> attributeInfoMap = readAttributeInfo(gameId);
+        Map<Integer, AttributeInfo> attributeInfoMap = readAttributesInfo(gameId);
         return new ArrayList<>(attributeInfoMap.values());
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //  Private Methods
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+
+    private Set<String> splitToSet(String text) {
+        return Stream.of(text.split(COMMA)).filter(Texts::isNotEmpty).collect(Collectors.toSet());
+    }
+
+    private boolean existTeam(int teamId, DbContext db) {
+        return db.mapKeyExists(ID.ALL_TEAMS, String.valueOf(teamId));
+    }
+
+    private boolean existUser(long userId, DbContext db) {
+        return db.mapKeyExists(ID.ALL_USERS, String.valueOf(userId));
+    }
 
     private UserMetadata createUserFromValue(long id, String val) {
         return new UserMetadata(id, val);
@@ -600,6 +688,12 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
     private void updateUserMetadata(UserObject userObject, DbContext db) {
         db.setValueInMap(ID.ALL_USERS_NAMES, String.valueOf(userObject.getUserId()), userObject.getDisplayName());
+    }
+
+    private void updateElementMetadata(ElementDef def, DbContext db) {
+        SimpleElementDefinition simpleElementDefinition = def.getMetadata();
+        db.setValueInMap(ID.getBasicElementDefKeyForGame(def.getGameId()),
+                def.getId(), serializationSupport.serialize(simpleElementDefinition));
     }
 
     private <T> T withDbContext(Handler<T> executor) {

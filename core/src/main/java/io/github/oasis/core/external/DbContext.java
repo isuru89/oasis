@@ -30,6 +30,7 @@ import java.util.Set;
 public interface DbContext extends Closeable {
 
     boolean keyExists(String key);
+    boolean mapKeyExists(String baseKey, String subKey);
     Set<String> allKeys(String pattern);
     void removeKey(String key);
 

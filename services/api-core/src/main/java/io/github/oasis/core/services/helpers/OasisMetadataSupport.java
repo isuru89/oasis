@@ -47,5 +47,5 @@ public interface OasisMetadataSupport {
 
     SimpleElementDefinition readElementDefinition(int gameId, String id) throws OasisException;
     Map<String, SimpleElementDefinition> readElementDefinitions(int gameId, Collection<String> ids) throws OasisException;
-    Map<Integer, AttributeInfo> readAttributeInfo(int gameId) throws OasisException;
+    Map<Integer, AttributeInfo> readAttributesInfo(int gameId) throws OasisException;
 }

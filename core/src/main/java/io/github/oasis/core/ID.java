@@ -38,7 +38,12 @@ public final class ID {
     public static final String ALL_TEAMS_NAMES = "oasis:teams:names";
     public static final String ALL_TEAMS_USERS = "oasis:teams:users";
     public static final String ALL_BASIC_ELEMENT_DEFINITIONS = "oasis:g%d:element:defs";
+    public static final String ALL_DETAILED_ELEMENT_DEFINITIONS = "oasis:g%d:element:detailed";
     public static final String ALL_ATTRIBUTE_DEFINITIONS = "oasis:g%d:attributes:defs";
+
+    public static String getDetailedElementDefKeyForGame(int gameId) {
+        return String.format(ALL_DETAILED_ELEMENT_DEFINITIONS, gameId);
+    }
 
     public static String getBasicElementDefKeyForGame(int gameId) {
         return String.format(ALL_BASIC_ELEMENT_DEFINITIONS, gameId);

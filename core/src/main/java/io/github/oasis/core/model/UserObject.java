@@ -38,4 +38,12 @@ public class UserObject {
     private LocalDate birthday;
     private UserGender gender;
 
+    public UserObject() {}
+
+    public UserObject(long userId, String name, String email) {
+        this.userId = userId;
+        this.displayName = name;
+        this.email = email;
+    }
+
 }
