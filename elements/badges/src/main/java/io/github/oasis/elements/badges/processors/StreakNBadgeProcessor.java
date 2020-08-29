@@ -20,13 +20,13 @@
 package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Sorted;
+import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
@@ -63,7 +63,7 @@ public class StreakNBadgeProcessor extends AbstractBadgeProcessor<StreakNBadgeRu
 
     @Override
     public List<BadgeSignal> process(Event event, StreakNBadgeRule rule, ExecutionContext context, DbContext db) {
-        String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
+        String key = BadgeIDs.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
         if (rule.getCriteria().matches(event, rule, context)) {

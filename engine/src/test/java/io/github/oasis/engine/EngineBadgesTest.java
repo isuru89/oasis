@@ -20,17 +20,18 @@
 package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.stats.BadgeStats;
 import io.github.oasis.elements.badges.stats.to.UserBadgeLog;
 import io.github.oasis.elements.badges.stats.to.UserBadgeLogRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeSummary;
+import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -72,7 +73,7 @@ public class EngineBadgesTest extends OasisEngineTest {
         awaitTerminated();
 
         String rid = findRuleByName(rules, "test.badge.rule").getId();
-        RedisAssert.assertMap(dbPool, ID.getGameUserBadgesSummary(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertMap(dbPool, BadgeIDs.getGameUserBadgesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(
                         "all","2",
                         "all:D20200324","1",
@@ -108,7 +109,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "rule:BDG00001:20:W202013","1",
                         "rule:BDG00001:20:Y2020","1"
                 ));
-        RedisAssert.assertSorted(dbPool, ID.getGameUserBadgesLog(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertSorted(dbPool, BadgeIDs.getGameUserBadgesLog(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofSortedEntries(
                         rid + ":10:" + e1.getTimestamp(), e5.getTimestamp(),
                         rid + ":20:" + e1.getTimestamp(), e5.getTimestamp()
@@ -147,7 +148,7 @@ public class EngineBadgesTest extends OasisEngineTest {
         awaitTerminated();
 
         String rid = findRuleByName(rules, "test.badge.points.rule").getId();
-        RedisAssert.assertMap(dbPool, ID.getGameUserBadgesSummary(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertMap(dbPool, BadgeIDs.getGameUserBadgesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(
                         "all","2",
                         "all:D20200324","1",
@@ -183,7 +184,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "rule:BDG00002:20:W202013","1",
                         "rule:BDG00002:20:Y2020","1"
                 ));
-        RedisAssert.assertSorted(dbPool, ID.getGameUserBadgesLog(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertSorted(dbPool, BadgeIDs.getGameUserBadgesLog(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofSortedEntries(
                         rid + ":10:" + e1.getTimestamp(), e5.getTimestamp(),
                         rid + ":20:" + e1.getTimestamp(), e5.getTimestamp()
@@ -193,7 +194,7 @@ public class EngineBadgesTest extends OasisEngineTest {
         String pid = "star.points";
         long tid = e1.getTeam();
         RedisAssert.assertMap(dbPool,
-                ID.getGameUserPointsSummary(TEvent.GAME_ID, TEvent.USER_ID),
+                PointIDs.getGameUserPointsSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries("all", "150",
                         "source:" + e1.getSource(), "150",
                         "all:Y2020", "150",
@@ -242,7 +243,7 @@ public class EngineBadgesTest extends OasisEngineTest {
         awaitTerminated();
 
         String rid = findRuleByName(rules, "test.badge.remove.points.rule").getId();
-        RedisAssert.assertMap(dbPool, ID.getGameUserBadgesSummary(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertMap(dbPool, BadgeIDs.getGameUserBadgesSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries(
                         "all","1",
                         "all:D20200323","-1",
@@ -273,7 +274,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "rule:BDG00003:10:W202014","1",
                         "rule:BDG00003:10:Y2020","1"
                 ));
-        RedisAssert.assertSorted(dbPool, ID.getGameUserBadgesLog(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertSorted(dbPool, BadgeIDs.getGameUserBadgesLog(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofSortedEntries(
                         rid + ":10:" + e2.getTimestamp(), e5.getTimestamp()
                 ));
@@ -282,7 +283,7 @@ public class EngineBadgesTest extends OasisEngineTest {
         String pid = "star.points";
         long tid = e1.getTeam();
         RedisAssert.assertMap(dbPool,
-                ID.getGameUserPointsSummary(TEvent.GAME_ID, TEvent.USER_ID),
+                PointIDs.getGameUserPointsSummary(TEvent.GAME_ID, TEvent.USER_ID),
                 RedisAssert.ofEntries("all", "50",
                         "source:" + e1.getSource(), "50",
                         "all:Y2020", "50",

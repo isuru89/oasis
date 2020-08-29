@@ -20,7 +20,6 @@
 package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.EventScope;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
@@ -50,7 +49,7 @@ public class RatingsSink extends AbstractSink {
             EventScope eventScope = ratingSignal.getEventScope();
             int gameId = eventScope.getGameId();
             long userId = eventScope.getUserId();
-            Sorted sorted = db.SORTED(ID.getGameUserRatingsLog(gameId, userId));
+            Sorted sorted = db.SORTED(RatingIDs.getGameUserRatingsLog(gameId, userId));
 
             String member = signal.getRuleId() + COLON
                     + signal.getPreviousRating() + COLON

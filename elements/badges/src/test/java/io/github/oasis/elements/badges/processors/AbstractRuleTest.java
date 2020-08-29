@@ -20,7 +20,6 @@
 package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.collect.Pair;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.Signal;
@@ -30,6 +29,7 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.EventReadWrite;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.db.redis.RedisEventLoader;
+import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -91,7 +91,7 @@ public abstract class AbstractRuleTest {
     @AfterEach
     public void afterEach() {
         try (DbContext db = pool.createContext()) {
-            Map<String, String> keys = db.MAP(ID.getUserBadgesMetaKey(1, 0L)).getAll();
+            Map<String, String> keys = db.MAP(BadgeIDs.getUserBadgesMetaKey(1, 0L)).getAll();
             System.out.println("Badges: " + keys);
         } catch (IOException e) {
             e.printStackTrace();

@@ -24,6 +24,10 @@ package io.github.oasis.elements.milestones;
  */
 public final class MilestoneIDs {
 
+    public static String getUserKeyUnderGameMilestone(long userId) {
+        return String.valueOf(userId);
+    }
+
     public static String getGameUserMilestonesSummary(int gameId, long userId) {
         return String.format("g%d:u%d:milestones", gameId, userId);
     }

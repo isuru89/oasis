@@ -20,7 +20,6 @@
 package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.collect.Pair;
 import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.context.ExecutionContext;
@@ -90,13 +89,13 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
             }
         }
 
-        Sorted winnerSet = db.SORTED(ID.getGameChallengeKey(event.getGameId(), rule.getId()));
+        Sorted winnerSet = db.SORTED(ChallengeIDs.getGameChallengeKey(event.getGameId(), rule.getId()));
         String member = getMemberKeyFormatInChallengeList(event, rule);
         if (rule.doesNotHaveFlag(REPEATABLE_WINNERS) && winnerSet.memberExists(member)) {
             return null;
         }
-        Mapped map = db.MAP(ID.getGameChallengesKey(event.getGameId()));
-        String winnerCountKey = ID.getGameChallengeSubKey(rule.getId(), WINNERS);
+        Mapped map = db.MAP(ChallengeIDs.getGameChallengesKey(event.getGameId()));
+        String winnerCountKey = ChallengeIDs.getGameChallengeSubKey(rule.getId(), WINNERS);
         int position = map.incrementByOne(winnerCountKey);
         if (position > rule.getWinnerCount()) {
             map.decrementByOne(winnerCountKey);
@@ -115,7 +114,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
     }
 
     private List<Signal> processOutOfOrderSupportChallenge(Event event, ChallengeRule rule, ExecutionContext context, DbContext db) {
-        Sorted winnerSet = db.SORTED(ID.getGameChallengeKey(event.getGameId(), rule.getId()));
+        Sorted winnerSet = db.SORTED(ChallengeIDs.getGameChallengeKey(event.getGameId(), rule.getId()));
         String member = getMemberKeyFormatInChallengeList(event, rule);
         if (rule.doesNotHaveFlag(REPEATABLE_WINNERS) && winnerSet.memberExists(member)) {
             return null;
@@ -128,11 +127,11 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
             return null;
         }
 
-        Mapped map = db.MAP(ID.getGameChallengesKey(event.getGameId()));
-        String winnerCountKey = ID.getGameChallengeSubKey(rule.getId(), WINNERS);
+        Mapped map = db.MAP(ChallengeIDs.getGameChallengesKey(event.getGameId()));
+        String winnerCountKey = ChallengeIDs.getGameChallengeSubKey(rule.getId(), WINNERS);
         map.incrementByOne(winnerCountKey);
 
-        String gameChallengeEventsKey = ID.getGameChallengeEventsKey(event.getGameId(), rule.getId());
+        String gameChallengeEventsKey = ChallengeIDs.getGameChallengeEventsKey(event.getGameId(), rule.getId());
         db.setValueInMap(gameChallengeEventsKey, member, event.getExternalId());
         eventLoader.write(gameChallengeEventsKey, event);
         return null;
@@ -141,8 +140,8 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
     private List<Signal> finalizeOutOfOrderChallenge(ChallengeOverEvent overEvent, ChallengeRule rule, ExecutionContext context, DbContext db) {
         int gameId = overEvent.getGameId();
         String ruleId = overEvent.getChallengeRuleId();
-        Sorted winnerSet = db.SORTED(ID.getGameChallengeKey(gameId, ruleId));
-        String gameChallengeEventsKey = ID.getGameChallengeEventsKey(gameId, ruleId);
+        Sorted winnerSet = db.SORTED(ChallengeIDs.getGameChallengeKey(gameId, ruleId));
+        String gameChallengeEventsKey = ChallengeIDs.getGameChallengeEventsKey(gameId, ruleId);
         Mapped eventMapRef = db.MAP(gameChallengeEventsKey);
         List<Record> ranksWithUsers = winnerSet.getRangeByRankWithScores(0, rule.getWinnerCount() - 1);
         List<Signal> signals = new ArrayList<>();

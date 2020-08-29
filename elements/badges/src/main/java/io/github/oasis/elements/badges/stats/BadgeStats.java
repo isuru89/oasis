@@ -19,7 +19,6 @@
 
 package io.github.oasis.elements.badges.stats;
 
-import io.github.oasis.core.ID;
 import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.SimpleElementDefinition;
@@ -36,6 +35,7 @@ import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Utils;
+import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.stats.to.UserBadgeLog;
 import io.github.oasis.elements.badges.stats.to.UserBadgeLog.BadgeLogRecord;
 import io.github.oasis.elements.badges.stats.to.UserBadgeLogRequest;
@@ -67,7 +67,7 @@ public class BadgeStats extends AbstractStatsApiService {
     public Object getBadgeSummary(@QueryPayload UserBadgeRequest request) throws Exception {
         try (DbContext db = getDbPool().createContext()) {
 
-            String badgeKey = ID.getGameUserBadgesSummary(request.getGameId(), request.getUserId());
+            String badgeKey = BadgeIDs.getGameUserBadgesSummary(request.getGameId(), request.getUserId());
 
             Mapped badgeSummary = db.MAP(badgeKey);
 
@@ -132,7 +132,7 @@ public class BadgeStats extends AbstractStatsApiService {
     public Object getBadgeLog(@QueryPayload UserBadgeLogRequest request) throws Exception {
         try (DbContext db = getDbPool().createContext()) {
 
-            String badgeLogKey = ID.getGameUserBadgesLog(request.getGameId(), request.getUserId());
+            String badgeLogKey = BadgeIDs.getGameUserBadgesLog(request.getGameId(), request.getUserId());
 
             Sorted badgeLog = db.SORTED(badgeLogKey);
             List<Record> rangeRecords = badgeLog.getRangeByScoreWithScores(request.getTimeFrom(), request.getTimeTo());

@@ -20,7 +20,6 @@
 package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
@@ -28,6 +27,7 @@ import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
+import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.StreakSupport;
 import io.github.oasis.elements.badges.rules.BadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
@@ -54,10 +54,10 @@ public abstract class AbstractBadgeProcessor<R extends BadgeRule> extends Abstra
 
     @Override
     protected void beforeEmit(BadgeSignal signal, Event event, R rule, ExecutionContext context, DbContext db) {
-        db.addToSorted(ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), rule.getId()),
+        db.addToSorted(BadgeIDs.getUserBadgeSpecKey(event.getGameId(), event.getUser(), rule.getId()),
                 String.format(BADGE_HISTORY_FORMAT, signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getAttribute()),
                 signal.getStartTime());
-        String userBadgesMeta = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+        String userBadgesMeta = BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser());
         Mapped map = db.MAP(userBadgesMeta);
         String value = map.getValue(rule.getId());
         int streak = 0;

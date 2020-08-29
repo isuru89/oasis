@@ -19,7 +19,6 @@
 
 package io.github.oasis.elements.challenges.stats;
 
-import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
@@ -33,6 +32,7 @@ import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Utils;
+import io.github.oasis.elements.challenges.ChallengeIDs;
 import io.github.oasis.elements.challenges.stats.to.GameChallengeRequest;
 import io.github.oasis.elements.challenges.stats.to.GameChallengesSummary;
 import io.github.oasis.elements.challenges.stats.to.GameChallengesSummary.ChallengeSummary;
@@ -63,7 +63,7 @@ public class ChallengeStats extends AbstractStatsApiService {
     public Object getGameChallengesSummary(@QueryPayload GameChallengeRequest request) throws Exception {
         try (DbContext db = getDbPool().createContext()) {
 
-            String mainKey = ID.getGameChallengesKey(request.getGameId());
+            String mainKey = ChallengeIDs.getGameChallengesKey(request.getGameId());
             Mapped challengeSummary = db.MAP(mainKey);
 
             GameChallengesSummary summary = new GameChallengesSummary();
@@ -84,7 +84,7 @@ public class ChallengeStats extends AbstractStatsApiService {
                     ChallengeSummary theChallenge = new ChallengeSummary(parts[0], Numbers.asInt(values.get(i)));
                     theChallenge.setChallengeMetadata(challengeDefs.get(parts[0]));
 
-                    Sorted winnerLog = db.SORTED(ID.getGameChallengeKey(request.getGameId(), parts[0]));
+                    Sorted winnerLog = db.SORTED(ChallengeIDs.getGameChallengeKey(request.getGameId(), parts[0]));
 
                     if (request.isCustomRange()) {
                         theChallenge.setWinners(winnerLog
@@ -117,8 +117,8 @@ public class ChallengeStats extends AbstractStatsApiService {
     public Object getUserChallengeLog(@QueryPayload UserChallengeRequest request) throws Exception {
         try (DbContext db = getDbPool().createContext()) {
 
-            String mainKey = ID.getGameUseChallengesLog(request.getGameId(), request.getUserId());
-            String summaryRefKey = ID.getGameUseChallengesSummary(request.getGameId(), request.getUserId());
+            String mainKey = ChallengeIDs.getGameUseChallengesLog(request.getGameId(), request.getUserId());
+            String summaryRefKey = ChallengeIDs.getGameUseChallengesSummary(request.getGameId(), request.getUserId());
 
             UserChallengesLog winLog = new UserChallengesLog();
             winLog.setGameId(request.getGameId());

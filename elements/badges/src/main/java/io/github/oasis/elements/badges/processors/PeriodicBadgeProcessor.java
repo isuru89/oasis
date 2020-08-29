@@ -20,12 +20,12 @@
 package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
+import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
@@ -68,7 +68,7 @@ public class PeriodicBadgeProcessor extends AbstractBadgeProcessor<PeriodicBadge
     @Override
     public List<BadgeSignal> process(Event event, PeriodicBadgeRule rule, ExecutionContext context, DbContext db) {
         BigDecimal value = resolveValueOfEvent(event, rule, context);
-        String badgeKey = ID.getUserTemporalBadgeKey(event.getGameId(), event.getUser(), rule.getId());
+        String badgeKey = BadgeIDs.getUserTemporalBadgeKey(event.getGameId(), event.getUser(), rule.getId());
         Mapped map = db.MAP(badgeKey);
         long ts = event.getTimestamp() + context.getUserTimeOffset();
         long tsUnit = ts - (ts % rule.getTimeUnit());

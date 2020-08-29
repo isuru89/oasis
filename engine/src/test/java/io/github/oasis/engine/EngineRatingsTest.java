@@ -20,10 +20,11 @@
 package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.elements.ratings.RatingIDs;
+import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -48,7 +49,7 @@ public class EngineRatingsTest extends OasisEngineTest {
         engine.submitAll(e1, e2, e3);
         awaitTerminated();
 
-        RedisAssert.assertMap(dbPool, ID.getGameUserPointsSummary(e1.getGameId(), e1.getUser()),
+        RedisAssert.assertMap(dbPool, PointIDs.getGameUserPointsSummary(e1.getGameId(), e1.getUser()),
                 RedisAssert.ofEntries(
                         "all","0",
                         "all:D20200324","0",
@@ -72,7 +73,7 @@ public class EngineRatingsTest extends OasisEngineTest {
                 ));
 
         String rid = "RAT000001";
-        RedisAssert.assertSorted(dbPool, ID.getGameUserRatingsLog(e1.getGameId(), e1.getUser()),
+        RedisAssert.assertSorted(dbPool, RatingIDs.getGameUserRatingsLog(e1.getGameId(), e1.getUser()),
                 RedisAssert.ofSortedEntries(
                         rid + ":1:3:" + e1.getExternalId(), e1.getTimestamp(),
                         rid + ":3:2:" + e2.getExternalId(), e2.getTimestamp(),
@@ -95,17 +96,17 @@ public class EngineRatingsTest extends OasisEngineTest {
         awaitTerminated();
 
         try (DbContext db = dbPool.createContext()) {
-            System.out.println(db.MAP(ID.getGameUserPointsSummary(e1.getGameId(), e1.getUser())).getAll());
+            System.out.println(db.MAP(PointIDs.getGameUserPointsSummary(e1.getGameId(), e1.getUser())).getAll());
         } catch (IOException e) {
             e.printStackTrace();
         }
         String rid = "RAT000001";
-        RedisAssert.assertSorted(dbPool, ID.getGameUserRatingsLog(e1.getGameId(), e1.getUser()),
+        RedisAssert.assertSorted(dbPool, RatingIDs.getGameUserRatingsLog(e1.getGameId(), e1.getUser()),
                 RedisAssert.ofSortedEntries(
                         rid + ":1:3:" + e1.getExternalId(), e1.getTimestamp(),
                         rid + ":3:2:" + e2.getExternalId(), e2.getTimestamp()
                 ));
-        RedisAssert.assertMap(dbPool, ID.getGameUserPointsSummary(e1.getGameId(), e1.getUser()),
+        RedisAssert.assertMap(dbPool, PointIDs.getGameUserPointsSummary(e1.getGameId(), e1.getUser()),
                 RedisAssert.ofEntries(
                         "all","10",
                         "all:D20200324","10",

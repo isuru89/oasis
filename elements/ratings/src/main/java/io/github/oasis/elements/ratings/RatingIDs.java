@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,17 +17,25 @@
  * under the License.
  */
 
-package io.github.oasis.model.db;
-
-import java.io.Closeable;
+package io.github.oasis.elements.ratings;
 
 /**
- * @author iweerarathna
+ * @author Isuru Weerarathna
  */
-public interface IQueryRepo extends Closeable {
+public final class RatingIDs {
 
-    void init(DbProperties dbProperties) throws Exception;
+    public static String getGameUserRatingsLog(int gameId, long userId) {
+        return String.format("g%d:u%d:ratingslog", gameId, userId);
+    }
 
-    String fetchQuery(String queryId) throws ScriptNotFoundException;
+    public static String getUserRatingsKey(int gameId, long userId, String ratingId) {
+        return String.format("u%d:g%d:rt:%s", userId, gameId, ratingId);
+    }
+
+    public static String getGameRatingKey(int gameId, String ratingId) {
+        return String.format("g%d:rating:%s", gameId, ratingId);
+    }
+
+    private RatingIDs() {}
 
 }

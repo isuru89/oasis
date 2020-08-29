@@ -20,11 +20,11 @@
 package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
+import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
 
@@ -45,7 +45,7 @@ public class BadgeFirstEvent extends AbstractBadgeProcessor<FirstEventBadgeRule>
 
     @Override
     public List<BadgeSignal> process(Event event, FirstEventBadgeRule rule, ExecutionContext context, DbContext db) {
-        String key = ID.getUserFirstEventsKey(event.getGameId(), event.getUser());
+        String key = BadgeIDs.getUserFirstEventsKey(event.getGameId(), event.getUser());
         long ts = event.getTimestamp();
         String id = event.getExternalId();
         String subKey = rule.getEventName();

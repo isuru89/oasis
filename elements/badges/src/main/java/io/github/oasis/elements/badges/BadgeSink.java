@@ -19,7 +19,6 @@
 
 package io.github.oasis.elements.badges;
 
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
@@ -76,7 +75,7 @@ public class BadgeSink extends AbstractSink {
             int addition = isRemoval ? -1 : 1;
 
             // badge log
-            Sorted badgeLog = db.SORTED(ID.getGameUserBadgesLog(gameId, userId));
+            Sorted badgeLog = db.SORTED(BadgeIDs.getGameUserBadgesLog(gameId, userId));
 
             if (isRemoval) {
                 removeFromBadgeLog(signal, badgeLog);
@@ -90,7 +89,7 @@ public class BadgeSink extends AbstractSink {
                 }
             }
 
-            Mapped badgesMap = db.MAP(ID.getGameUserBadgesSummary(gameId, userId));
+            Mapped badgesMap = db.MAP(BadgeIDs.getGameUserBadgesSummary(gameId, userId));
 
             TimeOffset tcx = new TimeOffset(ts, context.getUserTimeOffset());
 
