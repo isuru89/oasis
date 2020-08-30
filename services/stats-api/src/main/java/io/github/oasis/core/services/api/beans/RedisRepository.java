@@ -35,7 +35,10 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
+import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.model.EventSourceMetadata;
 import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.model.UserAssociationInfo;
 import io.github.oasis.core.model.UserObject;
 import io.github.oasis.core.services.SerializationSupport;
 import io.github.oasis.core.services.helpers.OasisMetadataSupport;
@@ -50,6 +53,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,6 +71,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     private static final String INCR_GAME_KEY = "games";
     private static final String INCR_USER_KEY = "users";
     private static final String INCR_TEAM_KEY = "teams";
+    private static final String INCR_SOURCES_KEY = "sources";
     public static final String ALL_ATTRIBUTES_KEY = "attributes";
 
     private final Db dbPool;
@@ -75,6 +80,135 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     public RedisRepository(Db dbPool, SerializationSupport serializationSupport) {
         this.dbPool = dbPool;
         this.serializationSupport = serializationSupport;
+    }
+
+    @Override
+    public EventSource addEventSource(EventSource eventSource) {
+        return withDbContext(db -> {
+            String token = eventSource.getToken();
+            if (existEventSource(token, db)) {
+                throw new OasisRuntimeException("A source token is already exist with same token!");
+            } else if (Objects.isNull(eventSource.getSecrets())
+                    || Objects.isNull(eventSource.getSecrets().getPrivateKey())
+                    || Objects.isNull(eventSource.getSecrets().getPublicKey())) {
+                throw new OasisRuntimeException("Source secrets must have defined!");
+            }
+
+            int id = db.MAP(ID.OASIS_ID_STORAGE).incrementByOne(INCR_SOURCES_KEY);
+            eventSource.setId(id);
+
+            db.setValueInMap(ID.ALL_SOURCES, String.valueOf(id), serializationSupport.serialize(eventSource));
+            updateSourceMetadata(eventSource, db);
+            return eventSource;
+        });
+    }
+
+    @Override
+    public EventSource deleteEventSource(int id) {
+        return withDbContext(db -> {
+            String valueFromMap = db.getValueFromMap(ID.ALL_SOURCES, String.valueOf(id));
+            if (Texts.isEmpty(valueFromMap)) {
+                throw new OasisRuntimeException("No event source is found by given id!");
+            }
+
+            EventSource source = serializationSupport.deserialize(valueFromMap, EventSource.class);
+            db.removeKeyFromMap(ID.ALL_SOURCES, String.valueOf(id));
+            db.removeKeyFromMap(ID.ALL_SOURCES_INDEX, source.getToken());
+            return source;
+        });
+    }
+
+    @Override
+    public EventSource readEventSource(int id) {
+        return withDbContext(db -> {
+            String valueFromMap = db.getValueFromMap(ID.ALL_SOURCES, String.valueOf(id));
+            if (Texts.isEmpty(valueFromMap)) {
+                throw new OasisRuntimeException("No event source is found by given id!");
+            }
+
+            return serializationSupport.deserialize(valueFromMap, EventSource.class);
+        });
+    }
+
+    @Override
+    public EventSource readEventSource(String token) {
+        return withDbContext(db -> {
+            String valueFromMap = db.getValueFromMap(ID.ALL_SOURCES_INDEX, token);
+            if (Texts.isEmpty(valueFromMap)) {
+                throw new OasisRuntimeException("No event source is found by given token!");
+            }
+
+            EventSourceMetadata meta = serializationSupport.deserialize(valueFromMap, EventSourceMetadata.class);
+            String val = db.getValueFromMap(ID.ALL_SOURCES, String.valueOf(meta.getId()));
+            return serializationSupport.deserialize(val, EventSource.class);
+        });
+    }
+
+    @Override
+    public List<EventSource> listAllEventSources() {
+        return withDbContext(db -> {
+            Map<String, String> all = db.MAP(ID.ALL_SOURCES).getAll();
+            if (all == null) {
+                return new ArrayList<>();
+            }
+
+            List<EventSource> sources = new ArrayList<>();
+            for (Map.Entry<String, String> entry : all.entrySet()) {
+                if (entry.getValue() != null) {
+                    sources.add(serializationSupport.deserialize(entry.getValue(), EventSource.class));
+                }
+            }
+            return sources;
+        });
+    }
+
+    @Override
+    public List<EventSource> listAllEventSourcesOfGame(int gameId) {
+        return listAllEventSources().stream()
+                .filter(sources -> sources.getGames() != null && sources.getGames().contains(gameId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void addEventSourceToGame(int sourceId, int gameId) {
+        withDbContext(db -> {
+            String valueFromMap = db.getValueFromMap(ID.ALL_SOURCES, String.valueOf(sourceId));
+            if (Texts.isEmpty(valueFromMap)) {
+                throw new OasisRuntimeException("No event source is found by given id!");
+            }
+
+            EventSource source = serializationSupport.deserialize(valueFromMap, EventSource.class);
+            if (source.getGames() != null) {
+                if (!source.getGames().add(gameId)) {
+                    throw new OasisRuntimeException("Provided game id already associated with given source id!");
+                }
+            } else {
+                source.setGames(Set.of(gameId));
+            }
+            db.setValueInMap(ID.ALL_SOURCES, String.valueOf(sourceId), serializationSupport.serialize(source));
+            updateSourceMetadata(source, db);
+            return null;
+        });
+    }
+
+    @Override
+    public void removeEventSourceFromGame(int sourceId, int gameId) {
+        withDbContext(db -> {
+            String valueFromMap = db.getValueFromMap(ID.ALL_SOURCES, String.valueOf(sourceId));
+            if (Texts.isEmpty(valueFromMap)) {
+                throw new OasisRuntimeException("No event source is found by given id!");
+            }
+
+            EventSource source = serializationSupport.deserialize(valueFromMap, EventSource.class);
+            if (source.getGames() != null) {
+                if (!source.getGames().remove(gameId)) {
+                    throw new OasisRuntimeException("Provided game id is not associated with given source id!");
+                }
+                db.setValueInMap(ID.ALL_SOURCES, String.valueOf(sourceId), serializationSupport.serialize(source));
+                updateSourceMetadata(source, db);
+            }
+            return null;
+        });
     }
 
     @Override
@@ -415,42 +549,68 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public void removeUserFromTeam(long userId, int teamId) {
+    public void addUserToTeam(long userId, int gameId, int teamId) {
         withDbContext(db -> {
-            if (!existUser(userId, db)) {
+            String userFullRef = db.getValueFromMap(ID.ALL_USERS, String.valueOf(userId));
+            if (Texts.isEmpty(userFullRef)) {
                 throw new OasisRuntimeException("Provided user id does not exist!");
-            } else if (!existTeam(teamId, db)) {
-                throw new OasisRuntimeException("Provided team id does not exist!");
             }
 
-            String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, String.valueOf(userId)));
+            UserObject userRef = serializationSupport.deserialize(userFullRef, UserObject.class);
+            String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, userRef.getEmail()));
             String currentTeamUsers = Texts.orDefault(db.getValueFromMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId)));
-            Set<String> userTeamsSet = splitToSet(currentUserTeams);
-            if (userTeamsSet.remove(String.valueOf(teamId))) {
-                Set<String> teamUserSet = splitToSet(currentTeamUsers);
-                if (teamUserSet.remove(String.valueOf(userId))) {
-                    db.setValueInMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId), String.join(COMMA, teamUserSet));
-                }
-                db.setValueInMap(ID.ALL_USERS_TEAMS, String.valueOf(userId), String.join(COMMA, userTeamsSet));
+
+            UserAssociationInfo associationInfo;
+            if (Texts.isEmpty(currentUserTeams)) {
+                associationInfo = new UserAssociationInfo();
+                associationInfo.setEmail(userRef.getEmail());
+                associationInfo.setId(userId);
+                associationInfo.setGames(Map.of(gameId, teamId));
             } else {
-                throw new OasisRuntimeException("Given team id was not associated with user id!");
+                associationInfo = serializationSupport.deserialize(currentUserTeams, UserAssociationInfo.class);
+                Integer currTeamId = associationInfo.getGames().get(gameId);
+                if (Objects.isNull(currTeamId)) {
+                    associationInfo.getGames().put(gameId, teamId);
+                } else {
+                    throw new OasisRuntimeException("There is already an associated team for the provided game!");
+                }
+            }
+            db.setValueInMap(ID.ALL_USERS_TEAMS, userRef.getEmail(), serializationSupport.serialize(associationInfo));
+
+            Set<String> teamUserSet = splitToSet(currentTeamUsers);
+            if (teamUserSet.add(String.valueOf(userId))) {
+                db.setValueInMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId), String.join(COMMA, teamUserSet));
             }
             return null;
         });
     }
 
     @Override
-    public void addUserToTeam(long userId, int teamId) {
+    public void removeUserFromTeam(long userId, int gameId, int teamId) {
         withDbContext(db -> {
-            String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, String.valueOf(userId)));
+            String userFullRef = db.getValueFromMap(ID.ALL_USERS, String.valueOf(userId));
+            if (Texts.isEmpty(userFullRef)) {
+                throw new OasisRuntimeException("Provided user id does not exist!");
+            } else if (!existTeam(teamId, db)) {
+                throw new OasisRuntimeException("Provided team id does not exist!");
+            }
+
+            UserObject userRef = serializationSupport.deserialize(userFullRef, UserObject.class);
+            String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, userRef.getEmail()));
             String currentTeamUsers = Texts.orDefault(db.getValueFromMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId)));
-            Set<String> userTeamsSet = splitToSet(currentUserTeams);
-            if (userTeamsSet.add(String.valueOf(teamId))) {
-                Set<String> teamUserSet = splitToSet(currentTeamUsers);
-                if (teamUserSet.add(String.valueOf(userId))) {
-                    db.setValueInMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId), String.join(COMMA, teamUserSet));
+
+            if (!Texts.isEmpty(currentUserTeams)) {
+                UserAssociationInfo associationInfo = serializationSupport.deserialize(currentUserTeams, UserAssociationInfo.class);
+                if (associationInfo.getGames().remove(gameId, teamId)) {
+                    db.setValueInMap(ID.ALL_USERS_TEAMS, userRef.getEmail(), serializationSupport.serialize(associationInfo));
+                } else {
+                    throw new OasisRuntimeException("Given team id was not associated with user id!");
                 }
-                db.setValueInMap(ID.ALL_USERS_TEAMS, String.valueOf(userId), String.join(COMMA, userTeamsSet));
+            }
+
+            Set<String> teamUserSet = splitToSet(currentTeamUsers);
+            if (teamUserSet.remove(String.valueOf(userId))) {
+                db.setValueInMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId), String.join(COMMA, teamUserSet));
             }
             return null;
         });
@@ -459,14 +619,20 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public List<TeamObject> getUserTeams(long userId) {
         return withDbContext(db -> {
-            if (!existUser(userId, db)) {
+            String userFullRef = db.getValueFromMap(ID.ALL_USERS, String.valueOf(userId));
+            if (Texts.isEmpty(userFullRef)) {
                 throw new OasisRuntimeException("No user is found by given id!");
             }
 
-            String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, String.valueOf(userId)));
-            List<String> userTeamsList = Stream.of(currentUserTeams.split(COMMA)).filter(Texts::isNotEmpty).collect(Collectors.toList());
-            return userTeamsList.stream().map(userTeam -> {
-                String teamJson = db.getValueFromMap(ID.ALL_TEAMS, userTeam);
+            UserObject userRef = serializationSupport.deserialize(userFullRef, UserObject.class);
+            String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, userRef.getEmail()));
+            if (Texts.isEmpty(currentUserTeams)) {
+                return new ArrayList<>();
+            }
+
+            UserAssociationInfo userAssociationInfo = serializationSupport.deserialize(currentUserTeams, UserAssociationInfo.class);
+            return userAssociationInfo.getGames().values().stream().map(userTeam -> {
+                String teamJson = db.getValueFromMap(ID.ALL_TEAMS, String.valueOf(userTeam));
                 return serializationSupport.deserialize(teamJson, TeamObject.class);
             }).collect(Collectors.toList());
         });
@@ -643,6 +809,10 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         return Stream.of(text.split(COMMA)).filter(Texts::isNotEmpty).collect(Collectors.toSet());
     }
 
+    private boolean existEventSource(String token, DbContext db) {
+        return db.mapKeyExists(ID.ALL_SOURCES_INDEX, token);
+    }
+
     private boolean existTeam(int teamId, DbContext db) {
         return db.mapKeyExists(ID.ALL_TEAMS, String.valueOf(teamId));
     }
@@ -657,6 +827,11 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
     private TeamMetadata createTeamFromValue(int id, String val) {
         return new TeamMetadata(id, val);
+    }
+
+    private void updateSourceMetadata(EventSource eventSourceOriginal, DbContext db) {
+        EventSourceMetadata source = eventSourceOriginal.createCopyOfMeta();
+        db.setValueInMap(ID.ALL_SOURCES_INDEX, source.getToken(), serializationSupport.serialize(source));
     }
 
     private void updateTeamMetadata(TeamObject teamObject, DbContext db) {

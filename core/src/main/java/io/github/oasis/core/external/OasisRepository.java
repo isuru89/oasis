@@ -23,6 +23,7 @@ import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
+import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserObject;
 
@@ -32,6 +33,15 @@ import java.util.List;
  * @author Isuru Weerarathna
  */
 public interface OasisRepository {
+
+    EventSource addEventSource(EventSource eventSource);
+    EventSource deleteEventSource(int id);
+    EventSource readEventSource(int id);
+    EventSource readEventSource(String token);
+    List<EventSource> listAllEventSources();
+    List<EventSource> listAllEventSourcesOfGame(int gameId);
+    void addEventSourceToGame(int sourceId, int gameId);
+    void removeEventSourceFromGame(int sourceId, int gameId);
 
     Game addNewGame(Game game);
     Game updateGame(int gameId, Game game);
@@ -55,8 +65,8 @@ public interface OasisRepository {
     boolean existsTeam(int teamId);
     PaginatedResult<TeamMetadata> searchTeam(String teamName, String offset, int maxRecords);
 
-    void removeUserFromTeam(long userId, int teamId);
-    void addUserToTeam(long userId, int teamId);
+    void removeUserFromTeam(long userId, int gameId, int teamId);
+    void addUserToTeam(long userId, int gameId, int teamId);
     List<TeamObject> getUserTeams(long userId);
     List<UserObject> getTeamUsers(int teamId);
 

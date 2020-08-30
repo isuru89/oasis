@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.events.utils;
 
+import io.github.oasis.core.ID;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
@@ -84,11 +85,11 @@ public class TestRedisDeployVerticle extends AbstractVerticle {
                     List<Future> futures = new ArrayList<>();
                     for (Map.Entry<String, JsonObject> entry : sources.entrySet()) {
                         futures.add(Future.<Response>future(p ->
-                                api.hset(List.of("oasis.sources", entry.getKey(), entry.getValue().encode()), p)));
+                                api.hset(List.of(ID.ALL_SOURCES_INDEX, entry.getKey(), entry.getValue().encode()), p)));
                     }
                     for (Map.Entry<String, JsonObject> entry : users.entrySet()) {
                         futures.add(Future.<Response>future(p ->
-                                api.hset(List.of("oasis.users", entry.getKey(), entry.getValue().encode()), p)));
+                                api.hset(List.of(ID.ALL_USERS_TEAMS, entry.getKey(), entry.getValue().encode()), p)));
                     }
                     CompositeFuture.all(futures).onComplete(r -> {
                         if (r.succeeded()) {
@@ -107,7 +108,7 @@ public class TestRedisDeployVerticle extends AbstractVerticle {
     }
 
     private void cleanAll(RedisAPI api, Handler<AsyncResult<Void>> handler) {
-        api.del(List.of("oasis.sources", "oasis.users"), res -> {
+        api.del(List.of(ID.ALL_SOURCES_INDEX, ID.ALL_USERS_TEAMS), res -> {
             handler.handle(Future.succeededFuture());
         });
     }
@@ -117,8 +118,8 @@ public class TestRedisDeployVerticle extends AbstractVerticle {
         if (api != null) {
             CompositeFuture.all(
                 List.of(
-                    Future.<Response>future(p -> api.del(List.of("oasis.sources"), p)),
-                    Future.<Response>future(p -> api.del(List.of("oasis.users"), p))
+                    Future.<Response>future(p -> api.del(List.of(ID.ALL_SOURCES_INDEX), p)),
+                    Future.<Response>future(p -> api.del(List.of(ID.ALL_USERS_TEAMS), p))
                 )
             ).onComplete(res -> {
                 stopPromise.complete();

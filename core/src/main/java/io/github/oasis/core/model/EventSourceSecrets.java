@@ -19,27 +19,23 @@
 
 package io.github.oasis.core.model;
 
+import io.github.oasis.core.utils.Texts;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
 @Getter
 @Setter
-public class TeamObject {
+public class EventSourceSecrets implements Serializable {
 
-    private Integer gameId;
-    private Integer teamId;
-    private String name;
-    private String avatarUrl;
+    private String publicKey;
+    private String privateKey;
 
-    public TeamObject() {
-    }
-
-    public TeamObject(int gameId, int teamId, String name) {
-        this.gameId = gameId;
-        this.teamId = teamId;
-        this.name = name;
+    public boolean isValid() {
+        return Texts.isNotEmpty(privateKey) && Texts.isNotEmpty(publicKey);
     }
 }

@@ -28,9 +28,11 @@ public final class ID {
     public static final String ALL_GAMES = "oasis:games";
     public static final String ALL_USERS = "oasis:users";
     public static final String ALL_TEAMS = "oasis:teams";
+    public static final String ALL_SOURCES = "oasis:sources";
     public static final String ALL_TEAMS_INDEX = "oasis:teams:index";
     public static final String ALL_USERS_INDEX = "oasis:users:index";
     public static final String ALL_GAMES_INDEX = "oasis:games:index";
+    public static final String ALL_SOURCES_INDEX = "oasis:sources:token";
     public static final String ALL_USERS_TEAMS = "oasis:users:teams";
     public static final String ALL_USERS_NAMES = "oasis:users:names";
     public static final String ALL_TEAMS_NAMES = "oasis:teams:names";

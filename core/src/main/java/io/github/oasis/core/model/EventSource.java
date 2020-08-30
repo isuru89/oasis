@@ -22,24 +22,35 @@ package io.github.oasis.core.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author Isuru Weerarathna
  */
 @Getter
 @Setter
-public class TeamObject {
+public class EventSource implements Serializable {
 
-    private Integer gameId;
-    private Integer teamId;
+    private Integer id;
+    private String token;
     private String name;
-    private String avatarUrl;
 
-    public TeamObject() {
-    }
+    private Set<Integer> games;
 
-    public TeamObject(int gameId, int teamId, String name) {
-        this.gameId = gameId;
-        this.teamId = teamId;
-        this.name = name;
+    private EventSourceSecrets secrets;
+
+    public EventSourceMetadata createCopyOfMeta() {
+        EventSourceMetadata source = new EventSourceMetadata();
+        source.setId(id);
+        source.setToken(token);
+        if (games != null) {
+            source.setGames(new HashSet<>(games));
+        } else {
+            source.setGames(new HashSet<>());
+        }
+        source.setKey(secrets.getPublicKey());
+        return source;
     }
 }
