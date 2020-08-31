@@ -24,6 +24,7 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
@@ -35,6 +36,35 @@ public class UserAssociationInfo implements Serializable {
     private String email;
     private long id;
 
-    private Map<Integer, Integer> games;
+    private Map<Integer, GameAssociation> games;
+
+    @Getter
+    @Setter
+    public static class GameAssociation implements Serializable {
+        private int team;
+
+        public GameAssociation() {}
+
+        private GameAssociation(int teamId) {
+            this.team = teamId;
+        }
+
+        public static GameAssociation ofTeam(int teamId) {
+            return new GameAssociation(teamId);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            GameAssociation that = (GameAssociation) o;
+            return team == that.team;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(team);
+        }
+    }
 
 }

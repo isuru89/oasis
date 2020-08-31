@@ -565,12 +565,12 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
                 associationInfo = new UserAssociationInfo();
                 associationInfo.setEmail(userRef.getEmail());
                 associationInfo.setId(userId);
-                associationInfo.setGames(Map.of(gameId, teamId));
+                associationInfo.setGames(Map.of(gameId, UserAssociationInfo.GameAssociation.ofTeam(teamId)));
             } else {
                 associationInfo = serializationSupport.deserialize(currentUserTeams, UserAssociationInfo.class);
-                Integer currTeamId = associationInfo.getGames().get(gameId);
-                if (Objects.isNull(currTeamId)) {
-                    associationInfo.getGames().put(gameId, teamId);
+                UserAssociationInfo.GameAssociation currAssociation = associationInfo.getGames().get(gameId);
+                if (Objects.isNull(currAssociation)) {
+                    associationInfo.getGames().put(gameId, UserAssociationInfo.GameAssociation.ofTeam(teamId));
                 } else {
                     throw new OasisRuntimeException("There is already an associated team for the provided game!");
                 }
@@ -601,7 +601,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
             if (!Texts.isEmpty(currentUserTeams)) {
                 UserAssociationInfo associationInfo = serializationSupport.deserialize(currentUserTeams, UserAssociationInfo.class);
-                if (associationInfo.getGames().remove(gameId, teamId)) {
+                if (associationInfo.getGames().remove(gameId, UserAssociationInfo.GameAssociation.ofTeam(teamId))) {
                     db.setValueInMap(ID.ALL_USERS_TEAMS, userRef.getEmail(), serializationSupport.serialize(associationInfo));
                 } else {
                     throw new OasisRuntimeException("Given team id was not associated with user id!");
@@ -632,7 +632,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
             UserAssociationInfo userAssociationInfo = serializationSupport.deserialize(currentUserTeams, UserAssociationInfo.class);
             return userAssociationInfo.getGames().values().stream().map(userTeam -> {
-                String teamJson = db.getValueFromMap(ID.ALL_TEAMS, String.valueOf(userTeam));
+                String teamJson = db.getValueFromMap(ID.ALL_TEAMS, String.valueOf(userTeam.getTeam()));
                 return serializationSupport.deserialize(teamJson, TeamObject.class);
             }).collect(Collectors.toList());
         });

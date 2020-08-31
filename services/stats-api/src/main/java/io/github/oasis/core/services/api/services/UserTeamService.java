@@ -17,31 +17,34 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.services;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.model.UserObject;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-@ToString
-public class TeamObject {
+@Service
+public class UserTeamService {
 
-    private Integer gameId;
-    private Integer teamId;
-    private String name;
-    private String avatarUrl;
+    private final OasisRepository repository;
 
-    public TeamObject() {
+    public UserTeamService(OasisRepository repository) {
+        this.repository = repository;
     }
 
-    public TeamObject(int gameId, int teamId, String name) {
-        this.gameId = gameId;
-        this.teamId = teamId;
-        this.name = name;
+    public UserObject addUser(UserObject userObject) {
+        return repository.addUser(userObject);
+    }
+
+    public TeamObject addTeam(TeamObject teamObject) {
+        return repository.addTeam(teamObject);
+    }
+
+    public void addUserToTeam(long userId, int gameId, int teamId) {
+        repository.addUserToTeam(userId, gameId, teamId);
     }
 }

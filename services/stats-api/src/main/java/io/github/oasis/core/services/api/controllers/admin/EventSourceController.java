@@ -19,11 +19,9 @@
 
 package io.github.oasis.core.services.api.controllers.admin;
 
-import io.github.oasis.core.model.TeamObject;
-import io.github.oasis.core.model.UserObject;
+import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.services.api.controllers.AbstractController;
-import io.github.oasis.core.services.api.services.UserTeamService;
-import io.github.oasis.core.services.api.to.UserGameAssociationRequest;
+import io.github.oasis.core.services.api.services.EventSourceService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,36 +37,22 @@ import org.springframework.web.bind.annotation.RestController;
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
 )
-public class UserController extends AbstractController {
+public class EventSourceController extends AbstractController {
 
-    private final UserTeamService userTeamService;
+    private final EventSourceService eventSourceService;
 
-    public UserController(UserTeamService userTeamService) {
-        this.userTeamService = userTeamService;
+    public EventSourceController(EventSourceService eventSourceService) {
+        this.eventSourceService = eventSourceService;
     }
 
-    @PostMapping("/admin/users")
-    public UserObject registerUser(@RequestBody UserObject user) {
-        return userTeamService.addUser(user);
+    @PostMapping("/admin/event-sources")
+    public EventSource registerEventSource(@RequestBody EventSource eventSource) {
+        return eventSourceService.registerEventSource(eventSource);
     }
 
-    void readUserProfile() {}
-    void browseUsers() {}
-    void updateUser() {}
-    void deactivateUser() {}
-
-    @PostMapping("/admin/teams")
-    public TeamObject addTeam(@RequestBody TeamObject team) {
-        return userTeamService.addTeam(team);
+    @PostMapping("/admin/event-sources/{eventSourceId}/games/{gameId}")
+    public void assignEventSourceToGame(@PathVariable("eventSourceId") Integer eventSourceId,
+                                        @PathVariable("gameId") Integer gameId) {
+        eventSourceService.assignEventSourceToGame(eventSourceId, gameId);
     }
-
-    void updateTeam() {}
-
-    @PostMapping("/admin/users/{userId}/teams")
-    void addUserToTeam(@PathVariable("userId") Integer userId,
-                       @RequestBody UserGameAssociationRequest request) {
-        userTeamService.addUserToTeam(userId, request.getGameId(), request.getTeamId());
-    }
-
-    void addUsersToTeam() {}
 }

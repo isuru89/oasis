@@ -17,31 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.to;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
 @Getter
 @Setter
-@ToString
-public class TeamObject {
+public class UserGameAssociationRequest implements Serializable {
 
+    private Long userId;
     private Integer gameId;
     private Integer teamId;
-    private String name;
-    private String avatarUrl;
 
-    public TeamObject() {
-    }
-
-    public TeamObject(int gameId, int teamId, String name) {
-        this.gameId = gameId;
-        this.teamId = teamId;
-        this.name = name;
-    }
 }

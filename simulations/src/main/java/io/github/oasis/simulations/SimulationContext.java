@@ -20,9 +20,6 @@
 package io.github.oasis.simulations;
 
 import io.github.oasis.core.external.EventDispatchSupport;
-import io.github.oasis.core.external.EventStreamFactory;
-import io.github.oasis.core.external.SourceStreamSupport;
-import io.github.oasis.simulations.impl.ManualSourceStream;
 
 import java.io.File;
 
@@ -36,6 +33,15 @@ public class SimulationContext {
     private EventDispatchSupport dispatcher;
 
     private String apiUrl;
+    private String adminApiUrl;
+
+    public String getAdminApiUrl() {
+        return adminApiUrl;
+    }
+
+    public void setAdminApiUrl(String adminApiUrl) {
+        this.adminApiUrl = adminApiUrl;
+    }
 
     public String getApiUrl() {
         return apiUrl;
