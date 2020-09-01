@@ -17,24 +17,21 @@
  * under the License.
  */
 
-package io.github.oasis.core;
+package io.github.oasis.core.services;
 
-import lombok.Getter;
-import lombok.Setter;
+import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.model.EventSource;
 
-import java.io.Serializable;
+import java.security.KeyPair;
+import java.security.PublicKey;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class Game implements Serializable {
+public interface KeyGeneratorSupport {
 
-    private Integer id;
+    KeyPair generate(EventSource source) throws OasisException;
 
-    private String name;
-    private String motto;
-    private String description;
+    PublicKey readPublicKey(byte[] keyData) throws OasisException;
 
 }

@@ -20,14 +20,21 @@
 package io.github.oasis.core.services.api.controllers.admin;
 
 import io.github.oasis.core.Game;
+import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.GameService;
 import io.github.oasis.core.services.api.to.GameObjectRequest;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -46,15 +53,34 @@ public class GamesController extends AbstractController {
     }
 
     @PostMapping(path = "/admin/games")
-    public Game addGame(@RequestBody GameObjectRequest request) {
+    public Game addGame(@RequestBody GameObjectRequest request) throws OasisException {
+        return gameService.addGame(request);
+    }
 
+    @GetMapping(path = "/admin/games")
+    public List<Game> listGames() {
+        return gameService.listAllGames();
+    }
+
+    @GetMapping(path = "/admin/games/{gameId}")
+    public Game readGame(@PathVariable("gameId") Integer gameId) {
+        return gameService.readGame(gameId);
+    }
+
+    @PutMapping(path = "/admin/games/{gameId}")
+    public Game updateGame(@PathVariable("gameId") Integer gameId,
+                           @RequestBody GameObjectRequest request) throws OasisException {
         Game game = new Game();
+        game.setId(request.getId());
         game.setName(request.getName());
         game.setDescription(request.getDescription());
         game.setMotto(request.getMotto());
 
-        return gameService.addGame(game);
+        return gameService.updateGame(gameId, game);
     }
 
-
+    @DeleteMapping(path = "/admin/games/{gameId}")
+    public Game deleteGame(@PathVariable("gameId") Integer gameId) {
+        return gameService.deleteGame(gameId);
+    }
 }

@@ -17,24 +17,17 @@
  * under the License.
  */
 
-package io.github.oasis.core;
-
-import lombok.Getter;
-import lombok.Setter;
-
-import java.io.Serializable;
+package io.github.oasis.core.services.api.exceptions;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class Game implements Serializable {
+public final class ErrorCodes {
 
-    private Integer id;
+    public static final String GAME_ID_SHOULD_NOT_SPECIFIED = "G0001";
+    public static final String GAME_ID_NOT_SPECIFIED = "G0002";
+    public static final String GAME_EXCEEDED_MOTTO_LEN = "G0003";
+    public static final String GAME_EXCEEDED_DESC_LEND = "G0004";
 
-    private String name;
-    private String motto;
-    private String description;
-
+    public static final String EVENT_SOURCE_NO_NAME = "ES0001";
 }

@@ -17,24 +17,16 @@
  * under the License.
  */
 
-package io.github.oasis.core;
+package io.github.oasis.core.services.api.exceptions;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import java.io.Serializable;
+import io.github.oasis.core.services.exceptions.OasisApiException;
+import org.springframework.http.HttpStatus;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class Game implements Serializable {
-
-    private Integer id;
-
-    private String name;
-    private String motto;
-    private String description;
-
+public class DataValidationException extends OasisApiException {
+    public DataValidationException(String errorCode) {
+        super(errorCode, HttpStatus.BAD_REQUEST.value(), "");
+    }
 }

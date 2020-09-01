@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.services.api.handlers;
 
+import io.github.oasis.core.services.api.configs.ErrorMessages;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -42,8 +43,14 @@ public class OasisErrorHandler extends ResponseEntityExceptionHandler {
 
     private static final HttpHeaders ERROR_HEADERS = new HttpHeaders();
 
+    private final ErrorMessages errorMessages;
+
     static {
         ERROR_HEADERS.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+    }
+
+    public OasisErrorHandler(ErrorMessages errorMessages) {
+        this.errorMessages = errorMessages;
     }
 
     @ExceptionHandler(value = { OasisApiException.class })
@@ -52,6 +59,7 @@ public class OasisErrorHandler extends ResponseEntityExceptionHandler {
         data.put("timestamp", Instant.now().toString());
         data.put("status", ex.getStatusCode());
         data.put("errorCode", ex.getErrorCode());
+        data.put("errorCodeDescription", errorMessages.getErrorMessage(ex.getErrorCode()));
         data.put("message", ex.getMessage());
         if (request instanceof ServletWebRequest) {
             data.put("path", ((ServletWebRequest) request).getRequest().getServletPath());

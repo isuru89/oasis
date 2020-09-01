@@ -17,24 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.core;
+package io.github.oasis.core.services.api.configs;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class Game implements Serializable {
+@Component
+@ConfigurationProperties()
+@PropertySource("classpath:error.properties")
+public class ErrorMessages {
 
-    private Integer id;
+    private final Map<String, String> errors = new HashMap<>();
 
-    private String name;
-    private String motto;
-    private String description;
+    public Map<String, String> getErrors() {
+        return errors;
+    }
 
+    public String getErrorMessage(String errorCode) {
+        return errors.get(errorCode);
+    }
 }

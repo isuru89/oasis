@@ -22,7 +22,6 @@ package io.github.oasis.simulations;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.model.EventSource;
-import io.github.oasis.core.model.EventSourceSecrets;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserObject;
 import io.github.oasis.simulations.model.Team;
@@ -34,7 +33,13 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Signature;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.HashMap;
@@ -58,15 +63,9 @@ public class SimulationWithApi extends Simulation {
 
     @Override
     protected int createEventSourceToken() throws Exception {
-        sourceKeyPair = generateKeyPair();
         EventSource source = new EventSource();
         source.setName(SOURCE_NAME);
-        source.setToken(SOURCE_TOKEN);
         source.setGames(Set.of(GAME_ID));
-        EventSourceSecrets sourceSecrets = new EventSourceSecrets();
-        sourceSecrets.setPublicKey(Base64.getEncoder().encodeToString(sourceKeyPair.getPublic().getEncoded()));
-        sourceSecrets.setPrivateKey(Base64.getEncoder().encodeToString(sourceKeyPair.getPrivate().getEncoded()));
-        source.setSecrets(sourceSecrets);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(context.getAdminApiUrl() + "/admin/event-sources"))
@@ -81,6 +80,12 @@ public class SimulationWithApi extends Simulation {
             throw new IllegalStateException("Cannot add new event source!");
         }
         EventSource eventSource = gson.fromJson(result.body(), EventSource.class);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PublicKey publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(eventSource.getSecrets().getPublicKey())));
+        PrivateKey privateKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(eventSource.getSecrets().getPrivateKey())));
+        sourceKeyPair = new KeyPair(publicKey, privateKey);
+        SOURCE_TOKEN = eventSource.getToken();
         return eventSource.getId();
     }
 
@@ -220,5 +225,36 @@ public class SimulationWithApi extends Simulation {
         sha1withRSA.initSign(sourceKeyPair.getPrivate());
         sha1withRSA.update(data);
         return Base64.getEncoder().encodeToString(sha1withRSA.sign());
+    }
+
+    @Override
+    protected void cleanUpAllResources() {
+//        try {
+//            {
+//                System.out.println("Deleting event source...");
+//                HttpRequest request = HttpRequest.newBuilder()
+//                        .uri(URI.create(context.getAdminApiUrl() + "/admin/event-sources/" + SOURCE_ID))
+//                        .timeout(Duration.ofSeconds(2))
+//                        .header("Content-Type", "application/json")
+//                        .DELETE()
+//                        .build();
+//
+//                client.send(request, HttpResponse.BodyHandlers.discarding());
+//            }
+//
+//            {
+//                System.out.println("Deleting game...");
+//                HttpRequest request = HttpRequest.newBuilder()
+//                        .uri(URI.create(context.getAdminApiUrl() + "/admin/games/" + GAME_ID))
+//                        .timeout(Duration.ofSeconds(2))
+//                        .header("Content-Type", "application/json")
+//                        .DELETE()
+//                        .build();
+//
+//                client.send(request, HttpResponse.BodyHandlers.discarding());
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 }
