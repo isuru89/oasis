@@ -667,6 +667,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
             db.setValueInMap(baseKey, id, serializationSupport.serialize(elementDef));
             updateElementMetadata(elementDef, db);
+            setToElementByType(elementDef, db);
             return elementDef;
         });
     }
@@ -685,6 +686,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
             db.setValueInMap(baseKey, id, serializationSupport.serialize(elementDef));
             updateElementMetadata(elementDef, db);
+            setToElementByType(elementDef, db);
             return elementDef;
         });
     }
@@ -701,7 +703,9 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
             db.removeKeyFromMap(baseKey, id);
             db.removeKeyFromMap(ID.getBasicElementDefKeyForGame(gameId), id);
-            return serializationSupport.deserialize(valueFromMap, ElementDef.class);
+            ElementDef elementDef = serializationSupport.deserialize(valueFromMap, ElementDef.class);
+            db.removeKeyFromMap(ID.getElementMetadataByTypeForGame(gameId, elementDef.getType()), elementDef.getId());
+            return elementDef;
         });
     }
 
@@ -741,7 +745,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
             List<String> elementValues = db.getValuesFromMap(baseKey, ids.toArray(new String[0]));
             Map<String, SimpleElementDefinition> defs = new HashMap<>();
-            System.out.println(elementValues);
             for (String value : elementValues) {
                 SimpleElementDefinition def = serializationSupport.deserialize(value, SimpleElementDefinition.class);
                 if (def != null) {
@@ -749,6 +752,23 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
                 }
             }
             return defs;
+        });
+    }
+
+    @Override
+    public List<SimpleElementDefinition> listAllElementDefinitions(int gameId, String type) {
+        return withDbContext(db -> {
+            String baseKey = ID.getElementMetadataByTypeForGame(gameId, type);
+
+            Map<String, String> all = db.MAP(baseKey).getAll();
+            List<SimpleElementDefinition> elementDefinitions = new ArrayList<>();
+            if (all != null) {
+                for (Map.Entry<String, String> entry : all.entrySet()) {
+                    SimpleElementDefinition def = serializationSupport.deserialize(entry.getValue(), SimpleElementDefinition.class);
+                    elementDefinitions.add(def);
+                }
+            }
+            return elementDefinitions;
         });
     }
 
@@ -869,6 +889,13 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         SimpleElementDefinition simpleElementDefinition = def.getMetadata();
         db.setValueInMap(ID.getBasicElementDefKeyForGame(def.getGameId()),
                 def.getId(), serializationSupport.serialize(simpleElementDefinition));
+    }
+
+    private void setToElementByType(ElementDef def, DbContext db) {
+        SimpleElementDefinition metadata = def.getMetadata();
+        db.setValueInMap(ID.getElementMetadataByTypeForGame(def.getGameId(), def.getType()),
+                def.getId(),
+                serializationSupport.serialize(metadata));
     }
 
     private <T> T withDbContext(Handler<T> executor) {

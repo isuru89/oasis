@@ -82,6 +82,9 @@ public class GameService {
         return repository.listGames();
     }
 
+
+
+
     private void validateGameObjectForCreation(Game game) throws OasisApiException {
         if (Texts.isEmpty(game.getName())) {
             throw new DataValidationException(ErrorCodes.GAME_ID_SHOULD_NOT_SPECIFIED);

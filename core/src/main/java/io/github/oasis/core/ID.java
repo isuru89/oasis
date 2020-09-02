@@ -39,6 +39,7 @@ public final class ID {
     public static final String ALL_TEAMS_USERS = "oasis:teams:users";
     public static final String ALL_BASIC_ELEMENT_DEFINITIONS = "oasis:g%d:element:defs";
     public static final String ALL_DETAILED_ELEMENT_DEFINITIONS = "oasis:g%d:element:detailed";
+    public static final String ALL_ELEMENTS_BY_TYPE = "oasis:g%d:elementtype:%s";
     public static final String ALL_ATTRIBUTE_DEFINITIONS = "oasis:g%d:attributes:defs";
 
     public static String getDetailedElementDefKeyForGame(int gameId) {
@@ -51,6 +52,10 @@ public final class ID {
 
     public static String getGameAttributesInfoKey(int gameId) {
         return String.format(ALL_ATTRIBUTE_DEFINITIONS, gameId);
+    }
+
+    public static String getElementMetadataByTypeForGame(int gameId, String type) {
+        return String.format(ALL_ELEMENTS_BY_TYPE, gameId, type);
     }
 
 }

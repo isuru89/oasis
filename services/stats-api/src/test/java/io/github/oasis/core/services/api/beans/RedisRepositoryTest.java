@@ -699,6 +699,33 @@ class RedisRepositoryTest {
     }
 
     @Test
+    void listAllElementDefinitions() {
+        Assertions.assertEquals(0, redisRepository.listAllElementDefinitions(1, "points").size());
+
+        redisRepository.addNewElement(1, createElement("ELE0001", "Bonus Points", "points"));
+        redisRepository.addNewElement(1, createElement("ELE0002", "Star Points", "points"));
+        redisRepository.addNewElement(1, createElement("ELE0003", "Combo", "badges"));
+
+        Assertions.assertEquals(2, redisRepository.listAllElementDefinitions(1, "points").size());
+        Assertions.assertEquals(1, redisRepository.listAllElementDefinitions(1, "badges").size());
+        Assertions.assertEquals(0, redisRepository.listAllElementDefinitions(1, "challenges").size());
+
+        ElementDef bonusPoints = redisRepository.readElement(1, "ELE0001");
+        bonusPoints.getMetadata().setName("Bonus Points 2");
+        redisRepository.updateElement(1, bonusPoints.getId(), bonusPoints);
+
+        Assertions.assertEquals(2, redisRepository.listAllElementDefinitions(1, "points").size());
+        Assertions.assertTrue(redisRepository.listAllElementDefinitions(1, "points").stream().anyMatch(e -> e.getName().equals("Bonus Points 2")));
+        Assertions.assertEquals(1, redisRepository.listAllElementDefinitions(1, "badges").size());
+
+        // delete now
+        redisRepository.deleteElement(1, "ELE0001");
+        Assertions.assertEquals(1, redisRepository.listAllElementDefinitions(1, "points").size());
+        Assertions.assertEquals(1, redisRepository.listAllElementDefinitions(1, "badges").size());
+        Assertions.assertEquals(0, redisRepository.listAllElementDefinitions(1, "challenges").size());
+    }
+
+    @Test
     void readAttributeInfo() {
         redisRepository.addAttribute(1, new AttributeInfo(1, "Gold", 30));
         redisRepository.addAttribute(1, new AttributeInfo(2, "Silver", 20));

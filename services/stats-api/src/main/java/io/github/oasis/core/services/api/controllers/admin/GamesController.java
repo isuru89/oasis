@@ -46,7 +46,7 @@ import java.util.List;
 )
 public class GamesController extends AbstractController {
 
-    private GameService gameService;
+    private final GameService gameService;
 
     public GamesController(GameService gameService) {
         this.gameService = gameService;

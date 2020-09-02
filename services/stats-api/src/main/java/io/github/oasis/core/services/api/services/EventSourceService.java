@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import java.security.KeyPair;
 import java.util.Base64;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -79,6 +80,25 @@ public class EventSourceService {
     public void assignEventSourceToGame(int eventSource, int gameId) {
         repository.addEventSourceToGame(eventSource, gameId);
     }
+
+    public List<EventSource> listAllEventSources() {
+        List<EventSource> sources = repository.listAllEventSources();
+        for (EventSource source : sources) {
+            source.setSecrets(null);
+        }
+        return sources;
+    }
+
+    public List<EventSource> listAllEventSourcesOfGame(int gameId) {
+        List<EventSource> sources = repository.listAllEventSourcesOfGame(gameId);
+        for (EventSource source : sources) {
+            source.setSecrets(null);
+        }
+        return sources;
+    }
+
+
+
 
     private String generateRandomToken() {
         return UUID.randomUUID().toString().replace("-", "");

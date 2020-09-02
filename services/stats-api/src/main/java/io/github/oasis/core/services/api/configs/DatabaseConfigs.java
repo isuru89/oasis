@@ -20,6 +20,7 @@
 package io.github.oasis.core.services.api.configs;
 
 import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.db.redis.RedisDb;
@@ -42,6 +43,12 @@ public class DatabaseConfigs {
     @Value("${oasis.configs.path}")
     private String oasisConfigFilePath;
 
+    @Value("${oasis.db.retries:5}")
+    private int numberOfDbRetries;
+
+    @Value("${oasis.db.retry.interval:3000}")
+    private int dbRetryInterval;
+
     @Bean
     public OasisConfigs loadOasisConfigs() {
         if (Texts.isEmpty(oasisConfigFilePath)) {
@@ -58,10 +65,24 @@ public class DatabaseConfigs {
     }
 
     @Bean
-    public Db createDbService(OasisConfigs oasisConfigs) {
-        RedisDb redisDb = RedisDb.create(oasisConfigs);
-        redisDb.init();
-        return redisDb;
+    public Db createDbService(OasisConfigs oasisConfigs) throws Exception {
+        LOG.info("Trying to create database connection... (with retries {})", numberOfDbRetries);
+        return loadDbService(oasisConfigs, numberOfDbRetries);
+    }
+
+    private Db loadDbService(OasisConfigs oasisConfigs, int retries) throws Exception {
+        if (retries > 0) {
+            try {
+                RedisDb redisDb = RedisDb.create(oasisConfigs);
+                redisDb.init();
+                return redisDb;
+            } catch (Throwable e) {
+                LOG.error("Could not load redis connection! Trying again later after {}ms... [Remaining: {}]", dbRetryInterval, retries);
+                Thread.sleep(dbRetryInterval);
+                return loadDbService(oasisConfigs, retries - 1);
+            }
+        }
+        throw new OasisDbException("Unable to create a redis connection!");
     }
 
 }

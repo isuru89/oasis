@@ -23,3 +23,14 @@ services:
     depends_on:
       - redis
       - rabbit
+
+  stats-api:
+    image: oasis/stats-api
+    ports:
+      - "8010:8010"
+    volumes:
+      - "./buildscripts/stats-api.conf:/etc/oasis/stats-api.conf"
+      - "./buildscripts/stats-api.properties:/etc/oasis/stats-api.properties"
+    depends_on:
+      - redis
+      - rabbit

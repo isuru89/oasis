@@ -57,7 +57,12 @@ public class RedisDb implements Db {
         String host = configs.get("oasis.db.host", "localhost");
         int port = configs.getInt("oasis.db.port", 6379);
         int poolSize = configs.getInt("oasis.db.pool.max", 5);
+        int maxIdle = configs.getInt("oasis.db.pool.maxIdle", -1);
+        int minIdle = configs.getInt("oasis.db.pool.minIdle", -1);
+
         JedisPoolConfig poolConfig = new JedisPoolConfig();
+        if (maxIdle > 0) poolConfig.setMaxIdle(maxIdle);
+        if (minIdle > 0) poolConfig.setMinIdle(minIdle);
         poolConfig.setMaxTotal(poolSize);
         JedisPool pool = new JedisPool(poolConfig, host, port);
         return new RedisDb(pool);

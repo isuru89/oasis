@@ -25,11 +25,17 @@ import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.UserTeamService;
 import io.github.oasis.core.services.api.to.UserGameAssociationRequest;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -52,17 +58,25 @@ public class UserController extends AbstractController {
         return userTeamService.addUser(user);
     }
 
-    void readUserProfile() {}
-    void browseUsers() {}
-    void updateUser() {}
-    void deactivateUser() {}
+    @GetMapping("/admin/users/{userId}")
+    void readUserProfile(@PathVariable("userId") Integer userId) {}
+
+    @GetMapping("/admin/teams/{teamId}/users")
+    void browseUsers(@PathVariable("teamId") Integer teamId) {}
+
+    @PutMapping("/admin/users/{userId}")
+    void updateUser(@PathVariable("userId") Integer userId) {}
+
+    @DeleteMapping("/admin/users/{userId}")
+    void deactivateUser(@PathVariable("userId") Integer userId) {}
 
     @PostMapping("/admin/teams")
     public TeamObject addTeam(@RequestBody TeamObject team) {
         return userTeamService.addTeam(team);
     }
 
-    void updateTeam() {}
+    @PutMapping("/admin/teams/{teamId}")
+    void updateTeam(@PathVariable("teamId") Integer teamId) {}
 
     @PostMapping("/admin/users/{userId}/teams")
     void addUserToTeam(@PathVariable("userId") Integer userId,
@@ -70,5 +84,10 @@ public class UserController extends AbstractController {
         userTeamService.addUserToTeam(userId, request.getGameId(), request.getTeamId());
     }
 
-    void addUsersToTeam() {}
+    @GetMapping("/admin/users/{userId}/teams")
+    void browseTeams(@PathVariable("userId") Integer userId) {}
+
+    @PostMapping("/admin/teams/{teamId}/users")
+    void addUsersToTeam(@PathVariable("teamId") Integer teamId,
+                        @RequestParam("userIds") List<Integer> userIds) {}
 }
