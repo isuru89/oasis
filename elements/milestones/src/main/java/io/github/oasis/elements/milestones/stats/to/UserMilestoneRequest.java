@@ -19,39 +19,21 @@
 
 package io.github.oasis.elements.milestones.stats.to;
 
+import io.github.oasis.core.services.AbstractStatsApiRequest;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserMilestoneRequest {
+@Getter
+@Setter
+public class UserMilestoneRequest extends AbstractStatsApiRequest {
 
-    private Integer gameId;
     private Long userId;
 
     private List<String> milestoneIds;
 
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public List<String> getMilestoneIds() {
-        return milestoneIds;
-    }
-
-    public void setMilestoneIds(List<String> milestoneIds) {
-        this.milestoneIds = milestoneIds;
-    }
 }

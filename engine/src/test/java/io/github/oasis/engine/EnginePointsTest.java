@@ -20,9 +20,9 @@
 package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.element.points.stats.PointStats;
 import io.github.oasis.engine.element.points.stats.to.LeaderboardRequest;
 import io.github.oasis.engine.element.points.stats.to.LeaderboardSummary;
@@ -70,7 +70,7 @@ public class EnginePointsTest extends OasisEngineTest {
         String rid = "bonus.points";
         long tid = e1.getTeam();
         RedisAssert.assertMap(dbPool,
-                ID.getGameUserPointsSummary(TEvent.GAME_ID, U1),
+                PointIDs.getGameUserPointsSummary(TEvent.GAME_ID, U1),
                 RedisAssert.ofEntries("all", "35",
                         "source:" + e1.getSource(), "35",
                         "all:Y2020", "35",
@@ -104,7 +104,7 @@ public class EnginePointsTest extends OasisEngineTest {
                         "team:"+tid+":D20200403", "24"
                 ));
         RedisAssert.assertMap(dbPool,
-                ID.getGameUserPointsSummary(TEvent.GAME_ID, U2),
+                PointIDs.getGameUserPointsSummary(TEvent.GAME_ID, U2),
                 RedisAssert.ofEntries("all", "81",
                         "source:" + e1.getSource(), "81",
                         "all:Y2019", "48",
@@ -143,25 +143,25 @@ public class EnginePointsTest extends OasisEngineTest {
 
         int gameId = TEvent.GAME_ID;
         assertSorted(dbPool,
-                ID.getGameLeaderboard(gameId, "all", ""),
+                PointIDs.getGameLeaderboard(gameId, "all", ""),
                 ofSortedEntries(U1, 35, U2, 81));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "y", "Y2020"), ofSortedEntries(U1, 35, U2, 33));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "y", "Y2019"), ofSortedEntries(U2, 48));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "m", "M201912"), ofSortedEntries(U2, 48));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "m", "M202003"), ofSortedEntries(U1, 11));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "m", "M202004"), ofSortedEntries(U1, 24, U2, 33));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "q", "Q201904"), ofSortedEntries(U2, 48));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "q", "Q202001"), ofSortedEntries(U1, 11));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "q", "Q202002"), ofSortedEntries(U1, 24, U2, 33));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "w", "W201952"), ofSortedEntries(U2, 48));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "w", "W202013"), ofSortedEntries(U1, 11));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "w", "W202014"), ofSortedEntries(U1, 24, U2, 33));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20191226"), ofSortedEntries(U2, 48));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200325"), ofSortedEntries(U1, 11));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200402"), ofSortedEntries(U2, 33));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200403"), ofSortedEntries(U1, 24));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "y", "Y2020"), ofSortedEntries(U1, 35, U2, 33));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "y", "Y2019"), ofSortedEntries(U2, 48));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "m", "M201912"), ofSortedEntries(U2, 48));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "m", "M202003"), ofSortedEntries(U1, 11));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "m", "M202004"), ofSortedEntries(U1, 24, U2, 33));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "q", "Q201904"), ofSortedEntries(U2, 48));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "q", "Q202001"), ofSortedEntries(U1, 11));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "q", "Q202002"), ofSortedEntries(U1, 24, U2, 33));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "w", "W201952"), ofSortedEntries(U2, 48));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "w", "W202013"), ofSortedEntries(U1, 11));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "w", "W202014"), ofSortedEntries(U1, 24, U2, 33));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "d", "D20191226"), ofSortedEntries(U2, 48));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "d", "D20200325"), ofSortedEntries(U1, 11));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "d", "D20200402"), ofSortedEntries(U2, 33));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "d", "D20200403"), ofSortedEntries(U1, 24));
 
-        PointStats stats = new PointStats(dbPool, contextHelperSupport);
+        PointStats stats = new PointStats(dbPool, metadataSupport);
 
         compareStatReqRes("stats/points/points01-req.json", UserPointsRequest.class,
                 "stats/points/points01-res.json", UserPointSummary.class,
@@ -197,36 +197,36 @@ public class EnginePointsTest extends OasisEngineTest {
 
         int gameId = TEvent.GAME_ID;
         // team T1 leaderboards
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "all", ""), ofSortedEntries(U1, 39, U2, 65));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "y", "Y2019"), ofSortedEntries(U1, 6, U2, 37));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "y", "Y2020"), ofSortedEntries(U1, 33, U2, 28));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "m", "M201912"), ofSortedEntries(U1, 6, U2, 37));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "m", "M202004"), ofSortedEntries(U1, 33, U2, 28));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "q", "Q201904"), ofSortedEntries(U1, 6, U2, 37));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "q", "Q202002"), ofSortedEntries(U2, 28, U1, 33));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "w", "W201952"), ofSortedEntries(U1, 6, U2, 37));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "w", "W202014"), ofSortedEntries(U2, 28, U1, 33));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "d", "D20191226"), ofSortedEntries(U1, 6));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "d", "D20191227"), ofSortedEntries(U2, 37));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "d", "D20200402"), ofSortedEntries(U1, 33));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T1, "d", "D20200403"), ofSortedEntries(U2, 28));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "all", ""), ofSortedEntries(U1, 39, U2, 65));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "y", "Y2019"), ofSortedEntries(U1, 6, U2, 37));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "y", "Y2020"), ofSortedEntries(U1, 33, U2, 28));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "m", "M201912"), ofSortedEntries(U1, 6, U2, 37));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "m", "M202004"), ofSortedEntries(U1, 33, U2, 28));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "q", "Q201904"), ofSortedEntries(U1, 6, U2, 37));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "q", "Q202002"), ofSortedEntries(U2, 28, U1, 33));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "w", "W201952"), ofSortedEntries(U1, 6, U2, 37));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "w", "W202014"), ofSortedEntries(U2, 28, U1, 33));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "d", "D20191226"), ofSortedEntries(U1, 6));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "d", "D20191227"), ofSortedEntries(U2, 37));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "d", "D20200402"), ofSortedEntries(U1, 33));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T1, "d", "D20200403"), ofSortedEntries(U2, 28));
 
         // team T2 leaderboards
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "all", ""), ofSortedEntries(U1, 16, U2, 57));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "y", "Y2019"), ofSortedEntries(U1, 5, U2, 48));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "y", "Y2020"), ofSortedEntries(U1, 11, U2, 9));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "m", "M201912"), ofSortedEntries(U1, 5, U2, 48));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "m", "M202004"), ofSortedEntries(U1, 11, U2, 9));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "q", "Q201904"), ofSortedEntries(U1, 5, U2, 48));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "q", "Q202002"), ofSortedEntries(U2, 9, U1, 11));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "w", "W201952"), ofSortedEntries(U1, 5, U2, 48));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "w", "W202014"), ofSortedEntries(U2, 9, U1, 11));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20191226"), ofSortedEntries(U2, 48));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20191227"), ofSortedEntries(U1, 5));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20200402"), ofSortedEntries(U1, 11));
-        assertSorted(dbPool, ID.getGameTeamLeaderboard(gameId, T2, "d", "D20200403"), ofSortedEntries(U2, 9));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "all", ""), ofSortedEntries(U1, 16, U2, 57));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "y", "Y2019"), ofSortedEntries(U1, 5, U2, 48));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "y", "Y2020"), ofSortedEntries(U1, 11, U2, 9));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "m", "M201912"), ofSortedEntries(U1, 5, U2, 48));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "m", "M202004"), ofSortedEntries(U1, 11, U2, 9));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "q", "Q201904"), ofSortedEntries(U1, 5, U2, 48));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "q", "Q202002"), ofSortedEntries(U2, 9, U1, 11));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "w", "W201952"), ofSortedEntries(U1, 5, U2, 48));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "w", "W202014"), ofSortedEntries(U2, 9, U1, 11));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "d", "D20191226"), ofSortedEntries(U2, 48));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "d", "D20191227"), ofSortedEntries(U1, 5));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "d", "D20200402"), ofSortedEntries(U1, 11));
+        assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "d", "D20200403"), ofSortedEntries(U2, 9));
 
-        PointStats stats = new PointStats(dbPool, contextHelperSupport);
+        PointStats stats = new PointStats(dbPool, metadataSupport);
 
         compareStatReqRes("stats/leaderboard/team-basic-req.json", LeaderboardRequest.class,
                 "stats/leaderboard/team-basic-res.json", LeaderboardSummary.class,
@@ -264,7 +264,7 @@ public class EnginePointsTest extends OasisEngineTest {
         String rid = "timely.bonus.points";
         long tid = e1.getTeam();
         RedisAssert.assertMap(dbPool,
-                ID.getGameUserPointsSummary(TEvent.GAME_ID, U1),
+                PointIDs.getGameUserPointsSummary(TEvent.GAME_ID, U1),
                 RedisAssert.ofEntries("all", "36",
                         "source:" + e1.getSource(), "36",
                         "all:Y2020", "36",
@@ -290,7 +290,7 @@ public class EnginePointsTest extends OasisEngineTest {
                 ));
 
         RedisAssert.assertMap(dbPool,
-                ID.getGameUserPointsSummary(TEvent.GAME_ID, U2),
+                PointIDs.getGameUserPointsSummary(TEvent.GAME_ID, U2),
                 RedisAssert.ofEntries("all", "33",
                         "source:" + e1.getSource(), "33",
                         "all:Y2020", "33",
@@ -312,7 +312,7 @@ public class EnginePointsTest extends OasisEngineTest {
                         "team:"+tid+":D20200702", "33"
                 ));
 
-        PointStats stats = new PointStats(dbPool, contextHelperSupport);
+        PointStats stats = new PointStats(dbPool, metadataSupport);
 
         compareStatReqRes("stats/leaderboard/game-all-req.json", LeaderboardRequest.class,
                 "stats/leaderboard/game-all-res.json", LeaderboardSummary.class,

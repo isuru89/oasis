@@ -71,7 +71,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
                         rid + ":nextlevelvalue", "500"
                 ));
 
-        MilestoneStats stats = new MilestoneStats(dbPool);
+        MilestoneStats stats = new MilestoneStats(dbPool, metadataSupport);
 
         compareStatReqRes("stats/milestones/user-req.json", UserMilestoneRequest.class,
                 "stats/milestones/user-res.json", UserMilestoneSummary.class,
@@ -101,7 +101,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
-        MilestoneStats stats = new MilestoneStats(dbPool);
+        MilestoneStats stats = new MilestoneStats(dbPool, metadataSupport);
 
         compareStatReqRes("stats/milestones/game-users-req.json", GameMilestoneRequest.class,
                 "stats/milestones/game-users-res.json", GameMilestoneResponse.class,

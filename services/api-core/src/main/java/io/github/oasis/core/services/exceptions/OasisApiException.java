@@ -19,10 +19,12 @@
 
 package io.github.oasis.core.services.exceptions;
 
+import io.github.oasis.core.exception.OasisException;
+
 /**
  * @author Isuru Weerarathna
  */
-public class OasisApiException extends Exception {
+public class OasisApiException extends OasisException {
 
     private final String errorCode;
     private final int statusCode;

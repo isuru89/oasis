@@ -4,6 +4,11 @@
   "winnings": [
     {
       "challengeId": "CHG000001",
+      "challengeMetadata": {
+        "id": "CHG000001",
+        "name": "test.challenge.rule",
+        "description": "Game scoped challenge when some one scored more than 50"
+      },
       "rank": 2,
       "wonAt": 1584864900000,
       "causedEventId": "a0d05445-a007-4ab7-9999-6d81f29d889c"

@@ -20,7 +20,10 @@
 package io.github.oasis.core.services.api.configs;
 
 import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.ElementCRUDSupport;
 import io.github.oasis.core.services.OasisServiceApiFactory;
+import io.github.oasis.core.services.ServiceRegistrar;
+import io.github.oasis.core.services.annotations.RepresentsElementType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -29,6 +32,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
@@ -48,25 +52,51 @@ public class ElementsConfigs implements BeanDefinitionRegistryPostProcessor {
         List<? extends Class<? extends OasisServiceApiFactory>> apiServices = ServiceLoader.load(OasisServiceApiFactory.class)
                 .stream()
                 .map(ServiceLoader.Provider::type)
-                .peek(factory -> LOG.info("Found element statistic service: {}", factory.getName()))
+                .peek(factory -> LOG.info("Found service plugin: {}", factory.getName()))
                 .collect(Collectors.toList());
+
+        SpringServiceRegistrar registrar = new SpringServiceRegistrar(registry);
 
         try {
             for (Class<? extends OasisServiceApiFactory> apiService : apiServices) {
-                List<Class<? extends AbstractStatsApiService>> statsApiServices = apiService.getDeclaredConstructor().newInstance().getStatsApiServices();
-                for (Class<? extends AbstractStatsApiService> statsApiService : statsApiServices) {
-                    LOG.info("Registering Stats Service: {}...", statsApiService.getName());
-                    registry.registerBeanDefinition(apiService.getSimpleName(),
-                            BeanDefinitionBuilder.genericBeanDefinition(statsApiService).getBeanDefinition());
-                }
+                OasisServiceApiFactory pluginApiFactory = apiService.getDeclaredConstructor().newInstance();
+
+                pluginApiFactory.initialize(registrar);
             }
         } catch (ReflectiveOperationException ex) {
-            throw new BeanCreationException("Unable to load stats service!", ex);
+            throw new BeanCreationException("Unable to load plugin!", ex);
         }
     }
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 
+    }
+
+    private static class SpringServiceRegistrar implements ServiceRegistrar {
+        private final BeanDefinitionRegistry registry;
+
+        private SpringServiceRegistrar(BeanDefinitionRegistry registry) {
+            this.registry = registry;
+        }
+
+        @Override
+        public void registerStatsService(Class<? extends AbstractStatsApiService> apiService) {
+            LOG.info("Registering Stats Service: {}...", apiService.getName());
+            registry.registerBeanDefinition(apiService.getSimpleName(),
+                    BeanDefinitionBuilder.genericBeanDefinition(apiService).getBeanDefinition());
+        }
+
+        @Override
+        public void registerElementCRUD(Class<? extends ElementCRUDSupport> crudClass) {
+            RepresentsElementType representsElementType = crudClass.getAnnotation(RepresentsElementType.class);
+            if (representsElementType == null) {
+                throw new BeanDefinitionValidationException("Element CRUD service must be annotated with @"
+                        + RepresentsElementType.class.getSimpleName() + " annotation!");
+            }
+            LOG.info("Registering Element CRUD Service: elementType: {}, impl: {}...", representsElementType.value(), crudClass.getSimpleName());
+            registry.registerBeanDefinition(representsElementType.value(),
+                    BeanDefinitionBuilder.genericBeanDefinition(crudClass).getBeanDefinition());
+        }
     }
 }

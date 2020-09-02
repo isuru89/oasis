@@ -19,9 +19,12 @@
 
 package io.github.oasis.simulations.model;
 
+import lombok.ToString;
+
 /**
  * @author Isuru Weerarathna
  */
+@ToString
 public class Team {
 
     private long id;

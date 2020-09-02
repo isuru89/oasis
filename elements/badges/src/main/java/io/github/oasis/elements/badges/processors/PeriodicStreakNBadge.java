@@ -20,7 +20,6 @@
 package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.RuleContext;
@@ -28,6 +27,7 @@ import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
+import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
 import io.github.oasis.elements.badges.signals.HistogramBadgeRemovalSignal;
@@ -76,7 +76,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
 
     @Override
     public List<BadgeSignal> process(Event event, PeriodicStreakNRule rule, ExecutionContext context, DbContext db) {
-        String badgeKey = ID.getBadgeHistogramKey(event.getGameId(), event.getUser(), rule.getId());
+        String badgeKey = BadgeIDs.getBadgeHistogramKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(badgeKey);
         long timestamp = event.getTimestamp() - (event.getTimestamp() % rule.getTimeUnit());
         BigDecimal value = evaluateForValue(event, context).setScale(SCALE, RoundingMode.HALF_UP);
@@ -102,7 +102,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
             if (rule.isConsecutive()) {
                 return fold(seq, event, rule, db, false);
             } else {
-                String metaBadgesInfoKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+                String metaBadgesInfoKey = BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser());
                 Mapped map = db.MAP(metaBadgesInfoKey);
                 String totalSubKey = String.format("%s:total", rule.getId());
                 String firstSubKey = String.format("%s:first", rule.getId());
@@ -139,7 +139,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
             if (rule.isConsecutive()) {
                 return unfold(seq, event, timestamp, rule, db);
             } else {
-                String metaBadgesInfoKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+                String metaBadgesInfoKey = BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser());
                 Mapped map = db.MAP(metaBadgesInfoKey);
                 String totalSubKey = String.format("%s:total", rule.getId());
                 String firstSubKey = String.format("%s:first", rule.getId());
@@ -218,7 +218,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
 
         long lastBadgeTs = 0L;
         int lastBadgeStreak = 0;
-        String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+        String badgeMetaKey = BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser());
         List<String> badgeInfos = db.getValuesFromMap(badgeMetaKey, getMetaEndTimeKey(rule), getMetaStreakKey(rule));
         lastBadgeTs = asLong(badgeInfos.get(0));
         lastBadgeStreak = asInt(badgeInfos.get(1));

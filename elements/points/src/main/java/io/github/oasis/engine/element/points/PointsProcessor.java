@@ -20,7 +20,6 @@
 package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.RuleContext;
@@ -63,7 +62,7 @@ public class PointsProcessor extends AbstractProcessor<PointRule, PointSignal> {
         }
 
         if (rule.isCapped()) {
-            String baseKey = ID.getGameUserPointsSummary(event.getGameId(), event.getUser());
+            String baseKey = PointIDs.getGameUserPointsSummary(event.getGameId(), event.getUser());
             TimeOffset tcx = new TimeOffset(event.getTimestamp(), context.getUserTimeZone());
             String childKey = PointsSink.RULE_PFX + rule.getPointId() + COLON + tcx.getByType(rule.getCapDuration());
             BigDecimal residue = db.incrementCapped(score, baseKey, childKey, rule.getCapLimit());

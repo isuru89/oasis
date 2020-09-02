@@ -1,17 +1,23 @@
 {
-  "gameId": 1,
   "records": [
     {
       "rank": 1,
       "userId": 2,
-      "displayName": "Thierry Hines",
+      "userMetadata": {
+        "userId": 2,
+        "displayName": "Thierry Hines"
+      },
       "score": 33.0
     },
     {
       "rank": 2,
       "userId": 1,
-      "displayName": "Jakob Floyd",
+      "userMetadata": {
+        "userId": 1,
+        "displayName": "Jakob Floyd"
+      },
       "score": 12.0
     }
-  ]
+  ],
+  "gameId": 1
 }

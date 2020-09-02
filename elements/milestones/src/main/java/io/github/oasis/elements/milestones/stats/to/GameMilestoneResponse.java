@@ -19,6 +19,12 @@
 
 package io.github.oasis.elements.milestones.stats.to;
 
+import io.github.oasis.core.UserMetadata;
+import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.services.AbstractStatsApiResponse;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -26,104 +32,36 @@ import java.util.Map;
 /**
  * @author Isuru Weerarathna
  */
-public class GameMilestoneResponse {
-
-    private Integer gameId;
+@Getter
+@Setter
+public class GameMilestoneResponse extends AbstractStatsApiResponse {
 
     private Map<String, MilestoneSummary> summaries;
     private List<UserMilestoneRecord> records;
 
+    @Getter
+    @Setter
     public static class UserMilestoneRecord {
         private long userId;
+        private UserMetadata userMetadata;
         private long rank;
         private BigDecimal score;
 
-        public UserMilestoneRecord() {
-        }
-
-        public UserMilestoneRecord(long userId, long rank, BigDecimal score) {
+        public UserMilestoneRecord(long userId, UserMetadata userMetadata, long rank, BigDecimal score) {
             this.userId = userId;
             this.rank = rank;
             this.score = score;
-        }
-
-        public long getUserId() {
-            return userId;
-        }
-
-        public void setUserId(long userId) {
-            this.userId = userId;
-        }
-
-        public long getRank() {
-            return rank;
-        }
-
-        public void setRank(long rank) {
-            this.rank = rank;
-        }
-
-        public BigDecimal getScore() {
-            return score;
-        }
-
-        public void setScore(BigDecimal score) {
-            this.score = score;
+            this.userMetadata = userMetadata;
         }
     }
 
+    @Getter
+    @Setter
     public static class MilestoneSummary {
         private String milestoneId;
+        private SimpleElementDefinition milestoneMetadata;
 
         private Map<String, Map<String, Long>> byTeams;
         private Map<String, Long> all;
-
-        public String getMilestoneId() {
-            return milestoneId;
-        }
-
-        public void setMilestoneId(String milestoneId) {
-            this.milestoneId = milestoneId;
-        }
-
-        public Map<String, Map<String, Long>> getByTeams() {
-            return byTeams;
-        }
-
-        public void setByTeams(Map<String, Map<String, Long>> byTeams) {
-            this.byTeams = byTeams;
-        }
-
-        public Map<String, Long> getAll() {
-            return all;
-        }
-
-        public void setAll(Map<String, Long> all) {
-            this.all = all;
-        }
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Map<String, MilestoneSummary> getSummaries() {
-        return summaries;
-    }
-
-    public void setSummaries(Map<String, MilestoneSummary> summaries) {
-        this.summaries = summaries;
-    }
-
-    public List<UserMilestoneRecord> getRecords() {
-        return records;
-    }
-
-    public void setRecords(List<UserMilestoneRecord> records) {
-        this.records = records;
     }
 }

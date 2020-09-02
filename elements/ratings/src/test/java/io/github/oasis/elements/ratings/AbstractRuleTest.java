@@ -20,7 +20,6 @@
 package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
@@ -42,7 +41,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -88,12 +86,6 @@ public abstract class AbstractRuleTest {
 
     @AfterEach
     public void afterEach() {
-        try (DbContext db = pool.createContext()) {
-            Map<String, String> keys = db.MAP(ID.getUserBadgesMetaKey(1, 0L)).getAll();
-            System.out.println("Badges: " + keys);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     protected void submitOrder(BiConsumer<Event, ExecutionContext> eventConsumer, Event... events) {

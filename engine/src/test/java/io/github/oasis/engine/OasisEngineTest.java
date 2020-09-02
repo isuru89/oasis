@@ -24,18 +24,20 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonParser;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.GameDef;
+import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.model.UserObject;
 import io.github.oasis.core.parser.GameParserYaml;
-import io.github.oasis.core.services.api.beans.OasisContextHelper;
-import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
+import io.github.oasis.core.services.api.beans.GsonSerializer;
+import io.github.oasis.core.services.api.beans.RedisRepository;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.db.redis.RedisEventLoader;
 import io.github.oasis.elements.badges.BadgesModuleFactory;
@@ -88,7 +90,7 @@ public class OasisEngineTest {
     protected OasisEngine engine;
 
     protected Db dbPool;
-    protected OasisContextHelperSupport contextHelperSupport;
+    protected RedisRepository metadataSupport;
 
     @BeforeEach
     public void setup() throws IOException, OasisException {
@@ -97,7 +99,7 @@ public class OasisEngineTest {
         dbPool = RedisDb.create(oasisConfigs);
         dbPool.init();
 
-        contextHelperSupport = new OasisContextHelper(dbPool);
+        metadataSupport = new RedisRepository(dbPool, new GsonSerializer(gson));
 
         context.setModuleFactoryList(List.of(
                 RatingsModuleFactory.class,
@@ -114,12 +116,19 @@ public class OasisEngineTest {
 
         try (DbContext db = dbPool.createContext()) {
             db.allKeys("*").forEach(db::removeKey);
-            db.setValueInMap(ID.ALL_USERS_NAMES, "1", "Jakob Floyd");
-            db.setValueInMap(ID.ALL_USERS_NAMES, "2", "Thierry Hines");
-            db.setValueInMap(ID.ALL_USERS_NAMES, "3", "Ray Glenn");
-            db.setValueInMap(ID.ALL_USERS_NAMES, "4", "Lilia Stewart");
-            db.setValueInMap(ID.ALL_USERS_NAMES, "5", "Archer Roberts");
+
+            metadataSupport.addUser(new UserObject(1, "Jakob Floyd", "jakob@oasis.io"));
+            metadataSupport.addUser(new UserObject(2, "Thierry Hines", "thierry@oasis.io"));
+            metadataSupport.addUser(new UserObject(3, "Ray Glenn", "ray@oasis.io"));
+            metadataSupport.addUser(new UserObject(4, "Lilia Stewart", "lilia@oasis.io"));
+            metadataSupport.addUser(new UserObject(5, "Archer Roberts", "archer@oasis.io"));
+
+            setupDbBefore(db);
         }
+    }
+
+    public void setupDbBefore(DbContext db) throws IOException {
+
     }
 
     @AfterEach
@@ -158,6 +167,13 @@ public class OasisEngineTest {
         List<AbstractRule> rules = new ArrayList<>();
         for (PersistedDef def : ruleDefinitions) {
             AbstractRule rule = engine.getContext().getParsers().parseToRule(def);
+            ElementDef elementDef = new ElementDef();
+            elementDef.setId(rule.getId());
+            elementDef.setType(def.getType());
+            elementDef.setData(def.getData());
+            elementDef.setGameId(gameId);
+            elementDef.setMetadata(new SimpleElementDefinition(rule.getId(), rule.getName(), rule.getDescription()));
+            metadataSupport.addNewElement(gameId, elementDef);
             engine.submit(Messages.createRuleAddMessage(gameId, rule, null));
             rules.add(rule);
         }

@@ -19,12 +19,17 @@
 
 package io.github.oasis.elements.challenges.stats.to;
 
+import io.github.oasis.core.services.AbstractStatsApiRequest;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * @author Isuru Weerarathna
  */
-public class UserChallengeRequest {
+@Getter
+@Setter
+public class UserChallengeRequest extends AbstractStatsApiRequest {
 
-    private Integer gameId;
     private Long userId;
 
     private Long startTime;
@@ -43,59 +48,4 @@ public class UserChallengeRequest {
         return offset != null && limit != null;
     }
 
-    public boolean isDescendingOrder() {
-        return descendingOrder;
-    }
-
-    public void setDescendingOrder(boolean descendingOrder) {
-        this.descendingOrder = descendingOrder;
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Long startTime) {
-        this.startTime = startTime;
-    }
-
-    public Long getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Long endTime) {
-        this.endTime = endTime;
-    }
-
-    public Integer getOffset() {
-        return offset;
-    }
-
-    public void setOffset(Integer offset) {
-        this.offset = offset;
-    }
-
-    public Integer getLimit() {
-        return limit;
-    }
-
-    public void setLimit(Integer limit) {
-        this.limit = limit;
-    }
 }

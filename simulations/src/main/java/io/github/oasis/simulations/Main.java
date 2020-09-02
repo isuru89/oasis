@@ -22,7 +22,6 @@ package io.github.oasis.simulations;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.configs.OasisConfigs;
-import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.EventDispatchSupport;
 import io.github.oasis.db.redis.RedisDb;
@@ -58,6 +57,7 @@ public class Main {
         simulationContext.setGameDataDir(new File("./simulations/stackoverflow"));
         simulationContext.setDispatcher(dispatcher);
         simulationContext.setApiUrl("http://localhost:8050");
+        simulationContext.setAdminApiUrl("http://localhost:8081/api");
         Simulation simulation = new SimulationWithApi();
         simulation.run(simulationContext);
 

@@ -20,12 +20,12 @@
 package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
+import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
 import io.github.oasis.elements.badges.signals.ConditionalBadgeSignal;
@@ -68,7 +68,7 @@ public class ConditionalBadgeProcessor extends AbstractBadgeProcessor<Conditiona
         if (first.isPresent()) {
             ConditionalBadgeRule.Condition condition = first.get();
             int attrId = condition.getAttribute();
-            String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+            String badgeMetaKey = BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser());
             String attrKey = rule.getId() + ATTR_DELIMETER + attrId;
             Mapped map = db.MAP(badgeMetaKey);
             long count = map.incrementByOne(attrKey);

@@ -1,5 +1,6 @@
 package io.github.oasis.services.events.db;
 
+import io.github.oasis.core.ID;
 import io.github.oasis.services.events.model.EventSource;
 import io.github.oasis.services.events.model.UserInfo;
 import io.vertx.core.AsyncResult;
@@ -17,7 +18,7 @@ import java.util.Objects;
  */
 public class RedisServiceImpl implements RedisService {
 
-    private static final String OASIS_USERS_KEY = "oasis.users";
+    private static final String OASIS_USERS_KEY = ID.ALL_USERS_TEAMS;
 
     private RedisAPI api;
 

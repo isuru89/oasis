@@ -3,6 +3,11 @@
   "summaries": {
     "MILE000001": {
       "milestoneId": "MILE000001",
+      "milestoneMetadata": {
+        "id": "MILE000001",
+        "name": "Milestone-Basic",
+        "description": "This is a basic milestone which accumulates using event values."
+      },
       "byTeams": {
         "1": {
           "1": 0,

@@ -19,49 +19,23 @@
 
 package io.github.oasis.elements.badges.stats.to;
 
+import io.github.oasis.core.services.AbstractStatsApiRequest;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserBadgeRequest {
+@Getter
+@Setter
+public class UserBadgeRequest extends AbstractStatsApiRequest {
 
-    private Integer gameId;
     private Long userId;
 
     private Set<Integer> attributeFilters;
 
     private Set<String> ruleFilters;
 
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Set<Integer> getAttributeFilters() {
-        return attributeFilters;
-    }
-
-    public void setAttributeFilters(Set<Integer> attributeFilters) {
-        this.attributeFilters = attributeFilters;
-    }
-
-    public Set<String> getRuleFilters() {
-        return ruleFilters;
-    }
-
-    public void setRuleFilters(Set<String> ruleFilters) {
-        this.ruleFilters = ruleFilters;
-    }
 }

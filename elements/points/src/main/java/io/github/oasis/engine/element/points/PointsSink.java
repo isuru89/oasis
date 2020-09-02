@@ -19,7 +19,6 @@
 
 package io.github.oasis.engine.element.points;
 
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
@@ -85,7 +84,7 @@ public class PointsSink extends AbstractSink {
             // by source-wise
             String sourcePfx = SOURCE_PFX + signal.getEventScope().getSourceId();
 
-            db.incrementAll(score, ID.getGameUserPointsSummary(gameId, userId),
+            db.incrementAll(score, PointIDs.getGameUserPointsSummary(gameId, userId),
                 Arrays.asList(ALL,
                     ALL_PFX + tcx.getYear(),
                     ALL_PFX + tcx.getMonth(),
@@ -112,18 +111,18 @@ public class PointsSink extends AbstractSink {
             String member = String.valueOf(userId);
             db.incrementAllInSorted(score,
                     member,
-                    Arrays.asList(ID.getGameLeaderboard(gameId, ALL, EMPTY),
-                            ID.getGameLeaderboard(gameId, ANNUALLY, tcx.getYear()),
-                            ID.getGameLeaderboard(gameId, QUARTERLY, tcx.getQuarter()),
-                            ID.getGameLeaderboard(gameId, MONTHLY, tcx.getMonth()),
-                            ID.getGameLeaderboard(gameId, WEEKLY, tcx.getWeek()),
-                            ID.getGameLeaderboard(gameId, DAILY, tcx.getDay()),
-                            ID.getGameTeamLeaderboard(gameId, teamId, ALL, EMPTY),
-                            ID.getGameTeamLeaderboard(gameId, teamId, ANNUALLY, tcx.getYear()),
-                            ID.getGameTeamLeaderboard(gameId, teamId, QUARTERLY, tcx.getQuarter()),
-                            ID.getGameTeamLeaderboard(gameId, teamId, MONTHLY, tcx.getMonth()),
-                            ID.getGameTeamLeaderboard(gameId, teamId, WEEKLY, tcx.getWeek()),
-                            ID.getGameTeamLeaderboard(gameId, teamId, DAILY, tcx.getDay())
+                    Arrays.asList(PointIDs.getGameLeaderboard(gameId, ALL, EMPTY),
+                            PointIDs.getGameLeaderboard(gameId, ANNUALLY, tcx.getYear()),
+                            PointIDs.getGameLeaderboard(gameId, QUARTERLY, tcx.getQuarter()),
+                            PointIDs.getGameLeaderboard(gameId, MONTHLY, tcx.getMonth()),
+                            PointIDs.getGameLeaderboard(gameId, WEEKLY, tcx.getWeek()),
+                            PointIDs.getGameLeaderboard(gameId, DAILY, tcx.getDay()),
+                            PointIDs.getGameTeamLeaderboard(gameId, teamId, ALL, EMPTY),
+                            PointIDs.getGameTeamLeaderboard(gameId, teamId, ANNUALLY, tcx.getYear()),
+                            PointIDs.getGameTeamLeaderboard(gameId, teamId, QUARTERLY, tcx.getQuarter()),
+                            PointIDs.getGameTeamLeaderboard(gameId, teamId, MONTHLY, tcx.getMonth()),
+                            PointIDs.getGameTeamLeaderboard(gameId, teamId, WEEKLY, tcx.getWeek()),
+                            PointIDs.getGameTeamLeaderboard(gameId, teamId, DAILY, tcx.getDay())
                     ));
 
         } catch (IOException e) {

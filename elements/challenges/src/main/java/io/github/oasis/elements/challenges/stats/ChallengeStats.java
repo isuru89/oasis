@@ -19,14 +19,20 @@
 
 package io.github.oasis.elements.challenges.stats;
 
-import io.github.oasis.core.ID;
+import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
+import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.annotations.OasisQueryService;
+import io.github.oasis.core.services.annotations.OasisStatEndPoint;
+import io.github.oasis.core.services.annotations.QueryPayload;
+import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Utils;
+import io.github.oasis.elements.challenges.ChallengeIDs;
 import io.github.oasis.elements.challenges.stats.to.GameChallengeRequest;
 import io.github.oasis.elements.challenges.stats.to.GameChallengesSummary;
 import io.github.oasis.elements.challenges.stats.to.GameChallengesSummary.ChallengeSummary;
@@ -38,25 +44,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
  */
-public class ChallengeStats {
+@OasisQueryService
+public class ChallengeStats extends AbstractStatsApiService {
 
     private static final String SCRIPT_CHALLENGE_LOG = "O.CHLNGLOG";
 
-    private Db dbPool;
-
-    public ChallengeStats(Db dbPool) {
-        this.dbPool = dbPool;
+    public ChallengeStats(Db dbPool, OasisMetadataSupport contextSupport) {
+        super(dbPool, contextSupport);
     }
 
-    public Object getGameChallengesSummary(GameChallengeRequest request) throws Exception {
-        try (DbContext db = dbPool.createContext()) {
+    @OasisStatEndPoint(path = "/elements/challenges/game")
+    public Object getGameChallengesSummary(@QueryPayload GameChallengeRequest request) throws Exception {
+        try (DbContext db = getDbPool().createContext()) {
 
-            String mainKey = ID.getGameChallengesKey(request.getGameId());
+            String mainKey = ChallengeIDs.getGameChallengesKey(request.getGameId());
             Mapped challengeSummary = db.MAP(mainKey);
 
             GameChallengesSummary summary = new GameChallengesSummary();
@@ -69,11 +76,15 @@ public class ChallengeStats {
                         .collect(Collectors.toList());
 
                 List<String> values = challengeSummary.getValues(subKeys.toArray(new String[0]));
+                Map<String, SimpleElementDefinition> challengeDefs = getContextHelper().readElementDefinitions(request.getGameId(), request.getChallengeIds());
+
                 for (int i = 0; i < values.size(); i++) {
                     String[] parts = subKeys.get(i).split("[:]");
 
                     ChallengeSummary theChallenge = new ChallengeSummary(parts[0], Numbers.asInt(values.get(i)));
-                    Sorted winnerLog = db.SORTED(ID.getGameChallengeKey(request.getGameId(), parts[0]));
+                    theChallenge.setChallengeMetadata(challengeDefs.get(parts[0]));
+
+                    Sorted winnerLog = db.SORTED(ChallengeIDs.getGameChallengeKey(request.getGameId(), parts[0]));
 
                     if (request.isCustomRange()) {
                         theChallenge.setWinners(winnerLog
@@ -101,12 +112,13 @@ public class ChallengeStats {
         }
     }
 
+    @OasisStatEndPoint(path = "/elements/challenges/user")
     @SuppressWarnings("unchecked")
-    public Object getUserChallengeLog(UserChallengeRequest request) throws Exception {
-        try (DbContext db = dbPool.createContext()) {
+    public Object getUserChallengeLog(@QueryPayload UserChallengeRequest request) throws Exception {
+        try (DbContext db = getDbPool().createContext()) {
 
-            String mainKey = ID.getGameUseChallengesLog(request.getGameId(), request.getUserId());
-            String summaryRefKey = ID.getGameUseChallengesSummary(request.getGameId(), request.getUserId());
+            String mainKey = ChallengeIDs.getGameUseChallengesLog(request.getGameId(), request.getUserId());
+            String summaryRefKey = ChallengeIDs.getGameUseChallengesSummary(request.getGameId(), request.getUserId());
 
             UserChallengesLog winLog = new UserChallengesLog();
             winLog.setGameId(request.getGameId());
@@ -128,6 +140,12 @@ public class ChallengeStats {
                 long wonAt = Numbers.asLong(values.get(i + 1));
 
                 records.add(new UserChallengesLog.ChallengeRecord(parts[0], Numbers.asInt(parts[1]), wonAt, parts[2]));
+            }
+
+            Set<String> challengeIds = records.stream().map(UserChallengesLog.ChallengeRecord::getChallengeId).collect(Collectors.toSet());
+            Map<String, SimpleElementDefinition> challengeMap = getContextHelper().readElementDefinitions(request.getGameId(), challengeIds);
+            for (UserChallengesLog.ChallengeRecord record : records) {
+                record.setChallengeMetadata(challengeMap.get(record.getChallengeId()));
             }
 
             winLog.setWinnings(records);

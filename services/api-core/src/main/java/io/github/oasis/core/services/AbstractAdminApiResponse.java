@@ -19,31 +19,18 @@
 
 package io.github.oasis.core.services;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class AbstractAdminApiResponse implements Serializable {
 
     private Integer gameId;
 
-    private boolean success;
-
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
 }

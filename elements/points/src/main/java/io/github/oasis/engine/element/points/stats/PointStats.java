@@ -19,8 +19,7 @@
 
 package io.github.oasis.engine.element.points.stats;
 
-import io.github.oasis.core.ID;
-import io.github.oasis.core.User;
+import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
@@ -34,10 +33,11 @@ import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
 import io.github.oasis.core.services.exceptions.ApiQueryException;
 import io.github.oasis.core.services.exceptions.OasisApiException;
-import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
+import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Timestamps;
 import io.github.oasis.core.utils.Utils;
+import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.element.points.stats.to.LeaderboardRequest;
 import io.github.oasis.engine.element.points.stats.to.LeaderboardSummary;
 import io.github.oasis.engine.element.points.stats.to.UserPointSummary;
@@ -66,7 +66,7 @@ public class PointStats extends AbstractStatsApiService {
     private static final String LEADERBOARD_RANK_REVERSE = "O.PLEADRANKSREV";
     private static final String WITH_CARDINALITY = "withcard";
 
-    public PointStats(Db pool, OasisContextHelperSupport contextSupport) {
+    public PointStats(Db pool, OasisMetadataSupport contextSupport) {
         super(pool, contextSupport);
     }
 
@@ -76,7 +76,7 @@ public class PointStats extends AbstractStatsApiService {
 
         try (DbContext db = getDbPool().createContext()) {
 
-            String key = ID.getGameUserPointsSummary(request.getGameId(), request.getUserId());
+            String key = PointIDs.getGameUserPointsSummary(request.getGameId(), request.getUserId());
 
             Mapped points = db.MAP(key);
             BigDecimal allPoints = Numbers.asDecimal(points.getValue("all"));
@@ -115,9 +115,9 @@ public class PointStats extends AbstractStatsApiService {
                 : String.valueOf(request.getTimeRange().name().charAt(0)).toLowerCase();
             String duration = request.getTimeRange() == TimeScope.ALL ? null : trait.toUpperCase() + request.getTime();
             if (request.isTeamScoped()) {
-                leadKey = ID.getGameTeamLeaderboard(request.getGameId(), request.getTeamId(), trait, duration);
+                leadKey = PointIDs.getGameTeamLeaderboard(request.getGameId(), request.getTeamId(), trait, duration);
             } else {
-                leadKey = ID.getGameLeaderboard(request.getGameId(), trait, duration);
+                leadKey = PointIDs.getGameLeaderboard(request.getGameId(), trait, duration);
             }
 
             LeaderboardSummary summary = new LeaderboardSummary();
@@ -136,14 +136,14 @@ public class PointStats extends AbstractStatsApiService {
             }
 
             List<String> userIds = records.stream().map(Record::getMember).collect(Collectors.toList());
-            Map<String, User> userNameMap = getContextHelper().readUsersByIdStrings(userIds);
+            Map<String, UserMetadata> userNameMap = getContextHelper().readUsersByIdStrings(userIds);
 
             for (int i = 0; i < records.size(); i++) {
                 Record record = records.get(i);
                 summary.addRecord(new LeaderboardSummary.LeaderboardRecord(
                         request.getOffset() + i,
                         Long.parseLong(record.getMember()),
-                        userNameMap.get(record.getMember()).getDisplayName(),
+                        userNameMap.get(record.getMember()),
                         BigDecimal.valueOf(record.getScore())));
             }
 
@@ -165,9 +165,9 @@ public class PointStats extends AbstractStatsApiService {
                         String trait = timeScope.getTrait();
                         String duration = timeScope == TimeScope.ALL ? null : Timestamps.formatKey(request.getDate(), timeScope);
                         if (request.isTeamScoped()) {
-                            return ID.getGameTeamLeaderboard(request.getGameId(), request.getTeamId(), trait, duration);
+                            return PointIDs.getGameTeamLeaderboard(request.getGameId(), request.getTeamId(), trait, duration);
                         }
-                        return ID.getGameLeaderboard(request.getGameId(), trait, duration);
+                        return PointIDs.getGameLeaderboard(request.getGameId(), trait, duration);
                     })
                     .toArray(String[]::new);
 

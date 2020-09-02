@@ -20,16 +20,17 @@
 package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.elements.challenges.ChallengeIDs;
 import io.github.oasis.elements.challenges.ChallengeOverEvent;
 import io.github.oasis.elements.challenges.stats.ChallengeStats;
 import io.github.oasis.elements.challenges.stats.to.GameChallengeRequest;
 import io.github.oasis.elements.challenges.stats.to.GameChallengesSummary;
 import io.github.oasis.elements.challenges.stats.to.UserChallengeRequest;
 import io.github.oasis.elements.challenges.stats.to.UserChallengesLog;
+import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -65,28 +66,28 @@ public class EngineChallengesTest extends OasisEngineTest {
         int gameId = e1.getGameId();
         String rid = "CHG000001";
         try (DbContext db = dbPool.createContext()) {
-            System.out.println("u1" + db.MAP(ID.getGameUserPointsSummary(gameId, U1)).getAll());
-            System.out.println("u2" + db.MAP(ID.getGameUserPointsSummary(gameId, U2)).getAll());
-            System.out.println("u4" + db.MAP(ID.getGameUserPointsSummary(gameId, U4)).getAll());
+            System.out.println("u1" + db.MAP(PointIDs.getGameUserPointsSummary(gameId, U1)).getAll());
+            System.out.println("u2" + db.MAP(PointIDs.getGameUserPointsSummary(gameId, U2)).getAll());
+            System.out.println("u4" + db.MAP(PointIDs.getGameUserPointsSummary(gameId, U4)).getAll());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         RedisAssert.assertSortedRef(dbPool,
-                ID.getGameUseChallengesLog(gameId, U1),
-                ID.getGameUseChallengesSummary(gameId, U1),
+                ChallengeIDs.getGameUseChallengesLog(gameId, U1),
+                ChallengeIDs.getGameUseChallengesSummary(gameId, U1),
                 ofSortedEntries(rid + ":1:" + e1.getExternalId(), e1.getTimestamp()));
         RedisAssert.assertSortedRef(dbPool,
-                ID.getGameUseChallengesLog(gameId, U2),
-                ID.getGameUseChallengesSummary(gameId, U2),
+                ChallengeIDs.getGameUseChallengesLog(gameId, U2),
+                ChallengeIDs.getGameUseChallengesSummary(gameId, U2),
                 ofSortedEntries(rid + ":2:" + e2.getExternalId(), e2.getTimestamp()));
         RedisAssert.assertSortedRef(dbPool,
-                ID.getGameUseChallengesLog(gameId, U4),
-                ID.getGameUseChallengesSummary(gameId, U4),
+                ChallengeIDs.getGameUseChallengesLog(gameId, U4),
+                ChallengeIDs.getGameUseChallengesSummary(gameId, U4),
                 ofSortedEntries(rid + ":3:" + e4.getExternalId(), e4.getTimestamp()));
 
         String score = "300";
-        RedisAssert.assertMap(dbPool, ID.getGameUserPointsSummary(e1.getGameId(), U1),
+        RedisAssert.assertMap(dbPool, PointIDs.getGameUserPointsSummary(e1.getGameId(), U1),
                 RedisAssert.ofEntries("all:D20200321", score,
                         "all:M202003", score,
                         "all:Q202001", score,
@@ -107,7 +108,7 @@ public class EngineChallengesTest extends OasisEngineTest {
                         "team:1:Y2020", score,
                         "team:1", score));
         score = "200";
-        RedisAssert.assertMap(dbPool, ID.getGameUserPointsSummary(e1.getGameId(), U2),
+        RedisAssert.assertMap(dbPool, PointIDs.getGameUserPointsSummary(e1.getGameId(), U2),
                 RedisAssert.ofEntries(
                         "all:D20200322", score,
                         "all:M202003", score,
@@ -129,7 +130,7 @@ public class EngineChallengesTest extends OasisEngineTest {
                         "team:1:Y2020", score,
                         "team:1", score));
         score = "100";
-        RedisAssert.assertMap(dbPool, ID.getGameUserPointsSummary(e1.getGameId(), U4),
+        RedisAssert.assertMap(dbPool, PointIDs.getGameUserPointsSummary(e1.getGameId(), U4),
                 RedisAssert.ofEntries(
                         "all:D20200401", score,
                         "all:M202004", score,
@@ -152,7 +153,7 @@ public class EngineChallengesTest extends OasisEngineTest {
                         "team:1", score));
 
 
-        ChallengeStats stats = new ChallengeStats(dbPool);
+        ChallengeStats stats = new ChallengeStats(dbPool, metadataSupport);
 
         compareStatReqRes("stats/challenges/user-log-req.json", UserChallengeRequest.class,
                 "stats/challenges/user-log-res.json", UserChallengesLog.class,
@@ -186,7 +187,7 @@ public class EngineChallengesTest extends OasisEngineTest {
 
         int gameId = TEvent.GAME_ID;
         assertSorted(dbPool,
-                ID.getGameChallengeKey(gameId, ruleId),
+                ChallengeIDs.getGameChallengeKey(gameId, ruleId),
                 ofSortedEntries(
                         "u" + U1, e2.getTimestamp(),
                         "u" + U3, e3.getTimestamp(),
@@ -195,14 +196,14 @@ public class EngineChallengesTest extends OasisEngineTest {
                 ));
 
         assertSorted(dbPool,
-                ID.getGameLeaderboard(gameId, "all", ""),
+                PointIDs.getGameLeaderboard(gameId, "all", ""),
                 ofSortedEntries(U1, 300,
                         U3, 200,
                         U5, 100));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200324"), ofSortedEntries(U1, 300));
-        assertSorted(dbPool, ID.getGameLeaderboard(gameId, "d", "D20200325"), ofSortedEntries(U5, 100, U3, 200));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "d", "D20200324"), ofSortedEntries(U1, 300));
+        assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "d", "D20200325"), ofSortedEntries(U5, 100, U3, 200));
 
-        ChallengeStats stats = new ChallengeStats(dbPool);
+        ChallengeStats stats = new ChallengeStats(dbPool, metadataSupport);
 
         compareStatReqRes("stats/challenges/game-summary-req.json", GameChallengeRequest.class,
                 "stats/challenges/game-summary-res.json", GameChallengesSummary.class,
@@ -235,12 +236,12 @@ public class EngineChallengesTest extends OasisEngineTest {
         int gameId = TEvent.GAME_ID;
         String ruleId = "CHG000001";
         assertSorted(dbPool,
-                ID.getGameChallengeKey(gameId, ruleId),
+                ChallengeIDs.getGameChallengeKey(gameId, ruleId),
                 ofSortedEntries(
                         "u" + U1, e2.getTimestamp(),
                         "u" + U3, e3.getTimestamp(),
                         "u" + U5, e7.getTimestamp()
                 ));
-        assertKeyNotExist(dbPool, ID.getGameLeaderboard(gameId, "all", ""));
+        assertKeyNotExist(dbPool, PointIDs.getGameLeaderboard(gameId, "all", ""));
     }
 }

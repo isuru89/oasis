@@ -1,18 +1,24 @@
 {
-  "gameId": 1,
   "teamId": 100,
   "records": [
     {
       "rank": 1,
       "userId": 1,
-      "displayName": "Jakob Floyd",
+      "userMetadata": {
+        "userId": 1,
+        "displayName": "Jakob Floyd"
+      },
       "score": 39.0
     },
     {
       "rank": 2,
       "userId": 2,
-      "displayName": "Thierry Hines",
+      "userMetadata": {
+        "userId": 2,
+        "displayName": "Thierry Hines"
+      },
       "score": 65.0
     }
-  ]
+  ],
+  "gameId": 1
 }

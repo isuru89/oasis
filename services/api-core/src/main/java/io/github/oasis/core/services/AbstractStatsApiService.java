@@ -20,7 +20,7 @@
 package io.github.oasis.core.services;
 
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
+import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 
 /**
  * @author Isuru Weerarathna
@@ -28,9 +28,9 @@ import io.github.oasis.core.services.helpers.OasisContextHelperSupport;
 public abstract class AbstractStatsApiService {
 
     private final Db dbPool;
-    private final OasisContextHelperSupport contextHelper;
+    private final OasisMetadataSupport contextHelper;
 
-    public AbstractStatsApiService(Db dbPool, OasisContextHelperSupport contextHelper) {
+    public AbstractStatsApiService(Db dbPool, OasisMetadataSupport contextHelper) {
         this.dbPool = dbPool;
         this.contextHelper = contextHelper;
     }
@@ -39,7 +39,7 @@ public abstract class AbstractStatsApiService {
         return dbPool;
     }
 
-    public OasisContextHelperSupport getContextHelper() {
+    public OasisMetadataSupport getContextHelper() {
         return contextHelper;
     }
 }

@@ -19,17 +19,33 @@
 
 package io.github.oasis.simulations;
 
+import io.github.oasis.core.Game;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.model.UserObject;
+import io.github.oasis.simulations.model.Team;
+import io.github.oasis.simulations.model.User;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Signature;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -44,6 +60,128 @@ public class SimulationWithApi extends Simulation {
             .followRedirects(HttpClient.Redirect.NORMAL)
             .connectTimeout(Duration.ofSeconds(20))
             .build();
+
+    @Override
+    protected int createEventSourceToken() throws Exception {
+        EventSource source = new EventSource();
+        source.setName(SOURCE_NAME);
+        source.setGames(Set.of(GAME_ID));
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(context.getAdminApiUrl() + "/admin/event-sources"))
+                .timeout(Duration.ofSeconds(2))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(source)))
+                .build();
+
+        HttpResponse<String> result = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (result.statusCode() > 200) {
+            System.out.println(result.statusCode());
+            throw new IllegalStateException("Cannot add new event source!");
+        }
+        EventSource eventSource = gson.fromJson(result.body(), EventSource.class);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PublicKey publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(eventSource.getSecrets().getPublicKey())));
+        PrivateKey privateKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(eventSource.getSecrets().getPrivateKey())));
+        sourceKeyPair = new KeyPair(publicKey, privateKey);
+        SOURCE_TOKEN = eventSource.getToken();
+        return eventSource.getId();
+    }
+
+    @Override
+    protected int createGame() throws Exception {
+        Game game = new Game();
+        game.setName("Stackoverflow-Game");
+        game.setMotto("Keep Help!");
+        game.setDescription("This game simulated stackoverflow reputation system");
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(context.getAdminApiUrl() + "/admin/games"))
+                .timeout(Duration.ofSeconds(2))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(game)))
+                .build();
+
+        HttpResponse<String> result = client.send(request, HttpResponse.BodyHandlers.ofString());
+        if (result.statusCode() > 200) {
+            throw new IllegalStateException("Cannot add new event source!");
+        }
+        return gson.fromJson(result.body(), Game.class).getId();
+    }
+
+    @Override
+    protected Map<String, Integer> persistTeams(List<Team> teams) throws IOException {
+        try {
+            Map<String, Integer> teamMap = new HashMap<>();
+            for (Team team : teams) {
+                TeamObject teamObject = new TeamObject();
+                teamObject.setGameId(GAME_ID);
+                teamObject.setName(team.getName());
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(context.getAdminApiUrl() + "/admin/teams"))
+                        .timeout(Duration.ofSeconds(2))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(teamObject)))
+                        .build();
+                HttpResponse<String> result = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (result.statusCode() >= 400) {
+                    throw new IOException("Unable to add team " + team);
+                }
+                TeamObject dbTeam = gson.fromJson(result.body(), TeamObject.class);
+                System.out.println("Added team " + dbTeam);
+                teamMap.put(dbTeam.getName(), dbTeam.getTeamId());
+            }
+            return teamMap;
+        } catch (InterruptedException e) {
+            throw new IOException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    protected void persistUsers(List<User> users) throws IOException {
+        try {
+            for (User user : users) {
+                System.out.println(user);
+                UserObject userObject = new UserObject();
+                userObject.setEmail(user.getEmail());
+                userObject.setDisplayName(user.getName());
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(context.getAdminApiUrl() + "/admin/users"))
+                        .timeout(Duration.ofSeconds(2))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(userObject)))
+                        .build();
+                HttpResponse<String> result = client.send(request, HttpResponse.BodyHandlers.ofString());
+                if (result.statusCode() >= 400) {
+                    throw new IOException("Unable to add user " + user);
+                }
+                UserObject dbUser = gson.fromJson(result.body(), UserObject.class);
+                System.out.println("Added user " + dbUser);
+
+                long teamId = user.getGames().get(String.valueOf(GAME_ID)).getTeam();
+                Map<String, Object> dataReq = Map.of("userId", dbUser.getUserId(),
+                        "gameId", GAME_ID,
+                        "teamId", teamId);
+
+                request = HttpRequest.newBuilder()
+                        .uri(URI.create(context.getAdminApiUrl() + "/admin/users/" + dbUser.getUserId() + "/teams"))
+                        .timeout(Duration.ofSeconds(2))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(dataReq)))
+                        .build();
+                HttpResponse<Void> resultTeamAdd = client.send(request, HttpResponse.BodyHandlers.discarding());
+                if (result.statusCode() >= 400) {
+                    throw new IOException("Unable to add user to team " + user);
+                }
+                System.out.println("Added user to team " + dbUser.getUserId() + " to team " + teamId);
+            }
+        } catch (InterruptedException e) {
+            throw new IOException(e.getMessage(), e);
+        }
+    }
 
     @Override
     protected void announceGame(PersistedDef def) throws Exception {
@@ -87,5 +225,36 @@ public class SimulationWithApi extends Simulation {
         sha1withRSA.initSign(sourceKeyPair.getPrivate());
         sha1withRSA.update(data);
         return Base64.getEncoder().encodeToString(sha1withRSA.sign());
+    }
+
+    @Override
+    protected void cleanUpAllResources() {
+//        try {
+//            {
+//                System.out.println("Deleting event source...");
+//                HttpRequest request = HttpRequest.newBuilder()
+//                        .uri(URI.create(context.getAdminApiUrl() + "/admin/event-sources/" + SOURCE_ID))
+//                        .timeout(Duration.ofSeconds(2))
+//                        .header("Content-Type", "application/json")
+//                        .DELETE()
+//                        .build();
+//
+//                client.send(request, HttpResponse.BodyHandlers.discarding());
+//            }
+//
+//            {
+//                System.out.println("Deleting game...");
+//                HttpRequest request = HttpRequest.newBuilder()
+//                        .uri(URI.create(context.getAdminApiUrl() + "/admin/games/" + GAME_ID))
+//                        .timeout(Duration.ofSeconds(2))
+//                        .header("Content-Type", "application/json")
+//                        .DELETE()
+//                        .build();
+//
+//                client.send(request, HttpResponse.BodyHandlers.discarding());
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 }

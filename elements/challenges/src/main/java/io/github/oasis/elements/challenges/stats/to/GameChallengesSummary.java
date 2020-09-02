@@ -19,34 +19,25 @@
 
 package io.github.oasis.elements.challenges.stats.to;
 
+import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.services.AbstractStatsApiResponse;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
-public class GameChallengesSummary {
-
-    private Integer gameId;
+@Getter
+@Setter
+public class GameChallengesSummary extends AbstractStatsApiResponse {
 
     private Map<String, ChallengeSummary> challenges;
 
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Map<String, ChallengeSummary> getChallenges() {
-        return challenges;
-    }
-
-    public void setChallenges(Map<String, ChallengeSummary> challenges) {
-        this.challenges = challenges;
-    }
-
+    @Getter
+    @Setter
     public static class ChallengeWinner {
         private Long userId;
         private long wonAt;
@@ -55,78 +46,22 @@ public class GameChallengesSummary {
             this.userId = userId;
             this.wonAt = wonAt;
         }
-
-        public Long getUserId() {
-            return userId;
-        }
-
-        public void setUserId(Long userId) {
-            this.userId = userId;
-        }
-
-        public long getWonAt() {
-            return wonAt;
-        }
-
-        public void setWonAt(long wonAt) {
-            this.wonAt = wonAt;
-        }
     }
 
+    @Getter
+    @Setter
     public static class ChallengeSummary {
         private String challengeId;
+        private SimpleElementDefinition challengeMetadata;
         private int winnerCount;
 
         private List<ChallengeWinner> winners;
         private List<ChallengeWinner> latestWinners;
         private List<ChallengeWinner> firstWinners;
 
-        public ChallengeSummary() {
-        }
-
         public ChallengeSummary(String challengeId, int count) {
             this.challengeId = challengeId;
             this.winnerCount = count;
-        }
-
-        public List<ChallengeWinner> getWinners() {
-            return winners;
-        }
-
-        public void setWinners(List<ChallengeWinner> winners) {
-            this.winners = winners;
-        }
-
-        public List<ChallengeWinner> getLatestWinners() {
-            return latestWinners;
-        }
-
-        public void setLatestWinners(List<ChallengeWinner> latestWinners) {
-            this.latestWinners = latestWinners;
-        }
-
-        public List<ChallengeWinner> getFirstWinners() {
-            return firstWinners;
-        }
-
-        public void setFirstWinners(List<ChallengeWinner> firstWinners) {
-            this.firstWinners = firstWinners;
-        }
-
-        public String getChallengeId() {
-            return challengeId;
-        }
-
-        public void setChallengeId(String challengeId) {
-            this.challengeId = challengeId;
-        }
-
-        public int getWinnerCount() {
-            return winnerCount;
-        }
-
-        public void setWinnerCount(int winnerCount) {
-            this.winnerCount = winnerCount;
         }
     }
 

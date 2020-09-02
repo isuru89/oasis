@@ -20,13 +20,13 @@
 package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Sorted;
+import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
 import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
@@ -66,11 +66,11 @@ public class TimeBoundedStreakNBadge extends StreakNBadgeProcessor {
     }
 
     private List<BadgeSignal> nonConsecutiveAccept(Event event, TimeBoundedStreakNRule rule, ExecutionContext context, DbContext db) {
-        String key = ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
+        String key = BadgeIDs.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId());
         Sorted sortedRange = db.SORTED(key);
         long ts = event.getTimestamp();
         if (rule.getCriteria().matches(event, rule, context)) {
-            String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+            String badgeMetaKey = BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser());
             String lastOffering = db.getValueFromMap(badgeMetaKey, rule.getId() + ":lasttime");  // <timestamp>:<streak>:<id>
             long lastTimeOffered = 0L;
             if (lastOffering != null) {
@@ -135,7 +135,7 @@ public class TimeBoundedStreakNBadge extends StreakNBadgeProcessor {
             int currStreak = countMap.ceilingEntry(ts).getValue() - prevEntry.getValue() + 1;
             int streakIndex = streakList.indexOf(currStreak);
             if (streakIndex >= 0) {
-                String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+                String badgeMetaKey = BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser());
                 long badgeStartTs = prevEntry.getKey();
                 Record startTuple = tupleMap.get(prevEntry.getKey());
                 String firstId;
@@ -160,7 +160,7 @@ public class TimeBoundedStreakNBadge extends StreakNBadgeProcessor {
                                 + COLON + signal.getStartId());
 
                 if (rule.isLastStreak(currStreak)) {
-                    db.SORTED(ID.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId())).removeRangeByScore(0, ts);
+                    db.SORTED(BadgeIDs.getUserBadgeStreakKey(event.getGameId(), event.getUser(), rule.getId())).removeRangeByScore(0, ts);
                 }
 
                 // no more streaks to find
@@ -210,7 +210,7 @@ public class TimeBoundedStreakNBadge extends StreakNBadgeProcessor {
 
         long lastBadgeTs = 0L;
         int lastBadgeStreak = 0;
-        String badgeMetaKey = ID.getUserBadgesMetaKey(event.getGameId(), event.getUser());
+        String badgeMetaKey = BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser());
         List<String> badgeInfos = db.getValuesFromMap(badgeMetaKey, getMetaEndTimeKey(this.rule), getMetaStreakKey(this.rule));
         lastBadgeTs = asLong(badgeInfos.get(0));
         lastBadgeStreak = asInt(badgeInfos.get(1));
@@ -251,7 +251,7 @@ public class TimeBoundedStreakNBadge extends StreakNBadgeProcessor {
         TimeBoundedStreakNRule options = (TimeBoundedStreakNRule) rule;
         List<BadgeSignal> signals = new ArrayList<>();
         long startTs = Math.max(0, ts - options.getTimeUnit());
-        String badgeSpecKey = ID.getUserBadgeSpecKey(event.getGameId(), event.getUser(), options.getId());
+        String badgeSpecKey = BadgeIDs.getUserBadgeSpecKey(event.getGameId(), event.getUser(), options.getId());
         List<Record> badgesInRange = db.SORTED(badgeSpecKey).getRangeByScoreWithScores(startTs, ts);
         if (!badgesInRange.isEmpty()) {
             badgesInRange.stream().filter(t -> {

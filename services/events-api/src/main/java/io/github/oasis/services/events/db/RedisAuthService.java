@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.events.db;
 
+import io.github.oasis.core.ID;
 import io.github.oasis.services.events.auth.AuthService;
 import io.github.oasis.services.events.model.EventSource;
 import io.vertx.core.AsyncResult;
@@ -41,10 +42,10 @@ public class RedisAuthService implements AuthService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisAuthService.class);
 
-    private static final String SOURCE_KEY = "oasis.sources";
+    private static final String SOURCE_KEY = ID.ALL_SOURCES_INDEX;
     private static final String EMPTY = "";
 
-    private RedisAPI redis;
+    private final RedisAPI redis;
 
     public static RedisAuthService create(Redis client, Handler<AsyncResult<AuthService>> handler) {
         return new RedisAuthService(client, handler);

@@ -19,26 +19,32 @@
 
 package io.github.oasis.elements.challenges.stats.to;
 
+import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.services.AbstractStatsApiResponse;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public class UserChallengesLog {
+@Getter
+@Setter
+public class UserChallengesLog extends AbstractStatsApiResponse {
 
-    private Integer gameId;
     private Long userId;
 
     private List<ChallengeRecord> winnings;
 
+    @Getter
+    @Setter
     public static class ChallengeRecord {
         private String challengeId;
+        private SimpleElementDefinition challengeMetadata;
         private int rank;
         private long wonAt;
         private String causedEventId;
-
-        public ChallengeRecord() {
-        }
 
         public ChallengeRecord(String challengeId, int rank, long wonAt, String causedEventId) {
             this.challengeId = challengeId;
@@ -46,61 +52,5 @@ public class UserChallengesLog {
             this.wonAt = wonAt;
             this.causedEventId = causedEventId;
         }
-
-        public String getChallengeId() {
-            return challengeId;
-        }
-
-        public void setChallengeId(String challengeId) {
-            this.challengeId = challengeId;
-        }
-
-        public int getRank() {
-            return rank;
-        }
-
-        public void setRank(int rank) {
-            this.rank = rank;
-        }
-
-        public long getWonAt() {
-            return wonAt;
-        }
-
-        public void setWonAt(long wonAt) {
-            this.wonAt = wonAt;
-        }
-
-        public String getCausedEventId() {
-            return causedEventId;
-        }
-
-        public void setCausedEventId(String causedEventId) {
-            this.causedEventId = causedEventId;
-        }
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public List<ChallengeRecord> getWinnings() {
-        return winnings;
-    }
-
-    public void setWinnings(List<ChallengeRecord> winnings) {
-        this.winnings = winnings;
     }
 }

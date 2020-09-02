@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.events.model;
 
+import io.github.oasis.services.events.auth.PublicKeyCache;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -29,13 +30,10 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 
 import java.security.InvalidKeyException;
-import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +44,7 @@ import java.util.stream.Collectors;
 @DataObject
 public class EventSource implements User {
 
-    private static final String KEY_ALGORITHM = "RSA";
+    public static final String KEY_ALGORITHM = "RSA";
     public static final String KEY = "key";
     public static final String TOKEN = "token";
     public static final String GAMES = "games";
@@ -59,36 +57,22 @@ public class EventSource implements User {
     private PublicKey publicKey;
 
     public static EventSource create(String token, JsonObject otherData) {
-        byte[] rawKey = Base64.getDecoder().decode(otherData.getString(KEY));
         JsonObject data = new JsonObject()
                 .put(TOKEN, token)
                 .mergeIn(otherData);
-        try {
-            PublicKey publicKey = KeyFactory.getInstance(KEY_ALGORITHM)
-                    .generatePublic(new X509EncodedKeySpec(rawKey));
-            return new EventSource(data).setPublicKey(publicKey);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException("Invalid key data!", e);
-        }
+
+        PublicKeyCache.getInstance().createOrLoad(token, otherData.getString(KEY));
+        return new EventSource(data);
     }
 
     public EventSource(JsonObject ref) {
         this.data = ref;
-        try {
-            JsonArray games = ref.getJsonArray(GAMES);
-            this.gameIds = games.stream()
-                    .map(g -> Integer.parseInt(g.toString()))
-                    .collect(Collectors.toList());
-            this.publicKey = KeyFactory.getInstance(KEY_ALGORITHM)
-                    .generatePublic(new X509EncodedKeySpec(ref.getBinary(KEY)));
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException("Invalid key data!", e);
-        }
-    }
-
-    EventSource setPublicKey(PublicKey publicKey) {
-        this.publicKey = publicKey;
-        return this;
+        JsonArray games = ref.getJsonArray(GAMES);
+        this.gameIds = games.stream()
+                .map(g -> Integer.parseInt(g.toString()))
+                .collect(Collectors.toList());
+        this.publicKey = PublicKeyCache.getInstance().readKey(ref.getString(TOKEN))
+                .orElseThrow(() -> new IllegalArgumentException("No key found for application token!"));
     }
 
     public JsonObject toJson() {

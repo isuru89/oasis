@@ -29,6 +29,16 @@
 			<artifactId>oasis-mod-points</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.github.oasis</groupId>
+			<artifactId>oasis-mod-badges</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.oasis</groupId>
+			<artifactId>oasis-mod-milestones</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -76,10 +86,14 @@
 	</dependencyManagement>
 
 	<build>
+		<finalName>oasis-stats-api</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

@@ -32,6 +32,8 @@ public interface Mapped {
 
     Map<String, String> getAll();
 
+    boolean existKey(String key);
+
     String getValue(String key);
     default int getValueAsInt(String key) {
         return Numbers.asInt(getValue(key));
@@ -66,6 +68,9 @@ public interface Mapped {
     void remove(String key);
 
     List<String> getValues(String... keys);
+
+    <T> PaginatedResult<T> search(String pattern, int count, String cursor);
+    <T> PaginatedResult<T> search(String pattern, int count);
 
     /**
      * Returns true if key did not exist and newly created.

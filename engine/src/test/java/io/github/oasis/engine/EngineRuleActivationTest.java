@@ -20,10 +20,10 @@
 package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.engine.actors.cmds.Messages;
+import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.element.points.PointRule;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,7 @@ public class EngineRuleActivationTest extends OasisEngineTest {
         String rid = rule.getPointId();
         long tid = e1.getTeam();
         RedisAssert.assertMap(dbPool,
-                ID.getGameUserPointsSummary(TEvent.GAME_ID, U1),
+                PointIDs.getGameUserPointsSummary(TEvent.GAME_ID, U1),
                 RedisAssert.ofEntries("all", "24",
                         "source:" + e1.getSource(), "24",
                         "all:Y2020", "24",

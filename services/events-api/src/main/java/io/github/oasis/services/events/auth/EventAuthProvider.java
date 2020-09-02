@@ -41,7 +41,7 @@ public class EventAuthProvider implements AuthProvider {
 
     private static final HttpStatusException NO_SOURCE = new HttpStatusException(401);
 
-    private AuthService authService;
+    private final AuthService authService;
 
     public EventAuthProvider(AuthService authService) {
         this.authService = authService;

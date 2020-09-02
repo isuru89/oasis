@@ -19,11 +19,14 @@
 
 package io.github.oasis.simulations.model;
 
+import lombok.ToString;
+
 import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
+@ToString
 public class User {
 
     private long id;
@@ -63,18 +66,19 @@ public class User {
         this.games = games;
     }
 
+    @ToString
     public static class UserGame {
-        private long team;
+        private int team;
 
-        public UserGame(long teamId) {
+        public UserGame(int teamId) {
             this.team = teamId;
         }
 
-        public long getTeam() {
+        public int getTeam() {
             return team;
         }
 
-        public void setTeam(long teamId) {
+        public void setTeam(int teamId) {
             this.team = teamId;
         }
     }

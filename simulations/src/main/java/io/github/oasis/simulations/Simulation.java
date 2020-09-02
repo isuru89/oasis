@@ -22,10 +22,10 @@ package io.github.oasis.simulations;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.oasis.core.Event;
+import io.github.oasis.core.Game;
 import io.github.oasis.core.external.EventDispatchSupport;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.element.points.PointDef;
-import io.github.oasis.simulations.model.Game;
 import io.github.oasis.simulations.model.Team;
 import io.github.oasis.simulations.model.User;
 import org.yaml.snakeyaml.Yaml;
@@ -63,9 +63,9 @@ import java.util.stream.Collectors;
 public class Simulation implements Closeable {
 
     static final String SOURCE_NAME = "oasis.simulation.internal";
-    static final String SOURCE_TOKEN = UUID.randomUUID().toString().replace("-", "");
-    static final int SOURCE_ID = 1;
-    static final int GAME_ID = 1001;
+    static String SOURCE_TOKEN;
+    static int SOURCE_ID = 1;
+    static int GAME_ID = 1001;
     static final int TIME_RESOLUTION = 84000 * 5;
 
     protected final Gson gson = new Gson();
@@ -79,6 +79,7 @@ public class Simulation implements Closeable {
 
     private List<User> users = new ArrayList<>();
     private List<String> acceptedEvents = new ArrayList<>();
+    Map<String, Integer> teamMapping;
 
     public void run(SimulationContext context) {
         try {
@@ -88,11 +89,11 @@ public class Simulation implements Closeable {
 
             bootstrapDb();
 
-            createEventSourceToken();
+            GAME_ID = createGame();
 
-            createGame();
+            SOURCE_ID = createEventSourceToken();
 
-            createTeams();
+            teamMapping = createTeams();
 
             createUsers();
 
@@ -107,7 +108,12 @@ public class Simulation implements Closeable {
             throw new RuntimeException(e.getMessage(), e);
         } finally {
             dispatchGameEnd();
+            cleanUpAllResources();
         }
+    }
+
+    protected void cleanUpAllResources() {
+
     }
 
     private void bootstrapDb() {
@@ -118,7 +124,7 @@ public class Simulation implements Closeable {
         dbPool = new JedisPool(config, host, port);
     }
 
-    private void createEventSourceToken() throws Exception {
+    protected int createEventSourceToken() throws Exception {
         try (Jedis jedis = dbPool.getResource()) {
             sourceKeyPair = generateKeyPair();
             Map<String, Object> sourceMap = new HashMap<>();
@@ -131,15 +137,17 @@ public class Simulation implements Closeable {
 
             jedis.hset("oasis.sources", SOURCE_TOKEN, gson.toJson(sourceMap));
         }
+        return SOURCE_ID;
     }
 
-    private void createGame() {
+    protected int createGame() throws Exception {
         Game game = new Game();
         game.setId(GAME_ID);
 
         try (Jedis jedis = dbPool.getResource()) {
             jedis.hset("oasis.games", String.valueOf(game.getId()), gson.toJson(game));
         }
+        return GAME_ID;
     }
 
     private void createUsers() throws IOException {
@@ -150,11 +158,16 @@ public class Simulation implements Closeable {
                     user.setId(Long.parseLong(parts[0]));
                     user.setName(parts[1]);
                     user.setEmail(parts[2]);
-                    user.setGames(Map.of(String.valueOf(GAME_ID), new User.UserGame(Long.parseLong(parts[3]))));
+                    Integer teamId = teamMapping.get(parts[3]);
+                    user.setGames(Map.of(String.valueOf(GAME_ID), new User.UserGame(teamId)));
                     return user;
                 }).collect(Collectors.toList());
         this.users = users;
 
+        persistUsers(users);
+    }
+
+    protected void persistUsers(List<User> users) throws IOException {
         try (Jedis jedis = dbPool.getResource()) {
 
             for (User user : users) {
@@ -163,21 +176,28 @@ public class Simulation implements Closeable {
         }
     }
 
-    private void createTeams() throws IOException {
+    private Map<String, Integer> createTeams() throws IOException {
         List<Team> teams = Files.lines(Paths.get(gameRootDir.getAbsolutePath()).resolve("teams.csv"))
                 .map(l -> {
                     String[] parts = l.split("[,]");
                     return new Team(Integer.parseInt(parts[0]), parts[1]);
                 }).collect(Collectors.toList());
 
+        return persistTeams(teams);
+    }
+
+    protected Map<String, Integer> persistTeams(List<Team> teams) throws IOException {
+        Map<String, Integer> teamMap = new HashMap<>();
         try (Jedis jedis = dbPool.getResource()) {
             for (Team team : teams) {
                 jedis.hset("oasis.teams", String.valueOf(team.getId()), gson.toJson(team));
+                teamMap.put(team.getName(), Integer.parseInt(String.valueOf(team.getId())));
             }
         }
+        return teamMap;
     }
 
-    private KeyPair generateKeyPair() throws NoSuchAlgorithmException {
+    protected KeyPair generateKeyPair() throws NoSuchAlgorithmException {
         KeyPairGenerator pairGenerator = KeyPairGenerator.getInstance("RSA");
         return pairGenerator.generateKeyPair();
     }

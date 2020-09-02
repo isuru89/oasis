@@ -19,17 +19,20 @@
 
 package io.github.oasis.elements.milestones.stats.to;
 
+import io.github.oasis.core.services.AbstractStatsApiRequest;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Utils;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
  */
-public class GameMilestoneRequest {
-
-    private Integer gameId;
+@Getter
+@Setter
+public class GameMilestoneRequest extends AbstractStatsApiRequest {
 
     // summary related attributes
     private Set<String> milestoneIds;
@@ -48,51 +51,4 @@ public class GameMilestoneRequest {
         return Texts.isNotEmpty(milestoneId) && Utils.isNotEmpty(userIds);
     }
 
-    public Set<Integer> getTeamIds() {
-        return teamIds;
-    }
-
-    public Set<Integer> getAttributeIds() {
-        return attributeIds;
-    }
-
-    public Set<String> getMilestoneIds() {
-        return milestoneIds;
-    }
-
-    public void setMilestoneIds(Set<String> milestoneIds) {
-        this.milestoneIds = milestoneIds;
-    }
-
-    public void setTeamIds(Set<Integer> teamIds) {
-        this.teamIds = teamIds;
-    }
-
-    public void setAttributeIds(Set<Integer> attributeIds) {
-        this.attributeIds = attributeIds;
-    }
-
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
-
-    public String getMilestoneId() {
-        return milestoneId;
-    }
-
-    public void setMilestoneId(String milestoneId) {
-        this.milestoneId = milestoneId;
-    }
-
-    public Set<Long> getUserIds() {
-        return userIds;
-    }
-
-    public void setUserIds(Set<Long> userIds) {
-        this.userIds = userIds;
-    }
 }

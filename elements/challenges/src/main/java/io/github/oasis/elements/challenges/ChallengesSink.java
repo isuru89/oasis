@@ -20,7 +20,6 @@
 package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.EventScope;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
@@ -75,7 +74,7 @@ public class ChallengesSink extends AbstractSink {
             long userId = eventScope.getUserId();
             long wonAt = signal.getWonAt();
 
-            String challengeMapKey = ID.getGameUseChallengesSummary(gameId, userId);
+            String challengeMapKey = ChallengeIDs.getGameUseChallengesSummary(gameId, userId);
             TimeOffset tcx = new TimeOffset(wonAt, context.getUserTimeOffset());
 
             db.incrementAll(WIN,
@@ -90,7 +89,7 @@ public class ChallengesSink extends AbstractSink {
                             ));
 
             // log
-            Sorted log = db.SORTED(ID.getGameUseChallengesLog(gameId, userId));
+            Sorted log = db.SORTED(ChallengeIDs.getGameUseChallengesLog(gameId, userId));
             String winId = UUID.randomUUID().toString();
             log.addRef(winId, wonAt, challengeMapKey, String.format("%s:%d:%s", rule.getId(), signal.getPosition(), signal.getWonEventId()));
 

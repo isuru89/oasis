@@ -20,7 +20,6 @@
 package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.ID;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.RuleContext;
@@ -54,7 +53,7 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
 
     @Override
     public List<Signal> process(Event event, RatingRule rule, ExecutionContext context, DbContext db) {
-        Mapped ratingsMap = db.MAP(ID.getGameRatingKey(event.getGameId(), rule.getId()));
+        Mapped ratingsMap = db.MAP(RatingIDs.getGameRatingKey(event.getGameId(), rule.getId()));
         String subRatingKey = String.valueOf(event.getUser());
         String userCurrentRating = ratingsMap.getValue(subRatingKey);
         int currRating = rule.getDefaultRating();
