@@ -58,17 +58,31 @@ public class UserController extends AbstractController {
         return userTeamService.addUser(user);
     }
 
+    @GetMapping("/admin/users")
+    public UserObject readUserProfileByEmail(@RequestParam(name = "email") String email) {
+        return userTeamService.readUser(email);
+    }
+
     @GetMapping("/admin/users/{userId}")
-    void readUserProfile(@PathVariable("userId") Integer userId) {}
+    public UserObject readUserProfile(@PathVariable("userId") Integer userId) {
+        return userTeamService.readUser(userId);
+    }
 
     @GetMapping("/admin/teams/{teamId}/users")
-    void browseUsers(@PathVariable("teamId") Integer teamId) {}
+    public List<UserObject> browseUsers(@PathVariable("teamId") Integer teamId) {
+        return userTeamService.listAllUsersInTeam(teamId);
+    }
 
     @PutMapping("/admin/users/{userId}")
-    void updateUser(@PathVariable("userId") Integer userId) {}
+    public UserObject updateUser(@PathVariable("userId") Integer userId,
+                                 @RequestBody UserObject userObject) {
+        return userTeamService.updateUser(userId, userObject);
+    }
 
     @DeleteMapping("/admin/users/{userId}")
-    void deactivateUser(@PathVariable("userId") Integer userId) {}
+    public UserObject deactivateUser(@PathVariable("userId") Integer userId) {
+        return userTeamService.deactivateUser(userId);
+    }
 
     @PostMapping("/admin/teams")
     public TeamObject addTeam(@RequestBody TeamObject team) {
@@ -76,18 +90,25 @@ public class UserController extends AbstractController {
     }
 
     @PutMapping("/admin/teams/{teamId}")
-    void updateTeam(@PathVariable("teamId") Integer teamId) {}
+    public TeamObject updateTeam(@PathVariable("teamId") Integer teamId,
+                                 @RequestBody TeamObject teamObject) {
+        return userTeamService.updateTeam(teamId, teamObject);
+    }
 
     @PostMapping("/admin/users/{userId}/teams")
-    void addUserToTeam(@PathVariable("userId") Integer userId,
-                       @RequestBody UserGameAssociationRequest request) {
+    public void addUserToTeam(@PathVariable("userId") Integer userId,
+                              @RequestBody UserGameAssociationRequest request) {
         userTeamService.addUserToTeam(userId, request.getGameId(), request.getTeamId());
     }
 
     @GetMapping("/admin/users/{userId}/teams")
-    void browseTeams(@PathVariable("userId") Integer userId) {}
+    public List<TeamObject> browseUserTeams(@PathVariable("userId") Integer userId) {
+        return userTeamService.getUserTeams(userId);
+    }
 
     @PostMapping("/admin/teams/{teamId}/users")
-    void addUsersToTeam(@PathVariable("teamId") Integer teamId,
-                        @RequestParam("userIds") List<Integer> userIds) {}
+    public void addUsersToTeam(@PathVariable("teamId") Integer teamId,
+                               @RequestParam("userIds") List<Integer> userIds) {
+        userTeamService.addUsersToTeam(teamId, userIds);
+    }
 }

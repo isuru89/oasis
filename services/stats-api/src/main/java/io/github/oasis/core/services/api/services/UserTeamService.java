@@ -24,6 +24,8 @@ import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserObject;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -40,11 +42,48 @@ public class UserTeamService {
         return repository.addUser(userObject);
     }
 
+    public UserObject readUser(long userId) {
+        return repository.readUser(userId);
+    }
+
+    public UserObject readUser(String userEmail) {
+        return repository.readUser(userEmail);
+    }
+
+    public UserObject updateUser(long userId, UserObject updatingUser) {
+        return repository.updateUser(userId, updatingUser);
+    }
+
+    public UserObject deactivateUser(long userId) {
+        return repository.deleteUser(userId);
+    }
+
+    public List<TeamObject> getUserTeams(long userId) {
+        return repository.getUserTeams(userId);
+    }
+
     public TeamObject addTeam(TeamObject teamObject) {
         return repository.addTeam(teamObject);
     }
 
+    public TeamObject updateTeam(int teamId, TeamObject updatingTeam) {
+        return repository.updateTeam(teamId, updatingTeam);
+    }
+
+    public List<UserObject> listAllUsersInTeam(int teamId) {
+        return repository.getTeamUsers(teamId);
+    }
+
     public void addUserToTeam(long userId, int gameId, int teamId) {
         repository.addUserToTeam(userId, gameId, teamId);
+    }
+
+    public void addUsersToTeam(int teamId, List<Integer> userIds) {
+        TeamObject teamObject = repository.readTeam(teamId);
+        int gameId = teamObject.getGameId();
+
+        for (int userId : userIds) {
+            repository.addUserToTeam(userId, gameId, teamId);
+        }
     }
 }
