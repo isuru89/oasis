@@ -20,11 +20,9 @@
 package io.github.oasis.core.services.api.controllers.admin;
 
 import io.github.oasis.core.elements.ElementDef;
-import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.services.ElementCRUDSupport;
 import io.github.oasis.core.services.api.controllers.AbstractController;
-import io.github.oasis.core.services.exceptions.OasisApiException;
-import org.springframework.http.HttpStatus;
+import io.github.oasis.core.services.api.services.ElementService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,9 +47,11 @@ import java.util.Set;
 public class ElementsController extends AbstractController {
 
     private final Map<String, ElementCRUDSupport> crudSupportMap;
+    private final ElementService elementService;
 
-    public ElementsController(Map<String, ElementCRUDSupport> crudSupportMap) {
+    public ElementsController(Map<String, ElementCRUDSupport> crudSupportMap, ElementService elementService) {
         this.crudSupportMap = crudSupportMap;
+        this.elementService = elementService;
     }
 
     @GetMapping(path = "/admin/games/{gameId}/elements")
@@ -59,48 +59,28 @@ public class ElementsController extends AbstractController {
         return crudSupportMap.keySet();
     }
 
-    @GetMapping(path = "/admin/games/{gameId}/elements/{elementType}/{elementId}")
+    @GetMapping(path = "/admin/games/{gameId}/elements/{elementId}")
     public ElementDef read(@PathVariable("gameId") Integer gameId,
-                           @PathVariable("elementType") String elementType,
-                           @PathVariable("elementId") String elementId) throws OasisException {
-        ElementCRUDSupport elementCRUDSupport = crudSupportMap.get(elementType);
-        if (elementCRUDSupport == null) {
-            throw new OasisApiException("E40400", HttpStatus.NOT_FOUND.value(), "Unknown element type! [" + elementType + "]");
-        }
-        return elementCRUDSupport.readElementDefinition(gameId, elementId);
+                           @PathVariable("elementId") String elementId) {
+        return elementService.readElement(gameId, elementId);
     }
 
-    @PostMapping(path = "/admin/games/{gameId}/elements/{elementType}")
+    @PostMapping(path = "/admin/games/{gameId}/elements")
     public ElementDef add(@PathVariable("gameId") Integer gameId,
-                           @PathVariable("elementType") String elementType,
-                           @RequestBody ElementDef elementDef) throws OasisException {
-        ElementCRUDSupport elementCRUDSupport = crudSupportMap.get(elementType);
-        if (elementCRUDSupport == null) {
-            throw new OasisApiException("E40400", HttpStatus.NOT_FOUND.value(), "Unknown element type! [" + elementType + "]");
-        }
-        return elementCRUDSupport.addElementDefinition(gameId, elementDef.getId(), elementDef);
+                           @RequestBody ElementDef elementDef) {
+        return elementService.addElement(gameId, elementDef);
     }
 
-    @PutMapping(path = "/admin/games/{gameId}/elements/{elementType}/{elementId}")
+    @PutMapping(path = "/admin/games/{gameId}/elements/{elementId}")
     public ElementDef update(@PathVariable("gameId") Integer gameId,
-                             @PathVariable("elementType") String elementType,
                              @PathVariable("elementId") String elementId,
-                             @RequestBody ElementDef elementDef) throws OasisException {
-        ElementCRUDSupport elementCRUDSupport = crudSupportMap.get(elementType);
-        if (elementCRUDSupport == null) {
-            throw new OasisApiException("E40400", HttpStatus.NOT_FOUND.value(), "Unknown element type! [" + elementType + "]");
-        }
-        return elementCRUDSupport.updateElementDefinition(gameId, elementDef.getId(), elementDef);
+                             @RequestBody ElementDef elementDef) {
+        return elementService.updateElement(gameId, elementId, elementDef);
     }
 
-    @DeleteMapping(path = "/admin/games/{gameId}/elements/{elementType}/{elementId}")
+    @DeleteMapping(path = "/admin/games/{gameId}/elements/{elementId}")
     public ElementDef delete(@PathVariable("gameId") Integer gameId,
-                             @PathVariable("elementType") String elementType,
-                             @PathVariable("elementId") String elementId) throws OasisException {
-        ElementCRUDSupport elementCRUDSupport = crudSupportMap.get(elementType);
-        if (elementCRUDSupport == null) {
-            throw new OasisApiException("E40400", HttpStatus.NOT_FOUND.value(), "Unknown element type! [" + elementType + "]");
-        }
-        return elementCRUDSupport.deleteElementDefinition(gameId, elementId);
+                             @PathVariable("elementId") String elementId) {
+        return elementService.deleteElement(gameId, elementId);
     }
 }
