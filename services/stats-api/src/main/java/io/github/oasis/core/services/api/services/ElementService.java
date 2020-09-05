@@ -20,8 +20,13 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.elements.ElementDef;
+import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -30,9 +35,11 @@ import org.springframework.stereotype.Service;
 public class ElementService {
 
     private final OasisRepository oasisRepository;
+    private final OasisMetadataSupport metadataSupport;
 
-    public ElementService(OasisRepository oasisRepository) {
+    public ElementService(OasisRepository oasisRepository, OasisMetadataSupport metadataSupport) {
         this.oasisRepository = oasisRepository;
+        this.metadataSupport = metadataSupport;
     }
 
     public ElementDef readElement(int gameId, String elementId) {
@@ -49,5 +56,9 @@ public class ElementService {
 
     public ElementDef deleteElement(int gameId, String elementId) {
         return oasisRepository.deleteElement(gameId, elementId);
+    }
+
+    public List<SimpleElementDefinition> listElementsByType(int gameId, String type) throws OasisException {
+        return metadataSupport.listAllElementDefinitions(gameId, type);
     }
 }

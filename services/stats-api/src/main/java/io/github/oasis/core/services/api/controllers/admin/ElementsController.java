@@ -20,7 +20,8 @@
 package io.github.oasis.core.services.api.controllers.admin;
 
 import io.github.oasis.core.elements.ElementDef;
-import io.github.oasis.core.services.ElementCRUDSupport;
+import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.ElementService;
 import org.springframework.http.MediaType;
@@ -33,8 +34,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -46,17 +46,16 @@ import java.util.Set;
 )
 public class ElementsController extends AbstractController {
 
-    private final Map<String, ElementCRUDSupport> crudSupportMap;
     private final ElementService elementService;
 
-    public ElementsController(Map<String, ElementCRUDSupport> crudSupportMap, ElementService elementService) {
-        this.crudSupportMap = crudSupportMap;
+    public ElementsController(ElementService elementService) {
         this.elementService = elementService;
     }
 
-    @GetMapping(path = "/admin/games/{gameId}/elements")
-    public Set<String> getGameElementTypes(@PathVariable("gameId") Integer gameId) {
-        return crudSupportMap.keySet();
+    @GetMapping(path = "/admin/games/{gameId}/elements/types/{elementType}")
+    public List<SimpleElementDefinition> getElementsByType(@PathVariable("gameId") Integer gameId,
+                                                           @PathVariable("elementType") String elementType) throws OasisException {
+        return elementService.listElementsByType(gameId, elementType);
     }
 
     @GetMapping(path = "/admin/games/{gameId}/elements/{elementId}")
