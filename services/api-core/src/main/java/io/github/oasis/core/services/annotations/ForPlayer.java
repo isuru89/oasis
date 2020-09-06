@@ -32,6 +32,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-@PreAuthorize("hasRole('ROLE_PLAYER')")
-public @interface IsPlayer {
+@PreAuthorize("hasRole('ROLE_player')")
+public @interface ForPlayer {
 }

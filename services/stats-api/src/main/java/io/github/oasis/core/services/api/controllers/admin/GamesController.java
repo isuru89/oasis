@@ -21,6 +21,8 @@ package io.github.oasis.core.services.api.controllers.admin;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.services.annotations.ForAdmin;
+import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.GameService;
 import io.github.oasis.core.services.api.to.GameObjectRequest;
@@ -52,21 +54,25 @@ public class GamesController extends AbstractController {
         this.gameService = gameService;
     }
 
+    @ForAdmin
     @PostMapping(path = "/admin/games")
     public Game addGame(@RequestBody GameObjectRequest request) throws OasisException {
         return gameService.addGame(request);
     }
 
+    @ForPlayer
     @GetMapping(path = "/admin/games")
     public List<Game> listGames() {
         return gameService.listAllGames();
     }
 
+    @ForPlayer
     @GetMapping(path = "/admin/games/{gameId}")
     public Game readGame(@PathVariable("gameId") Integer gameId) {
         return gameService.readGame(gameId);
     }
 
+    @ForAdmin
     @PutMapping(path = "/admin/games/{gameId}")
     public Game updateGame(@PathVariable("gameId") Integer gameId,
                            @RequestBody GameObjectRequest request) throws OasisException {
@@ -79,6 +85,7 @@ public class GamesController extends AbstractController {
         return gameService.updateGame(gameId, game);
     }
 
+    @ForAdmin
     @DeleteMapping(path = "/admin/games/{gameId}")
     public Game deleteGame(@PathVariable("gameId") Integer gameId) {
         return gameService.deleteGame(gameId);

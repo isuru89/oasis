@@ -27,11 +27,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *  When this annotation is present, only an admin can access the method. 
+ * Annotation to be used when the method can be accessed by a user having role
+ * curator.
  * @author Isuru Weerarathna
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-@PreAuthorize("hasRole('ROLE_ADMIN')")
-public @interface IsAdmin {
+@PreAuthorize("hasRole('ROLE_CURATOR')")
+public @interface ForCurator {
 }

@@ -17,25 +17,21 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.configs;
+package io.github.oasis.core.services.annotations;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
+ *  When this annotation is present, only an admin can access the method. 
  * @author Isuru Weerarathna
  */
-@Configuration
-@EnableWebSecurity
-public class SecurityConfigs extends WebSecurityConfigurerAdapter {
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/*").permitAll()
-                .and()
-                .csrf().disable();
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@PreAuthorize("hasRole('ROLE_admin')")
+public @interface ForAdmin {
 }
