@@ -17,34 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.to;
 
+import io.github.oasis.core.model.UserGender;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
 @Getter
 @Setter
-public class UserObject {
+public class UserCreateRequest implements Serializable {
 
     private Long userId;
-    private String displayName;
-
     private String email;
-    private LocalDate birthday;
+    private String firstName;
+    private String lastName;
+    private String userName;
+
     private UserGender gender;
     private String timeZone;
-
-    public UserObject() {}
-
-    public UserObject(long userId, String name, String email) {
-        this.userId = userId;
-        this.displayName = name;
-        this.email = email;
-    }
 
 }

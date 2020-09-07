@@ -22,6 +22,8 @@ package io.github.oasis.core.services.api.services;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserObject;
+import io.github.oasis.core.services.api.handlers.UserHandlerSupport;
+import io.github.oasis.core.services.api.to.UserCreateRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,13 +35,27 @@ import java.util.List;
 public class UserTeamService {
 
     private final OasisRepository repository;
+    private final UserHandlerSupport userHandlerSupport;
 
-    public UserTeamService(OasisRepository repository) {
+    public UserTeamService(OasisRepository repository, UserHandlerSupport userHandlerSupport) {
         this.repository = repository;
+        this.userHandlerSupport = userHandlerSupport;
     }
 
     public UserObject addUser(UserObject userObject) {
-        return repository.addUser(userObject);
+        UserObject oasisUser = repository.addUser(userObject);
+
+        UserCreateRequest request = new UserCreateRequest();
+        request.setEmail(userObject.getEmail());
+        request.setUserName(userObject.getEmail());
+        request.setGender(userObject.getGender());
+        request.setTimeZone(userObject.getTimeZone());
+        request.setFirstName(userObject.getDisplayName());
+        request.setLastName(userObject.getDisplayName());
+        request.setUserId(oasisUser.getUserId());
+        userHandlerSupport.createUser(request);
+
+        return oasisUser;
     }
 
     public UserObject readUser(long userId) {
@@ -55,7 +71,10 @@ public class UserTeamService {
     }
 
     public UserObject deactivateUser(long userId) {
-        return repository.deleteUser(userId);
+        UserObject userObject = repository.deleteUser(userId);
+
+        userHandlerSupport.deleteUser(userObject.getEmail());
+        return userObject;
     }
 
     public List<TeamObject> getUserTeams(long userId) {

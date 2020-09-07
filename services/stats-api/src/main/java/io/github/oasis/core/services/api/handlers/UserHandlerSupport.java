@@ -17,34 +17,16 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.handlers;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import java.time.LocalDate;
+import io.github.oasis.core.services.api.to.UserCreateRequest;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class UserObject {
+public interface UserHandlerSupport {
 
-    private Long userId;
-    private String displayName;
+    void createUser(UserCreateRequest request);
 
-    private String email;
-    private LocalDate birthday;
-    private UserGender gender;
-    private String timeZone;
-
-    public UserObject() {}
-
-    public UserObject(long userId, String name, String email) {
-        this.userId = userId;
-        this.displayName = name;
-        this.email = email;
-    }
-
+    void deleteUser(String email);
 }

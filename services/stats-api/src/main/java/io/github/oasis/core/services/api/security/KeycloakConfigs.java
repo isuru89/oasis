@@ -17,34 +17,17 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.security;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import java.time.LocalDate;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class UserObject {
+@Configuration
+public class KeycloakConfigs {
 
-    private Long userId;
-    private String displayName;
 
-    private String email;
-    private LocalDate birthday;
-    private UserGender gender;
-    private String timeZone;
 
-    public UserObject() {}
-
-    public UserObject(long userId, String name, String email) {
-        this.userId = userId;
-        this.displayName = name;
-        this.email = email;
-    }
 
 }
