@@ -41,4 +41,6 @@ public class UserCreateRequest implements Serializable {
     private UserGender gender;
     private String timeZone;
 
+    private String initialPassword;
+
 }

@@ -23,6 +23,7 @@ import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserObject;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.UserTeamService;
+import io.github.oasis.core.services.api.to.UserCreateRequest;
 import io.github.oasis.core.services.api.to.UserGameAssociationRequest;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -54,7 +55,7 @@ public class UserController extends AbstractController {
     }
 
     @PostMapping("/admin/users")
-    public UserObject registerUser(@RequestBody UserObject user) {
+    public UserObject registerUser(@RequestBody UserCreateRequest user) {
         return userTeamService.addUser(user);
     }
 

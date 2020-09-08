@@ -34,7 +34,9 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -44,12 +46,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Connect to keycloak and handle user management related activities.
+ *
  * @author Isuru Weerarathna
  */
 @Component("KeycloakUserHandler")
-public class KeycloakUserHandler implements UserHandlerSupport {
+public class KeycloakUserHandler implements UserHandlerSupport, DisposableBean {
 
     private static final Logger LOG = LoggerFactory.getLogger(KeycloakUserHandler.class);
+
+    private static final String ATTR_GENDER = "gender";
+    private static final String ATTR_ZONE_INFO = "zoneinfo";
+    private static final String ATTR_USER_ID = "userId";
+
 
     @Value("${keycloak.auth-server-url}")
     private String authServerUrl;
@@ -71,7 +80,8 @@ public class KeycloakUserHandler implements UserHandlerSupport {
     private UsersResource usersResource;
 
     @PostConstruct
-    void init() {
+    @Profile("!test")
+    public void init() {
         keycloak = KeycloakBuilder.builder()
                 .serverUrl(authServerUrl)
                 .grantType(OAuth2Constants.PASSWORD)
@@ -82,7 +92,6 @@ public class KeycloakUserHandler implements UserHandlerSupport {
                 .password(adminPassword)
                 .resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build())
                 .build();
-
 
         keycloak.tokenManager().getAccessToken();
         usersResource = keycloak.realm(realmName).users();
@@ -99,9 +108,9 @@ public class KeycloakUserHandler implements UserHandlerSupport {
         user.setEmailVerified(true);
 
         Map<String, List<String>> attrs = new HashMap<>();
-        attrs.put("gender", List.of(request.getGender().name()));
-        attrs.put("zoneinfo", List.of(request.getTimeZone()));
-        attrs.put("userId", List.of(String.valueOf(request.getUserId())));
+        attrs.put(ATTR_GENDER, List.of(request.getGender().name()));
+        attrs.put(ATTR_ZONE_INFO, List.of(request.getTimeZone()));
+        attrs.put(ATTR_USER_ID, List.of(String.valueOf(request.getUserId())));
         user.setAttributes(attrs);
 
         Response response = usersResource.create(user);
@@ -115,7 +124,7 @@ public class KeycloakUserHandler implements UserHandlerSupport {
         CredentialRepresentation pwCredentials = new CredentialRepresentation();
         pwCredentials.setTemporary(false);
         pwCredentials.setType(CredentialRepresentation.PASSWORD);
-        pwCredentials.setValue("user123");
+        pwCredentials.setValue(request.getInitialPassword());
 
         UserResource userResource = usersResource.get(userId);
         userResource.resetPassword(pwCredentials);
@@ -129,5 +138,12 @@ public class KeycloakUserHandler implements UserHandlerSupport {
         }
 
         list.forEach(u -> usersResource.delete(u.getId()));
+    }
+
+    @Override
+    public void destroy() {
+        if (keycloak != null) {
+            keycloak.close();
+        }
     }
 }

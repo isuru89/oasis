@@ -42,17 +42,16 @@ public class UserTeamService {
         this.userHandlerSupport = userHandlerSupport;
     }
 
-    public UserObject addUser(UserObject userObject) {
+    public UserObject addUser(UserCreateRequest request) {
+        UserObject userObject = new UserObject();
+        userObject.setDisplayName(request.getFirstName() + " " + request.getLastName());
+        userObject.setEmail(request.getEmail());
+        userObject.setGender(request.getGender());
+        userObject.setTimeZone(request.getTimeZone());
+
         UserObject oasisUser = repository.addUser(userObject);
 
-        UserCreateRequest request = new UserCreateRequest();
-        request.setEmail(userObject.getEmail());
-        request.setUserName(userObject.getEmail());
-        request.setGender(userObject.getGender());
-        request.setTimeZone(userObject.getTimeZone());
-        request.setFirstName(userObject.getDisplayName());
-        request.setLastName(userObject.getDisplayName());
-        request.setUserId(oasisUser.getUserId());
+        request.setUserId(userObject.getUserId());
         userHandlerSupport.createUser(request);
 
         return oasisUser;
