@@ -1,5 +1,4 @@
 {
-  "gameId": 1,
   "challenges": {
     "CHG000001": {
       "challengeId": "CHG000001",
@@ -12,21 +11,38 @@
       "winners": [
         {
           "userId": 1,
+          "userMetadata": {
+            "userId": 1,
+            "displayName": "Jakob Floyd"
+          },
           "wonAt": 1585036800000
         },
         {
           "userId": 3,
+          "userMetadata": {
+            "userId": 3,
+            "displayName": "Ray Glenn"
+          },
           "wonAt": 1585123200000
         },
         {
           "userId": 5,
+          "userMetadata": {
+            "userId": 5,
+            "displayName": "Archer Roberts"
+          },
           "wonAt": 1585134000000
         },
         {
           "userId": 4,
+          "userMetadata": {
+            "userId": 4,
+            "displayName": "Lilia Stewart"
+          },
           "wonAt": 1585209600000
         }
       ]
     }
-  }
+  },
+  "gameId": 1
 }
