@@ -1,0 +1,40 @@
+{
+  "badgeMetadata": {
+    "id": "BDG00001",
+    "name": "test.badge.rule",
+    "description": "Awards badge if value is >= 50 for streaks"
+  },
+  "log": [
+    {
+      "userId": 1,
+      "userMetadata": {
+        "userId": 1,
+        "displayName": "Malanie Seans"
+      },
+      "attribute": 20,
+      "attributeMetadata": {
+        "id": 20,
+        "name": "Silver",
+        "order": 50
+      },
+      "streakStartedAt": 1584962100000,
+      "awardedAt": 1585048500000
+    },
+    {
+      "userId": 1,
+      "userMetadata": {
+        "userId": 1,
+        "displayName": "Malanie Seans"
+      },
+      "attribute": 10,
+      "attributeMetadata": {
+        "id": 10,
+        "name": "Bronze",
+        "order": 100
+      },
+      "streakStartedAt": 1584962100000,
+      "awardedAt": 1585664100000
+    }
+  ],
+  "gameId": 1
+}
