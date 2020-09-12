@@ -118,7 +118,6 @@ public class OasisEngineTest {
         try (DbContext db = dbPool.createContext()) {
             db.allKeys("*").forEach(db::removeKey);
 
-            metadataSupport.addUser(new UserObject(0, "Malanie Seans", "melanie@oasis.io"));
             metadataSupport.addUser(new UserObject(1, "Jakob Floyd", "jakob@oasis.io"));
             metadataSupport.addUser(new UserObject(2, "Thierry Hines", "thierry@oasis.io"));
             metadataSupport.addUser(new UserObject(3, "Ray Glenn", "ray@oasis.io"));
