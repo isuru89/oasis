@@ -24,6 +24,10 @@ package io.github.oasis.elements.badges;
  */
 public final class BadgeIDs {
 
+    public static String getGameRuleWiseBadgeLogKey(int gameId, String badgeId) {
+        return String.format("g%d:%s:badgelog", gameId, badgeId);
+    }
+
     public static String getGameUserBadgesSummary(int gameId, long userId) {
         return String.format("g%d:u%d:badges", gameId, userId);
     }

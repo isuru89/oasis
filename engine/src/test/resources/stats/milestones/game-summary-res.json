@@ -1,5 +1,4 @@
 {
-  "gameId": 1,
   "summaries": {
     "MILE000001": {
       "milestoneId": "MILE000001",
@@ -8,18 +7,26 @@
         "name": "Milestone-Basic",
         "description": "This is a basic milestone which accumulates using event values."
       },
-      "byTeams": {
-        "1": {
-          "1": 0,
-          "2": 0,
-          "3": 1
+      "byTeams": [
+        {
+          "teamId": 1,
+          "teamMetadata": {
+            "teamId": 1,
+            "name": "Warriors"
+          },
+          "levels": {
+            "1": 0,
+            "2": 0,
+            "3": 1
+          }
         }
-      },
+      ],
       "all": {
         "1": 0,
         "2": 0,
         "3": 1
       }
     }
-  }
+  },
+  "gameId": 1
 }

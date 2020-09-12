@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.milestones.stats;
 
+import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.Db;
@@ -30,17 +31,21 @@ import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
 import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.core.utils.Numbers;
+import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.milestones.MilestoneIDs;
 import io.github.oasis.elements.milestones.stats.to.GameMilestoneRequest;
 import io.github.oasis.elements.milestones.stats.to.GameMilestoneResponse;
+import io.github.oasis.elements.milestones.stats.to.GameMilestoneResponse.MilestoneTeamSummary;
 import io.github.oasis.elements.milestones.stats.to.GameMilestoneResponse.UserMilestoneRecord;
 import io.github.oasis.elements.milestones.stats.to.UserMilestoneRequest;
 import io.github.oasis.elements.milestones.stats.to.UserMilestoneSummary;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.github.oasis.core.utils.Constants.COLON;
@@ -83,7 +88,8 @@ public class MilestoneStats extends AbstractStatsApiService {
                     summary.setMilestoneId(milestoneId);
                     summary.setMilestoneMetadata(milestoneDefs.get(milestoneId));
                     Map<String, Long> allCounts = new HashMap<>();
-                    Map<String, Map<String, Long>> byTeamCounts = new HashMap<>();
+                    Map<String, MilestoneTeamSummary> byTeamCounts = new HashMap<>();
+                    Set<String> teamIds = new HashSet<>();
 
                     List<String> summaryValues = db.getValuesFromMap(mainKey, subKeys.toArray(new String[0]));
                     for (int i = 0; i < subKeys.size(); i++) {
@@ -92,11 +98,23 @@ public class MilestoneStats extends AbstractStatsApiService {
                         if (parts.length == 2) {
                             allCounts.put(parts[1], Numbers.asLong(summaryValues.get(i)));
                         } else if (parts.length == 4) {
-                            Map<String, Long> teamMap = byTeamCounts.computeIfAbsent(parts[1], s -> new HashMap<>());
-                            teamMap.put(parts[3], Numbers.asLong(summaryValues.get(i)));
+                            MilestoneTeamSummary teamMap = byTeamCounts.computeIfAbsent(parts[1], s -> new MilestoneTeamSummary(Integer.parseInt(s)));
+                            teamIds.add(parts[1]);
+                            teamMap.addLevelSummary(parts[3], Numbers.asLong(summaryValues.get(i)));
                         }
                     }
-                    summary.setByTeams(byTeamCounts);
+
+                    if (Utils.isNotEmpty(teamIds)) {
+                        Map<String, TeamMetadata> metadataMap = getContextHelper().readTeamsByIdStrings(teamIds);
+                        for (Map.Entry<String, MilestoneTeamSummary> entry : byTeamCounts.entrySet()) {
+                            TeamMetadata teamMetadata = metadataMap.get(entry.getKey());
+                            if (teamMetadata != null) {
+                                entry.getValue().setTeamMetadata(teamMetadata);
+                            }
+                        }
+                    }
+
+                    summary.setByTeams(new ArrayList<>(byTeamCounts.values()));
                     summary.setAll(allCounts);
 
                     summaryMap.put(milestoneId, summary);
