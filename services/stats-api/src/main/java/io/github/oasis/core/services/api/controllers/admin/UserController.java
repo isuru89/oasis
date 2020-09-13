@@ -21,6 +21,9 @@ package io.github.oasis.core.services.api.controllers.admin;
 
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserObject;
+import io.github.oasis.core.services.annotations.ForAdmin;
+import io.github.oasis.core.services.annotations.ForCurator;
+import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.UserTeamService;
 import io.github.oasis.core.services.api.to.UserCreateRequest;
@@ -54,59 +57,70 @@ public class UserController extends AbstractController {
         this.userTeamService = userTeamService;
     }
 
+    @ForAdmin
     @PostMapping("/admin/users")
     public UserObject registerUser(@RequestBody UserCreateRequest user) {
         return userTeamService.addUser(user);
     }
 
+    @ForPlayer
     @GetMapping("/admin/users")
     public UserObject readUserProfileByEmail(@RequestParam(name = "email") String email) {
         return userTeamService.readUser(email);
     }
 
+    @ForPlayer
     @GetMapping("/admin/users/{userId}")
     public UserObject readUserProfile(@PathVariable("userId") Integer userId) {
         return userTeamService.readUser(userId);
     }
 
+    @ForPlayer
     @GetMapping("/admin/teams/{teamId}/users")
     public List<UserObject> browseUsers(@PathVariable("teamId") Integer teamId) {
         return userTeamService.listAllUsersInTeam(teamId);
     }
 
+    @ForCurator
     @PutMapping("/admin/users/{userId}")
     public UserObject updateUser(@PathVariable("userId") Integer userId,
                                  @RequestBody UserObject userObject) {
         return userTeamService.updateUser(userId, userObject);
     }
 
+    @ForAdmin
     @DeleteMapping("/admin/users/{userId}")
     public UserObject deactivateUser(@PathVariable("userId") Integer userId) {
         return userTeamService.deactivateUser(userId);
     }
 
+    @ForCurator
     @PostMapping("/admin/teams")
     public TeamObject addTeam(@RequestBody TeamObject team) {
         return userTeamService.addTeam(team);
     }
 
+    @ForCurator
     @PutMapping("/admin/teams/{teamId}")
     public TeamObject updateTeam(@PathVariable("teamId") Integer teamId,
                                  @RequestBody TeamObject teamObject) {
         return userTeamService.updateTeam(teamId, teamObject);
     }
 
+    @ForCurator
     @PostMapping("/admin/users/{userId}/teams")
     public void addUserToTeam(@PathVariable("userId") Integer userId,
                               @RequestBody UserGameAssociationRequest request) {
         userTeamService.addUserToTeam(userId, request.getGameId(), request.getTeamId());
     }
 
+    @ForPlayer
     @GetMapping("/admin/users/{userId}/teams")
     public List<TeamObject> browseUserTeams(@PathVariable("userId") Integer userId) {
         return userTeamService.getUserTeams(userId);
     }
 
+    @ForCurator
     @PostMapping("/admin/teams/{teamId}/users")
     public void addUsersToTeam(@PathVariable("teamId") Integer teamId,
                                @RequestParam("userIds") List<Integer> userIds) {
