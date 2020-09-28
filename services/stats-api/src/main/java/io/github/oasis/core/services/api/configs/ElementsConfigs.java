@@ -20,10 +20,8 @@
 package io.github.oasis.core.services.api.configs;
 
 import io.github.oasis.core.services.AbstractStatsApiService;
-import io.github.oasis.core.services.ElementCRUDSupport;
 import io.github.oasis.core.services.OasisServiceApiFactory;
 import io.github.oasis.core.services.ServiceRegistrar;
-import io.github.oasis.core.services.annotations.RepresentsElementType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -32,7 +30,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
@@ -85,18 +82,6 @@ public class ElementsConfigs implements BeanDefinitionRegistryPostProcessor {
             LOG.info("Registering Stats Service: {}...", apiService.getName());
             registry.registerBeanDefinition(apiService.getSimpleName(),
                     BeanDefinitionBuilder.genericBeanDefinition(apiService).getBeanDefinition());
-        }
-
-        @Override
-        public void registerElementCRUD(Class<? extends ElementCRUDSupport> crudClass) {
-            RepresentsElementType representsElementType = crudClass.getAnnotation(RepresentsElementType.class);
-            if (representsElementType == null) {
-                throw new BeanDefinitionValidationException("Element CRUD service must be annotated with @"
-                        + RepresentsElementType.class.getSimpleName() + " annotation!");
-            }
-            LOG.info("Registering Element CRUD Service: elementType: {}, impl: {}...", representsElementType.value(), crudClass.getSimpleName());
-            registry.registerBeanDefinition(representsElementType.value(),
-                    BeanDefinitionBuilder.genericBeanDefinition(crudClass).getBeanDefinition());
         }
     }
 }

@@ -17,53 +17,44 @@
  * under the License.
  */
 
-package io.github.oasis.elements.challenges.stats.to;
+package io.github.oasis.elements.badges.stats.to;
 
 import io.github.oasis.core.UserMetadata;
+import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.SimpleElementDefinition;
-import io.github.oasis.core.services.AbstractStatsApiResponse;
+import io.github.oasis.core.services.AbstractAdminApiResponse;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
 @Getter
 @Setter
-public class GameChallengesSummary extends AbstractStatsApiResponse {
+public class GameRuleWiseBadgeLog extends AbstractAdminApiResponse {
 
-    private Map<String, ChallengeSummary> challenges;
+    private String badgeId;
+    private SimpleElementDefinition badgeMetadata;
+
+    private List<RuleBadgeLogRecord> log;
 
     @Getter
     @Setter
-    public static class ChallengeWinner {
-        private Long userId;
+    public static class RuleBadgeLogRecord {
+        private long userId;
         private UserMetadata userMetadata;
-        private long wonAt;
+        private int attribute;
+        private AttributeInfo attributeMetadata;
+        private long streakStartedAt;
+        private long awardedAt;
 
-        public ChallengeWinner(Long userId, long wonAt) {
+        public RuleBadgeLogRecord(long userId, int attribute, long streakStartedAt, long awardedAt) {
             this.userId = userId;
-            this.wonAt = wonAt;
-        }
-    }
-
-    @Getter
-    @Setter
-    public static class ChallengeSummary {
-        private String challengeId;
-        private SimpleElementDefinition challengeMetadata;
-        private int winnerCount;
-
-        private List<ChallengeWinner> winners;
-        private List<ChallengeWinner> latestWinners;
-        private List<ChallengeWinner> firstWinners;
-
-        public ChallengeSummary(String challengeId, int count) {
-            this.challengeId = challengeId;
-            this.winnerCount = count;
+            this.attribute = attribute;
+            this.streakStartedAt = streakStartedAt;
+            this.awardedAt = awardedAt;
         }
     }
 

@@ -25,6 +25,4 @@ package io.github.oasis.core.services;
 public interface ServiceRegistrar {
 
     void registerStatsService(Class<? extends AbstractStatsApiService> statsServiceClass);
-
-    void registerElementCRUD(Class<? extends ElementCRUDSupport> crudClass);
 }

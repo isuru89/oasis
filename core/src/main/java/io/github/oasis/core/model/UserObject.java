@@ -37,6 +37,7 @@ public class UserObject {
     private String email;
     private LocalDate birthday;
     private UserGender gender;
+    private String timeZone;
 
     public UserObject() {}
 

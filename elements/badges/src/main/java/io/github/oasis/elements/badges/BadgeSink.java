@@ -56,6 +56,7 @@ public class BadgeSink extends AbstractSink {
 
     private static final String STREAK_BADGE_FORMAT = "%s:%d:%d";
     private static final String GENERAL_BADGE_FORMAT = "%s:%d:%s";
+    private static final String RULE_WISE_KEY_FORMAT = "%d:%d:%d";
 
     public BadgeSink(Db db) {
         super(db);
@@ -74,11 +75,14 @@ public class BadgeSink extends AbstractSink {
             String ruleId = signal.getRuleId();
             int addition = isRemoval ? -1 : 1;
 
+            String ruleWiseKey = String.format(RULE_WISE_KEY_FORMAT, signal.getEventScope().getUserId(), signal.getAttribute(), signal.getStartTime());
+
             // badge log
             Sorted badgeLog = db.SORTED(BadgeIDs.getGameUserBadgesLog(gameId, userId));
+            Sorted ruleWiseBadgeLog = db.SORTED(BadgeIDs.getGameRuleWiseBadgeLogKey(gameId, ruleId));
 
             if (isRemoval) {
-                removeFromBadgeLog(signal, badgeLog);
+                removeFromBadgeLog(signal, badgeLog, ruleWiseKey, ruleWiseBadgeLog);
             } else {
                 String logMember = getBadgeKey(signal);
                 boolean added = badgeLog.add(logMember, signal.getOccurredTimestamp());
@@ -87,6 +91,8 @@ public class BadgeSink extends AbstractSink {
                     LOG.info("Already added badge received! Skipping signal {}.", signal);
                     return null;
                 }
+
+                ruleWiseBadgeLog.add(ruleWiseKey, signal.getOccurredTimestamp());
             }
 
             Mapped badgesMap = db.MAP(BadgeIDs.getGameUserBadgesSummary(gameId, userId));
@@ -133,12 +139,13 @@ public class BadgeSink extends AbstractSink {
         return null;
     }
 
-    private void removeFromBadgeLog(BadgeSignal signal, Sorted badgeLog) {
+    private void removeFromBadgeLog(BadgeSignal signal, Sorted badgeLog, String ruleWiseKey, Sorted ruleWiseBadgeLog) {
         String ruleId = signal.getRuleId();
         int attributeId = signal.getAttribute();
         if (!badgeLog.remove(String.format(STREAK_BADGE_FORMAT, ruleId, attributeId, signal.getStartTime()))) {
             badgeLog.remove(String.format(GENERAL_BADGE_FORMAT, ruleId, attributeId, signal.getEndId()));
         }
+        ruleWiseBadgeLog.remove(ruleWiseKey);
     }
 
     private String getBadgeKey(BadgeSignal signal) {

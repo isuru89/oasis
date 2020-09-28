@@ -34,6 +34,7 @@ import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserObject;
 import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.core.services.api.beans.GsonSerializer;
@@ -122,6 +123,8 @@ public class OasisEngineTest {
             metadataSupport.addUser(new UserObject(3, "Ray Glenn", "ray@oasis.io"));
             metadataSupport.addUser(new UserObject(4, "Lilia Stewart", "lilia@oasis.io"));
             metadataSupport.addUser(new UserObject(5, "Archer Roberts", "archer@oasis.io"));
+
+            metadataSupport.addTeam(new TeamObject(1, 1, "Warriors"));
 
             setupDbBefore(db);
         }

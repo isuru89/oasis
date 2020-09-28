@@ -19,10 +19,7 @@
 
 package io.github.oasis.core.services.annotations;
 
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -30,18 +27,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Annotation to be used when the method can be accessed by a user having role
+ * curator.
  * @author Isuru Weerarathna
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-@RequestMapping(
-        method = RequestMethod.GET,
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-)
-public @interface ElementBrowseEndPoint {
-
-    @AliasFor(annotation = RequestMapping.class, attribute = "value")
-    String path();
-
+@PreAuthorize("hasRole('ROLE_CURATOR')")
+public @interface ForCurator {
 }

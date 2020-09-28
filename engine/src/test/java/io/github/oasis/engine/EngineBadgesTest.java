@@ -27,6 +27,8 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.stats.BadgeStats;
+import io.github.oasis.elements.badges.stats.to.GameRuleWiseBadgeLog;
+import io.github.oasis.elements.badges.stats.to.GameRuleWiseBadgeLogRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeLog;
 import io.github.oasis.elements.badges.stats.to.UserBadgeLogRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeRequest;
@@ -57,12 +59,12 @@ public class EngineBadgesTest extends OasisEngineTest {
 
     @Test
     public void testEngineBadges() {
-        Event e1 = TEvent.createKeyValue(TSZ("2020-03-23 11:15", UTC), EVT_A, 75);
-        Event e2 = TEvent.createKeyValue(TSZ("2020-03-25 09:55", UTC), EVT_A, 63);
-        Event e3 = TEvent.createKeyValue(TSZ("2020-03-31 14:15", UTC), EVT_A, 57);
-        Event e4 = TEvent.createKeyValue(TSZ("2020-04-01 07:15", UTC), EVT_A, 88);
-        Event e5 = TEvent.createKeyValue(TSZ("2020-03-24 11:15", UTC), EVT_A, 76);
-        Event e6 = TEvent.createKeyValue(TSZ("2020-04-05 11:15", UTC), EVT_A, 26);
+        Event e1 = TEvent.createKeyValue(U1, TSZ("2020-03-23 11:15", UTC), EVT_A, 75);
+        Event e2 = TEvent.createKeyValue(U1, TSZ("2020-03-25 09:55", UTC), EVT_A, 63);
+        Event e3 = TEvent.createKeyValue(U1, TSZ("2020-03-31 14:15", UTC), EVT_A, 57);
+        Event e4 = TEvent.createKeyValue(U1, TSZ("2020-04-01 07:15", UTC), EVT_A, 88);
+        Event e5 = TEvent.createKeyValue(U1, TSZ("2020-03-24 11:15", UTC), EVT_A, 76);
+        Event e6 = TEvent.createKeyValue(U1, TSZ("2020-04-05 11:15", UTC), EVT_A, 26);
 
         GameDef gameDef = loadRulesFromResource("rules/badges-basic.yml");
 
@@ -73,7 +75,7 @@ public class EngineBadgesTest extends OasisEngineTest {
         awaitTerminated();
 
         String rid = findRuleByName(rules, "test.badge.rule").getId();
-        RedisAssert.assertMap(dbPool, BadgeIDs.getGameUserBadgesSummary(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertMap(dbPool, BadgeIDs.getGameUserBadgesSummary(TEvent.GAME_ID, U1),
                 RedisAssert.ofEntries(
                         "all","2",
                         "all:D20200324","1",
@@ -109,7 +111,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "rule:BDG00001:20:W202013","1",
                         "rule:BDG00001:20:Y2020","1"
                 ));
-        RedisAssert.assertSorted(dbPool, BadgeIDs.getGameUserBadgesLog(TEvent.GAME_ID, TEvent.USER_ID),
+        RedisAssert.assertSorted(dbPool, BadgeIDs.getGameUserBadgesLog(TEvent.GAME_ID, U1),
                 RedisAssert.ofSortedEntries(
                         rid + ":10:" + e1.getTimestamp(), e5.getTimestamp(),
                         rid + ":20:" + e1.getTimestamp(), e5.getTimestamp()
@@ -128,6 +130,10 @@ public class EngineBadgesTest extends OasisEngineTest {
         compareStatReqRes("stats/badges/log-req.json", UserBadgeLogRequest.class,
                 "stats/badges/log-res.json", UserBadgeLog.class,
                 req ->(UserBadgeLog) stats.getBadgeLog(req));
+
+        compareStatReqRes("stats/badges/rulewise-log-offset-req.json", GameRuleWiseBadgeLogRequest.class,
+                "stats/badges/rulewise-log-offset-res.json", GameRuleWiseBadgeLog.class,
+                req ->(GameRuleWiseBadgeLog) stats.getRuleWiseBadgeLog(req));
     }
 
     @Test

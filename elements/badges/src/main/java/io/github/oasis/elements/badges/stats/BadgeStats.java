@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.badges.stats;
 
+import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.collect.Record;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.SimpleElementDefinition;
@@ -36,6 +37,9 @@ import io.github.oasis.core.utils.Constants;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.badges.BadgeIDs;
+import io.github.oasis.elements.badges.stats.to.GameRuleWiseBadgeLog;
+import io.github.oasis.elements.badges.stats.to.GameRuleWiseBadgeLog.RuleBadgeLogRecord;
+import io.github.oasis.elements.badges.stats.to.GameRuleWiseBadgeLogRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeLog;
 import io.github.oasis.elements.badges.stats.to.UserBadgeLog.BadgeLogRecord;
 import io.github.oasis.elements.badges.stats.to.UserBadgeLogRequest;
@@ -167,6 +171,55 @@ public class BadgeStats extends AbstractStatsApiService {
             UserBadgeLog userBadgeLog = new UserBadgeLog();
             userBadgeLog.setGameId(request.getGameId());
             userBadgeLog.setUserId(request.getUserId());
+            userBadgeLog.setLog(logRecords);
+
+            return userBadgeLog;
+        }
+    }
+
+    @OasisStatEndPoint(path = "/elements/badges/rules/log")
+    public Object getRuleWiseBadgeLog(@QueryPayload GameRuleWiseBadgeLogRequest request) throws Exception {
+        try (DbContext db = getDbPool().createContext()) {
+
+            String badgeLogKey = BadgeIDs.getGameRuleWiseBadgeLogKey(request.getGameId(), request.getBadgeId());
+
+            Sorted badgeLog = db.SORTED(badgeLogKey);
+            List<Record> rangeRecords;
+            if (request.isTimeBased()) {
+                rangeRecords = badgeLog.getRangeByScoreWithScores(request.getTimeFrom(), request.getTimeTo());
+            } else {
+                rangeRecords = badgeLog.getRangeByRankWithScores(request.getOffset(), request.getOffset() + request.getSize() - 1);
+            }
+            List<RuleBadgeLogRecord> logRecords = new ArrayList<>();
+
+            Set<String> userIds = new HashSet<>();
+            for (Record record : rangeRecords) {
+                long awardedTime = record.getScoreAsLong();
+                String[] parts = record.getMember().split(Constants.COLON);
+
+                if (parts.length < 3) {
+                    continue;
+                }
+
+                userIds.add(parts[0]);
+                logRecords.add(new RuleBadgeLogRecord(Numbers.asLong(parts[0]),
+                        Numbers.asInt(parts[1]),
+                        Numbers.asLong(parts[2]),
+                        awardedTime));
+            }
+
+            if (Utils.isNotEmpty(userIds)) {
+                Map<String, UserMetadata> defMap = getContextHelper().readUsersByIdStrings(userIds);
+                Map<Integer, AttributeInfo> attributeInfoMap = loadGameAttributes(request.getGameId());
+                for (RuleBadgeLogRecord record : logRecords) {
+                    record.setAttributeMetadata(attributeInfoMap.get(record.getAttribute()));
+                    record.setUserMetadata(defMap.get(String.valueOf(record.getUserId())));
+                }
+            }
+
+            GameRuleWiseBadgeLog userBadgeLog = new GameRuleWiseBadgeLog();
+            userBadgeLog.setGameId(request.getGameId());
+            userBadgeLog.setBadgeMetadata(getContextHelper().readElementDefinition(request.getGameId(), request.getBadgeId()));
             userBadgeLog.setLog(logRecords);
 
             return userBadgeLog;

@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.milestones.stats.to;
 
+import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractStatsApiResponse;
@@ -26,6 +27,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +63,27 @@ public class GameMilestoneResponse extends AbstractStatsApiResponse {
         private String milestoneId;
         private SimpleElementDefinition milestoneMetadata;
 
-        private Map<String, Map<String, Long>> byTeams;
+        private List<MilestoneTeamSummary> byTeams;
         private Map<String, Long> all;
+    }
+
+    @Getter
+    @Setter
+    public static class MilestoneTeamSummary {
+        private final Integer teamId;
+        private TeamMetadata teamMetadata;
+
+        private Map<String, Long> levels;
+
+        public MilestoneTeamSummary(int teamId) {
+            this.teamId = teamId;
+        }
+
+        public void addLevelSummary(String level, Long count) {
+            if (levels == null) {
+                levels = new HashMap<>();
+            }
+            levels.computeIfAbsent(level, s -> count);
+        }
     }
 }

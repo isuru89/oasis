@@ -22,7 +22,11 @@ package io.github.oasis.core.services.api.services;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserObject;
+import io.github.oasis.core.services.api.handlers.UserHandlerSupport;
+import io.github.oasis.core.services.api.to.UserCreateRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -31,20 +35,73 @@ import org.springframework.stereotype.Service;
 public class UserTeamService {
 
     private final OasisRepository repository;
+    private final UserHandlerSupport userHandlerSupport;
 
-    public UserTeamService(OasisRepository repository) {
+    public UserTeamService(OasisRepository repository, UserHandlerSupport userHandlerSupport) {
         this.repository = repository;
+        this.userHandlerSupport = userHandlerSupport;
     }
 
-    public UserObject addUser(UserObject userObject) {
-        return repository.addUser(userObject);
+    public UserObject addUser(UserCreateRequest request) {
+        UserObject userObject = new UserObject();
+        userObject.setDisplayName(request.getFirstName() + " " + request.getLastName());
+        userObject.setEmail(request.getEmail());
+        userObject.setGender(request.getGender());
+        userObject.setTimeZone(request.getTimeZone());
+
+        UserObject oasisUser = repository.addUser(userObject);
+
+        request.setUserId(userObject.getUserId());
+        userHandlerSupport.createUser(request);
+
+        return oasisUser;
+    }
+
+    public UserObject readUser(long userId) {
+        return repository.readUser(userId);
+    }
+
+    public UserObject readUser(String userEmail) {
+        return repository.readUser(userEmail);
+    }
+
+    public UserObject updateUser(long userId, UserObject updatingUser) {
+        return repository.updateUser(userId, updatingUser);
+    }
+
+    public UserObject deactivateUser(long userId) {
+        UserObject userObject = repository.deleteUser(userId);
+
+        userHandlerSupport.deleteUser(userObject.getEmail());
+        return userObject;
+    }
+
+    public List<TeamObject> getUserTeams(long userId) {
+        return repository.getUserTeams(userId);
     }
 
     public TeamObject addTeam(TeamObject teamObject) {
         return repository.addTeam(teamObject);
     }
 
+    public TeamObject updateTeam(int teamId, TeamObject updatingTeam) {
+        return repository.updateTeam(teamId, updatingTeam);
+    }
+
+    public List<UserObject> listAllUsersInTeam(int teamId) {
+        return repository.getTeamUsers(teamId);
+    }
+
     public void addUserToTeam(long userId, int gameId, int teamId) {
         repository.addUserToTeam(userId, gameId, teamId);
+    }
+
+    public void addUsersToTeam(int teamId, List<Integer> userIds) {
+        TeamObject teamObject = repository.readTeam(teamId);
+        int gameId = teamObject.getGameId();
+
+        for (int userId : userIds) {
+            repository.addUserToTeam(userId, gameId, teamId);
+        }
     }
 }

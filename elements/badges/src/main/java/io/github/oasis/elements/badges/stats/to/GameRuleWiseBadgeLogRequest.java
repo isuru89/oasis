@@ -17,30 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.annotations;
+package io.github.oasis.elements.badges.stats.to;
 
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import io.github.oasis.core.services.AbstractStatsApiRequest;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Isuru Weerarathna
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-@RequestMapping(
-        method = RequestMethod.GET,
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-)
-public @interface ElementReadEndPoint {
+@Getter
+@Setter
+public class GameRuleWiseBadgeLogRequest extends AbstractStatsApiRequest {
 
-    @AliasFor(annotation = RequestMapping.class, attribute = "value")
-    String path();
+    private String badgeId;
+
+    private Integer offset;
+    private Integer size;
+
+    private Long timeFrom;
+    private Long timeTo;
+
+    public boolean isTimeBased() {
+        return timeFrom != null && timeTo != null;
+    }
+
 }
