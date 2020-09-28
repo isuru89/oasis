@@ -17,17 +17,16 @@
  * under the License.
  */
 
-package io.github.oasis.engine.element.points.stats;
+package io.github.oasis.core.services.api.handlers;
 
-import io.github.oasis.core.services.annotations.RepresentsElementType;
-import io.github.oasis.core.services.impl.BaseElementCRUDSupport;
+import io.github.oasis.core.services.api.to.UserCreateRequest;
 
 /**
  * @author Isuru Weerarathna
  */
-@RepresentsElementType("points")
-public class PointsCRUD extends BaseElementCRUDSupport {
-    public PointsCRUD() {
-        super("points");
-    }
+public interface UserHandlerSupport {
+
+    void createUser(UserCreateRequest request);
+
+    void deleteUser(String email);
 }

@@ -17,30 +17,17 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.annotations;
+package io.github.oasis.core.services.api.security;
 
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Isuru Weerarathna
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-@RequestMapping(
-        method = RequestMethod.DELETE,
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-)
-public @interface ElementDeleteEndPoint {
+@Configuration
+public class KeycloakConfigs {
 
-    @AliasFor(annotation = RequestMapping.class, attribute = "value")
-    String path();
+
+
+
 }

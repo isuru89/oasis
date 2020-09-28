@@ -19,7 +19,9 @@
 
 package io.github.oasis.elements.challenges.stats;
 
+import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
@@ -70,6 +72,7 @@ public class ChallengeStats extends AbstractStatsApiService {
             summary.setGameId(request.getGameId());
 
             Map<String, ChallengeSummary> summaryMap = new HashMap<>();
+            Map<String, UserMetadata> userMetadataMap = new HashMap<>();
             if (Utils.isNotEmpty(request.getChallengeIds())) {
                 List<String> subKeys = request.getChallengeIds().stream()
                         .map(id -> id + Constants.COLON + "winners")
@@ -87,19 +90,26 @@ public class ChallengeStats extends AbstractStatsApiService {
                     Sorted winnerLog = db.SORTED(ChallengeIDs.getGameChallengeKey(request.getGameId(), parts[0]));
 
                     if (request.isCustomRange()) {
-                        theChallenge.setWinners(winnerLog
+                        List<GameChallengesSummary.ChallengeWinner> challengeWinners = winnerLog
                                 .getRangeByRankWithScores(request.getRankStart() - 1, request.getRankEnd() < 0 ? request.getRankEnd() : request.getRankEnd() - 1)
                                 .stream().map(rec -> new GameChallengesSummary.ChallengeWinner(parseUserId(rec.getMember()), rec.getScoreAsLong()))
-                                .collect(Collectors.toList()));
+                                .collect(Collectors.toList());
+
+                        assignUserMetadata(challengeWinners, userMetadataMap);
+                        theChallenge.setWinners(challengeWinners);
                     } else {
-                        theChallenge.setLatestWinners(winnerLog.getRangeByRankWithScores(-1 * request.getLatestWinnerCount(), -1)
+                        List<GameChallengesSummary.ChallengeWinner> latestWinners = winnerLog.getRangeByRankWithScores(-1 * request.getLatestWinnerCount(), -1)
                                 .stream().map(rec -> new GameChallengesSummary.ChallengeWinner(parseUserId(rec.getMember()), rec.getScoreAsLong()))
-                                .collect(Collectors.toList()));
+                                .collect(Collectors.toList());
+                        assignUserMetadata(latestWinners, userMetadataMap);
+                        theChallenge.setLatestWinners(latestWinners);
 
                         if (Objects.nonNull(request.getFirstWinnerCount())) {
-                            theChallenge.setFirstWinners(winnerLog.getRangeByRankWithScores(0, request.getFirstWinnerCount() - 1)
+                            List<GameChallengesSummary.ChallengeWinner> firstWinners = winnerLog.getRangeByRankWithScores(0, request.getFirstWinnerCount() - 1)
                                     .stream().map(rec -> new GameChallengesSummary.ChallengeWinner(parseUserId(rec.getMember()), rec.getScoreAsLong()))
-                                    .collect(Collectors.toList()));
+                                    .collect(Collectors.toList());
+                            assignUserMetadata(firstWinners, userMetadataMap);
+                            theChallenge.setFirstWinners(firstWinners);
                         }
                     }
 
@@ -151,6 +161,17 @@ public class ChallengeStats extends AbstractStatsApiService {
             winLog.setWinnings(records);
             return winLog;
         }
+    }
+
+    private void assignUserMetadata(List<GameChallengesSummary.ChallengeWinner> challengeWinners,
+                                    Map<String, UserMetadata> memo) throws OasisException {
+        Map<String, UserMetadata> userMetadataMap = getContextHelper().readUsersByIdStrings(challengeWinners
+                .stream().map(u -> String.valueOf(u.getUserId()))
+                .filter(uid -> !memo.containsKey(uid))
+                .collect(Collectors.toList()));
+        memo.putAll(userMetadataMap);
+
+        challengeWinners.forEach(winner -> winner.setUserMetadata(memo.get(String.valueOf(winner.getUserId()))));
     }
 
     private Long parseUserId(String val) {

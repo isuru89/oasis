@@ -17,21 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.annotations;
+package io.github.oasis.core.services.api.to;
 
-import org.springframework.security.access.prepost.PreAuthorize;
+import io.github.oasis.core.model.UserGender;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.io.Serializable;
 
 /**
- * When this annotation is present, user with player role can access the method.
  * @author Isuru Weerarathna
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-@PreAuthorize("hasRole('ROLE_PLAYER')")
-public @interface IsPlayer {
+@Getter
+@Setter
+public class UserCreateRequest implements Serializable {
+
+    private Long userId;
+    private String email;
+    private String firstName;
+    private String lastName;
+    private String userName;
+
+    private UserGender gender;
+    private String timeZone;
+
+    private String initialPassword;
+
 }

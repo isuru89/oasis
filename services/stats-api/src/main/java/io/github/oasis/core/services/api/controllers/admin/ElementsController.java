@@ -22,6 +22,8 @@ package io.github.oasis.core.services.api.controllers.admin;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.services.annotations.ForCurator;
+import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.ElementService;
 import org.springframework.http.MediaType;
@@ -52,24 +54,28 @@ public class ElementsController extends AbstractController {
         this.elementService = elementService;
     }
 
+    @ForPlayer
     @GetMapping(path = "/admin/games/{gameId}/elements/types/{elementType}")
     public List<SimpleElementDefinition> getElementsByType(@PathVariable("gameId") Integer gameId,
                                                            @PathVariable("elementType") String elementType) throws OasisException {
         return elementService.listElementsByType(gameId, elementType);
     }
 
+    @ForPlayer
     @GetMapping(path = "/admin/games/{gameId}/elements/{elementId}")
     public ElementDef read(@PathVariable("gameId") Integer gameId,
                            @PathVariable("elementId") String elementId) {
         return elementService.readElement(gameId, elementId);
     }
 
+    @ForCurator
     @PostMapping(path = "/admin/games/{gameId}/elements")
     public ElementDef add(@PathVariable("gameId") Integer gameId,
                            @RequestBody ElementDef elementDef) {
         return elementService.addElement(gameId, elementDef);
     }
 
+    @ForCurator
     @PutMapping(path = "/admin/games/{gameId}/elements/{elementId}")
     public ElementDef update(@PathVariable("gameId") Integer gameId,
                              @PathVariable("elementId") String elementId,
@@ -77,6 +83,7 @@ public class ElementsController extends AbstractController {
         return elementService.updateElement(gameId, elementId, elementDef);
     }
 
+    @ForCurator
     @DeleteMapping(path = "/admin/games/{gameId}/elements/{elementId}")
     public ElementDef delete(@PathVariable("gameId") Integer gameId,
                              @PathVariable("elementId") String elementId) {

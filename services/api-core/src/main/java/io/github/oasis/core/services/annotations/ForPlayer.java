@@ -17,16 +17,21 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api;
+package io.github.oasis.core.services.annotations;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.prepost.PreAuthorize;
 
-@SpringBootTest
-class StatsApiApplicationTests {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-	@Test
-	void contextLoads() {
-	}
-
+/**
+ * When this annotation is present, user with player role can access the method.
+ * @author Isuru Weerarathna
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@PreAuthorize("hasRole('ROLE_player')")
+public @interface ForPlayer {
 }

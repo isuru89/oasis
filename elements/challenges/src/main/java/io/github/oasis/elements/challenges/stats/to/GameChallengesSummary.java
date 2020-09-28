@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.challenges.stats.to;
 
+import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractStatsApiResponse;
 import lombok.Getter;
@@ -40,6 +41,7 @@ public class GameChallengesSummary extends AbstractStatsApiResponse {
     @Setter
     public static class ChallengeWinner {
         private Long userId;
+        private UserMetadata userMetadata;
         private long wonAt;
 
         public ChallengeWinner(Long userId, long wonAt) {

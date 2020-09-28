@@ -21,6 +21,7 @@ package io.github.oasis.core.services.api.controllers.admin;
 
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.EventSourceService;
 import org.springframework.http.MediaType;
@@ -50,27 +51,32 @@ public class EventSourceController extends AbstractController {
         this.eventSourceService = eventSourceService;
     }
 
+    @ForAdmin
     @PostMapping("/admin/event-sources")
     public EventSource registerEventSource(@RequestBody EventSource eventSource) throws OasisException {
         return eventSourceService.registerEventSource(eventSource);
     }
 
+    @ForAdmin
     @GetMapping("/admin/event-sources/games/{gameId}")
     public List<EventSource> getEventSourcesOfGame(@PathVariable("gameId") Integer gameId) {
         return eventSourceService.listAllEventSourcesOfGame(gameId);
     }
 
+    @ForAdmin
     @GetMapping("/admin/event-sources")
     public List<EventSource> getAllEventSources() {
         return eventSourceService.listAllEventSources();
     }
 
+    @ForAdmin
     @PostMapping("/admin/event-sources/{eventSourceId}/games/{gameId}")
     public void assignEventSourceToGame(@PathVariable("eventSourceId") Integer eventSourceId,
                                         @PathVariable("gameId") Integer gameId) {
         eventSourceService.assignEventSourceToGame(eventSourceId, gameId);
     }
 
+    @ForAdmin
     @DeleteMapping("/admin/event-sources/{eventSourceId}")
     public void deleteEventSource(@PathVariable("eventSourceId") Integer eventSourceId) {
         eventSourceService.deleteEventSource(eventSourceId);

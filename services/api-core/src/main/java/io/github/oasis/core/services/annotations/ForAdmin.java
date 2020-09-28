@@ -19,10 +19,7 @@
 
 package io.github.oasis.core.services.annotations;
 
-import org.springframework.core.annotation.AliasFor;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -30,17 +27,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ *  When this annotation is present, only an admin can access the method. 
  * @author Isuru Weerarathna
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-@RequestMapping(
-        method = RequestMethod.PUT,
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-)
-public @interface ElementUpdateEndPoint {
-
-    @AliasFor(annotation = RequestMapping.class, attribute = "value")
-    String path();
+@PreAuthorize("hasRole('ROLE_admin')")
+public @interface ForAdmin {
 }

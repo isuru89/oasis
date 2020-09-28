@@ -30,6 +30,5 @@ public class PointsServiceApiFactory extends OasisServiceApiFactory {
     @Override
     public void initialize(ServiceRegistrar registrar) {
         registrar.registerStatsService(PointStats.class);
-        registrar.registerElementCRUD(PointsCRUD.class);
     }
 }
