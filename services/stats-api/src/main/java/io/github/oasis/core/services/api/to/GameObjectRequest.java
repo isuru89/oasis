@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.services.api.to;
 
+import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.AttributeInfo;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,4 +42,12 @@ public class GameObjectRequest implements Serializable {
 
     private List<AttributeInfo> attributes;
 
+    public Game createGame() {
+        Game game = new Game();
+        game.setId(id);
+        game.setName(name);
+        game.setDescription(description);
+        game.setMotto(motto);
+        return game;
+    }
 }

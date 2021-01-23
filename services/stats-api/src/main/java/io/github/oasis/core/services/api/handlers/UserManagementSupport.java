@@ -22,9 +22,12 @@ package io.github.oasis.core.services.api.handlers;
 import io.github.oasis.core.services.api.to.UserCreateRequest;
 
 /**
+ * Base interface to implement backend user management implementation.
+ * By default, Oasis is shipped with keycloak implementation.
+ *
  * @author Isuru Weerarathna
  */
-public interface UserHandlerSupport {
+public interface UserManagementSupport {
 
     void createUser(UserCreateRequest request);
 

@@ -24,14 +24,10 @@ import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.EventSourceService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -43,6 +39,7 @@ import java.util.List;
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
 )
+@Tag(name = "Event-Sources", description = "Event source manipulation API")
 public class EventSourceController extends AbstractController {
 
     private final EventSourceService eventSourceService;
@@ -51,24 +48,40 @@ public class EventSourceController extends AbstractController {
         this.eventSourceService = eventSourceService;
     }
 
+    @Operation(
+            summary = "Register a new event source",
+            tags = {"admin"}
+    )
     @ForAdmin
     @PostMapping("/admin/event-sources")
     public EventSource registerEventSource(@RequestBody EventSource eventSource) throws OasisException {
         return eventSourceService.registerEventSource(eventSource);
     }
 
+    @Operation(
+            summary = "Returns all registered event sources of a game",
+            tags = {"admin"}
+    )
     @ForAdmin
     @GetMapping("/admin/event-sources/games/{gameId}")
     public List<EventSource> getEventSourcesOfGame(@PathVariable("gameId") Integer gameId) {
         return eventSourceService.listAllEventSourcesOfGame(gameId);
     }
 
+    @Operation(
+            summary = "Returns all registered event sources across all games",
+            tags = {"admin"}
+    )
     @ForAdmin
     @GetMapping("/admin/event-sources")
     public List<EventSource> getAllEventSources() {
         return eventSourceService.listAllEventSources();
     }
 
+    @Operation(
+            summary = "Assigns a registered event source to a game",
+            tags = {"admin"}
+    )
     @ForAdmin
     @PostMapping("/admin/event-sources/{eventSourceId}/games/{gameId}")
     public void assignEventSourceToGame(@PathVariable("eventSourceId") Integer eventSourceId,
@@ -76,6 +89,10 @@ public class EventSourceController extends AbstractController {
         eventSourceService.assignEventSourceToGame(eventSourceId, gameId);
     }
 
+    @Operation(
+            summary = "Deactivate an existing event source",
+            tags = {"admin"}
+    )
     @ForAdmin
     @DeleteMapping("/admin/event-sources/{eventSourceId}")
     public void deleteEventSource(@PathVariable("eventSourceId") Integer eventSourceId) {

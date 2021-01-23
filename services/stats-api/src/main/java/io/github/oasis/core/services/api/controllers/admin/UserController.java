@@ -28,16 +28,10 @@ import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.UserTeamService;
 import io.github.oasis.core.services.api.to.UserCreateRequest;
 import io.github.oasis.core.services.api.to.UserGameAssociationRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -49,6 +43,7 @@ import java.util.List;
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
 )
+@Tag(name = "Users", description = "Users related APIs")
 public class UserController extends AbstractController {
 
     private final UserTeamService userTeamService;
@@ -57,30 +52,47 @@ public class UserController extends AbstractController {
         this.userTeamService = userTeamService;
     }
 
+    @Operation(
+            summary = "Register a new user to the system",
+            tags = {"admin"}
+    )
     @ForAdmin
     @PostMapping("/admin/users")
     public UserObject registerUser(@RequestBody UserCreateRequest user) {
         return userTeamService.addUser(user);
     }
 
+    @Operation(
+            summary = "Gets a single user by email"
+    )
     @ForPlayer
     @GetMapping("/admin/users")
     public UserObject readUserProfileByEmail(@RequestParam(name = "email") String email) {
         return userTeamService.readUser(email);
     }
 
+    @Operation(
+            summary = "Gets a single user by user id"
+    )
     @ForPlayer
     @GetMapping("/admin/users/{userId}")
     public UserObject readUserProfile(@PathVariable("userId") Integer userId) {
         return userTeamService.readUser(userId);
     }
 
+    @Operation(
+            summary = "Gets all users of a team"
+    )
     @ForPlayer
     @GetMapping("/admin/teams/{teamId}/users")
     public List<UserObject> browseUsers(@PathVariable("teamId") Integer teamId) {
         return userTeamService.listAllUsersInTeam(teamId);
     }
 
+    @Operation(
+            summary = "Update user details",
+            tags = {"admin", "curator"}
+    )
     @ForCurator
     @PutMapping("/admin/users/{userId}")
     public UserObject updateUser(@PathVariable("userId") Integer userId,
@@ -88,18 +100,30 @@ public class UserController extends AbstractController {
         return userTeamService.updateUser(userId, userObject);
     }
 
+    @Operation(
+            summary = "Deactivate a user from the system",
+            tags = {"admin", "curator"}
+    )
     @ForAdmin
     @DeleteMapping("/admin/users/{userId}")
     public UserObject deactivateUser(@PathVariable("userId") Integer userId) {
         return userTeamService.deactivateUser(userId);
     }
 
+    @Operation(
+            summary = "Add a new team to the system",
+            tags = {"admin", "curator"}
+    )
     @ForCurator
     @PostMapping("/admin/teams")
     public TeamObject addTeam(@RequestBody TeamObject team) {
         return userTeamService.addTeam(team);
     }
 
+    @Operation(
+            summary = "Update team details",
+            tags = {"admin", "curator"}
+    )
     @ForCurator
     @PutMapping("/admin/teams/{teamId}")
     public TeamObject updateTeam(@PathVariable("teamId") Integer teamId,
@@ -107,6 +131,10 @@ public class UserController extends AbstractController {
         return userTeamService.updateTeam(teamId, teamObject);
     }
 
+    @Operation(
+            summary = "Add a user to the provided team",
+            tags = {"admin", "curator"}
+    )
     @ForCurator
     @PostMapping("/admin/users/{userId}/teams")
     public void addUserToTeam(@PathVariable("userId") Integer userId,
@@ -114,12 +142,19 @@ public class UserController extends AbstractController {
         userTeamService.addUserToTeam(userId, request.getGameId(), request.getTeamId());
     }
 
+    @Operation(
+            summary = "Gets all teams a user has been associated with"
+    )
     @ForPlayer
     @GetMapping("/admin/users/{userId}/teams")
     public List<TeamObject> browseUserTeams(@PathVariable("userId") Integer userId) {
         return userTeamService.getUserTeams(userId);
     }
 
+    @Operation(
+            summary = "Add multiple users at once to a team",
+            tags = {"admin", "curator"}
+    )
     @ForCurator
     @PostMapping("/admin/teams/{teamId}/users")
     public void addUsersToTeam(@PathVariable("teamId") Integer teamId,

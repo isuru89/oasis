@@ -21,25 +21,35 @@ package io.github.oasis.core.services.api.handlers;
 
 import io.github.oasis.core.services.api.configs.ErrorMessages;
 import io.github.oasis.core.services.exceptions.OasisApiException;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.util.WebUtils;
 
+import java.io.Serializable;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
 @ControllerAdvice
 public class OasisErrorHandler extends ResponseEntityExceptionHandler {
+
+    private static final String TIMESTAMP = "timestamp";
+    private static final String STATUS = "status";
+    private static final String ERROR_CODE = "errorCode";
+    private static final String ERROR_CODE_DESCRIPTION = "errorCodeDescription";
+    private static final String MESSAGE = "message";
+    private static final String PATH = "path";
 
     private static final HttpHeaders ERROR_HEADERS = new HttpHeaders();
 
@@ -54,19 +64,32 @@ public class OasisErrorHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = { OasisApiException.class })
-    protected ResponseEntity<Object> handleValidationError(OasisApiException ex, WebRequest request) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("timestamp", Instant.now().toString());
-        data.put("status", ex.getStatusCode());
-        data.put("errorCode", ex.getErrorCode());
-        data.put("errorCodeDescription", errorMessages.getErrorMessage(ex.getErrorCode()));
-        data.put("message", ex.getMessage());
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected ResponseEntity<ErrorObject> handleValidationError(OasisApiException ex, WebRequest request) {
+        ErrorObject errorObject = new ErrorObject();
+        errorObject.setTimestamp(Instant.now().toString());
+        errorObject.setStatus(ex.getStatusCode());
+        errorObject.setErrorCode(ex.getErrorCode());
+        errorObject.setErrorCodeDescription(errorMessages.getErrorMessage(ex.getErrorCode()));
+        errorObject.setMessage(ex.getMessage());
         if (request instanceof ServletWebRequest) {
-            data.put("path", ((ServletWebRequest) request).getRequest().getServletPath());
+            errorObject.setPath(((ServletWebRequest) request).getRequest().getServletPath());
         } else {
-            data.put("path", request.getContextPath());
+            errorObject.setPath(request.getContextPath());
         }
-        return handleExceptionInternal(ex, data, ERROR_HEADERS, HttpStatus.valueOf(ex.getStatusCode()), request);
+        request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
+        return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.valueOf(ex.getStatusCode()));
+    }
+
+    @Getter
+    @Setter
+    public static class ErrorObject implements Serializable {
+        private String timestamp;
+        private int status;
+        private String errorCode;
+        private String errorCodeDescription;
+        private String message;
+        private String path;
     }
 
 }

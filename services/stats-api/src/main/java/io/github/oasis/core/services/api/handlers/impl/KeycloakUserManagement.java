@@ -20,7 +20,7 @@
 package io.github.oasis.core.services.api.handlers.impl;
 
 import io.github.oasis.core.exception.OasisRuntimeException;
-import io.github.oasis.core.services.api.handlers.UserHandlerSupport;
+import io.github.oasis.core.services.api.handlers.UserManagementSupport;
 import io.github.oasis.core.services.api.to.UserCreateRequest;
 import io.github.oasis.core.utils.Utils;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -51,9 +51,9 @@ import java.util.Map;
  * @author Isuru Weerarathna
  */
 @Component("KeycloakUserHandler")
-public class KeycloakUserHandler implements UserHandlerSupport, DisposableBean {
+public class KeycloakUserManagement implements UserManagementSupport, DisposableBean {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KeycloakUserHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KeycloakUserManagement.class);
 
     private static final String ATTR_GENDER = "gender";
     private static final String ATTR_ZONE_INFO = "zoneinfo";
@@ -93,8 +93,8 @@ public class KeycloakUserHandler implements UserHandlerSupport, DisposableBean {
                 .resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).build())
                 .build();
 
-        keycloak.tokenManager().getAccessToken();
-        usersResource = keycloak.realm(realmName).users();
+//        keycloak.tokenManager().getAccessToken();
+//        usersResource = keycloak.realm(realmName).users();
     }
 
     @Override
