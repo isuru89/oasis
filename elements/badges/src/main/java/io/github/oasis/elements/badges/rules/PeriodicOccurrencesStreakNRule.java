@@ -41,9 +41,9 @@ public class PeriodicOccurrencesStreakNRule extends PeriodicStreakNRule {
         throw new IllegalStateException("Use condition instead of value resolver!");
     }
 
-    public void setCondition(EventExecutionFilter condition) {
+    public void setEventFilter(EventExecutionFilter eventFilter) {
         super.valueResolver = (event, ctx) -> {
-            if (condition.matches(event, this, ctx)) {
+            if (eventFilter.matches(event, this, ctx)) {
                 return BigDecimal.ONE;
             } else {
                 return BigDecimal.ZERO;

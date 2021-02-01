@@ -136,7 +136,7 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
      */
     private boolean canSkip(Event event, AbstractRule rule, ExecutionContext context) {
         return !rule.isEventFalls(event, context)
-                || !rule.isConditionMatches(event, context);
+                || !rule.isEventFilterSatisfy(event, context);
     }
 
 }

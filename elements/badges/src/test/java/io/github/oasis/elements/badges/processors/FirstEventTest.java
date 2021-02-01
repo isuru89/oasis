@@ -245,7 +245,7 @@ public class FirstEventTest extends AbstractRuleTest {
     private RuleContext<FirstEventBadgeRule> createRule(String forEvent, List<Signal> collectTo, EventExecutionFilter predicate) {
         FirstEventBadgeRule rule = new FirstEventBadgeRule("test.event", forEvent);
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_1));
-        rule.setCondition(predicate);
+        rule.setEventFilter(predicate);
         return new RuleContext<>(rule, fromConsumer(collectTo::add));
     }
 

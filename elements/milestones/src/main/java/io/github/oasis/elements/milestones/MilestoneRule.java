@@ -22,18 +22,14 @@ package io.github.oasis.elements.milestones;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.EventBiValueResolver;
+import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
+ * The base rule for milestones.
+ *
  * @author Isuru Weerarathna
  */
 public class MilestoneRule extends AbstractRule {
@@ -94,24 +90,17 @@ public class MilestoneRule extends AbstractRule {
         return levels;
     }
 
+    @Getter
     public static class Level implements Comparable<Level> {
 
         static final Level LEVEL_ZERO = new Level(0, BigDecimal.ZERO);
 
-        private int level;
-        private BigDecimal milestone;
+        private final int level;
+        private final BigDecimal milestone;
 
         public Level(int level, BigDecimal milestone) {
             this.level = level;
             this.milestone = milestone;
-        }
-
-        public int getLevel() {
-            return level;
-        }
-
-        public BigDecimal getMilestone() {
-            return milestone;
         }
 
         @Override

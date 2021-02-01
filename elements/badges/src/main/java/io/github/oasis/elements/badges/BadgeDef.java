@@ -25,6 +25,9 @@ import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
 import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,8 +37,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
+ * Definition for a badge rule. All badge rules will be represented by this single definition.
+ *
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class BadgeDef extends AbstractDef {
 
     public static final String FIRST_EVENT_KIND = "firstEvent";
@@ -55,7 +62,7 @@ public class BadgeDef extends AbstractDef {
 
     private Object timeUnit;
     private BigDecimal threshold;
-    private Object valueExtractorExpression;
+    private Object aggregatorExtractor;
 
     private String pointId;
     private Object pointAwards;
@@ -71,7 +78,7 @@ public class BadgeDef extends AbstractDef {
         attrs.add(Utils.firstNonNullAsStr(getConsecutive(), EMPTY));
         attrs.add(Utils.firstNonNullAsStr(getThreshold(), EMPTY));
         attrs.add(Utils.firstNonNullAsStr(getTimeUnit(), EMPTY));
-        attrs.add(Utils.firstNonNullAsStr(getValueExtractorExpression(), EMPTY));
+        attrs.add(Utils.firstNonNullAsStr(getAggregatorExtractor(), EMPTY));
         attrs.add(Utils.firstNonNullAsStr(getPointAwards(), EMPTY));
 
         if (Objects.nonNull(conditions)) {
@@ -94,109 +101,13 @@ public class BadgeDef extends AbstractDef {
         return attrs;
     }
 
-    public Object getValueExtractorExpression() {
-        return valueExtractorExpression;
-    }
-
-    public void setValueExtractorExpression(Object valueExtractorExpression) {
-        this.valueExtractorExpression = valueExtractorExpression;
-    }
-
-    public Integer getMaxAwardTimes() {
-        return maxAwardTimes;
-    }
-
-    public void setMaxAwardTimes(Integer maxAwardTimes) {
-        this.maxAwardTimes = maxAwardTimes;
-    }
-
-    public Integer getAttribute() {
-        return attribute;
-    }
-
-    public void setAttribute(Integer attribute) {
-        this.attribute = attribute;
-    }
-
-    public String getKind() {
-        return kind;
-    }
-
-    public void setKind(String kind) {
-        this.kind = kind;
-    }
-
-    public Boolean getConsecutive() {
-        return consecutive;
-    }
-
-    public void setConsecutive(Boolean consecutive) {
-        this.consecutive = consecutive;
-    }
-
-    public Object getTimeUnit() {
-        return timeUnit;
-    }
-
-    public void setTimeUnit(Object timeUnit) {
-        this.timeUnit = timeUnit;
-    }
-
-    public BigDecimal getThreshold() {
-        return threshold;
-    }
-
-    public void setThreshold(BigDecimal threshold) {
-        this.threshold = threshold;
-    }
-
-    public List<Condition> getConditions() {
-        return conditions;
-    }
-
-    public void setConditions(List<Condition> conditions) {
-        this.conditions = conditions;
-    }
-
-    public List<Streak> getStreaks() {
-        return streaks;
-    }
-
-    public void setStreaks(List<Streak> streaks) {
-        this.streaks = streaks;
-    }
-
-    public List<Threshold> getThresholds() {
-        return thresholds;
-    }
-
-    public void setThresholds(List<Threshold> thresholds) {
-        this.thresholds = thresholds;
-    }
-
-    public String getPointId() {
-        return pointId;
-    }
-
-    public void setPointId(String pointId) {
-        this.pointId = pointId;
-    }
-
-    public Object getPointAwards() {
-        return pointAwards;
-    }
-
-    public void setPointAwards(Object pointAwards) {
-        this.pointAwards = pointAwards;
-    }
-
+    @Getter
+    @Setter
+    @NoArgsConstructor
     public static class Streak {
         private Integer streak;
         private Integer attribute;
         private Object pointAwards;
-
-        public Streak() {
-        }
 
         public Streak(Integer streak, Integer attribute) {
             this.streak = streak;
@@ -209,39 +120,15 @@ public class BadgeDef extends AbstractDef {
                     Utils.firstNonNullAsStr(getStreak(), EMPTY)
             );
         }
-
-        public Object getPointAwards() {
-            return pointAwards;
-        }
-
-        public void setPointAwards(Object pointAwards) {
-            this.pointAwards = pointAwards;
-        }
-
-        public Integer getStreak() {
-            return streak;
-        }
-
-        public void setStreak(Integer streak) {
-            this.streak = streak;
-        }
-
-        public Integer getAttribute() {
-            return attribute;
-        }
-
-        public void setAttribute(Integer attribute) {
-            this.attribute = attribute;
-        }
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
     public static class Threshold {
         private BigDecimal value;
         private Integer attribute;
         private Object pointAwards;
-
-        public Threshold() {
-        }
 
         public Threshold(BigDecimal value, Integer attribute) {
             this.value = value;
@@ -258,40 +145,16 @@ public class BadgeDef extends AbstractDef {
         PeriodicBadgeRule.Threshold toRuleThreshold() {
             return new PeriodicBadgeRule.Threshold(attribute, value, Utils.toBigDecimal(pointAwards));
         }
-
-        public Object getPointAwards() {
-            return pointAwards;
-        }
-
-        public void setPointAwards(Object pointAwards) {
-            this.pointAwards = pointAwards;
-        }
-
-        public BigDecimal getValue() {
-            return value;
-        }
-
-        public void setValue(BigDecimal value) {
-            this.value = value;
-        }
-
-        public Integer getAttribute() {
-            return attribute;
-        }
-
-        public void setAttribute(Integer attribute) {
-            this.attribute = attribute;
-        }
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
     public static class Condition {
         private Integer priority;
         private Object condition;
         private Integer attribute;
         private Object pointAwards;
-
-        public Condition() {
-        }
 
         public Condition(Integer priority, Object condition, Integer attribute) {
             this.priority = priority;
@@ -310,38 +173,6 @@ public class BadgeDef extends AbstractDef {
         ConditionalBadgeRule.Condition toRuleCondition() {
             EventExecutionFilter filter = EventExecutionFilterFactory.create(condition);
             return new ConditionalBadgeRule.Condition(priority, filter, attribute, Utils.toBigDecimal(pointAwards));
-        }
-
-        public Object getPointAwards() {
-            return pointAwards;
-        }
-
-        public void setPointAwards(Object pointAwards) {
-            this.pointAwards = pointAwards;
-        }
-
-        public Integer getPriority() {
-            return priority;
-        }
-
-        public void setPriority(Integer priority) {
-            this.priority = priority;
-        }
-
-        public Object getCondition() {
-            return condition;
-        }
-
-        public void setCondition(Object condition) {
-            this.condition = condition;
-        }
-
-        public Integer getAttribute() {
-            return attribute;
-        }
-
-        public void setAttribute(Integer attribute) {
-            this.attribute = attribute;
         }
     }
 

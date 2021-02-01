@@ -36,15 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.github.oasis.elements.milestones.Utils.findByName;
-import static io.github.oasis.elements.milestones.Utils.isNonEmptyString;
-import static io.github.oasis.elements.milestones.Utils.isNumber;
-import static io.github.oasis.elements.milestones.Utils.parseAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.github.oasis.elements.milestones.Utils.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Isuru Weerarathna
@@ -138,7 +131,7 @@ class MilestoneParserTest {
             assertNull(def.getEvents());
             assertNull(def.getPointIds());
             assertNotNull(def.getLevels());
-            assertNotNull(def.getCondition());
+            assertNotNull(def.getEventFilter());
             assertTrue(isNumber(def.getValueExtractor()));
 
             MilestoneRule rule = parser.convert(def);
@@ -149,7 +142,7 @@ class MilestoneParserTest {
             assertTrue(rule.getEventTypeMatcher().matches("stackoverflow.question.answered"));
             assertFalse(rule.getEventTypeMatcher().matches("unknown.reputation"));
             assertEquals(BigDecimal.ONE, rule.getValueExtractor().resolve(null, rule, null));
-            assertNotNull(rule.getCondition());
+            assertNotNull(rule.getEventFilter());
         });
     }
 

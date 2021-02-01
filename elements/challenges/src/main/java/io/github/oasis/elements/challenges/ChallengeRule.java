@@ -22,12 +22,16 @@ package io.github.oasis.elements.challenges;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.EventBiValueResolver;
 import io.github.oasis.core.elements.EventExecutionFilter;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class ChallengeRule extends AbstractRule {
 
     public static final String REPEATABLE_WINNERS = "REPEATABLE_WINNERS";
@@ -48,78 +52,6 @@ public class ChallengeRule extends AbstractRule {
 
     public ChallengeRule(String id) {
         super(id);
-    }
-
-    public String getPointId() {
-        return pointId;
-    }
-
-    public void setPointId(String pointId) {
-        this.pointId = pointId;
-    }
-
-    public long getExpireAt() {
-        return expireAt;
-    }
-
-    public void setExpireAt(long expireAt) {
-        this.expireAt = expireAt;
-    }
-
-    public long getStartAt() {
-        return startAt;
-    }
-
-    public void setStartAt(long startAt) {
-        this.startAt = startAt;
-    }
-
-    public int getWinnerCount() {
-        return winnerCount;
-    }
-
-    public void setWinnerCount(int winnerCount) {
-        this.winnerCount = winnerCount;
-    }
-
-    public BigDecimal getAwardPoints() {
-        return awardPoints;
-    }
-
-    public void setAwardPoints(BigDecimal awardPoints) {
-        this.awardPoints = awardPoints;
-    }
-
-    public EventBiValueResolver<Integer, ChallengeRule> getCustomAwardPoints() {
-        return customAwardPoints;
-    }
-
-    public void setCustomAwardPoints(EventBiValueResolver<Integer, ChallengeRule> customAwardPoints) {
-        this.customAwardPoints = customAwardPoints;
-    }
-
-    public EventExecutionFilter getCriteria() {
-        return criteria;
-    }
-
-    public void setCriteria(EventExecutionFilter criteria) {
-        this.criteria = criteria;
-    }
-
-    public ChallengeScope getScope() {
-        return scope;
-    }
-
-    public void setScope(ChallengeScope scope) {
-        this.scope = scope;
-    }
-
-    public long getScopeId() {
-        return scopeId;
-    }
-
-    public void setScopeId(long scopeId) {
-        this.scopeId = scopeId;
     }
 
     public enum ChallengeScope {

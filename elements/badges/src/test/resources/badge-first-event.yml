@@ -12,7 +12,7 @@ badges:
     description: Awards a badge asking the first question for a topic.
     event: app.question.asked
     kind: firstEvent
-    condition: e.totalQuestions == 1
+    eventFilter: e.totalQuestions == 1
 
   - id: BDG00003
     name: Initial-Registration-With-Points

@@ -45,7 +45,7 @@ milestones:
   - name: Milestone-with-Event-Count
     description: This is a milestone counting events based on a criteria.
     event: stackoverflow.question.answered
-    condition: |
+    eventFilter: |
       return e.answeredAt - e.askedAt <= 60 * 60 * 5
     valueExtractor: 1
     levels:

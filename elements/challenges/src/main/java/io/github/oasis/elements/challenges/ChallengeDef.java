@@ -21,29 +21,58 @@ package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.utils.Utils;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
+ * Definition for challenge rule.
+ *
+ * This definition accepts two possible flags.
+ *   - REPEATABLE_WINNERS: allows a single user to win the challenge multiple times.
+ *   - OUT_OF_ORDER_WINNERS: allows processing out of order events and maintain constraints provided.
+ *
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class ChallengeDef extends AbstractDef {
 
+    /**
+     * Start time to begin processing events.
+     */
     private Long startAt;
+    /**
+     * End time to stop processing events and announce winners.
+     */
     private Long expireAt;
 
+    /**
+     * Maximum number of winners allowed to achieve this challenge.
+     * Once this number reached, the challenge will auto stop.
+     */
     private Integer winnerCount;
 
+    /**
+     * The map of scopes to choose winners.
+     * This can be by teams, individual or global.
+     * If teams or individual, the id must be specified as map value.
+     */
     private Map<String, Object> scope;
 
     private Object criteria;
 
+    /**
+     * When a user wins, the type of point id to be awarded.
+     * When not specified, challenge id will be used.
+     */
     private String pointId;
+    /**
+     * Expression for points to award to a winning user.
+     */
     private Object pointAwards;
 
     @Override
@@ -57,61 +86,5 @@ public class ChallengeDef extends AbstractDef {
         base.add(Utils.firstNonNullAsStr(pointAwards, EMPTY));
         base.add(Utils.firstNonNullAsStr(scope, EMPTY));
         return base;
-    }
-
-    public Long getStartAt() {
-        return startAt;
-    }
-
-    public void setStartAt(Long startAt) {
-        this.startAt = startAt;
-    }
-
-    public Long getExpireAt() {
-        return expireAt;
-    }
-
-    public void setExpireAt(Long expireAt) {
-        this.expireAt = expireAt;
-    }
-
-    public Integer getWinnerCount() {
-        return winnerCount;
-    }
-
-    public void setWinnerCount(Integer winnerCount) {
-        this.winnerCount = winnerCount;
-    }
-
-    public Map<String, Object> getScope() {
-        return scope;
-    }
-
-    public void setScope(Map<String, Object> scope) {
-        this.scope = scope;
-    }
-
-    public Object getCriteria() {
-        return criteria;
-    }
-
-    public void setCriteria(Object criteria) {
-        this.criteria = criteria;
-    }
-
-    public String getPointId() {
-        return pointId;
-    }
-
-    public void setPointId(String pointId) {
-        this.pointId = pointId;
-    }
-
-    public Object getPointAwards() {
-        return pointAwards;
-    }
-
-    public void setPointAwards(Object pointAwards) {
-        this.pointAwards = pointAwards;
     }
 }

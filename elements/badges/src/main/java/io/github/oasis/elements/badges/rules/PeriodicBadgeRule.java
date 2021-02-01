@@ -23,6 +23,8 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventValueResolver;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -33,6 +35,8 @@ import java.util.Objects;
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class PeriodicBadgeRule extends BadgeRule {
 
     private long timeUnit;
@@ -61,39 +65,12 @@ public class PeriodicBadgeRule extends BadgeRule {
         }
     }
 
-    public EventExecutionFilter getCriteria() {
-        return criteria;
-    }
-
-    public void setCriteria(EventExecutionFilter criteria) {
-        this.criteria = criteria;
-    }
-
-    public EventValueResolver<ExecutionContext> getValueResolver() {
-        return valueResolver;
-    }
-
-    public void setValueResolver(EventValueResolver<ExecutionContext> valueResolver) {
-        this.valueResolver = valueResolver;
-    }
-
-    public List<Threshold> getThresholds() {
-        return thresholds;
-    }
-
-    public long getTimeUnit() {
-        return timeUnit;
-    }
-
-    public void setTimeUnit(long timeUnit) {
-        this.timeUnit = timeUnit;
-    }
-
     public void setThresholds(List<Threshold> thresholds) {
         this.thresholds = new LinkedList<>(thresholds);
         this.thresholds.sort(Comparator.reverseOrder());
     }
 
+    @Getter
     public static class Threshold implements Comparable<Threshold> {
         private final int attribute;
         private final BigDecimal value;
@@ -107,18 +84,6 @@ public class PeriodicBadgeRule extends BadgeRule {
             this.attribute = attribute;
             this.value = value;
             this.pointAwards = pointAwards;
-        }
-
-        public BigDecimal getPointAwards() {
-            return pointAwards;
-        }
-
-        public int getAttribute() {
-            return attribute;
-        }
-
-        public BigDecimal getValue() {
-            return value;
         }
 
         @Override

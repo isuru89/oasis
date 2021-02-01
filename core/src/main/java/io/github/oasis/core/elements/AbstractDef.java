@@ -23,6 +23,9 @@ import io.github.oasis.core.elements.matchers.EventTypeMatcherFactory;
 import io.github.oasis.core.elements.matchers.TimeRangeMatcherFactory;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Utils;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -31,8 +34,16 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
+ * This is the base definition for any type of element which is going to be processed
+ * by engine. This definition object will directly be created by reading definition
+ * files or parsing event object in engine.
+ *
+ * Finally this definition will be used to create a rule instance.
+ *
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public abstract class AbstractDef implements Serializable {
 
     protected static final String EMPTY = "";
@@ -46,11 +57,17 @@ public abstract class AbstractDef implements Serializable {
     private String name;
     private String description;
 
+    /**
+     * Specify single or multiple events this rule should process on.
+     */
     private Object event;
     private Object events;
+    /**
+     * This filter filter out events based on its data before sending it to processor.
+     */
+    private Object eventFilter;
 
     private Set<String> flags;
-    private Object condition;
 
     private List<TimeRangeDef> timeRanges;
 
@@ -59,7 +76,7 @@ public abstract class AbstractDef implements Serializable {
         source.setDescription(def.getDescription());
         source.setFlags(Objects.isNull(def.flags) ? Set.of() : Set.copyOf(def.getFlags()));
         source.setEventTypeMatcher(def.deriveEventMatcher());
-        source.setCondition(EventExecutionFilterFactory.create(def.condition));
+        source.setEventFilter(EventExecutionFilterFactory.create(def.eventFilter));
         source.setTimeRangeMatcher(TimeRangeMatcherFactory.create(def.timeRanges));
         return source;
     }
@@ -74,20 +91,12 @@ public abstract class AbstractDef implements Serializable {
         return null;
     }
 
-    public Object getEvent() {
-        return event;
-    }
-
-    public void setEvent(Object event) {
-        this.event = event;
-    }
-
     protected List<String> getSensitiveAttributes() {
         return List.of(
                 Utils.firstNonNullAsStr(event, EMPTY),
                 Utils.firstNonNullAsStr(events, EMPTY),
                 Utils.firstNonNullAsStr(flags, EMPTY),
-                Utils.firstNonNullAsStr(condition, EMPTY)
+                Utils.firstNonNullAsStr(eventFilter, EMPTY)
         );
     }
 
@@ -95,62 +104,9 @@ public abstract class AbstractDef implements Serializable {
         return Texts.md5Digest(String.join("", getSensitiveAttributes()));
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Set<String> getFlags() {
-        return flags;
-    }
-
-    public void setFlags(Set<String> flags) {
-        this.flags = flags;
-    }
-
-    public Object getCondition() {
-        return condition;
-    }
-
-    public void setCondition(Object condition) {
-        this.condition = condition;
-    }
-
-    public Object getEvents() {
-        return events;
-    }
-
-    public void setEvents(Object events) {
-        this.events = events;
-    }
-
-    public List<TimeRangeDef> getTimeRanges() {
-        return timeRanges;
-    }
-
-    public void setTimeRanges(List<TimeRangeDef> timeRanges) {
-        this.timeRanges = timeRanges;
-    }
-
+    @Getter
+    @Setter
+    @NoArgsConstructor
     public static class TimeRangeDef {
         private String type;
         private Object from;
@@ -158,57 +114,9 @@ public abstract class AbstractDef implements Serializable {
         private Object when;
         private Object expression;
 
-        public TimeRangeDef() {
-        }
-
         public TimeRangeDef(String type, Object from, Object to) {
             this.type = type;
             this.from = from;
-            this.to = to;
-        }
-
-        public TimeRangeDef(String type, Object when) {
-            this.type = type;
-            this.when = when;
-        }
-
-        public Object getExpression() {
-            return expression;
-        }
-
-        public void setExpression(Object expression) {
-            this.expression = expression;
-        }
-
-        public Object getWhen() {
-            return when;
-        }
-
-        public void setWhen(Object when) {
-            this.when = when;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public Object getFrom() {
-            return from;
-        }
-
-        public void setFrom(Object from) {
-            this.from = from;
-        }
-
-        public Object getTo() {
-            return to;
-        }
-
-        public void setTo(Object to) {
             this.to = to;
         }
     }

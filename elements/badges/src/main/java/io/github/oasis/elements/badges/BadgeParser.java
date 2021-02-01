@@ -20,39 +20,20 @@
 package io.github.oasis.elements.badges;
 
 import io.github.oasis.core.VariableNames;
-import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.elements.AbstractElementParser;
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.EventExecutionFilterFactory;
-import io.github.oasis.core.elements.Scripting;
+import io.github.oasis.core.elements.*;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Timestamps;
 import io.github.oasis.core.utils.Utils;
-import io.github.oasis.elements.badges.rules.BadgeRule;
-import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
-import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
-import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
-import io.github.oasis.elements.badges.rules.PeriodicOccurrencesRule;
-import io.github.oasis.elements.badges.rules.PeriodicOccurrencesStreakNRule;
-import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
-import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
-import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
+import io.github.oasis.elements.badges.rules.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.github.oasis.elements.badges.BadgeDef.CONDITIONAL_KIND;
-import static io.github.oasis.elements.badges.BadgeDef.FIRST_EVENT_KIND;
-import static io.github.oasis.elements.badges.BadgeDef.PERIODIC_ACCUMULATIONS_KIND;
-import static io.github.oasis.elements.badges.BadgeDef.PERIODIC_ACCUMULATIONS_STREAK_KIND;
-import static io.github.oasis.elements.badges.BadgeDef.PERIODIC_OCCURRENCES_KIND;
-import static io.github.oasis.elements.badges.BadgeDef.PERIODIC_OCCURRENCES_STREAK_KIND;
-import static io.github.oasis.elements.badges.BadgeDef.STREAK_N_KIND;
-import static io.github.oasis.elements.badges.BadgeDef.TIME_BOUNDED_STREAK_KIND;
+import static io.github.oasis.elements.badges.BadgeDef.*;
 
 /**
  * @author Isuru Weerarathna
@@ -83,8 +64,8 @@ public class BadgeParser extends AbstractElementParser {
             StreakNBadgeRule temp = new StreakNBadgeRule(id);
             AbstractDef.defToRule(def, temp);
             temp.setStreaks(toStreakMap(def.getStreaks()));
-            temp.setCriteria(temp.getCondition());
-            temp.setCondition(EventExecutionFilterFactory.ALWAYS_TRUE);
+            temp.setCriteria(temp.getEventFilter());
+            temp.setEventFilter(EventExecutionFilterFactory.ALWAYS_TRUE);
             temp.setRetainTime(toLongTimeUnit(def));
             rule = temp;
         } else if (CONDITIONAL_KIND.equals(kind)) {
@@ -99,7 +80,7 @@ public class BadgeParser extends AbstractElementParser {
             TimeBoundedStreakNRule temp = new TimeBoundedStreakNRule(id);
             AbstractDef.defToRule(def, temp);
             temp.setStreaks(toStreakMap(def.getStreaks()));
-            temp.setCriteria(temp.getCondition());
+            temp.setCriteria(temp.getEventFilter());
             temp.setConsecutive(def.getConsecutive());
             temp.setTimeUnit(toLongTimeUnit(def));
             rule = temp;
@@ -107,16 +88,16 @@ public class BadgeParser extends AbstractElementParser {
             PeriodicBadgeRule temp = new PeriodicBadgeRule(id);
             AbstractDef.defToRule(def, temp);
             temp.setTimeUnit(toLongTimeUnit(def));
-            temp.setCriteria(temp.getCondition());
+            temp.setCriteria(temp.getEventFilter());
             temp.setThresholds(def.getThresholds().stream()
                     .map(BadgeDef.Threshold::toRuleThreshold).collect(Collectors.toList()));
-            temp.setValueResolver(Scripting.create((String) def.getValueExtractorExpression(), VariableNames.CONTEXT_VAR));
+            temp.setValueResolver(Scripting.create((String) def.getAggregatorExtractor(), VariableNames.CONTEXT_VAR));
             rule = temp;
         } else if (PERIODIC_OCCURRENCES_KIND.equals(kind)) {
             PeriodicOccurrencesRule temp = new PeriodicOccurrencesRule(id);
             AbstractDef.defToRule(def, temp);
             temp.setTimeUnit(toLongTimeUnit(def));
-            temp.setCriteria(temp.getCondition());
+            temp.setCriteria(temp.getEventFilter());
             temp.setThresholds(def.getThresholds().stream()
                     .map(BadgeDef.Threshold::toRuleThreshold).collect(Collectors.toList()));
             rule = temp;
@@ -125,7 +106,7 @@ public class BadgeParser extends AbstractElementParser {
             AbstractDef.defToRule(def, temp);
             temp.setConsecutive(def.getConsecutive());
             temp.setTimeUnit(toLongTimeUnit(def));
-            temp.setValueResolver(Scripting.create((String) def.getValueExtractorExpression(), VariableNames.CONTEXT_VAR));
+            temp.setValueResolver(Scripting.create((String) def.getAggregatorExtractor(), VariableNames.CONTEXT_VAR));
             temp.setThreshold(def.getThreshold());
             temp.setStreaks(toStreakMap(def.getStreaks()));
             rule = temp;

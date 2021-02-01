@@ -21,6 +21,8 @@ package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.utils.Utils;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,12 +31,30 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
+ * Definition for rating rule.
+ *
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class RatingDef extends AbstractDef {
 
+    /**
+     * Default rating to award, when no criteria is satisfied.
+     *
+     * Note: by default, the default rating will not be set to all users unless
+     * at least one event is processed against a user.
+     */
     private int defaultRating;
+
+    /**
+     * What to award.
+     */
     private Object award;
+
+    /**
+     * List of ratings.
+     */
     private List<ARatingDef> ratings;
 
     @Override
@@ -50,30 +70,8 @@ public class RatingDef extends AbstractDef {
         return base;
     }
 
-    public Object getAward() {
-        return award;
-    }
-
-    public void setAward(Object award) {
-        this.award = award;
-    }
-
-    public List<ARatingDef> getRatings() {
-        return ratings;
-    }
-
-    public void setRatings(List<ARatingDef> ratings) {
-        this.ratings = ratings;
-    }
-
-    public int getDefaultRating() {
-        return defaultRating;
-    }
-
-    public void setDefaultRating(int defaultRating) {
-        this.defaultRating = defaultRating;
-    }
-
+    @Getter
+    @Setter
     public static class ARatingDef {
         private int priority;
         private int rating;
@@ -88,46 +86,6 @@ public class RatingDef extends AbstractDef {
                     Utils.firstNonNullAsStr(criteria, EMPTY),
                     Utils.firstNonNullAsStr(award, EMPTY)
             );
-        }
-
-        public int getPriority() {
-            return priority;
-        }
-
-        public void setPriority(int priority) {
-            this.priority = priority;
-        }
-
-        public int getRating() {
-            return rating;
-        }
-
-        public void setRating(int rating) {
-            this.rating = rating;
-        }
-
-        public String getPointId() {
-            return pointId;
-        }
-
-        public void setPointId(String pointId) {
-            this.pointId = pointId;
-        }
-
-        public Object getCriteria() {
-            return criteria;
-        }
-
-        public void setCriteria(Object criteria) {
-            this.criteria = criteria;
-        }
-
-        public Object getAward() {
-            return award;
-        }
-
-        public void setAward(Object award) {
-            this.award = award;
         }
     }
 }

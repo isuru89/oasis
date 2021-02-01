@@ -7,7 +7,7 @@ badges:
     kind: periodicAccumulation
     event: reputation.changed
     timeUnit: daily
-    valueExtractorExpression: e.reputations
+    aggregatorExtractor: e.reputations
     thresholds:
       - value: 50        // 50 reputations
         attribute: 10
