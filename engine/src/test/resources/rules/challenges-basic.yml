@@ -5,7 +5,7 @@ challenges:
     name: test.challenge.rule
     description: Game scoped challenge when some one scored more than 50
     event: event.a
-    condition: e.value >= 50
+    eventFilter: e.value >= 50
     scope:
       type: GAME
     winnerCount: 3

@@ -5,7 +5,7 @@ points:
     description: Generates points if value is greater than 50
     pointId: star.points
     event: event.a
-    condition: "e.value >= 50"
+    eventFilter: "e.value >= 50"
     award: "e.value - 50"
 
 milestones:

@@ -7,6 +7,6 @@ points:
     events:
       - event.a
       - event.c
-    condition: e.value >= 50
+    eventFilter: e.value >= 50
     award: e.value - 50
     pointId: bonus.points

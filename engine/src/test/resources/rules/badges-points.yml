@@ -6,7 +6,7 @@ badges:
     description: Awards badge and points if value is >= 50 for streaks
     kind: streak
     event: event.a
-    condition: e.value >= 50
+    eventFilter: e.value >= 50
     timeUnit: 10
     pointId: star.points
     streaks:

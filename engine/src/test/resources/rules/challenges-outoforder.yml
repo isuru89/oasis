@@ -7,7 +7,7 @@ challenges:
     flags:
       - OUT_OF_ORDER_WINNERS
     event: event.a
-    condition: e.value >= 50
+    eventFilter: e.value >= 50
     scope:
       type: TEAM
       id: 2
