@@ -1,9 +1,10 @@
 version: 1
 
-challenges:
+elements:
   - id: CHG000001
     name: test.challenge.rule
     description: Game scoped challenge when some one scored more than 50
+    plugin: core:challenge
     flags:
       - OUT_OF_ORDER_WINNERS
     event: event.a

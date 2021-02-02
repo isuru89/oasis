@@ -54,7 +54,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -184,10 +183,9 @@ public class OasisEngineTest {
     }
 
     protected GameDef loadRulesFromResource(String location) {
-        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(location)) {
-            GameParserYaml parser = new GameParserYaml();
-            return parser.parse(is);
-        } catch (IOException | OasisParseException e) {
+        try {
+            return GameParserYaml.fromClasspath(location, Thread.currentThread().getContextClassLoader());
+        } catch (OasisParseException e) {
             throw new IllegalArgumentException("Unable to parse classpath resource! " + location, e);
         }
     }

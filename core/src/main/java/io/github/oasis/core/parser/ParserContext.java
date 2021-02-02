@@ -19,26 +19,23 @@
 
 package io.github.oasis.core.parser;
 
-import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.exception.OasisParseException;
 
 /**
- * Parses a game file and returns a game engine compatible instance.
- *
- * The version based parsing must be taken care by the corresponding implementation itself.
+ * Interface for storing parser related context.
  *
  * @author Isuru Weerarathna
  */
-public interface GameParseSupport {
+public interface ParserContext {
 
     /**
-     * Parses the given input (any arbitrary format) and converts to a game definition instance.
+     * Reads the given path relative to the context specification.
      *
-     * @param input filepath, input stream or any compatible.
-     * @param parserContext parser context.
-     * @return parsed game definition object.
-     * @throws OasisParseException throws when any error occurred while parsing.
+     * @param path path to load.
+     * @return parsed object.
+     * @throws OasisParseException any exception thrown while parsing.
      */
-    GameDef parse(Object input, ParserContext parserContext) throws OasisParseException;
+    Object loadSiblingPath(String path) throws OasisParseException;
 
 }
+

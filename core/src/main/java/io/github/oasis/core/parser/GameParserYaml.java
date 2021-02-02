@@ -22,6 +22,7 @@ package io.github.oasis.core.parser;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.utils.Texts;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Parses a game yaml file.
@@ -38,52 +40,85 @@ import java.util.Map;
  */
 public class GameParserYaml implements GameParseSupport {
 
-    private static final String VERSION = "version";
+    private static final String VERSION_KEY = "version";
+    private static final String ELEMENTS_KEY = "elements";
+    private static final String ELEMENT_PLUGIN_KEY = "plugin";
 
-    public GameDef parse(Object input) throws OasisParseException {
+    public static GameDef fromClasspath(String clzPathFile, ClassLoader clzLoader) throws OasisParseException {
+        var clzPathContext = new ParserContext() {
+            @Override
+            public Object loadSiblingPath(String path) throws OasisParseException {
+                InputStream is = clzLoader.getResourceAsStream(path);
+                if (Objects.isNull(is)) {
+                    throw new OasisParseException("Cannot find referenced classpath resource in " + path + "!");
+                }
+                return is;
+            }
+        };
+
+        try (InputStream is = clzLoader.getResourceAsStream(clzPathFile)) {
+            return new GameParserYaml().parse(is, clzPathContext);
+        } catch (IOException e) {
+            throw new OasisParseException("Unable to parse game definition file in " + clzPathFile + "!", e);
+        }
+    }
+
+    public GameDef parse(Object input, ParserContext parserContext) throws OasisParseException {
         if (input instanceof String) {
             String resource = (String) input;
             File file = new File(resource);
             try (InputStream is = new FileInputStream(file)) {
-                return parse(is);
+                return parse(is, parserContext);
             } catch (IOException e) {
                 throw new OasisParseException("Unable to parse " + resource + "!", e);
             }
         } else if (input instanceof InputStream) {
-            return parse((InputStream) input);
+            return parse((InputStream) input, parserContext);
         }
         throw new OasisParseException("Unknown input format provided for parsing!");
     }
 
-    private GameDef parse(InputStream is) {
+    private GameDef parse(InputStream is, ParserContext parserContext) throws OasisParseException {
         Yaml yaml = new Yaml();
 
         Map<String, Object> dataDef = yaml.load(is);
         GameDef def = new GameDef();
-        dataDef.forEach((key, value) -> {
-            if (VERSION.equals(key)) {
-                def.setVersion((int) value);
-            } else {
-                parseDefinitions(key, value, def);
-            }
-        });
+        def.setVersion((int) dataDef.get(VERSION_KEY));
+        Object elementsVal = dataDef.get(ELEMENTS_KEY);
+        parseDefinitions(elementsVal, def, parserContext);
 
         return def;
     }
 
     @SuppressWarnings("unchecked")
-    private void parseDefinitions(String key, Object value, GameDef gameDef) {
+    private void parseDefinitions(Object value, GameDef gameDef, ParserContext parserContext) throws OasisParseException {
         if (value instanceof List) {
-            List<Object> defs = (List<Object>) value;
-            for (Object def : defs) {
+            List<Object> definitions = (List<Object>) value;
+            for (Object def : definitions) {
                 if (def instanceof Map) {
+                    var elementDef = (Map<String, Object>) def;
+                    String elementPluginType = (String) elementDef.get(ELEMENT_PLUGIN_KEY);
+                    if (Texts.isEmpty(elementPluginType)) {
+                        throw new OasisParseException("Element does not have specified the associated plugin!");
+                    }
                     PersistedDef persistedDef = new PersistedDef();
                     persistedDef.setType(PersistedDef.GAME_RULE_ADDED);
-                    persistedDef.setImpl(key.toLowerCase());
-                    persistedDef.setData((Map<String, Object>) def);
+                    persistedDef.setImpl(elementPluginType);
+                    persistedDef.setData(elementDef);
                     gameDef.addRuleDefinition(persistedDef);
+                } else if (def instanceof String) {
+                    String refPath = (String) def;
+                    Object refData = parserContext.loadSiblingPath(refPath);
+                    GameDef referencedGameDef = this.parse(refData, parserContext);
+                    this.mergeGameDefinitions(gameDef, referencedGameDef);
                 }
             }
+        } else {
+            throw new OasisParseException("No elements are defined in the provided source!");
         }
+    }
+
+    private void mergeGameDefinitions(GameDef source, GameDef referenced) {
+        source.getRuleDefinitions().addAll(referenced.getRuleDefinitions());
     }
 }

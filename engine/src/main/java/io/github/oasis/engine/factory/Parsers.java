@@ -62,7 +62,7 @@ public class Parsers {
         if (elementParser != null) {
             return elementParser.parseToRule(dto);
         }
-        throw new IllegalArgumentException("Unknown type");
+        throw new IllegalArgumentException("Unknown element type '" + dto.getImpl() + "'!");
     }
 
 }

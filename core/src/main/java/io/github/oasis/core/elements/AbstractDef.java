@@ -56,6 +56,7 @@ public abstract class AbstractDef implements Serializable {
     private String id;
     private String name;
     private String description;
+    private String plugin;
 
     /**
      * Specify single or multiple events this rule should process on.

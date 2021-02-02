@@ -1,17 +1,18 @@
 version: 1
 
-points:
+elements:
   - name: Test-Point-Rule
     description: Generates points if value is greater than 50
+    plugin: core:point
     pointId: star.points
     event: event.a
     eventFilter: "e.value >= 50"
     award: "e.value - 50"
 
-milestones:
   - id: MILE00003
     name: Milestone-from-Points
     description: This is a milestone which processes points.
+    plugin: core:milestone
     pointIds:
       - star.points
     levels:
