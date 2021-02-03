@@ -24,12 +24,16 @@ import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.db.redis.RedisDb;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.sql.DataSource;
 import java.io.File;
 
 /**
@@ -42,6 +46,15 @@ public class DatabaseConfigs {
 
     @Value("${oasis.configs.path}")
     private String oasisConfigFilePath;
+
+    @Value("${oasis.jdbc.url}")
+    private String oasisJdbcUrl;
+    @Value("${oasis.jdbc.driver}")
+    private String oasisJdbcDriver;
+    @Value("${oasis.jdbc.user}")
+    private String oasisJdbcUser;
+    @Value("${oasis.jdbc.password}")
+    private String oasisJdbcPassword;
 
     @Value("${oasis.db.retries:5}")
     private int numberOfDbRetries;
@@ -62,6 +75,24 @@ public class DatabaseConfigs {
             }
             throw new IllegalStateException("Cannot load Oasis configurations! Config file not found in " + oasisConfigFilePath + "!");
         }
+    }
+
+    @Bean
+    public DataSource loadDataSource() {
+        return DataSourceBuilder.create()
+            .url(oasisJdbcUrl)
+            .driverClassName(oasisJdbcDriver)
+            .username(oasisJdbcUser)
+            .password(oasisJdbcPassword)
+            .build();
+    }
+
+    @Bean
+    public Jdbi createJdbiInterface(DataSource jdbcDataSource) {
+        Jdbi jdbi = Jdbi.create(jdbcDataSource);
+        jdbi.installPlugin(new SqlObjectPlugin());
+
+        return jdbi;
     }
 
     @Bean

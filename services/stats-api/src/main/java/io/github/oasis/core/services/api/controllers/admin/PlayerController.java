@@ -43,71 +43,71 @@ import java.util.List;
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
 )
-@Tag(name = "Users", description = "Users related APIs")
-public class UserController extends AbstractController {
+@Tag(name = "Players", description = "Players related APIs")
+public class PlayerController extends AbstractController {
 
     private final UserTeamService userTeamService;
 
-    public UserController(UserTeamService userTeamService) {
+    public PlayerController(UserTeamService userTeamService) {
         this.userTeamService = userTeamService;
     }
 
     @Operation(
-            summary = "Register a new user to the system",
+            summary = "Register a new player to the system",
             tags = {"admin"}
     )
     @ForAdmin
-    @PostMapping("/admin/users")
+    @PostMapping("/players")
     public UserObject registerUser(@RequestBody UserCreateRequest user) {
         return userTeamService.addUser(user);
     }
 
     @Operation(
-            summary = "Gets a single user by email"
+            summary = "Gets a single player by email"
     )
     @ForPlayer
-    @GetMapping("/admin/users")
+    @GetMapping("/players")
     public UserObject readUserProfileByEmail(@RequestParam(name = "email") String email) {
         return userTeamService.readUser(email);
     }
 
     @Operation(
-            summary = "Gets a single user by user id"
+            summary = "Gets a single player by user id"
     )
     @ForPlayer
-    @GetMapping("/admin/users/{userId}")
-    public UserObject readUserProfile(@PathVariable("userId") Integer userId) {
-        return userTeamService.readUser(userId);
+    @GetMapping("/players/{playerId}")
+    public UserObject readUserProfile(@PathVariable("playerId") Integer playerId) {
+        return userTeamService.readUser(playerId);
     }
 
     @Operation(
-            summary = "Gets all users of a team"
+            summary = "Gets all players of a team"
     )
     @ForPlayer
-    @GetMapping("/admin/teams/{teamId}/users")
+    @GetMapping("/teams/{teamId}/players")
     public List<UserObject> browseUsers(@PathVariable("teamId") Integer teamId) {
         return userTeamService.listAllUsersInTeam(teamId);
     }
 
     @Operation(
-            summary = "Update user details",
+            summary = "Update player details",
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PutMapping("/admin/users/{userId}")
-    public UserObject updateUser(@PathVariable("userId") Integer userId,
+    @PutMapping("/players/{playerId}")
+    public UserObject updateUser(@PathVariable("playerId") Integer playerId,
                                  @RequestBody UserObject userObject) {
-        return userTeamService.updateUser(userId, userObject);
+        return userTeamService.updateUser(playerId, userObject);
     }
 
     @Operation(
-            summary = "Deactivate a user from the system",
+            summary = "Deactivate a player from the system",
             tags = {"admin", "curator"}
     )
     @ForAdmin
-    @DeleteMapping("/admin/users/{userId}")
-    public UserObject deactivateUser(@PathVariable("userId") Integer userId) {
-        return userTeamService.deactivateUser(userId);
+    @DeleteMapping("/players/{playerId}")
+    public UserObject deactivateUser(@PathVariable("playerId") Integer playerId) {
+        return userTeamService.deactivateUser(playerId);
     }
 
     @Operation(
@@ -115,7 +115,7 @@ public class UserController extends AbstractController {
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PostMapping("/admin/teams")
+    @PostMapping("/teams")
     public TeamObject addTeam(@RequestBody TeamObject team) {
         return userTeamService.addTeam(team);
     }
@@ -125,40 +125,40 @@ public class UserController extends AbstractController {
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PutMapping("/admin/teams/{teamId}")
+    @PutMapping("/teams/{teamId}")
     public TeamObject updateTeam(@PathVariable("teamId") Integer teamId,
                                  @RequestBody TeamObject teamObject) {
         return userTeamService.updateTeam(teamId, teamObject);
     }
 
     @Operation(
-            summary = "Add a user to the provided team",
+            summary = "Add a player to the provided team",
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PostMapping("/admin/users/{userId}/teams")
-    public void addUserToTeam(@PathVariable("userId") Integer userId,
+    @PostMapping("/players/{playerId}/teams")
+    public void addUserToTeam(@PathVariable("playerId") Integer playerId,
                               @RequestBody UserGameAssociationRequest request) {
-        userTeamService.addUserToTeam(userId, request.getGameId(), request.getTeamId());
+        userTeamService.addUserToTeam(playerId, request.getGameId(), request.getTeamId());
     }
 
     @Operation(
             summary = "Gets all teams a user has been associated with"
     )
     @ForPlayer
-    @GetMapping("/admin/users/{userId}/teams")
-    public List<TeamObject> browseUserTeams(@PathVariable("userId") Integer userId) {
-        return userTeamService.getUserTeams(userId);
+    @GetMapping("/players/{userId}/teams")
+    public List<TeamObject> browseUserTeams(@PathVariable("playerId") Integer playerId) {
+        return userTeamService.getUserTeams(playerId);
     }
 
     @Operation(
-            summary = "Add multiple users at once to a team",
+            summary = "Add multiple players at once to a team",
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PostMapping("/admin/teams/{teamId}/users")
+    @PostMapping("/teams/{teamId}/players")
     public void addUsersToTeam(@PathVariable("teamId") Integer teamId,
-                               @RequestParam("userIds") List<Integer> userIds) {
-        userTeamService.addUsersToTeam(teamId, userIds);
+                               @RequestParam("playerIds") List<Integer> playerId) {
+        userTeamService.addUsersToTeam(teamId, playerId);
     }
 }

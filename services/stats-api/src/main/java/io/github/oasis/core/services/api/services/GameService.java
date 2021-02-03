@@ -21,7 +21,7 @@ package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.AttributeInfo;
-import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.to.GameObjectRequest;
@@ -37,12 +37,10 @@ import java.util.Objects;
  * @author Isuru Weerarathna
  */
 @Service
-public class GameService {
+public class GameService extends AbstractOasisService {
 
-    private final OasisRepository repository;
-
-    public GameService(OasisRepository repository) {
-        this.repository = repository;
+    public GameService(BackendRepository backendRepository) {
+        super(backendRepository);
     }
 
     public Game addGame(GameObjectRequest gameObjectRequest) throws OasisApiException {
@@ -53,12 +51,12 @@ public class GameService {
 
         validateGameObjectForCreation(game);
 
-        Game addedGame = repository.addNewGame(game);
+        Game addedGame = backendRepository.addNewGame(game);
 
         // add attributes associated with game
         if (Utils.isNotEmpty(gameObjectRequest.getAttributes())) {
             for (AttributeInfo attribute : gameObjectRequest.getAttributes()) {
-                repository.addAttribute(addedGame.getId(), attribute);
+                backendRepository.addAttribute(addedGame.getId(), attribute);
             }
         }
         return addedGame;
@@ -67,21 +65,20 @@ public class GameService {
     public Game updateGame(int gameId, Game game) throws OasisApiException {
         validateGameObjectForEdit(game);
 
-        return repository.updateGame(gameId, game);
+        return backendRepository.updateGame(gameId, game);
     }
 
     public Game deleteGame(int gameId) {
-        return repository.deleteGame(gameId);
+        return backendRepository.deleteGame(gameId);
     }
 
     public Game readGame(int gameId) {
-        return repository.readGame(gameId);
+        return backendRepository.readGame(gameId);
     }
 
     public List<Game> listAllGames() {
-        return repository.listGames();
+        return backendRepository.listGames();
     }
-
 
 
 

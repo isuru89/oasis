@@ -17,19 +17,10 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.handlers;
-
-import io.github.oasis.core.services.api.to.UserCreateRequest;
+package io.github.oasis.core.services.api.dao;
 
 /**
- * Base interface to implement backend user management implementation.
- * By default, Oasis is shipped with keycloak implementation.
- *
  * @author Isuru Weerarathna
  */
-public interface UserManagementSupport {
-
-    void createUser(UserCreateRequest request);
-
-    void deleteUser(String email);
+public interface IGameDao {
 }

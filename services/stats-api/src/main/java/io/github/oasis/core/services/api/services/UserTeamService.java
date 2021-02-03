@@ -19,10 +19,9 @@
 
 package io.github.oasis.core.services.api.services;
 
-import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserObject;
-import io.github.oasis.core.services.api.handlers.UserManagementSupport;
+import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.to.UserCreateRequest;
 import org.springframework.stereotype.Service;
 
@@ -32,14 +31,10 @@ import java.util.List;
  * @author Isuru Weerarathna
  */
 @Service
-public class UserTeamService {
+public class UserTeamService extends AbstractOasisService {
 
-    private final OasisRepository repository;
-    private final UserManagementSupport userManagementSupport;
-
-    public UserTeamService(OasisRepository repository, UserManagementSupport userManagementSupport) {
-        this.repository = repository;
-        this.userManagementSupport = userManagementSupport;
+    public UserTeamService(BackendRepository backendRepository) {
+        super(backendRepository);
     }
 
     public UserObject addUser(UserCreateRequest request) {
@@ -49,59 +44,59 @@ public class UserTeamService {
         userObject.setGender(request.getGender());
         userObject.setTimeZone(request.getTimeZone());
 
-        UserObject oasisUser = repository.addUser(userObject);
+        UserObject oasisUser = backendRepository.addUser(userObject);
 
         request.setUserId(userObject.getUserId());
-        userManagementSupport.createUser(request);
+        //userManagementSupport.createUser(request);
 
         return oasisUser;
     }
 
     public UserObject readUser(long userId) {
-        return repository.readUser(userId);
+        return backendRepository.readUser(userId);
     }
 
     public UserObject readUser(String userEmail) {
-        return repository.readUser(userEmail);
+        return backendRepository.readUser(userEmail);
     }
 
     public UserObject updateUser(long userId, UserObject updatingUser) {
-        return repository.updateUser(userId, updatingUser);
+        return backendRepository.updateUser(userId, updatingUser);
     }
 
     public UserObject deactivateUser(long userId) {
-        UserObject userObject = repository.deleteUser(userId);
+        UserObject userObject = backendRepository.deleteUser(userId);
 
-        userManagementSupport.deleteUser(userObject.getEmail());
+        //userManagementSupport.deleteUser(userObject.getEmail());
         return userObject;
     }
 
     public List<TeamObject> getUserTeams(long userId) {
-        return repository.getUserTeams(userId);
+        return backendRepository.getUserTeams(userId);
     }
 
     public TeamObject addTeam(TeamObject teamObject) {
-        return repository.addTeam(teamObject);
+        return backendRepository.addTeam(teamObject);
     }
 
     public TeamObject updateTeam(int teamId, TeamObject updatingTeam) {
-        return repository.updateTeam(teamId, updatingTeam);
+        return backendRepository.updateTeam(teamId, updatingTeam);
     }
 
     public List<UserObject> listAllUsersInTeam(int teamId) {
-        return repository.getTeamUsers(teamId);
+        return backendRepository.getTeamUsers(teamId);
     }
 
     public void addUserToTeam(long userId, int gameId, int teamId) {
-        repository.addUserToTeam(userId, gameId, teamId);
+        backendRepository.addUserToTeam(userId, gameId, teamId);
     }
 
     public void addUsersToTeam(int teamId, List<Integer> userIds) {
-        TeamObject teamObject = repository.readTeam(teamId);
+        TeamObject teamObject = backendRepository.readTeam(teamId);
         int gameId = teamObject.getGameId();
 
         for (int userId : userIds) {
-            repository.addUserToTeam(userId, gameId, teamId);
+            backendRepository.addUserToTeam(userId, gameId, teamId);
         }
     }
 }
