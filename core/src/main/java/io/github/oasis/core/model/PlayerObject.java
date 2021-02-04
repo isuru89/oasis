@@ -17,22 +17,34 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.to;
+package io.github.oasis.core.model;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serializable;
+import java.time.LocalDate;
 
 /**
  * @author Isuru Weerarathna
  */
 @Getter
 @Setter
-public class UserGameAssociationRequest implements Serializable {
+public class PlayerObject {
 
     private Long userId;
-    private Integer gameId;
-    private Integer teamId;
+    private String displayName;
+
+    private String email;
+    private LocalDate birthday;
+    private UserGender gender;
+    private String timeZone;
+
+    public PlayerObject() {}
+
+    public PlayerObject(long userId, String name, String email) {
+        this.userId = userId;
+        this.displayName = name;
+        this.email = email;
+    }
 
 }

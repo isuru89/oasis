@@ -332,25 +332,25 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public UserObject readUser(long userId) {
+    public PlayerObject readPlayer(long userId) {
         return withDbContext(db -> {
             String userStr = db.getValueFromMap(ID.ALL_USERS, String.valueOf(userId));
             if (Texts.isEmpty(userStr)) {
                 throw new OasisRuntimeException("No user found by given id!");
             }
-            return serializationSupport.deserialize(userStr, UserObject.class);
+            return serializationSupport.deserialize(userStr, PlayerObject.class);
         });
     }
 
     @Override
-    public UserObject readUser(String email) {
+    public PlayerObject readPlayer(String email) {
         return withDbContext(db -> {
             String userIdStr = db.getValueFromMap(ID.ALL_USERS_INDEX, email);
             if (Texts.isEmpty(userIdStr)) {
                 throw new OasisRuntimeException("No user found by given email!");
             }
             String userStr = db.getValueFromMap(ID.ALL_USERS, userIdStr);
-            return serializationSupport.deserialize(userStr, UserObject.class);
+            return serializationSupport.deserialize(userStr, PlayerObject.class);
         });
     }
 
@@ -400,7 +400,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public UserObject addUser(UserObject newUser) {
+    public PlayerObject addPlayer(PlayerObject newUser) {
         return withDbContext(db -> {
             if (db.mapKeyExists(ID.ALL_USERS_INDEX, newUser.getEmail())) {
                 throw new OasisRuntimeException("User by email already exist!");
@@ -417,17 +417,17 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public boolean existsUser(String email) {
+    public boolean existsPlayer(String email) {
         return withDbContext(db -> db.mapKeyExists(ID.ALL_USERS_INDEX, email));
     }
 
     @Override
-    public boolean existsUser(long userId) {
+    public boolean existsPlayer(long userId) {
         return withDbContext(db -> existUser(userId, db));
     }
 
     @Override
-    public UserObject updateUser(long userId, UserObject updatedUser) {
+    public PlayerObject updatePlayer(long userId, PlayerObject updatedUser) {
         return withDbContext(db -> {
             String userIdStr = String.valueOf(userId);
             String userIdOfEmail = db.getValueFromMap(ID.ALL_USERS_INDEX, updatedUser.getEmail());
@@ -443,7 +443,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public UserObject deleteUser(long userId) {
+    public PlayerObject deletePlayer(long userId) {
         return withDbContext(db -> {
             String userIdStr = String.valueOf(userId);
             String userVal = db.getValueFromMap(ID.ALL_USERS, userIdStr);
@@ -454,9 +454,9 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
             db.removeKeyFromMap(ID.ALL_USERS_NAMES, userIdStr);
             db.removeKeyFromMap(ID.ALL_USERS, userIdStr);
-            UserObject userObject = serializationSupport.deserialize(userVal, UserObject.class);
-            db.removeKeyFromMap(ID.ALL_USERS_INDEX, userObject.getEmail());
-            return userObject;
+            PlayerObject playerObject = serializationSupport.deserialize(userVal, PlayerObject.class);
+            db.removeKeyFromMap(ID.ALL_USERS_INDEX, playerObject.getEmail());
+            return playerObject;
         });
     }
 
@@ -535,14 +535,14 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public void addUserToTeam(long userId, int gameId, int teamId) {
+    public void addPlayerToTeam(long userId, int gameId, int teamId) {
         withDbContext(db -> {
             String userFullRef = db.getValueFromMap(ID.ALL_USERS, String.valueOf(userId));
             if (Texts.isEmpty(userFullRef)) {
                 throw new OasisRuntimeException("Provided user id does not exist!");
             }
 
-            UserObject userRef = serializationSupport.deserialize(userFullRef, UserObject.class);
+            PlayerObject userRef = serializationSupport.deserialize(userFullRef, PlayerObject.class);
             String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, userRef.getEmail()));
             String currentTeamUsers = Texts.orDefault(db.getValueFromMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId)));
 
@@ -572,7 +572,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public void removeUserFromTeam(long userId, int gameId, int teamId) {
+    public void removePlayerFromTeam(long userId, int gameId, int teamId) {
         withDbContext(db -> {
             String userFullRef = db.getValueFromMap(ID.ALL_USERS, String.valueOf(userId));
             if (Texts.isEmpty(userFullRef)) {
@@ -581,7 +581,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
                 throw new OasisRuntimeException("Provided team id does not exist!");
             }
 
-            UserObject userRef = serializationSupport.deserialize(userFullRef, UserObject.class);
+            PlayerObject userRef = serializationSupport.deserialize(userFullRef, PlayerObject.class);
             String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, userRef.getEmail()));
             String currentTeamUsers = Texts.orDefault(db.getValueFromMap(ID.ALL_TEAMS_USERS, String.valueOf(teamId)));
 
@@ -603,14 +603,14 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public List<TeamObject> getUserTeams(long userId) {
+    public List<TeamObject> getPlayerTeams(long userId) {
         return withDbContext(db -> {
             String userFullRef = db.getValueFromMap(ID.ALL_USERS, String.valueOf(userId));
             if (Texts.isEmpty(userFullRef)) {
                 throw new OasisRuntimeException("No user is found by given id!");
             }
 
-            UserObject userRef = serializationSupport.deserialize(userFullRef, UserObject.class);
+            PlayerObject userRef = serializationSupport.deserialize(userFullRef, PlayerObject.class);
             String currentUserTeams = Texts.orDefault(db.getValueFromMap(ID.ALL_USERS_TEAMS, userRef.getEmail()));
             if (Texts.isEmpty(currentUserTeams)) {
                 return new ArrayList<>();
@@ -625,7 +625,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public List<UserObject> getTeamUsers(int teamId) {
+    public List<PlayerObject> getTeamPlayers(int teamId) {
         return withDbContext(db -> {
             if (!existTeam(teamId, db)) {
                 throw new OasisRuntimeException("No team is found by given id!");
@@ -635,7 +635,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
             List<String> teamUserList = Stream.of(currentTeamUsers.split(COMMA)).filter(Texts::isNotEmpty).collect(Collectors.toList());
             return teamUserList.stream().map(userTeam -> {
                 String userJson = db.getValueFromMap(ID.ALL_USERS, userTeam);
-                return serializationSupport.deserialize(userJson, UserObject.class);
+                return serializationSupport.deserialize(userJson, PlayerObject.class);
             }).collect(Collectors.toList());
         });
     }
@@ -845,8 +845,8 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         db.setValueInMap(ID.ALL_TEAMS_NAMES, String.valueOf(teamMetadata.getTeamId()), teamMetadata.getName());
     }
 
-    private void updateUserIndex(UserObject userObject, DbContext db) {
-        db.setValueInMap(ID.ALL_USERS_INDEX, userObject.getEmail(), String.valueOf(userObject.getUserId()));
+    private void updateUserIndex(PlayerObject playerObject, DbContext db) {
+        db.setValueInMap(ID.ALL_USERS_INDEX, playerObject.getEmail(), String.valueOf(playerObject.getUserId()));
     }
 
     private void updateTeamIndex(TeamObject teamObject, String prevName, DbContext db) {
@@ -867,8 +867,8 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         }
     }
 
-    private void updateUserMetadata(UserObject userObject, DbContext db) {
-        db.setValueInMap(ID.ALL_USERS_NAMES, String.valueOf(userObject.getUserId()), userObject.getDisplayName());
+    private void updateUserMetadata(PlayerObject playerObject, DbContext db) {
+        db.setValueInMap(ID.ALL_USERS_NAMES, String.valueOf(playerObject.getUserId()), playerObject.getDisplayName());
     }
 
     private void updateElementMetadata(ElementDef def, DbContext db) {

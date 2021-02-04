@@ -19,15 +19,15 @@
 
 package io.github.oasis.core.services.api.controllers.admin;
 
+import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
-import io.github.oasis.core.model.UserObject;
 import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.annotations.ForCurator;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
-import io.github.oasis.core.services.api.services.UserTeamService;
-import io.github.oasis.core.services.api.to.UserCreateRequest;
-import io.github.oasis.core.services.api.to.UserGameAssociationRequest;
+import io.github.oasis.core.services.api.services.PlayerTeamService;
+import io.github.oasis.core.services.api.to.PlayerCreateRequest;
+import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
@@ -46,10 +46,10 @@ import java.util.List;
 @Tag(name = "Players", description = "Players related APIs")
 public class PlayerController extends AbstractController {
 
-    private final UserTeamService userTeamService;
+    private final PlayerTeamService playerTeamService;
 
-    public PlayerController(UserTeamService userTeamService) {
-        this.userTeamService = userTeamService;
+    public PlayerController(PlayerTeamService playerTeamService) {
+        this.playerTeamService = playerTeamService;
     }
 
     @Operation(
@@ -58,8 +58,8 @@ public class PlayerController extends AbstractController {
     )
     @ForAdmin
     @PostMapping("/players")
-    public UserObject registerUser(@RequestBody UserCreateRequest user) {
-        return userTeamService.addUser(user);
+    public PlayerObject registerPlayer(@RequestBody PlayerCreateRequest user) {
+        return playerTeamService.addPlayer(user);
     }
 
     @Operation(
@@ -67,8 +67,8 @@ public class PlayerController extends AbstractController {
     )
     @ForPlayer
     @GetMapping("/players")
-    public UserObject readUserProfileByEmail(@RequestParam(name = "email") String email) {
-        return userTeamService.readUser(email);
+    public PlayerObject readPlayerProfileByEmail(@RequestParam(name = "email") String email) {
+        return playerTeamService.readPlayer(email);
     }
 
     @Operation(
@@ -76,8 +76,8 @@ public class PlayerController extends AbstractController {
     )
     @ForPlayer
     @GetMapping("/players/{playerId}")
-    public UserObject readUserProfile(@PathVariable("playerId") Integer playerId) {
-        return userTeamService.readUser(playerId);
+    public PlayerObject readPlayerProfile(@PathVariable("playerId") Integer playerId) {
+        return playerTeamService.readPlayer(playerId);
     }
 
     @Operation(
@@ -85,8 +85,8 @@ public class PlayerController extends AbstractController {
     )
     @ForPlayer
     @GetMapping("/teams/{teamId}/players")
-    public List<UserObject> browseUsers(@PathVariable("teamId") Integer teamId) {
-        return userTeamService.listAllUsersInTeam(teamId);
+    public List<PlayerObject> browsePlayers(@PathVariable("teamId") Integer teamId) {
+        return playerTeamService.listAllUsersInTeam(teamId);
     }
 
     @Operation(
@@ -95,9 +95,9 @@ public class PlayerController extends AbstractController {
     )
     @ForCurator
     @PutMapping("/players/{playerId}")
-    public UserObject updateUser(@PathVariable("playerId") Integer playerId,
-                                 @RequestBody UserObject userObject) {
-        return userTeamService.updateUser(playerId, userObject);
+    public PlayerObject updatePlayer(@PathVariable("playerId") Integer playerId,
+                                     @RequestBody PlayerObject playerObject) {
+        return playerTeamService.updatePlayer(playerId, playerObject);
     }
 
     @Operation(
@@ -106,8 +106,8 @@ public class PlayerController extends AbstractController {
     )
     @ForAdmin
     @DeleteMapping("/players/{playerId}")
-    public UserObject deactivateUser(@PathVariable("playerId") Integer playerId) {
-        return userTeamService.deactivateUser(playerId);
+    public PlayerObject deactivatePlayer(@PathVariable("playerId") Integer playerId) {
+        return playerTeamService.deactivatePlayer(playerId);
     }
 
     @Operation(
@@ -117,7 +117,7 @@ public class PlayerController extends AbstractController {
     @ForCurator
     @PostMapping("/teams")
     public TeamObject addTeam(@RequestBody TeamObject team) {
-        return userTeamService.addTeam(team);
+        return playerTeamService.addTeam(team);
     }
 
     @Operation(
@@ -128,7 +128,7 @@ public class PlayerController extends AbstractController {
     @PutMapping("/teams/{teamId}")
     public TeamObject updateTeam(@PathVariable("teamId") Integer teamId,
                                  @RequestBody TeamObject teamObject) {
-        return userTeamService.updateTeam(teamId, teamObject);
+        return playerTeamService.updateTeam(teamId, teamObject);
     }
 
     @Operation(
@@ -137,9 +137,9 @@ public class PlayerController extends AbstractController {
     )
     @ForCurator
     @PostMapping("/players/{playerId}/teams")
-    public void addUserToTeam(@PathVariable("playerId") Integer playerId,
-                              @RequestBody UserGameAssociationRequest request) {
-        userTeamService.addUserToTeam(playerId, request.getGameId(), request.getTeamId());
+    public void addPlayerToTeam(@PathVariable("playerId") Integer playerId,
+                                @RequestBody PlayerGameAssociationRequest request) {
+        playerTeamService.addPlayerToTeam(playerId, request.getGameId(), request.getTeamId());
     }
 
     @Operation(
@@ -147,8 +147,8 @@ public class PlayerController extends AbstractController {
     )
     @ForPlayer
     @GetMapping("/players/{userId}/teams")
-    public List<TeamObject> browseUserTeams(@PathVariable("playerId") Integer playerId) {
-        return userTeamService.getUserTeams(playerId);
+    public List<TeamObject> browsePlayerTeams(@PathVariable("playerId") Integer playerId) {
+        return playerTeamService.getTeamsOfPlayer(playerId);
     }
 
     @Operation(
@@ -157,8 +157,8 @@ public class PlayerController extends AbstractController {
     )
     @ForCurator
     @PostMapping("/teams/{teamId}/players")
-    public void addUsersToTeam(@PathVariable("teamId") Integer teamId,
-                               @RequestParam("playerIds") List<Integer> playerId) {
-        userTeamService.addUsersToTeam(teamId, playerId);
+    public void addPlayerToTeam(@PathVariable("teamId") Integer teamId,
+                                @RequestParam("playerIds") List<Integer> playerId) {
+        playerTeamService.addPlayersToTeam(teamId, playerId);
     }
 }

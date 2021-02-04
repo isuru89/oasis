@@ -27,8 +27,8 @@ import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
-import io.github.oasis.core.model.UserObject;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -122,37 +122,37 @@ public class BackendRepository implements OasisRepository {
     }
 
     @Override
-    public UserObject readUser(long userId) {
+    public PlayerObject readPlayer(long userId) {
         return null;
     }
 
     @Override
-    public UserObject readUser(String email) {
+    public PlayerObject readPlayer(String email) {
         return null;
     }
 
     @Override
-    public UserObject addUser(UserObject newUser) {
+    public PlayerObject addPlayer(PlayerObject newUser) {
         return null;
     }
 
     @Override
-    public boolean existsUser(String email) {
+    public boolean existsPlayer(String email) {
         return false;
     }
 
     @Override
-    public boolean existsUser(long userId) {
+    public boolean existsPlayer(long userId) {
         return false;
     }
 
     @Override
-    public UserObject updateUser(long userId, UserObject updatedUser) {
+    public PlayerObject updatePlayer(long userId, PlayerObject updatedUser) {
         return null;
     }
 
     @Override
-    public UserObject deleteUser(long userId) {
+    public PlayerObject deletePlayer(long userId) {
         return null;
     }
 
@@ -187,22 +187,22 @@ public class BackendRepository implements OasisRepository {
     }
 
     @Override
-    public void removeUserFromTeam(long userId, int gameId, int teamId) {
+    public void removePlayerFromTeam(long userId, int gameId, int teamId) {
 
     }
 
     @Override
-    public void addUserToTeam(long userId, int gameId, int teamId) {
+    public void addPlayerToTeam(long userId, int gameId, int teamId) {
 
     }
 
     @Override
-    public List<TeamObject> getUserTeams(long userId) {
+    public List<TeamObject> getPlayerTeams(long userId) {
         return null;
     }
 
     @Override
-    public List<UserObject> getTeamUsers(int teamId) {
+    public List<PlayerObject> getTeamPlayers(int teamId) {
         return null;
     }
 
