@@ -55,7 +55,7 @@ public class GamesController extends AbstractController {
             tags = {"admin"}
     )
     @ForAdmin
-    @PostMapping(path = "/admin/games")
+    @PostMapping(path = "/games")
     public Game addGame(@RequestBody GameObjectRequest request) throws OasisException {
         return gameService.addGame(request);
     }
@@ -64,7 +64,7 @@ public class GamesController extends AbstractController {
             summary = "List all available games"
     )
     @ForPlayer
-    @GetMapping(path = "/admin/games")
+    @GetMapping(path = "/games")
     public List<Game> listGames() {
         return gameService.listAllGames();
     }
@@ -73,7 +73,7 @@ public class GamesController extends AbstractController {
             summary = "Reads the information about a game"
     )
     @ForPlayer
-    @GetMapping(path = "/admin/games/{gameId}")
+    @GetMapping(path = "/games/{gameId}")
     public Game readGame(@PathVariable("gameId") Integer gameId) {
         return gameService.readGame(gameId);
     }
@@ -83,7 +83,7 @@ public class GamesController extends AbstractController {
             tags = {"admin"}
     )
     @ForAdmin
-    @PutMapping(path = "/admin/games/{gameId}")
+    @PutMapping(path = "/games/{gameId}")
     public Game updateGame(@PathVariable("gameId") Integer gameId,
                            @RequestBody GameObjectRequest request) throws OasisException {
         Game game = request.createGame();
@@ -95,7 +95,7 @@ public class GamesController extends AbstractController {
             tags = {"admin"}
     )
     @ForAdmin
-    @DeleteMapping(path = "/admin/games/{gameId}")
+    @DeleteMapping(path = "/games/{gameId}")
     public Game deleteGame(@PathVariable("gameId") Integer gameId) {
         return gameService.deleteGame(gameId);
     }

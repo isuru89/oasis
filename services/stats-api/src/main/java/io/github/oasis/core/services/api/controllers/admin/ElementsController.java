@@ -54,7 +54,7 @@ public class ElementsController extends AbstractController {
             summary = "Reads all game elements of a game by element type"
     )
     @ForPlayer
-    @GetMapping(path = "/admin/games/{gameId}/elements/types/{elementType}")
+    @GetMapping(path = "/games/{gameId}/elements/types/{elementType}")
     public List<SimpleElementDefinition> getElementsByType(@PathVariable("gameId") Integer gameId,
                                                            @PathVariable("elementType") String elementType) throws OasisException {
         return elementService.listElementsByType(gameId, elementType);
@@ -64,7 +64,7 @@ public class ElementsController extends AbstractController {
             summary = "Gets a game element by its id"
     )
     @ForPlayer
-    @GetMapping(path = "/admin/games/{gameId}/elements/{elementId}")
+    @GetMapping(path = "/games/{gameId}/elements/{elementId}")
     public ElementDef read(@PathVariable("gameId") Integer gameId,
                            @PathVariable("elementId") String elementId) {
         return elementService.readElement(gameId, elementId);
@@ -75,7 +75,7 @@ public class ElementsController extends AbstractController {
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PostMapping(path = "/admin/games/{gameId}/elements")
+    @PostMapping(path = "/games/{gameId}/elements")
     public ElementDef add(@PathVariable("gameId") Integer gameId,
                            @RequestBody ElementDef elementDef) {
         return elementService.addElement(gameId, elementDef);
@@ -86,7 +86,7 @@ public class ElementsController extends AbstractController {
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PutMapping(path = "/admin/games/{gameId}/elements/{elementId}")
+    @PutMapping(path = "/games/{gameId}/elements/{elementId}")
     public ElementDef update(@PathVariable("gameId") Integer gameId,
                              @PathVariable("elementId") String elementId,
                              @RequestBody ElementDef elementDef) {
@@ -98,7 +98,7 @@ public class ElementsController extends AbstractController {
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @DeleteMapping(path = "/admin/games/{gameId}/elements/{elementId}")
+    @DeleteMapping(path = "/games/{gameId}/elements/{elementId}")
     public ElementDef delete(@PathVariable("gameId") Integer gameId,
                              @PathVariable("elementId") String elementId) {
         return elementService.deleteElement(gameId, elementId);

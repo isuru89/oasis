@@ -53,12 +53,16 @@ public class BackendRepository implements OasisRepository {
 
     @Override
     public EventSource addEventSource(EventSource eventSource) {
-        return null;
+        EventSource source = adminRepository.addEventSource(eventSource);
+        engineRepository.addEventSource(source);
+        return source;
     }
 
     @Override
     public EventSource deleteEventSource(int id) {
-        return null;
+        EventSource source = adminRepository.deleteEventSource(id);
+        engineRepository.deleteEventSource(id);
+        return source;
     }
 
     @Override
