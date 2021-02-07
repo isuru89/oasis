@@ -17,24 +17,31 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.dao;
+
+import io.github.oasis.core.model.EventSource;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public enum UserGender {
+public interface IEventSourceDao {
 
-    MALE(1),
-    FEMALE(2),
-    UNKNOWN(0);
+    int insertEventSource(EventSource eventSource);
 
-    private final int genderId;
+    void deleteEventSource(int id);
 
-    UserGender(int genderId) {
-        this.genderId = genderId;
-    }
+    EventSource readEventSource(int id);
 
-    public int getGenderId() {
-        return genderId;
-    }
+    EventSource readEventSource(String token);
+
+    List<EventSource> readAllEventSources();
+
+    List<EventSource> readEventSourcesOfGame(int gameId);
+
+    void addEventSourceToGame(int gameId, int eventSourceId);
+
+    void removeEventSourceFromGame(int gameId, int eventSourceId);
+
 }

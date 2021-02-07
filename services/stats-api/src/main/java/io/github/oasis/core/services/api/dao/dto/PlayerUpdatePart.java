@@ -17,24 +17,32 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.dao.dto;
+
+import io.github.oasis.core.model.PlayerObject;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serializable;
+import java.time.format.DateTimeFormatter;
 
 /**
  * @author Isuru Weerarathna
  */
-public enum UserGender {
+@Getter
+@Setter
+public class PlayerUpdatePart implements Serializable {
 
-    MALE(1),
-    FEMALE(2),
-    UNKNOWN(0);
+    private String displayName;
+    private String birthday;
+    private int gender;
 
-    private final int genderId;
-
-    UserGender(int genderId) {
-        this.genderId = genderId;
+    public static PlayerUpdatePart from(PlayerObject playerObject) {
+        PlayerUpdatePart part = new PlayerUpdatePart();
+        part.setGender(playerObject.getGender().getGenderId());
+        part.setDisplayName(playerObject.getDisplayName());
+        part.setBirthday(playerObject.getBirthday().format(DateTimeFormatter.ISO_DATE));
+        return part;
     }
 
-    public int getGenderId() {
-        return genderId;
-    }
 }

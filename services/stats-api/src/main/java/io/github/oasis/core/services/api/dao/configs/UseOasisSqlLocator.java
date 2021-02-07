@@ -17,24 +17,23 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.dao.configs;
+
+import org.jdbi.v3.sqlobject.config.ConfiguringAnnotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Isuru Weerarathna
  */
-public enum UserGender {
+@ConfiguringAnnotation(UseOasisSqlLocatorImpl.class)
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface UseOasisSqlLocator {
 
-    MALE(1),
-    FEMALE(2),
-    UNKNOWN(0);
+    String value() default "";
 
-    private final int genderId;
-
-    UserGender(int genderId) {
-        this.genderId = genderId;
-    }
-
-    public int getGenderId() {
-        return genderId;
-    }
 }

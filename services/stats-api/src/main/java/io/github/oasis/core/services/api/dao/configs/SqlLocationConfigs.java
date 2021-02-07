@@ -17,24 +17,39 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.dao.configs;
 
 /**
  * @author Isuru Weerarathna
  */
-public enum UserGender {
 
-    MALE(1),
-    FEMALE(2),
-    UNKNOWN(0);
+import org.jdbi.v3.core.config.JdbiConfig;
 
-    private final int genderId;
+/**
+ * @author Isuru Weerarathna
+ */
+public class SqlLocationConfigs implements JdbiConfig<SqlLocationConfigs> {
 
-    UserGender(int genderId) {
-        this.genderId = genderId;
+    private String sqlScriptPath;
+
+    public SqlLocationConfigs() {
+        this.sqlScriptPath = "oasis/db/scripts";
     }
 
-    public int getGenderId() {
-        return genderId;
+    private SqlLocationConfigs(SqlLocationConfigs other) {
+        this.sqlScriptPath = other.sqlScriptPath;
+    }
+
+    public String getSqlScriptPath() {
+        return sqlScriptPath;
+    }
+
+    public void setSqlScriptPath(String sqlScriptPath) {
+        this.sqlScriptPath = sqlScriptPath;
+    }
+
+    @Override
+    public SqlLocationConfigs createCopy() {
+        return new SqlLocationConfigs(this);
     }
 }

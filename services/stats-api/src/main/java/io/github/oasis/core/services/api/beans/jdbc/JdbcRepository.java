@@ -28,9 +28,15 @@ import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.services.api.dao.IElementDao;
+import io.github.oasis.core.services.api.dao.IEventSourceDao;
+import io.github.oasis.core.services.api.dao.IGameDao;
+import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
+import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * JDBC database implementation for admin database.
@@ -40,134 +46,161 @@ import java.util.List;
 @Component("jdbc")
 public class JdbcRepository implements OasisRepository {
 
+    private final IGameDao gameDao;
+    private final IEventSourceDao eventSourceDao;
+    private final IElementDao elementDao;
+    private final IPlayerTeamDao playerTeamDao;
+
+    public JdbcRepository(IGameDao gameDao, IEventSourceDao eventSourceDao, IElementDao elementDao, IPlayerTeamDao playerTeamDao) {
+        this.gameDao = gameDao;
+        this.eventSourceDao = eventSourceDao;
+        this.elementDao = elementDao;
+        this.playerTeamDao = playerTeamDao;
+    }
+
     @Override
     public EventSource addEventSource(EventSource eventSource) {
-        return null;
+        int newId = eventSourceDao.insertEventSource(eventSource);
+        return eventSourceDao.readEventSource(newId);
     }
 
     @Override
     public EventSource deleteEventSource(int id) {
-        return null;
+        EventSource toBeRemoved = eventSourceDao.readEventSource(id);
+        eventSourceDao.deleteEventSource(id);
+        return toBeRemoved;
     }
 
     @Override
     public EventSource readEventSource(int id) {
-        return null;
+        return eventSourceDao.readEventSource(id);
     }
 
     @Override
     public EventSource readEventSource(String token) {
-        return null;
+        return eventSourceDao.readEventSource(token);
     }
 
     @Override
     public List<EventSource> listAllEventSources() {
-        return null;
+        return eventSourceDao.readAllEventSources();
     }
 
     @Override
     public List<EventSource> listAllEventSourcesOfGame(int gameId) {
-        return null;
+        return eventSourceDao.readEventSourcesOfGame(gameId);
     }
 
     @Override
     public void addEventSourceToGame(int sourceId, int gameId) {
-
+        eventSourceDao.addEventSourceToGame(gameId, sourceId);
     }
 
     @Override
     public void removeEventSourceFromGame(int sourceId, int gameId) {
-
+        eventSourceDao.addEventSourceToGame(gameId, sourceId);
     }
 
     @Override
     public Game addNewGame(Game game) {
-        return null;
+        int newGameId = gameDao.insertGame(game);
+        return gameDao.readGame(newGameId);
     }
 
     @Override
     public Game updateGame(int gameId, Game game) {
-        return null;
+        gameDao.updateGame(gameId, GameUpdatePart.from(game));
+        return gameDao.readGame(gameId);
     }
 
     @Override
     public Game readGame(int gameId) {
-        return null;
+        return gameDao.readGame(gameId);
     }
 
     @Override
     public Game deleteGame(int gameId) {
-        return null;
+        Game toBeDeletedGame = gameDao.readGame(gameId);
+        gameDao.deleteGame(gameId);
+        return toBeDeletedGame;
     }
 
     @Override
     public boolean existsGame(String gameName) {
-        return false;
+        return Objects.nonNull(gameDao.getGameByName(gameName));
     }
 
     @Override
     public List<Game> listGames() {
-        return null;
+        return gameDao.listGames(0, 50);
     }
 
+
+
     @Override
-    public PlayerObject readPlayer(long userId) {
-        return null;
+    public PlayerObject readPlayer(long playerId) {
+        return playerTeamDao.readPlayer(playerId);
     }
 
     @Override
     public PlayerObject readPlayer(String email) {
-        return null;
+        return playerTeamDao.readPlayerByEmail(email);
     }
 
     @Override
-    public PlayerObject addPlayer(PlayerObject newUser) {
-        return null;
+    public PlayerObject addPlayer(PlayerObject newPlayer) {
+        long newId = playerTeamDao.insertPlayer(newPlayer);
+        return playerTeamDao.readPlayer(newId);
     }
 
     @Override
     public boolean existsPlayer(String email) {
-        return false;
+        return Objects.nonNull(playerTeamDao.readPlayerByEmail(email));
     }
 
     @Override
-    public boolean existsPlayer(long userId) {
-        return false;
+    public boolean existsPlayer(long playerId) {
+        return Objects.nonNull(playerTeamDao.readPlayer(playerId));
     }
 
     @Override
-    public PlayerObject updatePlayer(long userId, PlayerObject updatedUser) {
-        return null;
+    public PlayerObject updatePlayer(long playerId, PlayerObject updatedPlayer) {
+        playerTeamDao.updatePlayer(playerId, updatedPlayer);
+        return playerTeamDao.readPlayer(playerId);
     }
 
     @Override
-    public PlayerObject deletePlayer(long userId) {
-        return null;
+    public PlayerObject deletePlayer(long playerId) {
+        PlayerObject player = playerTeamDao.readPlayer(playerId);
+        playerTeamDao.deletePlayer(playerId);
+        return player;
     }
 
     @Override
     public TeamObject addTeam(TeamObject teamObject) {
-        return null;
+        int newId = playerTeamDao.insertTeam(teamObject);
+        return playerTeamDao.readTeam(newId);
     }
 
     @Override
     public TeamObject readTeam(int teamId) {
-        return null;
+        return playerTeamDao.readTeam(teamId);
     }
 
     @Override
     public TeamObject updateTeam(int teamId, TeamObject updatedTeam) {
-        return null;
+        playerTeamDao.updateTeam(teamId, updatedTeam);
+        return playerTeamDao.readTeam(teamId);
     }
 
     @Override
     public boolean existsTeam(String teamName) {
-        return false;
+        return Objects.nonNull(playerTeamDao.readTeamByName(teamName));
     }
 
     @Override
     public boolean existsTeam(int teamId) {
-        return false;
+        return Objects.nonNull(playerTeamDao.readTeam(teamId));
     }
 
     @Override
@@ -176,52 +209,59 @@ public class JdbcRepository implements OasisRepository {
     }
 
     @Override
-    public void removePlayerFromTeam(long userId, int gameId, int teamId) {
-
+    public void removePlayerFromTeam(long playerId, int gameId, int teamId) {
+        playerTeamDao.removePlayerFromTeam(gameId, playerId, teamId);
     }
 
     @Override
-    public void addPlayerToTeam(long userId, int gameId, int teamId) {
-
+    public void addPlayerToTeam(long playerId, int gameId, int teamId) {
+        playerTeamDao.insertPlayerToTeam(gameId, playerId, teamId);
     }
 
     @Override
-    public List<TeamObject> getPlayerTeams(long userId) {
-        return null;
+    public List<TeamObject> getPlayerTeams(long playerId) {
+        return playerTeamDao.readPlayerTeams(playerId);
     }
 
     @Override
     public List<PlayerObject> getTeamPlayers(int teamId) {
-        return null;
+        return playerTeamDao.readTeamPlayers(teamId);
     }
+
+
 
     @Override
     public ElementDef addNewElement(int gameId, ElementDef elementDef) {
-        return null;
+        int newId = elementDao.insertNewElement(gameId, elementDef);
+        return elementDao.readElement(newId);
     }
 
     @Override
     public ElementDef updateElement(int gameId, String id, ElementDef elementDef) {
-        return null;
+        elementDao.updateElement(id, elementDef);
+        return elementDao.readElementById(id);
     }
 
     @Override
     public ElementDef deleteElement(int gameId, String id) {
-        return null;
+        ElementDef elementDef = elementDao.readElementById(id);
+        elementDao.deleteElementById(id);
+        return elementDef;
     }
 
     @Override
     public ElementDef readElement(int gameId, String id) {
-        return null;
+        return elementDao.readElementById(id);
     }
 
     @Override
     public AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute) {
-        return null;
+        int newAttrId = elementDao.insertAttribute(gameId, newAttribute);
+        return elementDao.readAttribute(gameId, newAttrId);
     }
 
     @Override
     public List<AttributeInfo> listAllAttributes(int gameId) {
-        return null;
+        return elementDao.readAllAttributes(gameId);
     }
 }

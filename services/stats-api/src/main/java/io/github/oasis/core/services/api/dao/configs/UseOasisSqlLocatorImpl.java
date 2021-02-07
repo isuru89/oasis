@@ -17,24 +17,27 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.dao.configs;
+
+import org.jdbi.v3.core.config.ConfigRegistry;
+import org.jdbi.v3.sqlobject.SqlObjects;
+import org.jdbi.v3.sqlobject.config.Configurer;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  * @author Isuru Weerarathna
  */
-public enum UserGender {
+public class UseOasisSqlLocatorImpl implements Configurer {
 
-    MALE(1),
-    FEMALE(2),
-    UNKNOWN(0);
-
-    private final int genderId;
-
-    UserGender(int genderId) {
-        this.genderId = genderId;
+    @Override
+    public void configureForType(ConfigRegistry registry, Annotation annotation, Class<?> sqlObjectType) {
+        registry.get(SqlObjects.class).setSqlLocator(new OasisSqlLocator());
     }
 
-    public int getGenderId() {
-        return genderId;
+    @Override
+    public void configureForMethod(ConfigRegistry registry, Annotation annotation, Class<?> sqlObjectType, Method method) {
+        configureForType(registry, annotation, sqlObjectType);
     }
 }

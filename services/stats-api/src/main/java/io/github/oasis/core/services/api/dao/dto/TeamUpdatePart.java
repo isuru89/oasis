@@ -17,24 +17,15 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.dao.dto;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public enum UserGender {
+public class TeamUpdatePart implements Serializable {
 
-    MALE(1),
-    FEMALE(2),
-    UNKNOWN(0);
+    private String avatarUrl;
 
-    private final int genderId;
-
-    UserGender(int genderId) {
-        this.genderId = genderId;
-    }
-
-    public int getGenderId() {
-        return genderId;
-    }
 }

@@ -19,26 +19,43 @@
 
 package io.github.oasis.core.services.api.dao;
 
-import io.github.oasis.core.Game;
-import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
+import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.ElementDef;
+import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface IGameDao {
+public interface IElementDao {
 
-    int insertGame(Game game);
+    @SqlUpdate
+    @GetGeneratedKeys("id")
+    int insertNewElement(int gameId, ElementDef elementDef);
 
-    Game readGame(int gameId);
+    @SqlQuery
+    ElementDef readElement(int rowId);
 
-    void updateGame(int gameId, GameUpdatePart gameNew);
+    @SqlQuery
+    ElementDef readElementById(String elementId);
 
-    void deleteGame(int gameId);
+    @SqlUpdate
+    void updateElement(String id, ElementDef update);
 
-    List<Game> listGames(int pageOffset, int pageSize);
+    @SqlUpdate
+    void deleteElementById(String elementId);
 
-    Game getGameByName(String name);
+
+    @SqlUpdate
+    int insertAttribute(int gameId, AttributeInfo newAttr);
+
+    @SqlQuery
+    AttributeInfo readAttribute(int gameId, int id);
+
+    @SqlQuery
+    List<AttributeInfo> readAllAttributes(int gameId);
 
 }
