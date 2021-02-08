@@ -46,7 +46,7 @@ public class PlayerTeamService extends AbstractOasisService {
 
         PlayerObject oasisUser = backendRepository.addPlayer(playerObject);
 
-        request.setUserId(playerObject.getUserId());
+        request.setUserId(playerObject.getId());
         //userManagementSupport.createUser(request);
 
         return oasisUser;

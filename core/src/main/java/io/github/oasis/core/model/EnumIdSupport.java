@@ -17,31 +17,13 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.dao.dto;
-
-import io.github.oasis.core.model.PlayerObject;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.io.Serializable;
+package io.github.oasis.core.model;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class PlayerUpdatePart implements Serializable {
+public interface EnumIdSupport {
 
-    private String displayName;
-    private String avatarUrl;
-    private int gender;
-
-    public static PlayerUpdatePart from(PlayerObject playerObject) {
-        PlayerUpdatePart part = new PlayerUpdatePart();
-        part.setGender(playerObject.getGender().getId());
-        part.setDisplayName(playerObject.getDisplayName());
-        part.setAvatarUrl(playerObject.getAvatarRef());
-        return part;
-    }
+    int getId();
 
 }

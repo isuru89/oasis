@@ -33,6 +33,7 @@ import io.github.oasis.core.services.api.dao.IEventSourceDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
 import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
+import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -165,7 +166,7 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public PlayerObject updatePlayer(long playerId, PlayerObject updatedPlayer) {
-        playerTeamDao.updatePlayer(playerId, updatedPlayer);
+        playerTeamDao.updatePlayer(playerId, PlayerUpdatePart.from(updatedPlayer));
         return playerTeamDao.readPlayer(playerId);
     }
 

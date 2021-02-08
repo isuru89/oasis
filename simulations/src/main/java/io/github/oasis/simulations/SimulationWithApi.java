@@ -154,12 +154,12 @@ public class SimulationWithApi extends Simulation {
                 System.out.println("Added user " + dbUser);
 
                 long teamId = user.getGames().get(String.valueOf(GAME_ID)).getTeam();
-                Map<String, Object> dataReq = Map.of("userId", dbUser.getUserId(),
+                Map<String, Object> dataReq = Map.of("userId", dbUser.getId(),
                         "gameId", GAME_ID,
                         "teamId", teamId);
 
                 request = HttpRequest.newBuilder()
-                        .uri(URI.create(context.getAdminApiUrl() + "/admin/users/" + dbUser.getUserId() + "/teams"))
+                        .uri(URI.create(context.getAdminApiUrl() + "/admin/users/" + dbUser.getId() + "/teams"))
                         .timeout(Duration.ofSeconds(2))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(dataReq)))
@@ -168,7 +168,7 @@ public class SimulationWithApi extends Simulation {
                 if (result.statusCode() >= 400) {
                     throw new IOException("Unable to add user to team " + user);
                 }
-                System.out.println("Added user to team " + dbUser.getUserId() + " to team " + teamId);
+                System.out.println("Added user to team " + dbUser.getId() + " to team " + teamId);
             }
         } catch (InterruptedException e) {
             throw new IOException(e.getMessage(), e);

@@ -6,3 +6,4 @@
 /svp
 /web/node_modules
 /data
+*.db

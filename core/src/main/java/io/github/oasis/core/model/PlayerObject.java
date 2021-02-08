@@ -19,30 +19,30 @@
 
 package io.github.oasis.core.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import java.time.LocalDate;
+import lombok.*;
 
 /**
  * @author Isuru Weerarathna
  */
 @Getter
 @Setter
+@ToString
+@Builder
+@AllArgsConstructor
 public class PlayerObject {
 
-    private Long userId;
+    private Long id;
     private String displayName;
 
     private String email;
-    private LocalDate birthday;
     private UserGender gender;
     private String timeZone;
+    private String avatarRef;
 
     public PlayerObject() {}
 
-    public PlayerObject(long userId, String name, String email) {
-        this.userId = userId;
+    public PlayerObject(long playerId, String name, String email) {
+        this.id = playerId;
         this.displayName = name;
         this.email = email;
     }

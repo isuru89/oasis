@@ -21,32 +21,55 @@ package io.github.oasis.core.services.api.dao;
 
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.services.api.dao.configs.DaoConstants;
+import io.github.oasis.core.services.api.dao.configs.UseOasisSqlLocator;
+import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
+import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import org.jdbi.v3.sqlobject.transaction.Transaction;
 
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
+@UseOasisSqlLocator("io/github/oasis/db/scripts")
+@RegisterBeanMapper(PlayerObject.class)
+@RegisterBeanMapper(TeamObject.class)
 public interface IPlayerTeamDao {
 
-    @SqlQuery
-    PlayerObject readPlayer(long playerId);
+    @SqlQuery("SELECT * FROM OA_PLAYER WHERE id = :id")
+    PlayerObject readPlayer(@Bind("id") long playerId);
 
-    @SqlQuery
-    PlayerObject readPlayerByEmail(String playerEmail);
-
-    @SqlUpdate
-    long insertPlayer(PlayerObject newPlayer);
+    @SqlQuery("SELECT * FROM OA_PLAYER WHERE email = :email")
+    PlayerObject readPlayerByEmail(@Bind("email") String playerEmail);
 
     @SqlUpdate
-    void updatePlayer(long playerId, PlayerObject updateData);
+    @GetGeneratedKeys(DaoConstants.ID)
+    int insertPlayer(@BindBean PlayerObject newPlayer, @Bind("ts") long ts);
+
+    default int insertPlayer(PlayerObject newPlayer) {
+        return insertPlayer(newPlayer, System.currentTimeMillis());
+    }
+
+    @SqlUpdate("UPDATE OA_PLAYER SET display_name = :displayName, avatar_ref = :avatarUrl, gender = :gender WHERE id = :id")
+    void updatePlayer(@Bind("id") long playerId, @BindBean PlayerUpdatePart updateData);
+
+    @Transaction
+    default PlayerObject insertAndGet(PlayerObject newPlayer) {
+        int id = insertPlayer(newPlayer);
+        return readPlayer(id);
+    }
 
     @SqlUpdate
     void deletePlayer(long playerId);
 
     @SqlUpdate
+    @GetGeneratedKeys(DaoConstants.ID)
     int insertTeam(TeamObject newTeam);
 
     @SqlQuery

@@ -17,25 +17,28 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
+package io.github.oasis.core.services.api.dao.configs;
+
+import io.github.oasis.core.model.EnumIdSupport;
+import org.jdbi.v3.core.config.ConfigRegistry;
+import org.jdbi.v3.core.generic.GenericTypes;
+import org.jdbi.v3.core.mapper.ColumnMapper;
+import org.jdbi.v3.core.mapper.QualifiedColumnMapperFactory;
+import org.jdbi.v3.core.qualifier.QualifiedType;
+
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
  */
-public enum UserGender implements EnumIdSupport {
+public class OasisEnumColumnFactory implements QualifiedColumnMapperFactory {
 
-    MALE(1),
-    FEMALE(2),
-    UNKNOWN(0);
-
-    private final int genderId;
-
-    UserGender(int genderId) {
-        this.genderId = genderId;
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
-    public int getId() {
-        return genderId;
+    public Optional<ColumnMapper<?>> build(QualifiedType<?> givenType, ConfigRegistry config) {
+        return Optional.of(givenType.getType())
+                .map(GenericTypes::getErasedType)
+                .filter(c -> Enum.class.isAssignableFrom(c) && EnumIdSupport.class.isAssignableFrom(c))
+                .map(clazz -> EnumById.byId((Class<Enum>) clazz));
     }
 }

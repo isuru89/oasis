@@ -33,7 +33,7 @@ public class SqlLocationConfigs implements JdbiConfig<SqlLocationConfigs> {
     private String sqlScriptPath;
 
     public SqlLocationConfigs() {
-        this.sqlScriptPath = "oasis/db/scripts";
+        this.sqlScriptPath = "";
     }
 
     private SqlLocationConfigs(SqlLocationConfigs other) {

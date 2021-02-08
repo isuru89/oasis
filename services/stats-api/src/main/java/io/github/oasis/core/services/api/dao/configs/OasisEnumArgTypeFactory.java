@@ -17,31 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.dao.dto;
+package io.github.oasis.core.services.api.dao.configs;
 
-import io.github.oasis.core.model.PlayerObject;
-import lombok.Getter;
-import lombok.Setter;
+import io.github.oasis.core.model.EnumIdSupport;
+import org.jdbi.v3.core.argument.AbstractArgumentFactory;
+import org.jdbi.v3.core.argument.Argument;
+import org.jdbi.v3.core.argument.ArgumentFactory;
+import org.jdbi.v3.core.config.ConfigRegistry;
 
-import java.io.Serializable;
+import java.sql.Types;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class PlayerUpdatePart implements Serializable {
+public class OasisEnumArgTypeFactory extends AbstractArgumentFactory<EnumIdSupport> {
 
-    private String displayName;
-    private String avatarUrl;
-    private int gender;
-
-    public static PlayerUpdatePart from(PlayerObject playerObject) {
-        PlayerUpdatePart part = new PlayerUpdatePart();
-        part.setGender(playerObject.getGender().getId());
-        part.setDisplayName(playerObject.getDisplayName());
-        part.setAvatarUrl(playerObject.getAvatarRef());
-        return part;
+    /**
+     * Constructs an {@link ArgumentFactory} for type {@code T}.
+     */
+    public OasisEnumArgTypeFactory() {
+        super(Types.INTEGER);
     }
 
+    @Override
+    protected Argument build(EnumIdSupport value, ConfigRegistry config) {
+        return ((position, statement, ctx) -> statement.setInt(position, value.getId()));
+    }
 }

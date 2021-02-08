@@ -408,7 +408,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
             long userId = db.MAP(ID.OASIS_ID_STORAGE).incrementBy(INCR_USER_KEY, 1L);
             String userIdStr = String.valueOf(userId);
-            newUser.setUserId(userId);
+            newUser.setId(userId);
             db.setValueInMap(ID.ALL_USERS, userIdStr, serializationSupport.serialize(newUser));
             updateUserMetadata(newUser, db);
             updateUserIndex(newUser, db);
@@ -435,7 +435,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
                 throw new OasisRuntimeException("No such existing user found by email or id!");
             }
 
-            updatedUser.setUserId(userId);
+            updatedUser.setId(userId);
             db.setValueInMap(ID.ALL_USERS, userIdStr, serializationSupport.serialize(updatedUser));
             updateUserMetadata(updatedUser, db);
             return updatedUser;
@@ -846,7 +846,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     private void updateUserIndex(PlayerObject playerObject, DbContext db) {
-        db.setValueInMap(ID.ALL_USERS_INDEX, playerObject.getEmail(), String.valueOf(playerObject.getUserId()));
+        db.setValueInMap(ID.ALL_USERS_INDEX, playerObject.getEmail(), String.valueOf(playerObject.getId()));
     }
 
     private void updateTeamIndex(TeamObject teamObject, String prevName, DbContext db) {
@@ -868,7 +868,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     private void updateUserMetadata(PlayerObject playerObject, DbContext db) {
-        db.setValueInMap(ID.ALL_USERS_NAMES, String.valueOf(playerObject.getUserId()), playerObject.getDisplayName());
+        db.setValueInMap(ID.ALL_USERS_NAMES, String.valueOf(playerObject.getId()), playerObject.getDisplayName());
     }
 
     private void updateElementMetadata(ElementDef def, DbContext db) {
