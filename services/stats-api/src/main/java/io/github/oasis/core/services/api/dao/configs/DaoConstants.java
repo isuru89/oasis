@@ -17,34 +17,13 @@
  * under the License.
  */
 
-package io.github.oasis.core.model;
-
-import lombok.Getter;
-import lombok.Setter;
-
-import java.time.LocalDate;
+package io.github.oasis.core.services.api.dao.configs;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class UserObject {
+public final class DaoConstants {
 
-    private Long userId;
-    private String displayName;
-
-    private String email;
-    private LocalDate birthday;
-    private UserGender gender;
-    private String timeZone;
-
-    public UserObject() {}
-
-    public UserObject(long userId, String name, String email) {
-        this.userId = userId;
-        this.displayName = name;
-        this.email = email;
-    }
+    public static final String ID = "id";
 
 }

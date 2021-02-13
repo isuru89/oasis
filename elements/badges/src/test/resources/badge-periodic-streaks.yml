@@ -9,7 +9,7 @@ badges:
     threshold: 200
     timeUnit: daily
     consecutive: true
-    valueExtractorExpression: e.reputations
+    aggregatorExtractor: e.reputations
     streaks:
       - streak: 5         // 5 consecutive days
         attribute: 10

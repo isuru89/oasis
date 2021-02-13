@@ -22,12 +22,16 @@ package io.github.oasis.elements.badges.rules;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public abstract class BadgeRule extends AbstractRule {
 
     private String pointId;
@@ -44,19 +48,4 @@ public abstract class BadgeRule extends AbstractRule {
         signal.setPointAwards(pointId, pointAwards);
     }
 
-    public String getPointId() {
-        return pointId;
-    }
-
-    public void setPointId(String pointId) {
-        this.pointId = pointId;
-    }
-
-    public BigDecimal getPointAwards() {
-        return pointAwards;
-    }
-
-    public void setPointAwards(BigDecimal pointAwards) {
-        this.pointAwards = pointAwards;
-    }
 }

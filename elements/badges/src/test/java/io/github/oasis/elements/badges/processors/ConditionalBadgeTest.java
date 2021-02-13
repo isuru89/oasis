@@ -79,7 +79,7 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
 
         List<Signal> signals = new ArrayList<>();
         RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals, aCond(1, ATTR_50, this::greater50));
-        ruleContext.getRule().setCondition(((event, rule1, ctx) -> (long)event.getFieldValue("value") >= 75));
+        ruleContext.getRule().setEventFilter(((event, rule1, ctx) -> (long)event.getFieldValue("value") >= 75));
         Assertions.assertEquals(1, ruleContext.getRule().getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);

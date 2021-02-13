@@ -34,8 +34,8 @@ import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
-import io.github.oasis.core.model.UserObject;
 import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.core.services.api.beans.GsonSerializer;
 import io.github.oasis.core.services.api.beans.RedisRepository;
@@ -54,7 +54,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -118,11 +117,11 @@ public class OasisEngineTest {
         try (DbContext db = dbPool.createContext()) {
             db.allKeys("*").forEach(db::removeKey);
 
-            metadataSupport.addUser(new UserObject(1, "Jakob Floyd", "jakob@oasis.io"));
-            metadataSupport.addUser(new UserObject(2, "Thierry Hines", "thierry@oasis.io"));
-            metadataSupport.addUser(new UserObject(3, "Ray Glenn", "ray@oasis.io"));
-            metadataSupport.addUser(new UserObject(4, "Lilia Stewart", "lilia@oasis.io"));
-            metadataSupport.addUser(new UserObject(5, "Archer Roberts", "archer@oasis.io"));
+            metadataSupport.addPlayer(new PlayerObject(1, "Jakob Floyd", "jakob@oasis.io"));
+            metadataSupport.addPlayer(new PlayerObject(2, "Thierry Hines", "thierry@oasis.io"));
+            metadataSupport.addPlayer(new PlayerObject(3, "Ray Glenn", "ray@oasis.io"));
+            metadataSupport.addPlayer(new PlayerObject(4, "Lilia Stewart", "lilia@oasis.io"));
+            metadataSupport.addPlayer(new PlayerObject(5, "Archer Roberts", "archer@oasis.io"));
 
             metadataSupport.addTeam(new TeamObject(1, 1, "Warriors"));
 
@@ -184,10 +183,9 @@ public class OasisEngineTest {
     }
 
     protected GameDef loadRulesFromResource(String location) {
-        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(location)) {
-            GameParserYaml parser = new GameParserYaml();
-            return parser.parse(is);
-        } catch (IOException | OasisParseException e) {
+        try {
+            return GameParserYaml.fromClasspath(location, Thread.currentThread().getContextClassLoader());
+        } catch (OasisParseException e) {
             throw new IllegalArgumentException("Unable to parse classpath resource! " + location, e);
         }
     }

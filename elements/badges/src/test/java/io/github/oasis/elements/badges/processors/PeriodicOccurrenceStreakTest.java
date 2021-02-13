@@ -61,7 +61,7 @@ public class PeriodicOccurrenceStreakTest extends AbstractRuleTest {
         options.setStreaks(toStreakMap(Map.of(3, 3, 5, 5)));
         options.setConsecutive(true);
         options.setTimeUnit(FIFTY);
-        options.setCondition((e, r, ctx) -> (long) e.getFieldValue("value") >= 50);
+        options.setEventFilter((e, r, ctx) -> (long) e.getFieldValue("value") >= 50);
 
         Assertions.assertEquals(BigDecimal.ONE, options.getThreshold());
         Assertions.assertThrows(IllegalStateException.class, () -> options.setValueResolver((e, ctx) -> BigDecimal.ZERO));
@@ -305,7 +305,7 @@ public class PeriodicOccurrenceStreakTest extends AbstractRuleTest {
         rule.setConsecutive(true);
         rule.setThreshold(BigDecimal.valueOf(threshold));
         rule.setTimeUnit(timeunit);
-        rule.setCondition((e, r, c) -> (long) e.getFieldValue("value") >= 50);
+        rule.setEventFilter((e, r, c) -> (long) e.getFieldValue("value") >= 50);
         return new RuleContext<>(rule, fromConsumer(consumer));
     }
 

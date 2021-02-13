@@ -38,13 +38,13 @@ import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Timestamps;
 import io.github.oasis.core.utils.Utils;
 import io.github.oasis.engine.element.points.PointIDs;
-import io.github.oasis.engine.element.points.stats.to.LeaderboardRequest;
-import io.github.oasis.engine.element.points.stats.to.LeaderboardSummary;
-import io.github.oasis.engine.element.points.stats.to.UserPointSummary;
-import io.github.oasis.engine.element.points.stats.to.UserPointsRequest;
+import io.github.oasis.engine.element.points.stats.to.*;
 import io.github.oasis.engine.element.points.stats.to.UserPointsRequest.PointsFilterScope;
-import io.github.oasis.engine.element.points.stats.to.UserRankingRequest;
-import io.github.oasis.engine.element.points.stats.to.UserRankingSummary;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -60,6 +60,7 @@ import static io.github.oasis.core.utils.Constants.COLON;
  * @author Isuru Weerarathna
  */
 @OasisQueryService
+@Tag(name = "Points", description = "Retrieve points statistics")
 public class PointStats extends AbstractStatsApiService {
 
     private static final String LEADERBOARD_RANK = "O.PLEADRANKS";
@@ -70,6 +71,13 @@ public class PointStats extends AbstractStatsApiService {
         super(pool, contextSupport);
     }
 
+    @ApiResponse(
+            responseCode = "200", description = "Points summary for a user",
+            content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserPointSummary.class))
+            }
+    )
     @OasisStatEndPoint(path = "/elements/points/summary")
     public Object getUserPoints(@QueryPayload UserPointsRequest request) throws OasisApiException {
         Validators.checkPointRequest(request);
@@ -103,6 +111,13 @@ public class PointStats extends AbstractStatsApiService {
         }
     }
 
+    @ApiResponse(
+            responseCode = "200", description = "Get leaderboard",
+            content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = LeaderboardSummary.class))
+            }
+    )
     @OasisStatEndPoint(path = "/elements/points/leaderboard/summary")
     public Object getLeaderboard(@QueryPayload LeaderboardRequest request) throws OasisApiException {
         Validators.checkLeaderboardRequest(request);
@@ -153,6 +168,13 @@ public class PointStats extends AbstractStatsApiService {
         }
     }
 
+    @ApiResponse(
+            responseCode = "200", description = "Get user rankings",
+            content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserRankingSummary.class))
+            }
+    )
     @OasisStatEndPoint(path = "/elements/points/rankings/summary")
     @SuppressWarnings("unchecked")
     public Object getUserRankings(@QueryPayload UserRankingRequest request) throws OasisApiException {

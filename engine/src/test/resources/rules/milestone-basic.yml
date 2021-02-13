@@ -1,9 +1,10 @@
 version: 1
 
-milestones:
+elements:
   - id: MILE000001
     name: Milestone-Basic
     description: This is a basic milestone which accumulates using event values.
+    plugin: core:milestone
     event: event.a
     valueExtractor: e.value
     flags:

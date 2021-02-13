@@ -1,12 +1,13 @@
 version: 1
 
-badges:
+elements:
   - id: BDG00002
     name: test.badge.points.rule
     description: Awards badge and points if value is >= 50 for streaks
+    plugin: core:badge
     kind: streak
     event: event.a
-    condition: e.value >= 50
+    eventFilter: e.value >= 50
     timeUnit: 10
     pointId: star.points
     streaks:
@@ -17,11 +18,10 @@ badges:
         attribute: 20
         pointAwards: 100
 
-
-milestones:
   - id: MILE000001
     name: Milestone-Basic
     description: This is a basic milestone which accumulates using event values.
+    plugin: core:milestone
     event: star.points
     valueExtractor: e.points
     flags:

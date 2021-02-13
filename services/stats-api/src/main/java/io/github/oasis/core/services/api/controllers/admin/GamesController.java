@@ -26,15 +26,10 @@ import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.GameService;
 import io.github.oasis.core.services.api.to.GameObjectRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -46,6 +41,7 @@ import java.util.List;
     consumes = MediaType.APPLICATION_JSON_VALUE,
     produces = MediaType.APPLICATION_JSON_VALUE
 )
+@Tag(name = "Games", description = "Game API")
 public class GamesController extends AbstractController {
 
     private final GameService gameService;
@@ -54,39 +50,52 @@ public class GamesController extends AbstractController {
         this.gameService = gameService;
     }
 
+    @Operation(
+            summary = "Creates a new game",
+            tags = {"admin"}
+    )
     @ForAdmin
-    @PostMapping(path = "/admin/games")
+    @PostMapping(path = "/games")
     public Game addGame(@RequestBody GameObjectRequest request) throws OasisException {
         return gameService.addGame(request);
     }
 
+    @Operation(
+            summary = "List all available games"
+    )
     @ForPlayer
-    @GetMapping(path = "/admin/games")
+    @GetMapping(path = "/games")
     public List<Game> listGames() {
         return gameService.listAllGames();
     }
 
+    @Operation(
+            summary = "Reads the information about a game"
+    )
     @ForPlayer
-    @GetMapping(path = "/admin/games/{gameId}")
+    @GetMapping(path = "/games/{gameId}")
     public Game readGame(@PathVariable("gameId") Integer gameId) {
         return gameService.readGame(gameId);
     }
 
+    @Operation(
+            summary = "Updates information about existing game",
+            tags = {"admin"}
+    )
     @ForAdmin
-    @PutMapping(path = "/admin/games/{gameId}")
+    @PutMapping(path = "/games/{gameId}")
     public Game updateGame(@PathVariable("gameId") Integer gameId,
                            @RequestBody GameObjectRequest request) throws OasisException {
-        Game game = new Game();
-        game.setId(request.getId());
-        game.setName(request.getName());
-        game.setDescription(request.getDescription());
-        game.setMotto(request.getMotto());
-
+        Game game = request.createGame();
         return gameService.updateGame(gameId, game);
     }
 
+    @Operation(
+            summary = "Deletes an existing game",
+            tags = {"admin"}
+    )
     @ForAdmin
-    @DeleteMapping(path = "/admin/games/{gameId}")
+    @DeleteMapping(path = "/games/{gameId}")
     public Game deleteGame(@PathVariable("gameId") Integer gameId) {
         return gameService.deleteGame(gameId);
     }

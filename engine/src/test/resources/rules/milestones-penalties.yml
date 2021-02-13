@@ -1,9 +1,10 @@
 version: 1
 
-milestones:
+elements:
   - id: MILE00004
     name: Milestone-with-Penalties
     description: This is a milestone which counts the penalties too.
+    plugin: core:milestone
     event: event.a
     valueExtractor: e.value
     flags:

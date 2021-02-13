@@ -22,7 +22,7 @@ package io.github.oasis.core.services.api.services;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
-import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import org.springframework.stereotype.Service;
 
@@ -32,30 +32,31 @@ import java.util.List;
  * @author Isuru Weerarathna
  */
 @Service
-public class ElementService {
+public class ElementService extends AbstractOasisService {
 
-    private final OasisRepository oasisRepository;
     private final OasisMetadataSupport metadataSupport;
 
-    public ElementService(OasisRepository oasisRepository, OasisMetadataSupport metadataSupport) {
-        this.oasisRepository = oasisRepository;
+    ElementService(BackendRepository backendRepository, OasisMetadataSupport metadataSupport) {
+        super(backendRepository);
+
         this.metadataSupport = metadataSupport;
     }
 
+
     public ElementDef readElement(int gameId, String elementId) {
-        return oasisRepository.readElement(gameId, elementId);
+        return backendRepository.readElement(gameId, elementId);
     }
 
     public ElementDef addElement(int gameId, ElementDef elementDef) {
-        return oasisRepository.addNewElement(gameId, elementDef);
+        return backendRepository.addNewElement(gameId, elementDef);
     }
 
     public ElementDef updateElement(int gameId, String elementId, ElementDef elementDef) {
-        return oasisRepository.updateElement(gameId, elementId, elementDef);
+        return backendRepository.updateElement(gameId, elementId, elementDef);
     }
 
     public ElementDef deleteElement(int gameId, String elementId) {
-        return oasisRepository.deleteElement(gameId, elementId);
+        return backendRepository.deleteElement(gameId, elementId);
     }
 
     public List<SimpleElementDefinition> listElementsByType(int gameId, String type) throws OasisException {

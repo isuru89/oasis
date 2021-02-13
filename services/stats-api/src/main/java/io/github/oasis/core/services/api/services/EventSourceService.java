@@ -20,33 +20,29 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.exception.OasisException;
-import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.model.EventSourceSecrets;
 import io.github.oasis.core.services.KeyGeneratorSupport;
+import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.utils.Texts;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyPair;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Isuru Weerarathna
  */
 @Service
-public class EventSourceService {
+public class EventSourceService extends AbstractOasisService {
 
-    private final OasisRepository repository;
     private final KeyGeneratorSupport keyGeneratorSupport;
 
-    public EventSourceService(OasisRepository repository, KeyGeneratorSupport keyGeneratorSupport) {
-        this.repository = repository;
+    EventSourceService(BackendRepository backendRepository, KeyGeneratorSupport keyGeneratorSupport) {
+        super(backendRepository);
+
         this.keyGeneratorSupport = keyGeneratorSupport;
     }
 
@@ -64,25 +60,25 @@ public class EventSourceService {
         sourceSecrets.setPrivateKey(Base64.getEncoder().encodeToString(oasisKeyPair.getPrivate().getEncoded()));
         source.setSecrets(sourceSecrets);
 
-        EventSource dbSource = repository.addEventSource(source);
+        EventSource dbSource = backendRepository.addEventSource(source);
 
         for (Integer gameId : gameIds) {
-            repository.addEventSourceToGame(dbSource.getId(), gameId);
+            backendRepository.addEventSourceToGame(dbSource.getId(), gameId);
         }
 
         return dbSource;
     }
 
     public void deleteEventSource(int eventSourceId) {
-        repository.deleteEventSource(eventSourceId);
+        backendRepository.deleteEventSource(eventSourceId);
     }
 
     public void assignEventSourceToGame(int eventSource, int gameId) {
-        repository.addEventSourceToGame(eventSource, gameId);
+        backendRepository.addEventSourceToGame(eventSource, gameId);
     }
 
     public List<EventSource> listAllEventSources() {
-        List<EventSource> sources = repository.listAllEventSources();
+        List<EventSource> sources = backendRepository.listAllEventSources();
         for (EventSource source : sources) {
             source.setSecrets(null);
         }
@@ -90,15 +86,12 @@ public class EventSourceService {
     }
 
     public List<EventSource> listAllEventSourcesOfGame(int gameId) {
-        List<EventSource> sources = repository.listAllEventSourcesOfGame(gameId);
+        List<EventSource> sources = backendRepository.listAllEventSourcesOfGame(gameId);
         for (EventSource source : sources) {
             source.setSecrets(null);
         }
         return sources;
     }
-
-
-
 
     private String generateRandomToken() {
         return UUID.randomUUID().toString().replace("-", "");

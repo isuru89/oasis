@@ -19,14 +19,17 @@
 
 package io.github.oasis.elements.badges.rules;
 
+import lombok.Getter;
+
 /**
+ * Rule for awarding a badge for the very single event.
+ *
  * @author Isuru Weerarathna
  */
-
+@Getter
 public class FirstEventBadgeRule extends BadgeRule {
 
     public static final int DEFAULT_ATTRIBUTE = 1;
-
 
     private final String eventName;
     private final int attributeId;
@@ -42,11 +45,4 @@ public class FirstEventBadgeRule extends BadgeRule {
         this.attributeId = attributeId;
     }
 
-    public String getEventName() {
-        return eventName;
-    }
-
-    public int getAttributeId() {
-        return attributeId;
-    }
 }

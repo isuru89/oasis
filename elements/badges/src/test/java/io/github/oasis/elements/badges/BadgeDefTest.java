@@ -118,17 +118,17 @@ class BadgeDefTest {
     @Test
     void testUniqueIDGenerationValueExtractor() {
         BadgeDef def1 = new BadgeDef();
-        def1.setValueExtractorExpression("e.data.value");
+        def1.setAggregatorExtractor("e.data.value");
 
         BadgeDef def2 = new BadgeDef();
-        def2.setValueExtractorExpression("e.data.value");
+        def2.setAggregatorExtractor("e.data.value");
 
         BadgeDef def3 = new BadgeDef();
-        def3.setValueExtractorExpression("e.data.score");
+        def3.setAggregatorExtractor("e.data.score");
 
-        Assertions.assertEquals(def1.getValueExtractorExpression(), def2.getValueExtractorExpression());
+        Assertions.assertEquals(def1.getAggregatorExtractor(), def2.getAggregatorExtractor());
         Assertions.assertEquals(def1.generateUniqueHash(), def2.generateUniqueHash());
-        Assertions.assertNotEquals(def1.getValueExtractorExpression(), def3.getValueExtractorExpression());
+        Assertions.assertNotEquals(def1.getAggregatorExtractor(), def3.getAggregatorExtractor());
         Assertions.assertNotEquals(def1.generateUniqueHash(), def3.generateUniqueHash());
     }
 

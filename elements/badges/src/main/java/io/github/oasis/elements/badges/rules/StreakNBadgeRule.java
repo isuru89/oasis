@@ -21,15 +21,10 @@ package io.github.oasis.elements.badges.rules;
 
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
+import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.Objects;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * @author Isuru Weerarathna
@@ -44,6 +39,10 @@ public class StreakNBadgeRule extends BadgeRule {
     private NavigableMap<Integer, StreakProps> streakProps;
     private EventExecutionFilter criteria;
     private long retainTime;
+
+    public StreakNBadgeRule(String id) {
+        super(id);
+    }
 
     @Override
     public void derivePointsInTo(BadgeSignal signal) {
@@ -68,10 +67,6 @@ public class StreakNBadgeRule extends BadgeRule {
 
     public void setCriteria(EventExecutionFilter criteria) {
         this.criteria = criteria;
-    }
-
-    public StreakNBadgeRule(String id) {
-        super(id);
     }
 
     public int getMaxStreak() {
@@ -118,6 +113,7 @@ public class StreakNBadgeRule extends BadgeRule {
         return orderedStreakList;
     }
 
+    @Getter
     public static class StreakProps {
         private final int attribute;
         private final BigDecimal points;
@@ -129,14 +125,6 @@ public class StreakNBadgeRule extends BadgeRule {
         public StreakProps(int attribute, BigDecimal points) {
             this.attribute = attribute;
             this.points = points;
-        }
-
-        public int getAttribute() {
-            return attribute;
-        }
-
-        public BigDecimal getPoints() {
-            return points;
         }
     }
 }

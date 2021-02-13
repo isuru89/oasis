@@ -1,11 +1,12 @@
 version: 1
 
-points:
+elements:
   - id: PNT00002
     name: Time-Bonus
     description: Awards bonus points when invoked between 10am - 1pm.
+    plugin: core:point
     event: event.a
-    condition: e.value >= 50
+    eventFilter: e.value >= 50
     timeRanges:
       - type: time
         from: "10:00"

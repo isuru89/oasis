@@ -24,8 +24,8 @@ import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
-import io.github.oasis.core.model.UserObject;
 
 import java.util.List;
 
@@ -50,13 +50,13 @@ public interface OasisRepository {
     boolean existsGame(String gameName);
     List<Game> listGames();
 
-    UserObject readUser(long userId);
-    UserObject readUser(String email);
-    UserObject addUser(UserObject newUser);
-    boolean existsUser(String email);
-    boolean existsUser(long userId);
-    UserObject updateUser(long userId, UserObject updatedUser);
-    UserObject deleteUser(long userId);
+    PlayerObject readPlayer(long userId);
+    PlayerObject readPlayer(String email);
+    PlayerObject addPlayer(PlayerObject newUser);
+    boolean existsPlayer(String email);
+    boolean existsPlayer(long userId);
+    PlayerObject updatePlayer(long userId, PlayerObject updatedUser);
+    PlayerObject deletePlayer(long userId);
 
     TeamObject addTeam(TeamObject teamObject);
     TeamObject readTeam(int teamId);
@@ -65,10 +65,10 @@ public interface OasisRepository {
     boolean existsTeam(int teamId);
     PaginatedResult<TeamMetadata> searchTeam(String teamName, String offset, int maxRecords);
 
-    void removeUserFromTeam(long userId, int gameId, int teamId);
-    void addUserToTeam(long userId, int gameId, int teamId);
-    List<TeamObject> getUserTeams(long userId);
-    List<UserObject> getTeamUsers(int teamId);
+    void removePlayerFromTeam(long userId, int gameId, int teamId);
+    void addPlayerToTeam(long userId, int gameId, int teamId);
+    List<TeamObject> getPlayerTeams(long userId);
+    List<PlayerObject> getTeamPlayers(int teamId);
 
     ElementDef addNewElement(int gameId, ElementDef elementDef);
     ElementDef updateElement(int gameId, String id, ElementDef elementDef);

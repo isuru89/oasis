@@ -35,9 +35,10 @@ public interface GameParseSupport {
      * Parses the given input (any arbitrary format) and converts to a game definition instance.
      *
      * @param input filepath, input stream or any compatible.
+     * @param parserContext parser context.
      * @return parsed game definition object.
      * @throws OasisParseException throws when any error occurred while parsing.
      */
-    GameDef parse(Object input) throws OasisParseException;
+    GameDef parse(Object input, ParserContext parserContext) throws OasisParseException;
 
 }

@@ -19,9 +19,14 @@
 
 package io.github.oasis.elements.badges.rules;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class TimeBoundedStreakNRule extends StreakNBadgeRule {
 
     private long timeUnit;
@@ -29,21 +34,5 @@ public class TimeBoundedStreakNRule extends StreakNBadgeRule {
 
     public TimeBoundedStreakNRule(String id) {
         super(id);
-    }
-
-    public boolean isConsecutive() {
-        return consecutive;
-    }
-
-    public void setConsecutive(boolean consecutive) {
-        this.consecutive = consecutive;
-    }
-
-    public long getTimeUnit() {
-        return timeUnit;
-    }
-
-    public void setTimeUnit(long timeUnit) {
-        this.timeUnit = timeUnit;
     }
 }

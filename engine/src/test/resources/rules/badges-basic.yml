@@ -1,12 +1,13 @@
 version: 1
 
-badges:
+elements:
   - id: BDG00001
     name: test.badge.rule
     description: Awards badge if value is >= 50 for streaks
+    plugin: core:badge
     kind: streak
     event: event.a
-    condition: e.value >= 50
+    eventFilter: e.value >= 50
     timeUnit: 10
     streaks:
       - streak: 3

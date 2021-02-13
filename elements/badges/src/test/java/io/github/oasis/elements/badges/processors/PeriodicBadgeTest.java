@@ -148,7 +148,7 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         List<Signal> signals = new ArrayList<>();
         RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
         PeriodicBadgeRule rule = ruleContext.getRule();
-        rule.setCondition((event, ruleRef, ctx) -> (long)event.getFieldValue("value") < 50);
+        rule.setEventFilter((event, ruleRef, ctx) -> (long)event.getFieldValue("value") < 50);
         Assertions.assertEquals(1, rule.getThresholds().size());
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
@@ -353,7 +353,7 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         List<Signal> signals = new ArrayList<>();
         RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
         PeriodicBadgeRule rule = ruleContext.getRule();
-        rule.setCondition((event, ruleRef, ctx) -> (long) event.getFieldValue("value") >= 50);
+        rule.setEventFilter((event, ruleRef, ctx) -> (long) event.getFieldValue("value") >= 50);
         Assertions.assertEquals(3, rule.getThresholds().size());
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);

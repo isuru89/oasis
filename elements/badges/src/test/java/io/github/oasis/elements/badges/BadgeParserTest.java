@@ -24,14 +24,7 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.external.messages.PersistedDef;
-import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
-import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
-import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
-import io.github.oasis.elements.badges.rules.PeriodicOccurrencesRule;
-import io.github.oasis.elements.badges.rules.PeriodicOccurrencesStreakNRule;
-import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
-import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
-import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
+import io.github.oasis.elements.badges.rules.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,10 +34,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Isuru Weerarathna
@@ -212,7 +202,7 @@ class BadgeParserTest {
         def.setKind(BadgeDef.TIME_BOUNDED_STREAK_KIND);
         def.setConsecutive(true);
         def.setTimeUnit("daily");
-        def.setCondition("e.data.value > 100");
+        def.setEventFilter("e.data.value > 100");
         def.setStreaks(List.of(
                 new BadgeDef.Streak(3, 1),
                 new BadgeDef.Streak(5, 2),
@@ -248,7 +238,7 @@ class BadgeParserTest {
         def.setConsecutive(true);
         def.setTimeUnit(3600);
         def.setThreshold(BigDecimal.valueOf(100.0));
-        def.setValueExtractorExpression("e.data.score");
+        def.setAggregatorExtractor("e.data.score");
         def.setStreaks(List.of(
                 new BadgeDef.Streak(3, 1),
                 new BadgeDef.Streak(5, 2),
@@ -283,7 +273,7 @@ class BadgeParserTest {
         def.setConsecutive(true);
         def.setTimeUnit(3600);
         def.setThreshold(BigDecimal.valueOf(100.0));
-        def.setCondition("e.value > 50");
+        def.setEventFilter("e.value > 50");
         def.setStreaks(List.of(
                 new BadgeDef.Streak(3, 1),
                 new BadgeDef.Streak(5, 2),
@@ -319,7 +309,7 @@ class BadgeParserTest {
         BadgeDef def = createBase();
         def.setKind(BadgeDef.PERIODIC_ACCUMULATIONS_KIND);
         def.setTimeUnit(1234);
-        def.setValueExtractorExpression("e.data.value");
+        def.setAggregatorExtractor("e.data.value");
         def.setThresholds(List.of(
                 new BadgeDef.Threshold(BigDecimal.valueOf(100.0), 1),
                 new BadgeDef.Threshold(BigDecimal.valueOf(300.0), 3),
@@ -350,7 +340,7 @@ class BadgeParserTest {
         BadgeDef def = createBase();
         def.setKind(BadgeDef.PERIODIC_OCCURRENCES_KIND);
         def.setTimeUnit(1234);
-        def.setCondition("e.data.value > 100");
+        def.setEventFilter("e.data.value > 100");
         def.setThresholds(List.of(
                 new BadgeDef.Threshold(BigDecimal.valueOf(100.0), 1),
                 new BadgeDef.Threshold(BigDecimal.valueOf(300.0), 3),
@@ -403,7 +393,7 @@ class BadgeParserTest {
         def.setKind(BadgeDef.STREAK_N_KIND);
         def.setName("badge-2");
         def.setEvent("event.a");
-        def.setCondition("e.data.value > 100");
+        def.setEventFilter("e.data.value > 100");
         def.setConsecutive(true);
         def.setStreaks(List.of(
                 new BadgeDef.Streak(3, 1),

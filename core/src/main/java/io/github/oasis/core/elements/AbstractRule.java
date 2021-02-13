@@ -21,6 +21,8 @@ package io.github.oasis.core.elements;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.context.ExecutionContext;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -28,8 +30,13 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
+ * Base rule entity for all element rules.
+ * Every new rule must inherit this.
+ *
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public abstract class AbstractRule implements Serializable {
 
     private final String id;
@@ -38,7 +45,7 @@ public abstract class AbstractRule implements Serializable {
     private Set<String> flags = new HashSet<>();
     private EventTypeMatcher eventTypeMatcher;
     private TimeRangeMatcher timeRangeMatcher;
-    private EventExecutionFilter condition;
+    private EventExecutionFilter eventFilter;
     private boolean active = true;
 
     public AbstractRule(String id) {
@@ -53,70 +60,14 @@ public abstract class AbstractRule implements Serializable {
         return !flags.contains(flag);
     }
 
-    public void setFlags(Set<String> flags) {
-        this.flags = flags;
-    }
-
-    public EventExecutionFilter getCondition() {
-        return condition;
-    }
-
-    public void setCondition(EventExecutionFilter condition) {
-        this.condition = condition;
-    }
-
-    public void setEventTypeMatcher(EventTypeMatcher eventTypeMatcher) {
-        this.eventTypeMatcher = eventTypeMatcher;
-    }
-
-    public EventTypeMatcher getEventTypeMatcher() {
-        return eventTypeMatcher;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public void setTimeRangeMatcher(TimeRangeMatcher timeRangeMatcher) {
-        this.timeRangeMatcher = timeRangeMatcher;
-    }
-
-    public TimeRangeMatcher getTimeRangeMatcher() {
-        return timeRangeMatcher;
-    }
-
     public boolean isEventFalls(Event event, ExecutionContext executionContext) {
         return Objects.isNull(timeRangeMatcher) ||
                 timeRangeMatcher.isBetween(event.getTimestamp(), event.getTimeZone());
     }
 
-    public boolean isConditionMatches(Event event, ExecutionContext executionContext) {
-        return Objects.isNull(condition) ||
-                condition.matches(event, this, executionContext);
+    public boolean isEventFilterSatisfy(Event event, ExecutionContext executionContext) {
+        return Objects.isNull(eventFilter) ||
+                eventFilter.matches(event, this, executionContext);
     }
 
     @Override

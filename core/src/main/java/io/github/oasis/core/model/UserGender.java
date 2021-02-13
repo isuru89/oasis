@@ -22,10 +22,20 @@ package io.github.oasis.core.model;
 /**
  * @author Isuru Weerarathna
  */
-public enum UserGender {
+public enum UserGender implements EnumIdSupport {
 
-    MALE,
-    FEMALE,
-    UNKNOWN
+    MALE(1),
+    FEMALE(2),
+    UNKNOWN(0);
 
+    private final int genderId;
+
+    UserGender(int genderId) {
+        this.genderId = genderId;
+    }
+
+    @Override
+    public int getId() {
+        return genderId;
+    }
 }

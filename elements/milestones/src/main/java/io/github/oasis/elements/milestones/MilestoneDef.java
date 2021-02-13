@@ -21,6 +21,8 @@ package io.github.oasis.elements.milestones;
 
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.utils.Utils;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -31,12 +33,30 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
+ * Definition for all milestone rules.
+ *
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class MilestoneDef extends AbstractDef {
 
+    /**
+     * Indicates which point ids should be used to accumulate.
+     * Can indicate single or multiple point ids.
+     * When not specified, events will be filtered based on event ids.
+     */
     private Object pointIds;
+
+    /**
+     * Optional expression to extract accumulation value from events.
+     * When pointIds are specified, this field will be ignored.
+     */
     private Object valueExtractor;
+
+    /**
+     * Mandatory Level list for this milestone.
+     */
     private List<MilestoneLevel> levels;
 
     void initialize() {
@@ -62,52 +82,14 @@ public class MilestoneDef extends AbstractDef {
         return base;
     }
 
-    public Object getValueExtractor() {
-        return valueExtractor;
-    }
-
-    public void setValueExtractor(Object valueExtractor) {
-        this.valueExtractor = valueExtractor;
-    }
-
-    public List<MilestoneLevel> getLevels() {
-        return levels;
-    }
-
-    public void setLevels(List<MilestoneLevel> levels) {
-        this.levels = levels;
-    }
-
-    public Object getPointIds() {
-        return pointIds;
-    }
-
-    public void setPointIds(Object pointIds) {
-        this.pointIds = pointIds;
-    }
-
+    @Getter
+    @Setter
     public static class MilestoneLevel implements Serializable {
         private int level;
         private BigDecimal milestone;
 
         List<String> getSensitiveAttributes() {
             return List.of(String.valueOf(level), milestone.toString());
-        }
-
-        public int getLevel() {
-            return level;
-        }
-
-        public void setLevel(int level) {
-            this.level = level;
-        }
-
-        public BigDecimal getMilestone() {
-            return milestone;
-        }
-
-        public void setMilestone(BigDecimal milestone) {
-            this.milestone = milestone;
         }
     }
 }

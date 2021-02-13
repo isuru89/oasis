@@ -17,22 +17,30 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.to;
+package io.github.oasis.core.services.api.services;
 
-import lombok.Getter;
-import lombok.Setter;
+import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.services.api.beans.BackendRepository;
+import org.springframework.stereotype.Service;
 
-import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class UserGameAssociationRequest implements Serializable {
+@Service
+public class GameAttributeService extends AbstractOasisService {
 
-    private Long userId;
-    private Integer gameId;
-    private Integer teamId;
+    public GameAttributeService(BackendRepository backendRepository) {
+        super(backendRepository);
+    }
+
+    public AttributeInfo addAttribute(int gameId, AttributeInfo attributeInfo) {
+        return backendRepository.addAttribute(gameId, attributeInfo);
+    }
+
+    public List<AttributeInfo> listAttributes(int gameId) {
+        return backendRepository.listAllAttributes(gameId);
+    }
 
 }

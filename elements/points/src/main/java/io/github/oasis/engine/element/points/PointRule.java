@@ -23,12 +23,16 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventValueResolver;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class PointRule extends AbstractRule {
 
     private String pointId;
@@ -49,53 +53,5 @@ public class PointRule extends AbstractRule {
 
     public boolean isAwardBasedOnEvent() {
         return amountExpression != null;
-    }
-
-    public EventExecutionFilter getCriteria() {
-        return criteria;
-    }
-
-    public void setCriteria(EventExecutionFilter criteria) {
-        this.criteria = criteria;
-    }
-
-    public BigDecimal getAmountToAward() {
-        return amountToAward;
-    }
-
-    public void setAmountToAward(BigDecimal amountToAward) {
-        this.amountToAward = amountToAward;
-    }
-
-    public EventValueResolver<ExecutionContext> getAmountExpression() {
-        return amountExpression;
-    }
-
-    public void setAmountExpression(EventValueResolver<ExecutionContext> amountExpression) {
-        this.amountExpression = amountExpression;
-    }
-
-    public String getPointId() {
-        return pointId;
-    }
-
-    public void setPointId(String pointId) {
-        this.pointId = pointId;
-    }
-
-    public BigDecimal getCapLimit() {
-        return capLimit;
-    }
-
-    public void setCapLimit(BigDecimal capLimit) {
-        this.capLimit = capLimit;
-    }
-
-    public String getCapDuration() {
-        return capDuration;
-    }
-
-    public void setCapDuration(String capDuration) {
-        this.capDuration = capDuration;
     }
 }

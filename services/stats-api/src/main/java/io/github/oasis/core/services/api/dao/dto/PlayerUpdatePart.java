@@ -17,9 +17,9 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.to;
+package io.github.oasis.core.services.api.dao.dto;
 
-import io.github.oasis.core.model.UserGender;
+import io.github.oasis.core.model.PlayerObject;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,17 +30,18 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
-public class UserCreateRequest implements Serializable {
+public class PlayerUpdatePart implements Serializable {
 
-    private Long userId;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private String userName;
+    private String displayName;
+    private String avatarUrl;
+    private int gender;
 
-    private UserGender gender;
-    private String timeZone;
-
-    private String initialPassword;
+    public static PlayerUpdatePart from(PlayerObject playerObject) {
+        PlayerUpdatePart part = new PlayerUpdatePart();
+        part.setGender(playerObject.getGender().getId());
+        part.setDisplayName(playerObject.getDisplayName());
+        part.setAvatarUrl(playerObject.getAvatarRef());
+        return part;
+    }
 
 }

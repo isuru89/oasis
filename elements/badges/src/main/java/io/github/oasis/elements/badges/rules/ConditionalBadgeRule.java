@@ -21,6 +21,8 @@ package io.github.oasis.elements.badges.rules;
 
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -31,6 +33,8 @@ import java.util.Objects;
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class ConditionalBadgeRule extends BadgeRule {
 
     private int maxAwardTimes = Integer.MAX_VALUE;
@@ -57,23 +61,12 @@ public class ConditionalBadgeRule extends BadgeRule {
         }
     }
 
-    public int getMaxAwardTimes() {
-        return maxAwardTimes;
-    }
-
-    public void setMaxAwardTimes(int maxAwardTimes) {
-        this.maxAwardTimes = maxAwardTimes;
-    }
-
-    public List<Condition> getConditions() {
-        return conditions;
-    }
-
     public void setConditions(List<Condition> conditions) {
         this.conditions = new LinkedList<>(conditions);
         Collections.sort(this.conditions);
     }
 
+    @Getter
     public static class Condition implements Comparable<Condition> {
         private final int priority;
         private final EventExecutionFilter condition;
@@ -89,22 +82,6 @@ public class ConditionalBadgeRule extends BadgeRule {
             this.condition = condition;
             this.attribute = attribute;
             this.pointAwards = pointAwards;
-        }
-
-        public int getPriority() {
-            return priority;
-        }
-
-        public EventExecutionFilter getCondition() {
-            return condition;
-        }
-
-        public int getAttribute() {
-            return attribute;
-        }
-
-        public BigDecimal getPointAwards() {
-            return pointAwards;
         }
 
         @Override

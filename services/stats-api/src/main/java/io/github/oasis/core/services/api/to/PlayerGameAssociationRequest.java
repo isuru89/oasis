@@ -17,16 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.handlers;
+package io.github.oasis.core.services.api.to;
 
-import io.github.oasis.core.services.api.to.UserCreateRequest;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface UserHandlerSupport {
+@Getter
+@Setter
+public class PlayerGameAssociationRequest implements Serializable {
 
-    void createUser(UserCreateRequest request);
+    private Long userId;
+    private Integer gameId;
+    private Integer teamId;
 
-    void deleteUser(String email);
 }

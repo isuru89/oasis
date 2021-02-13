@@ -30,12 +30,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static io.github.oasis.elements.milestones.MilestoneRule.SKIP_NEGATIVE_VALUES;
 import static io.github.oasis.elements.milestones.MilestoneRule.TRACK_PENALTIES;
@@ -240,7 +235,7 @@ public class MilestoneTest extends AbstractRuleTest {
         RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue,
                 aLevel(1, 100),
                 aLevel(2, 200));
-        ruleContext.getRule().setCondition((event, rule, ctx) -> (long) event.getFieldValue("value") >= 75);
+        ruleContext.getRule().setEventFilter((event, rule, ctx) -> (long) event.getFieldValue("value") >= 75);
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3, e4, e5, e6);
 

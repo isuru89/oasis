@@ -23,6 +23,7 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.EventBiValueResolver;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventValueResolver;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,12 +67,13 @@ public class RatingRule extends AbstractRule {
         this.commonPointAwards = commonPointAwards;
     }
 
+    @Getter
     public static class Rating implements Comparable<Rating> {
-        private int priority;
-        private int rating;
-        private EventExecutionFilter criteria;
-        private String pointId;
-        private EventValueResolver<Integer> pointAwards;
+        private final int priority;
+        private final int rating;
+        private final EventExecutionFilter criteria;
+        private final String pointId;
+        private final EventValueResolver<Integer> pointAwards;
 
         public Rating(int priority, int rating, EventExecutionFilter criteria, EventValueResolver<Integer> pointAwards,
                       String pointId) {
@@ -80,26 +82,6 @@ public class RatingRule extends AbstractRule {
             this.criteria = criteria;
             this.pointAwards = pointAwards;
             this.pointId = pointId;
-        }
-
-        public String getPointId() {
-            return pointId;
-        }
-
-        public EventValueResolver<Integer> getPointAwards() {
-            return pointAwards;
-        }
-
-        public int getPriority() {
-            return priority;
-        }
-
-        public int getRating() {
-            return rating;
-        }
-
-        public EventExecutionFilter getCriteria() {
-            return criteria;
         }
 
         @Override

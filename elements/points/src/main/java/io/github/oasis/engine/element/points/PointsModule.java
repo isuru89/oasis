@@ -21,14 +21,7 @@ package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.elements.AbstractProcessor;
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.AbstractSink;
-import io.github.oasis.core.elements.ElementModule;
-import io.github.oasis.core.elements.ElementParser;
-import io.github.oasis.core.elements.RuleContext;
-import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.elements.*;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.engine.element.points.stats.PointStats;
@@ -40,7 +33,7 @@ import java.util.List;
  */
 public class PointsModule extends ElementModule {
 
-    private static final String POINTS = "points";
+    private static final String POINTS = "core:point";
 
     private final List<String> keysSupported = List.of(POINTS);
     private final List<Class<? extends AbstractSink>> sinks = List.of(PointsSink.class);

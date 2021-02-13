@@ -1,9 +1,10 @@
 version: 1
 
-ratings:
+elements:
   - id: RAT000001
     name: Point-Rating
     description: Awards points based on the value having. You also can describe common point award in rule level.
+    plugin: core:rating
     event: event.a
     defaultRating: 1
     award: (currentRating - previousRating) * 10
