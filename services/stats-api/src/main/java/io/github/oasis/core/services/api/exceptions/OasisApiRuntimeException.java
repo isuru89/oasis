@@ -17,31 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.dao.dto;
+package io.github.oasis.core.services.api.exceptions;
 
-import io.github.oasis.core.model.PlayerObject;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class PlayerUpdatePart implements Serializable {
+public class OasisApiRuntimeException extends RuntimeException {
 
-    private String displayName;
-    private String avatarRef;
-    private int gender;
+    private final String errorCode;
 
-    public static PlayerUpdatePart from(PlayerObject playerObject) {
-        PlayerUpdatePart part = new PlayerUpdatePart();
-        part.setGender(playerObject.getGender().getId());
-        part.setDisplayName(playerObject.getDisplayName());
-        part.setAvatarRef(playerObject.getAvatarRef());
-        return part;
+    public OasisApiRuntimeException(String errorCode, Throwable cause) {
+        super(cause);
+        this.errorCode = errorCode;
     }
 
+    public String getErrorCode() {
+        return errorCode;
+    }
 }

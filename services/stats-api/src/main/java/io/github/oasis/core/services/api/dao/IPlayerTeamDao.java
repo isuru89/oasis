@@ -42,10 +42,10 @@ import java.util.List;
 @RegisterBeanMapper(TeamObject.class)
 public interface IPlayerTeamDao {
 
-    @SqlQuery("SELECT * FROM OA_PLAYER WHERE id = :id")
+    @SqlQuery
     PlayerObject readPlayer(@Bind("id") long playerId);
 
-    @SqlQuery("SELECT * FROM OA_PLAYER WHERE email = :email")
+    @SqlQuery
     PlayerObject readPlayerByEmail(@Bind("email") String playerEmail);
 
     @SqlUpdate
@@ -56,8 +56,12 @@ public interface IPlayerTeamDao {
         return insertPlayer(newPlayer, System.currentTimeMillis());
     }
 
-    @SqlUpdate("UPDATE OA_PLAYER SET display_name = :displayName, avatar_ref = :avatarUrl, gender = :gender WHERE id = :id")
-    void updatePlayer(@Bind("id") long playerId, @BindBean PlayerUpdatePart updateData);
+    @SqlUpdate
+    void updatePlayer(@Bind("id") long playerId, @BindBean PlayerUpdatePart updateData, @Bind("ts") long ts);
+
+    default void updatePlayer(long playerId, PlayerUpdatePart updateData) {
+        updatePlayer(playerId, updateData, System.currentTimeMillis());
+    }
 
     @Transaction
     default PlayerObject insertAndGet(PlayerObject newPlayer) {
@@ -66,33 +70,48 @@ public interface IPlayerTeamDao {
     }
 
     @SqlUpdate
-    void deletePlayer(long playerId);
+    void deletePlayer(@Bind("id") long playerId);
 
     @SqlUpdate
     @GetGeneratedKeys(DaoConstants.ID)
-    int insertTeam(TeamObject newTeam);
+    int insertTeam(@BindBean TeamObject newTeam, @Bind("ts") long timestamp);
+
+    default int insertTeam(TeamObject newTeam) {
+        return insertTeam(newTeam, System.currentTimeMillis());
+    }
 
     @SqlQuery
-    TeamObject readTeam(int teamId);
+    TeamObject readTeam(@Bind("id") int teamId);
 
     @SqlQuery
-    TeamObject readTeamByName(String name);
+    TeamObject readTeamByName(@Bind("name") String name);
 
     @SqlUpdate
-    void updateTeam(int teamId, TeamObject teamObject);
+    void updateTeam(@Bind("id") int teamId, @BindBean TeamObject teamObject, @Bind("ts") long ts);
+
+    default void updateTeam(int teamId, TeamObject teamObject) {
+        updateTeam(teamId, teamObject, System.currentTimeMillis());
+    }
 
     @SqlQuery
-    List<TeamObject> readTeamsByName(String teamName, int offset, int size);
+    List<TeamObject> readTeamsByName(@Bind("name") String teamName, @Bind("offset") int offset, @Bind("limit") int size);
 
     @SqlUpdate
-    void insertPlayerToTeam(int gameId, long playerId, int teamId);
+    void insertPlayerToTeam(@Bind("gameId") int gameId,
+                            @Bind("playerId") long playerId,
+                            @Bind("teamId") int teamId,
+                            @Bind("ts") long timestamp);
+
+    default void insertPlayerToTeam(int gameId, long playerId, int teamId) {
+        insertPlayerToTeam(gameId, playerId, teamId, System.currentTimeMillis());
+    }
 
     @SqlUpdate
-    void removePlayerFromTeam(int gameId, long playerId, int teamId);
+    void removePlayerFromTeam(@Bind("gameId") int gameId, @Bind("playerId") long playerId, @Bind("teamId") int teamId);
 
     @SqlQuery
-    List<TeamObject> readPlayerTeams(long playerId);
+    List<TeamObject> readPlayerTeams(@Bind("playerId") long playerId);
 
     @SqlQuery
-    List<PlayerObject> readTeamPlayers(int teamId);
+    List<PlayerObject> readTeamPlayers(@Bind("teamId") int teamId);
 }

@@ -30,4 +30,6 @@ public final class ErrorCodes {
     public static final String GAME_EXCEEDED_DESC_LEND = "G0004";
 
     public static final String EVENT_SOURCE_NO_NAME = "ES0001";
+
+    public static final String PLAYER_EXISTS = "PL0001";
 }

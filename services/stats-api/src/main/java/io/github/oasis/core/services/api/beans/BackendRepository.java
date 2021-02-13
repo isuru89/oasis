@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Composition of admin and engine repositories where it takes the responsibility of
@@ -49,6 +50,11 @@ public class BackendRepository implements OasisRepository {
     public BackendRepository(Map<String, OasisRepository> oasisServiceMap, OasisConfigs oasisConfigs) {
         this.adminRepository = oasisServiceMap.get(oasisConfigs.get("oasis.db.admin", null));
         this.engineRepository = oasisServiceMap.get(oasisConfigs.get("oasis.db.engine", "redis"));
+    }
+
+    public BackendRepository(OasisRepository engineRepository, OasisRepository adminRepository) {
+        this.adminRepository = adminRepository;
+        this.engineRepository = engineRepository;
     }
 
     @Override
@@ -125,89 +131,112 @@ public class BackendRepository implements OasisRepository {
         return null;
     }
 
+    //
+    // PLAYER AND TEAM related service methods
+    //
+
     @Override
     public PlayerObject readPlayer(long userId) {
-        return null;
+        return adminRepository.readPlayer(userId);
     }
 
     @Override
     public PlayerObject readPlayer(String email) {
-        return null;
+        return adminRepository.readPlayer(email);
     }
 
     @Override
     public PlayerObject addPlayer(PlayerObject newUser) {
-        return null;
+        PlayerObject newPlayer = adminRepository.addPlayer(newUser);
+        engineRepository.addPlayer(newPlayer);
+        return newPlayer;
     }
 
     @Override
     public boolean existsPlayer(String email) {
-        return false;
+        return Objects.nonNull(adminRepository.readPlayer(email));
     }
 
     @Override
     public boolean existsPlayer(long userId) {
-        return false;
+        PlayerObject dbPlayer = adminRepository.readPlayer(userId);
+        System.out.println(dbPlayer);
+        return Objects.nonNull(dbPlayer) && dbPlayer.isActive();
     }
 
     @Override
     public PlayerObject updatePlayer(long userId, PlayerObject updatedUser) {
-        return null;
+        adminRepository.updatePlayer(userId, updatedUser);
+        engineRepository.updatePlayer(userId, updatedUser);
+        return adminRepository.readPlayer(userId);
     }
 
     @Override
     public PlayerObject deletePlayer(long userId) {
-        return null;
+        adminRepository.deletePlayer(userId);
+        engineRepository.deletePlayer(userId);
+        return adminRepository.readPlayer(userId);
     }
 
     @Override
     public TeamObject addTeam(TeamObject teamObject) {
-        return null;
+        TeamObject newTeam = adminRepository.addTeam(teamObject);
+        engineRepository.addTeam(newTeam);
+        return newTeam;
     }
 
     @Override
     public TeamObject readTeam(int teamId) {
-        return null;
+        return adminRepository.readTeam(teamId);
+    }
+
+    @Override
+    public TeamObject readTeam(String teamName) {
+        return adminRepository.readTeam(teamName);
     }
 
     @Override
     public TeamObject updateTeam(int teamId, TeamObject updatedTeam) {
-        return null;
+        TeamObject savedTeam = adminRepository.updateTeam(teamId, updatedTeam);
+        engineRepository.updateTeam(savedTeam.getId(), savedTeam);
+        return savedTeam;
     }
 
     @Override
     public boolean existsTeam(String teamName) {
-        return false;
+        return Objects.nonNull(adminRepository.readTeam(teamName));
     }
 
     @Override
     public boolean existsTeam(int teamId) {
-        return false;
+        return Objects.nonNull(adminRepository.readTeam(teamId));
     }
 
     @Override
     public PaginatedResult<TeamMetadata> searchTeam(String teamName, String offset, int maxRecords) {
-        return null;
+        return adminRepository.searchTeam(teamName, offset, maxRecords);
     }
 
     @Override
-    public void removePlayerFromTeam(long userId, int gameId, int teamId) {
-
+    public void removePlayerFromTeam(long playerId, int gameId, int teamId) {
+        adminRepository.removePlayerFromTeam(playerId, gameId, teamId);
+        engineRepository.removePlayerFromTeam(playerId, gameId, teamId);
     }
 
     @Override
-    public void addPlayerToTeam(long userId, int gameId, int teamId) {
-
+    public void addPlayerToTeam(long playerId, int gameId, int teamId) {
+        adminRepository.addPlayerToTeam(playerId, gameId, teamId);
+        engineRepository.addPlayerToTeam(playerId, gameId, teamId);
     }
 
     @Override
-    public List<TeamObject> getPlayerTeams(long userId) {
-        return null;
+    public List<TeamObject> getPlayerTeams(long playerId) {
+        return adminRepository.getPlayerTeams(playerId);
     }
 
     @Override
     public List<PlayerObject> getTeamPlayers(int teamId) {
-        return null;
+        return adminRepository.getTeamPlayers(teamId);
     }
 
     @Override

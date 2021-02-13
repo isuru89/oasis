@@ -24,7 +24,6 @@ package io.github.oasis.core;
  */
 public final class ID {
 
-    public static final String OASIS_ID_STORAGE = "oasis:ids";
     public static final String ALL_GAMES = "oasis:games";
     public static final String ALL_USERS = "oasis:users";
     public static final String ALL_TEAMS = "oasis:teams";

@@ -27,7 +27,7 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class PlayerObject {
 
@@ -38,6 +38,10 @@ public class PlayerObject {
     private UserGender gender;
     private String timeZone;
     private String avatarRef;
+
+    private long createdAt;
+    private Long updatedAt;
+    private boolean active = true;
 
     public PlayerObject() {}
 

@@ -43,11 +43,11 @@ public class GameObjectRequest implements Serializable {
     private List<AttributeInfo> attributes;
 
     public Game createGame() {
-        Game game = new Game();
-        game.setId(id);
-        game.setName(name);
-        game.setDescription(description);
-        game.setMotto(motto);
-        return game;
+        return Game.builder()
+                .id(id)
+                .name(name)
+                .motto(motto)
+                .description(description)
+                .build();
     }
 }

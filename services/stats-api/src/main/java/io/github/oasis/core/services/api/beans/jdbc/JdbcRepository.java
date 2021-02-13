@@ -34,10 +34,14 @@ import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
 import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
 import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
+import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import org.jdbi.v3.core.JdbiException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * JDBC database implementation for admin database.
@@ -150,8 +154,12 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public PlayerObject addPlayer(PlayerObject newPlayer) {
-        long newId = playerTeamDao.insertPlayer(newPlayer);
-        return playerTeamDao.readPlayer(newId);
+        try {
+            long newId = playerTeamDao.insertPlayer(newPlayer);
+            return playerTeamDao.readPlayer(newId);
+        } catch (JdbiException e) {
+            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_EXISTS, e);
+        }
     }
 
     @Override
@@ -189,6 +197,11 @@ public class JdbcRepository implements OasisRepository {
     }
 
     @Override
+    public TeamObject readTeam(String teamName) {
+        return playerTeamDao.readTeamByName(teamName);
+    }
+
+    @Override
     public TeamObject updateTeam(int teamId, TeamObject updatedTeam) {
         playerTeamDao.updateTeam(teamId, updatedTeam);
         return playerTeamDao.readTeam(teamId);
@@ -205,8 +218,15 @@ public class JdbcRepository implements OasisRepository {
     }
 
     @Override
-    public PaginatedResult<TeamMetadata> searchTeam(String teamName, String offset, int maxRecords) {
-        return null;
+    public PaginatedResult<TeamMetadata> searchTeam(String teamName, String offsetAsStr, int maxRecords) {
+        int offset = Integer.parseInt(offsetAsStr);
+        List<TeamMetadata> metadata = playerTeamDao.readTeamsByName(teamName, offset, maxRecords)
+                .stream()
+                .map(TeamMetadata::from)
+                .collect(Collectors.toList());
+
+        int next = metadata.size() == maxRecords ? offset + maxRecords : -1;
+        return new PaginatedResult<>(String.valueOf(next), metadata);
     }
 
     @Override

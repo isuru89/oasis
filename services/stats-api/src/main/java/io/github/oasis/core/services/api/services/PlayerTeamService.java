@@ -39,9 +39,10 @@ public class PlayerTeamService extends AbstractOasisService {
 
     public PlayerObject addPlayer(PlayerCreateRequest request) {
         PlayerObject playerObject = new PlayerObject();
-        playerObject.setDisplayName(request.getFirstName() + " " + request.getLastName());
+        playerObject.setDisplayName(request.getDisplayName());
         playerObject.setEmail(request.getEmail());
         playerObject.setGender(request.getGender());
+        playerObject.setAvatarRef(request.getAvatarRef());
         playerObject.setTimeZone(request.getTimeZone());
 
         PlayerObject oasisUser = backendRepository.addPlayer(playerObject);

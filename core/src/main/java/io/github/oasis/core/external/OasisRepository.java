@@ -60,6 +60,7 @@ public interface OasisRepository {
 
     TeamObject addTeam(TeamObject teamObject);
     TeamObject readTeam(int teamId);
+    TeamObject readTeam(String teamName);
     TeamObject updateTeam(int teamId, TeamObject updatedTeam);
     boolean existsTeam(String teamName);
     boolean existsTeam(int teamId);

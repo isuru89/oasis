@@ -123,7 +123,7 @@ public class OasisEngineTest {
             metadataSupport.addPlayer(new PlayerObject(4, "Lilia Stewart", "lilia@oasis.io"));
             metadataSupport.addPlayer(new PlayerObject(5, "Archer Roberts", "archer@oasis.io"));
 
-            metadataSupport.addTeam(new TeamObject(1, 1, "Warriors"));
+            metadataSupport.addTeam(TeamObject.builder().id(1).gameId(1).name("Warriors").build());
 
             setupDbBefore(db);
         }

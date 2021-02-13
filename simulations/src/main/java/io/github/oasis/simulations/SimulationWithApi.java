@@ -123,7 +123,7 @@ public class SimulationWithApi extends Simulation {
                 }
                 TeamObject dbTeam = gson.fromJson(result.body(), TeamObject.class);
                 System.out.println("Added team " + dbTeam);
-                teamMap.put(dbTeam.getName(), dbTeam.getTeamId());
+                teamMap.put(dbTeam.getName(), dbTeam.getId());
             }
             return teamMap;
         } catch (InterruptedException e) {
