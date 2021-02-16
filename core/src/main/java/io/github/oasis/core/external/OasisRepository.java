@@ -75,6 +75,7 @@ public interface OasisRepository {
     ElementDef updateElement(int gameId, String id, ElementDef elementDef);
     ElementDef deleteElement(int gameId, String id);
     ElementDef readElement(int gameId, String id);
+    ElementDef readElementWithoutData(int gameId, String id);
 
     AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute);
     List<AttributeInfo> listAllAttributes(int gameId);

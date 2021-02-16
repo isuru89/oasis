@@ -44,17 +44,23 @@ import java.util.Objects;
 @Component
 public class BackendRepository implements OasisRepository {
 
-    private final OasisRepository engineRepository;
-    private final OasisRepository adminRepository;
+    private OasisRepository engineRepository;
+    private OasisRepository adminRepository;
+
+    public BackendRepository(){}
 
     public BackendRepository(Map<String, OasisRepository> oasisServiceMap, OasisConfigs oasisConfigs) {
         this.adminRepository = oasisServiceMap.get(oasisConfigs.get("oasis.db.admin", null));
         this.engineRepository = oasisServiceMap.get(oasisConfigs.get("oasis.db.engine", "redis"));
     }
 
-    public BackendRepository(OasisRepository engineRepository, OasisRepository adminRepository) {
+    private BackendRepository(OasisRepository engineRepository, OasisRepository adminRepository) {
         this.adminRepository = adminRepository;
         this.engineRepository = engineRepository;
+    }
+
+    public static BackendRepository create(OasisRepository engineRepository, OasisRepository adminRepository) {
+        return new BackendRepository(engineRepository, adminRepository);
     }
 
     @Override
@@ -241,7 +247,9 @@ public class BackendRepository implements OasisRepository {
 
     @Override
     public ElementDef addNewElement(int gameId, ElementDef elementDef) {
-        return null;
+        ElementDef def = adminRepository.addNewElement(gameId, elementDef);
+        engineRepository.addNewElement(gameId, def);
+        return def;
     }
 
     @Override
@@ -256,7 +264,12 @@ public class BackendRepository implements OasisRepository {
 
     @Override
     public ElementDef readElement(int gameId, String id) {
-        return null;
+        return adminRepository.readElement(gameId, id);
+    }
+
+    @Override
+    public ElementDef readElementWithoutData(int gameId, String id) {
+        return adminRepository.readElementWithoutData(gameId, id);
     }
 
     @Override

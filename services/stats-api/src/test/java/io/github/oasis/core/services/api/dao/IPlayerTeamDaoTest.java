@@ -334,7 +334,7 @@ class IPlayerTeamDaoTest {
         int warriorId = dao.insertTeam(teamWarriors);
 
         dao.insertPlayerToTeam(1, jillId, strikerId);
-        dao.insertPlayerToTeam(1, jillId, warriorId);
+        dao.insertPlayerToTeam(2, jillId, warriorId);
         dao.insertPlayerToTeam(1, maryId, strikerId);
         dao.insertPlayerToTeam(1, zoeId, warriorId);
 

@@ -24,6 +24,7 @@ import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.services.SerializationSupport;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.beans.GsonSerializer;
 import io.github.oasis.core.services.api.beans.RedisRepository;
@@ -36,6 +37,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.gson2.Gson2Config;
+import org.jdbi.v3.gson2.Gson2Plugin;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,18 +56,23 @@ public abstract class AbstractServiceTest {
 
     protected Db dbPool;
 
+    protected SerializationSupport serializationSupport;
     protected OasisRepository engineRepo;
     protected OasisRepository adminRepo;
     protected BackendRepository combinedRepo;
 
     Jdbi createJdbcDao() throws IOException {
+        Gson gson = new Gson();
         DataSource ds = DataSourceBuilder.create()
                 .url("jdbc:sqlite:sample.db")
                 .build();
         Jdbi jdbi = Jdbi.create(ds)
                 .installPlugin(new SqlObjectPlugin())
+                .installPlugin(new Gson2Plugin())
                 .registerColumnMapper(new OasisEnumColumnFactory())
                 .registerArgument(new OasisEnumArgTypeFactory());
+
+        jdbi.getConfig(Gson2Config.class).setGson(gson);
 
         String schemaScript = IOUtils.resourceToString(
                 "io/github/oasis/db/schema/schema-sqlite.sql",
@@ -81,7 +89,8 @@ public abstract class AbstractServiceTest {
         redisDb.init();
         dbPool = redisDb;
         Gson gson = new SerializingConfigs().createSerializer();
-        return new RedisRepository(redisDb, new GsonSerializer(gson));
+        serializationSupport = new GsonSerializer(gson);
+        return new RedisRepository(redisDb, serializationSupport);
     }
 
 
@@ -101,7 +110,7 @@ public abstract class AbstractServiceTest {
 
         JdbcRepository jdbcRepository = createJdbcRepository(jdbi);
         adminRepo = jdbcRepository;
-        BackendRepository backendRepository = new BackendRepository(redisConnection, jdbcRepository);
+        BackendRepository backendRepository = BackendRepository.create(redisConnection, jdbcRepository);
         combinedRepo = backendRepository;
 
         createServices(backendRepository);

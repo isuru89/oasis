@@ -17,45 +17,40 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.beans;
+package io.github.oasis.core.services.api.dao.configs;
 
 import com.google.gson.Gson;
-import io.github.oasis.core.services.SerializationSupport;
-import org.springframework.stereotype.Component;
+import org.jdbi.v3.core.argument.AbstractArgumentFactory;
+import org.jdbi.v3.core.argument.Argument;
+import org.jdbi.v3.core.argument.ArgumentFactory;
+import org.jdbi.v3.core.config.ConfigRegistry;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
+import java.sql.Clob;
+import java.sql.Types;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
-@Component("gson")
-public class GsonSerializer implements SerializationSupport {
+public class OasisMapArgTypeFactory extends AbstractArgumentFactory<Map> {
 
     private final Gson gson;
 
-    public GsonSerializer(Gson gson) {
+    /**
+     * Constructs an {@link ArgumentFactory} for type {@code T}.
+     *
+     */
+    public OasisMapArgTypeFactory(Gson gson) {
+        super(Types.CLOB);
         this.gson = gson;
     }
 
     @Override
-    public <T> T deserialize(String data, Class<T> clz) {
-        return gson.fromJson(data, clz);
-    }
-
-    @Override
-    public <T> T deserialize(byte[] data, Class<T> clz) {
-        return gson.fromJson(new InputStreamReader(new ByteArrayInputStream(data)), clz);
-    }
-
-    @Override
-    public <T> T deserialize(byte[] data, Type type) {
-        return gson.fromJson(new InputStreamReader(new ByteArrayInputStream(data)), type);
-    }
-
-    @Override
-    public String serialize(Object data) {
-        return gson.toJson(data);
+    protected Argument build(Map value, ConfigRegistry config) {
+        return ((position, statement, ctx) -> {
+            Clob clob = ctx.getConnection().createClob();
+            clob.setString(1, gson.toJson(value));
+            statement.setClob(position, clob);
+        });
     }
 }

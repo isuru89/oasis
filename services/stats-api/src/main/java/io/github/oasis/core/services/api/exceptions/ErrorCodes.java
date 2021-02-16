@@ -32,4 +32,11 @@ public final class ErrorCodes {
     public static final String EVENT_SOURCE_NO_NAME = "ES0001";
 
     public static final String PLAYER_EXISTS = "PL0001";
+    public static final String PLAYER_ALREADY_IN_TEAM = "PL0002";
+
+    public static final String TEAM_EXISTS = "TM0001";
+    public static final String TEAM_NOT_EXISTS = "TM0002";
+
+    public static final String ELEMENT_ALREADY_EXISTS = "EL0001";
+    public static final String ELEMENT_NOT_EXISTS = "EL0002";
 }

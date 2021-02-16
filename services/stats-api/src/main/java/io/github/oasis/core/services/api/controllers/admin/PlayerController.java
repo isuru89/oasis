@@ -19,6 +19,8 @@
 
 package io.github.oasis.core.services.api.controllers.admin;
 
+import io.github.oasis.core.TeamMetadata;
+import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.services.annotations.ForAdmin;
@@ -28,6 +30,7 @@ import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.PlayerTeamService;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
+import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
@@ -76,7 +79,7 @@ public class PlayerController extends AbstractController {
     )
     @ForPlayer
     @GetMapping("/players/{playerId}")
-    public PlayerObject readPlayerProfile(@PathVariable("playerId") Integer playerId) {
+    public PlayerObject readPlayerProfile(@PathVariable("playerId") Long playerId) {
         return playerTeamService.readPlayer(playerId);
     }
 
@@ -95,7 +98,7 @@ public class PlayerController extends AbstractController {
     )
     @ForCurator
     @PutMapping("/players/{playerId}")
-    public PlayerObject updatePlayer(@PathVariable("playerId") Integer playerId,
+    public PlayerObject updatePlayer(@PathVariable("playerId") Long playerId,
                                      @RequestBody PlayerObject playerObject) {
         return playerTeamService.updatePlayer(playerId, playerObject);
     }
@@ -106,7 +109,7 @@ public class PlayerController extends AbstractController {
     )
     @ForAdmin
     @DeleteMapping("/players/{playerId}")
-    public PlayerObject deactivatePlayer(@PathVariable("playerId") Integer playerId) {
+    public PlayerObject deactivatePlayer(@PathVariable("playerId") Long playerId) {
         return playerTeamService.deactivatePlayer(playerId);
     }
 
@@ -118,6 +121,35 @@ public class PlayerController extends AbstractController {
     @PostMapping("/teams")
     public TeamObject addTeam(@RequestBody TeamObject team) {
         return playerTeamService.addTeam(team);
+    }
+
+    @Operation(
+            summary = "Gets a single team by team id"
+    )
+    @ForPlayer
+    @GetMapping("/teams/{teamId}")
+    public TeamObject readTeamInfo(@PathVariable("teamId") Integer teamId) throws OasisApiException {
+        return playerTeamService.readTeam(teamId);
+    }
+
+    @Operation(
+            summary = "Gets a single team information by its name"
+    )
+    @ForPlayer
+    @GetMapping("/teams")
+    public TeamObject readTeamInfoByName(@RequestParam(name = "name") String name) throws OasisApiException {
+        return playerTeamService.readTeam(name);
+    }
+
+    @Operation(
+            summary = "Search teams by its prefix"
+    )
+    @ForPlayer
+    @GetMapping("/teams/search")
+    public PaginatedResult<TeamMetadata> searchTeams(@RequestParam(name = "name") String teamPrefix,
+                                                     @RequestParam(name = "offset") String offset,
+                                                     @RequestParam(name = "pageSize") Integer pageSize) throws OasisApiException {
+        return playerTeamService.searchTeam(teamPrefix, offset, pageSize);
     }
 
     @Operation(
@@ -137,9 +169,20 @@ public class PlayerController extends AbstractController {
     )
     @ForCurator
     @PostMapping("/players/{playerId}/teams")
-    public void addPlayerToTeam(@PathVariable("playerId") Integer playerId,
+    public void addPlayerToTeam(@PathVariable("playerId") Long playerId,
                                 @RequestBody PlayerGameAssociationRequest request) {
         playerTeamService.addPlayerToTeam(playerId, request.getGameId(), request.getTeamId());
+    }
+
+    @Operation(
+            summary = "Remove a player from the team",
+            tags = {"admin", "curator"}
+    )
+    @ForCurator
+    @DeleteMapping("/players/{playerId}/teams")
+    public void removePlayerFromTeam(@PathVariable("playerId") Long playerId,
+                                @RequestBody PlayerGameAssociationRequest request) {
+        playerTeamService.removePlayerFromTeam(playerId, request.getGameId(), request.getTeamId());
     }
 
     @Operation(
@@ -147,7 +190,7 @@ public class PlayerController extends AbstractController {
     )
     @ForPlayer
     @GetMapping("/players/{userId}/teams")
-    public List<TeamObject> browsePlayerTeams(@PathVariable("playerId") Integer playerId) {
+    public List<TeamObject> browsePlayerTeams(@PathVariable("playerId") Long playerId) {
         return playerTeamService.getTeamsOfPlayer(playerId);
     }
 
@@ -157,8 +200,8 @@ public class PlayerController extends AbstractController {
     )
     @ForCurator
     @PostMapping("/teams/{teamId}/players")
-    public void addPlayerToTeam(@PathVariable("teamId") Integer teamId,
-                                @RequestParam("playerIds") List<Integer> playerId) {
+    public void addPlayersToTeam(@PathVariable("teamId") Integer teamId,
+                                @RequestParam("playerIds") List<Long> playerId) {
         playerTeamService.addPlayersToTeam(teamId, playerId);
     }
 }

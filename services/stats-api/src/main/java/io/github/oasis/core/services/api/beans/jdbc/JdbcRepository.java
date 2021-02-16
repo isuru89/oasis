@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.services.api.beans.jdbc;
 
+import com.google.gson.reflect.TypeToken;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
@@ -28,6 +29,7 @@ import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.services.SerializationSupport;
 import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.dao.IEventSourceDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
@@ -36,10 +38,14 @@ import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
 import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.to.ElementDto;
 import org.jdbi.v3.core.JdbiException;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -55,12 +61,20 @@ public class JdbcRepository implements OasisRepository {
     private final IEventSourceDao eventSourceDao;
     private final IElementDao elementDao;
     private final IPlayerTeamDao playerTeamDao;
+    private final SerializationSupport serializationSupport;
 
-    public JdbcRepository(IGameDao gameDao, IEventSourceDao eventSourceDao, IElementDao elementDao, IPlayerTeamDao playerTeamDao) {
+    private final Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
+
+    public JdbcRepository(IGameDao gameDao,
+                          IEventSourceDao eventSourceDao,
+                          IElementDao elementDao,
+                          IPlayerTeamDao playerTeamDao,
+                          SerializationSupport serializationSupport) {
         this.gameDao = gameDao;
         this.eventSourceDao = eventSourceDao;
         this.elementDao = elementDao;
         this.playerTeamDao = playerTeamDao;
+        this.serializationSupport = serializationSupport;
     }
 
     @Override
@@ -187,8 +201,12 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public TeamObject addTeam(TeamObject teamObject) {
-        int newId = playerTeamDao.insertTeam(teamObject);
-        return playerTeamDao.readTeam(newId);
+        try {
+            int newId = playerTeamDao.insertTeam(teamObject);
+            return playerTeamDao.readTeam(newId);
+        } catch (JdbiException e) {
+            throw new OasisApiRuntimeException(ErrorCodes.TEAM_EXISTS, e);
+        }
     }
 
     @Override
@@ -236,7 +254,11 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public void addPlayerToTeam(long playerId, int gameId, int teamId) {
-        playerTeamDao.insertPlayerToTeam(gameId, playerId, teamId);
+        try {
+            playerTeamDao.insertPlayerToTeam(gameId, playerId, teamId);
+        } catch (JdbiException e) {
+            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_ALREADY_IN_TEAM, e);
+        }
     }
 
     @Override
@@ -253,26 +275,45 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public ElementDef addNewElement(int gameId, ElementDef elementDef) {
-        int newId = elementDao.insertNewElement(gameId, elementDef);
-        return elementDao.readElement(newId);
+        try {
+            ElementDto dto = toElementDto(gameId, elementDef);
+            elementDao.insertNewElement(dto);
+            return toElementDef(elementDao.readElementWithData(elementDef.getElementId()));
+        } catch (JdbiException ex) {
+            throw new OasisApiRuntimeException(ErrorCodes.ELEMENT_ALREADY_EXISTS, ex);
+        }
     }
 
     @Override
     public ElementDef updateElement(int gameId, String id, ElementDef elementDef) {
-        elementDao.updateElement(id, elementDef);
-        return elementDao.readElementById(id);
+        var dto = toElementDto(gameId, elementDef);
+        elementDao.updateElement(elementDef.getElementId(), dto);
+        return toElementDef(elementDao.readElement(id));
     }
 
     @Override
     public ElementDef deleteElement(int gameId, String id) {
-        ElementDef elementDef = elementDao.readElementById(id);
-        elementDao.deleteElementById(id);
+        ElementDef elementDef = toElementDef(elementDao.readElementWithData(id));
+        elementDao.deleteElement(elementDef.getId());
         return elementDef;
     }
 
     @Override
     public ElementDef readElement(int gameId, String id) {
-        return elementDao.readElementById(id);
+        var dto = elementDao.readElementWithData(id);
+        if (dto != null && dto.isActive()) {
+            return toElementDef(dto);
+        }
+        return null;
+    }
+
+    @Override
+    public ElementDef readElementWithoutData(int gameId, String id) {
+        var dto = elementDao.readElement(id);
+        if (dto != null && dto.isActive()) {
+            return toElementDef(dto);
+        }
+        return null;
     }
 
     @Override
@@ -284,5 +325,20 @@ public class JdbcRepository implements OasisRepository {
     @Override
     public List<AttributeInfo> listAllAttributes(int gameId) {
         return elementDao.readAllAttributes(gameId);
+    }
+
+    private ElementDto toElementDto(int gameId, ElementDef def) {
+        ElementDto dto = ElementDto.fromWithoutData(def);
+        dto.setGameId(gameId);
+        dto.setData(serializationSupport.serialize(def.getData()).getBytes(StandardCharsets.UTF_8));
+        return dto;
+    }
+
+    private ElementDef toElementDef(ElementDto dto) {
+        ElementDef resultDef = dto.toDefWithoutData();
+        if (Objects.nonNull(dto.getData())) {
+            resultDef.setData(serializationSupport.deserialize(dto.getData(), mapType));
+        }
+        return resultDef;
     }
 }

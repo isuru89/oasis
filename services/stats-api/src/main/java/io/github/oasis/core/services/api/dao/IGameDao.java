@@ -20,25 +20,37 @@
 package io.github.oasis.core.services.api.dao;
 
 import io.github.oasis.core.Game;
+import io.github.oasis.core.services.api.dao.configs.UseOasisSqlLocator;
 import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
+import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
+@UseOasisSqlLocator("io/github/oasis/db/scripts/game")
+@RegisterBeanMapper(Game.class)
 public interface IGameDao {
 
+    @SqlUpdate
     int insertGame(Game game);
 
+    @SqlQuery
     Game readGame(int gameId);
 
+    @SqlUpdate
     void updateGame(int gameId, GameUpdatePart gameNew);
 
+    @SqlUpdate
     void deleteGame(int gameId);
 
+    @SqlQuery
     List<Game> listGames(int pageOffset, int pageSize);
 
+    @SqlQuery
     Game getGameByName(String name);
 
 }

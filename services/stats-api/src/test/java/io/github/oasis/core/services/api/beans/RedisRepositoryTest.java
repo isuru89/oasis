@@ -609,7 +609,7 @@ class RedisRepositoryTest {
     void addNewElement() {
         ElementDef element = createElement("ELE0001", "Bonus Points", "points");
         ElementDef elementDef = redisRepository.addNewElement(element.getGameId(), element);
-        Assertions.assertEquals(element.getId(), elementDef.getId());
+        Assertions.assertEquals(element.getElementId(), elementDef.getElementId());
 
         assertError(() -> redisRepository.addNewElement(element.getGameId(), elementDef));
     }
@@ -620,13 +620,13 @@ class RedisRepositoryTest {
         ElementDef elementDef = redisRepository.addNewElement(element.getGameId(), element);
 
         elementDef.getMetadata().setName("Bonus Points 2");
-        redisRepository.updateElement(elementDef.getGameId(), elementDef.getId(), elementDef);
-        ElementDef updatedElement = redisRepository.readElement(elementDef.getGameId(), elementDef.getId());
+        redisRepository.updateElement(elementDef.getGameId(), elementDef.getElementId(), elementDef);
+        ElementDef updatedElement = redisRepository.readElement(elementDef.getGameId(), elementDef.getElementId());
         Assertions.assertEquals("Bonus Points 2", updatedElement.getMetadata().getName());
 
         // update non-existing element
-        elementDef.setId("NEX00000");
-        assertError(() -> redisRepository.updateElement(element.getGameId(), elementDef.getId(), elementDef));
+        elementDef.setElementId("NEX00000");
+        assertError(() -> redisRepository.updateElement(element.getGameId(), elementDef.getElementId(), elementDef));
         assertError(() -> redisRepository.updateElement(element.getGameId(), "NEX9999", elementDef));
     }
 
@@ -648,7 +648,7 @@ class RedisRepositoryTest {
         redisRepository.addNewElement(element.getGameId(), element);
 
         ElementDef elementDef = redisRepository.readElement(element.getGameId(), "ELE0001");
-        Assertions.assertEquals(element.getId(), elementDef.getId());
+        Assertions.assertEquals(element.getElementId(), elementDef.getElementId());
         Assertions.assertEquals(element.getMetadata().getName(), elementDef.getMetadata().getName());
         Assertions.assertEquals(element.getType(), elementDef.getType());
 
@@ -702,7 +702,7 @@ class RedisRepositoryTest {
 
         ElementDef bonusPoints = redisRepository.readElement(1, "ELE0001");
         bonusPoints.getMetadata().setName("Bonus Points 2");
-        redisRepository.updateElement(1, bonusPoints.getId(), bonusPoints);
+        redisRepository.updateElement(1, bonusPoints.getElementId(), bonusPoints);
 
         Assertions.assertEquals(2, redisRepository.listAllElementDefinitions(1, "points").size());
         Assertions.assertTrue(redisRepository.listAllElementDefinitions(1, "points").stream().anyMatch(e -> e.getName().equals("Bonus Points 2")));
@@ -751,13 +751,13 @@ class RedisRepositoryTest {
     }
 
     private ElementDef createElement(String id, String name, String type) {
-        ElementDef def = new ElementDef();
-        def.setId(id);
-        def.setMetadata(new SimpleElementDefinition(id, name, ""));
-        def.setType(type);
-        def.setGameId(1);
-        def.setData(new HashMap<>());
-        return def;
+        return ElementDef.builder()
+                .elementId(id)
+                .metadata(new SimpleElementDefinition(id, name, ""))
+                .type(type)
+                .gameId(1)
+                .data(new HashMap<>())
+                .build();
     }
 
     private PlayerObject createUser(long id, String email, String name) {

@@ -29,5 +29,26 @@ CREATE TABLE `OA_PLAYER_TEAM` (
   `team_id` int NOT NULL,
   `player_id` int NOT NULL,
   `created_at` bigint DEFAULT NULL,
-  UNIQUE(`game_id`, `team_id`, `player_id`)
+  UNIQUE(`game_id`, `player_id`)
+);
+
+DROP TABLE IF EXISTS `OA_ELEMENT`;
+CREATE TABLE `OA_ELEMENT` (
+  `id` INTEGER PRIMARY KEY autoincrement,
+  `type` varchar(64) NOT NULL,
+  `game_id` int NOT NULL,
+  `impl` varchar(255) NOT NULL,
+  `def_id` varchar(128) NOT NULL COLLATE nocase UNIQUE,
+  `name` varchar(128) NOT NULL,
+  `description` varchar(512) DEFAULT NULL,
+  `created_at` bigint DEFAULT NULL,
+  `updated_at` bigint DEFAULT NULL,
+  `is_active` tinyint NOT NULL DEFAULT '1'
+);
+
+DROP TABLE IF EXISTS `OA_ELEMENT_DATA`;
+CREATE TABLE `OA_ELEMENT_DATA` (
+  `element_id` int NOT NULL,
+  `def_data` BLOB NOT NULL,
+  `is_active` tinyint NOT NULL DEFAULT '1'
 );

@@ -642,7 +642,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public ElementDef addNewElement(int gameId, ElementDef elementDef) {
         return withDbContext(db -> {
-            String id = elementDef.getId();
+            String id = elementDef.getElementId();
             String baseKey = ID.getDetailedElementDefKeyForGame(gameId);
             elementDef.setGameId(gameId);
 
@@ -660,7 +660,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     @Override
     public ElementDef updateElement(int gameId, String id, ElementDef elementDef) {
         return withDbContext(db -> {
-            if (!id.equals(elementDef.getId())) {
+            if (!id.equals(elementDef.getElementId())) {
                 throw new OasisRuntimeException("Provided id and element id mismatches!");
             }
             String baseKey = ID.getDetailedElementDefKeyForGame(gameId);
@@ -689,7 +689,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
             db.removeKeyFromMap(baseKey, id);
             db.removeKeyFromMap(ID.getBasicElementDefKeyForGame(gameId), id);
             ElementDef elementDef = serializationSupport.deserialize(valueFromMap, ElementDef.class);
-            db.removeKeyFromMap(ID.getElementMetadataByTypeForGame(gameId, elementDef.getType()), elementDef.getId());
+            db.removeKeyFromMap(ID.getElementMetadataByTypeForGame(gameId, elementDef.getType()), elementDef.getElementId());
             return elementDef;
         });
     }
@@ -705,6 +705,22 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
             }
 
             return serializationSupport.deserialize(valueFromMap, ElementDef.class);
+        });
+    }
+
+    @Override
+    public ElementDef readElementWithoutData(int gameId, String id) {
+        return withDbContext(db -> {
+            String baseKey = ID.getDetailedElementDefKeyForGame(gameId);
+
+            String valueFromMap = db.getValueFromMap(baseKey, id);
+            if (Texts.isEmpty(valueFromMap)) {
+                throw new OasisRuntimeException("Element by given id does not exist!");
+            }
+
+            ElementDef def = serializationSupport.deserialize(valueFromMap, ElementDef.class);
+            def.setData(null);
+            return def;
         });
     }
 
@@ -873,13 +889,13 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     private void updateElementMetadata(ElementDef def, DbContext db) {
         SimpleElementDefinition simpleElementDefinition = def.getMetadata();
         db.setValueInMap(ID.getBasicElementDefKeyForGame(def.getGameId()),
-                def.getId(), serializationSupport.serialize(simpleElementDefinition));
+                def.getElementId(), serializationSupport.serialize(simpleElementDefinition));
     }
 
     private void setToElementByType(ElementDef def, DbContext db) {
         SimpleElementDefinition metadata = def.getMetadata();
         db.setValueInMap(ID.getElementMetadataByTypeForGame(def.getGameId(), def.getType()),
-                def.getId(),
+                def.getElementId(),
                 serializationSupport.serialize(metadata));
     }
 
