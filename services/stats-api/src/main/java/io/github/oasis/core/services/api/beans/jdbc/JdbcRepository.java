@@ -317,6 +317,14 @@ public class JdbcRepository implements OasisRepository {
     }
 
     @Override
+    public List<ElementDef> readElementsByType(int gameId, String type) {
+        return elementDao.readElementsByType(gameId, type)
+                .stream()
+                .map(this::toElementDef)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute) {
         int newAttrId = elementDao.insertAttribute(gameId, newAttribute);
         return elementDao.readAttribute(gameId, newAttrId);

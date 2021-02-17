@@ -37,6 +37,7 @@ import java.util.List;
  */
 @UseOasisSqlLocator("io/github/oasis/db/scripts/elements")
 @RegisterBeanMapper(ElementDto.class)
+@RegisterBeanMapper(AttributeInfo.class)
 public interface IElementDao {
 
     @SqlUpdate
@@ -57,6 +58,9 @@ public interface IElementDao {
 
     @SqlQuery
     ElementDto readElementWithData(@Bind("defId") String elementId);
+
+    @SqlQuery
+    List<ElementDto> readElementsByType(@Bind("gameId") int gameId, @Bind("type") String type);
 
     @SqlUpdate
     void updateElement(@Bind("defId") String elementId, @BindBean ElementDto update);

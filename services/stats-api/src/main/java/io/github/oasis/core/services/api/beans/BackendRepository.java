@@ -29,6 +29,9 @@ import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import org.jdbi.v3.core.JdbiException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -259,7 +262,10 @@ public class BackendRepository implements OasisRepository {
 
     @Override
     public ElementDef deleteElement(int gameId, String id) {
-        return null;
+        ElementDef def = adminRepository.readElement(gameId, id);
+        adminRepository.deleteElement(gameId, id);
+        engineRepository.deleteElement(gameId, id);
+        return def;
     }
 
     @Override
@@ -273,12 +279,21 @@ public class BackendRepository implements OasisRepository {
     }
 
     @Override
+    public List<ElementDef> readElementsByType(int gameId, String type) {
+        return adminRepository.readElementsByType(gameId, type);
+    }
+
+    @Override
     public AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute) {
-        return null;
+        try {
+            return adminRepository.addAttribute(gameId, newAttribute);
+        } catch (JdbiException e) {
+            throw new OasisApiRuntimeException(ErrorCodes.ATTRIBUTE_EXISTS, e);
+        }
     }
 
     @Override
     public List<AttributeInfo> listAllAttributes(int gameId) {
-        return null;
+        return adminRepository.listAllAttributes(gameId);
     }
 }

@@ -20,7 +20,6 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.elements.ElementDef;
-import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
@@ -40,7 +39,7 @@ public class ElementService extends AbstractOasisService {
 
     private final OasisMetadataSupport metadataSupport;
 
-    ElementService(BackendRepository backendRepository, OasisMetadataSupport metadataSupport) {
+    public ElementService(BackendRepository backendRepository, OasisMetadataSupport metadataSupport) {
         super(backendRepository);
 
         this.metadataSupport = metadataSupport;
@@ -73,7 +72,7 @@ public class ElementService extends AbstractOasisService {
         return backendRepository.deleteElement(gameId, elementId);
     }
 
-    public List<SimpleElementDefinition> listElementsByType(int gameId, String type) throws OasisException {
-        return metadataSupport.listAllElementDefinitions(gameId, type);
+    public List<ElementDef> listElementsByType(int gameId, String type) throws OasisException {
+        return backendRepository.readElementsByType(gameId, type);
     }
 }

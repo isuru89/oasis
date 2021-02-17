@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.services;
+package io.github.oasis.core.services.api;
 
 import com.google.gson.Gson;
 import io.github.oasis.core.configs.OasisConfigs;

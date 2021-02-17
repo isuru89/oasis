@@ -39,6 +39,7 @@ public class GameObjectRequest implements Serializable {
     private String name;
     private String motto;
     private String description;
+    private String logoRef;
 
     private List<AttributeInfo> attributes;
 
@@ -48,6 +49,7 @@ public class GameObjectRequest implements Serializable {
                 .name(name)
                 .motto(motto)
                 .description(description)
+                .logoRef(logoRef)
                 .build();
     }
 }

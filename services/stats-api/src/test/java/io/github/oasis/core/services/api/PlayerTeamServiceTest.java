@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.services;
+package io.github.oasis.core.services.api;
 
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.external.PaginatedResult;
@@ -30,6 +30,7 @@ import io.github.oasis.core.services.api.controllers.admin.PlayerController;
 import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.services.PlayerTeamService;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
@@ -45,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * @author Isuru Weerarathna
  */
-class PlayerTeamServiceTest extends AbstractServiceTest {
+public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     private PlayerController service;
 

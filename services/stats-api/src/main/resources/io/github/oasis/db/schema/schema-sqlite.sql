@@ -52,3 +52,13 @@ CREATE TABLE `OA_ELEMENT_DATA` (
   `def_data` BLOB NOT NULL,
   `is_active` tinyint NOT NULL DEFAULT '1'
 );
+
+DROP TABLE IF EXISTS `OA_ATTRIBUTE_DEF`;
+CREATE TABLE `OA_ATTRIBUTE_DEF` (
+  `id` INTEGER PRIMARY KEY autoincrement,
+  `name` varchar(32) COLLATE nocase NOT NULL,
+  `priority` int NOT NULL,
+  `game_id` int NOT NULL,
+  `color_code` varchar(10) DEFAULT NULL,
+  UNIQUE(`game_id`, `name`)
+);

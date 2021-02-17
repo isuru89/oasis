@@ -725,6 +725,28 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
+    public List<ElementDef> readElementsByType(int gameId, String type) {
+        return withDbContext(db -> {
+            String baseKey = ID.getElementMetadataByTypeForGame(gameId, type);
+
+            Map<String, String> all = db.MAP(baseKey).getAll();
+            List<ElementDef> elementDefinitions = new ArrayList<>();
+            if (all != null) {
+                List<String> allKeys = new ArrayList<>(all.keySet());
+                String elementDefBaseKey = ID.getBasicElementDefKeyForGame(gameId);
+                List<String> valuesFromMap = db.getValuesFromMap(elementDefBaseKey, allKeys.toArray(new String[0]));
+                for (int i = 0; i < allKeys.size(); i++) {
+                    ElementDef def = serializationSupport.deserialize(valuesFromMap.get(i), ElementDef.class);
+                    if (def != null) {
+                        elementDefinitions.add(def);
+                    }
+                }
+            }
+            return elementDefinitions;
+        });
+    }
+
+    @Override
     public SimpleElementDefinition readElementDefinition(int gameId, String id) {
         return withDbContext(db -> {
             String baseKey = ID.getBasicElementDefKeyForGame(gameId);

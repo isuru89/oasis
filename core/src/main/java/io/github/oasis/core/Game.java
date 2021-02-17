@@ -38,6 +38,7 @@ public class Game implements Serializable {
     private String name;
     private String motto;
     private String description;
+    private String logoRef;
 
     public Game() {}
 
