@@ -283,7 +283,7 @@ class RedisRepositoryTest {
         redisRepository.addNewGame(createGame(5, "olympic"));
         redisRepository.addNewGame(createGame(6, "commonwealth"));
 
-        List<Game> games = redisRepository.listGames();
+        List<Game> games = redisRepository.listGames("0", 50).getRecords();
         Assertions.assertEquals(6, games.size());
     }
 

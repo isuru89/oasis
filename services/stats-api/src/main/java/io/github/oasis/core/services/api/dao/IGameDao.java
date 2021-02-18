@@ -23,6 +23,9 @@ import io.github.oasis.core.Game;
 import io.github.oasis.core.services.api.dao.configs.UseOasisSqlLocator;
 import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
@@ -36,21 +39,26 @@ import java.util.List;
 public interface IGameDao {
 
     @SqlUpdate
-    int insertGame(Game game);
+    @GetGeneratedKeys("id")
+    int insertGame(@BindBean Game game, @Bind("ts") long timestamp);
+
+    default int insertGame(Game game) {
+        return insertGame(game, System.currentTimeMillis());
+    }
 
     @SqlQuery
-    Game readGame(int gameId);
+    Game readGame(@Bind("id") int gameId);
 
     @SqlUpdate
-    void updateGame(int gameId, GameUpdatePart gameNew);
+    void updateGame(@Bind("id") int gameId, @BindBean GameUpdatePart gameNew);
 
     @SqlUpdate
-    void deleteGame(int gameId);
+    void deleteGame(@Bind("id") int gameId);
 
     @SqlQuery
-    List<Game> listGames(int pageOffset, int pageSize);
+    List<Game> listGames(@Bind("offset") int pageOffset, @Bind("pageSize") int pageSize);
 
     @SqlQuery
-    Game getGameByName(String name);
+    Game readGameByName(@Bind("name") String name);
 
 }

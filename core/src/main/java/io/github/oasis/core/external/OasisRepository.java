@@ -48,7 +48,8 @@ public interface OasisRepository {
     Game readGame(int gameId);
     Game deleteGame(int gameId);
     boolean existsGame(String gameName);
-    List<Game> listGames();
+    Game readGameByName(String gameName);
+    PaginatedResult<Game> listGames(String offset, int pageSize);
 
     PlayerObject readPlayer(long userId);
     PlayerObject readPlayer(String email);

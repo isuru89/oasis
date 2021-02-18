@@ -112,32 +112,45 @@ public class BackendRepository implements OasisRepository {
 
     @Override
     public Game addNewGame(Game game) {
-        return null;
+        Game newGame = adminRepository.addNewGame(game);
+        engineRepository.addNewGame(newGame);
+        return newGame;
     }
 
     @Override
     public Game updateGame(int gameId, Game game) {
-        return null;
+        adminRepository.updateGame(gameId, game);
+        Game readGame = adminRepository.readGame(gameId);
+        engineRepository.updateGame(gameId, readGame);
+        return readGame;
     }
 
     @Override
     public Game readGame(int gameId) {
-        return null;
+        return adminRepository.readGame(gameId);
     }
 
     @Override
     public Game deleteGame(int gameId) {
-        return null;
+        Game game = adminRepository.readGame(gameId);
+        adminRepository.deleteGame(gameId);
+        engineRepository.deleteGame(gameId);
+        return game;
     }
 
     @Override
     public boolean existsGame(String gameName) {
-        return false;
+        return adminRepository.existsGame(gameName);
     }
 
     @Override
-    public List<Game> listGames() {
-        return null;
+    public Game readGameByName(String gameName) {
+        return adminRepository.readGameByName(gameName);
+    }
+
+    @Override
+    public PaginatedResult<Game> listGames(String offset, int pageSize) {
+        return adminRepository.listGames(offset, pageSize);
     }
 
     //

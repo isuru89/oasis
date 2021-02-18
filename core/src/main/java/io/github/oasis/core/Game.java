@@ -40,6 +40,10 @@ public class Game implements Serializable {
     private String description;
     private String logoRef;
 
+    private long createdAt;
+    private long updatedAt;
+    private boolean active;
+
     public Game() {}
 
 }

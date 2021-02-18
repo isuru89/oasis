@@ -28,6 +28,7 @@ public final class ErrorCodes {
     public static final String GAME_ID_NOT_SPECIFIED = "G0002";
     public static final String GAME_EXCEEDED_MOTTO_LEN = "G0003";
     public static final String GAME_EXCEEDED_DESC_LEND = "G0004";
+    public static final String GAME_ALREADY_EXISTS = "G0005";
 
     public static final String EVENT_SOURCE_NO_NAME = "ES0001";
 

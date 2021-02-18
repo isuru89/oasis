@@ -122,8 +122,12 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public Game addNewGame(Game game) {
-        int newGameId = gameDao.insertGame(game);
-        return gameDao.readGame(newGameId);
+        try {
+            int newGameId = gameDao.insertGame(game);
+            return gameDao.readGame(newGameId);
+        } catch (JdbiException e) {
+            throw new OasisApiRuntimeException(ErrorCodes.GAME_ALREADY_EXISTS, e);
+        }
     }
 
     @Override
@@ -146,12 +150,21 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public boolean existsGame(String gameName) {
-        return Objects.nonNull(gameDao.getGameByName(gameName));
+        return Objects.nonNull(gameDao.readGameByName(gameName));
     }
 
     @Override
-    public List<Game> listGames() {
-        return gameDao.listGames(0, 50);
+    public Game readGameByName(String gameName) {
+        return gameDao.readGameByName(gameName);
+    }
+
+    @Override
+    public PaginatedResult<Game> listGames(String offsetAttr, int pageSize) {
+        int offset = Integer.parseInt(offsetAttr);
+        List<Game> games = gameDao.listGames(offset, pageSize);
+
+        int next = games.size() == pageSize ? offset + pageSize : -1;
+        return new PaginatedResult<>(String.valueOf(next), games);
     }
 
 

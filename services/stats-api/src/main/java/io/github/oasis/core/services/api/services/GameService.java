@@ -21,6 +21,7 @@ package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
@@ -30,7 +31,6 @@ import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Utils;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -44,10 +44,7 @@ public class GameService extends AbstractOasisService {
     }
 
     public Game addGame(GameObjectRequest gameObjectRequest) throws OasisApiException {
-        Game game = new Game();
-        game.setName(gameObjectRequest.getName());
-        game.setDescription(gameObjectRequest.getDescription());
-        game.setMotto(gameObjectRequest.getMotto());
+        Game game = gameObjectRequest.createGame();
 
         validateGameObjectForCreation(game);
 
@@ -76,10 +73,13 @@ public class GameService extends AbstractOasisService {
         return backendRepository.readGame(gameId);
     }
 
-    public List<Game> listAllGames() {
-        return backendRepository.listGames();
+    public PaginatedResult<Game> listAllGames(String offset, int pageSize) {
+        return backendRepository.listGames(offset, pageSize);
     }
 
+    public Game getGameByName(String name) {
+        return backendRepository.readGameByName(name);
+    }
 
 
     private void validateGameObjectForCreation(Game game) throws OasisApiException {

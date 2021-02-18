@@ -255,19 +255,33 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public List<Game> listGames() {
+    public Game readGameByName(String gameName) {
+        return withDbContext(db -> {
+            String gameStr = db.getValueFromMap(ID.ALL_GAMES_INDEX, gameName);
+            if (Texts.isEmpty(gameStr)) {
+                throw new OasisRuntimeException("No game is found by name " + gameName + "!");
+            }
+            return serializationSupport.deserialize(gameStr, Game.class);
+        });
+    }
+
+    @Override
+    public PaginatedResult<Game> listGames(String offset, int pageSize) {
         return withDbContext(db -> {
             List<Game> games = new ArrayList<>();
             Mapped gamesMap = db.MAP(ID.ALL_GAMES);
+            String cur = Texts.isEmpty(offset) ? null : offset;
             PaginatedResult<Pair<String, String>> searchResult;
             do {
-                searchResult = gamesMap.search(ALL_PATTERN, 50);
+                searchResult = gamesMap.search(ALL_PATTERN, pageSize, cur);
                 games.addAll(searchResult.getRecords().stream()
                         .map(rec -> serializationSupport.deserialize(rec.getRight(), Game.class))
                         .collect(Collectors.toList()));
 
             } while (!searchResult.isCompleted());
-            return games;
+            return new PaginatedResult<>(
+                    Texts.isEmpty(searchResult.getNextCursor()) ? null : searchResult.getNextCursor(),
+                    games);
         });
     }
 

@@ -62,3 +62,15 @@ CREATE TABLE `OA_ATTRIBUTE_DEF` (
   `color_code` varchar(10) DEFAULT NULL,
   UNIQUE(`game_id`, `name`)
 );
+
+DROP TABLE IF EXISTS `OA_GAME`;
+CREATE TABLE `OA_GAME` (
+  `id` INTEGER PRIMARY KEY autoincrement,
+  `name` varchar(32) COLLATE nocase NOT NULL UNIQUE,
+  `motto` varchar(128) DEFAULT NULL,
+  `description` varchar(512) DEFAULT NULL,
+  `logo_ref` varchar(255) DEFAULT NULL,
+  `created_at` bigint DEFAULT NULL,
+  `updated_at` bigint DEFAULT NULL,
+  `is_active` tinyint NOT NULL DEFAULT '1'
+);
