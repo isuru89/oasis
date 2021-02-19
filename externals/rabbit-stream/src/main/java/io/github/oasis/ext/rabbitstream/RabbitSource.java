@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -56,7 +57,7 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
 
     private Connection connection;
     private Channel channel;
-    private final Map<Integer, RabbitGameReader> consumers = new HashMap<>();
+    private final Map<Integer, RabbitGameReader> consumers = new ConcurrentHashMap<>();
     private MessageReceiver sourceRef;
     private final Gson gson = new Gson();
 
@@ -112,7 +113,7 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
             Closeable removedRef = consumers.remove(gameId);
             silentAck((long) gameCommand.getMessageId());
             if (Objects.nonNull(removedRef)) {
-                LOG.info("Game consumer {} closed!", gameId);
+                LOG.info("Game consumer {} disconnected!", gameId);
                 silentClose(removedRef);
             }
         } else {
@@ -153,7 +154,11 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
     @Override
     public void close() throws IOException {
         for (Closeable consumer : consumers.values()) {
-            consumer.close();
+            try {
+                consumer.close();
+            } catch (IOException e) {
+                LOG.warn("Failed to dispose consumer {}!", consumer);
+            }
         }
         consumers.clear();
 
@@ -161,7 +166,7 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
             try {
                 channel.close();
             } catch (TimeoutException e) {
-                e.printStackTrace();
+                LOG.warn(e.getMessage(), e);
             }
         }
         if (connection != null) {
@@ -277,6 +282,13 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
                     LOG.error("Error closing channel for game {}!", gameId, e);
                 }
             }
+        }
+
+        @Override
+        public String toString() {
+            return "RabbitGameReader{" +
+                    "gameId=" + gameId +
+                    '}';
         }
     }
 }

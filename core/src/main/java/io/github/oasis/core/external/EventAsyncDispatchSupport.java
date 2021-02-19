@@ -22,6 +22,10 @@ package io.github.oasis.core.external;
 import io.github.oasis.core.external.messages.PersistedDef;
 
 /**
+ * Asynchronous event dispatch support for message brokers.
+ *
+ * For synchronous dispatch support please see {@link EventDispatchSupport}.
+ *
  * @author Isuru Weerarathna
  */
 public interface EventAsyncDispatchSupport extends EventDispatchSupport {

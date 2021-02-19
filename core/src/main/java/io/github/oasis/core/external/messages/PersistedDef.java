@@ -20,6 +20,8 @@
 package io.github.oasis.core.external.messages;
 
 import io.github.oasis.core.Event;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -28,6 +30,8 @@ import java.util.Set;
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class PersistedDef implements Serializable {
 
     public static final String FIELD_TYPE = "type";
@@ -74,46 +78,6 @@ public class PersistedDef implements Serializable {
         def.setScope(new PersistedDef.Scope(event.getGameId()));
         def.setData(event.getAllFieldValues());
         return def;
-    }
-
-    public Object getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(Object messageId) {
-        this.messageId = messageId;
-    }
-
-    public Scope getScope() {
-        return scope;
-    }
-
-    public String getImpl() {
-        return impl;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public Map<String, Object> getData() {
-        return data;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setImpl(String impl) {
-        this.impl = impl;
-    }
-
-    public void setScope(Scope scope) {
-        this.scope = scope;
-    }
-
-    public void setData(Map<String, Object> data) {
-        this.data = data;
     }
 
     public boolean isEvent() {

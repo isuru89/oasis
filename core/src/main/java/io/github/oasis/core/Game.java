@@ -24,6 +24,8 @@ import lombok.*;
 import java.io.Serializable;
 
 /**
+ * Representation of game definition.
+ *
  * @author Isuru Weerarathna
  */
 @Getter

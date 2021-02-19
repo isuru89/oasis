@@ -28,10 +28,19 @@ import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.Messages;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * @author Isuru Weerarathna
  */
 class DefinitionReader {
+
+    private static final Map<String, RuleCommand.RuleChangeType> RULE_CHANGE_TYPE_MAP = Map.of(
+        PersistedDef.GAME_RULE_ADDED, RuleCommand.RuleChangeType.ADD,
+        PersistedDef.GAME_RULE_REMOVED, RuleCommand.RuleChangeType.REMOVE,
+        PersistedDef.GAME_RULE_UPDATED, RuleCommand.RuleChangeType.UPDATE
+    );
 
     static Object derive(PersistedDef def, EngineContext context) {
         if (def.isEvent()) {
@@ -63,12 +72,8 @@ class DefinitionReader {
     }
 
     private static RuleCommand.RuleChangeType toRuleChangeType(String type) {
-        switch (type) {
-            case PersistedDef.GAME_RULE_ADDED: return RuleCommand.RuleChangeType.ADD;
-            case PersistedDef.GAME_RULE_REMOVED: return RuleCommand.RuleChangeType.REMOVE;
-            case PersistedDef.GAME_RULE_UPDATED: return RuleCommand.RuleChangeType.UPDATE;
-            default: throw new IllegalArgumentException("Unknown rule change type! [" + type + "]");
-        }
+        return Optional.ofNullable(RULE_CHANGE_TYPE_MAP.get(type))
+                .orElseThrow(() -> new IllegalArgumentException("Unknown rule change type! [" + type + "]"));
     }
 
     private static GameCommand.GameLifecycle toLifecycleType(String type) {

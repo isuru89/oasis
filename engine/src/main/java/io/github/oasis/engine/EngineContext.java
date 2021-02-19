@@ -101,17 +101,9 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
         return configs;
     }
 
-    public void setConfigs(OasisConfigs configs) {
-        this.configs = configs;
-    }
-
     @Override
     public Db getDb() {
         return db;
-    }
-
-    public void setDb(Db db) {
-        this.db = db;
     }
 
     @Override
@@ -119,24 +111,79 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
         return eventStore;
     }
 
-    public void setEventStore(EventReadWrite eventStore) {
-        this.eventStore = eventStore;
-    }
-
-    public void setModuleFactoryList(List<Class<? extends ElementModuleFactory>> moduleFactoryList) {
-        this.moduleFactoryList = moduleFactoryList;
-    }
-
     @Override
     public void registerModule(ElementModule module) {
         moduleList.add(module);
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public SignalSubscriptionSupport getSignalSubscription() {
         return signalSubscription;
     }
 
-    public void setSignalSubscription(SignalSubscriptionSupport signalSubscription) {
+    private void setConfigs(OasisConfigs configs) {
+        this.configs = configs;
+    }
+
+    private void setDb(Db db) {
+        this.db = db;
+    }
+
+    private void setEventStore(EventReadWrite eventStore) {
+        this.eventStore = eventStore;
+    }
+
+    private void setModuleFactoryList(List<Class<? extends ElementModuleFactory>> moduleFactoryList) {
+        this.moduleFactoryList = moduleFactoryList;
+    }
+
+    private void setSignalSubscription(SignalSubscriptionSupport signalSubscription) {
         this.signalSubscription = signalSubscription;
+    }
+
+    public static class Builder {
+        private final EngineContext ctx = new EngineContext();
+        private final List<Class<? extends ElementModuleFactory>> factories = new ArrayList<>();
+
+        private Builder() {}
+
+        public Builder withConfigs(OasisConfigs configs) {
+            ctx.setConfigs(configs);
+            return this;
+        }
+
+        public Builder withDb(Db dbRef) {
+            ctx.setDb(dbRef);
+            return this;
+        }
+
+        public Builder withEventStore(EventReadWrite eventStore) {
+            ctx.setEventStore(eventStore);
+            return this;
+        }
+
+        public Builder withSignalSubscription(SignalSubscriptionSupport signalSubscription) {
+            ctx.setSignalSubscription(signalSubscription);
+            return this;
+        }
+
+        public Builder installModules(List<Class<? extends ElementModuleFactory>> factoriesList) {
+            factories.addAll(factoriesList);
+            return this;
+        }
+
+        public Builder installModule(Class<? extends ElementModuleFactory> moduleFactory) {
+            factories.add(moduleFactory);
+            return this;
+        }
+
+        public EngineContext build() {
+            ctx.setModuleFactoryList(factories);
+            return ctx;
+        }
+
     }
 }

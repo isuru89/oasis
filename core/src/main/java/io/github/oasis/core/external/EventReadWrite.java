@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
+ * Base interface to implement for storage of individual event data.
+ * This interface will be used by engine to store some of events based
+ * on the rule type to refer them later in execution process.
+ *
  * @author Isuru Weerarathna
  */
 public interface EventReadWrite {

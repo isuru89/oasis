@@ -40,25 +40,25 @@ public class OasisEngineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(OasisEngineRunner.class);
 
     public static void main(String[] args) throws OasisException {
-        EngineContext context = new EngineContext();
+        EngineContext.Builder builder = EngineContext.builder();
         OasisConfigs configs = OasisConfigs.defaultConfigs();
-        context.setConfigs(configs);
+        builder.withConfigs(configs);
 
-        discoverElements(context);
+        discoverElements(builder);
 
         Db dbPool = RedisDb.create(configs);
         dbPool.init();
-        context.setDb(dbPool);
+        builder.withDb(dbPool);
 
-        new OasisEngine(context).start();
+        new OasisEngine(builder.build()).start();
     }
 
-    private static void discoverElements(EngineContext context) {
-        context.setModuleFactoryList(ServiceLoader.load(ElementModuleFactory.class)
+    private static void discoverElements(EngineContext.Builder builder) {
+        ServiceLoader.load(ElementModuleFactory.class)
                 .stream()
                 .map(ServiceLoader.Provider::type)
                 .peek(factory -> LOG.info("Found element factory: {}", factory.getName()))
-                .collect(Collectors.toList()));
+                .forEach(builder::installModule);
     }
 
 }
