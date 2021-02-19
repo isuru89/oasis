@@ -66,19 +66,17 @@ public class Main {
 
     private static void runToEngine() throws Exception {
         OasisConfigs configs = OasisConfigs.defaultConfigs();
-        EngineContext context = new EngineContext();
-        context.setConfigs(configs);
-        context.setModuleFactoryList(List.of(
-                PointsModuleFactory.class
-        ));
+        EngineContext.Builder builder = EngineContext.builder()
+                .withConfigs(configs)
+                .installModule(PointsModuleFactory.class);
         Db dbPool = RedisDb.create(configs);
         dbPool.init();
-        context.setDb(dbPool);
+        builder.withDb(dbPool);
 
         // initialize dispatcher first
         EventDispatchSupport dispatcher = initializeDispatcher(configs.getConfigRef());
 
-        OasisEngine engine = new OasisEngine(context);
+        OasisEngine engine = new OasisEngine(builder.build());
         engine.start();
 
         SimulationContext simulationContext = new SimulationContext();

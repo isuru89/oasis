@@ -19,21 +19,23 @@
 
 package io.github.oasis.core.external.messages;
 
+import lombok.Getter;
+import lombok.ToString;
+
 /**
  * Acknowledgable oasis message class which can be used to requeue
  * messages in case of processing failures.
  *
  * @author Isuru Weerarathna
  */
+@Getter
+@ToString
 public class AckableOasisMessage implements OasisCommand {
 
-    private Object externalMessageId;
+    private final Object externalMessageId;
 
     public AckableOasisMessage(Object externalMessageId) {
         this.externalMessageId = externalMessageId;
     }
 
-    public Object getExternalMessageId() {
-        return externalMessageId;
-    }
 }

@@ -22,6 +22,12 @@ package io.github.oasis.core;
 import java.io.Serializable;
 import java.util.Map;
 
+/**
+ * Base interface for all game events. Game events ultimately consumed by
+ * {@link io.github.oasis.core.elements.AbstractRule} rules.
+ *
+ * @author Isuru Weerarathna
+ */
 public interface Event extends Serializable {
 
     String ID = "id";

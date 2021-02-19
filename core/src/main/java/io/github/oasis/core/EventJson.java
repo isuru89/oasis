@@ -22,6 +22,8 @@ package io.github.oasis.core;
 import java.util.Map;
 
 /**
+ * Json based event.
+ *
  * @author Isuru Weerarathna
  */
 public class EventJson implements Event {

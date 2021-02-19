@@ -20,6 +20,11 @@
 package io.github.oasis.core.external;
 
 /**
+ * Combined modular support of event dispatching and receiving
+ * for a particular message broker.
+ *
+ * Each message broker should implement one factory.
+ *
  * @author Isuru Weerarathna
  */
 public interface EventStreamFactory {
