@@ -52,7 +52,7 @@ public interface IEventSourceDao {
         int id = insertEventSource(source, System.currentTimeMillis());
         insertEventSourceKeys(id, source.getSecrets());
         EventSource dbSource = readEventSource(id);
-        EventSourceSecrets eventSourceSecrets = readEventSourceSecrets(id);
+        EventSourceSecrets eventSourceSecrets = readEventSourceKeys(id);
         dbSource.setSecrets(eventSourceSecrets);
         return dbSource;
     }
@@ -76,7 +76,7 @@ public interface IEventSourceDao {
     EventSource readEventSourceByToken(@Bind("token") String token);
 
     @SqlQuery
-    EventSourceSecrets readEventSourceSecrets(@Bind("id") int id);
+    EventSourceSecrets readEventSourceKeys(@Bind("id") int id);
 
     @SqlQuery
     List<EventSource> readAllEventSources();

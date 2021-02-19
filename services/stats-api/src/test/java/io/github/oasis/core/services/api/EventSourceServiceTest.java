@@ -34,6 +34,8 @@ import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.services.EventSourceService;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -131,7 +133,9 @@ public class EventSourceServiceTest extends AbstractServiceTest {
 
         assertEquals(3, esController.getAllEventSources().size());
 
-        esController.associateEventSourceToGame(1, id1);
+        ResponseEntity<String> response = esController.associateEventSourceToGame(1, id1);
+        assertEquals("OK", response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
         esController.associateEventSourceToGame(1, id2);
         esController.associateEventSourceToGame(1, id3);
 
@@ -179,8 +183,11 @@ public class EventSourceServiceTest extends AbstractServiceTest {
 
         assertEquals(3, esController.getEventSourcesOfGame(1).size());
 
-        esController.removeEventSourceFromGame(1, id2);
+        ResponseEntity<String> response = esController.removeEventSourceFromGame(1, id2);
         {
+            assertEquals("OK", response.getBody());
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+
             List<EventSource> game1Sources = esController.getEventSourcesOfGame(1);
             assertEquals(2, game1Sources.size());
             List<String> game1Names = game1Sources.stream().map(EventSource::getName).collect(Collectors.toList());

@@ -111,6 +111,16 @@ public class EventSourceController extends AbstractController {
     }
 
     @Operation(
+            summary = "Download the keys of an existing event source",
+            tags = {"admin"}
+    )
+    @ForAdmin
+    @DeleteMapping("/admin/event-sources/{eventSourceId}/download")
+    public void downloadEventSourceKeys(@PathVariable("eventSourceId") Integer eventSourceId) {
+        eventSourceService.deleteEventSource(eventSourceId);
+    }
+
+    @Operation(
             summary = "Deactivate an existing event source",
             tags = {"admin"}
     )

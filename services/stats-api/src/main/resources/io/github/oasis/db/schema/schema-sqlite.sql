@@ -80,6 +80,7 @@ CREATE TABLE `OA_EVENT_SOURCE` (
   `id` INTEGER PRIMARY KEY autoincrement,
   `token` varchar(255) COLLATE nocase NOT NULL UNIQUE,
   `display_name` varchar(255) COLLATE nocase NOT NULL UNIQUE,
+  `download_count` smallint DEFAULT '0',
   `created_at` bigint DEFAULT NULL,
   `updated_at` bigint DEFAULT NULL,
   `is_active` tinyint NOT NULL DEFAULT '1'

@@ -76,6 +76,10 @@ public class EventSourceService extends AbstractOasisService {
         backendRepository.deleteEventSource(eventSourceId);
     }
 
+    public void downloadEventSourceKeys(int eventSourceId) {
+
+    }
+
     public void assignEventSourceToGame(int eventSource, int gameId) {
         backendRepository.addEventSourceToGame(eventSource, gameId);
     }

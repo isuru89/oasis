@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
-@UseOasisSqlLocator("io/github/oasis/db/scripts")
+@UseOasisSqlLocator("io/github/oasis/db/scripts/players")
 @RegisterBeanMapper(PlayerObject.class)
 @RegisterBeanMapper(TeamObject.class)
 public interface IPlayerTeamDao {
