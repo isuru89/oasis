@@ -20,39 +20,24 @@
 package io.github.oasis.core.external.messages;
 
 import io.github.oasis.core.elements.AbstractRule;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
+ * Base command class for all rule related changes.
+ * See {@link RuleChangeType} for available list of rule activities.
+ *
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
+@ToString
 public class RuleCommand implements OasisCommand {
 
     private int gameId;
     private RuleChangeType changeType;
     private AbstractRule rule;
-
-    public AbstractRule getRule() {
-        return rule;
-    }
-
-    public void setRule(AbstractRule rule) {
-        this.rule = rule;
-    }
-
-    public RuleChangeType getChangeType() {
-        return changeType;
-    }
-
-    public void setChangeType(RuleChangeType changeType) {
-        this.changeType = changeType;
-    }
-
-    public int getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(int gameId) {
-        this.gameId = gameId;
-    }
 
     public enum RuleChangeType {
         ADD,

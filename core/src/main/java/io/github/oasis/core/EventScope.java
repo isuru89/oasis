@@ -23,6 +23,8 @@ import java.util.Comparator;
 import java.util.Objects;
 
 /**
+ * Represents the scope of a event.
+ *
  * @author Isuru Weerarathna
  */
 public class EventScope implements Comparable<EventScope> {

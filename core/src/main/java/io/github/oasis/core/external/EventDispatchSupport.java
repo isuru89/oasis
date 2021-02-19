@@ -25,6 +25,11 @@ import java.io.Closeable;
 import java.util.Map;
 
 /**
+ * Base interface to implement for event dispatching to a different
+ * message brokers.
+ *
+ * For asynchronous dispatch support please see {@link EventAsyncDispatchSupport}.
+ *
  * @author Isuru Weerarathna
  */
 public interface EventDispatchSupport extends Closeable {

@@ -25,6 +25,8 @@ import io.github.oasis.core.external.messages.GameCommand;
 import java.io.Closeable;
 
 /**
+ * Base interface to implement to subscribe for game event messages.
+ *
  * @author Isuru Weerarathna
  */
 public interface SourceStreamSupport extends Closeable {

@@ -19,8 +19,12 @@
 
 package io.github.oasis.core.external.messages;
 
+import java.io.Serializable;
+
 /**
+ * Base interface for all oasis commands.
+ *
  * @author Isuru Weerarathna
  */
-public interface OasisCommand {
+public interface OasisCommand extends Serializable {
 }

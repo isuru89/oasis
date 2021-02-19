@@ -24,7 +24,8 @@ import io.github.oasis.core.external.messages.OasisCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 
 /**
- * Accepts messages for game engine.
+ * Accepts messages through implementations of {@link SourceStreamSupport}
+ * for game engine.
  *
  * @author Isuru Weerarathna
  */

@@ -19,38 +19,27 @@
 
 package io.github.oasis.core.external.messages;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
+ * Base command class for every game related commands.
+ * This command is being used to signal game status changes, such as,
+ * START, PAUSE, REMOVE, etc.
+ *
+ * {@link GameLifecycle} to view available game statuses.
+ *
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
+@ToString
 public class GameCommand implements OasisCommand {
 
     private int gameId;
     private Object messageId;
     private GameLifecycle status;
-
-    public Object getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(Object messageId) {
-        this.messageId = messageId;
-    }
-
-    public GameLifecycle getStatus() {
-        return status;
-    }
-
-    public void setStatus(GameLifecycle status) {
-        this.status = status;
-    }
-
-    public int getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(int gameId) {
-        this.gameId = gameId;
-    }
 
     public static GameCommand create(int gameId, GameLifecycle status) {
         GameCommand cmd = new GameCommand();
@@ -59,6 +48,9 @@ public class GameCommand implements OasisCommand {
         return cmd;
     }
 
+    /**
+     * Life cycle statuses of a game.
+     */
     public enum GameLifecycle {
         CREATE,
         START,

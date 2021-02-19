@@ -94,23 +94,22 @@ public class OasisEngineTest {
 
     @BeforeEach
     public void setup() throws IOException, OasisException {
-        EngineContext context = new EngineContext();
+        EngineContext.Builder builder = EngineContext.builder();
         OasisConfigs oasisConfigs = OasisConfigs.defaultConfigs();
         dbPool = RedisDb.create(oasisConfigs);
         dbPool.init();
 
         metadataSupport = new RedisRepository(dbPool, new GsonSerializer(gson));
 
-        context.setModuleFactoryList(List.of(
-                RatingsModuleFactory.class,
-                PointsModuleFactory.class,
-                MilestonesModuleFactory.class,
-                ChallengesModuleFactory.class,
-                BadgesModuleFactory.class
-                ));
-        context.setConfigs(oasisConfigs);
-        context.setDb(dbPool);
-        context.setEventStore(new RedisEventLoader(dbPool, oasisConfigs));
+        EngineContext context = builder.withConfigs(oasisConfigs)
+                .withDb(dbPool)
+                .withEventStore(new RedisEventLoader(dbPool, oasisConfigs))
+                .installModule(RatingsModuleFactory.class)
+                .installModule(PointsModuleFactory.class)
+                .installModule(MilestonesModuleFactory.class)
+                .installModule(ChallengesModuleFactory.class)
+                .installModule(BadgesModuleFactory.class)
+                .build();
         engine = new OasisEngine(context);
         engine.start();
 
