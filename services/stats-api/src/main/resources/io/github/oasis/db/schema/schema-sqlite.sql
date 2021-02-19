@@ -74,3 +74,27 @@ CREATE TABLE `OA_GAME` (
   `updated_at` bigint DEFAULT NULL,
   `is_active` tinyint NOT NULL DEFAULT '1'
 );
+
+DROP TABLE IF EXISTS `OA_EVENT_SOURCE`;
+CREATE TABLE `OA_EVENT_SOURCE` (
+  `id` INTEGER PRIMARY KEY autoincrement,
+  `token` varchar(255) COLLATE nocase NOT NULL UNIQUE,
+  `display_name` varchar(255) COLLATE nocase NOT NULL UNIQUE,
+  `created_at` bigint DEFAULT NULL,
+  `updated_at` bigint DEFAULT NULL,
+  `is_active` tinyint NOT NULL DEFAULT '1'
+);
+
+DROP TABLE IF EXISTS `OA_EVENT_SOURCE_KEY`;
+CREATE TABLE `OA_EVENT_SOURCE_KEY` (
+  `event_source_id` int NOT NULL,
+  `public_key` TEXT NOT NULL,
+  `private_key` TEXT NOT NULL
+);
+
+DROP TABLE IF EXISTS `OA_EVENT_SOURCE_GAME`;
+CREATE TABLE `OA_EVENT_SOURCE_GAME` (
+  `game_id` int NOT NULL,
+  `event_source_id` int NOT NULL,
+  UNIQUE(`game_id`, `event_source_id`)
+);

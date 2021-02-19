@@ -79,8 +79,11 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public EventSource addEventSource(EventSource eventSource) {
-        int newId = eventSourceDao.insertEventSource(eventSource);
-        return eventSourceDao.readEventSource(newId);
+        try {
+            return eventSourceDao.insertEventSource(eventSource);
+        } catch (JdbiException e) {
+            throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_ALREADY_EXISTS, e);
+        }
     }
 
     @Override
@@ -97,7 +100,7 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public EventSource readEventSource(String token) {
-        return eventSourceDao.readEventSource(token);
+        return eventSourceDao.readEventSourceByToken(token);
     }
 
     @Override
@@ -112,12 +115,16 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public void addEventSourceToGame(int sourceId, int gameId) {
-        eventSourceDao.addEventSourceToGame(gameId, sourceId);
+        try {
+            eventSourceDao.addEventSourceToGame(gameId, sourceId);
+        } catch (JdbiException e) {
+            throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_ALREADY_MAPPED, e);
+        }
     }
 
     @Override
     public void removeEventSourceFromGame(int sourceId, int gameId) {
-        eventSourceDao.addEventSourceToGame(gameId, sourceId);
+        eventSourceDao.removeEventSourceFromGame(gameId, sourceId);
     }
 
     @Override

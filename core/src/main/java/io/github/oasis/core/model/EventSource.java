@@ -19,8 +19,7 @@
 
 package io.github.oasis.core.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -31,6 +30,10 @@ import java.util.Set;
  */
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class EventSource implements Serializable {
 
     private Integer id;
@@ -40,6 +43,7 @@ public class EventSource implements Serializable {
     private Set<Integer> games;
 
     private EventSourceSecrets secrets;
+    private boolean active;
 
     public EventSourceMetadata createCopyOfMeta() {
         EventSourceMetadata source = new EventSourceMetadata();

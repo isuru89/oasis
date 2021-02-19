@@ -82,32 +82,34 @@ public class BackendRepository implements OasisRepository {
 
     @Override
     public EventSource readEventSource(int id) {
-        return null;
+        return adminRepository.readEventSource(id);
     }
 
     @Override
     public EventSource readEventSource(String token) {
-        return null;
+        return adminRepository.readEventSource(token);
     }
 
     @Override
     public List<EventSource> listAllEventSources() {
-        return null;
+        return adminRepository.listAllEventSources();
     }
 
     @Override
     public List<EventSource> listAllEventSourcesOfGame(int gameId) {
-        return null;
+        return adminRepository.listAllEventSourcesOfGame(gameId);
     }
 
     @Override
     public void addEventSourceToGame(int sourceId, int gameId) {
-
+        adminRepository.addEventSourceToGame(sourceId, gameId);
+        engineRepository.addEventSourceToGame(sourceId, gameId);
     }
 
     @Override
     public void removeEventSourceFromGame(int sourceId, int gameId) {
-
+        adminRepository.removeEventSourceFromGame(sourceId, gameId);
+        engineRepository.removeEventSourceFromGame(sourceId, gameId);
     }
 
     @Override

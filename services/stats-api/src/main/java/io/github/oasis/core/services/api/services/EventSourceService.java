@@ -27,6 +27,7 @@ import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.utils.Texts;
+import io.github.oasis.core.utils.Utils;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyPair;
@@ -40,7 +41,7 @@ public class EventSourceService extends AbstractOasisService {
 
     private final KeyGeneratorSupport keyGeneratorSupport;
 
-    EventSourceService(BackendRepository backendRepository, KeyGeneratorSupport keyGeneratorSupport) {
+    public EventSourceService(BackendRepository backendRepository, KeyGeneratorSupport keyGeneratorSupport) {
         super(backendRepository);
 
         this.keyGeneratorSupport = keyGeneratorSupport;
@@ -49,7 +50,6 @@ public class EventSourceService extends AbstractOasisService {
     public EventSource registerEventSource(EventSource source) throws OasisException {
         validateEventSource(source);
 
-        Set<Integer> gameIds = new HashSet<>(source.getGames());
         source.setGames(null);
         source.setToken(generateRandomToken());
 
@@ -62,8 +62,11 @@ public class EventSourceService extends AbstractOasisService {
 
         EventSource dbSource = backendRepository.addEventSource(source);
 
-        for (Integer gameId : gameIds) {
-            backendRepository.addEventSourceToGame(dbSource.getId(), gameId);
+        if (Utils.isNotEmpty(source.getGames())) {
+            Set<Integer> gameIds = new HashSet<>(source.getGames());
+            for (Integer gameId : gameIds) {
+                backendRepository.addEventSourceToGame(dbSource.getId(), gameId);
+            }
         }
 
         return dbSource;
@@ -75,6 +78,10 @@ public class EventSourceService extends AbstractOasisService {
 
     public void assignEventSourceToGame(int eventSource, int gameId) {
         backendRepository.addEventSourceToGame(eventSource, gameId);
+    }
+
+    public void removeEventSourceFromGame(int eventSource, int gameId) {
+        backendRepository.removeEventSourceFromGame(eventSource, gameId);
     }
 
     public List<EventSource> listAllEventSources() {

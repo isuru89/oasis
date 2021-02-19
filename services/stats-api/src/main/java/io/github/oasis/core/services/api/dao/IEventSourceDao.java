@@ -20,42 +20,74 @@
 package io.github.oasis.core.services.api.dao;
 
 import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.model.EventSourceSecrets;
 import io.github.oasis.core.services.api.dao.configs.UseOasisSqlLocator;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
+import org.jdbi.v3.sqlobject.transaction.Transaction;
 
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@UseOasisSqlLocator("io/github/oasis/db/scripts/eventSource")
+@UseOasisSqlLocator("io/github/oasis/db/scripts/eventsource")
 @RegisterBeanMapper(EventSource.class)
+@RegisterBeanMapper(EventSourceSecrets.class)
 public interface IEventSourceDao {
 
     @SqlUpdate
-    int insertEventSource(EventSource eventSource);
+    @GetGeneratedKeys("id")
+    int insertEventSource(@BindBean EventSource eventSource, @Bind("ts") long timestamp);
 
     @SqlUpdate
-    void deleteEventSource(int id);
+    void insertEventSourceKeys(@Bind("id") int id, @BindBean EventSourceSecrets secrets);
+
+    @Transaction
+    default EventSource insertEventSource(EventSource source) {
+        int id = insertEventSource(source, System.currentTimeMillis());
+        insertEventSourceKeys(id, source.getSecrets());
+        EventSource dbSource = readEventSource(id);
+        EventSourceSecrets eventSourceSecrets = readEventSourceSecrets(id);
+        dbSource.setSecrets(eventSourceSecrets);
+        return dbSource;
+    }
+
+    @SqlUpdate
+    void deleteEventSourceById(@Bind("id") int id);
+
+    @SqlUpdate
+    void deleteEventSourceKeys(@Bind("id") int id);
+
+    @Transaction
+    default void deleteEventSource(int id) {
+        deleteEventSourceById(id);
+        deleteEventSourceKeys(id);
+    }
 
     @SqlQuery
-    EventSource readEventSource(int id);
+    EventSource readEventSource(@Bind("id") int id);
 
     @SqlQuery
-    EventSource readEventSource(String token);
+    EventSource readEventSourceByToken(@Bind("token") String token);
+
+    @SqlQuery
+    EventSourceSecrets readEventSourceSecrets(@Bind("id") int id);
 
     @SqlQuery
     List<EventSource> readAllEventSources();
 
     @SqlQuery
-    List<EventSource> readEventSourcesOfGame(int gameId);
+    List<EventSource> readEventSourcesOfGame(@Bind("gameId") int gameId);
 
     @SqlUpdate
-    void addEventSourceToGame(int gameId, int eventSourceId);
+    void addEventSourceToGame(@Bind("gameId") int gameId, @Bind("eventSourceId") int eventSourceId);
 
     @SqlUpdate
-    void removeEventSourceFromGame(int gameId, int eventSourceId);
+    void removeEventSourceFromGame(@Bind("gameId") int gameId, @Bind("eventSourceId") int eventSourceId);
 
 }
