@@ -1,3 +1,0 @@
-SELECT *
-FROM OA_PLAYER
-WHERE id = :id

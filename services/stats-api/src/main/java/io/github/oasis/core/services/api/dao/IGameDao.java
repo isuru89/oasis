@@ -20,25 +20,45 @@
 package io.github.oasis.core.services.api.dao;
 
 import io.github.oasis.core.Game;
+import io.github.oasis.core.services.api.dao.configs.UseOasisSqlLocator;
 import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
+import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.customizer.BindBean;
+import org.jdbi.v3.sqlobject.statement.GetGeneratedKeys;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
+@UseOasisSqlLocator("io/github/oasis/db/scripts/game")
+@RegisterBeanMapper(Game.class)
 public interface IGameDao {
 
-    int insertGame(Game game);
+    @SqlUpdate
+    @GetGeneratedKeys("id")
+    int insertGame(@BindBean Game game, @Bind("ts") long timestamp);
 
-    Game readGame(int gameId);
+    default int insertGame(Game game) {
+        return insertGame(game, System.currentTimeMillis());
+    }
 
-    void updateGame(int gameId, GameUpdatePart gameNew);
+    @SqlQuery
+    Game readGame(@Bind("id") int gameId);
 
-    void deleteGame(int gameId);
+    @SqlUpdate
+    void updateGame(@Bind("id") int gameId, @BindBean GameUpdatePart gameNew);
 
-    List<Game> listGames(int pageOffset, int pageSize);
+    @SqlUpdate
+    void deleteGame(@Bind("id") int gameId);
 
-    Game getGameByName(String name);
+    @SqlQuery
+    List<Game> listGames(@Bind("offset") int pageOffset, @Bind("pageSize") int pageSize);
+
+    @SqlQuery
+    Game readGameByName(@Bind("name") String name);
 
 }

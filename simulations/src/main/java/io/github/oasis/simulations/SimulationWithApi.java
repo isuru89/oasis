@@ -37,7 +37,10 @@ import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -57,7 +60,6 @@ public class SimulationWithApi extends Simulation {
     protected int createEventSourceToken() throws Exception {
         EventSource source = new EventSource();
         source.setName(SOURCE_NAME);
-        source.setGames(Set.of(GAME_ID));
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(context.getAdminApiUrl() + "/admin/event-sources"))
@@ -71,7 +73,16 @@ public class SimulationWithApi extends Simulation {
             System.out.println(result.statusCode());
             throw new IllegalStateException("Cannot add new event source!");
         }
+
         EventSource eventSource = gson.fromJson(result.body(), EventSource.class);
+
+        client.send(HttpRequest.newBuilder()
+                .uri(URI.create(context.getAdminApiUrl() + "/admin/games/" + GAME_ID + "/event-sources/" + eventSource.getId()))
+                .timeout(Duration.ofSeconds(2))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(source)))
+                .build(), HttpResponse.BodyHandlers.ofString());
+
 
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PublicKey publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(eventSource.getSecrets().getPublicKey())));
@@ -123,7 +134,7 @@ public class SimulationWithApi extends Simulation {
                 }
                 TeamObject dbTeam = gson.fromJson(result.body(), TeamObject.class);
                 System.out.println("Added team " + dbTeam);
-                teamMap.put(dbTeam.getName(), dbTeam.getTeamId());
+                teamMap.put(dbTeam.getName(), dbTeam.getId());
             }
             return teamMap;
         } catch (InterruptedException e) {

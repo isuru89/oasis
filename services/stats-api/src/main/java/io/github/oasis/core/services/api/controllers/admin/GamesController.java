@@ -21,6 +21,7 @@ package io.github.oasis.core.services.api.controllers.admin;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
@@ -30,8 +31,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -65,8 +64,18 @@ public class GamesController extends AbstractController {
     )
     @ForPlayer
     @GetMapping(path = "/games")
-    public List<Game> listGames() {
-        return gameService.listAllGames();
+    public PaginatedResult<Game> listGames(@RequestParam(name = "page", defaultValue = "0") String page,
+                                           @RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize) {
+        return gameService.listAllGames(page, pageSize);
+    }
+
+    @Operation(
+            summary = "Check existence of game by name"
+    )
+    @ForPlayer
+    @GetMapping(path = "/games/search")
+    public Game getGameByName(@RequestParam(name = "name") String gameName) {
+        return gameService.getGameByName(gameName);
     }
 
     @Operation(

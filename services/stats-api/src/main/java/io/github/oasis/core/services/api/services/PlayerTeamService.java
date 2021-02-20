@@ -19,13 +19,19 @@
 
 package io.github.oasis.core.services.api.services;
 
+import io.github.oasis.core.TeamMetadata;
+import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.services.api.beans.BackendRepository;
+import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
+import io.github.oasis.core.services.exceptions.OasisApiException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
@@ -39,9 +45,10 @@ public class PlayerTeamService extends AbstractOasisService {
 
     public PlayerObject addPlayer(PlayerCreateRequest request) {
         PlayerObject playerObject = new PlayerObject();
-        playerObject.setDisplayName(request.getFirstName() + " " + request.getLastName());
+        playerObject.setDisplayName(request.getDisplayName());
         playerObject.setEmail(request.getEmail());
         playerObject.setGender(request.getGender());
+        playerObject.setAvatarRef(request.getAvatarRef());
         playerObject.setTimeZone(request.getTimeZone());
 
         PlayerObject oasisUser = backendRepository.addPlayer(playerObject);
@@ -79,6 +86,19 @@ public class PlayerTeamService extends AbstractOasisService {
         return backendRepository.addTeam(teamObject);
     }
 
+    public TeamObject readTeam(String name) throws OasisApiException {
+        return Optional.ofNullable(backendRepository.readTeam(name))
+                .orElseThrow(() -> new OasisApiException(ErrorCodes.TEAM_NOT_EXISTS, HttpStatus.NOT_FOUND.value(),
+                        "Provided team is not found!"));
+    }
+
+    public TeamObject readTeam(int teamId) throws OasisApiException {
+        return Optional.ofNullable(backendRepository.readTeam(teamId))
+                .orElseThrow(() -> new OasisApiException(ErrorCodes.TEAM_NOT_EXISTS, HttpStatus.NOT_FOUND.value(),
+                        "Provided team is not found!"));
+
+    }
+
     public TeamObject updateTeam(int teamId, TeamObject updatingTeam) {
         return backendRepository.updateTeam(teamId, updatingTeam);
     }
@@ -91,11 +111,19 @@ public class PlayerTeamService extends AbstractOasisService {
         backendRepository.addPlayerToTeam(userId, gameId, teamId);
     }
 
-    public void addPlayersToTeam(int teamId, List<Integer> userIds) {
+    public void removePlayerFromTeam(long playerId, int gameId, int teamId) {
+        backendRepository.removePlayerFromTeam(playerId, gameId, teamId);
+    }
+
+    public PaginatedResult<TeamMetadata> searchTeam(String teamPrefix, String offset, int maxSize) {
+        return backendRepository.searchTeam(teamPrefix, offset, maxSize);
+    }
+
+    public void addPlayersToTeam(int teamId, List<Long> userIds) {
         TeamObject teamObject = backendRepository.readTeam(teamId);
         int gameId = teamObject.getGameId();
 
-        for (int userId : userIds) {
+        for (long userId : userIds) {
             backendRepository.addPlayerToTeam(userId, gameId, teamId);
         }
     }

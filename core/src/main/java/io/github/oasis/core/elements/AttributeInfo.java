@@ -19,9 +19,7 @@
 
 package io.github.oasis.core.elements;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -30,11 +28,19 @@ import java.io.Serializable;
  */
 @Setter
 @Getter
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
+@ToString
 public class AttributeInfo implements Serializable {
 
-    private int id;
+    private Integer id;
     private String name;
-    private int order;
+    private int priority;
+    private String colorCode;
+
+    public AttributeInfo(Integer id, String name, Integer priority) {
+        this(id, name, priority, null);
+    }
 
 }

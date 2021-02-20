@@ -20,12 +20,12 @@
 package io.github.oasis.core.services.api.controllers.admin;
 
 import io.github.oasis.core.elements.ElementDef;
-import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.services.annotations.ForCurator;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.ElementService;
+import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
@@ -55,7 +55,7 @@ public class ElementsController extends AbstractController {
     )
     @ForPlayer
     @GetMapping(path = "/games/{gameId}/elements/types/{elementType}")
-    public List<SimpleElementDefinition> getElementsByType(@PathVariable("gameId") Integer gameId,
+    public List<ElementDef> getElementsByType(@PathVariable("gameId") Integer gameId,
                                                            @PathVariable("elementType") String elementType) throws OasisException {
         return elementService.listElementsByType(gameId, elementType);
     }
@@ -66,8 +66,9 @@ public class ElementsController extends AbstractController {
     @ForPlayer
     @GetMapping(path = "/games/{gameId}/elements/{elementId}")
     public ElementDef read(@PathVariable("gameId") Integer gameId,
-                           @PathVariable("elementId") String elementId) {
-        return elementService.readElement(gameId, elementId);
+                           @PathVariable("elementId") String elementId,
+                           @RequestParam(name = "withData", defaultValue = "false") Boolean withData) throws OasisApiException {
+        return elementService.readElement(gameId, elementId, withData);
     }
 
     @Operation(

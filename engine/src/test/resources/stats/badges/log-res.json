@@ -12,7 +12,7 @@
       "attributeMetadata": {
         "id": 10,
         "name": "Bronze",
-        "order": 100
+        "priority": 100
       },
       "streakStartedAt": 1584962100000,
       "awardedAt": 1585048500000
@@ -28,7 +28,7 @@
       "attributeMetadata": {
         "id": 20,
         "name": "Silver",
-        "order": 50
+        "priority": 50
       },
       "streakStartedAt": 1584962100000,
       "awardedAt": 1585048500000

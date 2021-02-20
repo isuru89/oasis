@@ -20,6 +20,7 @@
 package io.github.oasis.core.services.api.dao.dto;
 
 import io.github.oasis.core.Game;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,17 +31,20 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@Builder
 public class GameUpdatePart implements Serializable {
 
     private String name;
     private String description;
     private String motto;
+    private String logoRef;
 
     public static GameUpdatePart from(Game game) {
-        GameUpdatePart part = new GameUpdatePart();
-        part.setName(game.getName());
-        part.setMotto(game.getMotto());
-        part.setDescription(game.getDescription());
-        return part;
+        return GameUpdatePart.builder()
+                .name(game.getName())
+                .description(game.getDescription())
+                .motto(game.getMotto())
+                .logoRef(game.getLogoRef())
+                .build();
     }
 }

@@ -19,6 +19,7 @@
 
 package io.github.oasis.core;
 
+import io.github.oasis.core.model.TeamObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,5 +38,9 @@ public class TeamMetadata implements Serializable {
 
     private int teamId;
     private String name;
+
+    public static TeamMetadata from(TeamObject team) {
+        return new TeamMetadata(team.getId(), team.getName());
+    }
 
 }

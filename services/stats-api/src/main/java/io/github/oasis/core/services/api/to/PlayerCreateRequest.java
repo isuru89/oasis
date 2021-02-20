@@ -20,6 +20,7 @@
 package io.github.oasis.core.services.api.to;
 
 import io.github.oasis.core.model.UserGender;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,14 +31,13 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@Builder(toBuilder = true)
 public class PlayerCreateRequest implements Serializable {
 
     private Long userId;
     private String email;
-    private String firstName;
-    private String lastName;
-    private String userName;
-
+    private String displayName;
+    private String avatarRef;
     private UserGender gender;
     private String timeZone;
 

@@ -22,6 +22,12 @@ package io.github.oasis.core.services.api.configs;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.external.Db;
+import io.github.oasis.core.services.api.dao.IElementDao;
+import io.github.oasis.core.services.api.dao.IEventSourceDao;
+import io.github.oasis.core.services.api.dao.IGameDao;
+import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
+import io.github.oasis.core.services.api.dao.configs.OasisEnumArgTypeFactory;
+import io.github.oasis.core.services.api.dao.configs.OasisEnumColumnFactory;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.db.redis.RedisDb;
 import org.jdbi.v3.core.Jdbi;
@@ -90,7 +96,9 @@ public class DatabaseConfigs {
     @Bean
     public Jdbi createJdbiInterface(DataSource jdbcDataSource) {
         Jdbi jdbi = Jdbi.create(jdbcDataSource);
-        jdbi.installPlugin(new SqlObjectPlugin());
+        jdbi.installPlugin(new SqlObjectPlugin())
+                .registerColumnMapper(new OasisEnumColumnFactory())
+                .registerArgument(new OasisEnumArgTypeFactory());;
 
         return jdbi;
     }
@@ -99,6 +107,26 @@ public class DatabaseConfigs {
     public Db createDbService(OasisConfigs oasisConfigs) throws Exception {
         LOG.info("Trying to create database connection... (with retries {})", numberOfDbRetries);
         return loadDbService(oasisConfigs, numberOfDbRetries);
+    }
+
+    @Bean
+    public IGameDao createGameDao(Jdbi jdbi) {
+        return jdbi.onDemand(IGameDao.class);
+    }
+
+    @Bean
+    public IEventSourceDao createEventSourceDao(Jdbi jdbi) {
+        return jdbi.onDemand(IEventSourceDao.class);
+    }
+
+    @Bean
+    public IElementDao createElementDao(Jdbi jdbi) {
+        return jdbi.onDemand(IElementDao.class);
+    }
+
+    @Bean
+    public IPlayerTeamDao createPlayerTeamDao(Jdbi jdbi) {
+        return jdbi.onDemand(IPlayerTeamDao.class);
     }
 
     private Db loadDbService(OasisConfigs oasisConfigs, int retries) throws Exception {

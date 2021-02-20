@@ -19,12 +19,17 @@
 
 package io.github.oasis.core.services;
 
+import java.lang.reflect.Type;
+
 /**
  * @author Isuru Weerarathna
  */
 public interface SerializationSupport {
 
     <T> T deserialize(String data, Class<T> clz);
+
+    <T> T deserialize(byte[] data, Class<T> clz);
+    <T> T deserialize(byte[] data, Type type);
 
     String serialize(Object data);
 

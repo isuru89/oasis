@@ -28,6 +28,22 @@ public final class ErrorCodes {
     public static final String GAME_ID_NOT_SPECIFIED = "G0002";
     public static final String GAME_EXCEEDED_MOTTO_LEN = "G0003";
     public static final String GAME_EXCEEDED_DESC_LEND = "G0004";
+    public static final String GAME_ALREADY_EXISTS = "G0005";
 
     public static final String EVENT_SOURCE_NO_NAME = "ES0001";
+    public static final String EVENT_SOURCE_ALREADY_EXISTS = "ES0002";
+    public static final String EVENT_SOURCE_ALREADY_MAPPED = "ES0003";
+    public static final String EVENT_SOURCE_NOT_EXISTS = "ES0004";
+    public static final String EVENT_SOURCE_DOWNLOAD_LIMIT_EXCEEDED = "ES0005";
+
+    public static final String PLAYER_EXISTS = "PL0001";
+    public static final String PLAYER_ALREADY_IN_TEAM = "PL0002";
+
+    public static final String TEAM_EXISTS = "TM0001";
+    public static final String TEAM_NOT_EXISTS = "TM0002";
+
+    public static final String ELEMENT_ALREADY_EXISTS = "EL0001";
+    public static final String ELEMENT_NOT_EXISTS = "EL0002";
+
+    public static final String ATTRIBUTE_EXISTS = "AT0001";
 }

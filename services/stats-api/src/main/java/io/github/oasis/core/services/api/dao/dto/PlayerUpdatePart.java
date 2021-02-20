@@ -33,14 +33,14 @@ import java.io.Serializable;
 public class PlayerUpdatePart implements Serializable {
 
     private String displayName;
-    private String avatarUrl;
+    private String avatarRef;
     private int gender;
 
     public static PlayerUpdatePart from(PlayerObject playerObject) {
         PlayerUpdatePart part = new PlayerUpdatePart();
         part.setGender(playerObject.getGender().getId());
         part.setDisplayName(playerObject.getDisplayName());
-        part.setAvatarUrl(playerObject.getAvatarRef());
+        part.setAvatarRef(playerObject.getAvatarRef());
         return part;
     }
 

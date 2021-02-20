@@ -24,6 +24,7 @@ import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.model.EventSourceSecrets;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 
@@ -38,6 +39,7 @@ public interface OasisRepository {
     EventSource deleteEventSource(int id);
     EventSource readEventSource(int id);
     EventSource readEventSource(String token);
+    EventSourceSecrets readEventSourceSecrets(int id);
     List<EventSource> listAllEventSources();
     List<EventSource> listAllEventSourcesOfGame(int gameId);
     void addEventSourceToGame(int sourceId, int gameId);
@@ -48,7 +50,8 @@ public interface OasisRepository {
     Game readGame(int gameId);
     Game deleteGame(int gameId);
     boolean existsGame(String gameName);
-    List<Game> listGames();
+    Game readGameByName(String gameName);
+    PaginatedResult<Game> listGames(String offset, int pageSize);
 
     PlayerObject readPlayer(long userId);
     PlayerObject readPlayer(String email);
@@ -60,6 +63,7 @@ public interface OasisRepository {
 
     TeamObject addTeam(TeamObject teamObject);
     TeamObject readTeam(int teamId);
+    TeamObject readTeam(String teamName);
     TeamObject updateTeam(int teamId, TeamObject updatedTeam);
     boolean existsTeam(String teamName);
     boolean existsTeam(int teamId);
@@ -74,6 +78,8 @@ public interface OasisRepository {
     ElementDef updateElement(int gameId, String id, ElementDef elementDef);
     ElementDef deleteElement(int gameId, String id);
     ElementDef readElement(int gameId, String id);
+    ElementDef readElementWithoutData(int gameId, String id);
+    List<ElementDef> readElementsByType(int gameId, String type);
 
     AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute);
     List<AttributeInfo> listAllAttributes(int gameId);

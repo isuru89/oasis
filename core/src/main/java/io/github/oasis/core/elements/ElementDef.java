@@ -19,8 +19,10 @@
 
 package io.github.oasis.core.elements;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -30,12 +32,15 @@ import java.util.Map;
  */
 @Getter
 @Setter
+@Builder
+@ToString
 public class ElementDef implements Serializable {
 
+    private Integer id;
     private String type;
     private String impl;
     private Integer gameId;
-    private String id;
+    private String elementId;
     private SimpleElementDefinition metadata;
     private Map<String, Object> data;
 

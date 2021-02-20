@@ -23,6 +23,10 @@ import com.google.gson.Gson;
 import io.github.oasis.core.services.SerializationSupport;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -38,6 +42,16 @@ public class GsonSerializer implements SerializationSupport {
     @Override
     public <T> T deserialize(String data, Class<T> clz) {
         return gson.fromJson(data, clz);
+    }
+
+    @Override
+    public <T> T deserialize(byte[] data, Class<T> clz) {
+        return gson.fromJson(new InputStreamReader(new ByteArrayInputStream(data)), clz);
+    }
+
+    @Override
+    public <T> T deserialize(byte[] data, Type type) {
+        return gson.fromJson(new InputStreamReader(new ByteArrayInputStream(data)), type);
     }
 
     @Override

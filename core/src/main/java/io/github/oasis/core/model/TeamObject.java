@@ -19,9 +19,7 @@
 
 package io.github.oasis.core.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 /**
  * @author Isuru Weerarathna
@@ -29,19 +27,21 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@Builder(toBuilder = true)
+@AllArgsConstructor
 public class TeamObject {
 
     private Integer gameId;
-    private Integer teamId;
+    private Integer id;
     private String name;
-    private String avatarUrl;
+    private String colorCode;
+    private String avatarRef;
+
+    private long createdAt;
+    private long updatedAt;
+    private boolean active = true;
 
     public TeamObject() {
     }
 
-    public TeamObject(int gameId, int teamId, String name) {
-        this.gameId = gameId;
-        this.teamId = teamId;
-        this.name = name;
-    }
 }

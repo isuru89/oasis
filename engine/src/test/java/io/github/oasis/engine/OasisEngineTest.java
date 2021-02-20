@@ -122,7 +122,7 @@ public class OasisEngineTest {
             metadataSupport.addPlayer(new PlayerObject(4, "Lilia Stewart", "lilia@oasis.io"));
             metadataSupport.addPlayer(new PlayerObject(5, "Archer Roberts", "archer@oasis.io"));
 
-            metadataSupport.addTeam(new TeamObject(1, 1, "Warriors"));
+            metadataSupport.addTeam(TeamObject.builder().id(1).gameId(1).name("Warriors").build());
 
             setupDbBefore(db);
         }
@@ -168,12 +168,13 @@ public class OasisEngineTest {
         List<AbstractRule> rules = new ArrayList<>();
         for (PersistedDef def : ruleDefinitions) {
             AbstractRule rule = engine.getContext().getParsers().parseToRule(def);
-            ElementDef elementDef = new ElementDef();
-            elementDef.setId(rule.getId());
-            elementDef.setType(def.getType());
-            elementDef.setData(def.getData());
-            elementDef.setGameId(gameId);
-            elementDef.setMetadata(new SimpleElementDefinition(rule.getId(), rule.getName(), rule.getDescription()));
+            ElementDef elementDef = ElementDef.builder()
+                    .elementId(rule.getId())
+                    .type(def.getType())
+                    .data(def.getData())
+                    .gameId(gameId)
+                    .metadata(new SimpleElementDefinition(rule.getId(), rule.getName(), rule.getDescription()))
+                    .build();
             metadataSupport.addNewElement(gameId, elementDef);
             engine.submit(Messages.createRuleAddMessage(gameId, rule, null));
             rules.add(rule);

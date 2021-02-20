@@ -71,26 +71,26 @@ class RedisRepositoryTest {
 
     @Test
     void addEventSource() {
-        EventSource eventSource = createEventSource("token-1", "source-app", 1);
+        EventSource eventSource = createEventSource(1, "token-1", "source-app", 1);
         redisRepository.addEventSource(eventSource);
 
         eventSource.setName("source-app-2");
         assertError(() -> redisRepository.addEventSource(eventSource));
 
-        redisRepository.addEventSource(createEventSource("token-2", "source-app-new", 1, 2));
+        redisRepository.addEventSource(createEventSource(2, "token-2", "source-app-new", 1, 2));
 
         // without game ids
-        redisRepository.addEventSource(createEventSource("token-3", "source-app-new"));
+        redisRepository.addEventSource(createEventSource(3, "token-3", "source-app-new"));
 
         // without secrets, it should fail
-        EventSource src = createEventSource("token-no", "no-secret-app", 1);
+        EventSource src = createEventSource(4, "token-no", "no-secret-app", 1);
         src.setSecrets(null);
         assertError(() -> redisRepository.addEventSource(src));
     }
 
     @Test
     void deleteEventSource() {
-        Integer id = redisRepository.addEventSource(createEventSource("token-1", "my-app", 1)).getId();
+        Integer id = redisRepository.addEventSource(createEventSource(1, "token-1", "my-app", 1)).getId();
 
         Assertions.assertNotNull(redisRepository.readEventSource("token-1"));
 
@@ -110,7 +110,7 @@ class RedisRepositoryTest {
 
     @Test
     void readEventSource() {
-        Integer id = redisRepository.addEventSource(createEventSource("token-1", "my-app", 1)).getId();
+        Integer id = redisRepository.addEventSource(createEventSource(1, "token-1", "my-app", 1)).getId();
         EventSource source = redisRepository.readEventSource(id);
         Assertions.assertEquals("token-1", source.getToken());
         Assertions.assertEquals("my-app", source.getName());
@@ -137,11 +137,11 @@ class RedisRepositoryTest {
     void listAllEventSources() {
         Assertions.assertEquals(0, redisRepository.listAllEventSources().size());
 
-        redisRepository.addEventSource(createEventSource("t-1", "app-1", 1));
-        redisRepository.addEventSource(createEventSource("t-2", "app-2", 2, 3));
-        redisRepository.addEventSource(createEventSource("t-3", "app-3", 3));
-        redisRepository.addEventSource(createEventSource("t-4", "app-4"));
-        redisRepository.addEventSource(createEventSource("t-5", "app-5", 2, 3));
+        redisRepository.addEventSource(createEventSource(1, "t-1", "app-1", 1));
+        redisRepository.addEventSource(createEventSource(2, "t-2", "app-2", 2, 3));
+        redisRepository.addEventSource(createEventSource(3, "t-3", "app-3", 3));
+        redisRepository.addEventSource(createEventSource(4, "t-4", "app-4"));
+        redisRepository.addEventSource(createEventSource(5, "t-5", "app-5", 2, 3));
 
         List<EventSource> sources = redisRepository.listAllEventSources();
         Assertions.assertEquals(5, sources.size());
@@ -157,11 +157,11 @@ class RedisRepositoryTest {
 
     @Test
     void listAllEventSourcesOfGame() {
-        redisRepository.addEventSource(createEventSource("t-1", "app-1", 1));
-        redisRepository.addEventSource(createEventSource("t-2", "app-2", 2, 3));
-        redisRepository.addEventSource(createEventSource("t-3", "app-3", 3));
-        redisRepository.addEventSource(createEventSource("t-4", "app-4"));
-        redisRepository.addEventSource(createEventSource("t-5", "app-5", 2, 3));
+        redisRepository.addEventSource(createEventSource(1, "t-1", "app-1", 1));
+        redisRepository.addEventSource(createEventSource(2, "t-2", "app-2", 2, 3));
+        redisRepository.addEventSource(createEventSource(3, "t-3", "app-3", 3));
+        redisRepository.addEventSource(createEventSource(4, "t-4", "app-4"));
+        redisRepository.addEventSource(createEventSource(5, "t-5", "app-5", 2, 3));
 
         Assertions.assertEquals(5, redisRepository.listAllEventSources().size());
 
@@ -173,7 +173,7 @@ class RedisRepositoryTest {
 
     @Test
     void addEventSourceToGame() {
-        int src1Id = redisRepository.addEventSource(createEventSource("t-1", "app-1")).getId();
+        int src1Id = redisRepository.addEventSource(createEventSource(1, "t-1", "app-1")).getId();
 
         Assertions.assertNull(redisRepository.readEventSource(src1Id).getGames());
 
@@ -190,7 +190,7 @@ class RedisRepositoryTest {
 
     @Test
     void removeEventSourceFromGame() {
-        int src1Id = redisRepository.addEventSource(createEventSource("t-1", "app-1")).getId();
+        int src1Id = redisRepository.addEventSource(createEventSource(1, "t-1", "app-1")).getId();
 
         Assertions.assertNull(redisRepository.readEventSource(src1Id).getGames());
 
@@ -213,19 +213,19 @@ class RedisRepositoryTest {
     @Test
     @DisplayName("Game: Add")
     void addNewGame() {
-        Game game = createGame("game1");
+        Game game = createGame(1, "game1");
         int gameId = redisRepository.addNewGame(game).getId();
         assertError(() -> redisRepository.addNewGame(game));
 
-        game.setName("game2");
-        int game2Id = redisRepository.addNewGame(game).getId();
-        Assertions.assertEquals(gameId + 1, game2Id);
+        Game game2 = game.toBuilder().id(2).name("game2").build();
+        int game2Id = redisRepository.addNewGame(game2).getId();
+        Assertions.assertTrue(gameId < game2Id);
     }
 
     @Test
     @DisplayName("Game: Update")
     void updateGame() {
-        Game game = createGame("game1");
+        Game game = createGame(1, "game1");
         int gameId = redisRepository.addNewGame(game).getId();
 
         game.setName("gamenameupdated");
@@ -242,7 +242,7 @@ class RedisRepositoryTest {
     @Test
     @DisplayName("Game: Read")
     void readGame() {
-        Integer gameId = redisRepository.addNewGame(createGame("game1")).getId();
+        Integer gameId = redisRepository.addNewGame(createGame(1, "game1")).getId();
         Game game = redisRepository.readGame(gameId);
         Assertions.assertNotNull(game);
         Assertions.assertNotNull(game.getId());
@@ -257,7 +257,7 @@ class RedisRepositoryTest {
     @Test
     @DisplayName("Game: Delete")
     void deleteGame() {
-        Game oldGame = createGame("game1");
+        Game oldGame = createGame(1, "game1");
         Integer gameId = redisRepository.addNewGame(oldGame).getId();
         Game game = redisRepository.deleteGame(gameId);
         Assertions.assertEquals(oldGame.getId(), game.getId());
@@ -276,22 +276,22 @@ class RedisRepositoryTest {
     @Test
     @DisplayName("Game: List All")
     void listGames() {
-        redisRepository.addNewGame(createGame("game-apex-1"));
-        redisRepository.addNewGame(createGame("game-apex-2"));
-        redisRepository.addNewGame(createGame("game-apex-3"));
-        redisRepository.addNewGame(createGame("helloworld"));
-        redisRepository.addNewGame(createGame("olympic"));
-        redisRepository.addNewGame(createGame("commonwealth"));
+        redisRepository.addNewGame(createGame(1, "game-apex-1"));
+        redisRepository.addNewGame(createGame(2, "game-apex-2"));
+        redisRepository.addNewGame(createGame(3, "game-apex-3"));
+        redisRepository.addNewGame(createGame(4, "helloworld"));
+        redisRepository.addNewGame(createGame(5, "olympic"));
+        redisRepository.addNewGame(createGame(6, "commonwealth"));
 
-        List<Game> games = redisRepository.listGames();
+        List<Game> games = redisRepository.listGames("0", 50).getRecords();
         Assertions.assertEquals(6, games.size());
     }
 
     @Test
     void readUsersByIdStrings() {
-        long userId = redisRepository.addPlayer(createUser("john@oasis.io", "John Doe")).getId();
-        long user2Id = redisRepository.addPlayer(createUser("alice@oasis.io", "Alice Lena")).getId();
-        long user3Id = redisRepository.addPlayer(createUser("bob@oasis.io", "Bob Hopkins")).getId();
+        long userId = redisRepository.addPlayer(createUser(1, "john@oasis.io", "John Doe")).getId();
+        long user2Id = redisRepository.addPlayer(createUser(2, "alice@oasis.io", "Alice Lena")).getId();
+        long user3Id = redisRepository.addPlayer(createUser(3, "bob@oasis.io", "Bob Hopkins")).getId();
 
         Map<String, UserMetadata> userMap = redisRepository.readUsersByIdStrings(List.of(String.valueOf(userId), String.valueOf(user2Id)));
         Assertions.assertEquals(2, userMap.size());
@@ -308,8 +308,8 @@ class RedisRepositoryTest {
 
     @Test
     void readUser() {
-        long userId = redisRepository.addPlayer(createUser("john@oasis.io", "John Doe")).getId();
-        long user2Id = redisRepository.addPlayer(createUser("alice@oasis.io", "Alice Lena")).getId();
+        long userId = redisRepository.addPlayer(createUser(1, "john@oasis.io", "John Doe")).getId();
+        long user2Id = redisRepository.addPlayer(createUser(2, "alice@oasis.io", "Alice Lena")).getId();
 
         PlayerObject userById = redisRepository.readPlayer(userId);
         PlayerObject userByEmail = redisRepository.readPlayer("john@oasis.io");
@@ -335,18 +335,18 @@ class RedisRepositoryTest {
 
     @Test
     void addUser() {
-        long userId = redisRepository.addPlayer(createUser("john@oasis.io", "John Doe")).getId();
+        long userId = redisRepository.addPlayer(createUser(1, "john@oasis.io", "John Doe")).getId();
 
         // no duplicate emails
-        assertError(() -> redisRepository.addPlayer(createUser("john@oasis.io", "Other John")));
+        assertError(() -> redisRepository.addPlayer(createUser(2, "john@oasis.io", "Other John")));
 
-        long user2Id = redisRepository.addPlayer(createUser("alice@oasis.io", "Alice Lena")).getId();
-        Assertions.assertEquals(user2Id, userId + 1);
+        long user2Id = redisRepository.addPlayer(createUser(3, "alice@oasis.io", "Alice Lena")).getId();
+        Assertions.assertTrue(user2Id > userId);
     }
 
     @Test
     void updateUser() {
-        long userId = redisRepository.addPlayer(createUser("john@oasis.io", "John Doe")).getId();
+        long userId = redisRepository.addPlayer(createUser(1, "john@oasis.io", "John Doe")).getId();
         PlayerObject playerObject = redisRepository.readPlayer(userId);
         Assertions.assertNotNull(playerObject);
         Assertions.assertEquals("john@oasis.io", playerObject.getEmail());
@@ -360,7 +360,7 @@ class RedisRepositoryTest {
         assertError(() -> redisRepository.updatePlayer(userId, playerObject));
 
         // impersonating users should fail
-        redisRepository.addPlayer(createUser("bob@oasis.io", "Bob Hopkins"));
+        redisRepository.addPlayer(createUser(2, "bob@oasis.io", "Bob Hopkins"));
         playerObject.setEmail("bob@oasis.io");
         assertError(() -> redisRepository.updatePlayer(userId, playerObject));
 
@@ -375,7 +375,7 @@ class RedisRepositoryTest {
 
     @Test
     void deleteUser() {
-        long userId = redisRepository.addPlayer(createUser("john@oasis.io", "John Doe")).getId();
+        long userId = redisRepository.addPlayer(createUser(1, "john@oasis.io", "John Doe")).getId();
         Assertions.assertTrue(redisRepository.existsPlayer("john@oasis.io"));
 
         PlayerObject playerObject = redisRepository.deletePlayer(userId);
@@ -394,33 +394,33 @@ class RedisRepositoryTest {
 
     @Test
     void existsUser() {
-        long userId = redisRepository.addPlayer(createUser("john@oasis.io", "John Doe")).getId();
+        long userId = redisRepository.addPlayer(createUser(1, "john@oasis.io", "John Doe")).getId();
         Assertions.assertTrue(redisRepository.existsPlayer(userId));
         Assertions.assertFalse(redisRepository.existsPlayer(999));
     }
 
     @Test
     void addTeam() {
-        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
-        Integer team2Id = redisRepository.addTeam(createTeam("Avengers")).getTeamId();
+        Integer teamId = redisRepository.addTeam(createTeam(1, "Warriors")).getId();
+        Integer team2Id = redisRepository.addTeam(createTeam(2, "Avengers")).getId();
         Assertions.assertTrue(teamId > 0);
         Assertions.assertEquals(team2Id, teamId + 1);
 
         // should not be able to add same team again
-        assertError(() -> redisRepository.addTeam(createTeam("Warriors")));
-        assertError(() -> redisRepository.addTeam(createTeam("warriors")));
+        assertError(() -> redisRepository.addTeam(createTeam(1, "Warriors")));
+        assertError(() -> redisRepository.addTeam(createTeam(2, "warriors")));
     }
 
     @Test
     void existsTeam() {
-        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
+        Integer teamId = redisRepository.addTeam(createTeam(1, "Warriors")).getId();
         Assertions.assertTrue(redisRepository.existsTeam(teamId));
         Assertions.assertFalse(redisRepository.existsTeam(999));
     }
 
     @Test
     void readTeam() {
-        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
+        Integer teamId = redisRepository.addTeam(createTeam(1, "Warriors")).getId();
         Assertions.assertEquals("Warriors", redisRepository.readTeam(teamId).getName());
 
         // non-exist team id
@@ -429,8 +429,8 @@ class RedisRepositoryTest {
 
     @Test
     void readTeamsByIdStrings() {
-        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
-        Integer team2Id = redisRepository.addTeam(createTeam("Avengers")).getTeamId();
+        Integer teamId = redisRepository.addTeam(createTeam(1, "Warriors")).getId();
+        Integer team2Id = redisRepository.addTeam(createTeam(2, "Avengers")).getId();
 
         // read metadata
         Map<Integer, TeamMetadata> teamMap = redisRepository.readTeamsById(List.of(teamId, team2Id));
@@ -441,8 +441,8 @@ class RedisRepositoryTest {
 
     @Test
     void readTeamsById() {
-        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
-        Integer team2Id = redisRepository.addTeam(createTeam("Avengers")).getTeamId();
+        Integer teamId = redisRepository.addTeam(createTeam(1, "Warriors")).getId();
+        Integer team2Id = redisRepository.addTeam(createTeam(2, "Avengers")).getId();
 
         // read metadata
         Map<String, TeamMetadata> teamMap = redisRepository.readTeamsByIdStrings(List.of(String.valueOf(teamId), String.valueOf(team2Id)));
@@ -453,7 +453,7 @@ class RedisRepositoryTest {
 
     @Test
     void readTeamMetadata() {
-        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
+        Integer teamId = redisRepository.addTeam(createTeam(1, "Warriors")).getId();
 
         TeamMetadata teamMetadata = redisRepository.readTeamMetadata(teamId);
         Assertions.assertNotNull(teamMetadata);
@@ -467,7 +467,7 @@ class RedisRepositoryTest {
 
     @Test
     void updateTeam() {
-        Integer teamId = redisRepository.addTeam(createTeam("Warriors")).getTeamId();
+        Integer teamId = redisRepository.addTeam(createTeam(1, "Warriors")).getId();
         TeamObject teamObject = redisRepository.readTeam(teamId);
         Assertions.assertEquals("Warriors", teamObject.getName());
 
@@ -485,7 +485,7 @@ class RedisRepositoryTest {
 
     @Test
     void existTeam() {
-        redisRepository.addTeam(createTeam("Warriors"));
+        redisRepository.addTeam(createTeam(1, "Warriors"));
 
         Assertions.assertTrue(redisRepository.existsTeam("Warriors"));
         Assertions.assertTrue(redisRepository.existsTeam("warriors"));
@@ -493,12 +493,12 @@ class RedisRepositoryTest {
 
     @Test
     void searchTeam() {
-        redisRepository.addTeam(createTeam("wildfire"));
-        redisRepository.addTeam(createTeam("t-apex-1"));
-        redisRepository.addTeam(createTeam("t-apex-2"));
-        redisRepository.addTeam(createTeam("sunrise warrior"));
-        redisRepository.addTeam(createTeam("musketeers"));
-        redisRepository.addTeam(createTeam("avengers"));
+        redisRepository.addTeam(createTeam(1, "wildfire"));
+        redisRepository.addTeam(createTeam(2, "t-apex-1"));
+        redisRepository.addTeam(createTeam(3, "t-apex-2"));
+        redisRepository.addTeam(createTeam(4, "sunrise warrior"));
+        redisRepository.addTeam(createTeam(5, "musketeers"));
+        redisRepository.addTeam(createTeam(6, "avengers"));
 
         PaginatedResult<TeamMetadata> result = redisRepository.searchTeam("apex", null, 10);
         Assertions.assertTrue(result.isCompleted());
@@ -512,10 +512,10 @@ class RedisRepositoryTest {
 
     @Test
     void getUserTeams() {
-        long u1 = redisRepository.addPlayer(createUser("john@oasis.io", "John Doe")).getId();
-        int t1 = redisRepository.addTeam(createTeam(DEF_GAME_ID, "sunrise warrior")).getTeamId();
-        int t2 = redisRepository.addTeam(createTeam(2, "musketeers")).getTeamId();
-        int t3 = redisRepository.addTeam(createTeam(3, "avengers")).getTeamId();
+        long u1 = redisRepository.addPlayer(createUser(1, "john@oasis.io", "John Doe")).getId();
+        int t1 = redisRepository.addTeam(createTeam(DEF_GAME_ID, "sunrise warrior")).getId();
+        int t2 = redisRepository.addTeam(createTeam(2, "musketeers")).getId();
+        int t3 = redisRepository.addTeam(createTeam(3, "avengers")).getId();
 
         redisRepository.addPlayerToTeam(u1, DEF_GAME_ID, t1);
         redisRepository.addPlayerToTeam(u1, 2, t2);
@@ -533,12 +533,12 @@ class RedisRepositoryTest {
 
     @Test
     void addUserToTeam() {
-        long u1 = redisRepository.addPlayer(createUser("john@oasis.io", "John Doe")).getId();
-        long u2 = redisRepository.addPlayer(createUser("alice@oasis.io", "Alice Lee")).getId();
+        long u1 = redisRepository.addPlayer(createUser(1, "john@oasis.io", "John Doe")).getId();
+        long u2 = redisRepository.addPlayer(createUser(2, "alice@oasis.io", "Alice Lee")).getId();
 
-        int t1 = redisRepository.addTeam(createTeam("sunrise warrior")).getTeamId();
-        int t2 = redisRepository.addTeam(createTeam("musketeers")).getTeamId();
-        int t3 = redisRepository.addTeam(createTeam(2, "avengers")).getTeamId();
+        int t1 = redisRepository.addTeam(createTeam(1, "sunrise warrior")).getId();
+        int t2 = redisRepository.addTeam(createTeam(2, "musketeers")).getId();
+        int t3 = redisRepository.addTeam(createTeam(2, "avengers")).getId();
 
         redisRepository.addPlayerToTeam(u1, DEF_GAME_ID, t1);
         assertError(() -> redisRepository.addPlayerToTeam(u1, DEF_GAME_ID, t2));
@@ -558,11 +558,11 @@ class RedisRepositoryTest {
 
     @Test
     void removeUserFromTeam() {
-        long u1 = redisRepository.addPlayer(createUser("john@oasis.io", "John Doe")).getId();
+        long u1 = redisRepository.addPlayer(createUser(1, "john@oasis.io", "John Doe")).getId();
 
-        int t1 = redisRepository.addTeam(createTeam(DEF_GAME_ID, "sunrise warrior")).getTeamId();
-        int t2 = redisRepository.addTeam(createTeam(2, "musketeers")).getTeamId();
-        int t3 = redisRepository.addTeam(createTeam("avengers")).getTeamId();
+        int t1 = redisRepository.addTeam(createTeam(DEF_GAME_ID, "sunrise warrior")).getId();
+        int t2 = redisRepository.addTeam(createTeam(2, "musketeers")).getId();
+        int t3 = redisRepository.addTeam(createTeam(1, "avengers")).getId();
 
         redisRepository.addPlayerToTeam(u1, DEF_GAME_ID, t1);
         redisRepository.addPlayerToTeam(u1, 2, t2);
@@ -581,12 +581,12 @@ class RedisRepositoryTest {
 
     @Test
     void getTeamUsers() {
-        long u1 = redisRepository.addPlayer(createUser("john@oasis.io", "John Doe")).getId();
-        long u3 = redisRepository.addPlayer(createUser("bob@oasis.io", "Bob Hopkins")).getId();
+        long u1 = redisRepository.addPlayer(createUser(1, "john@oasis.io", "John Doe")).getId();
+        long u3 = redisRepository.addPlayer(createUser(2, "bob@oasis.io", "Bob Hopkins")).getId();
 
-        int t1 = redisRepository.addTeam(createTeam(DEF_GAME_ID, "sunrise warrior")).getTeamId();
-        int t2 = redisRepository.addTeam(createTeam(2, "musketeers")).getTeamId();
-        int t3 = redisRepository.addTeam(createTeam(3, "avengers")).getTeamId();
+        int t1 = redisRepository.addTeam(createTeam(DEF_GAME_ID, "sunrise warrior")).getId();
+        int t2 = redisRepository.addTeam(createTeam(2, "musketeers")).getId();
+        int t3 = redisRepository.addTeam(createTeam(3, "avengers")).getId();
 
         redisRepository.addPlayerToTeam(u1, DEF_GAME_ID, t1);
         redisRepository.addPlayerToTeam(u1, 2, t2);
@@ -609,7 +609,7 @@ class RedisRepositoryTest {
     void addNewElement() {
         ElementDef element = createElement("ELE0001", "Bonus Points", "points");
         ElementDef elementDef = redisRepository.addNewElement(element.getGameId(), element);
-        Assertions.assertEquals(element.getId(), elementDef.getId());
+        Assertions.assertEquals(element.getElementId(), elementDef.getElementId());
 
         assertError(() -> redisRepository.addNewElement(element.getGameId(), elementDef));
     }
@@ -620,13 +620,13 @@ class RedisRepositoryTest {
         ElementDef elementDef = redisRepository.addNewElement(element.getGameId(), element);
 
         elementDef.getMetadata().setName("Bonus Points 2");
-        redisRepository.updateElement(elementDef.getGameId(), elementDef.getId(), elementDef);
-        ElementDef updatedElement = redisRepository.readElement(elementDef.getGameId(), elementDef.getId());
+        redisRepository.updateElement(elementDef.getGameId(), elementDef.getElementId(), elementDef);
+        ElementDef updatedElement = redisRepository.readElement(elementDef.getGameId(), elementDef.getElementId());
         Assertions.assertEquals("Bonus Points 2", updatedElement.getMetadata().getName());
 
         // update non-existing element
-        elementDef.setId("NEX00000");
-        assertError(() -> redisRepository.updateElement(element.getGameId(), elementDef.getId(), elementDef));
+        elementDef.setElementId("NEX00000");
+        assertError(() -> redisRepository.updateElement(element.getGameId(), elementDef.getElementId(), elementDef));
         assertError(() -> redisRepository.updateElement(element.getGameId(), "NEX9999", elementDef));
     }
 
@@ -648,7 +648,7 @@ class RedisRepositoryTest {
         redisRepository.addNewElement(element.getGameId(), element);
 
         ElementDef elementDef = redisRepository.readElement(element.getGameId(), "ELE0001");
-        Assertions.assertEquals(element.getId(), elementDef.getId());
+        Assertions.assertEquals(element.getElementId(), elementDef.getElementId());
         Assertions.assertEquals(element.getMetadata().getName(), elementDef.getMetadata().getName());
         Assertions.assertEquals(element.getType(), elementDef.getType());
 
@@ -702,7 +702,7 @@ class RedisRepositoryTest {
 
         ElementDef bonusPoints = redisRepository.readElement(1, "ELE0001");
         bonusPoints.getMetadata().setName("Bonus Points 2");
-        redisRepository.updateElement(1, bonusPoints.getId(), bonusPoints);
+        redisRepository.updateElement(1, bonusPoints.getElementId(), bonusPoints);
 
         Assertions.assertEquals(2, redisRepository.listAllElementDefinitions(1, "points").size());
         Assertions.assertTrue(redisRepository.listAllElementDefinitions(1, "points").stream().anyMatch(e -> e.getName().equals("Bonus Points 2")));
@@ -751,46 +751,43 @@ class RedisRepositoryTest {
     }
 
     private ElementDef createElement(String id, String name, String type) {
-        ElementDef def = new ElementDef();
-        def.setId(id);
-        def.setMetadata(new SimpleElementDefinition(id, name, ""));
-        def.setType(type);
-        def.setGameId(1);
-        def.setData(new HashMap<>());
-        return def;
+        return ElementDef.builder()
+                .elementId(id)
+                .metadata(new SimpleElementDefinition(id, name, ""))
+                .type(type)
+                .gameId(1)
+                .data(new HashMap<>())
+                .build();
     }
 
-    private PlayerObject createUser(String email, String name) {
+    private PlayerObject createUser(long id, String email, String name) {
         PlayerObject playerObject = new PlayerObject();
+        playerObject.setId(id);
         playerObject.setDisplayName(name);
         playerObject.setEmail(email);
         return playerObject;
     }
 
-    private TeamObject createTeam(int gameId, String name) {
+    private TeamObject createTeam(int id, String name) {
         TeamObject team = new TeamObject();
-        team.setGameId(gameId);
-        team.setName(name);
-        return team;
-    }
-
-    private TeamObject createTeam(String name) {
-        TeamObject team = new TeamObject();
+        team.setId(id);
         team.setGameId(DEF_GAME_ID);
         team.setName(name);
         return team;
     }
 
-    private Game createGame(String name) {
+    private Game createGame(int id, String name) {
         Game game = new Game();
+        game.setId(id);
         game.setName(name);
         game.setDescription("Test Game");
         game.setMotto("All the way!");
         return game;
     }
 
-    private EventSource createEventSource(String token, String name, Integer... gameIds) {
+    private EventSource createEventSource(int id, String token, String name, Integer... gameIds) {
         EventSource source = new EventSource();
+        source.setId(id);
         source.setName(name);
         source.setToken(token);
         if (gameIds != null && gameIds.length > 0) {

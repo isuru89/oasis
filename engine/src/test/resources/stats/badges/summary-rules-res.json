@@ -14,7 +14,7 @@
           "attributeMetadata": {
             "id": 30,
             "name": "Gold",
-            "order": 20
+            "priority": 20
           },
           "count": 0
         },
@@ -23,7 +23,7 @@
           "attributeMetadata": {
             "id": 20,
             "name": "Silver",
-            "order": 50
+            "priority": 50
           },
           "count": 1
         },
@@ -32,7 +32,7 @@
           "attributeMetadata": {
             "id": 10,
             "name": "Bronze",
-            "order": 100
+            "priority": 100
           },
           "count": 1
         }
