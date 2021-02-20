@@ -33,6 +33,8 @@ public final class ErrorCodes {
     public static final String EVENT_SOURCE_NO_NAME = "ES0001";
     public static final String EVENT_SOURCE_ALREADY_EXISTS = "ES0002";
     public static final String EVENT_SOURCE_ALREADY_MAPPED = "ES0003";
+    public static final String EVENT_SOURCE_NOT_EXISTS = "ES0004";
+    public static final String EVENT_SOURCE_DOWNLOAD_LIMIT_EXCEEDED = "ES0005";
 
     public static final String PLAYER_EXISTS = "PL0001";
     public static final String PLAYER_ALREADY_IN_TEAM = "PL0002";

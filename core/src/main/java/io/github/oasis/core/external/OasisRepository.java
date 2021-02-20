@@ -24,6 +24,7 @@ import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.model.EventSourceSecrets;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 
@@ -38,6 +39,7 @@ public interface OasisRepository {
     EventSource deleteEventSource(int id);
     EventSource readEventSource(int id);
     EventSource readEventSource(String token);
+    EventSourceSecrets readEventSourceSecrets(int id);
     List<EventSource> listAllEventSources();
     List<EventSource> listAllEventSourcesOfGame(int gameId);
     void addEventSourceToGame(int sourceId, int gameId);

@@ -17,27 +17,40 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.exceptions;
+package io.github.oasis.core.services.api.dao.dto;
 
+import io.github.oasis.core.model.EventSourceSecrets;
+import lombok.*;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public class OasisApiRuntimeException extends RuntimeException {
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class EventSourceSecretsDto implements Serializable {
 
-    private final String errorCode;
+    private String publicKey;
+    private String privateKey;
 
-    public OasisApiRuntimeException(String errorCode, Throwable cause) {
-        super(cause);
-        this.errorCode = errorCode;
+    private int downloadCount;
+
+    public static EventSourceSecretsDto from(EventSourceSecrets secrets) {
+        return EventSourceSecretsDto.builder()
+                .privateKey(secrets.getPrivateKey())
+                .publicKey(secrets.getPublicKey())
+                .build();
     }
 
-    public OasisApiRuntimeException(String errorCode) {
-        super();
-        this.errorCode = errorCode;
+    public EventSourceSecrets toSecrets() {
+        EventSourceSecrets secrets = new EventSourceSecrets();
+        secrets.setPrivateKey(privateKey);
+        secrets.setPublicKey(publicKey);
+        return secrets;
     }
 
-    public String getErrorCode() {
-        return errorCode;
-    }
 }

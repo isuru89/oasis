@@ -24,6 +24,7 @@ import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.EventSourceService;
+import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -79,10 +80,28 @@ public class EventSourceController extends AbstractController {
     public ResponseEntity<String> associateEventSourceToGame(@PathVariable("gameId") Integer gameId,
                                                      @PathVariable("eventSourceId") Integer eventSourceId) {
         eventSourceService.assignEventSourceToGame(eventSourceId, gameId);
-        return new ResponseEntity<>(
-                "OK",
-                HttpStatus.CREATED
-        );
+        return ResponseEntity.status(HttpStatus.CREATED).body("OK");
+    }
+
+    @Operation(
+            summary = "Get the key associated with a event source. Can only download once.",
+            tags = {"admin"}
+    )
+    @ForAdmin
+    @GetMapping("/admin/event-sources/{eventSourceId}/keys")
+    public ResponseEntity<EventSourceKeysResponse> fetchEventSourceKeys(@PathVariable("eventSourceId") Integer eventSourceId) {
+        EventSourceKeysResponse response = eventSourceService.downloadEventSourceKeys(eventSourceId);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(
+            summary = "Get the event source details associated with given id.",
+            tags = {"admin"}
+    )
+    @ForAdmin
+    @GetMapping("/admin/event-sources/{eventSourceId}")
+    public EventSource getEventSource(@PathVariable("eventSourceId") Integer eventSourceId) {
+        return eventSourceService.readEventSource(eventSourceId);
     }
 
     @Operation(
@@ -94,10 +113,7 @@ public class EventSourceController extends AbstractController {
     public ResponseEntity<String> removeEventSourceFromGame(@PathVariable("gameId") Integer gameId,
                                                              @PathVariable("eventSourceId") Integer eventSourceId) {
         eventSourceService.removeEventSourceFromGame(eventSourceId, gameId);
-        return new ResponseEntity<>(
-                "OK",
-                HttpStatus.OK
-        );
+        return ResponseEntity.ok("OK");
     }
 
     @Operation(
@@ -108,16 +124,6 @@ public class EventSourceController extends AbstractController {
     @GetMapping("/admin/event-sources")
     public List<EventSource> getAllEventSources() {
         return eventSourceService.listAllEventSources();
-    }
-
-    @Operation(
-            summary = "Download the keys of an existing event source",
-            tags = {"admin"}
-    )
-    @ForAdmin
-    @DeleteMapping("/admin/event-sources/{eventSourceId}/download")
-    public void downloadEventSourceKeys(@PathVariable("eventSourceId") Integer eventSourceId) {
-        eventSourceService.deleteEventSource(eventSourceId);
     }
 
     @Operation(

@@ -27,6 +27,7 @@ import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.model.EventSourceSecrets;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.services.SerializationSupport;
@@ -34,11 +35,9 @@ import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.dao.IEventSourceDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
-import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
-import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
+import io.github.oasis.core.services.api.dao.dto.*;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import io.github.oasis.core.services.api.to.ElementDto;
 import org.jdbi.v3.core.JdbiException;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -56,6 +56,8 @@ import java.util.stream.Collectors;
  */
 @Component("jdbc")
 public class JdbcRepository implements OasisRepository {
+
+    public static final int KEY_DOWNLOAD_LIMIT = 1;
 
     private final IGameDao gameDao;
     private final IEventSourceDao eventSourceDao;
@@ -80,7 +82,8 @@ public class JdbcRepository implements OasisRepository {
     @Override
     public EventSource addEventSource(EventSource eventSource) {
         try {
-            return eventSourceDao.insertEventSource(eventSource);
+            EventSourceDto dto = eventSourceDao.insertEventSource(EventSourceDto.from(eventSource));
+            return dto.toEventSource();
         } catch (JdbiException e) {
             throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_ALREADY_EXISTS, e);
         }
@@ -88,29 +91,51 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public EventSource deleteEventSource(int id) {
-        EventSource toBeRemoved = eventSourceDao.readEventSource(id);
+        EventSourceDto toBeRemoved = eventSourceDao.readEventSource(id);
         eventSourceDao.deleteEventSource(id);
-        return toBeRemoved;
+        return toBeRemoved.toEventSource();
     }
 
     @Override
     public EventSource readEventSource(int id) {
-        return eventSourceDao.readEventSource(id);
+        return Optional.ofNullable(eventSourceDao.readEventSource(id))
+                .map(EventSourceDto::toEventSource)
+                .orElseThrow(() -> new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_NOT_EXISTS));
     }
 
     @Override
     public EventSource readEventSource(String token) {
-        return eventSourceDao.readEventSourceByToken(token);
+        return Optional.ofNullable(eventSourceDao.readEventSourceByToken(token))
+                .map(EventSourceDto::toEventSource)
+                .orElseThrow(() -> new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_NOT_EXISTS));
+    }
+
+    @Override
+    public EventSourceSecrets readEventSourceSecrets(int id) {
+        EventSourceSecretsDto dto = eventSourceDao.readKeysAndIncrement(id, KEY_DOWNLOAD_LIMIT);
+        if (dto.getDownloadCount() >= KEY_DOWNLOAD_LIMIT) {
+            throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_DOWNLOAD_LIMIT_EXCEEDED);
+        }
+        EventSourceSecrets secrets = new EventSourceSecrets();
+        secrets.setPrivateKey(dto.getPrivateKey());
+        secrets.setPublicKey(dto.getPublicKey());
+        return secrets;
     }
 
     @Override
     public List<EventSource> listAllEventSources() {
-        return eventSourceDao.readAllEventSources();
+        return eventSourceDao.readAllEventSources()
+                .stream()
+                .map(EventSourceDto::toEventSource)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<EventSource> listAllEventSourcesOfGame(int gameId) {
-        return eventSourceDao.readEventSourcesOfGame(gameId);
+        return eventSourceDao.readEventSourcesOfGame(gameId)
+                .stream()
+                .map(EventSourceDto::toEventSource)
+                .collect(Collectors.toList());
     }
 
     @Override

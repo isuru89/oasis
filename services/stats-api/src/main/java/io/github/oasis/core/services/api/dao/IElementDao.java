@@ -21,7 +21,7 @@ package io.github.oasis.core.services.api.dao;
 
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.services.api.dao.configs.UseOasisSqlLocator;
-import io.github.oasis.core.services.api.to.ElementDto;
+import io.github.oasis.core.services.api.dao.dto.ElementDto;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;

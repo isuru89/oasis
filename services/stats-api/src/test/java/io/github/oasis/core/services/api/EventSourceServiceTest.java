@@ -32,6 +32,7 @@ import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.services.EventSourceService;
+import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -74,6 +75,39 @@ public class EventSourceServiceTest extends AbstractServiceTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> esController.registerEventSource(EventSource.builder().name("").build()))
                 .isInstanceOf(DataValidationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_NO_NAME);
+    }
+
+    @Test
+    void testDownloadEventSourceKeys() throws OasisException {
+        EventSource source = EventSource.builder().name("test-1").build();
+        EventSource dbSource = esController.registerEventSource(source);
+        System.out.println(dbSource);
+        assertSource(dbSource, source, true);
+
+        ResponseEntity<EventSourceKeysResponse> keyset = esController.fetchEventSourceKeys(dbSource.getId());
+        assertNotNull(keyset.getBody());
+        assertEquals(dbSource.getSecrets().getPrivateKey(), keyset.getBody().getPrivateKeyB64Encoded());
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> esController.fetchEventSourceKeys(dbSource.getId()))
+                .isInstanceOf(OasisApiRuntimeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_DOWNLOAD_LIMIT_EXCEEDED);
+    }
+
+    @Test
+    void testReadEventSourceInfo() throws OasisException {
+        EventSource source = EventSource.builder().name("test-1").build();
+        EventSource dbSource = esController.registerEventSource(source);
+        System.out.println(dbSource);
+        assertSource(dbSource, source, true);
+
+        EventSource eventSource = esController.getEventSource(dbSource.getId());
+        System.out.println(eventSource);
+        assertNull(eventSource.getSecrets());
+        assertSource(eventSource, dbSource, false);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> esController.getEventSource(dbSource.getId() + 500))
+                .isInstanceOf(OasisApiRuntimeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_NOT_EXISTS);
     }
 
     @Test

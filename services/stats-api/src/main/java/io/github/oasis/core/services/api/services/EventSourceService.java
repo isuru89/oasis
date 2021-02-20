@@ -26,6 +26,7 @@ import io.github.oasis.core.services.KeyGeneratorSupport;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Utils;
 import org.springframework.stereotype.Service;
@@ -72,12 +73,17 @@ public class EventSourceService extends AbstractOasisService {
         return dbSource;
     }
 
+    public EventSource readEventSource(int eventSourceId) {
+        return backendRepository.readEventSource(eventSourceId);
+    }
+
     public void deleteEventSource(int eventSourceId) {
         backendRepository.deleteEventSource(eventSourceId);
     }
 
-    public void downloadEventSourceKeys(int eventSourceId) {
-
+    public EventSourceKeysResponse downloadEventSourceKeys(int eventSourceId) {
+        EventSourceSecrets secrets = backendRepository.readEventSourceSecrets(eventSourceId);
+        return new EventSourceKeysResponse(secrets.getPrivateKey());
     }
 
     public void assignEventSourceToGame(int eventSource, int gameId) {

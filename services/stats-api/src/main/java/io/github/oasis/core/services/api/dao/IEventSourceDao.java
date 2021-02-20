@@ -19,9 +19,10 @@
 
 package io.github.oasis.core.services.api.dao;
 
-import io.github.oasis.core.model.EventSource;
-import io.github.oasis.core.model.EventSourceSecrets;
 import io.github.oasis.core.services.api.dao.configs.UseOasisSqlLocator;
+import io.github.oasis.core.services.api.dao.dto.EventSourceDto;
+import io.github.oasis.core.services.api.dao.dto.EventSourceSecretsDto;
+import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -36,25 +37,46 @@ import java.util.List;
  * @author Isuru Weerarathna
  */
 @UseOasisSqlLocator("io/github/oasis/db/scripts/eventsource")
-@RegisterBeanMapper(EventSource.class)
-@RegisterBeanMapper(EventSourceSecrets.class)
+@RegisterBeanMapper(EventSourceDto.class)
+@RegisterBeanMapper(EventSourceSecretsDto.class)
 public interface IEventSourceDao {
 
     @SqlUpdate
     @GetGeneratedKeys("id")
-    int insertEventSource(@BindBean EventSource eventSource, @Bind("ts") long timestamp);
+    int insertEventSource(@BindBean EventSourceDto eventSource, @Bind("ts") long timestamp);
 
     @SqlUpdate
-    void insertEventSourceKeys(@Bind("id") int id, @BindBean EventSourceSecrets secrets);
+    void insertEventSourceKeys(@Bind("id") int id, @BindBean EventSourceSecretsDto secrets);
 
-    @Transaction
-    default EventSource insertEventSource(EventSource source) {
+    @SqlQuery
+    EventSourceDto readEventSource(@Bind("id") int id);
+
+    @SqlQuery
+    EventSourceDto readEventSourceByToken(@Bind("token") String token);
+
+    @SqlQuery
+    EventSourceSecretsDto readEventSourceKeys(@Bind("id") int id);
+
+    @SqlUpdate
+    void updateDownloadCount(@Bind("id") int id, @Bind("downloadCount") int count);
+
+    @Transaction(TransactionIsolationLevel.SERIALIZABLE)
+    default EventSourceDto insertEventSource(EventSourceDto source) {
         int id = insertEventSource(source, System.currentTimeMillis());
         insertEventSourceKeys(id, source.getSecrets());
-        EventSource dbSource = readEventSource(id);
-        EventSourceSecrets eventSourceSecrets = readEventSourceKeys(id);
+        EventSourceDto dbSource = readEventSource(id);
+        EventSourceSecretsDto eventSourceSecrets = readEventSourceKeys(id);
         dbSource.setSecrets(eventSourceSecrets);
         return dbSource;
+    }
+
+    @Transaction(TransactionIsolationLevel.SERIALIZABLE)
+    default EventSourceSecretsDto readKeysAndIncrement(int eventSourceId, int limit) {
+        EventSourceSecretsDto secretsDto = readEventSourceKeys(eventSourceId);
+        if (secretsDto.getDownloadCount() < limit) {
+            updateDownloadCount(eventSourceId, secretsDto.getDownloadCount() + 1);
+        }
+        return secretsDto;
     }
 
     @SqlUpdate
@@ -70,19 +92,10 @@ public interface IEventSourceDao {
     }
 
     @SqlQuery
-    EventSource readEventSource(@Bind("id") int id);
+    List<EventSourceDto> readAllEventSources();
 
     @SqlQuery
-    EventSource readEventSourceByToken(@Bind("token") String token);
-
-    @SqlQuery
-    EventSourceSecrets readEventSourceKeys(@Bind("id") int id);
-
-    @SqlQuery
-    List<EventSource> readAllEventSources();
-
-    @SqlQuery
-    List<EventSource> readEventSourcesOfGame(@Bind("gameId") int gameId);
+    List<EventSourceDto> readEventSourcesOfGame(@Bind("gameId") int gameId);
 
     @SqlUpdate
     void addEventSourceToGame(@Bind("gameId") int gameId, @Bind("eventSourceId") int eventSourceId);

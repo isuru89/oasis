@@ -27,6 +27,7 @@ import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.model.EventSourceSecrets;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
@@ -88,6 +89,11 @@ public class BackendRepository implements OasisRepository {
     @Override
     public EventSource readEventSource(String token) {
         return adminRepository.readEventSource(token);
+    }
+
+    @Override
+    public EventSourceSecrets readEventSourceSecrets(int id) {
+        return adminRepository.readEventSourceSecrets(id);
     }
 
     @Override

@@ -124,6 +124,12 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
+    public EventSourceSecrets readEventSourceSecrets(int id) {
+        // Not allowed to read secrets from engine database.
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<EventSource> listAllEventSources() {
         return withDbContext(db -> {
             Map<String, String> all = db.MAP(ID.ALL_SOURCES).getAll();

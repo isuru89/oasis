@@ -17,27 +17,23 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.exceptions;
+package io.github.oasis.core.services.api.to;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public class OasisApiRuntimeException extends RuntimeException {
+@Getter
+@Setter
+@AllArgsConstructor
+public class EventSourceKeysResponse implements Serializable {
 
-    private final String errorCode;
+    public String privateKeyB64Encoded;
 
-    public OasisApiRuntimeException(String errorCode, Throwable cause) {
-        super(cause);
-        this.errorCode = errorCode;
-    }
 
-    public OasisApiRuntimeException(String errorCode) {
-        super();
-        this.errorCode = errorCode;
-    }
-
-    public String getErrorCode() {
-        return errorCode;
-    }
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.to;
+package io.github.oasis.core.services.api.dao.dto;
 
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;

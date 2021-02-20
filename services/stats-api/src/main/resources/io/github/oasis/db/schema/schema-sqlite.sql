@@ -90,7 +90,8 @@ DROP TABLE IF EXISTS `OA_EVENT_SOURCE_KEY`;
 CREATE TABLE `OA_EVENT_SOURCE_KEY` (
   `event_source_id` int NOT NULL,
   `public_key` TEXT NOT NULL,
-  `private_key` TEXT NOT NULL
+  `private_key` TEXT NOT NULL,
+  `download_count` smallint DEFAULT '0'
 );
 
 DROP TABLE IF EXISTS `OA_EVENT_SOURCE_GAME`;
