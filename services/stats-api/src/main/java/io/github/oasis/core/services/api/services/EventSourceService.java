@@ -45,6 +45,7 @@ public class EventSourceService extends AbstractOasisService {
     public EventSourceService(BackendRepository backendRepository, KeyGeneratorSupport keyGeneratorSupport) {
         super(backendRepository);
 
+        System.out.println(backendRepository);
         this.keyGeneratorSupport = keyGeneratorSupport;
     }
 

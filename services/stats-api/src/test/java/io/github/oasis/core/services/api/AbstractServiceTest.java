@@ -48,6 +48,8 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -110,7 +112,14 @@ public abstract class AbstractServiceTest {
 
         JdbcRepository jdbcRepository = createJdbcRepository(jdbi);
         adminRepo = jdbcRepository;
-        BackendRepository backendRepository = BackendRepository.create(redisConnection, jdbcRepository);
+        Map<String, Object> configData = new HashMap<>();
+        configData.put("oasis.db.admin", "jdbc");
+        configData.put("oasis.db.engine", "redis");
+        OasisConfigs configs = OasisConfigs.create(configData);
+        Map<String, OasisRepository> repositoryMap = new HashMap<>();
+        repositoryMap.put("redis", redisConnection);
+        repositoryMap.put("jdbc", jdbcRepository);
+        BackendRepository backendRepository = new BackendRepository(repositoryMap, configs);
         combinedRepo = backendRepository;
 
         createServices(backendRepository);

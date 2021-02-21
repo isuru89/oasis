@@ -17,19 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.services;
+package io.github.oasis.core.services.api.dao;
 
-import io.github.oasis.core.services.api.beans.BackendRepository;
+import io.github.oasis.core.services.api.dao.configs.UseOasisSqlLocator;
+import io.github.oasis.core.services.api.dao.dto.ApiKeyDto;
+import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
+import org.jdbi.v3.sqlobject.customizer.Bind;
+import org.jdbi.v3.sqlobject.statement.SqlQuery;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractOasisService {
+@UseOasisSqlLocator("io/github/oasis/db/scripts/apiKey")
+@RegisterBeanMapper(ApiKeyDto.class)
+public interface IApiKeyDao {
 
-    protected final BackendRepository backendRepository;
-
-    AbstractOasisService(BackendRepository backendRepository) {
-        this.backendRepository = backendRepository;
-    }
+    @SqlQuery
+    ApiKeyDto readApiKey(@Bind("token") String token);
 
 }

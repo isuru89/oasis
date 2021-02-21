@@ -19,15 +19,30 @@
 
 package io.github.oasis.core.services.api.security;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Collection;
 
 /**
  * @author Isuru Weerarathna
  */
-@Configuration
-public class KeycloakConfigs {
+public class OasisApiKeyToken extends AbstractAuthenticationToken {
 
+    private String apiKey;
+    private String apiSecret;
 
+    public OasisApiKeyToken(Collection<? extends GrantedAuthority> authorities) {
+        super(authorities);
+    }
 
+    @Override
+    public Object getCredentials() {
+        return apiSecret;
+    }
 
+    @Override
+    public Object getPrincipal() {
+        return apiKey;
+    }
 }

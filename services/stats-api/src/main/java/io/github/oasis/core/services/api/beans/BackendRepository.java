@@ -33,6 +33,8 @@ import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import org.jdbi.v3.core.JdbiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -48,23 +50,14 @@ import java.util.Objects;
 @Component
 public class BackendRepository implements OasisRepository {
 
-    private OasisRepository engineRepository;
-    private OasisRepository adminRepository;
+    private static final Logger LOG = LoggerFactory.getLogger(BackendRepository.class);
 
-    public BackendRepository(){}
+    private final OasisRepository engineRepository;
+    private final OasisRepository adminRepository;
 
     public BackendRepository(Map<String, OasisRepository> oasisServiceMap, OasisConfigs oasisConfigs) {
         this.adminRepository = oasisServiceMap.get(oasisConfigs.get("oasis.db.admin", null));
         this.engineRepository = oasisServiceMap.get(oasisConfigs.get("oasis.db.engine", "redis"));
-    }
-
-    private BackendRepository(OasisRepository engineRepository, OasisRepository adminRepository) {
-        this.adminRepository = adminRepository;
-        this.engineRepository = engineRepository;
-    }
-
-    public static BackendRepository create(OasisRepository engineRepository, OasisRepository adminRepository) {
-        return new BackendRepository(engineRepository, adminRepository);
     }
 
     @Override

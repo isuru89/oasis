@@ -22,14 +22,13 @@ package io.github.oasis.core.services.api.configs;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.services.api.dao.IElementDao;
-import io.github.oasis.core.services.api.dao.IEventSourceDao;
-import io.github.oasis.core.services.api.dao.IGameDao;
-import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
+import io.github.oasis.core.services.api.dao.*;
 import io.github.oasis.core.services.api.dao.configs.OasisEnumArgTypeFactory;
 import io.github.oasis.core.services.api.dao.configs.OasisEnumColumnFactory;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.db.redis.RedisDb;
+import org.apache.commons.io.IOUtils;
+import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.slf4j.Logger;
@@ -41,6 +40,8 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Isuru Weerarathna
@@ -94,12 +95,21 @@ public class DatabaseConfigs {
     }
 
     @Bean
-    public Jdbi createJdbiInterface(DataSource jdbcDataSource) {
+    public Jdbi createJdbiInterface(DataSource jdbcDataSource) throws IOException {
         Jdbi jdbi = Jdbi.create(jdbcDataSource);
         jdbi.installPlugin(new SqlObjectPlugin())
                 .registerColumnMapper(new OasisEnumColumnFactory())
-                .registerArgument(new OasisEnumArgTypeFactory());;
+                .registerArgument(new OasisEnumArgTypeFactory());
 
+        if (oasisJdbcUrl.contains(":sqlite:")) {
+            String schemaScript = IOUtils.resourceToString(
+                    "io/github/oasis/db/schema/schema-sqlite.sql",
+                    StandardCharsets.UTF_8,
+                    Thread.currentThread().getContextClassLoader());
+            try (Handle h = jdbi.open()) {
+                h.createScript(schemaScript).executeAsSeparateStatements();
+            }
+        }
         return jdbi;
     }
 
@@ -107,6 +117,11 @@ public class DatabaseConfigs {
     public Db createDbService(OasisConfigs oasisConfigs) throws Exception {
         LOG.info("Trying to create database connection... (with retries {})", numberOfDbRetries);
         return loadDbService(oasisConfigs, numberOfDbRetries);
+    }
+
+    @Bean
+    public IApiKeyDao createApiKeyDao(Jdbi jdbi) {
+        return jdbi.onDemand(IApiKeyDao.class);
     }
 
     @Bean

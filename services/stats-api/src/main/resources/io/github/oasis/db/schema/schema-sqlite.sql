@@ -100,3 +100,14 @@ CREATE TABLE `OA_EVENT_SOURCE_GAME` (
   `event_source_id` int NOT NULL,
   UNIQUE(`game_id`, `event_source_id`)
 );
+
+
+DROP TABLE IF EXISTS `OA_API_KEY`;
+CREATE TABLE `OA_API_KEY` (
+  `token` VARCHAR(128) NOT NULL UNIQUE,
+  `secret_key` varchar(255) NOT NULL,
+  `roles` int NOT NULL,
+  `is_active` tinyint default '1'
+);
+
+INSERT INTO `OA_API_KEY` (`token`, `secret_key`, `roles`) VALUES ('admin', 'admin', 4);

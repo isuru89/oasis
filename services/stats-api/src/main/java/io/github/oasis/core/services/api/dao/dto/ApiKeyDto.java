@@ -17,19 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.services;
+package io.github.oasis.core.services.api.dao.dto;
 
-import io.github.oasis.core.services.api.beans.BackendRepository;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractOasisService {
+@Getter
+@Setter
+public class ApiKeyDto implements Serializable {
 
-    protected final BackendRepository backendRepository;
-
-    AbstractOasisService(BackendRepository backendRepository) {
-        this.backendRepository = backendRepository;
-    }
+    private String token;
+    private String secretKey;
+    private int roles;
 
 }
