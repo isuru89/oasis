@@ -47,7 +47,7 @@ public class RedisVerticle extends AbstractVerticle {
     public void start(Promise<Void> promise) {
         LOG.info("Starting Redis connection...");
         JsonObject redisConfigs = config();
-        LOG.debug("Redis Configs: {}", redisConfigs.encodePrettily());
+        LOG.info("Redis Configs: {}", redisConfigs.encodePrettily());
         RedisOptions configs = new RedisOptions(redisConfigs);
 
         redisClient = Redis.createClient(vertx, configs);

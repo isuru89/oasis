@@ -44,13 +44,6 @@ import java.time.Instant;
 @ControllerAdvice
 public class OasisErrorHandler extends ResponseEntityExceptionHandler {
 
-    private static final String TIMESTAMP = "timestamp";
-    private static final String STATUS = "status";
-    private static final String ERROR_CODE = "errorCode";
-    private static final String ERROR_CODE_DESCRIPTION = "errorCodeDescription";
-    private static final String MESSAGE = "message";
-    private static final String PATH = "path";
-
     private static final HttpHeaders ERROR_HEADERS = new HttpHeaders();
 
     private final ErrorMessages errorMessages;

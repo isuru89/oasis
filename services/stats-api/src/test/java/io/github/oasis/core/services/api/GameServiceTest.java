@@ -22,6 +22,7 @@ package io.github.oasis.core.services.api;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.exception.OasisRuntimeException;
+import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.beans.jdbc.JdbcRepository;
 import io.github.oasis.core.services.api.controllers.admin.GamesController;
@@ -29,10 +30,13 @@ import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.services.GameService;
+import io.github.oasis.core.services.api.services.IEngineManager;
 import io.github.oasis.core.services.api.to.GameObjectRequest;
+import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GameServiceTest extends AbstractServiceTest {
 
     private GamesController controller;
+    private final IEngineManager engineManager = Mockito.mock(IEngineManager.class);
 
     private final GameObjectRequest stackOverflow = GameObjectRequest.builder()
             .name("Stack-overflow")
@@ -131,6 +136,38 @@ public class GameServiceTest extends AbstractServiceTest {
         assertThrows(OasisRuntimeException.class, () -> engineRepo.readGame(stackId));
     }
 
+    @Test
+    void updateGameStatus() throws OasisException {
+        int stackId = controller.addGame(stackOverflow).getId();
+
+        Mockito.reset(engineManager);
+        Game gameRef = controller.updateGameStatus(stackId, "start");
+        assertEngineManagerOnceCalledWithState(GameState.STARTED, gameRef);
+
+        Mockito.reset(engineManager);
+        gameRef = controller.updateGameStatus(stackId, "stop");
+        assertEngineManagerOnceCalledWithState(GameState.STOPPED, gameRef);
+
+        Mockito.reset(engineManager);
+        gameRef = controller.updateGameStatus(stackId, "pause");
+        assertEngineManagerOnceCalledWithState(GameState.PAUSED, gameRef);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.updateGameStatus(stackId, null))
+                .isInstanceOf(OasisApiException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.GAME_UNKNOWN_STATE);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.updateGameStatus(stackId, ""))
+                .isInstanceOf(OasisApiException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.GAME_UNKNOWN_STATE);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.updateGameStatus(stackId, "hello"))
+                .isInstanceOf(OasisApiException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.GAME_UNKNOWN_STATE);
+    }
+
+    private void assertEngineManagerOnceCalledWithState(GameState state, Game game) {
+        Mockito.verify(engineManager,
+                Mockito.times(1)).changeGameStatus(state, game);
+    }
+
     @Override
     JdbcRepository createJdbcRepository(Jdbi jdbi) {
         return new JdbcRepository(
@@ -144,7 +181,7 @@ public class GameServiceTest extends AbstractServiceTest {
 
     @Override
     void createServices(BackendRepository backendRepository) {
-        controller = new GamesController(new GameService(backendRepository));
+        controller = new GamesController(new GameService(backendRepository, engineManager));
     }
 
     private void assertGame(Game db, GameObjectRequest other) {

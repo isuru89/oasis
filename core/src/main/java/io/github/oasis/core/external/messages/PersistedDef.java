@@ -36,6 +36,7 @@ public class PersistedDef implements Serializable {
 
     public static final String FIELD_TYPE = "type";
     public static final String FIELD_IMPL = "impl";
+    public static final String FIELD_SCOPE = "scope";
     public static final String FIELD_DATA = "data";
 
     public static final String GAME_CREATED = "GAME.CREATED";
@@ -80,6 +81,13 @@ public class PersistedDef implements Serializable {
         return def;
     }
 
+    public static PersistedDef createGameLifecycleEvent(int gameId, GameState gameStatus) {
+        PersistedDef def = new PersistedDef();
+        def.setType(gameStatus.getCommand());
+        def.setScope(new PersistedDef.Scope(gameId));
+        return def;
+    }
+
     public boolean isEvent() {
         return GAME_EVENT.equals(type);
     }
@@ -92,9 +100,7 @@ public class PersistedDef implements Serializable {
         return ALL_RULE_TYPES.contains(type);
     }
 
-    public boolean isGameRemoved() {
-        return GAME_REMOVED.equals(type);
-    }
+
 
     @Override
     public String toString() {

@@ -20,12 +20,7 @@
 package io.github.oasis.ext.rabbitstream;
 
 import com.google.gson.Gson;
-import com.rabbitmq.client.CancelCallback;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DeliverCallback;
-import com.rabbitmq.client.Delivery;
+import com.rabbitmq.client.*;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.context.RuntimeContextSupport;
@@ -40,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -53,7 +47,6 @@ import java.util.concurrent.TimeoutException;
 public class RabbitSource implements SourceStreamSupport, Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitSource.class);
-    private static final String OASIS_ANNOUNCEMENTS = "oasis.announcements.";
 
     private Connection connection;
     private Channel channel;
@@ -73,7 +66,7 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
         connection = factory.newConnection();
         channel = connection.createChannel();
 
-        String queue = OASIS_ANNOUNCEMENTS + id;
+        String queue = RabbitConstants.ANNOUNCEMENT_EXCHANGE + "." + id;
         LOG.info("Connecting to announcement queue {}", queue);
         RabbitUtils.declareAnnouncementExchange(channel);
         channel.queueDeclare(queue, true, true, false, null);

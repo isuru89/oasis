@@ -29,6 +29,9 @@ public final class ErrorCodes {
     public static final String GAME_EXCEEDED_MOTTO_LEN = "G0003";
     public static final String GAME_EXCEEDED_DESC_LEND = "G0004";
     public static final String GAME_ALREADY_EXISTS = "G0005";
+    public static final String GAME_UNKNOWN_STATE = "G0006";
+
+    public static final String UNABLE_TO_CHANGE_GAME_STATE = "EG0001";
 
     public static final String EVENT_SOURCE_NO_NAME = "ES0001";
     public static final String EVENT_SOURCE_ALREADY_EXISTS = "ES0002";

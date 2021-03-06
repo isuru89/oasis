@@ -108,4 +108,17 @@ public class GamesController extends AbstractController {
     public Game deleteGame(@PathVariable("gameId") Integer gameId) {
         return gameService.deleteGame(gameId);
     }
+
+
+    @Operation(
+            summary = "Updates the status of game",
+            tags = {"admin"}
+    )
+    @ForAdmin
+    @PutMapping(path = "/games/{gameId}/:status")
+    public Game updateGameStatus(@PathVariable("gameId") Integer gameId,
+                                 @PathVariable("status") String status) throws OasisException {
+        return gameService.changeStatusOfGame(gameId, status);
+    }
+
 }
