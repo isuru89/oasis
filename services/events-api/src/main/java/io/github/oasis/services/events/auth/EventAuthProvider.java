@@ -23,19 +23,18 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.github.oasis.services.events.model.ApiKeyCredentials.SOURCE_ID;
+
 /**
  * @author Isuru Weerarathna
  */
-public class EventAuthProvider implements AuthProvider {
-
-    static final String SOURCE_ID = "id";
-    static final String SOURCE_DIGEST = "digest";
+public class EventAuthProvider implements AuthenticationProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventAuthProvider.class);
 

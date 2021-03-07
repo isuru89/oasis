@@ -35,15 +35,12 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.AuthHandler;
+import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.github.oasis.services.events.http.Constants.CONF_PORT;
-import static io.github.oasis.services.events.http.Constants.ROUTE_BULK_EVENT_PUSH;
-import static io.github.oasis.services.events.http.Constants.ROUTE_EVENT_PUSH;
-import static io.github.oasis.services.events.http.Constants.ROUTE_PING;
+import static io.github.oasis.services.events.http.Constants.*;
 
 /**
  * @author Isuru Weerarathna
@@ -67,7 +64,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
         RedisService redisService = RedisService.createProxy(vertx, RedisService.DB_SERVICE_QUEUE);
         EventDispatcherService dispatcherService = EventDispatcherService.createProxy(vertx, EventDispatcherService.DISPATCHER_SERVICE_QUEUE);
 
-        AuthHandler authHandler = new EventAuthHandler(new EventAuthProvider(authService));
+        AuthenticationHandler authHandler = new EventAuthHandler(new EventAuthProvider(authService));
 
         HttpServerOptions serverOptions = new HttpServerOptions(httpConf);
         server = vertx.createHttpServer(serverOptions);

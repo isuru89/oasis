@@ -22,6 +22,7 @@ package io.github.oasis.services.events.dispatcher;
 import io.github.oasis.core.external.EventAsyncDispatchSupport;
 import io.github.oasis.core.external.EventDispatchSupport;
 import io.github.oasis.core.external.EventStreamFactory;
+import io.vertx.core.Promise;
 import io.vertx.core.Verticle;
 import io.vertx.core.spi.VerticleFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.concurrent.Callable;
 
 /**
  * @author Isuru Weerarathna
@@ -47,7 +49,7 @@ public class DispatcherFactory implements VerticleFactory {
     }
 
     @Override
-    public Verticle createVerticle(String type, ClassLoader classLoader) throws Exception {
+    public void createVerticle(String type, ClassLoader classLoader, Promise<Callable<Verticle>> promise) {
         String impl = StringUtils.substringAfter(type, OASIS_PREFIX);
         LOG.info("Creating dispatcher of type: {}", impl);
         try {
@@ -67,18 +69,19 @@ public class DispatcherFactory implements VerticleFactory {
             if (instance instanceof EventDispatchSupport) {
                 EventDispatchSupport dispatchSupport = (EventDispatchSupport) instance;
                 if (instance instanceof EventAsyncDispatchSupport) {
-                    return new DispatcherAsyncVerticle((EventAsyncDispatchSupport) instance);
+                    promise.complete(() -> new DispatcherAsyncVerticle((EventAsyncDispatchSupport) instance));
+                } else {
+                    promise.complete(() -> new DispatcherVerticle(dispatchSupport));
                 }
-                return new DispatcherVerticle(dispatchSupport);
             } else if (instance instanceof Verticle) {
-                return (Verticle) instance;
+                promise.complete(() -> (Verticle) instance);
             } else {
-                throw new IllegalArgumentException("Unknown dispatcher type provided! " + impl);
+                promise.fail(new IllegalArgumentException("Unknown dispatcher type provided! " + impl));
             }
 
         } catch (ReflectiveOperationException e) {
             LOG.error("Cannot load provided dispatcher implementation!", e);
-            throw e;
+            promise.fail(e);
         }
     }
 }

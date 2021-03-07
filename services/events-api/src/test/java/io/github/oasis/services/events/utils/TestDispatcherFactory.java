@@ -20,8 +20,11 @@
 package io.github.oasis.services.events.utils;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Promise;
 import io.vertx.core.Verticle;
 import io.vertx.core.spi.VerticleFactory;
+
+import java.util.concurrent.Callable;
 
 /**
  * @author Isuru Weerarathna
@@ -40,7 +43,7 @@ public class TestDispatcherFactory implements VerticleFactory {
     }
 
     @Override
-    public Verticle createVerticle(String s, ClassLoader classLoader) {
-        return verticle;
+    public void createVerticle(String s, ClassLoader classLoader, Promise<Callable<Verticle>> promise) {
+        promise.complete(() -> verticle);
     }
 }

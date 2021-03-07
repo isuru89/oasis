@@ -31,12 +31,12 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-config</artifactId>
-            <version>3.9.0</version>
+            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-config-hocon</artifactId>
-            <version>3.9.0</version>
+            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -47,16 +47,6 @@
             <groupId>io.github.oasis</groupId>
             <artifactId>oasis-ext-rabbitstream</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.oasis</groupId>
-            <artifactId>oasis-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.10</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
