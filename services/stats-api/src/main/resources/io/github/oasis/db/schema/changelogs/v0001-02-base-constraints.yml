@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0002.uniques
+      author: isuruw
+      changes:
+        - addUniqueConstraint:
+            constraintName: UQ_OA_ATTRIBUTE_DEF
+            columnNames: game_id, name
+            tableName: OA_ATTRIBUTE_DEF
+            validate: true
+  - changeSet:
+      id: 0002.uniques.h2
+      author: isuruw
+      dbms: h2
+      changes:
+        - sql:
+            sql: ALTER TABLE OA_TEAM ALTER COLUMN name VARCHAR_IGNORECASE(64)

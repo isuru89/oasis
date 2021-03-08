@@ -27,8 +27,12 @@ import io.github.oasis.core.services.api.dao.configs.OasisEnumArgTypeFactory;
 import io.github.oasis.core.services.api.dao.configs.OasisEnumColumnFactory;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.db.redis.RedisDb;
-import org.apache.commons.io.IOUtils;
-import org.jdbi.v3.core.Handle;
+import liquibase.Contexts;
+import liquibase.Liquibase;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.slf4j.Logger;
@@ -40,8 +44,8 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * @author Isuru Weerarathna
@@ -95,22 +99,32 @@ public class DatabaseConfigs {
     }
 
     @Bean
-    public Jdbi createJdbiInterface(DataSource jdbcDataSource) throws IOException {
+    public Jdbi createJdbiInterface(DataSource jdbcDataSource) throws SQLException {
         Jdbi jdbi = Jdbi.create(jdbcDataSource);
         jdbi.installPlugin(new SqlObjectPlugin())
                 .registerColumnMapper(new OasisEnumColumnFactory())
                 .registerArgument(new OasisEnumArgTypeFactory());
 
-        if (oasisJdbcUrl.contains(":sqlite:")) {
-            String schemaScript = IOUtils.resourceToString(
-                    "io/github/oasis/db/schema/schema-sqlite.sql",
-                    StandardCharsets.UTF_8,
-                    Thread.currentThread().getContextClassLoader());
-            try (Handle h = jdbi.open()) {
-                h.createScript(schemaScript).executeAsSeparateStatements();
-            }
+        try (Connection connection = jdbcDataSource.getConnection()) {
+            runDbMigration(connection);
         }
         return jdbi;
+    }
+
+
+    public void runDbMigration(Connection connection) {
+        LOG.info("Starting to run db migration...");
+        String changeLogLocation = "classpath:io/github/oasis/db/schema/oasis-changelog-master.yml";
+        ResourceAccessor classPathAccessor = new ClassLoaderResourceAccessor();
+
+        try {
+            DatabaseConnection databaseConnection = new JdbcConnection(connection);
+            Liquibase liquibase = new Liquibase(changeLogLocation, classPathAccessor, databaseConnection);
+            liquibase.update(new Contexts());
+        } catch (Exception e) {
+            LOG.error("Error occurred while executing db migration!", e);
+            throw new IllegalStateException("Unable to execute db migration!", e);
+        }
     }
 
     @Bean

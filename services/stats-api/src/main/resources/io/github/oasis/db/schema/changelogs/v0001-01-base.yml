@@ -1,0 +1,364 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_PLAYER
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: display_name
+                  type: varchar(64)
+              - column:
+                  name: email
+                  type: varchar(64)
+                  constraints:
+                    unique: true
+              - column:
+                  name: avatar_ref
+                  type: varchar(255)
+              - column:
+                  name: timezone
+                  type: varchar(64)
+              - column:
+                  name: gender
+                  type: smallint
+              - column:
+                  name: created_at
+                  type: bigint
+              - column:
+                  name: updated_at
+                  type: bigint
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValue: true
+  - changeSet:
+      id: 2
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_TEAM
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(64)
+                  constraints:
+                    unique: true
+              - column:
+                  name: color_code
+                  type: varchar(10)
+              - column:
+                  name: avatar_ref
+                  type: varchar(255)
+              - column:
+                  name: game_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: bigint
+              - column:
+                  name: updated_at
+                  type: bigint
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValue: true
+  - changeSet:
+      id: 3
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_PLAYER_TEAM
+            columns:
+              - column:
+                  name: game_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: PK_OA_PLAYER_TEAM
+              - column:
+                  name: team_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: player_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: PK_OA_PLAYER_TEAM
+              - column:
+                  name: created_at
+                  type: bigint
+  - changeSet:
+      id: 4
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_ELEMENT
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: game_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: impl
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: def_id
+                  type: varchar(128)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: name
+                  type: varchar(128)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(512)
+              - column:
+                  name: created_at
+                  type: bigint
+              - column:
+                  name: updated_at
+                  type: bigint
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValue: true
+  - changeSet:
+      id: 5
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_ELEMENT_DATA
+            columns:
+              - column:
+                  name: element_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: def_data
+                  type: blob
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValue: true
+  - changeSet:
+      id: 6
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_ATTRIBUTE_DEF
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(64)
+              - column:
+                  name: priority
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: color_code
+                  type: varchar(10)
+              - column:
+                  name: game_id
+                  type: int
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 7
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_GAME
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(32)
+                  constraints:
+                    unique: true
+              - column:
+                  name: motto
+                  type: varchar(128)
+              - column:
+                  name: description
+                  type: varchar(512)
+              - column:
+                  name: logo_ref
+                  type: varchar(255)
+              - column:
+                  name: created_at
+                  type: bigint
+              - column:
+                  name: updated_at
+                  type: bigint
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValue: true
+  - changeSet:
+      id: 8
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_EVENT_SOURCE
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: token
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+              - column:
+                  name: display_name
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+              - column:
+                  name: download_count
+                  type: smallint
+              - column:
+                  name: created_at
+                  type: bigint
+              - column:
+                  name: updated_at
+                  type: bigint
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValue: true
+  - changeSet:
+      id: 9
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_EVENT_SOURCE_KEY
+            columns:
+              - column:
+                  name: event_source_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: public_key
+                  type: clob
+                  constraints:
+                    nullable: false
+              - column:
+                  name: private_key
+                  type: clob
+                  constraints:
+                    nullable: false
+              - column:
+                  name: download_count
+                  type: smallint
+                  defaultValue: 0
+  - changeSet:
+      id: 10
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_EVENT_SOURCE_GAME
+            columns:
+              - column:
+                  name: game_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: PK_OA_EVENT_SOURCE_GAME
+              - column:
+                  name: event_source_id
+                  type: int
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: PK_OA_EVENT_SOURCE_GAME
+  - changeSet:
+      id: 11
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_API_KEY
+            columns:
+              - column:
+                  name: token
+                  type: varchar(128)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: secret_key
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: roles
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_active
+                  type: boolean
+                  defaultValue: true
