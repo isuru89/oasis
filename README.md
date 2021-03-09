@@ -3,7 +3,6 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/isuru89/oasis/badge.svg)](https://snyk.io/test/github/isuru89/oasis)
 [![coverage](https://codecov.io/gh/isuru89/oasis/branch/master/graph/badge.svg)](https://codecov.io/gh/isuru89/oasis)
 
-
 # OASIS
 Open-source Gamification framework based on Redis.
 
@@ -11,28 +10,31 @@ _This project is still under development_
 
 Oasis, is an event-driven gamification framework having ability to define the game rules for events
 coming from your applications. This is inspired from Stackoverflow badge system, and extended into 
-supporting many game elements. Such as, Points, Badges, Leaderboards,
-Milestones, Challenges, and Races. 
+supporting many game elements, such as, points, badges, leaderboards,
+milestones, challenges, and ratings.
 
 ## Features:
   * Different types of customizable gamification elements. (see below)
   * Near real-time status updates
-  * Team support
-  * Character driven game playing <To-be-implemented>
-  * Narrative Play <To-be-implemented>
-  * Cloud friendly <To-be-implemented>
+  * Embeddable game engine
+  * Users can play in teams
+  * Modular design, so its easier to extend to your needs
+  * Out of order event support
   
-## Key Gamification Elements in Oasis
+## Supported Gamification Elements
+
+### Attributes
+Each game should define set of awarding attributes to rank some of game elements.
+For e.g. attributes equivalent in Stackoverflow are gold, silver and bronze.
 
 ### Points
-This is 0one of the core element type in Oasis. The points indicate a measurement about a user. Users
-can accumulate points over the time as rules defined by the admin. Sometimes, points can be negative,
-and it called penalties. 
+One of the core element type in Oasis. The points indicate a measurement about a user against an event. 
+Users can accumulate points over the time as rules defined by the admin or curator. 
+Sometimes, points can be negative, hence called penalties. 
 
 ### Badges
 A badge is a collectible achievement by a user based on correlating one or several
-events. Every badge has an attribute. An attribute is like a Gold, Silver, Bronze type, and 
-can be defined by an admin.
+events. Every badge can associate with an attribute.
 
 There are several kinds of badges supported by Oasis.
 
@@ -53,11 +55,11 @@ There are several kinds of badges supported by Oasis.
      * Curators and admin can award badges to players based on non-measurable activities.
 
 ### Milestones
-Milestone can be created to accumulate points over the lifecycle of game.
+Milestone can be created to accumulate points over the lifecycle of a game.
 It indicates the progress gained by a user. Milestones are always being based on the points
 scored by a user.
 
-Milestones can be used to give a *rank* to a user based on the current status.
+Milestones can be used to give a *rank* to a user based on the current accumulated value.
 Eg: In Stackoverflow, the total Reputation earned can be defined as a milestone definition and levels
 can be defined in such a way,
   * Scoring 10k reputation - Level 1
@@ -72,41 +74,28 @@ supported by a game. Such as,
   1. Game Leaderboard
   2. Team Leaderboard
 
-Each leaderboard can be viewed scoped on the time slots. Supported time slots are;
-   1. Daily
-   2. Weekly
-   3. Monthly
-   4. Quarterly
-   5. Annually
+Each leaderboard can be viewed scoped on the time slots. Supported time slots are; daily, weekly,
+monthly, quarterly and annually.
 
 ### Challenges
 Challenge can be created by a curator at any time of game lifecycle
 to motivate a user towards a very short term goal. Challenge must have a start time
 and end time.
 A challenge can be scoped to a single user, team, or a game. It also can be defined to
-have single winner or multiple winners. Winners are being selected First-come basis.
+have single winner or multiple winners. Winners are being awarded First-come basis.
 
-A challenge can be over in two ways.
+A challenge can be completed in two ways, whichever comes first.
   * Number of all winners found.
-  * Time expired
-
-### Races
-Races are point-awarding leaderboards for non-overlapping time windows. 
-Think of this is as an award for being top in a particular leaderboard.
-At a pre-defined time range (daily, weekly, monthly), 
-top N leaderboard winners will be awarded a set of points. 
-This will continue in each time window as specified in a definition of race. 
+  * Time has expired
 
 ### Ratings
 Ratings indicate the current state of a user at a particular time. Based on the events, user's
-status will be calculated and from that status, some amount of net points will be awarded.
-A user can only be in one state at a time. A difference between Milestone and Rating would
+status will be calculated, and from that status, some amount of net points will be awarded.
+_A user can only be in one state at a time_. A difference between Milestone and Rating would
 be ratings can fluctuate to any direction, while milestones can only grow.
 
-For Eg: someone can define a rating (good/bad) based on total good answer ratio. As long as
-a user has positive good answer ratio, then that user will have, say 100 points, with him/her.
-Once the ratio goes down below a threshold, status will be changed to _'bad'_, and he/she will
-lose 100 points he/she had.
+### Architecture of Oasis
+![Oasis Architecture](/docs/images/oasis-arch.png?raw=true "Oasis Architecture")
 
 ## Entities in Oasis
 There are several entities in Oasis.
@@ -137,6 +126,11 @@ Following gamifiable environments have been identified.
    - Support Systems: IT helpdesk systems
    - Q/A sites: Stackoverflow, Reddit like sites
    - Social Networking
+
+## Roadmap
+  * Character driven game playing 
+  * Narrative Play
+  * Cloud friendly
 
 ## Kudos!
 
