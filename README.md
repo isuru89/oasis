@@ -11,7 +11,7 @@ Open-source Gamification framework based on Redis.
 
 Oasis, is an event-driven gamification framework having ability to define the game rules for events
 coming from your applications. This is inspired from Stackoverflow badge system, and extended into
-supporting many game elements, such as, points, badges, leaderboards,
+supporting many other game elements, such as, points, badges, leaderboards,
 milestones, challenges, and ratings.
 
 ## Features:
@@ -57,14 +57,14 @@ As of initial version, Redis will act as the database for engine operations cons
 This is a full deployment with all the components as shown in [Architecture](#architecture-of-oasis).
 This provides out-of-the-box components which can be used by your applications.
 
-For testing purpose, a docker compose has been provided to up and running locally.
+For testing purpose, a docker compose setup has been provided to up and running locally.
 
 Kubernetes and AWS solution are still pending.
 
 ### Embedding Engine
 
 One of the important thing about Oasis is that you can embed the game engine
-inside your application. In this way, you have to pumping all your events and getting
+inside your application. In this way, you have to pump all your events and getting
 data/statistics out of Redis.
 
 Its very simple.
@@ -118,7 +118,7 @@ There are four major participants in the system.
 A game is a boundary of all game elements. Manipulation of games can only be done by an admin thorugh Stats API.
 
 
-####Player:
+#### Player:
 A player is an entity who associate with events and get rewarded from elements.
 Players can register to the system only by Admins and they will be uniquely identified by email address.
 Also Players needs to associate with a game through a team. That means every player must be a member of team.
@@ -243,14 +243,13 @@ be ratings can fluctuate to any direction, while milestones can only grow.
 
 
 ### Leaderboards
-Oasis provides leaderboards based on points scored by users. There are several leaderboards
-supported by a game. Such as,
-1. Game Leaderboard
-2. Team Leaderboard
+Oasis provides leaderboards based on points scored by users. 
+Leaderboards are scoped to game and team levels.
 
 Each leaderboard can be viewed scoped on the time slots. Supported time slots are; daily, weekly,
 monthly, quarterly and annually.
 
+**_Note_**: Oasis will not support global leaderboards where players can be compared across games.
 
 ## Why Oasis?
 
@@ -273,6 +272,7 @@ Following gamifiable environments have been identified.
 * Cloud friendly
 
 ## Contributing
+TBW
 
 ## Kudos!
 
