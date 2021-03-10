@@ -97,17 +97,51 @@ public static void main(String[] args) {
     var engine = new OasisEngine(context);
     engine.start(); 
     
-    engine.submit(event) // you can submit your event(s) now.
+    // first notify game create and start events to game engine
+    engine.submit(GameCommand.create(gameId, GameCommand.GameLifecycle.CREATE));
+    engine.submit(GameCommand.create(gameId, GameCommand.GameLifecycle.START));
+    
+    // first add game rules...
+    engine.submit(rule1);
+    engine.submit(rule2);
+    ...
+    
+    // then you can submit events
+    engine.submit(event1);
+    engine.submit(event2);
+    ...
+        
+        
+    // later, if you think the game is over, you can signal it to the engine
+    // so it will accepts no more events for that game and clean up anything related to the game.
+    engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.REMOVE));    
 }
 
 ```
 
 **Note:** Once you start the engine, it will keep running until the application goes down.
 
-Check the methods of `OasisEngine` class how you can submit your events.
-
+Check the methods of `OasisEngine` class how you can submit your events/rules/game commands.
 
 ## Concepts
+
+This section will introduce you to the concepts around the Oasis framework.
+
+## Rules of Oasis
+
+Below rules are fundamental assumptions when building Oasis.
+
+* **Rule-1**: There can be many Games running at the same time.
+* **Rule-2**: A Player can play in many Games at once.
+* **Rule-3**: A Player can play a Game _only_ by association with one Team.
+  Assigning to multiple Teams within a single Game is not allowed.
+* **Rule-4**: A Player may change his/her Team, or leave the Game completely while the game is in progress.
+* **Rule-5**: An Event-Source and Game has a many-to-many relationship,
+  so that a Game can have multiple sources while a source may push events to multiple games.
+* **Rule-6**: A game should have at least one element rule defined. 
+* **Rule-7**: And those rules can be added/removed to a game while it is running. 
+  Modification to an existing rule may affect to its old data and its solely dependent on the rule's implementation.
+  Framework does not guarantee a smooth migration to existing data in case of a rule modification.
 
 ## Participants
 It is very important to understand supporting model before going down to the details.
@@ -147,37 +181,22 @@ Once received those events to Events API, it will check for the integrity of mes
 the signature and will allow further processing.
 
 
-### Rules of Relationships
-Rules of relationship between the above entities can be described as shown below.
-* **Rule-1**: There can be many Games running at the same time in a [single deployment](#engine-as-a-service).
-* **Rule-2**: A Player can play in many Games at once.
-* **Rule-3**: A Player can play a Game _only_ by association with one Team.
-  Assigning to multiple Teams within a single Game is not allowed.
-* **Rule-4**: A Player may change his/her Team, or leave the Game completely.
-* **Rule-5**: An Event-Source and Game has a many-to-many relationship,
-  so that a Game can have multiple sources while a source may push events to multiple games.
-
-
 ## Game Elements
 
 All these game elements, except Attributes and Leaderboards, can be defined in yaml files and register to the engine.
 Attributes must be defined when a game is created through admin-api.
 
-### Attributes
+### [Attributes](docs/specs/attributes.md)
 Each game should define set of awarding attributes to rank some of game elements.
 For e.g. attributes equivalent in Stackoverflow are gold, silver and bronze.
 
-### Points
-
-_See a sample point specification_ [here](engine/src/test/resources/rules/points-basic.yml)
+### [Points](docs/specs/points.md)
 
 One of the core element type in Oasis. The points indicate a measurement about a user against an event.
 Users can accumulate points over the time as rules defined by the admin or curator.
 Sometimes, points can be negative, hence called penalties.
 
-### Badges
-
-_See a sample badge specification_ [here](engine/src/test/resources/rules/badges-basic.yml)
+### [Badges](docs/specs/badges.md)
 
 A badge is a collectible achievement by a user based on correlating one or several
 events. Every badge can associate with an attribute.
@@ -188,68 +207,37 @@ There are several kinds of badges supported by Oasis.
 * An event satisfies a certain criteria (eg: [Stackoverflow Popular Question](https://stackoverflow.com/help/badges/26/popular-question) )
     * For different thresholds can award different sub-badges
     * (eg: [Stackoverflow Famous question](https://stackoverflow.com/help/badges/28/famous-question) )
-* Streaks:
-    * Satisfies a condition for N consecutive times. (eg: [Stackoverflow Enthusiast](https://stackoverflow.com/help/badges/71/enthusiast) )
+* Streaks
+    * Satisfies a condition for N consecutive times. (e.g.: [Stackoverflow Enthusiast](https://stackoverflow.com/help/badges/71/enthusiast) )
     * Satisfies a condition for N consecutive times within T time-unit.
-    * Satisfies a condition for N times within T time-unit. (eg: [Stackoverflow Curious badge](https://stackoverflow.com/help/badges/4127/curious) )
+    * Satisfies a condition for N times within T time-unit. (e.g.: [Stackoverflow Curious badge](https://stackoverflow.com/help/badges/4127/curious) )
 * Earn K points within a single time-unit (daily/weekly/monthly)
-    * Eg: [Stackoverflow Mortarboard badge](https://stackoverflow.com/help/badges/144/mortarboard)
+    * E.g.: [Stackoverflow Mortarboard badge](https://stackoverflow.com/help/badges/144/mortarboard)
 * Daily accumulation of an event field is higher than a threshold (T) for,
     * N consecutive days. (eg: Earn 50 daily reputation for 10 consecutive days)
     * N separate days (eg: Earn 200 daily reputation for 50 consecutive days)
-* Manually
-    * Curators and admin can award badges to players based on non-measurable activities.
 
-### Milestones
-
-_See a sample milestone specification_ [here](engine/src/test/resources/rules/milestone-basic.yml)
+### [Milestones](docs/specs/milestones.md)
 
 Milestone can be created to accumulate points over the lifecycle of a game.
 It indicates the progress gained by a user. Milestones are always being based on the points
 scored by a user.
 
-Milestones can be used to give a *rank* (called Levels in Oasis) to a user based on the current accumulated value.
-Eg: In Stackoverflow, the total Reputation earned can be defined as a milestone definition and levels
-can be defined in such a way,
-* Scoring 10k reputation - Level 1
-* Scoring 50k reputation - Level 2
-* Scoring 100k reputation - Level 3
-* Scoring 500k reputation - Level 4
-* Scoring 1M reputation - Level 5
-
-
-### Challenges
-
-_See a sample challenge specification_ [here](engine/src/test/resources/rules/challenges-basic.yml)
+### [Challenges](docs/specs/challenges.md)
 
 Challenge can be created by a curator at any time of game lifecycle
-to motivate a user towards a very short term goal. Challenge must have a start time
-and end time.
-A challenge can be scoped to a single user, team, or a game. It also can be defined to
-have single winner or multiple winners. Winners are being awarded First-come basis.
+to motivate a user towards a very short term goal. 
 
-A challenge can be completed in two ways, whichever comes first.
-* Number of all winners found.
-* Time has expired
+See more detailed information about challenges from [here]()
 
-### Ratings
+### [Ratings](docs/specs/ratings.md)
 
-_See a sample rating specification_ [here](engine/src/test/resources/rules/ratings-basic.yml)
+Ratings indicate the current state of a user at a particular time. 
+Based on the events, player's  status will be calculated.
 
-Ratings indicate the current state of a user at a particular time. Based on the events, user's
-status will be calculated, and from that status, some amount of net points will be awarded.
-_A user can only be in one state at a time_. A difference between Milestone and Rating would
-be ratings can fluctuate to any direction, while milestones can only grow.
-
-
-### Leaderboards
+### [Leaderboards](docs/specs/leaderboard.md)
 Oasis provides leaderboards based on points scored by users. 
 Leaderboards are scoped to game and team levels.
-
-Each leaderboard can be viewed scoped on the time slots. Supported time slots are; daily, weekly,
-monthly, quarterly and annually.
-
-**_Note_**: Oasis will not support global leaderboards where players can be compared across games.
 
 ## Why Oasis?
 
