@@ -25,10 +25,7 @@ import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.utils.Texts;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -43,6 +40,27 @@ public class GameParserYaml implements GameParseSupport {
     private static final String VERSION_KEY = "version";
     private static final String ELEMENTS_KEY = "elements";
     private static final String ELEMENT_PLUGIN_KEY = "plugin";
+
+    public static GameDef fromFile(File file) throws OasisParseException {
+        var fsContext = new ParserContext() {
+            @Override
+            public Object loadSiblingPath(String path) throws OasisParseException {
+                try {
+                    return new FileInputStream(path);
+                } catch (FileNotFoundException e) {
+                    throw new OasisParseException("File not found in given path '" + path + "'!");
+                }
+
+
+            }
+        };
+
+        try (InputStream is = new FileInputStream(file)) {
+            return new GameParserYaml().parse(is, fsContext);
+        } catch (IOException e) {
+            throw new OasisParseException("Unable to parse game definition file in " + file.getAbsolutePath() + "!", e);
+        }
+    }
 
     public static GameDef fromClasspath(String clzPathFile, ClassLoader clzLoader) throws OasisParseException {
         var clzPathContext = new ParserContext() {

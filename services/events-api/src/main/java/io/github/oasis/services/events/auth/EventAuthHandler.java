@@ -19,15 +19,14 @@
 
 package io.github.oasis.services.events.auth;
 
+import io.github.oasis.services.events.model.ApiKeyCredentials;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.authentication.Credentials;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.impl.AuthHandlerImpl;
+import io.vertx.ext.web.handler.impl.AuthenticationHandlerImpl;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Isuru Weerarathna
  */
-public class EventAuthHandler extends AuthHandlerImpl {
+public class EventAuthHandler extends AuthenticationHandlerImpl<EventAuthProvider> {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventAuthHandler.class);
 
@@ -47,22 +46,12 @@ public class EventAuthHandler extends AuthHandlerImpl {
 
     private static final String BEARER = "Bearer";
 
-    public EventAuthHandler(AuthProvider authProvider) {
+    public EventAuthHandler(EventAuthProvider authProvider) {
         super(authProvider);
     }
 
     @Override
-    protected String authenticateHeader(RoutingContext context) {
-        return BEARER;
-    }
-
-    @Override
-    public void authorize(User user, Handler<AsyncResult<Void>> handler) {
-        handler.handle(Future.succeededFuture());
-    }
-
-    @Override
-    public void parseCredentials(RoutingContext context, Handler<AsyncResult<JsonObject>> handler) {
+    public void parseCredentials(RoutingContext context, Handler<AsyncResult<Credentials>> handler) {
         String authorization = context.request().headers().get(HttpHeaders.AUTHORIZATION);
         if (authorization == null || authorization.isEmpty()) {
             LOG.warn("No authorization header is provided!");
@@ -84,8 +73,6 @@ public class EventAuthHandler extends AuthHandlerImpl {
         }
         String digest = dataParts[1];
         context.put(AuthService.REQ_DIGEST, digest);
-        handler.handle(Future.succeededFuture(new JsonObject()
-                .put(EventAuthProvider.SOURCE_ID, dataParts[0])
-                .put(EventAuthProvider.SOURCE_DIGEST, digest)));
+        handler.handle(Future.succeededFuture(new ApiKeyCredentials(dataParts[0], digest)));
     }
 }

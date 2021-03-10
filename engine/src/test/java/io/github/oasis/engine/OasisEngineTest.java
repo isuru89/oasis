@@ -163,6 +163,17 @@ public class OasisEngineTest {
         return rules.stream().filter(rule -> rule.getName().equals(name)).findFirst().orElseThrow();
     }
 
+    protected void addRulesToMetadata(int gameId, List<AbstractRule> rules) {
+        for (AbstractRule rule : rules) {
+            ElementDef elementDef = ElementDef.builder()
+                    .elementId(rule.getId())
+                    .gameId(gameId)
+                    .metadata(new SimpleElementDefinition(rule.getId(), rule.getName(), rule.getDescription()))
+                    .build();
+            metadataSupport.addNewElement(gameId, elementDef);
+        }
+    }
+
     protected List<AbstractRule> submitRules(OasisEngine engine, int gameId, GameDef gameDef) {
         List<PersistedDef> ruleDefinitions = gameDef.getRuleDefinitions();
         List<AbstractRule> rules = new ArrayList<>();

@@ -22,12 +22,11 @@ package io.github.oasis.core.services.api.dao;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserGender;
+import io.github.oasis.core.services.api.configs.DatabaseConfigs;
 import io.github.oasis.core.services.api.dao.configs.OasisEnumArgTypeFactory;
 import io.github.oasis.core.services.api.dao.configs.OasisEnumColumnFactory;
 import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
@@ -39,7 +38,8 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -93,19 +93,23 @@ class IPlayerTeamDaoTest {
             .build();
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() throws IOException, SQLException {
         DataSource ds = DataSourceBuilder.create()
-                .url("jdbc:sqlite:sample.db")
+                .url("jdbc:h2:mem:sampledb")
                 .build();
         Jdbi jdbi = Jdbi.create(ds)
                 .installPlugin(new SqlObjectPlugin())
                 .registerColumnMapper(new OasisEnumColumnFactory())
                 .registerArgument(new OasisEnumArgTypeFactory());
 
-        String schemaScript = IOUtils.resourceToString("io/github/oasis/db/schema/schema-sqlite.sql", StandardCharsets.UTF_8,
-                Thread.currentThread().getContextClassLoader());
-        try (Handle h = jdbi.open()) {
-            h.createScript(schemaScript).executeAsSeparateStatements();
+
+        try (Connection connection = ds.getConnection()) {
+            connection.createStatement().execute("DROP ALL OBJECTS");
+        }
+
+        DatabaseConfigs configs = new DatabaseConfigs();
+        try (Connection connection = ds.getConnection()) {
+            configs.runDbMigration(connection);
         }
         dao = jdbi.onDemand(IPlayerTeamDao.class);
     }

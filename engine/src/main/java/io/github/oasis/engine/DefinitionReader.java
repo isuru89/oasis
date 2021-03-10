@@ -21,6 +21,7 @@ package io.github.oasis.engine;
 
 import io.github.oasis.core.EventJson;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.external.messages.RuleCommand;
@@ -28,8 +29,10 @@ import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.Messages;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -41,6 +44,13 @@ class DefinitionReader {
         PersistedDef.GAME_RULE_REMOVED, RuleCommand.RuleChangeType.REMOVE,
         PersistedDef.GAME_RULE_UPDATED, RuleCommand.RuleChangeType.UPDATE
     );
+
+    static List<AbstractRule> parseDefsToRules(int gameId, GameDef gameDef, EngineContext context) {
+        return gameDef.getRuleDefinitions()
+                .stream()
+                .map(def -> context.getParsers().parseToRule(def))
+                .collect(Collectors.toList());
+    }
 
     static Object derive(PersistedDef def, EngineContext context) {
         if (def.isEvent()) {

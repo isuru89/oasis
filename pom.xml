@@ -17,9 +17,20 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <jackson.version>2.9.9</jackson.version>
-        <jdbi.version>3.9.1</jdbi.version>
-        <vertx.version>3.9.0</vertx.version>
-        <junit.version>5.5.2</junit.version>
+        <jdbi.version>3.18.0</jdbi.version>
+        <vertx.version>4.0.2</vertx.version>
+        <junit.version>5.7.1</junit.version>
+        <lombok.version>1.18.18</lombok.version>
+        <jedis.version>3.5.1</jedis.version>
+        <akka.version>2.6.13</akka.version>
+        <logback.version>1.2.3</logback.version>
+        <springboot.version>2.4.3</springboot.version>
+        <commonsio.version>2.8.0</commonsio.version>
+        <commonslang.version>3.12.0</commonslang.version>
+        <amqp.version>5.11.0</amqp.version>
+        <gson.version>2.8.6</gson.version>
+        <jsonsimple.version>3.1.1</jsonsimple.version>
+        <slf4j.version>1.7.30</slf4j.version>
     </properties>
 
     <modules>
@@ -35,23 +46,23 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.10</version>
+            <version>1.18.18</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
-            <version>1.4.0</version>
+            <version>1.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.23</version>
+            <version>1.28</version>
         </dependency>
         <dependency>
             <groupId>org.mvel</groupId>
             <artifactId>mvel2</artifactId>
-            <version>2.4.0.Final</version>
+            <version>2.4.12.Final</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -61,7 +72,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.10</version>
+            <version>3.12.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -76,21 +87,27 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.11.1</version>
+            <version>3.19.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.23.4</version>
+            <version>3.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.6</version>
+            <version>2.8.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

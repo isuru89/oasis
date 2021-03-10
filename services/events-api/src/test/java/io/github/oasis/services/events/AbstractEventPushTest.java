@@ -12,6 +12,7 @@ import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.junit5.VertxTestContext;
+import org.apache.commons.lang3.StringUtils;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -44,6 +45,11 @@ public abstract class AbstractEventPushTest extends AbstractTest {
     }
 
     protected HttpRequest<String> callForEvent(Vertx vertx, String bearerHeader) {
+        if (StringUtils.isBlank(bearerHeader)) {
+            return callPushEvent(vertx)
+                    .as(BodyCodec.string());
+        }
+
         return callPushEvent(vertx)
                 .bearerTokenAuthentication(bearerHeader)
                 .as(BodyCodec.string());

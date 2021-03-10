@@ -20,12 +20,10 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.services.api.beans.BackendRepository;
-import org.springframework.stereotype.Service;
 
 /**
  * @author Isuru Weerarathna
  */
-@Service
 public abstract class AbstractOasisService {
 
     protected final BackendRepository backendRepository;

@@ -24,15 +24,9 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.stats.BadgeStats;
-import io.github.oasis.elements.badges.stats.to.GameRuleWiseBadgeLog;
-import io.github.oasis.elements.badges.stats.to.GameRuleWiseBadgeLogRequest;
-import io.github.oasis.elements.badges.stats.to.UserBadgeLog;
-import io.github.oasis.elements.badges.stats.to.UserBadgeLogRequest;
-import io.github.oasis.elements.badges.stats.to.UserBadgeRequest;
-import io.github.oasis.elements.badges.stats.to.UserBadgeSummary;
+import io.github.oasis.elements.badges.stats.to.*;
 import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
@@ -68,9 +62,9 @@ public class EngineBadgesTest extends OasisEngineTest {
 
         GameDef gameDef = loadRulesFromResource("rules/badges-basic.yml");
 
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        List<AbstractRule> rules = submitRules(engine, TEvent.GAME_ID, gameDef);
+        List<AbstractRule> rules = engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+        addRulesToMetadata(TEvent.GAME_ID, rules);
+
         engine.submitAll(e1, e2, e3, e4, e5, e6);
         awaitTerminated();
 
@@ -147,9 +141,8 @@ public class EngineBadgesTest extends OasisEngineTest {
 
         GameDef gameDef = loadRulesFromResource("rules/badges-points.yml");
 
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        List<AbstractRule> rules = submitRules(engine, TEvent.GAME_ID, gameDef);
+        List<AbstractRule> rules = engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+
         engine.submitAll(e1, e2, e3, e4, e5, e6);
         awaitTerminated();
 
@@ -242,9 +235,8 @@ public class EngineBadgesTest extends OasisEngineTest {
 
         GameDef gameDef = loadRulesFromResource("rules/badges-removal-points.yml");
 
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        List<AbstractRule> rules = submitRules(engine, TEvent.GAME_ID, gameDef);
+        List<AbstractRule> rules = engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+
         engine.submitAll(e1, e2, e3, e4, e5);
         awaitTerminated();
 

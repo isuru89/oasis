@@ -21,19 +21,12 @@ package io.github.oasis.services.events.model;
 
 import io.github.oasis.services.events.auth.PublicKeyCache;
 import io.vertx.codegen.annotations.DataObject;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.impl.UserImpl;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +35,7 @@ import java.util.stream.Collectors;
  * @author Isuru Weerarathna
  */
 @DataObject
-public class EventSource implements User {
+public class EventSource extends UserImpl {
 
     public static final String KEY_ALGORITHM = "RSA";
     public static final String KEY = "key";
@@ -99,25 +92,8 @@ public class EventSource implements User {
     }
 
     @Override
-    public User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
-        return null;
-    }
-
-    @Override
-    @Deprecated
-    public User clearCache() {
-        return null;
-    }
-
-    @Override
     public JsonObject principal() {
         return data;
-    }
-
-    @Override
-    @Deprecated
-    public void setAuthProvider(AuthProvider authProvider) {
-
     }
 
     @Override

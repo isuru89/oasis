@@ -17,17 +17,17 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.security;
-
-import org.springframework.context.annotation.Configuration;
+package io.github.oasis.core.services.api.exceptions;
 
 /**
  * @author Isuru Weerarathna
  */
-@Configuration
-public class KeycloakConfigs {
+public class EngineManagerException extends OasisApiRuntimeException {
+    public EngineManagerException(String errorCode, Throwable cause) {
+        super(errorCode, cause);
+    }
 
-
-
-
+    public EngineManagerException(String errorCode) {
+        super(errorCode);
+    }
 }

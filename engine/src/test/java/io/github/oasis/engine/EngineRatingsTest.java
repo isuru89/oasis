@@ -22,7 +22,6 @@ package io.github.oasis.engine;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.elements.ratings.RatingIDs;
 import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.model.TEvent;
@@ -43,9 +42,8 @@ public class EngineRatingsTest extends OasisEngineTest {
 
         GameDef gameDef = loadRulesFromResource("rules/ratings-basic.yml");
 
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        submitRules(engine, TEvent.GAME_ID, gameDef);
+        engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+
         engine.submitAll(e1, e2, e3);
         awaitTerminated();
 
@@ -89,9 +87,8 @@ public class EngineRatingsTest extends OasisEngineTest {
 
         GameDef gameDef = loadRulesFromResource("rules/ratings-common.yml");
 
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        submitRules(engine, TEvent.GAME_ID, gameDef);
+        engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+
         engine.submitAll(e1, e2, e3);
         awaitTerminated();
 

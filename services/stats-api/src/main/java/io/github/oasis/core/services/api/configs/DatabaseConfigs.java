@@ -22,14 +22,17 @@ package io.github.oasis.core.services.api.configs;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.services.api.dao.IElementDao;
-import io.github.oasis.core.services.api.dao.IEventSourceDao;
-import io.github.oasis.core.services.api.dao.IGameDao;
-import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
+import io.github.oasis.core.services.api.dao.*;
 import io.github.oasis.core.services.api.dao.configs.OasisEnumArgTypeFactory;
 import io.github.oasis.core.services.api.dao.configs.OasisEnumColumnFactory;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.db.redis.RedisDb;
+import liquibase.Contexts;
+import liquibase.Liquibase;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.slf4j.Logger;
@@ -41,6 +44,8 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * @author Isuru Weerarathna
@@ -94,19 +99,43 @@ public class DatabaseConfigs {
     }
 
     @Bean
-    public Jdbi createJdbiInterface(DataSource jdbcDataSource) {
+    public Jdbi createJdbiInterface(DataSource jdbcDataSource) throws SQLException {
         Jdbi jdbi = Jdbi.create(jdbcDataSource);
         jdbi.installPlugin(new SqlObjectPlugin())
                 .registerColumnMapper(new OasisEnumColumnFactory())
-                .registerArgument(new OasisEnumArgTypeFactory());;
+                .registerArgument(new OasisEnumArgTypeFactory());
 
+        try (Connection connection = jdbcDataSource.getConnection()) {
+            runDbMigration(connection);
+        }
         return jdbi;
+    }
+
+
+    public void runDbMigration(Connection connection) {
+        LOG.info("Starting to run db migration...");
+        String changeLogLocation = "classpath:io/github/oasis/db/schema/oasis-changelog-master.yml";
+        ResourceAccessor classPathAccessor = new ClassLoaderResourceAccessor();
+
+        try {
+            DatabaseConnection databaseConnection = new JdbcConnection(connection);
+            Liquibase liquibase = new Liquibase(changeLogLocation, classPathAccessor, databaseConnection);
+            liquibase.update(new Contexts());
+        } catch (Exception e) {
+            LOG.error("Error occurred while executing db migration!", e);
+            throw new IllegalStateException("Unable to execute db migration!", e);
+        }
     }
 
     @Bean
     public Db createDbService(OasisConfigs oasisConfigs) throws Exception {
         LOG.info("Trying to create database connection... (with retries {})", numberOfDbRetries);
         return loadDbService(oasisConfigs, numberOfDbRetries);
+    }
+
+    @Bean
+    public IApiKeyDao createApiKeyDao(Jdbi jdbi) {
+        return jdbi.onDemand(IApiKeyDao.class);
     }
 
     @Bean

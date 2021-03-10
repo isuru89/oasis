@@ -17,26 +17,32 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.configs;
+package io.github.oasis.core.services.api.security;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Collection;
 
 /**
  * @author Isuru Weerarathna
  */
-@Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(jsr250Enabled = true, securedEnabled = true, prePostEnabled = true)
-public class BasicSecurityConfigs extends WebSecurityConfigurerAdapter {
+public class OasisApiKeyToken extends AbstractAuthenticationToken {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .anyRequest().permitAll();
+    private String apiKey;
+    private String apiSecret;
+
+    public OasisApiKeyToken(Collection<? extends GrantedAuthority> authorities) {
+        super(authorities);
     }
 
+    @Override
+    public Object getCredentials() {
+        return apiSecret;
+    }
+
+    @Override
+    public Object getPrincipal() {
+        return apiKey;
+    }
 }

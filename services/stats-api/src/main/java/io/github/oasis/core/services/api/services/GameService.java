@@ -22,6 +22,7 @@ package io.github.oasis.core.services.api.services;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.external.PaginatedResult;
+import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
@@ -29,8 +30,10 @@ import io.github.oasis.core.services.api.to.GameObjectRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Utils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -39,8 +42,16 @@ import java.util.Objects;
 @Service
 public class GameService extends AbstractOasisService {
 
-    public GameService(BackendRepository backendRepository) {
+    private final Map<String, GameState> availableStatuses = Map.of(
+            "start", GameState.STARTED,
+            "pause", GameState.PAUSED,
+            "stop", GameState.STOPPED);
+
+    private final IEngineManager engineManager;
+
+    public GameService(BackendRepository backendRepository, IEngineManager engineManager) {
         super(backendRepository);
+        this.engineManager = engineManager;
     }
 
     public Game addGame(GameObjectRequest gameObjectRequest) throws OasisApiException {
@@ -81,6 +92,27 @@ public class GameService extends AbstractOasisService {
         return backendRepository.readGameByName(name);
     }
 
+    public Game changeStatusOfGame(int gameId, String newStatus) throws OasisApiException {
+        GameState gameState = validateGameState(newStatus);
+
+        Game game = backendRepository.readGame(gameId);
+        engineManager.changeGameStatus(gameState, game);
+        return game;
+    }
+
+    private GameState validateGameState(String status) throws OasisApiException {
+        if (Objects.isNull(status)) {
+            throw new OasisApiException(ErrorCodes.GAME_UNKNOWN_STATE,
+                    HttpStatus.BAD_REQUEST.value(), "Unknown game state!");
+        }
+
+        GameState gameState = availableStatuses.get(status);
+        if (Objects.isNull(gameState)) {
+            throw new OasisApiException(ErrorCodes.GAME_UNKNOWN_STATE,
+                    HttpStatus.BAD_REQUEST.value(), "Unknown game state!");
+        }
+        return gameState;
+    }
 
     private void validateGameObjectForCreation(Game game) throws OasisApiException {
         if (Texts.isEmpty(game.getName())) {

@@ -23,17 +23,23 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.core.external.MessageReceiver;
+import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.OasisCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
 import io.github.oasis.engine.actors.cmds.EventMessage;
+import io.github.oasis.engine.actors.cmds.Messages;
 import io.github.oasis.engine.ext.ExternalParty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -45,7 +51,7 @@ public class OasisEngine implements MessageReceiver {
     private ActorSystem oasisEngine;
     private ActorRef supervisor;
 
-    private EngineContext context;
+    private final EngineContext context;
 
     public OasisEngine(EngineContext context) {
         this.context = context;
@@ -106,6 +112,58 @@ public class OasisEngine implements MessageReceiver {
         for (Object event : events) {
             submit(event);
         }
+    }
+
+    /**
+     * Creates a game in the engine. Basically this will prepare the game contexts and
+     * other internal things before starting the game.
+     * This game id must be available in engine database as well.
+     *
+     * @param gameId game id to create
+     */
+    public OasisEngine createGame(int gameId) {
+        submit(GameCommand.create(gameId, GameCommand.GameLifecycle.CREATE));
+        return this;
+    }
+
+    /**
+     * Starts an already created game in this engine.
+     * It is mandatory to call {@link #createGame(int)} before calling this method.
+     *
+     * @param gameId game id to start
+     */
+    public OasisEngine startGame(int gameId) {
+        submit(GameCommand.create(gameId, GameCommand.GameLifecycle.START));
+        return this;
+    }
+
+    /**
+     * Starts a game with provided element rules. All rules will be associated under the given game id.
+     *
+     * Once rules have been submitted, those will be returned as well.
+     *
+     * @param gameId game id to start
+     * @param gameDefWithRules parsed game definition with rules from file or resource.
+     * @return list of rules added to the game.
+     */
+    public List<AbstractRule> startGame(int gameId, GameDef gameDefWithRules) {
+        submit(GameCommand.create(gameId, GameCommand.GameLifecycle.START));
+
+        List<AbstractRule> gameRules = DefinitionReader.parseDefsToRules(gameId, gameDefWithRules, context);
+        gameRules.stream()
+                .map(rule -> Messages.createRuleAddMessage(gameId, rule, null))
+                .forEach(this::submit);
+        return gameRules;
+    }
+
+    /**
+     * Stops the game with give id. Once this command is invoked, the engine will discard
+     * all the following events associated for this removed game.
+     *
+     * @param gameId game id to stop
+     */
+    public void stopGame(int gameId) {
+        submit(GameCommand.create(gameId, GameCommand.GameLifecycle.REMOVE));
     }
 
     EngineContext getContext() {

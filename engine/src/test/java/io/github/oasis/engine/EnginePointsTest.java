@@ -21,15 +21,9 @@ package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.GameDef;
-import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.element.points.stats.PointStats;
-import io.github.oasis.engine.element.points.stats.to.LeaderboardRequest;
-import io.github.oasis.engine.element.points.stats.to.LeaderboardSummary;
-import io.github.oasis.engine.element.points.stats.to.UserPointSummary;
-import io.github.oasis.engine.element.points.stats.to.UserPointsRequest;
-import io.github.oasis.engine.element.points.stats.to.UserRankingRequest;
-import io.github.oasis.engine.element.points.stats.to.UserRankingSummary;
+import io.github.oasis.engine.element.points.stats.to.*;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -60,9 +54,8 @@ public class EnginePointsTest extends OasisEngineTest {
 
         GameDef gameDef = loadRulesFromResource("rules/points-basic.yml");
 
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        submitRules(engine, TEvent.GAME_ID, gameDef);
+        engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+
         engine.submitAll(e1, e2, e3, e4, e5);
         awaitTerminated();
 
@@ -189,9 +182,8 @@ public class EnginePointsTest extends OasisEngineTest {
 
         GameDef gameDef = loadRulesFromResource("rules/points-basic.yml");
 
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        submitRules(engine, TEvent.GAME_ID, gameDef);
+        engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
@@ -254,9 +246,8 @@ public class EnginePointsTest extends OasisEngineTest {
 
         GameDef gameDef = loadRulesFromResource("rules/points-timely.yml");
 
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        submitRules(engine, TEvent.GAME_ID, gameDef);
+        engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
