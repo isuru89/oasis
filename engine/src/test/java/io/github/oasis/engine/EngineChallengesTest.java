@@ -20,9 +20,9 @@
 package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.elements.challenges.ChallengeIDs;
 import io.github.oasis.elements.challenges.ChallengeOverEvent;
 import io.github.oasis.elements.challenges.stats.ChallengeStats;
@@ -35,11 +35,10 @@ import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
-import static io.github.oasis.engine.RedisAssert.assertKeyNotExist;
-import static io.github.oasis.engine.RedisAssert.assertSorted;
-import static io.github.oasis.engine.RedisAssert.ofSortedEntries;
+import static io.github.oasis.engine.RedisAssert.*;
 
 /**
  * @author Isuru Weerarathna
@@ -57,9 +56,9 @@ public class EngineChallengesTest extends OasisEngineTest {
 
         GameDef gameDef = loadRulesFromResource("rules/challenges-basic.yml");
 
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        submitRules(engine, TEvent.GAME_ID, gameDef);
+        List<AbstractRule> rules = engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+        addRulesToMetadata(TEvent.GAME_ID, rules);
+
         engine.submitAll(e1, e2, e3, e4, e5, e6);
         awaitTerminated();
 
@@ -178,9 +177,9 @@ public class EngineChallengesTest extends OasisEngineTest {
         GameDef gameDef = loadRulesFromResource("rules/challenges-outoforder.yml");
         String ruleId = "CHG000001";
 
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        submitRules(engine, TEvent.GAME_ID, gameDef);
+        List<AbstractRule> rules = engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+        addRulesToMetadata(TEvent.GAME_ID, rules);
+
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8,
                 ChallengeOverEvent.createFor(e1.getGameId(), ruleId));
         awaitTerminated();
@@ -227,9 +226,8 @@ public class EngineChallengesTest extends OasisEngineTest {
 
         GameDef gameDef = loadRulesFromResource("rules/challenges-outoforder.yml");
 
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.CREATE));
-        engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.START));
-        submitRules(engine, TEvent.GAME_ID, gameDef);
+        engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 

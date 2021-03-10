@@ -70,7 +70,7 @@ data/statistics out of Redis.
 Its very simple.
 
 ```java
-public static void main(String[] args) {
+public static void main(String[] args) throws Exception {
     // load the engine configuration (we use typesafe configs here)
     var oasisConfigs = OasisConfigs.defaultConfigs();
     
@@ -98,15 +98,13 @@ public static void main(String[] args) {
     engine.start(); 
     
     // first notify game create and start events to game engine
-    engine.submit(GameCommand.create(gameId, GameCommand.GameLifecycle.CREATE));
-    engine.submit(GameCommand.create(gameId, GameCommand.GameLifecycle.START));
+    engine.createGame(gameId);
     
-    // first add game rules...
-    engine.submit(rule1);
-    engine.submit(rule2);
-    ...
+    // let's parse the game rules from yaml file
+    var gameDef = GameParserYaml.fromFile(gameDefFile);
+    engine.startGame(gameId, gameDef);
     
-    // then you can submit events
+    // now you can submit events
     engine.submit(event1);
     engine.submit(event2);
     ...
@@ -114,7 +112,7 @@ public static void main(String[] args) {
         
     // later, if you think the game is over, you can signal it to the engine
     // so it will accepts no more events for that game and clean up anything related to the game.
-    engine.submit(GameCommand.create(TEvent.GAME_ID, GameCommand.GameLifecycle.REMOVE));    
+    engine.stopGame(gameId);
 }
 
 ```
