@@ -21,6 +21,8 @@ package io.github.oasis.core.parser;
 
 import io.github.oasis.core.exception.OasisParseException;
 
+import java.io.InputStream;
+
 /**
  * Interface for storing parser related context.
  *
@@ -31,11 +33,33 @@ public interface ParserContext {
     /**
      * Reads the given path relative to the context specification.
      *
-     * @param path path to load.
+     * @param fullPath path to load. Path will be provided as full path relevant to the context.
      * @return parsed object.
      * @throws OasisParseException any exception thrown while parsing.
      */
-    Object loadSiblingPath(String path) throws OasisParseException;
+    InputStream loadPath(String fullPath) throws OasisParseException;
+
+    /**
+     * Sets the current parsing location to the stack
+     *
+     * @param currentLocation current location
+     */
+    void pushCurrentLocation(String currentLocation);
+
+    /**
+     * Removes the current location from stack.
+     */
+    void popCurrentLocation();
+
+    /**
+     * Returns full path for the given relative path by combining it with
+     * the already set current path.
+     *
+     * @param relativePath given relative path to the current path
+     * @return full absolute path that can be load from
+     * @throws OasisParseException if paths are incorrect or cannot be derived
+     */
+    String manipulateFullPath(String relativePath) throws OasisParseException;
 
 }
 

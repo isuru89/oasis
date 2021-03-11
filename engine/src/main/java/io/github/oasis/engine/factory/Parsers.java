@@ -28,11 +28,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 /**
  * @author Isuru Weerarathna
  */
-public class Parsers {
+public final class Parsers {
 
     private static final Logger LOG = LoggerFactory.getLogger(Parsers.class);
 
@@ -47,12 +48,14 @@ public class Parsers {
     private void init(EngineContext context) {
         context.getModuleList()
                 .forEach(mod -> {
-                    mod.getSupportedDefinitions().forEach(def -> {
-                        ElementParser parser = mod.getParser();
-                        parserCache.put(def.getName(), parser);
-                        LOG.info("Definition {} will be parsed with {}", def.getName(), parser.getClass().getName());
-                    });
-                    mod.getSupportedDefinitionKeys().forEach(key -> parserCache.put(key.toLowerCase(), mod.getParser()));
+                    ElementParser elementParser = mod.getParser();
+
+                    Stream.concat(
+                        mod.getSupportedDefinitionKeys().stream().map(String::toLowerCase),
+                        mod.getSupportedDefinitions().stream().map(Class::getName)
+                    )
+                    .peek(key -> LOG.info("Definition {} will be parsed with {}", key, elementParser.getClass().getName()))
+                    .forEach(key -> parserCache.put(key, elementParser));
                 });
     }
 

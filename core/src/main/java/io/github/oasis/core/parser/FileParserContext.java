@@ -19,28 +19,39 @@
 
 package io.github.oasis.core.parser;
 
-import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.exception.OasisParseException;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 
 /**
- * Parses a game file and returns a game engine compatible instance.
- *
- * The version based parsing must be taken care by the corresponding implementation itself.
- *
  * @author Isuru Weerarathna
  */
-public interface GameParseSupport {
+public class FileParserContext extends AbstractParserContext {
 
-    /**
-     * Parses the given input stream and converts to a game definition instance.
-     *
-     * @param input input stream to read
-     * @param parserContext parser context.
-     * @return parsed game definition object.
-     * @throws OasisParseException throws when any error occurred while parsing.
-     */
-    GameDef parse(InputStream input, ParserContext parserContext) throws OasisParseException;
+    public FileParserContext(String initialFileLocation) {
+        super(initialFileLocation);
+    }
+
+    @Override
+    public InputStream loadPath(String path) throws OasisParseException {
+        try {
+            return new FileInputStream(path);
+        } catch (FileNotFoundException e) {
+            throw new OasisParseException("The provided file does not exist! [" + path + "]", e);
+        }
+    }
+
+    @Override
+    public String manipulateFullPath(String relativePath) {
+        File parent = new File(getCurrentLocation()).getParentFile();
+        if (parent != null) {
+            return parent.toPath().resolve(relativePath).normalize().toString();
+        }
+        return Paths.get(relativePath).normalize().toString();
+    }
 
 }

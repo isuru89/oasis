@@ -19,28 +19,37 @@
 
 package io.github.oasis.core.parser;
 
-import io.github.oasis.core.elements.GameDef;
-import io.github.oasis.core.exception.OasisParseException;
-
-import java.io.InputStream;
+import java.util.Stack;
 
 /**
- * Parses a game file and returns a game engine compatible instance.
- *
- * The version based parsing must be taken care by the corresponding implementation itself.
- *
  * @author Isuru Weerarathna
  */
-public interface GameParseSupport {
+abstract class AbstractParserContext implements ParserContext {
 
-    /**
-     * Parses the given input stream and converts to a game definition instance.
-     *
-     * @param input input stream to read
-     * @param parserContext parser context.
-     * @return parsed game definition object.
-     * @throws OasisParseException throws when any error occurred while parsing.
-     */
-    GameDef parse(InputStream input, ParserContext parserContext) throws OasisParseException;
+    private final Stack<String> locations = new Stack<>();
 
+    public AbstractParserContext(String currentLocation) {
+        locations.push(currentLocation);
+    }
+
+    @Override
+    public void pushCurrentLocation(String currentLocation) {
+        this.locations.push(currentLocation);
+    }
+
+    @Override
+    public void popCurrentLocation() {
+        locations.pop();
+    }
+
+    public String getCurrentLocation() {
+        return locations.peek();
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractParserContext{" +
+                "locations=" + locations +
+                '}';
+    }
 }
