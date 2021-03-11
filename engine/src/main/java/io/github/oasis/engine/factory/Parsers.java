@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 /**
  * @author Isuru Weerarathna
  */
-public final class Parsers {
+public class Parsers {
 
     private static final Logger LOG = LoggerFactory.getLogger(Parsers.class);
 
