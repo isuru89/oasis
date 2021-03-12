@@ -20,12 +20,10 @@
 package io.github.oasis.core.elements.matchers;
 
 import io.github.oasis.core.elements.EventTypeMatcher;
+import io.github.oasis.core.elements.spec.MatchEventsDef;
 import io.github.oasis.core.utils.Texts;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +42,21 @@ public final class EventTypeMatcherFactory {
         } else {
             return new SingleEventTypeMatcher(source);
         }
+    }
+
+    public static EventTypeMatcher create(MatchEventsDef matchEventsDef) {
+        if (Objects.nonNull(matchEventsDef.getAnyOf())) {
+            return AnyOfEventTypeMatcher.create(matchEventsDef.getAnyOf());
+        }
+
+        if (Objects.nonNull(matchEventsDef.getPatterns())) {
+            List<EventTypeMatcher> patternMatchers = matchEventsDef.getPatterns().stream()
+                    .map(RegexEventTypeMatcher::create)
+                    .collect(Collectors.toList());
+            return new MixedEventTypeMatcher(patternMatchers);
+        }
+
+        throw new IllegalArgumentException("At least one of 'anyOf' or 'patterns' field must be set!");
     }
 
     public static EventTypeMatcher create(Collection<String> items) {

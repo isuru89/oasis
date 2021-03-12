@@ -19,12 +19,7 @@
 
 package io.github.oasis.core.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -43,8 +38,18 @@ public class Utils {
         }
     }
 
-    public static String firstNonNullAsStr(Object first, Object secod) {
-        return String.valueOf(firstNonNull(first, secod));
+    public static String firstNonNullAsStr(Object first, Object second) {
+        return String.valueOf(firstNonNull(first, second));
+    }
+
+    public static <T> T firstNonNullAsStr(T first, T second, T third) {
+        if (first != null) {
+            return first;
+        } else if (second != null) {
+            return second;
+        } else {
+            return third;
+        }
     }
 
     public static String bytesToHex(byte[] digest) {

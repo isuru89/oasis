@@ -17,17 +17,40 @@
  * under the License.
  */
 
-package io.github.oasis.core.exception;
+package io.github.oasis.core.elements.spec;
+
+import io.github.oasis.core.elements.Validator;
+import io.github.oasis.core.exception.OasisParseException;
+import io.github.oasis.core.utils.Texts;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public class OasisParseException extends OasisRuntimeException {
-    public OasisParseException(String message) {
-        super(message);
+@Getter
+@Setter
+@NoArgsConstructor
+public class TimeRangeDef implements Validator, Serializable {
+    private String type;
+    private Object from;
+    private Object to;
+    private Object when;
+    private Object expression;
+
+    public TimeRangeDef(String type, Object from, Object to) {
+        this.type = type;
+        this.from = from;
+        this.to = to;
     }
 
-    public OasisParseException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public void validate() throws OasisParseException {
+        if (Texts.isEmpty(type)) {
+            throw new OasisParseException("Field 'type' cannot be empty!");
+        }
     }
 }

@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,24 +17,27 @@
  * under the License.
  */
 
-package io.github.oasis.core.elements;
+package io.github.oasis.core.elements.spec;
 
-import io.github.oasis.core.elements.spec.BaseSpecification;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.elements.Validator;
+import io.github.oasis.core.exception.OasisParseException;
+import lombok.Data;
 
 import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface ElementParser extends Serializable {
+@Data
+public class AwardDef implements Validator, Serializable {
 
-    AbstractDef<? extends BaseSpecification> parse(PersistedDef persistedObj);
+    private PointAwardDef points;
 
-    default AbstractRule parseToRule(PersistedDef dto) {
-        return convert(parse(dto));
+    @Override
+    public void validate() throws OasisParseException {
+        if (points == null) {
+            throw new OasisParseException("Field 'points' must be specified!");
+        }
+        points.validate();
     }
-
-    AbstractRule convert(AbstractDef<? extends BaseSpecification> definition);
-
 }
