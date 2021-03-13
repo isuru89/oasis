@@ -17,36 +17,44 @@
  * under the License.
  */
 
-package io.github.oasis.core.elements.spec;
+package io.github.oasis.engine.element.points.spec;
 
-import io.github.oasis.core.elements.Validator;
+import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.exception.OasisParseException;
-import io.github.oasis.core.utils.Texts;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class TimeUnitDef implements Validator, Serializable {
+public class PointSpecification extends BaseSpecification {
 
-    private Long duration;
+    /**
+     * Indicates how many points should be awarded to the user once condition satisfies.
+     * This can be a number or expression based on event data.
+     */
+    private PointRewardDef reward;
 
-    private String unit;
+    /**
+     * If specified, then this indicated how many maximum points can be earned
+     * from this rule for the specified constrained time period.
+     */
+    private CappedDef cap;
 
     @Override
     public void validate() throws OasisParseException {
-        if (Texts.isEmpty(unit) && duration == null) {
-            throw new OasisParseException("Either 'unit' or 'duration' field must be specified!");
-        }
-    }
+        super.validate();
 
-    public static TimeUnitDef of(Long duration, String unit) {
-        TimeUnitDef def = new TimeUnitDef();
-        def.setDuration(duration);
-        def.setUnit(unit);
-        return def;
+        if (reward == null) {
+            throw new OasisParseException("Field 'reward' must be specified!");
+        }
+        reward.validate();
+
+        if (cap != null) {
+            cap.validate();
+        }
     }
 }

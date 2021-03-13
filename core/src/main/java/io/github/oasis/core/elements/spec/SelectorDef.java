@@ -41,6 +41,12 @@ public class SelectorDef implements Validator, Serializable {
 
     private List<TimeRangeDef> acceptsWithin;
 
+    public static SelectorDef singleEvent(String matchEvent) {
+        SelectorDef def = new SelectorDef();
+        def.setMatchEvent(matchEvent);
+        return def;
+    }
+
     @Override
     public void validate() throws OasisParseException {
         if (Texts.isEmpty(matchEvent) && matchEvents == null) {

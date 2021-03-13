@@ -17,36 +17,33 @@
  * under the License.
  */
 
-package io.github.oasis.core.elements.spec;
+package io.github.oasis.engine.element.points.spec;
 
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
-import io.github.oasis.core.utils.Texts;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.Validate;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @author Isuru Weerarathna
  */
 @Data
-public class TimeUnitDef implements Validator, Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class CappedDef implements Validator, Serializable {
 
-    private Long duration;
+    private String duration;
 
-    private String unit;
+    private BigDecimal limit;
 
     @Override
     public void validate() throws OasisParseException {
-        if (Texts.isEmpty(unit) && duration == null) {
-            throw new OasisParseException("Either 'unit' or 'duration' field must be specified!");
-        }
-    }
-
-    public static TimeUnitDef of(Long duration, String unit) {
-        TimeUnitDef def = new TimeUnitDef();
-        def.setDuration(duration);
-        def.setUnit(unit);
-        return def;
+        Validate.notNull(limit, "Field 'limit' must be specified!");
+        Validate.notEmpty(duration, "Field 'duration' must be specified!");
     }
 }

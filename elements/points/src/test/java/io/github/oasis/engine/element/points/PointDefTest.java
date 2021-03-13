@@ -19,7 +19,11 @@
 
 package io.github.oasis.engine.element.points;
 
+import io.github.oasis.core.elements.spec.SelectorDef;
 import io.github.oasis.core.events.BasePointEvent;
+import io.github.oasis.engine.element.points.spec.CappedDef;
+import io.github.oasis.engine.element.points.spec.PointRewardDef;
+import io.github.oasis.engine.element.points.spec.PointSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -48,34 +52,55 @@ class PointDefTest {
     }
 
     @Test
-    void testUniqueIDGenerationWhenAwardChanged() {
-        PointDef def1 = new PointDef();
-        def1.setId("RULE0001");
-        def1.setName("point-1");
-        def1.setAward(23.0);
+    void testPointSpecEquals() {
+        CappedDef cappedDef1 = new CappedDef("days", BigDecimal.ONE);
+        CappedDef cappedDef2 = new CappedDef("days", BigDecimal.ONE);
+        Assertions.assertEquals(cappedDef1, cappedDef2);
+        Assertions.assertEquals(cappedDef1.hashCode(), cappedDef2.hashCode());
 
-        PointDef def2 = new PointDef();
-        def2.setId(def1.getId());
-        def2.setName(def1.getName());
-        def2.setAward("e.data.votes + 100");
+        PointSpecification pSpec1 = createPointSpec("event.b");
+        PointSpecification pSpec2 = createPointSpec("event.b");
+        Assertions.assertEquals(pSpec1, pSpec2);
 
-        Assertions.assertTrue(def2.getAward() instanceof String);
-        Assertions.assertNotEquals(def1.generateUniqueHash(), def2.generateUniqueHash());
+        pSpec1.setCap(cappedDef1);
+        pSpec2.setCap(cappedDef2);
+        Assertions.assertEquals(pSpec1, pSpec2);
+
+        pSpec2.setCap(new CappedDef("days", BigDecimal.TEN));
+        Assertions.assertNotEquals(pSpec1, pSpec2);
     }
 
     @Test
-    void testSameIDGenerationWhenSameAward() {
-        PointDef def1 = new PointDef();
-        def1.setId("RULE00002");
-        def1.setName("point-1");
-        def1.setAward(23.0);
-
-        PointDef def2 = new PointDef();
-        def2.setId(def1.getId());
-        def2.setName(def1.getName());
-        def2.setAward("23.0");
-
-        Assertions.assertEquals(def1.generateUniqueHash(), def2.generateUniqueHash());
+    void testValidityOfCapSpec() {
+        Assertions.assertThrows(RuntimeException.class, () -> new CappedDef("daily", null).validate());
+        Assertions.assertThrows(RuntimeException.class, () -> new CappedDef(null, null).validate());
+        Assertions.assertThrows(RuntimeException.class, () -> new CappedDef(null, BigDecimal.valueOf(10)).validate());
     }
 
+    @Test
+    void testValidityOfRewardSpec() {
+        Assertions.assertThrows(RuntimeException.class, () -> new PointRewardDef().validate());
+        Assertions.assertThrows(RuntimeException.class, () -> new PointRewardDef(null, "").validate());
+        Assertions.assertThrows(RuntimeException.class, () -> new PointRewardDef(null, "e.value").validate());
+        Assertions.assertThrows(RuntimeException.class, () -> new PointRewardDef(null, (BigDecimal) null).validate());
+        Assertions.assertThrows(RuntimeException.class, () -> new PointRewardDef(null, BigDecimal.TEN).validate());
+        Assertions.assertThrows(RuntimeException.class, () -> new PointRewardDef("pointId", (BigDecimal) null).validate());
+        Assertions.assertThrows(RuntimeException.class, () -> new PointRewardDef("pointId", (String) null).validate());
+    }
+
+    @Test
+    void testValidityOfPointSpec() {
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            PointSpecification pointSpecification = createPointSpec("event.a");
+            pointSpecification.validate();
+        });
+    }
+
+    private PointSpecification createPointSpec(String matchEvent) {
+        SelectorDef selectorDef = new SelectorDef();
+        selectorDef.setMatchEvent(matchEvent);
+        PointSpecification pSpec = new PointSpecification();
+        pSpec.setSelector(selectorDef);
+        return pSpec;
+    }
 }

@@ -17,36 +17,45 @@
  * under the License.
  */
 
-package io.github.oasis.core.elements.spec;
+package io.github.oasis.engine.element.points.spec;
 
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Texts;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.Validate;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * @author Isuru Weerarathna
  */
 @Data
-public class TimeUnitDef implements Validator, Serializable {
+@NoArgsConstructor
+public class PointRewardDef implements Validator, Serializable {
 
-    private Long duration;
+    private String pointId;
+    private BigDecimal amount;
+    private String expression;
 
-    private String unit;
+    public PointRewardDef(String pointId, BigDecimal amount) {
+        this.pointId = pointId;
+        this.amount = amount;
+    }
+
+    public PointRewardDef(String pointId, String expression) {
+        this.pointId = pointId;
+        this.expression = expression;
+    }
 
     @Override
     public void validate() throws OasisParseException {
-        if (Texts.isEmpty(unit) && duration == null) {
-            throw new OasisParseException("Either 'unit' or 'duration' field must be specified!");
-        }
-    }
+        Validate.notEmpty(pointId, "Mandatory field 'pointId' is missing!");
 
-    public static TimeUnitDef of(Long duration, String unit) {
-        TimeUnitDef def = new TimeUnitDef();
-        def.setDuration(duration);
-        def.setUnit(unit);
-        return def;
+        if (amount == null && Texts.isEmpty(expression)) {
+            throw new OasisParseException("Either 'amount' or 'expression' field must be specified!");
+        }
     }
 }

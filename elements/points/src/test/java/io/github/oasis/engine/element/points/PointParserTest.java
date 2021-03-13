@@ -25,7 +25,12 @@ import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.matchers.AnnualDateRangeMatcher;
 import io.github.oasis.core.elements.matchers.ScriptedTimeMatcher;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
+import io.github.oasis.core.elements.spec.SelectorDef;
+import io.github.oasis.core.elements.spec.TimeRangeDef;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.engine.element.points.spec.CappedDef;
+import io.github.oasis.engine.element.points.spec.PointRewardDef;
+import io.github.oasis.engine.element.points.spec.PointSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,29 +65,31 @@ class PointParserTest {
         PointDef pointDef = new PointDef();
         pointDef.setId("POINT00001");
         pointDef.setName("point-1");
-        pointDef.setAward(10.0);
-        pointDef.setEvent("event.a");
+        pointDef.setType("core:point");
+        PointSpecification spec = new PointSpecification();
+        spec.setReward(new PointRewardDef("point-1", BigDecimal.valueOf(100.0)));
+        SelectorDef selectorDef = new SelectorDef();
+        selectorDef.setMatchEvent("event.a");
+        spec.setSelector(selectorDef);
+        pointDef.setSpec(spec);
 
         PersistedDef def = new PersistedDef();
         def.setType(PersistedDef.GAME_RULE_ADDED);
         def.setImpl(PointDef.class.getName());
         def.setData(toMap(pointDef));
 
-        AbstractDef parsedDef = parser.parse(def);
+        PointDef parsedDef = parser.parse(def);
 
-        assertTrue(parsedDef instanceof PointDef);
         assertEquals(pointDef.getId(), parsedDef.getId());
         assertEquals(pointDef.getName(), parsedDef.getName());
         assertEquals(pointDef.getDescription(), parsedDef.getDescription());
-        assertEquals(pointDef.getEvent(), parsedDef.getEvent());
-        assertEquals(pointDef.getAward(), ((PointDef) parsedDef).getAward());
+        assertEquals(pointDef.getSpec().getSelector().getMatchEvent(), parsedDef.getSpec().getSelector().getMatchEvent());
+        assertEquals(pointDef.getSpec().getReward().getAmount(), parsedDef.getSpec().getReward().getAmount());
     }
 
     @Test
     void testUnknownDef() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            parser.convert(null);
-        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.convert(null));
     }
 
     @Test
@@ -90,8 +97,13 @@ class PointParserTest {
         PointDef pointDef = new PointDef();
         pointDef.setId("POINT000002");
         pointDef.setName("point-1");
-        pointDef.setAward(10.0);
-        pointDef.setEvent("event.a");
+        pointDef.setType("core:point");
+        PointSpecification spec = new PointSpecification();
+        spec.setReward(new PointRewardDef("point-1", BigDecimal.valueOf(10.0)));
+        SelectorDef selectorDef = new SelectorDef();
+        selectorDef.setMatchEvent("event.a");
+        spec.setSelector(selectorDef);
+        pointDef.setSpec(spec);
 
         AbstractRule abstractRule = parser.convert(pointDef);
 
@@ -113,8 +125,13 @@ class PointParserTest {
         PointDef pointDef = new PointDef();
         pointDef.setId("POINT00003");
         pointDef.setName("point-1");
-        pointDef.setAward("e.data.votes + 100");
-        pointDef.setEvent("event.a");
+        pointDef.setType("core:point");
+        PointSpecification spec = new PointSpecification();
+        spec.setReward(new PointRewardDef("point-1", "e.data.votes + 100"));
+        SelectorDef selectorDef = new SelectorDef();
+        selectorDef.setMatchEvent("event.a");
+        spec.setSelector(selectorDef);
+        pointDef.setSpec(spec);
 
         AbstractRule abstractRule = parser.convert(pointDef);
 
@@ -134,9 +151,13 @@ class PointParserTest {
         PointDef pointDef = new PointDef();
         pointDef.setId("POINT00004");
         pointDef.setName("point-1");
-        pointDef.setAward("e.data.votes + 100");
-        pointDef.setEvent("event.a");
-        pointDef.setPointId("customPointId");
+        pointDef.setType("core:point");
+        PointSpecification spec = new PointSpecification();
+        spec.setReward(new PointRewardDef("customPointId", "e.data.votes + 100"));
+        SelectorDef selectorDef = new SelectorDef();
+        selectorDef.setMatchEvent("event.a");
+        spec.setSelector(selectorDef);
+        pointDef.setSpec(spec);
 
         AbstractRule abstractRule = parser.convert(pointDef);
 
@@ -145,7 +166,7 @@ class PointParserTest {
 
         assertNotNull(rule.getId());
         assertEquals(pointDef.getName(), rule.getName());
-        assertEquals(pointDef.getPointId(), rule.getPointId());
+        assertEquals(pointDef.getSpec().getReward().getPointId(), rule.getPointId());
         assertEquals(EventExecutionFilterFactory.ALWAYS_TRUE, rule.getCriteria());
         assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
         assertTrue(rule.isAwardBasedOnEvent());
@@ -158,10 +179,14 @@ class PointParserTest {
         PointDef pointDef = new PointDef();
         pointDef.setId("POINT000005");
         pointDef.setName("point-1");
-        pointDef.setAward("e.data.votes + 100");
-        pointDef.setEvent("event.a");
-        pointDef.setPointId("customPointId");
-        pointDef.setTimeRanges(List.of(new AbstractDef.TimeRangeDef(AbstractDef.TIME_RANGE_TYPE_SEASONAL, "05-01", "05-31")));
+        pointDef.setType("core:point");
+        PointSpecification spec = new PointSpecification();
+        spec.setReward(new PointRewardDef("customPointId", "e.data.votes + 100"));
+        SelectorDef selectorDef = new SelectorDef();
+        selectorDef.setMatchEvent("event.a");
+        selectorDef.setAcceptsWithin(List.of(new TimeRangeDef(AbstractDef.TIME_RANGE_TYPE_SEASONAL, "05-01", "05-31")));
+        spec.setSelector(selectorDef);
+        pointDef.setSpec(spec);
 
         AbstractRule abstractRule = parser.convert(pointDef);
 
@@ -170,7 +195,7 @@ class PointParserTest {
 
         assertNotNull(rule.getId());
         assertEquals(pointDef.getName(), rule.getName());
-        assertEquals(pointDef.getPointId(), rule.getPointId());
+        assertEquals(pointDef.getSpec().getReward().getPointId(), rule.getPointId());
         assertEquals(EventExecutionFilterFactory.ALWAYS_TRUE, rule.getCriteria());
         assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
         assertTrue(rule.isAwardBasedOnEvent());
@@ -186,10 +211,14 @@ class PointParserTest {
         PointDef pointDef = new PointDef();
         pointDef.setId("POINT000007");
         pointDef.setName("point-1");
-        pointDef.setAward("e.data.votes + 100");
-        pointDef.setEvent("event.a");
-        pointDef.setPointId("customPointId");
-        pointDef.setLimit(Map.of("daily", 200));
+        pointDef.setType("core:point");
+        PointSpecification spec = new PointSpecification();
+        spec.setCap(new CappedDef("daily", BigDecimal.valueOf(200)));
+        spec.setReward(new PointRewardDef("customPointId", "e.data.votes + 100"));
+        SelectorDef selectorDef = new SelectorDef();
+        selectorDef.setMatchEvent("event.a");
+        spec.setSelector(selectorDef);
+        pointDef.setSpec(spec);
 
         AbstractRule abstractRule = parser.convert(pointDef);
 
@@ -198,7 +227,7 @@ class PointParserTest {
 
         assertNotNull(rule.getId());
         assertEquals(pointDef.getName(), rule.getName());
-        assertEquals(pointDef.getPointId(), rule.getPointId());
+        assertEquals(pointDef.getSpec().getReward().getPointId(), rule.getPointId());
         assertEquals(EventExecutionFilterFactory.ALWAYS_TRUE, rule.getCriteria());
         assertTrue(rule.getEventTypeMatcher() instanceof SingleEventTypeMatcher);
         assertTrue(rule.isAwardBasedOnEvent());
@@ -220,9 +249,8 @@ class PointParserTest {
         assertFalse(rule.getTimeRangeMatcher().isBetween(1595502000000L, "UTC"));
     }
 
-    @SuppressWarnings("unchecked")
     private Map<String, Object> toMap(PointDef def) {
         System.out.println(YAML.dumpAsMap(def));
-        return (Map<String, Object>) YAML.load(YAML.dumpAsMap(def));
+        return YAML.load(YAML.dumpAsMap(def));
     }
 }

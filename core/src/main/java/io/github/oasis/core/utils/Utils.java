@@ -19,7 +19,12 @@
 
 package io.github.oasis.core.utils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -30,7 +35,7 @@ import java.util.UUID;
  */
 public class Utils {
 
-    public static Object firstNonNull(Object first, Object second) {
+    public static <T> T firstNonNull(T first, T second) {
         if (first != null) {
             return first;
         } else {

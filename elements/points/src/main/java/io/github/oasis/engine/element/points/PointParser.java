@@ -24,11 +24,11 @@ import io.github.oasis.core.elements.AbstractElementParser;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.Scripting;
+import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.utils.Utils;
+import io.github.oasis.engine.element.points.spec.PointRewardDef;
 
-import java.math.BigDecimal;
-import java.util.Map;
 import java.util.Objects;
 
 import static io.github.oasis.core.VariableNames.CONTEXT_VAR;
@@ -40,11 +40,13 @@ public class PointParser extends AbstractElementParser {
 
     @Override
     public PointDef parse(PersistedDef persistedObj) {
-        return loadFrom(persistedObj, PointDef.class);
+        PointDef def = loadFrom(persistedObj, PointDef.class);
+        def.validate();
+        return def;
     }
 
     @Override
-    public AbstractRule convert(AbstractDef definition) {
+    public AbstractRule convert(AbstractDef<? extends BaseSpecification> definition) {
         if (definition instanceof PointDef) {
             return toRule((PointDef) definition);
         }
@@ -52,32 +54,25 @@ public class PointParser extends AbstractElementParser {
     }
 
     private AbstractRule toRule(PointDef def) {
-        String id = Utils.firstNonNullAsStr(def.getId(), def.generateUniqueHash());
-        PointRule rule = new PointRule(id);
+        def.validate();
+
+        PointRule rule = new PointRule(def.getId());
         AbstractDef.defToRule(def, rule);
-        rule.setPointId(Utils.firstNonNullAsStr(def.getPointId(), def.getName()));
+        rule.setPointId(Utils.firstNonNullAsStr(def.getSpec().getReward().getPointId(), def.getName()));
         rule.setCriteria(EventExecutionFilterFactory.ALWAYS_TRUE);
 
-        Object award = def.getAward();
-        if (award instanceof Number) {
-            rule.setAmountToAward(BigDecimal.valueOf(((Number) award).doubleValue()));
-        } else {
-            rule.setAmountExpression(Scripting.create((String) award, CONTEXT_VAR));
+        PointRewardDef award = def.getSpec().getReward();
+        if (Objects.nonNull(award.getAmount())) {
+            rule.setAmountToAward(award.getAmount());
+        } else if (Objects.nonNull(award.getExpression())) {
+            rule.setAmountExpression(Scripting.create(award.getExpression(), CONTEXT_VAR));
         }
 
-        appendLimit(rule, def);
+        if (Objects.nonNull(def.getSpec().getCap())) {
+            rule.setCapDuration(def.getSpec().getCap().getDuration());
+            rule.setCapLimit(def.getSpec().getCap().getLimit());
+        }
         return rule;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void appendLimit(PointRule rule, PointDef def) {
-        if (Objects.nonNull(def.getLimit())) {
-            Map<String, Object> limit = (Map<String, Object>) def.getLimit();
-            limit.forEach((unit, value) -> {
-                rule.setCapDuration(unit);
-                rule.setCapLimit(new BigDecimal(value.toString()));
-            });
-        }
     }
 
 }

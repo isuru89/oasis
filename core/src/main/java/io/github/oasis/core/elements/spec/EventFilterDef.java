@@ -42,4 +42,10 @@ public class EventFilterDef implements Validator, Serializable {
             throw new OasisParseException("Either 'expression' or 'className' must be specified in filter!");
         }
     }
+
+    public static EventFilterDef withExpression(String expression) {
+        EventFilterDef def = new EventFilterDef();
+        def.setExpression(expression);
+        return def;
+    }
 }

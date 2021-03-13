@@ -1,76 +1,117 @@
 version: 1
 
-points:
-  - name: Answer-Accepted
+elements:
+  - id: P_ANSWER_ACCEPTED
+    name: Answer-Accepted
     description: Awards 15 reputations when an answer has been accepted
-    event: stackoverflow.answer.accepted
-    pointId: stackoverflow.reputation
-    award: 15
+    type: core:point
+    spec:
+      selector:
+        matchEvent: stackoverflow.answer.accepted
+      reward:
+        pointId: stackoverflow.reputation
+        amount: 15
 
-  - name: Night-time-bonus
+  - id: P_NIGHT_BONUS
+    name: Night-time-bonus
     description: Awards +20 bonus for night time submission from midnight to 6am in the morning.
-    event: submission.accepted
-    pointId: marks
-    timeRanges:
-      - type: time
-        from: "00:00"
-        to: "06:00"
-    award: 20
+    type: core:point
+    spec:
+      selector:
+        matchEvent: submission.accepted
+        acceptsWithin:
+          - type: time
+            from: "00:00"
+            to: "06:00"
+      reward:
+        pointId: marks
+        amount: 20
 
-  - name: Thank-God-Its-Weekend
-    description: Awards +10 bonus for every order placed on Weekends,
-    event: order.accepted
-    pointId: star.points
-    timeRanges:
-      - type: weekly
-        when: "Friday,Saturday,Sunday"
-    award: 10
+  - id: P_TGIW
+    name: Thank-God-Its-Weekend
+    description: Awards +10 bonus for every order placed on Weekends.
+    type: core:point
+    spec:
+      selector:
+        matchEvent: order.accepted
+        acceptsWithin:
+          - type: weekly
+            when: "Friday,Saturday,Sunday"
+      reward:
+        pointId: star.points
+        amount: 10
 
-  - name: Monthly-Last-Sale
-    description: Awards +5 bonus for every order placed on last week of every month,
-    event: order.accepted
-    pointId: star.points
-    timeRanges:
-      - type: custom
-        expression: |
-          YearMonth currMonth = YearMonth.of(ts.getYear(), ts.getMonth());
-          ts.getDayOfMonth() >= currMonth.lengthOfMonth() - 7
-    award: 10
+  - id: P_MONTH_LAST_SALES
+    name: Monthly-Last-Sale
+    description: Awards +5 bonus for every order placed on last week of every month.
+    type: core:point
+    spec:
+      selector:
+        matchEvent: order.accepted
+        acceptsWithin:
+          - type: custom
+            expression: |
+              YearMonth currMonth = YearMonth.of(ts.getYear(), ts.getMonth());
+              ts.getDayOfMonth() >= currMonth.lengthOfMonth() - 7
+      reward:
+        pointId: star.points
+        amount: 10
 
-  - name: Special-Seasonal-Award
-    description: Awards double bonus points for every purchase done on december
-    event: order.accepted
-    pointId: star.points
-    timeRanges:
-      - type: seasonal
-        from: "12-01"
-        to: "12-31"
-    award: "e.total * 2"
+  - id: P_SEASONAL_AWARDS
+    name: Special-Seasonal-Award
+    description: Awards double bonus points for every purchase done on december.
+    type: core:point
+    spec:
+      selector:
+        matchEvent: order.accepted
+        acceptsWithin:
+          - type: seasonal
+            from: "12-01"
+            to: "12-31"
+      reward:
+        pointId: star.points
+        expression: "e.total * 2"
 
-  - name: General-Spending-Rule
+  - id: P_GENERAL_SPENDING
+    name: General-Spending-Rule
     description: Customer could receive points for order value
-    event: order.accepted
-    pointId: star.points
-    award: "e.total"
+    type: core:point
+    spec:
+      selector:
+        matchEvent: order.accepted
+      reward:
+        pointId: star.points
+        expression: "e.total"
 
-  - name: Big-Purchase-Bonus
-    description: Customer receives bonus points for passing purchase limit
-    event: order.accepted
-    pointId: star.points
-    award: |
-        if (e.total >= 500) {
-          return (e.total - 500) * 10;
-        } else if (e.total >= 100) {
-          return (e.total - 100) * 3;
-        } else if (e.total >= 50) {
-          return (e.total - 50) * 2;
-        }
-        return 0;
+  - id: P_BIG_PURCHASE
+    name: Big-Purchase-Bonus
+    description: Customer receives bonus points for passing purchase limit.
+    type: core:point
+    spec:
+      selector:
+        matchEvent: order.accepted
+      reward:
+        pointId: star.points
+        expression: |
+          if (e.total >= 500) {
+            return (e.total - 500) * 10;
+          } else if (e.total >= 100) {
+            return (e.total - 100) * 3;
+          } else if (e.total >= 50) {
+            return (e.total - 50) * 2;
+          }
+          return 0;
 
-  - name: Questions-Asked-Limited
-    description: Awards 5 reputations when a question is asked
-    event: stackoverflow.question.asked
-    pointId: stackoverflow.reputation
-    limit:
-      daily: 200
-    award: 5
+  - id: P_QUESTION_ASKED
+    name: Questions-Asked-Limited
+    description: Awards 5 reputations when a question is asked. But daily limited to 200 maximum.
+    type: core:point
+    spec:
+      selector:
+        matchEvent: stackoverflow.question.asked
+      reward:
+        pointId: stackoverflow.reputation
+        amount: 5
+      cap:
+        duration: daily
+        limit: 200

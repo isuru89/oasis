@@ -34,7 +34,7 @@ public class TimestampsTest {
 
     @Test
     public void testTimeUnitStr() {
-        Assertions.assertEquals(0L, Timestamps.parseTimeUnit(null));
+        Assertions.assertEquals(0L, Timestamps.parseTimeUnit((String) null));
         Assertions.assertEquals(0L, Timestamps.parseTimeUnit(""));
         Assertions.assertEquals(0L, Timestamps.parseTimeUnit(" "));
 
