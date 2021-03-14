@@ -24,12 +24,14 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.StreakSupport;
 import io.github.oasis.elements.badges.rules.BadgeRule;
+import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
 
 
@@ -54,6 +56,9 @@ public abstract class AbstractBadgeProcessor<R extends BadgeRule> extends Abstra
 
     @Override
     protected void beforeEmit(BadgeSignal signal, Event event, R rule, ExecutionContext context, DbContext db) {
+        rule.derivePointsInTo(signal);
+        negatePointsIfBadgeRemoval(signal);
+
         db.addToSorted(BadgeIDs.getUserBadgeSpecKey(event.getGameId(), event.getUser(), rule.getId()),
                 String.format(BADGE_HISTORY_FORMAT, signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getAttribute()),
                 signal.getStartTime());
@@ -82,6 +87,15 @@ public abstract class AbstractBadgeProcessor<R extends BadgeRule> extends Abstra
                 map.setValue(streakKey, streak);
             }
             map.setValue(endTimeKey, Math.max(signal.getEndTime(), val));
+        }
+    }
+
+    private void negatePointsIfBadgeRemoval(Signal signalRef) {
+        if (signalRef instanceof BadgeRemoveSignal) {
+            BadgeRemoveSignal signal = (BadgeRemoveSignal) signalRef;
+            if (signal.getPointId() != null) {
+                signal.setPointAwards(signal.getPointId(), signal.getPoints().negate());
+            }
         }
     }
 }

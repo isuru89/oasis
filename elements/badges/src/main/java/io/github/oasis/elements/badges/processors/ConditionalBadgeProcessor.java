@@ -72,7 +72,7 @@ public class ConditionalBadgeProcessor extends AbstractBadgeProcessor<Conditiona
             String attrKey = rule.getId() + ATTR_DELIMETER + attrId;
             Mapped map = db.MAP(badgeMetaKey);
             long count = map.incrementByOne(attrKey);
-            if (rule.getMaxAwardTimes() >= count) {
+            if (condition.getMaxBadgesAllowed() >= count) {
                 return List.of(ConditionalBadgeSignal.create(rule.getId(), event, attrId));
             } else {
                 map.decrementByOne(attrKey);

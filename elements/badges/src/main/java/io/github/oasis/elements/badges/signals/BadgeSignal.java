@@ -106,9 +106,10 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
         return Optional.empty();
     }
 
-    public void setPointAwards(String pointId, BigDecimal value) {
+    public BadgeSignal setPointAwards(String pointId, BigDecimal value) {
         this.pointId = pointId;
         this.points = value;
+        return this;
     }
 
     public String getPointId() {
@@ -164,15 +165,21 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
     @Override
     public int compareTo(Signal o) {
         if (o instanceof BadgeSignal) {
-            return Comparator
+            Comparator<BadgeSignal> comparator = Comparator
                     .comparingLong(BadgeSignal::getStartTime)
                     .thenComparing(Signal::getEventScope)
                     .thenComparing(BadgeSignal::getAttribute)
                     .thenComparing(BadgeSignal::getRuleId)
                     .thenComparingLong(BadgeSignal::getEndTime)
                     .thenComparing(BadgeSignal::getStartId)
-                    .thenComparing(BadgeSignal::getEndId)
-                    .compare(this, (BadgeSignal) o);
+                    .thenComparing(BadgeSignal::getEndId);
+            if (getPointId() != null) {
+                comparator = comparator.thenComparing(BadgeSignal::getPointId);
+            }
+            if (getPoints() != null) {
+                comparator = comparator.thenComparing(BadgeSignal::getPoints);
+            }
+            return comparator.compare(this, (BadgeSignal) o);
         } else {
             return -1;
         }

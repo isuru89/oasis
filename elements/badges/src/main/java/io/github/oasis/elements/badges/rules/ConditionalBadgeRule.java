@@ -20,7 +20,9 @@
 package io.github.oasis.elements.badges.rules;
 
 import io.github.oasis.core.elements.EventExecutionFilter;
+import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,7 +39,6 @@ import java.util.Objects;
 @Setter
 public class ConditionalBadgeRule extends BadgeRule {
 
-    private int maxAwardTimes = Integer.MAX_VALUE;
     private List<Condition> conditions;
 
     public ConditionalBadgeRule(String id) {
@@ -54,7 +55,7 @@ public class ConditionalBadgeRule extends BadgeRule {
 
         if (matchedCondition != null) {
             if (Objects.nonNull(matchedCondition.getPointAwards())) {
-                signal.setPointAwards(getPointId(), matchedCondition.getPointAwards());
+                signal.setPointAwards(matchedCondition.getPointId(), matchedCondition.getPointAwards());
             } else {
                 super.derivePointsInTo(signal);
             }
@@ -67,20 +68,27 @@ public class ConditionalBadgeRule extends BadgeRule {
     }
 
     @Getter
+    @Builder
     public static class Condition implements Comparable<Condition> {
         private final int priority;
         private final EventExecutionFilter condition;
         private final int attribute;
+        private final int maxBadgesAllowed;
+        private final String pointId;
         private final BigDecimal pointAwards;
 
-        public Condition(int priority, EventExecutionFilter condition, int attribute) {
-            this(priority, condition, attribute, null);
+        public Condition(int priority, EventExecutionFilter condition, int attribute, Integer maxBadgesAllowed) {
+            this(priority, condition, attribute, maxBadgesAllowed, null, null);
         }
 
-        public Condition(int priority, EventExecutionFilter condition, int attribute, BigDecimal pointAwards) {
+        public Condition(int priority, EventExecutionFilter condition,
+                         int attribute, Integer maxBadgesAllowed,
+                         String pointId, BigDecimal pointAwards) {
             this.priority = priority;
             this.condition = condition;
             this.attribute = attribute;
+            this.maxBadgesAllowed = Utils.firstNonNull(maxBadgesAllowed, Integer.MAX_VALUE);
+            this.pointId = pointId;
             this.pointAwards = pointAwards;
         }
 

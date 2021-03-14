@@ -23,6 +23,7 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventValueResolver;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -58,7 +59,7 @@ public class PeriodicBadgeRule extends BadgeRule {
 
         if (matchedThreshold != null) {
             if (Objects.nonNull(matchedThreshold.getPointAwards())) {
-                signal.setPointAwards(getPointId(), matchedThreshold.getPointAwards());
+                signal.setPointAwards(matchedThreshold.getPointId(), matchedThreshold.getPointAwards());
             } else {
                 super.derivePointsInTo(signal);
             }
@@ -71,18 +72,21 @@ public class PeriodicBadgeRule extends BadgeRule {
     }
 
     @Getter
+    @Builder
     public static class Threshold implements Comparable<Threshold> {
         private final int attribute;
         private final BigDecimal value;
+        private final String pointId;
         private final BigDecimal pointAwards;
 
         public Threshold(int attribute, BigDecimal value) {
-            this(attribute, value, null);
+            this(attribute, value, null, null);
         }
 
-        public Threshold(int attribute, BigDecimal value, BigDecimal pointAwards) {
+        public Threshold(int attribute, BigDecimal value, String pointId, BigDecimal pointAwards) {
             this.attribute = attribute;
             this.value = value;
+            this.pointId = pointId;
             this.pointAwards = pointAwards;
         }
 

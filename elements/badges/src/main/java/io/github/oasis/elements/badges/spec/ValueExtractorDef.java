@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,34 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges.rules;
+package io.github.oasis.elements.badges.spec;
 
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.utils.Texts;
-import io.github.oasis.elements.badges.signals.BadgeSignal;
-import lombok.Getter;
-import lombok.Setter;
+import io.github.oasis.core.elements.Validator;
+import io.github.oasis.core.exception.OasisParseException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.Validate;
 
-import java.math.BigDecimal;
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public abstract class BadgeRule extends AbstractRule {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ValueExtractorDef implements Validator, Serializable {
 
-    private String pointId;
-    private BigDecimal pointAwards;
+    private String expression;
 
-    public BadgeRule(String id) {
-        super(id);
+    @Override
+    public void validate() throws OasisParseException {
+        Validate.notEmpty(expression, "Mandatory field 'expression' is missing or empty!");
     }
-
-    public void derivePointsInTo(BadgeSignal signal) {
-        if (Texts.isNotEmpty(pointId) && pointAwards != null) {
-            signal.setPointAwards(pointId, pointAwards);
-        }
-    }
-
 }

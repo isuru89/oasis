@@ -60,7 +60,7 @@ public class PeriodicStreakNRule extends BadgeRule {
 
         if (matchedStreak != null) {
             if (Objects.nonNull(matchedStreak.getValue().getPoints())) {
-                signal.setPointAwards(getPointId(), matchedStreak.getValue().getPoints());
+                signal.setPointAwards(matchedStreak.getValue().getPointId(), matchedStreak.getValue().getPoints());
             } else {
                 super.derivePointsInTo(signal);
             }

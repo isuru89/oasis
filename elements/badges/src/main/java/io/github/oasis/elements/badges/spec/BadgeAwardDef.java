@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,34 +17,34 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges.rules;
+package io.github.oasis.elements.badges.spec;
 
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.utils.Texts;
-import io.github.oasis.elements.badges.signals.BadgeSignal;
-import lombok.Getter;
-import lombok.Setter;
+import io.github.oasis.core.elements.Validator;
+import io.github.oasis.core.exception.OasisParseException;
+import lombok.Data;
 
-import java.math.BigDecimal;
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public abstract class BadgeRule extends AbstractRule {
+@Data
+public class BadgeAwardDef implements Validator, Serializable {
 
-    private String pointId;
-    private BigDecimal pointAwards;
+    /**
+     * Maximum how many time should a user be awarded this badge.
+     */
+    private Integer maxAwardTimes;
 
-    public BadgeRule(String id) {
-        super(id);
-    }
+    /**
+     * Badge attribute id (like, Gold, Silver or Bronze)
+     */
+    private Integer attribute;
 
-    public void derivePointsInTo(BadgeSignal signal) {
-        if (Texts.isNotEmpty(pointId) && pointAwards != null) {
-            signal.setPointAwards(pointId, pointAwards);
+    @Override
+    public void validate() throws OasisParseException {
+        if (maxAwardTimes == null && attribute == null) {
+            throw new OasisParseException("Either one of 'maxAwardTimes' or 'attributes' field must be specified!");
         }
     }
-
 }

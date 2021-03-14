@@ -29,14 +29,8 @@ import lombok.Getter;
 @Getter
 public class FirstEventBadgeRule extends BadgeRule {
 
-    public static final int DEFAULT_ATTRIBUTE = 1;
-
     private final String eventName;
     private final int attributeId;
-
-    public FirstEventBadgeRule(String id, String eventName) {
-        this(id, eventName, DEFAULT_ATTRIBUTE);
-    }
 
     public FirstEventBadgeRule(String id, String eventName, int attributeId) {
         super(id);

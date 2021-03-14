@@ -57,7 +57,7 @@ public class TestUtils {
     @SuppressWarnings("unchecked")
     public static List<BadgeDef> parseAll(String resourcePath, BadgeParser badgeParser) {
         Map<String, Object> map = loadGroupFile(resourcePath);
-        List<Map<String, Object>> items = (List<Map<String, Object>>) map.get("badges");
+        List<Map<String, Object>> items = (List<Map<String, Object>>) map.get("elements");
         return items.stream().map(TestUtils::asPersistedDef)
                 .map(badgeParser::parse)
                 .collect(Collectors.toList());

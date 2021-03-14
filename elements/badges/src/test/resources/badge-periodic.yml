@@ -4,33 +4,63 @@ badges:
   - id: BDG-P0001
     name: Daily-Reputations
     description: Accumulates user reputation daily and awards badges if user scores 50+ reputations on a day
-    kind: periodicAccumulation
-    event: reputation.changed
-    timeUnit: daily
-    aggregatorExtractor: e.reputations
-    thresholds:
-      - value: 50        // 50 reputations
-        attribute: 10
-      - value: 100         // 100 reputations
-        attribute: 20
-      - value: 200       // 200 reputations
-        attribute: 30
+    type: core:badge
+    spec:
+      kind: periodicAccumulation
+      selector:
+        matchEvent: reputation.changed
+      period:
+        duration: 1
+        unit: days
+      aggregatorExtractor:
+        expression: e.reputations
+      thresholds:
+        - value: 50        # 50 reputations
+          rewards:
+            badge:
+              attribute: 10
+        - value: 100         # 100 reputations
+          rewards:
+            badge:
+              attribute: 20
+        - value: 200       # 200 reputations
+          rewards:
+            badge:
+              attribute: 30
 
   - id: BDG-P0002
     name: Daily-Uploads
     description: Accumulates user daily image file uploads and awards badges based on number of uploads
-    kind: periodicOccurrences
-    event: file.uploaded
-    timeUnit: daily
-    criteria: "['jpg', 'jpeg', 'png'].contains(e.fileType)"
-    pointId: extra.iops
-    thresholds:
-      - value: 50        // 5 uploads
-        attribute: 10
-        pointAwards: 1
-      - value: 100         // 20 uploads
-        attribute: 20
-        pointAwards: 2
-      - value: 200       // 100 uploads
-        attribute: 30
-        pointAwards: 10
+    type: core:badge
+    spec:
+      kind: periodicOccurrences
+      selector:
+        matchEvent: file.uploaded
+      period:
+        duration: 1
+        unit: days
+      criteria: "['jpg', 'jpeg', 'png'].contains(e.fileType)"
+      thresholds:
+        - value: 50        # 5 uploads
+          attribute: 10
+          pointAwards: 1
+          rewards:
+            badge:
+              attribute: 10
+            points:
+              id: extra.iops
+              amount: 1
+        - value: 100         # 20 uploads
+          rewards:
+            badge:
+              attribute: 20
+            points:
+              id: extra.iops
+              amount: 2
+        - value: 200       # 100 uploads
+          rewards:
+            badge:
+              attribute: 30
+            points:
+              id: extra.iops
+              amount: 10

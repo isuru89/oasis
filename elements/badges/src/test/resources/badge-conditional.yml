@@ -1,38 +1,61 @@
 version: 1
 
-badges:
+elements:
   - id: BDG-C0001
     name: Question-Quality
     description: Awards badges based on how many scores got for the question
-    event: question.scored
-    kind: conditional
-    conditions:
-      - priority: 1
-        attribute: 30
-        condition: "e.score >= 100"
-      - priority: 2
-        attribute: 20
-        condition: "e.score >= 25"
-      - priority: 3
-        attribute: 10
-        condition: "e.score >= 10"
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.scored
+      conditions:
+        - priority: 1
+          condition: "e.score >= 100"
+          rewards:
+            badge:
+              attribute: 30
+        - priority: 2
+          condition: "e.score >= 25"
+          rewards:
+            badge:
+              attribute: 20
+        - priority: 3
+          condition: "e.score >= 10"
+          rewards:
+            badge:
+              attribute: 10
 
   - id: BDG-C0002
     name: Question-Views-With-Points
     description: Awards badges based on how many scores got for the question and also awards points.
-    event: question.viewed
-    kind: conditional
-    pointId: reputation
-    conditions:
-      - priority: 1
-        attribute: 30
-        condition: "e.views >= 10000"
-        pointAwards: 50
-      - priority: 2
-        attribute: 20
-        condition: "e.views >= 2500"
-        pointAwards: 20
-      - priority: 3
-        attribute: 10
-        condition: "e.views >= 1000"
-        pointAwards: 10
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.viewed
+      conditions:
+        - priority: 1
+          condition: "e.views >= 1000"
+          rewards:
+            badge:
+              attribute: 30
+            points:
+              id: reputation
+              amount: 50
+        - priority: 2
+          condition: "e.views >= 2500"
+          rewards:
+            badge:
+              attribute: 20
+            points:
+              id: reputation
+              amount: 30
+        - priority: 3
+          condition: "e.views >= 1000"
+          rewards:
+            badge:
+              attribute: 10
+            points:
+              id: reputation
+              amount: 10
