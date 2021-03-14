@@ -19,9 +19,6 @@
 
 package io.github.oasis.elements.ratings;
 
-import io.github.oasis.core.Event;
-import io.github.oasis.core.elements.EventExecutionFilter;
-import io.github.oasis.core.elements.EventValueResolver;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
@@ -36,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -43,8 +41,8 @@ import java.util.List;
 @DisplayName("Ratings")
 public class RatingsTest extends AbstractRuleTest {
 
-    private static final String EVT_A = "a";
-    private static final String EVT_B = "b";
+    private static final String EVT_A = "user.average";
+    private static final String EVT_B = "unknown.event";
 
     private static final int DEF_RATING = 1;
 
@@ -80,12 +78,8 @@ public class RatingsTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(160, EVT_B, 64);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<RatingRule> ruleContext = createRule(signals,
-                aRating(1, 1, checkGt(85), pointAward(1)),
-                aRating(2, 2, checkGt(65), pointAward(2)),
-                aRating(3, 3, checkGt(50), pointAward(3))
-        );
-        RatingRule rule = ruleContext.getRule();
+        RatingRule rule = loadRule("ratings.yml", "WITH_THREE_RATINGS");
+        RuleContext<RatingRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getRatings().size());
         Assertions.assertEquals(DEF_RATING, rule.getDefaultRating());
         RatingProcessor processor = new RatingProcessor(pool, ruleContext);
@@ -103,12 +97,15 @@ public class RatingsTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<RatingRule> ruleContext = createRule(signals,
-                aRating(1, 3, checkGt(85), null),
-                aRating(2, 2, checkGt(65), null),
-                aRating(3, 1, checkGt(50), null)
-        );
-        RatingRule rule = ruleContext.getRule();
+        RatingRule rule = loadRule("ratings.yml", "WITH_THREE_RATINGS");
+        RuleContext<RatingRule> ruleContext = createRule(rule, signals);
+        rule.setRatings(rule.getRatings().stream().map(rating -> new RatingRule.Rating(
+                rating.getPriority(),
+                rating.getRating(),
+                rating.getCriteria(),
+                null,
+                POINT_ID
+        )).collect(Collectors.toList()));
         Assertions.assertEquals(3, rule.getRatings().size());
         Assertions.assertEquals(DEF_RATING, rule.getDefaultRating());
         RatingProcessor processor = new RatingProcessor(pool, ruleContext);
@@ -127,87 +124,20 @@ public class RatingsTest extends AbstractRuleTest {
         TEvent e1 = TEvent.createKeyValue(100, EVT_A, 57);
         TEvent e2 = TEvent.createKeyValue(105, EVT_A, 83);
         TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
+        TEvent e4 = TEvent.createKeyValue(120, EVT_B, 66);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<RatingRule> ruleContext = createRule(signals,
-                aRating(1, 3, checkGt(85), pointAward(3)),
-                aRating(2, 2, checkGt(65), pointAward(2)),
-                aRating(3, 1, checkGt(50), pointAward(1))
-        );
-        RatingRule rule = ruleContext.getRule();
+        RatingRule rule = loadRule("ratings.yml", "WITH_THREE_RATINGS");
+        RuleContext<RatingRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getRatings().size());
         Assertions.assertEquals(DEF_RATING, rule.getDefaultRating());
         RatingProcessor processor = new RatingProcessor(pool, ruleContext);
-        submitOrder(processor, e1, e2, e3);
+        submitOrder(processor, e1, e2, e3, e4);
 
         System.out.println(signals);
         assertStrict(signals,
                 new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e2.getTimestamp(), e2),
                 new RatingPointsSignal(rule.getId(), POINT_ID, 2, asDecimal(10), e2)
-        );
-
-        RatingChangedSignal signal = (RatingChangedSignal) signals.stream().filter(s -> s instanceof RatingChangedSignal).findFirst().orElse(null);
-        Assertions.assertNotNull(signal);
-        Assertions.assertEquals(RatingsSink.class, signal.sinkHandler());
-    }
-
-    @DisplayName("Common Award: Rating go up")
-    @Test
-    public void testCommonAwardGoUpRating() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 57);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 83);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
-
-        List<Signal> signals = new ArrayList<>();
-        RuleContext<RatingRule> ruleContext = createRule(signals,
-                aRating(1, 3, checkGt(85), null),
-                aRating(2, 2, checkGt(65), null),
-                aRating(3, 1, checkGt(50), null)
-        );
-        RatingRule rule = ruleContext.getRule();
-        rule.setCommonPointAwards((event, prevRating, currRating) -> BigDecimal.valueOf((currRating - prevRating) * 10.0));
-        Assertions.assertEquals(3, rule.getRatings().size());
-        Assertions.assertEquals(DEF_RATING, rule.getDefaultRating());
-        RatingProcessor processor = new RatingProcessor(pool, ruleContext);
-        submitOrder(processor, e1, e2, e3);
-
-        System.out.println(signals);
-        assertStrict(signals,
-                new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e2.getTimestamp(), e2),
-                new RatingPointsSignal(rule.getId(), POINT_ID, 2, asDecimal(10), e2)
-        );
-
-        RatingChangedSignal signal = (RatingChangedSignal) signals.stream().filter(s -> s instanceof RatingChangedSignal).findFirst().orElse(null);
-        Assertions.assertNotNull(signal);
-        Assertions.assertEquals(RatingsSink.class, signal.sinkHandler());
-    }
-
-    @DisplayName("Overridden Award: Rating go up")
-    @Test
-    public void testOverriddenAwardGoUpRating() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 66);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 89);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
-
-        List<Signal> signals = new ArrayList<>();
-        RuleContext<RatingRule> ruleContext = createRule(signals,
-                aRating(1, 3, checkGt(85), null),
-                aRating(2, 2, checkGt(65), (event, input) -> BigDecimal.valueOf(100)),
-                aRating(3, 1, checkGt(50), null)
-        );
-        RatingRule rule = ruleContext.getRule();
-        rule.setCommonPointAwards((event, prevRating, currRating) -> BigDecimal.valueOf((currRating - prevRating) * 10.0));
-        Assertions.assertEquals(3, rule.getRatings().size());
-        Assertions.assertEquals(DEF_RATING, rule.getDefaultRating());
-        RatingProcessor processor = new RatingProcessor(pool, ruleContext);
-        submitOrder(processor, e1, e2, e3);
-
-        System.out.println(signals);
-        assertStrict(signals,
-                new RatingChangedSignal(rule.getId(), DEF_RATING, 2, e1.getTimestamp(), e1),
-                new RatingPointsSignal(rule.getId(), POINT_ID, 2, asDecimal(100), e1),
-                new RatingChangedSignal(rule.getId(), 2, 3, e2.getTimestamp(), e2),
-                new RatingPointsSignal(rule.getId(), POINT_ID, 3, asDecimal(10), e2)
         );
 
         RatingChangedSignal signal = (RatingChangedSignal) signals.stream().filter(s -> s instanceof RatingChangedSignal).findFirst().orElse(null);
@@ -223,12 +153,8 @@ public class RatingsTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(110, EVT_A, 75);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<RatingRule> ruleContext = createRule(signals,
-                aRating(1, 3, checkGt(85), pointAward(3)),
-                aRating(2, 2, checkGt(65), pointAward(2)),
-                aRating(3, 1, checkGt(50), pointAward(1))
-        );
-        RatingRule rule = ruleContext.getRule();
+        RatingRule rule = loadRule("ratings.yml", "WITH_THREE_RATINGS");
+        RuleContext<RatingRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getRatings().size());
         Assertions.assertEquals(DEF_RATING, rule.getDefaultRating());
         RatingProcessor processor = new RatingProcessor(pool, ruleContext);
@@ -249,12 +175,8 @@ public class RatingsTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<RatingRule> ruleContext = createRule(signals,
-                aRating(1, 3, checkGt(85), pointAward(3)),
-                aRating(2, 2, checkGt(65), pointAward(2)),
-                aRating(3, 1, checkGt(50), pointAward(1))
-        );
-        RatingRule rule = ruleContext.getRule();
+        RatingRule rule = loadRule("ratings.yml", "WITH_THREE_RATINGS");
+        RuleContext<RatingRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getRatings().size());
         Assertions.assertEquals(DEF_RATING, rule.getDefaultRating());
         RatingProcessor processor = new RatingProcessor(pool, ruleContext);
@@ -273,13 +195,7 @@ public class RatingsTest extends AbstractRuleTest {
     @Test
     public void noPointEventIfEmptyPointId() {
         TEvent e1 = TEvent.createKeyValue(100, EVT_A, 57);
-        List<Signal> signals = new ArrayList<>();
-        RuleContext<RatingRule> ruleContext = createRule(signals,
-                aRating(1, 3, checkGt(85), pointAward(3)),
-                aRating(2, 2, checkGt(65), pointAward(2)),
-                aRating(3, 1, checkGt(50), pointAward(1))
-        );
-        RatingRule rule = ruleContext.getRule();
+        RatingRule rule = loadRule("ratings.yml", "WITH_THREE_RATINGS");
         RatingPointsSignal withPointId = new RatingPointsSignal(rule.getId(), POINT_ID, 3, asDecimal(20), e1);
         Assertions.assertTrue(withPointId.generateEvent().isPresent());
         RatingPointsSignal noPointId = new RatingPointsSignal(rule.getId(), null, 3, asDecimal(20), e1);
@@ -290,37 +206,15 @@ public class RatingsTest extends AbstractRuleTest {
         return BigDecimal.valueOf(val).setScale(Constants.SCALE, RoundingMode.HALF_UP);
     }
 
-    private EventExecutionFilter checkGt(long margin) {
-        return (e,r,c) -> (long) e.getFieldValue("value") >= margin;
-    }
-
-    private EventExecutionFilter checkLt(long margin) {
-        return (e,r,c) -> (long) e.getFieldValue("value") < margin;
-    }
-
-    private BigDecimal noPoints(Event event, int prevRating) {
-        return BigDecimal.ZERO;
-    }
-
-    private EventValueResolver<Integer> pointAward(int currRating) {
-        return (event, prevRating) -> BigDecimal.valueOf((currRating - prevRating) * 10.0);
-    }
-
-    private RatingRule.Rating aRating(int priority, int rating, EventExecutionFilter criteria,
-                                      EventValueResolver<Integer> pointDerive) {
-        return new RatingRule.Rating(priority, rating, criteria, pointDerive, POINT_ID);
-    }
-
-    private RatingRule.Rating aRating(int priority, int rating, EventExecutionFilter criteria, String pointId,
-                                      EventValueResolver<Integer> pointDerive) {
-        return new RatingRule.Rating(priority, rating, criteria, pointDerive, pointId);
-    }
-
     private RuleContext<RatingRule> createRule(Collection<Signal> signals, RatingRule.Rating... ratings) {
         RatingRule rule = new RatingRule("test.rating.rule");
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
         rule.setDefaultRating(DEF_RATING);
         rule.setRatings(Arrays.asList(ratings));
+        return new RuleContext<>(rule, fromConsumer(signals::add));
+    }
+
+    private RuleContext<RatingRule> createRule(RatingRule rule, Collection<Signal> signals) {
         return new RuleContext<>(rule, fromConsumer(signals::add));
     }
 
