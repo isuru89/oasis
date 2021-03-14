@@ -41,7 +41,7 @@ public class GameParserYaml implements GameParseSupport {
 
     private static final String VERSION_KEY = "version";
     private static final String ELEMENTS_KEY = "elements";
-    private static final String ELEMENT_PLUGIN_KEY = "plugin";
+    private static final String ELEMENT_PLUGIN_KEY = "type";
 
     public static GameDef fromFile(File file) throws OasisParseException {
         try (InputStream is = new FileInputStream(file)) {
@@ -83,7 +83,7 @@ public class GameParserYaml implements GameParseSupport {
                     var elementDef = (Map<String, Object>) def;
                     String elementPluginType = (String) elementDef.get(ELEMENT_PLUGIN_KEY);
                     if (Texts.isEmpty(elementPluginType)) {
-                        throw new OasisParseException("Element does not have specified the associated plugin!");
+                        throw new OasisParseException("Element does not have specified the associated type!");
                     }
                     PersistedDef persistedDef = new PersistedDef();
                     persistedDef.setType(PersistedDef.GAME_RULE_ADDED);

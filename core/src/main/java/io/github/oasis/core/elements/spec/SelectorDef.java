@@ -37,6 +37,11 @@ public class SelectorDef implements Validator, Serializable {
     private String matchEvent;
     private MatchEventsDef matchEvents;
 
+    /**
+     * Accepted point ids. These are same as event ids in game engine.
+     */
+    private MatchEventsDef matchPointIds;
+
     private EventFilterDef filter;
 
     private List<TimeRangeDef> acceptsWithin;
@@ -49,12 +54,16 @@ public class SelectorDef implements Validator, Serializable {
 
     @Override
     public void validate() throws OasisParseException {
-        if (Texts.isEmpty(matchEvent) && matchEvents == null) {
-            throw new OasisParseException("Either 'matchEvent' or 'matchEvents' must be specified!");
+        if (Texts.isEmpty(matchEvent) && matchEvents == null && matchPointIds == null) {
+            throw new OasisParseException("Either 'matchEvent', 'matchEvents' or 'matchPointIds' must be specified!");
         }
 
         if (matchEvents != null) {
             matchEvents.validate();
+        }
+
+        if (matchPointIds != null) {
+            matchPointIds.validate();
         }
 
         if (filter != null) {

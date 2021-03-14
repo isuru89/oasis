@@ -24,8 +24,7 @@ import io.github.oasis.core.elements.matchers.TimeRangeMatcherFactory;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.elements.spec.SelectorDef;
 import io.github.oasis.core.exception.OasisParseException;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.apache.commons.lang3.Validate;
 
 import java.io.Serializable;
@@ -42,8 +41,7 @@ import java.util.regex.Pattern;
  *
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@Data
 public abstract class AbstractDef<S extends BaseSpecification> implements Validator, Serializable  {
 
     private static final Pattern ID_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
@@ -82,6 +80,8 @@ public abstract class AbstractDef<S extends BaseSpecification> implements Valida
             return EventTypeMatcherFactory.createMatcher(selector.getMatchEvent());
         } else if (Objects.nonNull(selector.getMatchEvents())) {
             return EventTypeMatcherFactory.create(selector.getMatchEvents());
+        } else if (Objects.nonNull(selector.getMatchPointIds())) {
+            return EventTypeMatcherFactory.create(selector.getMatchPointIds());
         }
         return null;
     }
