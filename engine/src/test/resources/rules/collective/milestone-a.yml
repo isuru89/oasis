@@ -4,17 +4,20 @@ elements:
   - id: MILE000001
     name: Milestone-Basic
     description: This is a basic milestone which accumulates using event values.
-    plugin: core:milestone
-    event: event.a
-    valueExtractor: e.value
-    flags:
-      - SKIP_NEGATIVE_VALUES
-    levels:
-      - level: 1
-        milestone: 100
-      - level: 2
-        milestone: 200
-      - level: 3
-        milestone: 300
-      - level: 4
-        milestone: 500
+    type: core:milestone
+    spec:
+      selector:
+        matchEvent: event.a
+      valueExtractor:
+        expression: e.value
+      flags:
+        - SKIP_NEGATIVE_VALUES
+      levels:
+        - level: 1
+          milestone: 100
+        - level: 2
+          milestone: 200
+        - level: 3
+          milestone: 300
+        - level: 4
+          milestone: 500

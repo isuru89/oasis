@@ -22,7 +22,13 @@ package io.github.oasis.elements.challenges;
 import io.github.oasis.core.EventJson;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.spec.BaseSpecification;
+import io.github.oasis.core.elements.spec.PointAwardDef;
+import io.github.oasis.core.elements.spec.SelectorDef;
 import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.elements.challenges.spec.ChallengeRewardDef;
+import io.github.oasis.elements.challenges.spec.ChallengeSpecification;
+import io.github.oasis.elements.challenges.spec.ScopeDef;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,18 +60,17 @@ class ChallengeParserTest {
         persistedDef.setImpl(ChallengeDef.class.getName());
         persistedDef.setData(toMap(def));
 
-        AbstractDef abstractDef = parser.parse(persistedDef);
+        AbstractDef<? extends BaseSpecification> abstractDef = parser.parse(persistedDef);
 
         Assertions.assertTrue(abstractDef instanceof ChallengeDef);
         ChallengeDef parsed = (ChallengeDef) abstractDef;
-        Assertions.assertEquals(def.getStartAt(), parsed.getStartAt());
-        Assertions.assertEquals(def.getExpireAt(), parsed.getExpireAt());
-        Assertions.assertEquals(def.getWinnerCount(), parsed.getWinnerCount());
-        Assertions.assertEquals(def.getPointId(), parsed.getPointId());
-        Assertions.assertEquals(def.getPointAwards(), parsed.getPointAwards());
-        Assertions.assertEquals(def.getCriteria(), parsed.getCriteria());
-        Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM.name(), parsed.getScope().get(Constants.DEF_SCOPE_TYPE));
-        Assertions.assertEquals(1000, parsed.getScope().get(Constants.DEF_SCOPE_ID));
+        Assertions.assertEquals(def.getSpec().getStartAt(), parsed.getSpec().getStartAt());
+        Assertions.assertEquals(def.getSpec().getExpireAt(), parsed.getSpec().getExpireAt());
+        Assertions.assertEquals(def.getSpec().getWinnerCount(), parsed.getSpec().getWinnerCount());
+        Assertions.assertEquals(def.getSpec().getRewards().getPoints().getId(), parsed.getSpec().getRewards().getPoints().getId());
+        Assertions.assertEquals(def.getSpec().getRewards().getPoints().getExpression(), parsed.getSpec().getRewards().getPoints().getExpression());
+        Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM.name(), parsed.getSpec().getScopeTo().getType());
+        Assertions.assertEquals(1000, parsed.getSpec().getScopeTo().getTargetId());
     }
 
     @Test
@@ -76,12 +81,12 @@ class ChallengeParserTest {
         Assertions.assertTrue(abstractRule instanceof ChallengeRule);
 
         ChallengeRule rule = (ChallengeRule) abstractRule;
-        Assertions.assertEquals(def.getWinnerCount(), rule.getWinnerCount());
+        Assertions.assertEquals(def.getSpec().getWinnerCount(), rule.getWinnerCount());
         Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM, rule.getScope());
         Assertions.assertEquals(1000L, rule.getScopeId());
-        Assertions.assertEquals(def.getPointId(), rule.getPointId());
-        Assertions.assertEquals(def.getExpireAt(), rule.getExpireAt());
-        Assertions.assertEquals(def.getStartAt(), rule.getStartAt());
+        Assertions.assertEquals(def.getSpec().getRewards().getPoints().getId(), rule.getPointId());
+        Assertions.assertEquals(def.getSpec().getExpireAt(), rule.getExpireAt());
+        Assertions.assertEquals(def.getSpec().getStartAt(), rule.getStartAt());
         Assertions.assertEquals(BigDecimal.ZERO, rule.getAwardPoints());
         Assertions.assertNotNull(rule.getCustomAwardPoints());
 
@@ -92,22 +97,10 @@ class ChallengeParserTest {
     }
 
     @Test
-    void convertNullScope() {
-        ChallengeDef def = createTestChallenge();
-        def.setScope(null);
-
-        AbstractRule abstractRule = parser.convert(def);
-        Assertions.assertTrue(abstractRule instanceof ChallengeRule);
-
-        ChallengeRule rule = (ChallengeRule) abstractRule;
-        Assertions.assertEquals(ChallengeRule.ChallengeScope.GAME, rule.getScope());
-        Assertions.assertEquals(0, rule.getScopeId());
-    }
-
-    @Test
     void convertConstAward() {
         ChallengeDef def = createTestChallenge();
-        def.setPointAwards(200.0);
+        def.getSpec().getRewards().getPoints().setAmount(BigDecimal.valueOf(200.0));
+        def.getSpec().getRewards().getPoints().setExpression(null);
 
         AbstractRule abstractRule = parser.convert(def);
         Assertions.assertTrue(abstractRule instanceof ChallengeRule);
@@ -118,25 +111,8 @@ class ChallengeParserTest {
     }
 
     @Test
-    void convertNoAward() {
-        ChallengeDef def = createTestChallenge();
-        def.setPointAwards(null);
-
-        AbstractRule abstractRule = parser.convert(def);
-        Assertions.assertTrue(abstractRule instanceof ChallengeRule);
-
-        ChallengeRule rule = (ChallengeRule) abstractRule;
-        Assertions.assertEquals(BigDecimal.ZERO, rule.getAwardPoints());
-        Assertions.assertNull(rule.getCustomAwardPoints());
-    }
-
-    @Test
     void unknownDef() {
         AbstractDef unknownDef = new AbstractDef() {
-            @Override
-            public Object getEvent() {
-                return super.getEvent();
-            }
         };
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> parser.convert(unknownDef));
@@ -146,22 +122,29 @@ class ChallengeParserTest {
         ChallengeDef def = new ChallengeDef();
         def.setId("CHAL00003");
         def.setName("challenge-1");
-        def.setStartAt(System.currentTimeMillis());
-        def.setExpireAt(LocalDate.of(2020, 12, 31).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
-        def.setWinnerCount(20);
-        def.setPointId("challenge-winner-points");
-        def.setCriteria("e.data.reputations > 200");
-        def.setScope(Map.of(Constants.DEF_SCOPE_TYPE, ChallengeRule.ChallengeScope.TEAM.toString(),
-                Constants.DEF_SCOPE_ID, 1000L));
-        def.setPointAwards("100 * (50 - rank + 1)");
+        def.setType("core:challenge");
+        ChallengeSpecification spec = new ChallengeSpecification();
+        def.setSpec(spec);
+
+        spec.setSelector(new SelectorDef());
+        spec.getSelector().setMatchEvent("event.a");
+        spec.setStartAt(System.currentTimeMillis());
+        spec.setExpireAt(LocalDate.of(2020, 12, 31).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        spec.setWinnerCount(20);
+        spec.setRewards(new ChallengeRewardDef());
+        spec.getRewards().setPoints(new PointAwardDef());
+        spec.getRewards().getPoints().setId("challenge-winner-points");
+        spec.getRewards().getPoints().setExpression("100 * (50 - rank + 1)");
+        spec.setScopeTo(new ScopeDef());
+        spec.getScopeTo().setType(ChallengeRule.ChallengeScope.TEAM.name());
+        spec.getScopeTo().setTargetId(1000L);
 
         return def;
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> toMap(AbstractDef def) {
+    private Map<String, Object> toMap(AbstractDef<? extends BaseSpecification> def) {
         Yaml yaml = new Yaml();
         System.out.println(yaml.dumpAsMap(def));
-        return (Map<String, Object>) yaml.load(yaml.dumpAsMap(def));
+        return yaml.load(yaml.dumpAsMap(def));
     }
 }

@@ -67,6 +67,14 @@ public class ChallengeOverSignal extends AbstractChallengeSignal {
         return -1;
     }
 
+    @Override
+    public String toString() {
+        return "ChallengeOverSignal{" +
+                "ruleId=" + getRuleId() + ", " +
+                "completionType=" + completionType +
+                '}';
+    }
+
     public enum CompletionType {
         TIME_EXPIRED,
         ALL_WINNERS_FOUND

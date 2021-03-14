@@ -4,10 +4,15 @@ elements:
   - id: PNT00001
     name: Bonus-Half-Century
     description: Awards points for each additional value when total is greater than 50
-    plugin: core:point
-    events:
-      - event.a
-      - event.c
-    eventFilter: e.value >= 50
-    award: e.value - 50
-    pointId: bonus.points
+    type: core:point
+    spec:
+      selector:
+        matchEvents:
+          anyOf:
+            - event.a
+            - event.c
+        filter:
+          expression: e.value >= 50
+      reward:
+        expression: e.value - 50
+        pointId: bonus.points

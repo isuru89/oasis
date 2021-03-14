@@ -7,14 +7,14 @@ elements:
     type: core:challenge
     spec:
       selector:
-        matchEvent: event.a
+        matchEvent: user.scored
         filter:
           expression: e.value >= 50
-      scopeTo:
+      scope:
         type: GAME
-      winnerCount: 3
       startAt: 1583027100000
       expireAt: 1588297500000
+      winnerCount: 3
       rewards:
         points:
           id: challenge.points

@@ -19,12 +19,8 @@
 
 package io.github.oasis.elements.challenges;
 
-import io.github.oasis.core.Event;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
-import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.core.utils.Constants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +31,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
@@ -43,7 +38,7 @@ import java.util.Set;
 @DisplayName("Challenges - Out of order winners")
 public class ChallengeOutOfOrderTest extends AbstractRuleTest {
 
-    private static final String EVT_A = "a";
+    private static final String EVT_A = "user.scored";
 
     static final BigDecimal AWARD = BigDecimal.valueOf(100).setScale(Constants.SCALE, RoundingMode.HALF_UP);
 
@@ -58,6 +53,7 @@ public class ChallengeOutOfOrderTest extends AbstractRuleTest {
     static final int WIN_3 = 3;
 
     static final String POINT_ID = "challenge.points";
+    public static final String CHALLENGES_OUT_OF_ORDER_YML = "challenges-out-of-order.yml";
 
     @DisplayName("Team Scope: non-repeatable")
     @Test
@@ -72,11 +68,8 @@ public class ChallengeOutOfOrderTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createWithTeam(U4, 2,180, EVT_A, 50);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
-        rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS));
-        rule.setScope(ChallengeRule.ChallengeScope.TEAM);
-        rule.setScopeId(2);
+        ChallengeRule rule = loadRule(CHALLENGES_OUT_OF_ORDER_YML, "TEAM_SCOPED_MULTI_WINNER_OOO");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertEquals(2, rule.getScopeId());
         Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM, rule.getScope());
@@ -87,7 +80,6 @@ public class ChallengeOutOfOrderTest extends AbstractRuleTest {
         ChallengeOverEvent overEvent = ChallengeOverEvent.createFor(e1.getGameId(), ruleId);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8, overEvent);
 
-        System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(ruleId, e2, 1, U1, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengeWinSignal(ruleId, e3, 2, U3, e3.getTimestamp(), e3.getExternalId()),
@@ -111,12 +103,8 @@ public class ChallengeOutOfOrderTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createWithTeam(U4, 2,180, EVT_A, 50);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
-        rule.setCustomAwardPoints(this::award);
-        rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS, ChallengeRule.REPEATABLE_WINNERS));
-        rule.setScope(ChallengeRule.ChallengeScope.TEAM);
-        rule.setScopeId(2);
+        ChallengeRule rule = loadRule(CHALLENGES_OUT_OF_ORDER_YML, "TEAM_SCOPED_MULTI_WINNER_OOO_REPEATABLE");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertTrue(rule.hasFlag(ChallengeRule.REPEATABLE_WINNERS));
         Assertions.assertTrue(rule.hasFlag(ChallengeRule.OUT_OF_ORDER_WINNERS));
         ChallengeProcessor processor = new ChallengeProcessor(pool, eventReadWrite, ruleContext);
@@ -124,7 +112,6 @@ public class ChallengeOutOfOrderTest extends AbstractRuleTest {
         ChallengeOverEvent overEvent = ChallengeOverEvent.createFor(e1.getGameId(), ruleId);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8, overEvent);
 
-        System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(ruleId, e2, 1, U1, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengeWinSignal(ruleId, e7, 2, U5, e7.getTimestamp(), e7.getExternalId()),
@@ -148,12 +135,8 @@ public class ChallengeOutOfOrderTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createWithTeam(U4, 2,180, EVT_A, 50);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
-        rule.setCustomAwardPoints(this::award);
-        rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS, ChallengeRule.REPEATABLE_WINNERS));
-        rule.setScope(ChallengeRule.ChallengeScope.TEAM);
-        rule.setScopeId(2);
+        ChallengeRule rule = loadRule(CHALLENGES_OUT_OF_ORDER_YML, "TEAM_SCOPED_MULTI_WINNER_OOO_REPEATABLE");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         ChallengeProcessor processor = new ChallengeProcessor(pool, eventReadWrite, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8);
 
@@ -165,26 +148,7 @@ public class ChallengeOutOfOrderTest extends AbstractRuleTest {
         return BigDecimal.valueOf(val).setScale(Constants.SCALE, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal award(Event event, int position, ChallengeRule rule) {
-        return BigDecimal.valueOf((long)event.getFieldValue("value") - 50);
-    }
-
-    private boolean check(Event event, AbstractRule rule, ExecutionContext context) {
-        return (long)event.getFieldValue("value") >= 50;
-    }
-
-    private RuleContext<ChallengeRule> createRule(BigDecimal points, int winners, long start, long end, Collection<Signal> signals) {
-        ChallengeRule rule = new ChallengeRule("test.challenge.rule");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_A));
-        rule.setScope(ChallengeRule.ChallengeScope.GAME);
-        rule.setAwardPoints(points);
-        rule.setStartAt(start);
-        rule.setExpireAt(end);
-        rule.setCriteria(this::check);
-        rule.setWinnerCount(winners);
-        rule.setPointId(POINT_ID);
-        rule.setFlags(Set.of(ChallengeRule.OUT_OF_ORDER_WINNERS));
+    private RuleContext<ChallengeRule> createRule(ChallengeRule rule, Collection<Signal> signals) {
         return new RuleContext<>(rule, fromConsumer(signals::add));
     }
-
 }

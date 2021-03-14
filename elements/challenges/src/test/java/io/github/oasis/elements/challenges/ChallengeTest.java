@@ -20,8 +20,6 @@
 package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
@@ -43,12 +41,10 @@ import java.util.Set;
 @DisplayName("Challenges")
 public class ChallengeTest extends AbstractRuleTest {
 
-    private static final String EVT_A = "a";
-    private static final String EVT_B = "b";
+    private static final String EVT_A = "user.scored";
+    private static final String EVT_B = "unknown.event";
 
     static final BigDecimal AWARD = BigDecimal.valueOf(100).setScale(Constants.SCALE, RoundingMode.HALF_UP);
-
-    static final long START = 0;
 
     static final long U1 = 1;
     static final long U2 = 2;
@@ -59,6 +55,9 @@ public class ChallengeTest extends AbstractRuleTest {
     static final int WIN_3 = 3;
 
     static final String POINT_ID = "challenge.points";
+    public static final String CHALLENGES_USER_YML = "challenges-user.yml";
+    public static final String CHALLENGES_TEAM_YML = "challenges-team.yml";
+    public static final String CHALLENGES_GAME_YML = "challenges-game.yml";
 
     @DisplayName("No relevant events, no winners")
     @Test
@@ -68,8 +67,8 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(3,110, EVT_B, 34);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 150, signals);
-        ChallengeRule rule = ruleContext.getRule();
+        ChallengeRule rule = loadRule(CHALLENGES_GAME_YML, "GAME_SCOPED_MULTI_WINNER_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertTrue(rule.hasFlag(ChallengeRule.REPEATABLE_WINNERS));
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
@@ -88,8 +87,8 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(U4,115, EVT_A, 45);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 150, signals);
-        ChallengeRule rule = ruleContext.getRule();
+        ChallengeRule rule = loadRule(CHALLENGES_GAME_YML, "GAME_SCOPED_MULTI_WINNER_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4);
@@ -107,13 +106,12 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(U4,115, EVT_A, 25);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 150, signals);
-        ChallengeRule rule = ruleContext.getRule();
+        ChallengeRule rule = loadRule(CHALLENGES_GAME_YML, "GAME_SCOPED_MULTI_WINNER_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4);
 
-        System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
@@ -131,14 +129,13 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(U4,115, EVT_A, 25);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 150, signals);
-        ChallengeRule rule = ruleContext.getRule();
+        ChallengeRule rule = loadRule(CHALLENGES_GAME_YML, "GAME_SCOPED_MULTI_WINNER_RANKWISE_POINTS");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         rule.setCustomAwardPoints(this::award);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4);
 
-        System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
@@ -157,13 +154,12 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(U4,160, EVT_A, 99);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
+        ChallengeRule rule = loadRule(CHALLENGES_GAME_YML, "GAME_SCOPED_MULTI_WINNER_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5);
 
-        System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
@@ -185,15 +181,13 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(U4,160, EVT_A, 99);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
-        rule.setFlags(Set.of());
+        ChallengeRule rule = loadRule(CHALLENGES_GAME_YML, "GAME_SCOPED_MULTI_WINNER_NO_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertTrue(rule.doesNotHaveFlag(ChallengeRule.REPEATABLE_WINNERS));
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5);
 
-        System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e2, 2, U2, e2.getTimestamp(), e2.getExternalId()),
@@ -214,8 +208,8 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(U4,160, EVT_A, 99);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
+        ChallengeRule rule = loadRule(CHALLENGES_GAME_YML, "GAME_SCOPED_MULTI_WINNER_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertTrue(rule.hasFlag(ChallengeRule.REPEATABLE_WINNERS));
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
@@ -239,11 +233,11 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e1 = TEvent.createKeyValue(U1,100, EVT_A, 57);
         TEvent e2 = TEvent.createKeyValue(U2,105, EVT_A, 83);
         TEvent e3 = TEvent.createKeyValue(U3,110, EVT_A, 34);
-        TEvent e4 = TEvent.createKeyValue(U4,155, EVT_A, 75);
+        TEvent e4 = TEvent.createKeyValue(U4,255, EVT_A, 75);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 150, signals);
-        ChallengeRule rule = ruleContext.getRule();
+        ChallengeRule rule = loadRule(CHALLENGES_GAME_YML, "GAME_SCOPED_MULTI_WINNER_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4);
@@ -266,8 +260,8 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(U4,155, EVT_A, 75);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, 100, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
+        ChallengeRule rule = loadRule(CHALLENGES_GAME_YML, "GAME_SCOPED_MULTI_WINNER_REPEAT_START_EARLY");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4);
@@ -281,7 +275,7 @@ public class ChallengeTest extends AbstractRuleTest {
         );
     }
 
-    @DisplayName("User Scoped: single challenge")
+    @DisplayName("User Scoped: single winner challenge")
     @Test
     public void testUserScopedChallenge() {
         TEvent e1 = TEvent.createKeyValue(U1,100, EVT_A, 57);
@@ -291,17 +285,11 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(U2,160, EVT_A, 64);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, 1, START, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
-        rule.setScope(ChallengeRule.ChallengeScope.USER);
-        rule.setScopeId(U2);
-        Assertions.assertEquals(1, rule.getWinnerCount());
-        Assertions.assertEquals(U2, rule.getScopeId());
-        Assertions.assertEquals(ChallengeRule.ChallengeScope.USER, rule.getScope());
+        ChallengeRule rule = loadRule(CHALLENGES_USER_YML, "USER_SCOPED_SINGLE_WINNER");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5);
 
-        System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
@@ -323,10 +311,8 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(U2,160, EVT_A, 64);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
-        rule.setScope(ChallengeRule.ChallengeScope.USER);
-        rule.setScopeId(U2);
+        ChallengeRule rule = loadRule(CHALLENGES_USER_YML, "USER_SCOPED_MULTI_WINNER");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertEquals(U2, rule.getScopeId());
         Assertions.assertEquals(ChallengeRule.ChallengeScope.USER, rule.getScope());
@@ -334,7 +320,6 @@ public class ChallengeTest extends AbstractRuleTest {
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5);
 
-        System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e4, 2, U2, e4.getTimestamp(), e4.getExternalId()),
@@ -355,11 +340,8 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(U2,160, EVT_A, 64);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
-        rule.setScope(ChallengeRule.ChallengeScope.USER);
-        rule.setScopeId(U2);
-        rule.setFlags(Set.of());
+        ChallengeRule rule = loadRule(CHALLENGES_USER_YML, "USER_SCOPED_MULTI_WINNER_NON_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertEquals(U2, rule.getScopeId());
         Assertions.assertEquals(ChallengeRule.ChallengeScope.USER, rule.getScope());
@@ -367,10 +349,36 @@ public class ChallengeTest extends AbstractRuleTest {
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5);
 
-        System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2)
+        );
+    }
+
+    @DisplayName("User Scoped: multi user non repeatable challenge")
+    @Test
+    public void testMultiUserScopedNRMultipleChallenge() {
+        TEvent e1 = TEvent.createKeyValue(U1,100, EVT_A, 57);
+        TEvent e2 = TEvent.createKeyValue(U2,105, EVT_A, 83);
+        TEvent e3 = TEvent.createKeyValue(U3,110, EVT_A, 74);
+        TEvent e4 = TEvent.createKeyValue(U2,155, EVT_A, 75);
+        TEvent e5 = TEvent.createKeyValue(U2,160, EVT_A, 64);
+
+        List<Signal> signals = new ArrayList<>();
+        ChallengeRule rule = loadRule(CHALLENGES_USER_YML, "MULTI_USER_SCOPED_MULTI_WINNER_NON_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
+        Assertions.assertEquals(WIN_3, rule.getWinnerCount());
+        Assertions.assertFalse(rule.getScopeIds().isEmpty());
+        Assertions.assertEquals(ChallengeRule.ChallengeScope.USER, rule.getScope());
+        Assertions.assertTrue(rule.doesNotHaveFlag(ChallengeRule.REPEATABLE_WINNERS));
+        ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
+        submitOrder(processor, e1, e2, e3, e4, e5);
+
+        assertStrict(signals,
+                new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e3, 2, U3, e3.getTimestamp(), e3.getExternalId()),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e3)
         );
     }
 
@@ -399,11 +407,8 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createWithTeam(U5, 2,175, EVT_A, 50);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
-        rule.setFlags(Set.of());
-        rule.setScope(ChallengeRule.ChallengeScope.TEAM);
-        rule.setScopeId(2);
+        ChallengeRule rule = loadRule(CHALLENGES_TEAM_YML, "TEAM_SCOPED_MULTI_WINNER_NO_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertEquals(2, rule.getScopeId());
         Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM, rule.getScope());
@@ -411,14 +416,13 @@ public class ChallengeTest extends AbstractRuleTest {
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8);
 
-        System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e3, 2, U3, e3.getTimestamp(), e3.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e7, 3, U4, e7.getTimestamp(), e7.getExternalId()),
-                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
-                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e3),
-                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e7),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, new BigDecimal("300.00"), e2),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, new BigDecimal("200.00"), e3),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, new BigDecimal("100.00"), e7),
                 new ChallengeOverSignal(rule.getId(), e8.asEventScope(), e8.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
         );
     }
@@ -436,10 +440,8 @@ public class ChallengeTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createWithTeam(U5, 2,175, EVT_A, 50);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ChallengeRule> ruleContext = createRule(AWARD, WIN_3, START, 200, signals);
-        ChallengeRule rule = ruleContext.getRule();
-        rule.setScope(ChallengeRule.ChallengeScope.TEAM);
-        rule.setScopeId(2);
+        ChallengeRule rule = loadRule(CHALLENGES_TEAM_YML, "TEAM_SCOPED_MULTI_WINNER_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(WIN_3, rule.getWinnerCount());
         Assertions.assertEquals(2, rule.getScopeId());
         Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM, rule.getScope());
@@ -447,7 +449,6 @@ public class ChallengeTest extends AbstractRuleTest {
         ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8);
 
-        System.out.println(signals);
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengeWinSignal(rule.getId(), e3, 2, U3, e3.getTimestamp(), e3.getExternalId()),
@@ -460,16 +461,45 @@ public class ChallengeTest extends AbstractRuleTest {
         );
     }
 
+    @DisplayName("Team Scoped: Multi teams, multiple repeatable winners")
+    @Test
+    public void teamMultiScopedRepeatableWinners() {
+        TEvent e1 = TEvent.createWithTeam(U1, 1,100, EVT_A, 57);
+        TEvent e2 = TEvent.createWithTeam(U2, 4,105, EVT_A, 83);
+        TEvent e3 = TEvent.createWithTeam(U3, 3,110, EVT_A, 98);
+        TEvent e4 = TEvent.createWithTeam(U2, 4,155, EVT_A, 75);
+        TEvent e5 = TEvent.createWithTeam(U4, 2,160, EVT_A, 88);
+        TEvent e6 = TEvent.createWithTeam(U1, 1,165, EVT_A, 71);
+        TEvent e7 = TEvent.createWithTeam(U4, 2,170, EVT_A, 64);
+        TEvent e8 = TEvent.createWithTeam(U5, 5,175, EVT_A, 50);
+
+        List<Signal> signals = new ArrayList<>();
+        ChallengeRule rule = loadRule(CHALLENGES_TEAM_YML, "MULTI_TEAM_SCOPED_MULTI_WINNER_REPEAT");
+        RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
+        Assertions.assertEquals(WIN_3, rule.getWinnerCount());
+        Assertions.assertEquals(2, rule.getScopeIds().size());
+        Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM, rule.getScope());
+        Assertions.assertTrue(rule.hasFlag(ChallengeRule.REPEATABLE_WINNERS));
+        ChallengeProcessor processor = new ChallengeProcessor(pool, ruleContext);
+        submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8);
+
+        assertStrict(signals,
+                new ChallengeWinSignal(rule.getId(), e1, 1, U1, e1.getTimestamp(), e1.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e5, 2, U4, e5.getTimestamp(), e5.getExternalId()),
+                new ChallengeWinSignal(rule.getId(), e6, 3, U1, e6.getTimestamp(), e6.getExternalId()),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e5),
+                new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e6),
+                new ChallengeOverSignal(rule.getId(), e7.asEventScope(), e7.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+        );
+    }
+
     private BigDecimal asDecimal(long val) {
         return BigDecimal.valueOf(val).setScale(Constants.SCALE, RoundingMode.HALF_UP);
     }
 
     private BigDecimal award(Event event, int position, ChallengeRule rule) {
         return BigDecimal.valueOf((long)event.getFieldValue("value") - 50);
-    }
-
-    private boolean check(Event event, AbstractRule rule, ExecutionContext context) {
-        return (long)event.getFieldValue("value") >= 50;
     }
 
     private RuleContext<ChallengeRule> createRule(BigDecimal points, int winners, long start, long end, Collection<Signal> signals) {
@@ -479,11 +509,13 @@ public class ChallengeTest extends AbstractRuleTest {
         rule.setAwardPoints(points);
         rule.setStartAt(start);
         rule.setExpireAt(end);
-        rule.setCriteria(this::check);
         rule.setWinnerCount(winners);
         rule.setPointId(POINT_ID);
         rule.setFlags(Set.of(ChallengeRule.REPEATABLE_WINNERS));
         return new RuleContext<>(rule, fromConsumer(signals::add));
     }
 
+    private RuleContext<ChallengeRule> createRule(ChallengeRule rule, Collection<Signal> signals) {
+        return new RuleContext<>(rule, fromConsumer(signals::add));
+    }
 }

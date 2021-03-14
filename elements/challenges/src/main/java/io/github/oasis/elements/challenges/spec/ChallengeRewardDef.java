@@ -17,11 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.elements.challenges;
+package io.github.oasis.elements.challenges.spec;
+
+import io.github.oasis.core.elements.Validator;
+import io.github.oasis.core.elements.spec.PointAwardDef;
+import io.github.oasis.core.exception.OasisParseException;
+import lombok.Data;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-class ChallengeDefTest {
+@Data
+public class ChallengeRewardDef implements Validator, Serializable {
 
+    /**
+     * When a user wins, the type of point id to be awarded.
+     * When not specified, challenge id will be used.
+     */
+    private PointAwardDef points;
+
+    @Override
+    public void validate() throws OasisParseException {
+
+    }
 }

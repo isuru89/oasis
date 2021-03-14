@@ -1,0 +1,47 @@
+version: 1
+
+elements:
+  - id: TEAM_SCOPED_MULTI_WINNER_OOO
+    name: test.challenge.rule
+    description: Game scoped challenge when some one scored more than 50
+    type: core:challenge
+    spec:
+      selector:
+        matchEvent: user.scored
+        filter:
+          expression: e.value >= 50
+      flags:
+        - OUT_OF_ORDER_WINNERS
+      scopeTo:
+        type: TEAM
+        targetId: 2
+      startAt: 0
+      expireAt: 200
+      winnerCount: 3
+      rewards:
+        points:
+          id: challenge.points
+          amount: 100
+
+  - id: TEAM_SCOPED_MULTI_WINNER_OOO_REPEATABLE
+    name: test.challenge.rule
+    description: Game scoped challenge when some one scored more than 50
+    type: core:challenge
+    spec:
+      selector:
+        matchEvent: user.scored
+        filter:
+          expression: e.value >= 50
+      flags:
+        - OUT_OF_ORDER_WINNERS
+        - REPEATABLE_WINNERS
+      scopeTo:
+        type: TEAM
+        targetId: 2
+      startAt: 0
+      expireAt: 200
+      winnerCount: 3
+      rewards:
+        points:
+          id: challenge.points
+          expression: e.value - 50

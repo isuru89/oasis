@@ -20,13 +20,9 @@
 package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.utils.Utils;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import io.github.oasis.elements.challenges.spec.ChallengeSpecification;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Definition for challenge rule.
@@ -37,54 +33,8 @@ import java.util.Map;
  *
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class ChallengeDef extends AbstractDef {
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class ChallengeDef extends AbstractDef<ChallengeSpecification> {
 
-    /**
-     * Start time to begin processing events.
-     */
-    private Long startAt;
-    /**
-     * End time to stop processing events and announce winners.
-     */
-    private Long expireAt;
-
-    /**
-     * Maximum number of winners allowed to achieve this challenge.
-     * Once this number reached, the challenge will auto stop.
-     */
-    private Integer winnerCount;
-
-    /**
-     * The map of scopes to choose winners.
-     * This can be by teams, individual or global.
-     * If teams or individual, the id must be specified as map value.
-     */
-    private Map<String, Object> scope;
-
-    private Object criteria;
-
-    /**
-     * When a user wins, the type of point id to be awarded.
-     * When not specified, challenge id will be used.
-     */
-    private String pointId;
-    /**
-     * Expression for points to award to a winning user.
-     */
-    private Object pointAwards;
-
-    @Override
-    protected List<String> getSensitiveAttributes() {
-        List<String> base = new ArrayList<>(super.getSensitiveAttributes());
-        base.add(Utils.firstNonNullAsStr(startAt, EMPTY));
-        base.add(Utils.firstNonNullAsStr(expireAt, EMPTY));
-        base.add(Utils.firstNonNullAsStr(winnerCount, EMPTY));
-        base.add(Utils.firstNonNullAsStr(criteria, EMPTY));
-        base.add(Utils.firstNonNullAsStr(pointId, EMPTY));
-        base.add(Utils.firstNonNullAsStr(pointAwards, EMPTY));
-        base.add(Utils.firstNonNullAsStr(scope, EMPTY));
-        return base;
-    }
 }

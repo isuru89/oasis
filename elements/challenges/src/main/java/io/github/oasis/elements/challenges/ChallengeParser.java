@@ -23,14 +23,16 @@ import io.github.oasis.core.VariableNames;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractElementParser;
 import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.Scripting;
+import io.github.oasis.core.elements.spec.BaseSpecification;
+import io.github.oasis.core.elements.spec.PointAwardDef;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Utils;
+import io.github.oasis.elements.challenges.spec.ScopeDef;
 
-import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
@@ -38,12 +40,14 @@ import java.util.Objects;
 public class ChallengeParser extends AbstractElementParser {
 
     @Override
-    public AbstractDef parse(PersistedDef persistedObj) {
-        return loadFrom(persistedObj, ChallengeDef.class);
+    public AbstractDef<? extends BaseSpecification> parse(PersistedDef persistedObj) {
+        ChallengeDef def = loadFrom(persistedObj, ChallengeDef.class);
+        def.validate();
+        return def;
     }
 
     @Override
-    public AbstractRule convert(AbstractDef definition) {
+    public AbstractRule convert(AbstractDef<? extends BaseSpecification> definition) {
         if (definition instanceof ChallengeDef) {
             return toRule((ChallengeDef) definition);
         }
@@ -51,34 +55,32 @@ public class ChallengeParser extends AbstractElementParser {
     }
 
     private ChallengeRule toRule(ChallengeDef def) {
-        String id = Utils.firstNonNullAsStr(def.getId(), def.generateUniqueHash());
-        ChallengeRule rule = new ChallengeRule(id);
+        def.validate();
+
+        ChallengeRule rule = new ChallengeRule(def.getId());
         AbstractDef.defToRule(def, rule);
 
-        rule.setStartAt(Numbers.ifNull(def.getStartAt(), Constants.DEFAULT_START_TIME));
-        rule.setExpireAt(Numbers.ifNull(def.getExpireAt(), Constants.DEFAULT_EXPIRE_TIME));
-        rule.setWinnerCount(Numbers.ifNull(def.getWinnerCount(), Constants.DEFAULT_WINNER_COUNT));
+        rule.setStartAt(Numbers.ifNull(def.getSpec().getStartAt(), Constants.DEFAULT_START_TIME));
+        rule.setExpireAt(Numbers.ifNull(def.getSpec().getExpireAt(), Constants.DEFAULT_EXPIRE_TIME));
+        rule.setWinnerCount(Numbers.ifNull(def.getSpec().getWinnerCount(), Constants.DEFAULT_WINNER_COUNT));
 
-        rule.setCriteria(EventExecutionFilterFactory.create(def.getCriteria()));
-
-        rule.setPointId(def.getPointId());
-        Object pointAwards = def.getPointAwards();
-        if (Objects.nonNull(pointAwards)) {
-            if (pointAwards instanceof Number) {
-                rule.setAwardPoints(BigDecimal.valueOf(((Number) pointAwards).doubleValue()));
-            } else {
-                rule.setCustomAwardPoints(Scripting.create((String) pointAwards, Constants.VARIABLE_POSITION, VariableNames.RULE_VAR));
-            }
+        PointAwardDef pointAwards = def.getSpec().getRewards().getPoints();
+        rule.setPointId(def.getSpec().getRewards().getPoints().getId());
+        if (pointAwards.getAmount() != null) {
+            rule.setAwardPoints(pointAwards.getAmount());
         } else {
-            rule.setAwardPoints(BigDecimal.ZERO);
-            rule.setCustomAwardPoints(null);
+            rule.setCustomAwardPoints(Scripting.create(pointAwards.getExpression(), Constants.VARIABLE_POSITION, VariableNames.RULE_VAR));
         }
 
-        if (Objects.nonNull(def.getScope())) {
-            String type = (String) def.getScope().getOrDefault(Constants.DEF_SCOPE_TYPE, Constants.DEFAULT_SCOPE.toString());
-            long scopeId = Long.parseLong(String.valueOf(def.getScope().getOrDefault(Constants.DEF_SCOPE_ID, Constants.DEFAULT_SCOPE_VALUE)));
-            rule.setScope(ChallengeRule.ChallengeScope.valueOf(type));
-            rule.setScopeId(scopeId);
+        ScopeDef scopeTo = def.getSpec().getScopeTo();
+        if (Objects.nonNull(scopeTo)) {
+            rule.setScope(ChallengeRule.ChallengeScope.valueOf(scopeTo.getType()));
+            if (scopeTo.getTargetId() != null) {
+                rule.setScopeId(scopeTo.getTargetId());
+            }
+            if (Utils.isNotEmpty(scopeTo.getTargetIds())) {
+                rule.setScopeIds(Set.copyOf(scopeTo.getTargetIds()));
+            }
         } else {
             rule.setScope(Constants.DEFAULT_SCOPE);
         }
