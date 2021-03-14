@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,26 +17,23 @@
  * under the License.
  */
 
-package io.github.oasis.elements.milestones;
+package io.github.oasis.elements.milestones.spec;
 
-import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.elements.milestones.spec.MilestoneSpecification;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-import java.util.Objects;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
- * Definition for all milestone rules.
- *
  * @author Isuru Weerarathna
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class MilestoneDef extends AbstractDef<MilestoneSpecification> {
+public class MilestoneLevel implements Serializable {
+    private int level;
+    private BigDecimal milestone;
 
-    public boolean isPointBased() {
-        return Objects.nonNull(getSpec().getSelector().getMatchPointIds());
+    List<String> getSensitiveAttributes() {
+        return List.of(String.valueOf(level), milestone.toString());
     }
-
 }

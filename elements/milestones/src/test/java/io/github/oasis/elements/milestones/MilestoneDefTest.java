@@ -19,29 +19,9 @@
 
 package io.github.oasis.elements.milestones;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 /**
  * @author Isuru Weerarathna
  */
 class MilestoneDefTest {
-
-    @Test
-    void uniqueIdGeneratorValueExtractor() {
-        MilestoneDef def1 = new MilestoneDef();
-        def1.setValueExtractor("e.data.value");
-
-        MilestoneDef def2 = new MilestoneDef();
-        def2.setValueExtractor("e.data.value");
-
-        MilestoneDef def3 = new MilestoneDef();
-        def3.setValueExtractor("e.data.score");
-
-        Assertions.assertEquals(def1.getValueExtractor(), def2.getValueExtractor());
-        Assertions.assertEquals(def1.generateUniqueHash(), def2.generateUniqueHash());
-        Assertions.assertNotEquals(def1.getValueExtractor(), def3.getValueExtractor());
-        Assertions.assertNotEquals(def1.generateUniqueHash(), def3.generateUniqueHash());
-    }
 
 }
