@@ -55,8 +55,11 @@ A comprehensive set of examples for badges can be viewed from [this directory](e
   - id: BDG00001
     name: Initial-Registration
     description: Awards a badge when a user first registered within the application.
-    event: app.user.registered
-    kind: firstEvent
+    type: core:badge
+    spec:
+      kind: firstEvent
+      selector:
+        matchEvent: app.user.registered
 ```
 
 * Sub badges based on conditions
@@ -64,18 +67,27 @@ A comprehensive set of examples for badges can be viewed from [this directory](e
   - id: BDG-C0001
     name: Question-Quality
     description: Awards badges based on how many scores got for the question
-    event: question.scored
-    kind: conditional
-    conditions:
-      - priority: 1
-        attribute: 30
-        condition: "e.score >= 100"
-      - priority: 2
-        attribute: 20
-        condition: "e.score >= 25"
-      - priority: 3
-        attribute: 10
-        condition: "e.score >= 10"
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.scored
+      conditions:
+        - priority: 1
+          condition: "e.score >= 100"
+          rewards:
+            badge:
+              attribute: 30
+        - priority: 2
+          condition: "e.score >= 25"
+          rewards:
+            badge:
+              attribute: 20
+        - priority: 3
+          condition: "e.score >= 10"
+          rewards:
+            badge:
+              attribute: 10
 ```
 
 * Badges based on continuous streaks
@@ -83,16 +95,25 @@ A comprehensive set of examples for badges can be viewed from [this directory](e
   - id: BDG-S0001
     name: Question-Score-Streak
     description: Awards badges when a question is up voted consecutively
-    event: question.voted
-    kind: streak
-    condition: "e.upvote == true"   # if condition become falsy, then streak will break.
-    streaks:
-      - streak: 10
-        attribute: 10
-      - streak: 50
-        attribute: 20
-      - streak: 100
-        attribute: 30
+    type: core:badge
+    spec:
+      kind: streak
+      selector:
+        matchEvent: question.voted
+      condition: "e.upvote == true"  # if condition become falsy, then streak will break.
+      streaks:
+        - streak: 10
+          rewards:
+            badge:
+              attribute: 30
+        - streak: 50
+          rewards:
+            badge:
+              attribute: 20
+        - streak: 100
+          rewards:
+            badge:
+              attribute: 10
 ```
 
 * Badges based on periodic aggregations
@@ -100,17 +121,29 @@ A comprehensive set of examples for badges can be viewed from [this directory](e
   - id: BDG-P0001
     name: Daily-Reputations
     description: Accumulates user reputation daily and awards badges if user scores 50+ reputations on a day
-    kind: periodicAccumulation
-    event: reputation.changed
-    timeUnit: daily
-    aggregatorExtractor: e.reputations
-    thresholds:
-      - value: 50        # 50 reputations
-        attribute: 10
-      - value: 100         # 100 reputations
-        attribute: 20
-      - value: 200       # 200 reputations
-        attribute: 30
+    type: core:badge
+    spec:
+      kind: periodicAccumulation
+      selector:
+        matchEvent: reputation.changed
+      period:
+        duration: 1
+        unit: days
+      aggregatorExtractor:
+        expression: e.reputations
+      thresholds:
+        - value: 50        # 50 reputations
+          rewards:
+            badge:
+              attribute: 10
+        - value: 100         # 100 reputations
+          rewards:
+            badge:
+              attribute: 20
+        - value: 200       # 200 reputations
+          rewards:
+            badge:
+              attribute: 30
 ```
 
 * Badges based on periodic streaks
@@ -118,37 +151,68 @@ A comprehensive set of examples for badges can be viewed from [this directory](e
   - id: BDG-PS0001
     name: Daily-Reputations
     description: Accumulates user reputation and awards badges if user scores 200+ reputation for minimum 5 consecutive days.
-    kind: periodicAccumulationStreak
-    event: reputation.changed
-    threshold: 200
-    timeUnit: daily
-    consecutive: true
-    aggregatorExtractor: e.reputations
-    streaks:
-      - streak: 5         # 5 consecutive days
-        attribute: 10
-      - streak: 7         # 7 consecutive days
-        attribute: 20
-      - streak: 10        # 10 consecutive days
-        attribute: 30
+    type: core:badge
+    spec:
+      kind: periodicAccumulationStreak
+      selector:
+        matchEvent: reputation.changed
+      period:
+        duration: 1
+        unit: daily
+      threshold: 200
+      consecutive: true
+      aggregatorExtractor:
+        expression: e.reputations
+      streaks:
+        - streak: 5         # 5 consecutive days
+          rewards:
+            badge:
+              attribute: 10
+        - streak: 7         # 7 consecutive days
+          rewards:
+            badge:
+              attribute: 20
+        - streak: 10        # 10 consecutive days
+          rewards:
+            badge:
+              attribute: 30
 ```
 
 * Badges which awards points
 ```yaml
-  - id: BDG00002
-    name: test.badge.points.rule
-    description: Awards badge and points if value is >= 50 for streaks
-    plugin: core:badge
-    kind: streak
-    event: event.a
-    eventFilter: e.value >= 50
-    timeUnit: 10
-    pointId: star.points
-    streaks:
-      - streak: 3
-        attribute: 10
-        pointAwards: 50
-      - streak: 5
-        attribute: 20
-        pointAwards: 100
+  - id: BDG-S0002
+    name: Loyality-Customer
+    description: Awards badges and points when a customer buys $500 or more worth items consecutively in each weekend.
+    type: core:badge
+    spec:
+      kind: streak
+      selector:
+        matchEvent: order.accepted
+        acceptsWithin:
+          - type: weekly
+            when: "SATURDAY,SUNDAY"
+      condition: e.total >= 500
+      pointId: star.points
+      streaks:
+        - streak: 3
+          rewards:
+            badge:
+              attribute: 10
+            points:
+              id: star.points
+              amount: 100
+        - streak: 5
+          rewards:
+            badge:
+              attribute: 20
+            points:
+              id: star.points
+              amount: 250
+        - streak: 10
+          rewards:
+            badge:
+              attribute: 30
+            points:
+              id: star.points
+              amount: 500
 ```

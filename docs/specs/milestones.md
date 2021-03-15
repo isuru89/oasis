@@ -21,7 +21,52 @@
     * Count of events
   
 ## Specification
-TBW
+
+
+
+| Field | Description | Required |
+| --- | --- | --- |
+| [`selector`](common-spec.md#selector) | Specify events and conditions to filter out for processing | yes |
+| [`valueExtractor`](#valueExtractor) | Function/expression to extract the value from the event for accumulation. | yes |
+| [`levels`](#levels) | List of milestone levels. At least one level must be specified | yes |
+| [`flags`](#flags) | Custom set of features to be applied for milestone definition | default: `null` |
+
+### selector
+[See here](common-spec.md#selector) for more details
+
+### valueExtractor
+Function/expression to extract the value from the event for accumulation. The expression must always
+evaluate to a number, otherwise it will fail.
+
+Currently, this accepts `expression` as a text.
+```yaml
+valueExtractor:
+  expression: "e.value"
+```
+
+If you want to make count the filtered out event, just simply specify `1` in amount field.
+```yaml
+valueExtractor:
+  amount: 1
+```
+
+### levels
+Levels of this milestones. Each level has two mandatory field to specify.
+
+* `level`: level number.
+* `milestone`: Threshold value to achieve this level. Must always be a number.
+
+**_Notes_**: 
+1. At least one level must be specified in every milestone. Otherwise, it will fail.
+2. `level` field must be a number and cannot have duplicates.
+
+
+### flags
+There are two supported flags by milestones.
+
+  * `TRACK_PENALTIES`: when specified, the negative values will be stored separately as a breakdown of the milestone stats. 
+The relevant application can choose to decide what to do with positive and negative accumulation.
+  * `SKIP_NEGATIVE_VALUES`: totally ignores the negative values being accumulated into the milestone.
 
 ## Examples
 
@@ -29,53 +74,71 @@ More comprehensive set of examples can be found in this [file](elements/mileston
 
 * Accumulate a single point id
 ```yaml
-  - id: MILE-0001
+  - id: MILE-00010
     name: Total-Reputations
     description: Provides ranking through accumulated reputations
-    pointIds:
-      - stackoverflow.reputation
-    levels:
-      - level: 1
-        milestone: 1000
-      - level: 2
-        milestone: 5000
-      - level: 3
-        milestone: 10000
-      - level: 4
-        milestone: 50000
-      - level: 5
-        milestone: 100000
+    type: core:milestone
+    spec:
+      selector:
+        matchPointIds:
+          anyOf:
+            - stackoverflow.reputation
+      flags:
+        - TRACK_PENALTIES         # negative values will store separately along with milestone
+      levels:
+        - level: 1
+          milestone: 1000
+        - level: 2
+          milestone: 5000
+        - level: 3
+          milestone: 10000
+        - level: 4
+          milestone: 50000
+        - level: 5
+          milestone: 100000
 ```
 
 * Accumulates based on multiple point ids
 ```yaml
-  - name: Star-Points
+  - id: MILE-00020
+    name: Star-Points
     description: Allow tiers for customers based on star points accumulated
-    pointIds:
-      - star.points
-      - coupan.points
-    levels:
-      - level: 1
-        milestone: 100
-      - level: 2
-        milestone: 1000
-      - level: 3
-        milestone: 10000
+    type: core:milestone
+    spec:
+      selector:
+        matchPointIds:
+          anyOf:
+            - star.points
+            - coupan.points
+      flags:
+        - SKIP_NEGATIVE_VALUES      # prevents reducing milestone scores due to negative values
+      levels:
+        - level: 1
+          milestone: 100
+        - level: 2
+          milestone: 1000
+        - level: 3
+          milestone: 10000
 ```
 
 * Accumulate directly from events based on a condition
 ```yaml
-  - name: Milestone-with-Event-Count
+  - id: MILE-00030
+    name: Milestone-with-Event-Count
     description: This is a milestone counting events based on a criteria.
-    event: stackoverflow.question.answered
-    eventFilter: |
-      return e.answeredAt - e.askedAt <= 60 * 60 * 5
-    valueExtractor: 1
-    levels:
-      - level: 1
-        milestone: 5
-      - level: 2
-        milestone: 10
-      - level: 3
-        milestone: 15
+    type: core:milestone
+    spec:
+      selector:
+        matchEvent: stackoverflow.question.answered
+        filter:
+          expression: e.answeredAt - e.askedAt <= 60 * 60 * 5
+      valueExtractor:
+        amount: 1       # by setting 1, we simulate the count behaviour
+      levels:
+        - level: 1
+          milestone: 5
+        - level: 2
+          milestone: 10
+        - level: 3
+          milestone: 15
 ```

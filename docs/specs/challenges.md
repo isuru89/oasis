@@ -26,35 +26,43 @@ TBW
   - id: CHG000001
     name: test.challenge.rule
     description: Game scoped challenge when some one scored more than 50
-    plugin: core:challenge
-    event: event.a
-    eventFilter: e.value >= 50
-    scope:
-      type: GAME
-    winnerCount: 3
-    startAt: 1583027100000
-    expireAt: 1588297500000
-    pointId: challenge.points
-    pointAwards: 100 * (3 - rank + 1)
+    type: core:challenge
+    spec:
+      selector:
+        matchEvent: user.scored
+        filter:
+          expression: e.value >= 50
+      scope:
+        type: GAME
+      startAt: 1583027100000
+      expireAt: 1588297500000
+      winnerCount: 3
+      rewards:
+        points:
+          id: challenge.points
+          expression: 100 * (4 - rank)
 ```
 
-* A challenge scoped to team identified by id = 2, which accepts out of order winners 
+* A challenge winners only scoped to the team identified by id = 2, which accepts out of order winners 
   (in case an event related to a  winner comes up later)
 ```yaml
-  - id: CHG000001
+  - id: TEAM_SCOPED_MULTI_WINNER_NO_REPEAT
     name: test.challenge.rule
     description: Game scoped challenge when some one scored more than 50
-    plugin: core:challenge
-    flags:
-      - OUT_OF_ORDER_WINNERS
-    event: event.a
-    eventFilter: e.value >= 50
-    scope:
-      type: TEAM
-      id: 2
-    winnerCount: 3
-    startAt: 1583027100000
-    expireAt: 1588297500000
-    pointId: challenge.points
-    pointAwards: 100 * (3 - rank + 1)
+    type: core:challenge
+    spec:
+      selector:
+        matchEvent: user.scored
+        filter:
+          expression: e.value >= 50
+      scopeTo:
+        type: TEAM
+        targetId: 2
+      startAt: 0
+      expireAt: 200
+      winnerCount: 3
+      rewards:
+        points:
+          id: challenge.points
+          expression: 100 * (4 - rank)
 ```
