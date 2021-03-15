@@ -23,16 +23,23 @@ selector:
   filter:
     expression: <string>  # dynamic expression which evaluates against each event
   
-  acceptsWithin:          # details more below
-    - type: <string>
-      from: <string>
-      to: <string>
+  acceptsWithin:          # more details are shown below
+    anyOf:
+      - type: <string>
+        from: <string>
+        to: <string>
+      - ...
+    allOf:
+      - ...
 ```
 
 ### acceptsWithin
 This field will determine how events should be matched based on its timestamp.
 This is suitable, if you want to filter event based on time or season. This
 should be specified using `type` field followed by relevant fields for each type.
+
+Every criterion must belong to either `anyOf` or `allOf` field to indicate the behaviour
+when multiple criteria are specified.
 
 There are in-built several types supported by the framework. Such as,
 
@@ -42,55 +49,73 @@ There are in-built several types supported by the framework. Such as,
   * `custom`: Allows you to specify a custom predicate to evaluate with given event timestamp
 
 **Note**: 
-1. When multiple time filters has specified under `acceptsWithin`, the engine will evaluate
-for **_at least one match_** to allow the event for execution.
-2. When evaluating ranges, the `from` field will be inclusive, while `to` field will be exclusive.
+1. Only one of `allOf` or `anyOf` can be specified. If both exists, it will throw an error.
+1. When evaluating ranges, the `from` field will be inclusive, while `to` field will be exclusive.
 
 #### Examples
 * Filter for the month of December. You can match across months or even consecutive years.
 ```yaml
 acceptsWithin:
-  - type: seasonal
-    from: "12-01"
-    to: "01-01"     # to field is exclusive
+  anyOf:
+    - type: seasonal
+      from: "12-01"
+      to: "01-01"     # to field is exclusive
 ```
 
 * Filter out winter season
 ```yaml
 acceptsWithin:
-  - type: seasonal
-    from: "12-01"
-    to: "03-01"
+  anyOf:
+    - type: seasonal
+      from: "12-01"
+      to: "03-01"
 ```
 
 * Filter out Dinner time (assuming its 6pm to 11pm)
 ```yaml
 acceptsWithin:
-  - type: time
-    from: "18:00"
-    to: "23:00"
+  anyOf:
+    - type: time
+      from: "18:00"
+      to: "23:00"
 ```
 
 * Filter our mid-night time (usually 11pm - 5am on the following day)
 ```yaml
 acceptsWithin:
-  - type: time
-    from: "23:00"
-    to: "05:00"
+  anyOf:
+    - type: time
+      from: "23:00"
+      to: "05:00"
 ```
 
 * Filter out Weekend days. Should specify days in a comma separated string on `when` property.
 ```yaml
 acceptsWithin:
-  - type: weekly
-    when: "Saturday,Sunday"
+  anyOf:
+    - type: weekly
+      when: "Saturday,Sunday"
 ```
 
 * A custom filter which filters last week of every month. The expression must be written in Jdk-11 compatible way.
 ```yaml
 acceptsWithin:
-  - type: custom
-    expression: |
+  anyOf:
+    - type: custom
+      expression: |
         YearMonth currMonth = YearMonth.of(ts.getYear(), ts.getMonth());
         ts.getDayOfMonth() >= currMonth.lengthOfMonth() - 7
+```
+
+* Filter out events only in December evenings. To match all criteria, we can use `allOf` parameter.
+```yaml
+acceptsWithin:
+  allOf:
+    - type: seasonal
+      from: "12-01"
+      to: "01-01"
+      
+    - type: time
+      from: "06:00"
+      to: "23:00"
 ```

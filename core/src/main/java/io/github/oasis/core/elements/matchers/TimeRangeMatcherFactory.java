@@ -21,7 +21,9 @@ package io.github.oasis.core.elements.matchers;
 
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.TimeRangeMatcher;
+import io.github.oasis.core.elements.spec.AcceptsWithinDef;
 import io.github.oasis.core.elements.spec.TimeRangeDef;
+import io.github.oasis.core.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,34 @@ import java.util.Objects;
  */
 public final class TimeRangeMatcherFactory {
 
+    public static TimeRangeMatcher create(AcceptsWithinDef acceptsWithinDef) {
+        if (acceptsWithinDef == null) {
+            return null;
+        }
+
+        if (Utils.isNotEmpty(acceptsWithinDef.getAllOf())) {
+            TimeRangeMatcher timeRangeMatcher = create(acceptsWithinDef.getAllOf());
+            if (timeRangeMatcher == null) {
+                List<TimeRangeMatcher> matchers = new ArrayList<>();
+                for (TimeRangeDef def : acceptsWithinDef.getAllOf()) {
+                    matchers.add(create(def));
+                }
+                return new AllOfTimeRangeMatcher(matchers);
+            }
+            return timeRangeMatcher;
+        } else {
+            TimeRangeMatcher timeRangeMatcher = create(acceptsWithinDef.getAnyOf());
+            if (timeRangeMatcher == null) {
+                List<TimeRangeMatcher> matchers = new ArrayList<>();
+                for (TimeRangeDef def : acceptsWithinDef.getAnyOf()) {
+                    matchers.add(create(def));
+                }
+                return new AnyOfTimeRangeMatcher(matchers);
+            }
+            return timeRangeMatcher;
+        }
+    }
+
     public static TimeRangeMatcher create(List<TimeRangeDef> defList) {
         if (Objects.isNull(defList) || defList.isEmpty()) {
             return null;
@@ -40,11 +70,7 @@ public final class TimeRangeMatcherFactory {
         if (defList.size() == 1) {
             return create(defList.get(0));
         } else {
-            List<TimeRangeMatcher> matchers = new ArrayList<>();
-            for (TimeRangeDef def : defList) {
-                matchers.add(create(def));
-            }
-            return new AnyOfTimeRangeMatcher(matchers);
+            return null;
         }
     }
 

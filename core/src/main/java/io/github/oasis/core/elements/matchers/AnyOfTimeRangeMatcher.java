@@ -25,8 +25,8 @@ import io.github.oasis.core.elements.TimeRangeMatcher;
 import java.util.List;
 
 /**
- * Compares timestamp for two time ranges within every day.
- * No date (dd/mm) is considered. Only time portion.
+ * This class will take multiple time ranges and will return true
+ * if at least one is satisfied.
  *
  * @author Isuru Weerarathna
  */

@@ -145,9 +145,10 @@ elements:
       selector:
         matchEvent: order.accepted
         acceptsWithin:
-          - type: seasonal
-            from: "12-01"
-            to: "12-31"
+          anyOf:
+            - type: seasonal
+              from: "12-01"
+              to: "12-31"
       reward:
         pointId: star.points
         expression: "e.total * 2"

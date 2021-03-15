@@ -189,8 +189,9 @@ A comprehensive set of examples for badges can be viewed from [this directory](e
       selector:
         matchEvent: order.accepted
         acceptsWithin:
-          - type: weekly
-            when: "SATURDAY,SUNDAY"
+          anyOf:
+            - type: weekly
+              when: "SATURDAY,SUNDAY"
       condition: e.total >= 500
       pointId: star.points
       streaks:
