@@ -1,0 +1,25 @@
+version: 1
+
+elements:
+  - id: SINGLE_STREAK_WITHIN_30
+    name: Question-Score-Streak
+    description: Awards badges when a question is up voted consecutively
+    type: core:badge
+    spec:
+      kind: timeBoundedStreak
+      selector:
+        matchEvent: question.voted
+      condition:
+        expression: "e.value >= 50"
+      retainTime:
+        duration: 1
+        unit: second
+      timeRange:
+        duration: 30
+        unit: millis
+      consecutive: false
+      streaks:
+        - streak: 3
+          rewards:
+            badge:
+              attribute: 10

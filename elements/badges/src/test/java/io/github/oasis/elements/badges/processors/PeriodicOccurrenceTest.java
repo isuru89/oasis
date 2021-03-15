@@ -149,6 +149,29 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
                 new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()));
     }
 
+    @DisplayName("Single Threshold: badge creation with points")
+    @Test
+    public void testSingleTBadgeWithPoints() {
+        TEvent e1 = TEvent.createKeyValue(110, EVENT_TYPE, 99);
+        TEvent e2 = TEvent.createKeyValue(115, EVENT_TYPE, 54);
+        TEvent e3 = TEvent.createKeyValue(120, EVENT_TYPE, 63);
+        TEvent e4 = TEvent.createKeyValue(155, EVENT_TYPE, 5);
+        TEvent e5 = TEvent.createKeyValue(160, EVENT_TYPE, 34);
+        TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
+
+        List<Signal> signals = new ArrayList<>();
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aTPoints(ATTR_1, T_3, "point.a", BigDecimal.valueOf(100)));
+        PeriodicBadgeRule rule = ruleContext.getRule();
+        Assertions.assertEquals(1, rule.getThresholds().size());
+        PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
+        submitOrder(processor, e1, e2, e3, e4, e5, e6);
+
+        System.out.println(signals);
+        assertStrict(signals,
+                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId())
+                        .setPointAwards("point.a", BigDecimal.valueOf(100)));
+    }
+
     @DisplayName("Single Threshold: badge creation sparse condition")
     @Test
     public void testSingleTBadgeWithC() {
@@ -382,6 +405,10 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
 
     private PeriodicBadgeRule.Threshold aT(int attr, long threshold) {
         return new PeriodicBadgeRule.Threshold(attr, BigDecimal.valueOf(threshold));
+    }
+
+    private PeriodicBadgeRule.Threshold aTPoints(int attr, long threshold, String pointId, BigDecimal points) {
+        return new PeriodicBadgeRule.Threshold(attr, BigDecimal.valueOf(threshold), pointId, points);
     }
 
     private RuleContext<PeriodicBadgeRule> createRule(long timeUnit, Collection<Signal> collection, PeriodicBadgeRule.Threshold... thresholds) {

@@ -1,0 +1,125 @@
+version: 1
+
+elements:
+  - id: Total-Reputations
+    name: Total-Reputations
+    description: Provides ranking through accumulated reputations
+    type: core:milestone
+    spec:
+      selector:
+        matchPointIds:
+          anyOf:
+            - stackoverflow.reputation
+      levels:
+        - level: 1
+          milestone: 1000
+        - level: 2
+          milestone: 5000
+        - level: 3
+          milestone: 10000
+        - level: 4
+          milestone: 50000
+        - level: 5
+          milestone: 100000
+
+  - id: Test-Star-Points
+    name: Star-Points
+    description: Allow tiers for customers based on star points accumulated
+    type: core:milestone
+    spec:
+      selector:
+        matchPointIds:
+          anyOf:
+            - star.points
+            - coupan.points
+      flags:
+        - SKIP_NEGATIVE_VALUES
+      valueExtractor:
+        expression: e.value
+      levels:
+        - level: 1
+          milestone: 100
+        - level: 2
+          milestone: 200
+        - level: 3
+          milestone: 300
+
+  - id: Test-Challenge-Win-Points
+    name: Test-Challenge-Win-Points
+    description: This milestone indicates direct accumulation through events
+    type: core:milestone
+    spec:
+      selector:
+        matchEvents:
+          anyOf:
+            - stackoverflow.bounty.awarded
+            - stackoverflow.answer.accepted
+        filter:
+          expression: e.value >= 75
+      valueExtractor:
+        expression: e.value
+      levels:
+        - level: 1
+          milestone: 100
+        - level: 2
+          milestone: 200
+        - level: 3
+          milestone: 300
+
+  - id: Test-Challenge-Win-Points-Without-Filter
+    name: Test-Challenge-Win-Points
+    description: This milestone indicates direct accumulation through events
+    type: core:milestone
+    spec:
+      selector:
+        matchEvents:
+          anyOf:
+            - stackoverflow.bounty.awarded
+            - stackoverflow.answer.accepted
+      valueExtractor:
+        expression: e.value
+      levels:
+        - level: 1
+          milestone: 100
+        - level: 2
+          milestone: 200
+        - level: 3
+          milestone: 300
+
+  - id: Test-Challenge-Win-Points-Track-Penalties
+    name: Test-Challenge-Win-Points
+    description: This milestone indicates direct accumulation through events
+    type: core:milestone
+    spec:
+      selector:
+        matchPointIds:
+          anyOf:
+            - stackoverflow.bounty.awarded
+            - stackoverflow.answer.accepted
+      valueExtractor:
+        expression: e.value
+      flags:
+        - TRACK_PENALTIES
+      levels:
+        - level: 1
+          milestone: 100
+        - level: 2
+          milestone: 200
+        - level: 3
+          milestone: 300
+
+  - id: Test-Single-Level
+    name: Test-Single-Level
+    description: This milestone having only single level
+    type: core:milestone
+    spec:
+      selector:
+        matchPointIds:
+          anyOf:
+            - stackoverflow.bounty.awarded
+            - stackoverflow.answer.accepted
+      valueExtractor:
+        expression: e.value
+      levels:
+        - level: 1
+          milestone: 100

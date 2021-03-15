@@ -21,10 +21,17 @@ package io.github.oasis.elements.badges.rules;
 
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Objects;
+import java.util.TreeMap;
 
 /**
  * @author Isuru Weerarathna
@@ -54,7 +61,7 @@ public class StreakNBadgeRule extends BadgeRule {
 
         if (matchedStreak != null) {
             if (Objects.nonNull(matchedStreak.getValue().getPoints())) {
-                signal.setPointAwards(getPointId(), matchedStreak.getValue().getPoints());
+                signal.setPointAwards(matchedStreak.getValue().getPointId(), matchedStreak.getValue().getPoints());
             } else {
                 super.derivePointsInTo(signal);
             }
@@ -114,8 +121,10 @@ public class StreakNBadgeRule extends BadgeRule {
     }
 
     @Getter
+    @Builder(toBuilder = true)
     public static class StreakProps {
         private final int attribute;
+        private final String pointId;
         private final BigDecimal points;
 
         public StreakProps(int attribute) {
@@ -124,6 +133,13 @@ public class StreakNBadgeRule extends BadgeRule {
 
         public StreakProps(int attribute, BigDecimal points) {
             this.attribute = attribute;
+            this.points = points;
+            this.pointId = null;
+        }
+
+        public StreakProps(int attribute, String pointId, BigDecimal points) {
+            this.attribute = attribute;
+            this.pointId = pointId;
             this.points = points;
         }
     }

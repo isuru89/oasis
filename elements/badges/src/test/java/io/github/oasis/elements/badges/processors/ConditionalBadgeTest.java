@@ -19,10 +19,6 @@
 
 package io.github.oasis.elements.badges.processors;
 
-import io.github.oasis.core.Event;
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
@@ -44,14 +40,22 @@ import java.util.List;
 @DisplayName("Conditional Badges")
 public class ConditionalBadgeTest extends AbstractRuleTest {
 
-    private static final String EVT_1 = "event.a";
+    private static final String EVT_1 = "question.scored";
     private static final String EVT_2 = "event.b";
 
     private static final int ATTR_50 = 50;
-    private static final int ATTR_65 = 65;
     private static final int ATTR_75 = 75;
     private static final int ATTR_85 = 85;
     public static final String RULE_ID = "test.cond.badge";
+    private static final String CONDITIONAL_YML = "kinds/conditional.yml";
+    public static final String SINGLE_CONDITION_WITH_FILTER = "SINGLE_CONDITION_WITH_FILTER";
+    public static final String SINGLE_CONDITION = "SINGLE_CONDITION";
+    public static final String SINGLE_CONDITION_ONLY_ONCE = "SINGLE_CONDITION_ONLY_ONCE";
+    public static final String MULTIPLE_CONDITIONS = "MULTIPLE_CONDITIONS";
+    public static final String MULTIPLE_CONDITIONS_65 = "MULTIPLE_CONDITIONS_65";
+    public static final String MULTIPLE_CONDITIONS_WRONG_ORDER = "MULTIPLE_CONDITIONS_WRONG_ORDER";
+    public static final String THREE_CONDITIONS = "THREE_CONDITIONS";
+    public static final String THREE_CONDITIONS_ONLY_ONCE = "THREE_CONDITIONS_ONLY_ONCE";
 
     @DisplayName("No conditions")
     @Test
@@ -78,8 +82,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_1, 11);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals, aCond(1, ATTR_50, this::greater50));
-        ruleContext.getRule().setEventFilter(((event, rule1, ctx) -> (long)event.getFieldValue("value") >= 75));
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, SINGLE_CONDITION_WITH_FILTER);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(1, ruleContext.getRule().getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -96,8 +100,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_2, 11);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals, aCond(1, ATTR_50, this::greater50));
-        ruleContext.getRule().setEventTypeMatcher(new SingleEventTypeMatcher(EVT_1));
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, SINGLE_CONDITION);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(1, ruleContext.getRule().getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -114,7 +118,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_1, 11);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals, aCond(1, ATTR_50, this::greater50));
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, SINGLE_CONDITION);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(1, ruleContext.getRule().getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -131,7 +136,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_1, 11);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals, aCond(1, ATTR_50, this::greater50));
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, SINGLE_CONDITION);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(1, ruleContext.getRule().getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -149,8 +155,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_1, 64);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals, aCond(1, ATTR_50, this::greater50));
-        ConditionalBadgeRule rule = ruleContext.getRule();
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, SINGLE_CONDITION);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(1, rule.getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -169,8 +175,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(147, EVT_1, 57);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals, 1, aCond(1, ATTR_50, this::greater50));
-        ConditionalBadgeRule rule = ruleContext.getRule();
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, SINGLE_CONDITION_ONLY_ONCE);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(1, rule.getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -188,8 +194,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_1, 57);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals, 1, aCond(1, ATTR_50, this::greater50));
-        ConditionalBadgeRule rule = ruleContext.getRule();
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, SINGLE_CONDITION_ONLY_ONCE);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(1, rule.getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -211,11 +217,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_2, 11);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals,
-                aCond(2, ATTR_50, this::greater50),
-                aCond(1, ATTR_75, this::greater75));
-        ConditionalBadgeRule rule = ruleContext.getRule();
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_1));
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, MULTIPLE_CONDITIONS);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(2, rule.getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -232,9 +235,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_1, 11);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals,
-                aCond(2, ATTR_50, this::greater50),
-                aCond(1, ATTR_65, this::greater65));
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, MULTIPLE_CONDITIONS_65);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(2, ruleContext.getRule().getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -251,9 +253,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(125, EVT_1, 11);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals,
-                aCond(2, ATTR_75, this::greater75),
-                aCond(1, ATTR_50, this::greater50));
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, MULTIPLE_CONDITIONS);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(2, ruleContext.getRule().getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -271,10 +272,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(145, EVT_1, 87);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals,
-                aCond(1, ATTR_75, this::greater75),
-                aCond(2, ATTR_50, this::greater50));
-        ConditionalBadgeRule rule = ruleContext.getRule();
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, MULTIPLE_CONDITIONS);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(2, rule.getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -293,10 +292,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(145, EVT_1, 87);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals,
-                aCond(2, ATTR_75, this::greater75),
-                aCond(1, ATTR_50, this::greater50));
-        ConditionalBadgeRule rule = ruleContext.getRule();
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, MULTIPLE_CONDITIONS_WRONG_ORDER);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(2, rule.getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3);
@@ -320,11 +317,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(165, EVT_1, 85);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals,
-                aCond(1, ATTR_85, this::greater85),
-                aCond(2, ATTR_75, this::greater75),
-                aCond(3, ATTR_50, this::greater50));
-        ConditionalBadgeRule rule = ruleContext.getRule();
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, THREE_CONDITIONS);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8);
@@ -352,11 +346,8 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
         TEvent e8 = TEvent.createKeyValue(165, EVT_1, 85);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<ConditionalBadgeRule> ruleContext = createRule(signals, 1,
-                aCond(1, ATTR_85, this::greater85),
-                aCond(2, ATTR_75, this::greater75),
-                aCond(3, ATTR_50, this::greater50));
-        ConditionalBadgeRule rule = ruleContext.getRule();
+        ConditionalBadgeRule rule = loadRule(CONDITIONAL_YML, THREE_CONDITIONS_ONLY_ONCE);
+        RuleContext<ConditionalBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getConditions().size());
         ConditionalBadgeProcessor processor = new ConditionalBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8);
@@ -368,36 +359,14 @@ public class ConditionalBadgeTest extends AbstractRuleTest {
                 new ConditionalBadgeSignal(rule.getId(), e3, ATTR_85, 145, e3.getExternalId()));
     }
 
-    private boolean greater50(Event event, AbstractRule rule, ExecutionContext context) {
-        return (long) event.getFieldValue("value") >= 50;
-    }
-
-    private boolean greater65(Event event, AbstractRule rule, ExecutionContext context) {
-        return (long) event.getFieldValue("value") >= 65;
-    }
-
-    private boolean greater75(Event event, AbstractRule rule, ExecutionContext context) {
-        return (long) event.getFieldValue("value") >= 75;
-    }
-
-    private boolean greater85(Event event, AbstractRule rule, ExecutionContext context) {
-        return (long) event.getFieldValue("value") >= 85;
-    }
-
-    private ConditionalBadgeRule.Condition aCond(int priority, int attr, EventExecutionFilter cond) {
-        return new ConditionalBadgeRule.Condition(priority, cond, attr);
-    }
-
     private RuleContext<ConditionalBadgeRule> createRule(Collection<Signal> collector, ConditionalBadgeRule.Condition... conditions) {
-        return createRule(collector, Integer.MAX_VALUE, conditions);
-    }
-
-    private RuleContext<ConditionalBadgeRule> createRule(Collection<Signal> collector, int maxTimes, ConditionalBadgeRule.Condition... conditions) {
         ConditionalBadgeRule rule = new ConditionalBadgeRule(RULE_ID);
         rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVT_1));
-        rule.setMaxAwardTimes(maxTimes);
         rule.setConditions(Arrays.asList(conditions));
         return new RuleContext<>(rule, fromConsumer(collector::add));
     }
 
+    private RuleContext<ConditionalBadgeRule> createRule(ConditionalBadgeRule rule, Collection<Signal> collector) {
+        return new RuleContext<>(rule, fromConsumer(collector::add));
+    }
 }

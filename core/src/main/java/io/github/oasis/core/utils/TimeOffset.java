@@ -64,7 +64,8 @@ public class TimeOffset {
             case 'D': return getDay();
             case 'M': return getMonth();
             case 'Q': return getQuarter();
-            case 'Y': return getYear();
+            case 'Y':
+            case 'A': return getYear();
             default: return getWeek();
         }
     }

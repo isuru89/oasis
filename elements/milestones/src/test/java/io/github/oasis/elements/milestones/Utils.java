@@ -56,7 +56,7 @@ class Utils {
     @SuppressWarnings("unchecked")
     public static List<MilestoneDef> parseAll(String resourcePath, MilestoneParser parser) {
         Map<String, Object> map = loadGroupFile(resourcePath);
-        List<Map<String, Object>> items = (List<Map<String, Object>>) map.get("milestones");
+        List<Map<String, Object>> items = (List<Map<String, Object>>) map.get("elements");
         return items.stream().map(Utils::asPersistedDef)
                 .map(parser::parse)
                 .collect(Collectors.toList());

@@ -4,16 +4,28 @@ elements:
   - id: BDG00003
     name: test.badge.remove.points.rule
     description: Awards badge and points if value is >= 50 for streaks
-    plugin: core:badge
-    kind: streak
-    event: event.a
-    eventFilter: e.value >= 50
-    pointId: star.points
-    timeUnit: 30d
-    streaks:
-      - streak: 3
-        attribute: 10
-        pointAwards: 50
-      - streak: 5
-        attribute: 20
-        pointAwards: 100
+    type: core:badge
+    spec:
+      kind: streak
+      selector:
+        matchEvent: event.a
+      condition:
+        expression: e.value >= 50
+      retainTime:
+        duration: 30
+        unit: days
+      streaks:
+        - streak: 3
+          rewards:
+            badge:
+              attribute: 10
+            points:
+              id: star.points
+              amount: 50
+        - streak: 5
+          rewards:
+            badge:
+              attribute: 20
+            points:
+              id: star.points
+              amount: 100

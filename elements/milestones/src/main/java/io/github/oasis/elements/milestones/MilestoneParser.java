@@ -22,9 +22,11 @@ package io.github.oasis.elements.milestones;
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractElementParser;
 import io.github.oasis.core.elements.Scripting;
+import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.events.BasePointEvent;
 import io.github.oasis.core.external.messages.PersistedDef;
-import io.github.oasis.core.utils.Utils;
+import io.github.oasis.core.utils.Texts;
+import io.github.oasis.elements.milestones.spec.ValueExtractorDef;
 
 import java.math.BigDecimal;
 import java.util.stream.Collectors;
@@ -38,11 +40,13 @@ import static io.github.oasis.core.VariableNames.RULE_VAR;
 public class MilestoneParser extends AbstractElementParser {
     @Override
     public MilestoneDef parse(PersistedDef persistedObj) {
-        return loadFrom(persistedObj, MilestoneDef.class);
+        MilestoneDef def = loadFrom(persistedObj, MilestoneDef.class);
+        def.validate();
+        return def;
     }
 
     @Override
-    public MilestoneRule convert(AbstractDef definition) {
+    public MilestoneRule convert(AbstractDef<? extends BaseSpecification> definition) {
         if (definition instanceof MilestoneDef) {
             return toRule((MilestoneDef) definition);
         }
@@ -50,29 +54,31 @@ public class MilestoneParser extends AbstractElementParser {
     }
 
     private MilestoneRule toRule(MilestoneDef def) {
-        def.initialize();
+        def.validate();
 
-        String id = Utils.firstNonNullAsStr(def.getId(), def.generateUniqueHash());
-        MilestoneRule rule = new MilestoneRule(id);
+        MilestoneRule rule = new MilestoneRule(def.getId());
         AbstractDef.defToRule(def, rule);
 
-        if (def.isPointBased()) {
+
+        ValueExtractorDef valueExtractor = def.getSpec().getValueExtractor();
+        if (valueExtractor != null) {
+            if (Texts.isNotEmpty(valueExtractor.getExpression())) {
+                rule.setValueExtractor(Scripting.create(valueExtractor.getExpression(), RULE_VAR, CONTEXT_VAR));
+            } else if (valueExtractor.getAmount() != null) {
+                rule.setValueExtractor((event, input, otherInput) -> valueExtractor.getAmount());
+            } else {
+                rule.setValueExtractor((event, input, otherInput) -> BigDecimal.ONE);
+            }
+        } else if (def.isPointBased()) {
             rule.setValueExtractor((event, input, otherInput) -> {
                 if (event instanceof BasePointEvent) {
                     return ((BasePointEvent) event).getPoints();
                 }
                 return BigDecimal.ZERO;
             });
-        } else {
-            Object valueExtractor = def.getValueExtractor();
-            if (valueExtractor instanceof String) {
-                rule.setValueExtractor(Scripting.create((String) valueExtractor, RULE_VAR, CONTEXT_VAR));
-            } else {
-                rule.setValueExtractor((event, input, otherInput) -> BigDecimal.ONE);
-            }
         }
 
-        rule.setLevels(def.getLevels().stream()
+        rule.setLevels(def.getSpec().getLevels().stream()
             .map(l -> new MilestoneRule.Level(l.getLevel(), l.getMilestone()))
             .collect(Collectors.toList()));
 

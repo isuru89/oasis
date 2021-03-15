@@ -46,13 +46,9 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
     private static final int ATTR_2 = 2;
     private static final int ATTR_4 = 4;
 
-    private static final long T_100 = 100;
-    private static final long T_150 = 150;
-    private static final long T_200 = 200;
-
     private static final long FIFTY = 50;
-    public static final String EVENT_TYPE = "event.a";
-    public static final String EVENT_TYPE_B = "event.b";
+    public static final String EVENT_TYPE = "reputation.changed";
+    public static final String EVENT_TYPE_B = "unknown.event";
 
     @DisplayName("No Thresholds")
     @Test
@@ -84,8 +80,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        PeriodicBadgeRule rule = ruleContext.getRule();
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "SINGLE_THRESHOLD");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(1, rule.getThresholds().size());
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
@@ -104,9 +100,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE_B, 71);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        PeriodicBadgeRule rule = ruleContext.getRule();
-        Assertions.assertEquals(1, rule.getThresholds().size());
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "SINGLE_THRESHOLD");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
@@ -124,9 +119,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        PeriodicBadgeRule rule = ruleContext.getRule();
-        Assertions.assertEquals(1, rule.getThresholds().size());
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "SINGLE_THRESHOLD");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
@@ -135,7 +129,7 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
                 new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()));
     }
 
-    @DisplayName("Single Threshold: badge creation with condition")
+    @DisplayName("Single Threshold: badge creation with filter")
     @Test
     public void testSingleTBadgeWithC() {
         TEvent e1 = TEvent.createKeyValue(110, EVENT_TYPE, 99);
@@ -146,9 +140,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        PeriodicBadgeRule rule = ruleContext.getRule();
-        rule.setEventFilter((event, ruleRef, ctx) -> (long)event.getFieldValue("value") < 50);
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "SINGLE_THRESHOLD_WITH_FILTER");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(1, rule.getThresholds().size());
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
@@ -169,8 +162,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        PeriodicBadgeRule rule = ruleContext.getRule();
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "SINGLE_THRESHOLD");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(1, rule.getThresholds().size());
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
@@ -192,9 +185,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(120, EVENT_TYPE, 43);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        PeriodicBadgeRule rule = ruleContext.getRule();
-        Assertions.assertEquals(1, rule.getThresholds().size());
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "SINGLE_THRESHOLD");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
@@ -215,9 +207,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(120, EVENT_TYPE, -43);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100));
-        PeriodicBadgeRule rule = ruleContext.getRule();
-        Assertions.assertEquals(1, rule.getThresholds().size());
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "SINGLE_THRESHOLD");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
@@ -243,8 +234,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        PeriodicBadgeRule rule = ruleContext.getRule();
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "MULTIPLE_THRESHOLDS");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getThresholds().size());
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
@@ -263,8 +254,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE_B, 71);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        PeriodicBadgeRule rule = ruleContext.getRule();
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "MULTIPLE_THRESHOLDS");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getThresholds().size());
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
@@ -283,8 +274,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        PeriodicBadgeRule rule = ruleContext.getRule();
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "MULTIPLE_THRESHOLDS");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getThresholds().size());
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
@@ -305,9 +296,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        PeriodicBadgeRule rule = ruleContext.getRule();
-        Assertions.assertEquals(3, rule.getThresholds().size());
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "MULTIPLE_THRESHOLDS");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
@@ -328,9 +318,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        PeriodicBadgeRule rule = ruleContext.getRule();
-        Assertions.assertEquals(3, rule.getThresholds().size());
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "MULTIPLE_THRESHOLDS");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
@@ -351,9 +340,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        PeriodicBadgeRule rule = ruleContext.getRule();
-        rule.setEventFilter((event, ruleRef, ctx) -> (long) event.getFieldValue("value") >= 50);
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "MULTIPLE_THRESHOLDS_WITH_FILTER");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getThresholds().size());
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
@@ -374,8 +362,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(165, EVENT_TYPE, 39);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        PeriodicBadgeRule rule = ruleContext.getRule();
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "MULTIPLE_THRESHOLDS");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getThresholds().size());
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
@@ -396,8 +384,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e4 = TEvent.createKeyValue(155, EVENT_TYPE, 5);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        PeriodicBadgeRule rule = ruleContext.getRule();
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "MULTIPLE_THRESHOLDS");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         Assertions.assertEquals(3, rule.getThresholds().size());
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4);
@@ -419,9 +407,8 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(120, EVENT_TYPE, 13);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<PeriodicBadgeRule> ruleContext = createRule(FIFTY, signals, aT(ATTR_1, T_100), aT(ATTR_2, T_150), aT(ATTR_4, T_200));
-        PeriodicBadgeRule rule = ruleContext.getRule();
-        Assertions.assertEquals(3, rule.getThresholds().size());
+        PeriodicBadgeRule rule = loadRule("kinds/periodic.yml", "MULTIPLE_THRESHOLDS");
+        RuleContext<PeriodicBadgeRule> ruleContext = createRule(rule, signals);
         PeriodicBadgeProcessor processor = new PeriodicBadgeProcessor(pool, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6);
 
@@ -430,10 +417,6 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
                 new TemporalBadgeSignal(rule.getId(), e2, ATTR_1, 100, 150, e2.getTimestamp(), e2.getExternalId()),
                 new TemporalBadgeSignal(rule.getId(), e6, ATTR_2, 100, 150, e6.getTimestamp(), e6.getExternalId()),
                 new TemporalBadgeSignal(rule.getId(), e5, ATTR_1, 150, 200, e5.getTimestamp(), e5.getExternalId()));
-    }
-
-    private PeriodicBadgeRule.Threshold aT(int attr, long threshold) {
-        return new PeriodicBadgeRule.Threshold(attr, BigDecimal.valueOf(threshold));
     }
 
     private RuleContext<PeriodicBadgeRule> createRule(long timeUnit, Collection<Signal> collection, PeriodicBadgeRule.Threshold... thresholds) {
@@ -445,4 +428,7 @@ public class PeriodicBadgeTest extends AbstractRuleTest {
         return new RuleContext<>(rule, fromConsumer(collection::add));
     }
 
+    private RuleContext<PeriodicBadgeRule> createRule(PeriodicBadgeRule rule, Collection<Signal> collection) {
+        return new RuleContext<>(rule, fromConsumer(collection::add));
+    }
 }

@@ -4,13 +4,16 @@ elements:
   - id: MILE00004
     name: Milestone-with-Penalties
     description: This is a milestone which counts the penalties too.
-    plugin: core:milestone
-    event: event.a
-    valueExtractor: e.value
-    flags:
-      - TRACK_PENALTIES
-    levels:
-      - level: 1
-        milestone: 100
-      - level: 2
-        milestone: 200
+    type: core:milestone
+    spec:
+      selector:
+        matchEvent: event.a
+      valueExtractor:
+        expression: e.value
+      flags:
+        - TRACK_PENALTIES
+      levels:
+        - level: 1
+          milestone: 100
+        - level: 2
+          milestone: 200

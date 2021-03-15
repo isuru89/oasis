@@ -35,7 +35,7 @@ import java.util.UUID;
  */
 public class Utils {
 
-    public static Object firstNonNull(Object first, Object second) {
+    public static <T> T firstNonNull(T first, T second) {
         if (first != null) {
             return first;
         } else {
@@ -43,8 +43,18 @@ public class Utils {
         }
     }
 
-    public static String firstNonNullAsStr(Object first, Object secod) {
-        return String.valueOf(firstNonNull(first, secod));
+    public static String firstNonNullAsStr(Object first, Object second) {
+        return String.valueOf(firstNonNull(first, second));
+    }
+
+    public static <T> T firstNonNullAsStr(T first, T second, T third) {
+        if (first != null) {
+            return first;
+        } else if (second != null) {
+            return second;
+        } else {
+            return third;
+        }
     }
 
     public static String bytesToHex(byte[] digest) {

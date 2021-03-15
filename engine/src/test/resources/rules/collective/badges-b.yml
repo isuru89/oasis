@@ -1,0 +1,52 @@
+version: 1
+
+elements:
+  - id: BDG00002
+    name: test.badge.points.rule
+    description: Awards badge and points if value is >= 50 for streaks
+    type: core:badge
+    spec:
+      kind: streak
+      selector:
+        matchEvent: event.a
+      condition:
+        expression: e.value >= 50
+      timeRange:
+        duration: 10
+        unit: millis
+      streaks:
+        - streak: 3
+          rewards:
+            badge:
+              attribute: 10
+            points:
+              id: star.points
+              amount: 50
+        - streak: 5
+          rewards:
+            badge:
+              attribute: 20
+            points:
+              id: star.points
+              amount: 100
+
+  - id: BDG00003
+    name: Milestone-Basic
+    description: This is a basic milestone which accumulates using event values.
+    type: core:milestone
+    spec:
+      selector:
+        matchEvent: star.points
+      valueExtractor:
+        expression: e.points
+      flags:
+        - SKIP_NEGATIVE_VALUES
+      levels:
+        - level: 1
+          milestone: 0
+        - level: 2
+          milestone: 200
+        - level: 3
+          milestone: 300
+        - level: 4
+          milestone: 500

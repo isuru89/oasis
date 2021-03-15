@@ -1,0 +1,163 @@
+version: 1
+
+elements:
+  - id: SINGLE_CONDITION
+    name: Question-Quality
+    description: Awards badges based on how many scores got for the question
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.scored
+      conditions:
+        - priority: 1
+          condition: "e.value >= 50"
+          rewards:
+            badge:
+              attribute: 50
+
+  - id: SINGLE_CONDITION_WITH_FILTER
+    name: Question-Quality
+    description: Awards badges based on how many scores got for the question
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.scored
+        filter:
+          expression: e.value >= 75
+      conditions:
+        - priority: 1
+          condition: "e.value >= 50"
+          rewards:
+            badge:
+              attribute: 50
+
+  - id: SINGLE_CONDITION_ONLY_ONCE
+    name: Question-Quality
+    description: Awards badges based on how many scores got for the question
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.scored
+      conditions:
+        - priority: 1
+          condition: "e.value >= 50"
+          rewards:
+            badge:
+              maxAwardTimes: 1
+              attribute: 50
+
+  - id: MULTIPLE_CONDITIONS
+    name: Question-Quality
+    description: Awards badges based on how many scores got for the question
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.scored
+      conditions:
+        - priority: 1
+          condition: "e.value >= 75"
+          rewards:
+            badge:
+              attribute: 75
+        - priority: 2
+          condition: "e.value >= 50"
+          rewards:
+            badge:
+              attribute: 50
+
+  - id: MULTIPLE_CONDITIONS_65
+    name: Question-Quality
+    description: Awards badges based on how many scores got for the question
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.scored
+      conditions:
+        - priority: 2
+          condition: "e.value >= 50"
+          rewards:
+            badge:
+              attribute: 50
+        - priority: 1
+          condition: "e.value >= 65"
+          rewards:
+            badge:
+              attribute: 65
+
+  - id: THREE_CONDITIONS
+    name: Question-Quality
+    description: Awards badges based on how many scores got for the question
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.scored
+      conditions:
+        - priority: 1
+          condition: "e.value >= 85"
+          rewards:
+            badge:
+              attribute: 85
+        - priority: 2
+          condition: "e.value >= 75"
+          rewards:
+            badge:
+              attribute: 75
+        - priority: 2
+          condition: "e.value >= 50"
+          rewards:
+            badge:
+              attribute: 50
+
+  - id: MULTIPLE_CONDITIONS_WRONG_ORDER
+    name: Question-Quality
+    description: Awards badges based on how many scores got for the question
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.scored
+      conditions:
+        - priority: 2
+          condition: "e.value >= 75"
+          rewards:
+            badge:
+              attribute: 75
+        - priority: 1
+          condition: "e.value >= 50"
+          rewards:
+            badge:
+              attribute: 50
+
+  - id: THREE_CONDITIONS_ONLY_ONCE
+    name: Question-Quality
+    description: Awards badges based on how many scores got for the question
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.scored
+      rewards:
+        badge:
+          maxAwardTimes: 1
+      conditions:
+        - priority: 1
+          condition: "e.value >= 85"
+          rewards:
+            badge:
+              attribute: 85
+        - priority: 2
+          condition: "e.value >= 75"
+          rewards:
+            badge:
+              attribute: 75
+        - priority: 2
+          condition: "e.value >= 50"
+          rewards:
+            badge:
+              attribute: 50

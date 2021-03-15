@@ -21,11 +21,11 @@ package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.EventBiValueResolver;
-import io.github.oasis.core.elements.EventExecutionFilter;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
@@ -45,10 +45,9 @@ public class ChallengeRule extends AbstractRule {
     private BigDecimal awardPoints = BigDecimal.ZERO;
     private EventBiValueResolver<Integer, ChallengeRule> customAwardPoints;
 
-    private EventExecutionFilter criteria;
-
     private ChallengeScope scope = ChallengeScope.GAME;
     private long scopeId;
+    private Set<Long> scopeIds;
 
     public ChallengeRule(String id) {
         super(id);

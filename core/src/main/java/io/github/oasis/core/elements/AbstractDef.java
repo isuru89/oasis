@@ -21,17 +21,16 @@ package io.github.oasis.core.elements;
 
 import io.github.oasis.core.elements.matchers.EventTypeMatcherFactory;
 import io.github.oasis.core.elements.matchers.TimeRangeMatcherFactory;
-import io.github.oasis.core.utils.Texts;
-import io.github.oasis.core.utils.Utils;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import io.github.oasis.core.elements.spec.BaseSpecification;
+import io.github.oasis.core.elements.spec.SelectorDef;
+import io.github.oasis.core.exception.OasisParseException;
+import lombok.Data;
+import org.apache.commons.lang3.Validate;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * This is the base definition for any type of element which is going to be processed
@@ -42,11 +41,12 @@ import java.util.Set;
  *
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public abstract class AbstractDef implements Serializable {
+@Data
+public abstract class AbstractDef<S extends BaseSpecification> implements Validator, Serializable  {
 
-    protected static final String EMPTY = "";
+    private static final Pattern ID_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
+
+    public static final String EMPTY = "";
 
     public static final String TIME_RANGE_TYPE_SEASONAL = "seasonal";
     public static final String TIME_RANGE_TYPE_TIME = "time";
@@ -56,69 +56,49 @@ public abstract class AbstractDef implements Serializable {
     private String id;
     private String name;
     private String description;
-    private String plugin;
+    private String type;
 
-    /**
-     * Specify single or multiple events this rule should process on.
-     */
-    private Object event;
-    private Object events;
-    /**
-     * This filter filter out events based on its data before sending it to processor.
-     */
-    private Object eventFilter;
+    private S spec;
 
-    private Set<String> flags;
-
-    private List<TimeRangeDef> timeRanges;
-
-    public static AbstractRule defToRule(AbstractDef def, AbstractRule source) {
+    public static AbstractRule defToRule(AbstractDef<? extends BaseSpecification> def, AbstractRule source) {
         source.setName(def.getName());
         source.setDescription(def.getDescription());
-        source.setFlags(Objects.isNull(def.flags) ? Set.of() : Set.copyOf(def.getFlags()));
+        source.setFlags(Objects.isNull(def.getSpec().getFlags()) ? Set.of() : Set.copyOf(def.getSpec().getFlags()));
         source.setEventTypeMatcher(def.deriveEventMatcher());
-        source.setEventFilter(EventExecutionFilterFactory.create(def.eventFilter));
-        source.setTimeRangeMatcher(TimeRangeMatcherFactory.create(def.timeRanges));
+        source.setEventFilter(EventExecutionFilterFactory.create(def.getSpec().getSelector().getFilter()));
+        source.setTimeRangeMatcher(TimeRangeMatcherFactory.create(def.getSpec().getSelector().getAcceptsWithin()));
         return source;
     }
 
-    @SuppressWarnings("unchecked")
     private EventTypeMatcher deriveEventMatcher() {
-        if (Objects.nonNull(event)) {
-            return EventTypeMatcherFactory.createMatcher((String) event);
-        } else if (Objects.nonNull(events)) {
-            return EventTypeMatcherFactory.create((Collection<String>) events);
+        SelectorDef selector = spec.getSelector();
+        if (Objects.isNull(selector)) {
+            throw new IllegalArgumentException("Mandatory 'spec' field is not defined!");
+        }
+
+        if (Objects.nonNull(selector.getMatchEvent())) {
+            return EventTypeMatcherFactory.createMatcher(selector.getMatchEvent());
+        } else if (Objects.nonNull(selector.getMatchEvents())) {
+            return EventTypeMatcherFactory.create(selector.getMatchEvents());
+        } else if (Objects.nonNull(selector.getMatchPointIds())) {
+            return EventTypeMatcherFactory.create(selector.getMatchPointIds());
         }
         return null;
     }
 
-    protected List<String> getSensitiveAttributes() {
-        return List.of(
-                Utils.firstNonNullAsStr(event, EMPTY),
-                Utils.firstNonNullAsStr(events, EMPTY),
-                Utils.firstNonNullAsStr(flags, EMPTY),
-                Utils.firstNonNullAsStr(eventFilter, EMPTY)
-        );
-    }
+    @Override
+    public void validate() {
+        Validate.notEmpty(id, "Definition 'id' must be specified!");
+        Validate.notEmpty(name, "Definition 'name' must be specified!");
+        Validate.notEmpty(type, "Definition 'type' must be specified!");
+        Validate.notNull(spec, "Definition 'spec' must be specified!");
 
-    public final String generateUniqueHash() {
-        return Texts.md5Digest(String.join("", getSensitiveAttributes()));
-    }
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    public static class TimeRangeDef {
-        private String type;
-        private Object from;
-        private Object to;
-        private Object when;
-        private Object expression;
-
-        public TimeRangeDef(String type, Object from, Object to) {
-            this.type = type;
-            this.from = from;
-            this.to = to;
+        if (!ID_PATTERN.matcher(id).matches()) {
+            throw new OasisParseException("Definition 'id' must have only alphanumeric characters, hyphens or underscores only! " +
+                    "[Provided: " + id + "]");
         }
+
+        spec.validate();
     }
+
 }

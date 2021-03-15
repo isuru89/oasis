@@ -20,6 +20,7 @@
 package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.elements.AbstractDef;
+import io.github.oasis.core.elements.spec.TimeRangeDef;
 import io.github.oasis.core.external.messages.PersistedDef;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
@@ -43,63 +46,66 @@ public class ParserTest {
     private final PointParser pointParser = new PointParser();
 
     @Test
-    @SuppressWarnings("unchecked")
     void testPointParser() {
         List<PointDef> pointDefs = parseAll("points.yml", pointParser);
         findByName(pointDefs, "Answer-Accepted").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNumber(def.getAward()));
-            assertTrue(isNonEmptyString(def.getEvent()));
-            assertEquals("stackoverflow.reputation", def.getPointId());
-            assertTrue(Objects.isNull(def.getLimit()));
+            assertNotNull(def.getSpec());
+            assertTrue(isNumber(def.getSpec().getReward().getAmount()));
+            assertTrue(isNonEmptyString(def.getSpec().getSelector().getMatchEvent()));
+            assertEquals("stackoverflow.reputation", def.getSpec().getReward().getPointId());
+            assertTrue(Objects.isNull(def.getSpec().getCap()));
         });
         findByName(pointDefs, "Night-time-bonus").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNumber(def.getAward()));
-            assertEquals(1, def.getTimeRanges().size());
-            assertEquals("marks", def.getPointId());
-            AbstractDef.TimeRangeDef timeRangeDef = def.getTimeRanges().get(0);
+            assertNotNull(def.getSpec());
+            assertTrue(isNumber(def.getSpec().getReward().getAmount()));
+            assertEquals(1, def.getSpec().getSelector().getAcceptsWithin().size());
+            assertEquals("marks", def.getSpec().getReward().getPointId());
+            TimeRangeDef timeRangeDef = def.getSpec().getSelector().getAcceptsWithin().get(0);
             assertEquals(AbstractDef.TIME_RANGE_TYPE_TIME, timeRangeDef.getType());
             assertEquals("00:00", timeRangeDef.getFrom());
             assertEquals("06:00", timeRangeDef.getTo());
         });
         findByName(pointDefs, "Special-Seasonal-Award").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNonEmptyString(def.getAward()));
-            assertEquals(1, def.getTimeRanges().size());
-            assertEquals("star.points", def.getPointId());
-            AbstractDef.TimeRangeDef timeRangeDef = def.getTimeRanges().get(0);
+            assertNotNull(def.getSpec());
+            assertTrue(isNonEmptyString(def.getSpec().getReward().getExpression()));
+            assertEquals(1, def.getSpec().getSelector().getAcceptsWithin().size());
+            assertEquals("star.points", def.getSpec().getReward().getPointId());
+            TimeRangeDef timeRangeDef = def.getSpec().getSelector().getAcceptsWithin().get(0);
             assertEquals(AbstractDef.TIME_RANGE_TYPE_SEASONAL, timeRangeDef.getType());
             assertEquals("12-01", timeRangeDef.getFrom());
             assertEquals("12-31", timeRangeDef.getTo());
         });
         findByName(pointDefs, "General-Spending-Rule").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNonEmptyString(def.getAward()));
-            assertTrue(isNonEmptyString(def.getEvent()));
-            assertEquals("star.points", def.getPointId());
+            assertNotNull(def.getSpec());
+            assertTrue(isNonEmptyString(def.getSpec().getReward().getExpression()));
+            assertTrue(isNonEmptyString(def.getSpec().getSelector().getMatchEvent()));
+            assertEquals("star.points", def.getSpec().getReward().getPointId());
         });
         findByName(pointDefs, "Big-Purchase-Bonus").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNonEmptyString(def.getAward()));
-            assertTrue(isNonEmptyString(def.getEvent()));
-            assertTrue(def.getAward().toString().contains("\n"));
-            assertEquals("star.points", def.getPointId());
+            assertNotNull(def.getSpec());
+            assertTrue(isNonEmptyString(def.getSpec().getReward().getExpression()));
+            assertTrue(isNonEmptyString(def.getSpec().getSelector().getMatchEvent()));
+            assertTrue(def.getSpec().getReward().getExpression().contains("\n"));
+            assertEquals("star.points", def.getSpec().getReward().getPointId());
         });
         findByName(pointDefs, "Questions-Asked-Limited").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
-            assertTrue(isNumber(def.getAward()));
-            assertTrue(isNonEmptyString(def.getEvent()));
-            assertTrue(Objects.nonNull(def.getLimit()));
-            assertEquals("stackoverflow.reputation", def.getPointId());
-            Map<String, Object> limit = (Map<String, Object>) def.getLimit();
-            assertTrue(limit.containsKey("daily"));
-            assertTrue(isNumber(limit.get("daily")));
+            assertNotNull(def.getSpec().getReward().getAmount());
+            assertTrue(isNonEmptyString(def.getSpec().getSelector().getMatchEvent()));
+            assertEquals("stackoverflow.reputation", def.getSpec().getReward().getPointId());
+            assertTrue(Objects.nonNull(def.getSpec().getCap()));
+            assertEquals("daily", def.getSpec().getCap().getDuration());
+            assertTrue(Objects.nonNull(def.getSpec().getCap().getLimit()));
         });
         findByName(pointDefs, "Monthly-Last-Sale").ifPresent(def -> {
-            assertNotNull(def.getTimeRanges());
-            assertEquals(1, def.getTimeRanges().size());
-            AbstractDef.TimeRangeDef rangeDef = def.getTimeRanges().get(0);
+            assertNotNull(def.getSpec().getSelector().getAcceptsWithin());
+            assertEquals(1, def.getSpec().getSelector().getAcceptsWithin().size());
+            TimeRangeDef rangeDef = def.getSpec().getSelector().getAcceptsWithin().get(0);
             assertEquals("custom", rangeDef.getType());
             assertTrue(isNonEmptyString(rangeDef.getExpression()));
         });
@@ -126,7 +132,7 @@ public class ParserTest {
     @SuppressWarnings("unchecked")
     public static List<PointDef> parseAll(String resourcePath, PointParser pointParser) {
         Map<String, Object> map = loadGroupFile(resourcePath);
-        List<Map<String, Object>> items = (List<Map<String, Object>>) map.get("points");
+        List<Map<String, Object>> items = (List<Map<String, Object>>) map.get("elements");
         return items.stream().map(ParserTest::asPersistedDef)
                 .map(pointParser::parse)
                 .collect(Collectors.toList());

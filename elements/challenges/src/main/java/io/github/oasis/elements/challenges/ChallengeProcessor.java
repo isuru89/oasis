@@ -70,8 +70,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
         }
         return super.isDenied(event, context)
                 || notInScope(event, rule)
-                || notInRange(event, rule)
-                || !criteriaSatisfied(event, rule, context);
+                || notInRange(event, rule);
     }
 
     @Override
@@ -183,10 +182,6 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
         return rule.getAwardPoints();
     }
 
-    private boolean criteriaSatisfied(Event event, ChallengeRule rule, ExecutionContext context) {
-        return rule.getCriteria() == null || rule.getCriteria().matches(event, rule, context);
-    }
-
     private boolean notInRange(Event event, ChallengeRule rule) {
         long ts = event.getTimestamp();
         return ts < rule.getStartAt() || rule.getExpireAt() < ts;
@@ -196,8 +191,14 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
         ChallengeRule.ChallengeScope scope = rule.getScope();
         long scopeId = rule.getScopeId();
         if (scope == ChallengeRule.ChallengeScope.USER) {
+            if (rule.getScopeIds() != null) {
+                return !rule.getScopeIds().contains(event.getUser());
+            }
             return event.getUser() != scopeId;
         } else if (scope == ChallengeRule.ChallengeScope.TEAM) {
+            if (rule.getScopeIds() != null) {
+                return !rule.getScopeIds().contains(event.getTeam());
+            }
             return event.getTeam() != scopeId;
         }
         return false;

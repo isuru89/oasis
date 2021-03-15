@@ -1,0 +1,84 @@
+version: 1
+
+elements:
+  - id: GAME_SCOPED_MULTI_WINNER_REPEAT
+    name: test.challenge.rule
+    description: Game scoped challenge when some one scored more than 50
+    type: core:challenge
+    spec:
+      selector:
+        matchEvent: user.scored
+        filter:
+          expression: e.value >= 50
+      flags:
+        - REPEATABLE_WINNERS
+      scopeTo:
+        type: GAME
+      startAt: 0
+      expireAt: 200
+      winnerCount: 3
+      rewards:
+        points:
+          id: challenge.points
+          amount: 100
+
+  - id: GAME_SCOPED_MULTI_WINNER_RANKWISE_POINTS
+    name: test.challenge.rule
+    description: Game scoped challenge when some one scored more than 50
+    type: core:challenge
+    spec:
+      selector:
+        matchEvent: user.scored
+        filter:
+          expression: e.value >= 50
+      flags:
+        - REPEATABLE_WINNERS
+      scopeTo:
+        type: GAME
+      startAt: 0
+      expireAt: 200
+      winnerCount: 3
+      rewards:
+        points:
+          id: challenge.points
+          expression: e.value - 50
+
+  - id: GAME_SCOPED_MULTI_WINNER_NO_REPEAT
+    name: test.challenge.rule
+    description: Game scoped challenge when some one scored more than 50
+    type: core:challenge
+    spec:
+      selector:
+        matchEvent: user.scored
+        filter:
+          expression: e.value >= 50
+      scopeTo:
+        type: GAME
+      startAt: 0
+      expireAt: 200
+      winnerCount: 3
+      rewards:
+        points:
+          id: challenge.points
+          amount: 100
+
+  - id: GAME_SCOPED_MULTI_WINNER_REPEAT_START_EARLY
+    name: test.challenge.rule
+    description: Game scoped challenge when some one scored more than 50
+    type: core:challenge
+    spec:
+      selector:
+        matchEvent: user.scored
+        filter:
+          expression: e.value >= 50
+      flags:
+        - REPEATABLE_WINNERS
+      scopeTo:
+        type: GAME
+      startAt: 100
+      expireAt: 200
+      winnerCount: 3
+      rewards:
+        points:
+          id: challenge.points
+          amount: 100

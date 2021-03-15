@@ -44,13 +44,14 @@ public class TemporalBadgeSignal extends BadgeSignal {
 
     @Override
     public int compareTo(Signal o) {
-        return Comparator
+        Comparator<BadgeSignal> comparator = Comparator
                 .comparingLong(BadgeSignal::getStartTime)
                 .thenComparing(BadgeSignal::getAttribute)
                 .thenComparing(BadgeSignal::getRuleId)
                 .thenComparing(Signal::getEventScope)
                 .thenComparingLong(BadgeSignal::getEndTime)
-                .thenComparing(BadgeSignal::getStartId)
-                .compare(this, (BadgeSignal) o);
+                .thenComparing(BadgeSignal::getStartId);
+
+        return comparator.compare(this, (BadgeSignal) o);
     }
 }

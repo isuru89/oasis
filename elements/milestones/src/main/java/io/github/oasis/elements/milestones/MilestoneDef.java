@@ -20,76 +20,23 @@
 package io.github.oasis.elements.milestones;
 
 import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.utils.Utils;
-import lombok.Getter;
-import lombok.Setter;
+import io.github.oasis.elements.milestones.spec.MilestoneSpecification;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Definition for all milestone rules.
  *
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-public class MilestoneDef extends AbstractDef {
-
-    /**
-     * Indicates which point ids should be used to accumulate.
-     * Can indicate single or multiple point ids.
-     * When not specified, events will be filtered based on event ids.
-     */
-    private Object pointIds;
-
-    /**
-     * Optional expression to extract accumulation value from events.
-     * When pointIds are specified, this field will be ignored.
-     */
-    private Object valueExtractor;
-
-    /**
-     * Mandatory Level list for this milestone.
-     */
-    private List<MilestoneLevel> levels;
-
-    void initialize() {
-        if (Objects.isNull(getEvents()) && Objects.nonNull(pointIds)) {
-            super.setEvents(pointIds);
-        }
-    }
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class MilestoneDef extends AbstractDef<MilestoneSpecification> {
 
     public boolean isPointBased() {
-        return Objects.nonNull(pointIds);
+        return Objects.nonNull(getSpec().getSelector().getMatchPointIds());
     }
 
-    @Override
-    protected List<String> getSensitiveAttributes() {
-        List<String> base = new ArrayList<>(super.getSensitiveAttributes());
-        base.add(Utils.firstNonNullAsStr(valueExtractor, EMPTY));
-        if (Objects.nonNull(levels)) {
-            base.addAll(levels.stream()
-                    .sorted(Comparator.comparingInt(MilestoneLevel::getLevel))
-                    .flatMap(l -> l.getSensitiveAttributes().stream())
-                    .collect(Collectors.toList()));
-        }
-        return base;
-    }
-
-    @Getter
-    @Setter
-    public static class MilestoneLevel implements Serializable {
-        private int level;
-        private BigDecimal milestone;
-
-        List<String> getSensitiveAttributes() {
-            return List.of(String.valueOf(level), milestone.toString());
-        }
-    }
 }

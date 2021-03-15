@@ -57,7 +57,7 @@ public class Scripting {
         @Override
         public BigDecimal resolve(Event event, I input) {
             Map<String, Object> vars = new HashMap<>();
-            vars.put(EVENT_VAR , event.getAllFieldValues());
+            vars.put(EVENT_VAR , (event != null) ? event.getAllFieldValues() : null);
             vars.put(paramName, input);
             Object result = MVEL.executeExpression(compiledExpression, vars);
             if (result instanceof BigDecimal) {

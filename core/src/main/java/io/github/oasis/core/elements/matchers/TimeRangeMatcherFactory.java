@@ -21,6 +21,7 @@ package io.github.oasis.core.elements.matchers;
 
 import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.TimeRangeMatcher;
+import io.github.oasis.core.elements.spec.TimeRangeDef;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ import java.util.Objects;
  */
 public final class TimeRangeMatcherFactory {
 
-    public static TimeRangeMatcher create(List<AbstractDef.TimeRangeDef> defList) {
+    public static TimeRangeMatcher create(List<TimeRangeDef> defList) {
         if (Objects.isNull(defList) || defList.isEmpty()) {
             return null;
         }
@@ -40,14 +41,14 @@ public final class TimeRangeMatcherFactory {
             return create(defList.get(0));
         } else {
             List<TimeRangeMatcher> matchers = new ArrayList<>();
-            for (AbstractDef.TimeRangeDef def : defList) {
+            for (TimeRangeDef def : defList) {
                 matchers.add(create(def));
             }
             return new AnyOfTimeRangeMatcher(matchers);
         }
     }
 
-    private static TimeRangeMatcher create(AbstractDef.TimeRangeDef def) {
+    private static TimeRangeMatcher create(TimeRangeDef def) {
         if (AbstractDef.TIME_RANGE_TYPE_SEASONAL.equals(def.getType())) {
             return AnnualDateRangeMatcher.create((String) def.getFrom(), (String) def.getTo());
         } else if (AbstractDef.TIME_RANGE_TYPE_TIME.equals(def.getType())) {

@@ -85,8 +85,6 @@ public class RatingProcessor extends AbstractProcessor<RatingRule, Signal> {
     private BigDecimal deriveAwardedPoints(Event event, int prevRating, RatingRule.Rating rating, RatingRule rule) {
         if (rating.getPointAwards() != null) {
             return rating.getPointAwards().resolve(event, prevRating);
-        } else if (rule.getCommonPointAwards() != null) {
-            return rule.getCommonPointAwards().resolve(event, prevRating, rating.getRating());
         }
         return BigDecimal.ZERO;
     }

@@ -1,23 +1,38 @@
 version: 1
 
-badges:
+elements:
   - id: BDG00001
     name: Initial-Registration
     description: Awards a badge when a user first registered within the application.
-    event: app.user.registered
-    kind: firstEvent
+    type: core:badge
+    spec:
+      kind: firstEvent
+      selector:
+        matchEvent: app.user.registered
 
   - id: BDG0002
     name: First-Question-On-Topic
     description: Awards a badge asking the first question for a topic.
-    event: app.question.asked
-    kind: firstEvent
-    eventFilter: e.totalQuestions == 1
+    type: core:badge
+    spec:
+      kind: firstEvent
+      selector:
+        matchEvent: app.question.asked
+        filter:
+          expression: e.totalQuestions == 1
+      rewards:
+        badge:
+          attribute: 10
 
   - id: BDG00003
     name: Initial-Registration-With-Points
     description: Awards a badge when a user first registered within the application.
-    event: app.user.registered
-    kind: firstEvent
-    pointId: star.points
-    pointAwards: 50
+    type: core:badge
+    spec:
+      kind: firstEvent
+      selector:
+        matchEvent: app.user.registered
+      rewards:
+        points:
+          id: star.points
+          amount: 50

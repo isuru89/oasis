@@ -21,7 +21,6 @@ package io.github.oasis.elements.badges.processors;
 
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
-import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.elements.badges.TEvent;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
@@ -33,7 +32,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -43,14 +41,11 @@ import java.util.function.Consumer;
 @DisplayName("Time bounded Streaks")
 public class TimeBoundedStreakNTest extends AbstractRuleTest {
 
-    public static final String EVENT_TYPE = "event.a";
-    public static final String EVENT_B = "event.b";
+    public static final String EVENT_TYPE = "question.voted";
+    public static final String EVENT_B = "unknown.event";
 
     private static final int ATTR_SILVER = 10;
     private static final int ATTR_GOLD = 20;
-
-    private final Map<Integer, Integer> multiStreak = Map.of(3, ATTR_SILVER, 5, ATTR_GOLD);
-    private final Map<Integer, Integer> singleStreak = Map.of(3, ATTR_SILVER);
 
     @DisplayName("Multi streaks: No matching event types")
     @Test
@@ -63,7 +58,8 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(160, EVENT_B, 87);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNBadgeRule> ruleContext = createRule(multiStreak, 60, signalsRef::add);
+        TimeBoundedStreakNRule rule = loadRule("kinds/timeBoundedStreakN.yml", "MULTI_STREAK");
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
         Assertions.assertEquals(5, ruleContext.getRule().getMaxStreak());
         StreakNBadgeProcessor streakN = new TimeBoundedStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6);
@@ -85,8 +81,8 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         TEvent e7 = TEvent.createKeyValue(170, EVENT_TYPE, 11);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, 30, signalsRef::add);
-        StreakNBadgeRule rule = ruleContext.getRule();
+        TimeBoundedStreakNRule rule = loadRule("kinds/timeBoundedStreakN.yml", "SINGLE_STREAK_WITHIN_30");
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
         Assertions.assertEquals(3, rule.getMaxStreak());
         StreakNBadgeProcessor streakN = new TimeBoundedStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7);
@@ -109,8 +105,8 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(160, EVENT_TYPE, 87);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNBadgeRule> ruleContext = createRule(multiStreak, 60, signalsRef::add);
-        StreakNBadgeRule rule = ruleContext.getRule();
+        TimeBoundedStreakNRule rule = loadRule("kinds/timeBoundedStreakN.yml", "MULTI_STREAK");
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
         Assertions.assertEquals(5, rule.getMaxStreak());
         StreakNBadgeProcessor streakN = new TimeBoundedStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6);
@@ -133,9 +129,8 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         TEvent e6 = TEvent.createKeyValue(125, EVENT_TYPE, 12);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNBadgeRule> ruleContext = createRule(multiStreak, 60, signalsRef::add);
-        StreakNBadgeRule rule = ruleContext.getRule();
-        Assertions.assertEquals(5, rule.getMaxStreak());
+        TimeBoundedStreakNRule rule = loadRule("kinds/timeBoundedStreakN.yml", "MULTI_STREAK");
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
         StreakNBadgeProcessor streakN = new TimeBoundedStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5, e6);
 
@@ -157,8 +152,8 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(140, EVENT_TYPE, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, 20, signalsRef::add);
-        Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
+        TimeBoundedStreakNRule rule = loadRule("kinds/timeBoundedStreakN.yml", "SINGLE_STREAK_WITHIN_20");
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
         StreakNBadgeProcessor streakN = new TimeBoundedStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
@@ -177,8 +172,8 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(140, EVENT_TYPE, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, 30, signalsRef::add);
-        Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
+        TimeBoundedStreakNRule rule = loadRule("kinds/timeBoundedStreakN.yml", "SINGLE_STREAK_WITHIN_30");
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
         StreakNBadgeProcessor streakN = new TimeBoundedStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
@@ -199,8 +194,8 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(160, EVENT_TYPE, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, 30, signalsRef::add);
-        Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
+        TimeBoundedStreakNRule rule = loadRule("kinds/timeBoundedStreakN.yml", "SINGLE_STREAK_WITHIN_30");
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
         StreakNBadgeProcessor streakN = new TimeBoundedStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
@@ -219,8 +214,8 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(115, EVENT_TYPE, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, 30, signalsRef::add);
-        Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
+        TimeBoundedStreakNRule rule = loadRule("kinds/timeBoundedStreakN.yml", "SINGLE_STREAK_WITHIN_30");
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
         StreakNBadgeProcessor streakN = new TimeBoundedStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
@@ -241,8 +236,8 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         TEvent e5 = TEvent.createKeyValue(105, EVENT_TYPE, 21);
 
         List<Signal> signalsRef = new ArrayList<>();
-        RuleContext<StreakNBadgeRule> ruleContext = createRule(singleStreak, 30, signalsRef::add);
-        Assertions.assertEquals(3, ruleContext.getRule().getMaxStreak());
+        TimeBoundedStreakNRule rule = loadRule("kinds/timeBoundedStreakN.yml", "SINGLE_STREAK_WITHIN_30");
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
         StreakNBadgeProcessor streakN = new TimeBoundedStreakNBadge(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
@@ -252,13 +247,7 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
                 new StreakBadgeSignal(ruleContext.getRule().getId(), e4, 3, ATTR_SILVER, 110, 140, e2.getExternalId(), e4.getExternalId()));
     }
 
-    private RuleContext<StreakNBadgeRule> createRule(Map<Integer, Integer> streaks, long timeUnit, Consumer<Signal> consumer) {
-        TimeBoundedStreakNRule rule = new TimeBoundedStreakNRule("test.temporal.streak");
-        rule.setEventTypeMatcher(new SingleEventTypeMatcher(EVENT_TYPE));
-        rule.setStreaks(toStreakMap(streaks));
-        rule.setCriteria((e,r,c) -> (long) e.getFieldValue("value") >= 50);
-        rule.setRetainTime(100);
-        rule.setTimeUnit(timeUnit);
+    private RuleContext<StreakNBadgeRule> createRule(StreakNBadgeRule rule, Consumer<Signal> consumer) {
         return new RuleContext<>(rule, fromConsumer(consumer));
     }
 }

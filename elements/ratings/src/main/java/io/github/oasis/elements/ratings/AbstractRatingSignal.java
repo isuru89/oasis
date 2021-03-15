@@ -22,10 +22,12 @@ package io.github.oasis.elements.ratings;
 import io.github.oasis.core.EventScope;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
+import lombok.ToString;
 
 /**
  * @author Isuru Weerarathna
  */
+@ToString
 public abstract class AbstractRatingSignal extends Signal {
 
     private final int currentRating;

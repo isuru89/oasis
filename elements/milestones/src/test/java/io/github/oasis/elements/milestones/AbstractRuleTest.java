@@ -21,11 +21,13 @@ package io.github.oasis.elements.milestones;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.db.redis.RedisEventLoader;
 import org.junit.jupiter.api.AfterAll;
@@ -52,11 +54,13 @@ public abstract class AbstractRuleTest {
 
     protected ExecutionContext defaultContext = ExecutionContext.withUserTz(0, "UTC");
 
+    private final MilestoneParser parser = new MilestoneParser();
+
     protected static Db pool;
     protected static EventReadWrite eventReadWrite;
 
     @BeforeAll
-    public static void beforeAll() throws IOException {
+    public static void beforeAll() {
         JedisPoolConfig config = new JedisPoolConfig();
         config.setMaxTotal(5);
         JedisPool poolRedis = new JedisPool(config, "localhost");
@@ -97,6 +101,16 @@ public abstract class AbstractRuleTest {
         }
     }
 
+    protected MilestoneRule loadRule(String clzPathLocation, String ruleId) {
+        GameDef gameDef = GameParserYaml.fromClasspath(clzPathLocation, Thread.currentThread().getContextClassLoader());
+        return gameDef.getRuleDefinitions().stream()
+                .map(parser::parse)
+                .filter(def -> def.getId().equals(ruleId))
+                .map(parser::convert)
+                .findFirst()
+                .orElseThrow();
+    }
+
     protected Set<Signal> mergeSignals(List<Signal> refSignals) {
         Set<Signal> signals = new HashSet<>();
         for (Signal signal : refSignals) {
@@ -107,7 +121,7 @@ public abstract class AbstractRuleTest {
     }
 
     protected SignalCollector fromConsumer(Consumer<Signal> eventConsumer) {
-        return (SignalCollector) (signal, context, rule) -> eventConsumer.accept(signal);
+        return (signal, context, rule) -> eventConsumer.accept(signal);
     }
 
     protected void assertSignal(Collection<Signal> signals, Signal signalRef) {

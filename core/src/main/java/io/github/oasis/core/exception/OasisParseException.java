@@ -22,7 +22,7 @@ package io.github.oasis.core.exception;
 /**
  * @author Isuru Weerarathna
  */
-public class OasisParseException extends OasisException {
+public class OasisParseException extends OasisRuntimeException {
     public OasisParseException(String message) {
         super(message);
     }

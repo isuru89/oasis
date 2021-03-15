@@ -1,0 +1,98 @@
+version: 1
+
+elements:
+  - id: SINGLE_THRESHOLD
+    name: Daily-Reputations
+    description: Accumulates user reputation daily and awards badges if user scores 50+ reputations on a day
+    type: core:badge
+    spec:
+      kind: periodicAccumulation
+      selector:
+        matchEvent: reputation.changed
+      period:
+        duration: 50
+        unit: millis
+      aggregatorExtractor:
+        expression: e.value
+      thresholds:
+        - value: 100        # 50 reputations
+          rewards:
+            badge:
+              attribute: 1
+
+  - id: SINGLE_THRESHOLD_WITH_FILTER
+    name: Daily-Reputations
+    description: Accumulates user reputation daily and awards badges if user scores 50+ reputations on a day
+    type: core:badge
+    spec:
+      kind: periodicAccumulation
+      selector:
+        matchEvent: reputation.changed
+        filter:
+          expression: e.value < 50
+      period:
+        duration: 50
+        unit: millis
+      aggregatorExtractor:
+        expression: e.value
+      thresholds:
+        - value: 100        # 50 reputations
+          rewards:
+            badge:
+              attribute: 1
+
+  - id: MULTIPLE_THRESHOLDS
+    name: Daily-Reputations
+    description: Accumulates user reputation daily and awards badges if user scores 50+ reputations on a day
+    type: core:badge
+    spec:
+      kind: periodicAccumulation
+      selector:
+        matchEvent: reputation.changed
+      period:
+        duration: 50
+        unit: millis
+      aggregatorExtractor:
+        expression: e.value
+      thresholds:
+        - value: 100        # 50 reputations
+          rewards:
+            badge:
+              attribute: 1
+        - value: 150         # 100 reputations
+          rewards:
+            badge:
+              attribute: 2
+        - value: 200       # 200 reputations
+          rewards:
+            badge:
+              attribute: 4
+
+  - id: MULTIPLE_THRESHOLDS_WITH_FILTER
+    name: Daily-Reputations
+    description: Accumulates user reputation daily and awards badges if user scores 50+ reputations on a day
+    type: core:badge
+    spec:
+      kind: periodicAccumulation
+      selector:
+        matchEvent: reputation.changed
+        filter:
+          expression: e.value >= 50
+      period:
+        duration: 50
+        unit: millis
+      aggregatorExtractor:
+        expression: e.value
+      thresholds:
+        - value: 100        # 50 reputations
+          rewards:
+            badge:
+              attribute: 1
+        - value: 150         # 100 reputations
+          rewards:
+            badge:
+              attribute: 2
+        - value: 200       # 200 reputations
+          rewards:
+            badge:
+              attribute: 4

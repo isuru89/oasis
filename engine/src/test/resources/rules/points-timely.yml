@@ -4,12 +4,16 @@ elements:
   - id: PNT00002
     name: Time-Bonus
     description: Awards bonus points when invoked between 10am - 1pm.
-    plugin: core:point
-    event: event.a
-    eventFilter: e.value >= 50
-    timeRanges:
-      - type: time
-        from: "10:00"
-        to: "13:00"
-    award: e.value - 50
-    pointId: timely.bonus.points
+    type: core:point
+    spec:
+      selector:
+        matchEvent: event.a
+        filter:
+          expression: e.value >= 50
+        acceptsWithin:
+          - type: time
+            from: "10:00"
+            to: "13:00"
+      reward:
+        expression: e.value - 50
+        pointId: timely.bonus.points

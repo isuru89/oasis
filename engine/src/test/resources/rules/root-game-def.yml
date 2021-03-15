@@ -1,0 +1,7 @@
+version: 1
+
+elements:
+  - collective/badges-a.yml
+  - collective/badges-b.yml
+  - collective/challenges-a.yml
+  - collective/milestone-a.yml

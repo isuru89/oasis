@@ -22,6 +22,8 @@ package io.github.oasis.core.elements;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.matchers.ScriptedEventFilter;
+import io.github.oasis.core.elements.spec.EventFilterDef;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 
@@ -38,6 +40,17 @@ public class EventExecutionFilterFactory {
         public boolean matches(Event event, AbstractRule rule, ExecutionContext ctx) {
             return true;
         }
+    }
+
+    public static EventExecutionFilter create(EventFilterDef filterDef) {
+        if (Objects.isNull(filterDef)) {
+            return ALWAYS_TRUE;
+        }
+
+        if (StringUtils.isNotBlank(filterDef.getExpression())) {
+            return ScriptedEventFilter.create(filterDef.getExpression());
+        }
+        throw new IllegalArgumentException("Unsupported event filter specification!");
     }
 
     public static EventExecutionFilter create(Object source) {

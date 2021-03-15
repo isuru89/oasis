@@ -21,6 +21,7 @@ package io.github.oasis.core.elements.matchers;
 
 import io.github.oasis.core.elements.EventTypeMatcher;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,6 +40,12 @@ public class AnyOfEventTypeMatcher implements EventTypeMatcher {
     @Override
     public boolean matches(String eventType) {
         return against.contains(eventType);
+    }
+
+    public static AnyOfEventTypeMatcher create(Collection<String> eventIds) {
+        return new AnyOfEventTypeMatcher(eventIds.stream()
+                .map(String::trim)
+                .collect(Collectors.toSet()));
     }
 
     public static AnyOfEventTypeMatcher create(String pattern) {

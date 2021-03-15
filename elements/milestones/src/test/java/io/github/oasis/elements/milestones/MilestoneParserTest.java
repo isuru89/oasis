@@ -20,24 +20,36 @@
 package io.github.oasis.elements.milestones;
 
 import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.matchers.AnyOfEventTypeMatcher;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
+import io.github.oasis.core.elements.spec.BaseSpecification;
+import io.github.oasis.core.elements.spec.MatchEventsDef;
+import io.github.oasis.core.elements.spec.SelectorDef;
 import io.github.oasis.core.events.BasePointEvent;
 import io.github.oasis.core.external.messages.PersistedDef;
-import org.junit.jupiter.api.Assertions;
+import io.github.oasis.elements.milestones.spec.MilestoneLevel;
+import io.github.oasis.elements.milestones.spec.MilestoneSpecification;
+import io.github.oasis.elements.milestones.spec.ValueExtractorDef;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.github.oasis.elements.milestones.Utils.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static io.github.oasis.elements.milestones.Utils.findByName;
+import static io.github.oasis.elements.milestones.Utils.isNonEmptyString;
+import static io.github.oasis.elements.milestones.Utils.isNumber;
+import static io.github.oasis.elements.milestones.Utils.parseAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
@@ -60,12 +72,10 @@ class MilestoneParserTest {
         persistedDef.setImpl(MilestoneDef.class.getName());
         persistedDef.setData(toMap(def));
 
-        AbstractDef abstractDef = parser.parse(persistedDef);
+        MilestoneDef parsed = parser.parse(persistedDef);
 
-        assertTrue(abstractDef instanceof MilestoneDef);
-        MilestoneDef parsed = (MilestoneDef) abstractDef;
-        assertEquals(def.getValueExtractor(), parsed.getValueExtractor());
-        assertEquals(def.getLevels().size(), parsed.getLevels().size());
+        assertEquals(def.getSpec().getValueExtractor(), parsed.getSpec().getValueExtractor());
+        assertEquals(def.getSpec().getLevels().size(), parsed.getSpec().getLevels().size());
     }
 
     @Test
@@ -73,10 +83,10 @@ class MilestoneParserTest {
         List<MilestoneDef> defs = parseAll("milestones.yml", parser);
         findByName(defs, "Challenge-Win-Points").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
-            assertNotNull(def.getEvents());
-            assertNull(def.getEvent());
-            assertNotNull(def.getValueExtractor());
-            assertEquals(2, def.getLevels().size());
+            assertNotNull(def.getSpec().getSelector().getMatchEvents());
+            assertNull(def.getSpec().getSelector().getMatchEvent());
+            assertNotNull(def.getSpec().getValueExtractor());
+            assertEquals(2, def.getSpec().getLevels().size());
 
             MilestoneRule rule = parser.convert(def);
             assertNotNull(rule.getValueExtractor());
@@ -87,10 +97,10 @@ class MilestoneParserTest {
         });
         findByName(defs, "Star-Points").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
-            assertNull(def.getEvent());
-            assertNull(def.getEvents());
-            assertNotNull(def.getPointIds());
-            assertNotNull(def.getLevels());
+            assertNull(def.getSpec().getSelector().getMatchEvent());
+            assertNull(def.getSpec().getSelector().getMatchEvents());
+            assertNotNull(def.getSpec().getSelector().getMatchPointIds());
+            assertNotNull(def.getSpec().getLevels());
 
             TEvent event = TEvent.createKeyValue(Instant.now().toEpochMilli(), "event.a", 55);
             BasePointEvent basePointEvent = new BasePointEvent("star.points", BasePointEvent.DEFAULT_POINTS_KEY, BigDecimal.valueOf(20), event) {
@@ -112,10 +122,10 @@ class MilestoneParserTest {
         });
         findByName(defs, "Total-Reputations").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
-            assertNull(def.getEvent());
-            assertNull(def.getEvents());
-            assertNotNull(def.getPointIds());
-            assertNotNull(def.getLevels());
+            assertNull(def.getSpec().getSelector().getMatchEvent());
+            assertNull(def.getSpec().getSelector().getMatchEvents());
+            assertNotNull(def.getSpec().getSelector().getMatchPointIds());
+            assertNotNull(def.getSpec().getLevels());
 
             MilestoneRule rule = parser.convert(def);
             assertNotNull(rule.getValueExtractor());
@@ -127,12 +137,12 @@ class MilestoneParserTest {
         });
         findByName(defs, "Milestone-with-Event-Count").ifPresent(def -> {
             assertTrue(isNonEmptyString(def.getDescription()));
-            assertNotNull(def.getEvent());
-            assertNull(def.getEvents());
-            assertNull(def.getPointIds());
-            assertNotNull(def.getLevels());
-            assertNotNull(def.getEventFilter());
-            assertTrue(isNumber(def.getValueExtractor()));
+            assertNotNull(def.getSpec().getSelector().getMatchEvent());
+            assertNull(def.getSpec().getSelector().getMatchEvents());
+            assertNull(def.getSpec().getSelector().getMatchPointIds());
+            assertNotNull(def.getSpec().getLevels());
+            assertNotNull(def.getSpec().getSelector().getFilter());
+            assertTrue(isNumber(def.getSpec().getValueExtractor().getAmount()));
 
             MilestoneRule rule = parser.convert(def);
             assertNotNull(rule.getValueExtractor());
@@ -150,10 +160,8 @@ class MilestoneParserTest {
     void convert() {
         MilestoneDef def = createMilestone();
 
-        AbstractRule abstractRule = parser.convert(def);
-        assertTrue(abstractRule instanceof MilestoneRule);
+        MilestoneRule rule = parser.convert(def);
 
-        MilestoneRule rule = (MilestoneRule) abstractRule;
         {
             Optional<MilestoneRule.Level> levelFor = rule.getLevelFor(new BigDecimal("100.0"));
             assertTrue(levelFor.isPresent());
@@ -185,44 +193,43 @@ class MilestoneParserTest {
         }
     }
 
-    @Test
-    void unknownDef() {
-        AbstractDef unknownDef = new AbstractDef() {
-            @Override
-            public Object getEvent() {
-                return super.getEvent();
-            }
-        };
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.convert(unknownDef));
-    }
-
     private MilestoneDef createMilestone() {
         MilestoneDef def = new MilestoneDef();
         def.setId("MILE00001");
         def.setName("milestone-1");
-        def.setValueExtractor("e.data.value");
-        def.setLevels(List.of(
+        def.setType("core:milestone");
+        SelectorDef selectorDef = new SelectorDef();
+        MatchEventsDef eventsDef = new MatchEventsDef();
+        eventsDef.setAnyOf(Arrays.asList("point.a", "point.b"));
+        selectorDef.setMatchPointIds(eventsDef);
+        MilestoneSpecification spec = new MilestoneSpecification();
+        spec.setSelector(selectorDef);
+
+        ValueExtractorDef valueExtractorDef = new ValueExtractorDef();
+        valueExtractorDef.setExpression("e.data.value");
+        spec.setValueExtractor(valueExtractorDef);
+        spec.setLevels(List.of(
             aLevel(1, 100),
             aLevel(2, 200),
             aLevel(3, 500),
             aLevel(4, 1000)
         ));
+
+        def.setSpec(spec);
         return def;
     }
 
-    private MilestoneDef.MilestoneLevel aLevel(int levelId, double milestone) {
-        MilestoneDef.MilestoneLevel level = new MilestoneDef.MilestoneLevel();
+    private MilestoneLevel aLevel(int levelId, double milestone) {
+        MilestoneLevel level = new MilestoneLevel();
         level.setLevel(levelId);
         level.setMilestone(BigDecimal.valueOf(milestone));
         return level;
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> toMap(AbstractDef def) {
+    private Map<String, Object> toMap(AbstractDef<? extends BaseSpecification> def) {
         Yaml yaml = new Yaml();
         System.out.println(yaml.dumpAsMap(def));
-        return (Map<String, Object>) yaml.load(yaml.dumpAsMap(def));
+        return yaml.load(yaml.dumpAsMap(def));
     }
 
 }

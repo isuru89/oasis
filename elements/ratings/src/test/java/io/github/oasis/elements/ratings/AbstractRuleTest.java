@@ -21,11 +21,13 @@ package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.db.redis.RedisEventLoader;
 import io.github.oasis.engine.element.points.PointSignal;
@@ -52,6 +54,8 @@ import java.util.function.Consumer;
 public abstract class AbstractRuleTest {
 
     protected ExecutionContext defaultContext = ExecutionContext.withUserTz(0, "UTC");
+
+    private final RatingParser parser = new RatingParser();
 
     protected static Db pool;
     protected static EventReadWrite eventReadWrite;
@@ -88,12 +92,25 @@ public abstract class AbstractRuleTest {
     public void afterEach() {
     }
 
+    protected RatingRule loadRule(String clzPathLocation, String ruleId) {
+        GameDef gameDef = GameParserYaml.fromClasspath(clzPathLocation, Thread.currentThread().getContextClassLoader());
+        return (RatingRule) gameDef.getRuleDefinitions().stream()
+                .map(parser::parse)
+                .filter(def -> def.getId().equals(ruleId))
+                .map(parser::convert)
+                .findFirst()
+                .orElseThrow();
+    }
+
     protected void submitOrder(BiConsumer<Event, ExecutionContext> eventConsumer, Event... events) {
+        System.out.println("--- Submitting events ------");
         submitOrder(eventConsumer, defaultContext, events);
+        System.out.println("---- Submission Done ------");
     }
 
     protected void submitOrder(BiConsumer<Event, ExecutionContext> eventConsumer, ExecutionContext context, Event... events) {
         for (Event event : events) {
+            System.out.println(" > " + event);
             eventConsumer.accept(event, context);
         }
     }
@@ -124,6 +141,12 @@ public abstract class AbstractRuleTest {
     }
 
     protected void assertStrict(Collection<Signal> signals, Signal... challengeSignals) {
+        System.out.println("---- Received Signals (" + signals.size() + ") -----");
+        for (Signal signal : signals) {
+            System.out.println(" < " + signal);
+        }
+        System.out.println("---- *** -----");
+
         if (challengeSignals == null) {
             Assertions.assertTrue(signals.isEmpty(), "No signals excepted but found many!");
             return;

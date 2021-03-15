@@ -21,4 +21,37 @@ A rating indicates a state of a player.
 TBW
 
 ## Examples
-TBW
+
+* Award points based on the fluctuation of user score average 
+```yaml
+  - id: WITH_THREE_RATINGS
+    name: Point-Rating
+    description: Awards points based on the value having.
+    type: core:rating
+    spec:
+      selector:
+        matchEvent: user.average
+      defaultRating: 1
+      ratings:
+        - priority: 1
+          rating: 3
+          condition: e.value >= 85
+          rewards:
+            points:
+              id: rating.points
+              expression: (3 - previousRating) * 10
+        - priority: 2
+          rating: 2
+          condition: e.value >= 65
+          rewards:
+            points:
+              id: rating.points
+              expression: (2 - previousRating) * 10
+        - priority: 3
+          rating: 1
+          condition: e.value >= 50
+          rewards:
+            points:
+              id: rating.points
+              expression: (1 - previousRating) * 10
+```

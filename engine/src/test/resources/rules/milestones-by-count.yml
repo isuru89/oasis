@@ -4,13 +4,16 @@ elements:
   - id: MILE00002
     name: Milestone-with-Event-Count
     description: This is a milestone counting events based on a criteria.
-    plugin: core:milestone
-    event: event.a
-    valueExtractor: 1
-    levels:
-      - level: 1
-        milestone: 5
-      - level: 2
-        milestone: 10
-      - level: 3
-        milestone: 15
+    type: core:milestone
+    spec:
+      selector:
+        matchEvent: event.a
+      valueExtractor:
+        amount: 1
+      levels:
+        - level: 1
+          milestone: 5
+        - level: 2
+          milestone: 10
+        - level: 3
+          milestone: 15

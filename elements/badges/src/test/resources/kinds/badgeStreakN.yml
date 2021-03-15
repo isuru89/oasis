@@ -1,0 +1,95 @@
+version: 1
+
+elements:
+  - id: SINGLE_STREAK
+    name: Question-Score-Streak
+    description: Awards badges when a question is up voted consecutively
+    type: core:badge
+    spec:
+      kind: streak
+      selector:
+        matchEvent: question.voted
+      condition:  # if condition become falsy, then streak will break.
+        expression: "e.value >= 50"
+      retainTime:
+        duration: 1
+        unit: second
+      streaks:
+        - streak: 3
+          rewards:
+            badge:
+              attribute: 10
+
+  - id: SINGLE_STREAK_WITH_POINTS
+    name: Question-Score-Streak
+    description: Awards badges when a question is up voted consecutively
+    type: core:badge
+    spec:
+      kind: streak
+      selector:
+        matchEvent: question.voted
+      condition:  # if condition become falsy, then streak will break.
+        expression: "e.value >= 50"
+      retainTime:
+        duration: 1
+        unit: second
+      streaks:
+        - streak: 3
+          rewards:
+            badge:
+              attribute: 10
+            points:
+              id: reputation
+              amount: 10
+
+  - id: MULTI_STREAK
+    name: Question-Score-Streak
+    description: Awards badges when a question is up voted consecutively
+    type: core:badge
+    spec:
+      kind: streak
+      selector:
+        matchEvent: question.voted
+      condition:  # if condition become falsy, then streak will break.
+        expression: "e.value >= 50"
+      retainTime:
+        duration: 1
+        unit: second
+      streaks:
+        - streak: 3
+          rewards:
+            badge:
+              attribute: 10
+        - streak: 5
+          rewards:
+            badge:
+              attribute: 20
+
+  - id: MULTI_STREAK_WITH_POINTS
+    name: Question-Score-Streak
+    description: Awards badges when a question is up voted consecutively
+    type: core:badge
+    spec:
+      kind: streak
+      selector:
+        matchEvent: question.voted
+      condition:  # if condition become falsy, then streak will break.
+        expression: "e.value >= 50"
+      retainTime:
+        duration: 1
+        unit: second
+      streaks:
+        - streak: 3
+          rewards:
+            badge:
+              attribute: 10
+            points:
+              id: reputation
+              amount: 10
+        - streak: 5
+          rewards:
+            badge:
+              attribute: 20
+            points:
+              id: reputation
+              amount: 50

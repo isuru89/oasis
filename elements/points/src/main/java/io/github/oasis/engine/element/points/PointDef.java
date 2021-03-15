@@ -20,12 +20,9 @@
 package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.utils.Utils;
+import io.github.oasis.engine.element.points.spec.PointSpecification;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Definition for a point rule.
@@ -34,31 +31,6 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class PointDef extends AbstractDef {
+public class PointDef extends AbstractDef<PointSpecification> {
 
-    /**
-     * This id will be used when creating points instead of id and used to grouping
-     * of several point rules.
-     * So that, multiple rule can award same type of points to user.
-     */
-    private String pointId;
-
-    /**
-     * Indicates how many points should be awarded to the user once condition satisfies.
-     * This can be a number or expression based on event data.
-     */
-    private Object award;
-
-    /**
-     * If specified, then this indicated how many maximum points can be earned
-     * from this rule for the specified constrained time period.
-     */
-    private Object limit;
-
-    @Override
-    protected List<String> getSensitiveAttributes() {
-        List<String> base = new ArrayList<>(super.getSensitiveAttributes());
-        base.add(Utils.firstNonNullAsStr(award, EMPTY));
-        return base;
-    }
 }

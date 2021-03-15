@@ -42,10 +42,9 @@ public abstract class BadgeRule extends AbstractRule {
     }
 
     public void derivePointsInTo(BadgeSignal signal) {
-        if (Texts.isEmpty(pointId) || pointAwards == null) {
-            return;
+        if (Texts.isNotEmpty(pointId) && pointAwards != null) {
+            signal.setPointAwards(pointId, pointAwards);
         }
-        signal.setPointAwards(pointId, pointAwards);
     }
 
 }

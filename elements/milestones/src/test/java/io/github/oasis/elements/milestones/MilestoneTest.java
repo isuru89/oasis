@@ -30,10 +30,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static io.github.oasis.elements.milestones.MilestoneRule.SKIP_NEGATIVE_VALUES;
-import static io.github.oasis.elements.milestones.MilestoneRule.TRACK_PENALTIES;
 
 /**
  * @author Isuru Weerarathna
@@ -41,13 +45,25 @@ import static io.github.oasis.elements.milestones.MilestoneRule.TRACK_PENALTIES;
 @DisplayName("Milestones")
 public class MilestoneTest extends AbstractRuleTest {
 
-    private static final String EVT_A = "a";
-    private static final String EVT_B = "b";
+    private static final String EVT_SP = "star.points";
+    private static final String EVT_CP = "coupan.points";
+    private static final String EVT_SOBA = "stackoverflow.bounty.awarded";
+    private static final String EVT_SOAA = "stackoverflow.answer.accepted";
+    private static final String EVT_A = "event.a";
+    private static final String EVT_B = "unknown.event";
 
     private static final int L_0 = 0;
     private static final int L_1 = 1;
     private static final int L_2 = 2;
     private static final int L_3 = 3;
+
+    private static final String MILESTONES_YML = "milestones-testrun.yml";
+    private static final String TOTAL_REPUTATIONS = "Total-Reputations";
+    private static final String TEST_SINGLE_LEVEL = "Test-Single-Level";
+    private static final String TEST_STAR_POINTS = "Test-Star-Points";
+    private static final String TEST_CHALLENGE_WIN_POINTS = "Test-Challenge-Win-Points";
+    private static final String TEST_CHALLENGE_WIN_POINTS_WITHOUT_FILTER = "Test-Challenge-Win-Points-Without-Filter";
+    private static final String TEST_CHALLENGE_WIN_POINTS_TRACK_PENALTIES = "Test-Challenge-Win-Points-Track-Penalties";
 
     @DisplayName("No levels")
     @Test
@@ -73,7 +89,8 @@ public class MilestoneTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(105, EVT_A, 34);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, null, aLevel(1, 100));
+        MilestoneRule rule = loadRule(MILESTONES_YML, TOTAL_REPUTATIONS);
+        RuleContext<MilestoneRule> ruleContext = createRule(rule, signals);
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3);
 
@@ -89,7 +106,8 @@ public class MilestoneTest extends AbstractRuleTest {
         TEvent e3 = TEvent.createKeyValue(105, EVT_B, 34);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue, aLevel(1, 100));
+        MilestoneRule rule = loadRule(MILESTONES_YML, TOTAL_REPUTATIONS);
+        RuleContext<MilestoneRule> ruleContext = createRule(rule, signals);
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3);
 
@@ -100,12 +118,13 @@ public class MilestoneTest extends AbstractRuleTest {
     @DisplayName("Single level")
     @Test
     public void testSingleLevel() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 87);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 53);
-        TEvent e3 = TEvent.createKeyValue(105, EVT_A, 34);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_SOBA, 87);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_SOBA, 53);
+        TEvent e3 = TEvent.createKeyValue(105, EVT_SOBA, 34);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue, aLevel(1, 100));
+        MilestoneRule rule = loadRule(MILESTONES_YML, TEST_SINGLE_LEVEL);
+        RuleContext<MilestoneRule> ruleContext = createRule(rule, signals);
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3);
 
@@ -117,18 +136,16 @@ public class MilestoneTest extends AbstractRuleTest {
     @DisplayName("Multiple Levels")
     @Test
     public void testMultipleLevels() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 87);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 53);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
-        TEvent e4 = TEvent.createKeyValue(115, EVT_A, 11);
-        TEvent e5 = TEvent.createKeyValue(120, EVT_A, 84);
-        TEvent e6 = TEvent.createKeyValue(125, EVT_A, 92);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_SP, 87);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_CP, 53);
+        TEvent e3 = TEvent.createKeyValue(110, EVT_SP, 34);
+        TEvent e4 = TEvent.createKeyValue(115, EVT_SP, 11);
+        TEvent e5 = TEvent.createKeyValue(120, EVT_CP, 84);
+        TEvent e6 = TEvent.createKeyValue(125, EVT_SP, 92);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue,
-                aLevel(1, 100),
-                aLevel(2, 200),
-                aLevel(3, 300));
+        MilestoneRule rule = loadRule(MILESTONES_YML, TEST_STAR_POINTS);
+        RuleContext<MilestoneRule> ruleContext = createRule(rule, signals);
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3, e4, e5, e6);
 
@@ -142,18 +159,16 @@ public class MilestoneTest extends AbstractRuleTest {
     @DisplayName("Multiple Levels: No fluctuations")
     @Test
     public void testMultipleLevelsNoFluctuations() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 87);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 53);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, -74);
-        TEvent e4 = TEvent.createKeyValue(115, EVT_A, 11);
-        TEvent e5 = TEvent.createKeyValue(120, EVT_A, 84);
-        TEvent e6 = TEvent.createKeyValue(125, EVT_A, 92);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_CP, 87);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_SP, 53);
+        TEvent e3 = TEvent.createKeyValue(110, EVT_CP, -74);
+        TEvent e4 = TEvent.createKeyValue(115, EVT_SP, 11);
+        TEvent e5 = TEvent.createKeyValue(120, EVT_CP, 84);
+        TEvent e6 = TEvent.createKeyValue(125, EVT_SP, 92);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue,
-                aLevel(1, 100),
-                aLevel(2, 200),
-                aLevel(3, 300));
+        MilestoneRule rule = loadRule(MILESTONES_YML, TEST_STAR_POINTS);
+        RuleContext<MilestoneRule> ruleContext = createRule(rule, signals);
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3, e4, e5, e6);
 
@@ -167,19 +182,16 @@ public class MilestoneTest extends AbstractRuleTest {
     @DisplayName("Multiple Levels: Penalties with fluctuations")
     @Test
     public void testMultipleLevelsAffectPenalties() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 87);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 53);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, -74);
-        TEvent e4 = TEvent.createKeyValue(115, EVT_A, 11);
-        TEvent e5 = TEvent.createKeyValue(120, EVT_A, 84);
-        TEvent e6 = TEvent.createKeyValue(125, EVT_A, 92);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_CP, 87);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_CP, 53);
+        TEvent e3 = TEvent.createKeyValue(110, EVT_SP, -74);
+        TEvent e4 = TEvent.createKeyValue(115, EVT_SP, 11);
+        TEvent e5 = TEvent.createKeyValue(120, EVT_CP, 84);
+        TEvent e6 = TEvent.createKeyValue(125, EVT_SP, 92);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue,
-                aLevel(1, 100),
-                aLevel(2, 200),
-                aLevel(3, 300));
-        MilestoneRule rule = ruleContext.getRule();
+        MilestoneRule rule = loadRule(MILESTONES_YML, TEST_STAR_POINTS);
+        RuleContext<MilestoneRule> ruleContext = createRule(rule, signals);
         rule.setFlags(new HashSet<>());
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3, e4, e5, e6);
@@ -195,20 +207,17 @@ public class MilestoneTest extends AbstractRuleTest {
     @DisplayName("Multiple Levels: Single penalty reset all levels")
     @Test
     public void testMultipleLevelsPenaltyResetAll() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 87);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 53);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
-        TEvent e4 = TEvent.createKeyValue(115, EVT_A, 11);
-        TEvent e5 = TEvent.createKeyValue(120, EVT_A, 84);
-        TEvent e6 = TEvent.createKeyValue(125, EVT_A, 92);
-        TEvent e7 = TEvent.createKeyValue(125, EVT_A, -400);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_CP, 87);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_SP, 53);
+        TEvent e3 = TEvent.createKeyValue(110, EVT_CP, 34);
+        TEvent e4 = TEvent.createKeyValue(115, EVT_SP, 11);
+        TEvent e5 = TEvent.createKeyValue(120, EVT_CP, 84);
+        TEvent e6 = TEvent.createKeyValue(125, EVT_SP, 92);
+        TEvent e7 = TEvent.createKeyValue(125, EVT_SP, -400);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue,
-                aLevel(1, 100),
-                aLevel(2, 200),
-                aLevel(3, 300));
-        MilestoneRule rule = ruleContext.getRule();
+        MilestoneRule rule = loadRule(MILESTONES_YML, TEST_STAR_POINTS);
+        RuleContext<MilestoneRule> ruleContext = createRule(rule, signals);
         rule.setFlags(new HashSet<>());
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3, e4, e5, e6, e7);
@@ -224,65 +233,60 @@ public class MilestoneTest extends AbstractRuleTest {
     @DisplayName("With condition")
     @Test
     public void testWithCondition() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 87);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 53);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
-        TEvent e4 = TEvent.createKeyValue(115, EVT_A, 11);
-        TEvent e5 = TEvent.createKeyValue(120, EVT_A, 84);
-        TEvent e6 = TEvent.createKeyValue(125, EVT_A, 92);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_SOBA, 87);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_SOBA, 53);
+        TEvent e3 = TEvent.createKeyValue(110, EVT_SOBA, 34);
+        TEvent e4 = TEvent.createKeyValue(115, EVT_SOAA, 11);
+        TEvent e5 = TEvent.createKeyValue(120, EVT_SOAA, 84);
+        TEvent e6 = TEvent.createKeyValue(125, EVT_SOAA, 92);
+        TEvent e7 = TEvent.createKeyValue(126, EVT_B, 99);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue,
-                aLevel(1, 100),
-                aLevel(2, 200));
-        ruleContext.getRule().setEventFilter((event, rule, ctx) -> (long) event.getFieldValue("value") >= 75);
+        MilestoneRule rule = loadRule(MILESTONES_YML, TEST_CHALLENGE_WIN_POINTS);
+        RuleContext<MilestoneRule> ruleContext = createRule(rule, signals);
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
-        submitOrder(milestoneProcessor, e1, e2, e3, e4, e5, e6);
+        submitOrder(milestoneProcessor, e1, e2, e3, e4, e5, e6, e7);
 
         System.out.println(signals);
         assertStrict(signals,
-                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_1, BigDecimal.valueOf(171.0), e5),
-                new MilestoneSignal(ruleContext.getRule().getId(), L_1, L_2, BigDecimal.valueOf(171.0 + 92.0), e6));
+                new MilestoneSignal(rule.getId(), L_0, L_1, BigDecimal.valueOf(171.0), e5),
+                new MilestoneSignal(rule.getId(), L_1, L_2, BigDecimal.valueOf(171.0 + 92.0), e6));
     }
 
     @DisplayName("Single event passes multiple levels from first level")
     @Test
     public void testEventPassesMultipleLevels() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 87);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 253);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 34);
-        TEvent e4 = TEvent.createKeyValue(115, EVT_A, 11);
-        TEvent e5 = TEvent.createKeyValue(120, EVT_A, 84);
-        TEvent e6 = TEvent.createKeyValue(125, EVT_A, 92);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_SOAA, 87);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_SOBA, 253);
+        TEvent e3 = TEvent.createKeyValue(110, EVT_SOAA, 34);
+        TEvent e4 = TEvent.createKeyValue(115, EVT_SOBA, 11);
+        TEvent e5 = TEvent.createKeyValue(120, EVT_SOAA, 84);
+        TEvent e6 = TEvent.createKeyValue(125, EVT_SOBA, 92);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue,
-                aLevel(1, 100),
-                aLevel(2, 200),
-                aLevel(3, 300));
+        MilestoneRule rule = loadRule(MILESTONES_YML, TEST_CHALLENGE_WIN_POINTS_WITHOUT_FILTER);
+        RuleContext<MilestoneRule> ruleContext = createRule(rule, signals);
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3, e4, e5, e6);
 
         System.out.println(signals);
         assertStrict(signals,
-                new MilestoneSignal(ruleContext.getRule().getId(), L_0, L_3, BigDecimal.valueOf(340.0), e2));
+                new MilestoneSignal(rule.getId(), L_0, L_3, BigDecimal.valueOf(340.0), e2));
     }
 
     @DisplayName("Single event passes multiple levels from a middle level")
     @Test
     public void testEventPassesMiddleMultipleLevels() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 187);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 12);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, 341);
-        TEvent e4 = TEvent.createKeyValue(115, EVT_A, 11);
-        TEvent e5 = TEvent.createKeyValue(120, EVT_A, 84);
-        TEvent e6 = TEvent.createKeyValue(125, EVT_A, 92);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_SOBA, 187);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_SOAA, 12);
+        TEvent e3 = TEvent.createKeyValue(110, EVT_SOAA, 341);
+        TEvent e4 = TEvent.createKeyValue(115, EVT_SOBA, 11);
+        TEvent e5 = TEvent.createKeyValue(120, EVT_SOBA, 84);
+        TEvent e6 = TEvent.createKeyValue(125, EVT_SOAA, 92);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, this::extractValue,
-                aLevel(1, 100),
-                aLevel(2, 200),
-                aLevel(3, 300));
+        MilestoneRule rule = loadRule(MILESTONES_YML, TEST_CHALLENGE_WIN_POINTS_WITHOUT_FILTER);
+        RuleContext<MilestoneRule> ruleContext = createRule(rule, signals);
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3, e4, e5, e6);
 
@@ -295,18 +299,14 @@ public class MilestoneTest extends AbstractRuleTest {
     @DisplayName("Track penalties")
     @Test
     public void testTrackNegatives() {
-        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 187);
-        TEvent e2 = TEvent.createKeyValue(105, EVT_A, 12);
-        TEvent e3 = TEvent.createKeyValue(110, EVT_A, -98);
-        TEvent e4 = TEvent.createKeyValue(115, EVT_A, 11);
+        TEvent e1 = TEvent.createKeyValue(100, EVT_SOBA, 187);
+        TEvent e2 = TEvent.createKeyValue(105, EVT_SOBA, 12);
+        TEvent e3 = TEvent.createKeyValue(110, EVT_SOAA, -98);
+        TEvent e4 = TEvent.createKeyValue(115, EVT_SOAA, 11);
 
         List<Signal> signals = new ArrayList<>();
-        RuleContext<MilestoneRule> ruleContext = createRule(signals, this.valueExtraction(),
-                aLevel(1, 100),
-                aLevel(2, 200),
-                aLevel(3, 300));
-        MilestoneRule rule = ruleContext.getRule();
-        rule.setFlags(Set.of(TRACK_PENALTIES));
+        MilestoneRule rule = loadRule(MILESTONES_YML, TEST_CHALLENGE_WIN_POINTS_TRACK_PENALTIES);
+        RuleContext<MilestoneRule> ruleContext = createRule(rule, signals);
         MilestoneProcessor milestoneProcessor = new MilestoneProcessor(pool, ruleContext);
         submitOrder(milestoneProcessor, e1, e2, e3, e4);
 
@@ -319,16 +319,8 @@ public class MilestoneTest extends AbstractRuleTest {
                 "-98");
     }
 
-    private EventBiValueResolver<MilestoneRule, ExecutionContext> valueExtraction() {
-        return (event, input, otherInput) -> BigDecimal.valueOf((long)event.getFieldValue("value"));
-    }
-
     private BigDecimal extractValue(Event event, MilestoneRule rule, ExecutionContext context) {
         return BigDecimal.valueOf((long)event.getFieldValue("value"));
-    }
-
-    private MilestoneRule.Level aLevel(int level, long milestone) {
-        return new MilestoneRule.Level(level, BigDecimal.valueOf(milestone));
     }
 
     private RuleContext<MilestoneRule> createRule(Collection<Signal> collector, EventBiValueResolver<MilestoneRule, ExecutionContext> extractor, MilestoneRule.Level... levels) {
@@ -337,6 +329,10 @@ public class MilestoneTest extends AbstractRuleTest {
         rule.setValueExtractor(extractor);
         rule.setLevels(Arrays.asList(levels));
         rule.setFlags(Set.of(SKIP_NEGATIVE_VALUES));
+        return new RuleContext<>(rule, fromConsumer(collector::add));
+    }
+
+    private RuleContext<MilestoneRule> createRule(MilestoneRule rule, Collection<Signal> collector) {
         return new RuleContext<>(rule, fromConsumer(collector::add));
     }
 }

@@ -22,6 +22,8 @@ package io.github.oasis.core.parser;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.exception.OasisParseException;
 
+import java.io.InputStream;
+
 /**
  * Parses a game file and returns a game engine compatible instance.
  *
@@ -32,13 +34,13 @@ import io.github.oasis.core.exception.OasisParseException;
 public interface GameParseSupport {
 
     /**
-     * Parses the given input (any arbitrary format) and converts to a game definition instance.
+     * Parses the given input stream and converts to a game definition instance.
      *
-     * @param input filepath, input stream or any compatible.
+     * @param input input stream to read
      * @param parserContext parser context.
      * @return parsed game definition object.
      * @throws OasisParseException throws when any error occurred while parsing.
      */
-    GameDef parse(Object input, ParserContext parserContext) throws OasisParseException;
+    GameDef parse(InputStream input, ParserContext parserContext) throws OasisParseException;
 
 }

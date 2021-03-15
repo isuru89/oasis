@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.utils;
 
+import io.github.oasis.core.elements.spec.TimeUnitDef;
 import io.github.oasis.core.model.TimeScope;
 
 import java.time.Duration;
@@ -75,6 +76,30 @@ public class Timestamps {
 
     public static int getYear(long ts, int userTzOffsetInSeconds) {
         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneOffset.ofTotalSeconds(userTzOffsetInSeconds)).getYear();
+    }
+
+    public static long parseTimeUnit(TimeUnitDef def) {
+        return Duration.of(def.getDuration(), toChronoUnit(def.getUnit())).toMillis();
+    }
+
+    private static ChronoUnit toChronoUnit(String unit) {
+        String unitLower = unit.toLowerCase();
+        if (unitLower.startsWith("d")) {
+            return ChronoUnit.DAYS;
+        } else if (unitLower.startsWith("min")) {
+            return ChronoUnit.MINUTES;
+        } else if (unitLower.startsWith("h")) {
+            return ChronoUnit.HOURS;
+        } else if (unitLower.startsWith("s")) {
+            return ChronoUnit.SECONDS;
+        } else if (unitLower.startsWith("w")) {
+            return ChronoUnit.WEEKS;
+        } else if (unitLower.startsWith("mo")) {
+            return ChronoUnit.MONTHS;
+        } else if (unitLower.startsWith("mi") || unitLower.startsWith("ms")) {
+            return ChronoUnit.MILLIS;
+        }
+        throw new IllegalArgumentException("Unknown time unit [" + unit + "]!");
     }
 
     /**
