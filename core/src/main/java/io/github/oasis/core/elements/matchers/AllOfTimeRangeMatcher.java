@@ -17,38 +17,29 @@
  * under the License.
  */
 
-package io.github.oasis.core.elements.spec;
+package io.github.oasis.core.elements.matchers;
 
-import io.github.oasis.core.elements.Validator;
-import io.github.oasis.core.exception.OasisParseException;
-import io.github.oasis.core.utils.Texts;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import io.github.oasis.core.elements.TimeRangeMatcher;
 
-import java.io.Serializable;
+import java.util.List;
 
 /**
+ * This class will take multiple time ranges and will return true only
+ * if all of them are satisfied.
+ *
  * @author Isuru Weerarathna
  */
-@Data
-@NoArgsConstructor
-public class TimeRangeDef implements Validator, Serializable {
-    private String type;
-    private Object from;
-    private Object to;
-    private Object when;
-    private Object expression;
+public class AllOfTimeRangeMatcher implements TimeRangeMatcher {
 
-    public TimeRangeDef(String type, Object from, Object to) {
-        this.type = type;
-        this.from = from;
-        this.to = to;
+    private final List<TimeRangeMatcher> matcherList;
+
+    public AllOfTimeRangeMatcher(List<TimeRangeMatcher> matcherList) {
+        this.matcherList = matcherList;
     }
 
     @Override
-    public void validate() throws OasisParseException {
-        if (Texts.isEmpty(type)) {
-            throw new OasisParseException("Field 'type' cannot be empty!");
-        }
+    public boolean isBetween(long timeMs, String timeZone) {
+        return matcherList.stream()
+                .allMatch(mat -> mat.isBetween(timeMs, timeZone));
     }
 }

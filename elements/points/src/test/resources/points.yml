@@ -20,9 +20,10 @@ elements:
       selector:
         matchEvent: submission.accepted
         acceptsWithin:
-          - type: time
-            from: "00:00"
-            to: "06:00"
+          anyOf:
+            - type: time
+              from: "00:00"
+              to: "06:00"
       reward:
         pointId: marks
         amount: 20
@@ -35,8 +36,9 @@ elements:
       selector:
         matchEvent: order.accepted
         acceptsWithin:
-          - type: weekly
-            when: "Friday,Saturday,Sunday"
+          anyOf:
+            - type: weekly
+              when: "Friday,Saturday,Sunday"
       reward:
         pointId: star.points
         amount: 10
@@ -49,10 +51,11 @@ elements:
       selector:
         matchEvent: order.accepted
         acceptsWithin:
-          - type: custom
-            expression: |
-              YearMonth currMonth = YearMonth.of(ts.getYear(), ts.getMonth());
-              ts.getDayOfMonth() >= currMonth.lengthOfMonth() - 7
+          anyOf:
+            - type: custom
+              expression: |
+                YearMonth currMonth = YearMonth.of(ts.getYear(), ts.getMonth());
+                ts.getDayOfMonth() >= currMonth.lengthOfMonth() - 7
       reward:
         pointId: star.points
         amount: 10
@@ -65,9 +68,10 @@ elements:
       selector:
         matchEvent: order.accepted
         acceptsWithin:
-          - type: seasonal
-            from: "12-01"
-            to: "12-31"
+          anyOf:
+            - type: seasonal
+              from: "12-01"
+              to: "12-31"
       reward:
         pointId: star.points
         expression: "e.total * 2"

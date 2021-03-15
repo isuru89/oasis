@@ -11,9 +11,10 @@ elements:
         filter:
           expression: e.value >= 50
         acceptsWithin:
-          - type: time
-            from: "10:00"
-            to: "13:00"
+          anyOf:
+            - type: time
+              from: "10:00"
+              to: "13:00"
       reward:
         expression: e.value - 50
         pointId: timely.bonus.points

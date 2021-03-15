@@ -60,9 +60,9 @@ public class ParserTest {
             assertTrue(isNonEmptyString(def.getDescription()));
             assertNotNull(def.getSpec());
             assertTrue(isNumber(def.getSpec().getReward().getAmount()));
-            assertEquals(1, def.getSpec().getSelector().getAcceptsWithin().size());
+            assertEquals(1, def.getSpec().getSelector().getAcceptsWithin().getAnyOf().size());
             assertEquals("marks", def.getSpec().getReward().getPointId());
-            TimeRangeDef timeRangeDef = def.getSpec().getSelector().getAcceptsWithin().get(0);
+            TimeRangeDef timeRangeDef = def.getSpec().getSelector().getAcceptsWithin().getAnyOf().get(0);
             assertEquals(AbstractDef.TIME_RANGE_TYPE_TIME, timeRangeDef.getType());
             assertEquals("00:00", timeRangeDef.getFrom());
             assertEquals("06:00", timeRangeDef.getTo());
@@ -71,9 +71,9 @@ public class ParserTest {
             assertTrue(isNonEmptyString(def.getDescription()));
             assertNotNull(def.getSpec());
             assertTrue(isNonEmptyString(def.getSpec().getReward().getExpression()));
-            assertEquals(1, def.getSpec().getSelector().getAcceptsWithin().size());
+            assertEquals(1, def.getSpec().getSelector().getAcceptsWithin().getAnyOf().size());
             assertEquals("star.points", def.getSpec().getReward().getPointId());
-            TimeRangeDef timeRangeDef = def.getSpec().getSelector().getAcceptsWithin().get(0);
+            TimeRangeDef timeRangeDef = def.getSpec().getSelector().getAcceptsWithin().getAnyOf().get(0);
             assertEquals(AbstractDef.TIME_RANGE_TYPE_SEASONAL, timeRangeDef.getType());
             assertEquals("12-01", timeRangeDef.getFrom());
             assertEquals("12-31", timeRangeDef.getTo());
@@ -104,8 +104,8 @@ public class ParserTest {
         });
         findByName(pointDefs, "Monthly-Last-Sale").ifPresent(def -> {
             assertNotNull(def.getSpec().getSelector().getAcceptsWithin());
-            assertEquals(1, def.getSpec().getSelector().getAcceptsWithin().size());
-            TimeRangeDef rangeDef = def.getSpec().getSelector().getAcceptsWithin().get(0);
+            assertEquals(1, def.getSpec().getSelector().getAcceptsWithin().getAnyOf().size());
+            TimeRangeDef rangeDef = def.getSpec().getSelector().getAcceptsWithin().getAnyOf().get(0);
             assertEquals("custom", rangeDef.getType());
             assertTrue(isNonEmptyString(rangeDef.getExpression()));
         });

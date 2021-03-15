@@ -37,8 +37,9 @@ elements:
       selector:
         matchEvent: order.accepted
         acceptsWithin:
-          - type: weekly
-            when: "SATURDAY,SUNDAY"
+          anyOf:
+            - type: weekly
+              when: "SATURDAY,SUNDAY"
       consecutive: false
       condition: e.total >= 500
       timeRange:

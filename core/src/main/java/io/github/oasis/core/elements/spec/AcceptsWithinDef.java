@@ -21,56 +21,37 @@ package io.github.oasis.core.elements.spec;
 
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
-import io.github.oasis.core.utils.Texts;
+import io.github.oasis.core.utils.Utils;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Objects;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
 @Data
-public class SelectorDef implements Validator, Serializable {
+public class AcceptsWithinDef implements Validator, Serializable {
 
-    private String matchEvent;
-    private MatchEventsDef matchEvents;
+    private List<TimeRangeDef> anyOf;
 
-    /**
-     * Accepted point ids. These are same as event ids in game engine.
-     */
-    private MatchEventsDef matchPointIds;
-
-    private EventFilterDef filter;
-
-    private AcceptsWithinDef acceptsWithin;
-
-    public static SelectorDef singleEvent(String matchEvent) {
-        SelectorDef def = new SelectorDef();
-        def.setMatchEvent(matchEvent);
-        return def;
-    }
+    private List<TimeRangeDef> allOf;
 
     @Override
     public void validate() throws OasisParseException {
-        if (Texts.isEmpty(matchEvent) && matchEvents == null && matchPointIds == null) {
-            throw new OasisParseException("Either 'matchEvent', 'matchEvents' or 'matchPointIds' must be specified!");
+        if (Utils.isEmpty(anyOf) && Utils.isEmpty(allOf)) {
+            throw new OasisParseException("Either 'allOf' or 'anyOf' must be specified under accepted time ranges!");
         }
 
-        if (matchEvents != null) {
-            matchEvents.validate();
+        if (Utils.isNotEmpty(anyOf) && Utils.isNotEmpty(allOf)) {
+            throw new OasisParseException("Not allowed to specify both 'allOf' and 'anyOf' together! Only one can be specified!");
         }
 
-        if (matchPointIds != null) {
-            matchPointIds.validate();
+        if (Utils.isNotEmpty(anyOf)) {
+            anyOf.forEach(TimeRangeDef::validate);
         }
-
-        if (filter != null) {
-            filter.validate();
-        }
-
-        if (Objects.nonNull(acceptsWithin)) {
-            acceptsWithin.validate();
+        if (Utils.isNotEmpty(allOf)) {
+            allOf.forEach(TimeRangeDef::validate);
         }
     }
 }

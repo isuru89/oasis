@@ -25,6 +25,7 @@ import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.matchers.AnnualDateRangeMatcher;
 import io.github.oasis.core.elements.matchers.ScriptedTimeMatcher;
 import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
+import io.github.oasis.core.elements.spec.AcceptsWithinDef;
 import io.github.oasis.core.elements.spec.SelectorDef;
 import io.github.oasis.core.elements.spec.TimeRangeDef;
 import io.github.oasis.core.external.messages.PersistedDef;
@@ -184,7 +185,8 @@ class PointParserTest {
         spec.setReward(new PointRewardDef("customPointId", "e.data.votes + 100"));
         SelectorDef selectorDef = new SelectorDef();
         selectorDef.setMatchEvent("event.a");
-        selectorDef.setAcceptsWithin(List.of(new TimeRangeDef(AbstractDef.TIME_RANGE_TYPE_SEASONAL, "05-01", "05-31")));
+        selectorDef.setAcceptsWithin(new AcceptsWithinDef());
+        selectorDef.getAcceptsWithin().setAnyOf(List.of(new TimeRangeDef(AbstractDef.TIME_RANGE_TYPE_SEASONAL, "05-01", "05-31")));
         spec.setSelector(selectorDef);
         pointDef.setSpec(spec);
 
