@@ -21,7 +21,7 @@ package io.github.oasis.core.parser;
 
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.exception.OasisParseException;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Texts;
 import org.yaml.snakeyaml.Yaml;
 
@@ -85,11 +85,11 @@ public class GameParserYaml implements GameParseSupport {
                     if (Texts.isEmpty(elementPluginType)) {
                         throw new OasisParseException("Element does not have specified the associated type!");
                     }
-                    PersistedDef persistedDef = new PersistedDef();
-                    persistedDef.setType(PersistedDef.GAME_RULE_ADDED);
-                    persistedDef.setImpl(elementPluginType);
-                    persistedDef.setData(elementDef);
-                    gameDef.addRuleDefinition(persistedDef);
+                    EngineMessage engineMessage = new EngineMessage();
+                    engineMessage.setType(EngineMessage.GAME_RULE_ADDED);
+                    engineMessage.setImpl(elementPluginType);
+                    engineMessage.setData(elementDef);
+                    gameDef.addRuleDefinition(engineMessage);
                 } else if (def instanceof String) {
                     String refPath = (String) def;
 

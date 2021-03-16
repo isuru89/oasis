@@ -31,9 +31,9 @@ import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.external.MessageReceiver;
 import io.github.oasis.core.external.SourceStreamProvider;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.external.messages.FailedGameCommand;
 import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.core.external.messages.PersistedDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,10 +132,10 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
     public void handleMessage(String consumerTag, Delivery message) {
         String content = new String(message.getBody(), StandardCharsets.UTF_8);
         LOG.debug("Message received. {}", content);
-        PersistedDef persistedDef = gson.fromJson(content, PersistedDef.class);
+        EngineMessage engineMessage = gson.fromJson(content, EngineMessage.class);
         long deliveryTag = message.getEnvelope().getDeliveryTag();
-        persistedDef.setMessageId(deliveryTag);
-        sourceRef.submit(persistedDef);
+        engineMessage.setMessageId(deliveryTag);
+        sourceRef.submit(engineMessage);
     }
 
     public void handleCancel(String consumerTag) {
@@ -247,10 +247,10 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
             }
 
             String content = new String(message.getBody(), StandardCharsets.UTF_8);
-            PersistedDef persistedDef = gson.fromJson(content, PersistedDef.class);
-            persistedDef.setMessageId(deliveryTag);
-            LOG.info("Game event received in channel {}! [{}]", channel, persistedDef);
-            sourceRef.submit(persistedDef);
+            EngineMessage engineMessage = gson.fromJson(content, EngineMessage.class);
+            engineMessage.setMessageId(deliveryTag);
+            LOG.info("Game event received in channel {}! [{}]", channel, engineMessage);
+            sourceRef.submit(engineMessage);
         }
 
         private void silentAck(long deliveryId) {

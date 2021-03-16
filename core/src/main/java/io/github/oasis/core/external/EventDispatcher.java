@@ -19,7 +19,7 @@
 
 package io.github.oasis.core.external;
 
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 
 import java.io.Closeable;
 import java.util.Map;
@@ -36,9 +36,9 @@ public interface EventDispatcher extends Closeable {
 
     void init(DispatcherContext context) throws Exception;
 
-    void push(PersistedDef message) throws Exception;
+    void push(EngineMessage message) throws Exception;
 
-    void broadcast(PersistedDef message) throws Exception;
+    void broadcast(EngineMessage message) throws Exception;
 
     interface DispatcherContext {
         Map<String, Object> getConfigs();

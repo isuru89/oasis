@@ -19,7 +19,6 @@
 
 package io.github.oasis.services.events.dispatcher;
 
-import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;

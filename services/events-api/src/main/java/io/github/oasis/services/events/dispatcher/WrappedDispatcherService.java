@@ -20,7 +20,7 @@
 package io.github.oasis.services.events.dispatcher;
 
 import io.github.oasis.core.external.EventDispatcher;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -61,10 +61,10 @@ public class WrappedDispatcherService extends AbstractDispatcherService {
         return this;
     }
 
-    private void broadcastSync(PersistedDef persistedDef, Handler<AsyncResult<JsonObject>> handler) {
+    private void broadcastSync(EngineMessage engineMessage, Handler<AsyncResult<JsonObject>> handler) {
         vertx.executeBlocking(future -> {
             try {
-                dispatcher.broadcast(persistedDef);
+                dispatcher.broadcast(engineMessage);
                 future.complete();
             } catch (Exception e) {
                 future.fail(e);
@@ -78,10 +78,10 @@ public class WrappedDispatcherService extends AbstractDispatcherService {
         });
     }
 
-    private void handle(PersistedDef persistedDef, Handler<AsyncResult<JsonObject>> handler) {
+    private void handle(EngineMessage engineMessage, Handler<AsyncResult<JsonObject>> handler) {
         vertx.executeBlocking(future -> {
             try {
-                dispatcher.push(persistedDef);
+                dispatcher.push(engineMessage);
                 future.complete();
             } catch (Exception e) {
                 future.fail(e);

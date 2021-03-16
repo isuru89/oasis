@@ -26,11 +26,11 @@ package io.github.oasis.core.external.messages;
  */
 public enum GameState {
 
-    CREATED(PersistedDef.GAME_CREATED),
-    STARTED(PersistedDef.GAME_STARTED),
-    PAUSED(PersistedDef.GAME_PAUSED),
-    UPDATED(PersistedDef.GAME_UPDATED),
-    STOPPED(PersistedDef.GAME_REMOVED);
+    CREATED(EngineMessage.GAME_CREATED),
+    STARTED(EngineMessage.GAME_STARTED),
+    PAUSED(EngineMessage.GAME_PAUSED),
+    UPDATED(EngineMessage.GAME_UPDATED),
+    STOPPED(EngineMessage.GAME_REMOVED);
 
     private final String command;
 

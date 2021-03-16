@@ -21,7 +21,7 @@ package io.github.oasis.services.events.dispatcher;
 
 import io.github.oasis.core.external.EventAsyncDispatcher;
 import io.github.oasis.core.external.EventDispatcher;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.services.events.EventsApi;
 import io.github.oasis.services.events.model.EventProxy;
 import io.github.oasis.services.events.utils.TestDispatcherVerticle;
@@ -136,7 +136,7 @@ public class ExternalDispatcherTest {
         service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isTrue();
-                Mockito.verify(dispatcher, Mockito.times(1)).push(Mockito.any(PersistedDef.class));
+                Mockito.verify(dispatcher, Mockito.times(1)).push(Mockito.any(EngineMessage.class));
             } catch (Exception e) {
                 Assertions.fail(e.getMessage());
             } finally {
@@ -154,7 +154,7 @@ public class ExternalDispatcherTest {
         service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isFalse();
-                Mockito.verify(dispatcher, Mockito.times(1)).push(Mockito.any(PersistedDef.class));
+                Mockito.verify(dispatcher, Mockito.times(1)).push(Mockito.any(EngineMessage.class));
             } catch (Exception e) {
                 Assertions.fail(e.getMessage());
             } finally {
@@ -173,7 +173,7 @@ public class ExternalDispatcherTest {
             try {
                 Assertions.assertThat(res.succeeded()).isTrue();
                 Mockito.verify(dispatcher, Mockito.times(1))
-                        .pushAsync(Mockito.any(PersistedDef.class), Mockito.any(EventAsyncDispatcher.Handler.class));
+                        .pushAsync(Mockito.any(EngineMessage.class), Mockito.any(EventAsyncDispatcher.Handler.class));
             } catch (Exception e) {
                 Assertions.fail(e.getMessage());
             }
@@ -190,7 +190,7 @@ public class ExternalDispatcherTest {
             try {
                 Assertions.assertThat(res.succeeded()).isFalse();
                 Mockito.verify(dispatcher, Mockito.times(1))
-                        .pushAsync(Mockito.any(PersistedDef.class), Mockito.any(EventAsyncDispatcher.Handler.class));
+                        .pushAsync(Mockito.any(EngineMessage.class), Mockito.any(EventAsyncDispatcher.Handler.class));
             } catch (Exception e) {
                 Assertions.fail(e.getMessage());
             }
@@ -305,14 +305,14 @@ public class ExternalDispatcherTest {
         }
 
         @Override
-        public void push(PersistedDef event) throws Exception {
+        public void push(EngineMessage event) throws Exception {
             if (throwError) {
                 throw new Exception();
             }
         }
 
         @Override
-        public void broadcast(PersistedDef message) throws Exception {
+        public void broadcast(EngineMessage message) throws Exception {
             if (throwError) {
                 throw new Exception();
             }
@@ -335,7 +335,7 @@ public class ExternalDispatcherTest {
         }
 
         @Override
-        public void pushAsync(PersistedDef event, Handler handler) {
+        public void pushAsync(EngineMessage event, Handler handler) {
             if (throwError) {
                 handler.onFail(new Exception());
             } else {
@@ -349,7 +349,7 @@ public class ExternalDispatcherTest {
         }
 
         @Override
-        public void broadcastAsync(PersistedDef message, Handler handler) {
+        public void broadcastAsync(EngineMessage message, Handler handler) {
             if (throwError) {
                 handler.onFail(new Exception());
             } else {

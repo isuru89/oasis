@@ -28,7 +28,7 @@ import io.github.oasis.core.elements.matchers.SingleEventTypeMatcher;
 import io.github.oasis.core.elements.spec.AcceptsWithinDef;
 import io.github.oasis.core.elements.spec.SelectorDef;
 import io.github.oasis.core.elements.spec.TimeRangeDef;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.engine.element.points.spec.CappedDef;
 import io.github.oasis.engine.element.points.spec.PointRewardDef;
 import io.github.oasis.engine.element.points.spec.PointSpecification;
@@ -74,8 +74,8 @@ class PointParserTest {
         spec.setSelector(selectorDef);
         pointDef.setSpec(spec);
 
-        PersistedDef def = new PersistedDef();
-        def.setType(PersistedDef.GAME_RULE_ADDED);
+        EngineMessage def = new EngineMessage();
+        def.setType(EngineMessage.GAME_RULE_ADDED);
         def.setImpl(PointDef.class.getName());
         def.setData(toMap(pointDef));
 

@@ -25,7 +25,7 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.elements.spec.BaseSpecification;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Utils;
 import io.github.oasis.engine.element.points.spec.PointRewardDef;
 
@@ -39,7 +39,7 @@ import static io.github.oasis.core.VariableNames.CONTEXT_VAR;
 public class PointParser extends AbstractElementParser {
 
     @Override
-    public PointDef parse(PersistedDef persistedObj) {
+    public PointDef parse(EngineMessage persistedObj) {
         PointDef def = loadFrom(persistedObj, PointDef.class);
         def.validate();
         return def;

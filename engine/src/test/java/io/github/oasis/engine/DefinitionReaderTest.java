@@ -23,8 +23,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.oasis.core.EventJson;
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.cmds.RuleAddedMessage;
@@ -54,7 +54,7 @@ public class DefinitionReaderTest {
     @Test
     @DisplayName("Parsing Event Messages")
     void testEventParsing() {
-        PersistedDef eventDef = createDef(PersistedDef.GAME_EVENT, null, GAME_ID);
+        EngineMessage eventDef = createDef(EngineMessage.GAME_EVENT, null, GAME_ID);
         eventDef.setData(objToMap(TEvent.createKeyValue(System.currentTimeMillis(), "event.a", 100)));
         Object derived = DefinitionReader.derive(eventDef, null);
         Assertions.assertNotNull(derived);
@@ -65,7 +65,7 @@ public class DefinitionReaderTest {
     @Test
     @DisplayName("Parsing Game Add Messages")
     void testGameAddParsing() {
-        PersistedDef gameDef = createDef(PersistedDef.GAME_CREATED, null, GAME_ID);
+        EngineMessage gameDef = createDef(EngineMessage.GAME_CREATED, null, GAME_ID);
         GameCommand derived = (GameCommand) DefinitionReader.derive(gameDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(GameCommand.GameLifecycle.CREATE, derived.getStatus());
@@ -75,7 +75,7 @@ public class DefinitionReaderTest {
     @Test
     @DisplayName("Parsing Game Remove Messages")
     void testGameRemoveParsing() {
-        PersistedDef gameDef = createDef(PersistedDef.GAME_REMOVED, null, GAME_ID);
+        EngineMessage gameDef = createDef(EngineMessage.GAME_REMOVED, null, GAME_ID);
         GameCommand derived = (GameCommand) DefinitionReader.derive(gameDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(GameCommand.GameLifecycle.REMOVE, derived.getStatus());
@@ -85,7 +85,7 @@ public class DefinitionReaderTest {
     @Test
     @DisplayName("Parsing Game Update Messages")
     void testGameUpdateParsing() {
-        PersistedDef gameDef = createDef(PersistedDef.GAME_UPDATED, null, GAME_ID);
+        EngineMessage gameDef = createDef(EngineMessage.GAME_UPDATED, null, GAME_ID);
         GameCommand derived = (GameCommand) DefinitionReader.derive(gameDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(GameCommand.GameLifecycle.UPDATE, derived.getStatus());
@@ -95,7 +95,7 @@ public class DefinitionReaderTest {
     @Test
     @DisplayName("Parsing Game Start Messages")
     void testGameStartParsing() {
-        PersistedDef gameDef = createDef(PersistedDef.GAME_STARTED, null, GAME_ID);
+        EngineMessage gameDef = createDef(EngineMessage.GAME_STARTED, null, GAME_ID);
         GameCommand derived = (GameCommand) DefinitionReader.derive(gameDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(GameCommand.GameLifecycle.START, derived.getStatus());
@@ -105,7 +105,7 @@ public class DefinitionReaderTest {
     @Test
     @DisplayName("Parsing Game Pause Messages")
     void testGamePauseParsing() {
-        PersistedDef gameDef = createDef(PersistedDef.GAME_PAUSED, null, GAME_ID);
+        EngineMessage gameDef = createDef(EngineMessage.GAME_PAUSED, null, GAME_ID);
         GameCommand derived = (GameCommand) DefinitionReader.derive(gameDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(GameCommand.GameLifecycle.PAUSE, derived.getStatus());
@@ -121,7 +121,7 @@ public class DefinitionReaderTest {
         Mockito.when(parsers.parseToRule(Mockito.any())).thenReturn(testRule);
         Mockito.when(context.getParsers()).thenReturn(parsers);
 
-        PersistedDef ruleDef = createDef(PersistedDef.GAME_RULE_ADDED, "any", GAME_ID);
+        EngineMessage ruleDef = createDef(EngineMessage.GAME_RULE_ADDED, "any", GAME_ID);
         OasisRuleMessage derived = (OasisRuleMessage) DefinitionReader.derive(ruleDef, context);
         Assertions.assertNotNull(derived);
         Assertions.assertTrue(derived instanceof RuleAddedMessage, "should be rule added message!");
@@ -138,7 +138,7 @@ public class DefinitionReaderTest {
         Mockito.when(parsers.parseToRule(Mockito.any())).thenReturn(testRule);
         Mockito.when(context.getParsers()).thenReturn(parsers);
 
-        PersistedDef ruleDef = createDef(PersistedDef.GAME_RULE_UPDATED, "any", GAME_ID);
+        EngineMessage ruleDef = createDef(EngineMessage.GAME_RULE_UPDATED, "any", GAME_ID);
         OasisRuleMessage derived = (OasisRuleMessage) DefinitionReader.derive(ruleDef, context);
         Assertions.assertNotNull(derived);
         Assertions.assertTrue(derived instanceof RuleUpdatedMessage, "should be rule updated message!");
@@ -155,7 +155,7 @@ public class DefinitionReaderTest {
         Mockito.when(parsers.parseToRule(Mockito.any())).thenReturn(testRule);
         Mockito.when(context.getParsers()).thenReturn(parsers);
 
-        PersistedDef ruleDef = createDef(PersistedDef.GAME_RULE_REMOVED, "any", GAME_ID);
+        EngineMessage ruleDef = createDef(EngineMessage.GAME_RULE_REMOVED, "any", GAME_ID);
         OasisRuleMessage derived = (OasisRuleMessage) DefinitionReader.derive(ruleDef, context);
         Assertions.assertNotNull(derived);
         Assertions.assertTrue(derived instanceof RuleRemovedMessage, "should be rule removed message!");
@@ -166,7 +166,7 @@ public class DefinitionReaderTest {
     @Test
     @DisplayName("Parsing unknown message")
     void testUnknownMessage() {
-        PersistedDef def = createDef("unknown", "any", 2);
+        EngineMessage def = createDef("unknown", "any", 2);
         Object derive = DefinitionReader.derive(def, null);
         Assertions.assertNull(derive);
     }
@@ -176,9 +176,9 @@ public class DefinitionReaderTest {
         return gson.fromJson(jsonStr, type);
     }
 
-    private PersistedDef createDef(String type, String impl, int gameId) {
-        PersistedDef def = new PersistedDef();
-        def.setScope(new PersistedDef.Scope(gameId));
+    private EngineMessage createDef(String type, String impl, int gameId) {
+        EngineMessage def = new EngineMessage();
+        def.setScope(new EngineMessage.Scope(gameId));
         def.setImpl(impl);
         def.setType(type);
         return def;

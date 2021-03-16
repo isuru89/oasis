@@ -22,8 +22,8 @@ package io.github.oasis.engine;
 import io.github.oasis.core.EventJson;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.core.external.messages.RuleCommand;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.Messages;
@@ -40,9 +40,9 @@ import java.util.stream.Collectors;
 class DefinitionReader {
 
     private static final Map<String, RuleCommand.RuleChangeType> RULE_CHANGE_TYPE_MAP = Map.of(
-        PersistedDef.GAME_RULE_ADDED, RuleCommand.RuleChangeType.ADD,
-        PersistedDef.GAME_RULE_REMOVED, RuleCommand.RuleChangeType.REMOVE,
-        PersistedDef.GAME_RULE_UPDATED, RuleCommand.RuleChangeType.UPDATE
+        EngineMessage.GAME_RULE_ADDED, RuleCommand.RuleChangeType.ADD,
+        EngineMessage.GAME_RULE_REMOVED, RuleCommand.RuleChangeType.REMOVE,
+        EngineMessage.GAME_RULE_UPDATED, RuleCommand.RuleChangeType.UPDATE
     );
 
     static List<AbstractRule> parseDefsToRules(int gameId, GameDef gameDef, EngineContext context) {
@@ -52,7 +52,7 @@ class DefinitionReader {
                 .collect(Collectors.toList());
     }
 
-    static Object derive(PersistedDef def, EngineContext context) {
+    static Object derive(EngineMessage def, EngineContext context) {
         if (def.isEvent()) {
             return new EventMessage(new EventJson(def.getData()), null, def.getMessageId());
         } else if (def.isGameLifecycleEvent()) {
@@ -67,7 +67,7 @@ class DefinitionReader {
         return null;
     }
 
-    private static OasisRuleMessage readRuleMessage(PersistedDef def, EngineContext context) {
+    private static OasisRuleMessage readRuleMessage(EngineMessage def, EngineContext context) {
         int gameId = def.getScope().getGameId();
         RuleCommand.RuleChangeType ruleChangeType = toRuleChangeType(def.getType());
         AbstractRule rule = context.getParsers().parseToRule(def);
@@ -88,11 +88,11 @@ class DefinitionReader {
 
     private static GameCommand.GameLifecycle toLifecycleType(String type) {
         switch (type) {
-            case PersistedDef.GAME_CREATED: return GameCommand.GameLifecycle.CREATE;
-            case PersistedDef.GAME_PAUSED: return GameCommand.GameLifecycle.PAUSE;
-            case PersistedDef.GAME_REMOVED: return GameCommand.GameLifecycle.REMOVE;
-            case PersistedDef.GAME_STARTED: return GameCommand.GameLifecycle.START;
-            case PersistedDef.GAME_UPDATED: return GameCommand.GameLifecycle.UPDATE;
+            case EngineMessage.GAME_CREATED: return GameCommand.GameLifecycle.CREATE;
+            case EngineMessage.GAME_PAUSED: return GameCommand.GameLifecycle.PAUSE;
+            case EngineMessage.GAME_REMOVED: return GameCommand.GameLifecycle.REMOVE;
+            case EngineMessage.GAME_STARTED: return GameCommand.GameLifecycle.START;
+            case EngineMessage.GAME_UPDATED: return GameCommand.GameLifecycle.UPDATE;
             default: throw new IllegalArgumentException("Unknown game lifecycle type! [" + type + "]");
         }
     }

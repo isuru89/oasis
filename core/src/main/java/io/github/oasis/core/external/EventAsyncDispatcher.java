@@ -19,7 +19,7 @@
 
 package io.github.oasis.core.external;
 
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 
 /**
  * Asynchronous event dispatch support for message brokers.
@@ -34,9 +34,9 @@ public interface EventAsyncDispatcher extends EventDispatcher {
 
     void init(DispatcherContext context, Handler handler);
 
-    void broadcastAsync(PersistedDef message, Handler handler);
+    void broadcastAsync(EngineMessage message, Handler handler);
 
-    void pushAsync(PersistedDef event, Handler handler);
+    void pushAsync(EngineMessage event, Handler handler);
 
     @Override
     default void init(DispatcherContext context) {
@@ -44,12 +44,12 @@ public interface EventAsyncDispatcher extends EventDispatcher {
     }
 
     @Override
-    default void push(PersistedDef event) {
+    default void push(EngineMessage event) {
         throw NOT_SUPPORTED;
     }
 
     @Override
-    default void broadcast(PersistedDef message) {
+    default void broadcast(EngineMessage message) {
         throw NOT_SUPPORTED;
     }
 

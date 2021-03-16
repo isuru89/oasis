@@ -21,7 +21,7 @@ package io.github.oasis.engine;
 
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.exception.OasisParseException;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.parser.GameParserYaml;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ public class GameFileParserTest {
     @Test
     public void testParseReferencedFiles() throws OasisParseException {
         GameDef gameDef = GameParserYaml.fromClasspath("rules/root-game-def.yml", Thread.currentThread().getContextClassLoader());
-        List<PersistedDef> ruleDefinitions = gameDef.getRuleDefinitions();
+        List<EngineMessage> ruleDefinitions = gameDef.getRuleDefinitions();
         Assertions.assertEquals(5, ruleDefinitions.size());
 
         Set<String> ids = ruleDefinitions.stream().map(r -> (String) r.getData().get("id")).collect(Collectors.toSet());

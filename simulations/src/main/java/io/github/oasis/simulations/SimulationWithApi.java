@@ -20,7 +20,7 @@
 package io.github.oasis.simulations;
 
 import io.github.oasis.core.Game;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
@@ -33,7 +33,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
@@ -187,17 +191,17 @@ public class SimulationWithApi extends Simulation {
     }
 
     @Override
-    protected void announceGame(PersistedDef def) throws Exception {
+    protected void announceGame(EngineMessage def) throws Exception {
         super.announceGame(def);
     }
 
     @Override
-    protected void announceRule(PersistedDef def) throws Exception {
+    protected void announceRule(EngineMessage def) throws Exception {
         super.announceRule(def);
     }
 
     @Override
-    protected void sendEvent(PersistedDef def) throws Exception {
+    protected void sendEvent(EngineMessage def) throws Exception {
         System.out.println(">>> sending event " + def);
         Map<String, Object> body = Map.of("data", def.getData());
         String msg = gson.toJson(body);

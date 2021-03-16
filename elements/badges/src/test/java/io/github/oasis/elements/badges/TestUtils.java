@@ -19,7 +19,7 @@
 
 package io.github.oasis.elements.badges;
 
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import org.junit.jupiter.api.Assertions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -46,10 +46,10 @@ public class TestUtils {
         }
     }
 
-    private static PersistedDef asPersistedDef(Map<String, Object> data) {
-        PersistedDef def = new PersistedDef();
+    private static EngineMessage asPersistedDef(Map<String, Object> data) {
+        EngineMessage def = new EngineMessage();
         def.setData(data);
-        def.setType(PersistedDef.GAME_RULE_ADDED);
+        def.setType(EngineMessage.GAME_RULE_ADDED);
         def.setImpl(BadgeDef.class.getName());
         return def;
     }

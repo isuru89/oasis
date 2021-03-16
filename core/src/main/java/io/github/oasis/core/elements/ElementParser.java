@@ -20,7 +20,7 @@
 package io.github.oasis.core.elements;
 
 import io.github.oasis.core.elements.spec.BaseSpecification;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 
 import java.io.Serializable;
 
@@ -29,9 +29,9 @@ import java.io.Serializable;
  */
 public interface ElementParser extends Serializable {
 
-    AbstractDef<? extends BaseSpecification> parse(PersistedDef persistedObj);
+    AbstractDef<? extends BaseSpecification> parse(EngineMessage persistedObj);
 
-    default AbstractRule parseToRule(PersistedDef dto) {
+    default AbstractRule parseToRule(EngineMessage dto) {
         return convert(parse(dto));
     }
 
