@@ -19,24 +19,24 @@
 
 package io.github.oasis.core.external;
 
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 
 /**
  * Asynchronous event dispatch support for message brokers.
  *
- * For synchronous dispatch support please see {@link EventDispatchSupport}.
+ * For synchronous dispatch support please see {@link EventDispatcher}.
  *
  * @author Isuru Weerarathna
  */
-public interface EventAsyncDispatchSupport extends EventDispatchSupport {
+public interface EventAsyncDispatcher extends EventDispatcher {
 
     RuntimeException NOT_SUPPORTED = new UnsupportedOperationException("Async handler does not support sync operations!");
 
     void init(DispatcherContext context, Handler handler);
 
-    void broadcastAsync(PersistedDef message, Handler handler);
+    void broadcastAsync(EngineMessage message, Handler handler);
 
-    void pushAsync(PersistedDef event, Handler handler);
+    void pushAsync(EngineMessage event, Handler handler);
 
     @Override
     default void init(DispatcherContext context) {
@@ -44,12 +44,12 @@ public interface EventAsyncDispatchSupport extends EventDispatchSupport {
     }
 
     @Override
-    default void push(PersistedDef event) {
+    default void push(EngineMessage event) {
         throw NOT_SUPPORTED;
     }
 
     @Override
-    default void broadcast(PersistedDef message) {
+    default void broadcast(EngineMessage message) {
         throw NOT_SUPPORTED;
     }
 

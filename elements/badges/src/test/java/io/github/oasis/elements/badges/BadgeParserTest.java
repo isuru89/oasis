@@ -27,7 +27,7 @@ import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.elements.spec.EventFilterDef;
 import io.github.oasis.core.elements.spec.SelectorDef;
 import io.github.oasis.core.elements.spec.TimeUnitDef;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
 import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
@@ -127,23 +127,23 @@ class BadgeParserTest {
     void parse() {
         {
             BadgeDef def = createFirstEvent();
-            PersistedDef persistedDef = new PersistedDef();
-            persistedDef.setType(PersistedDef.GAME_RULE_ADDED);
-            persistedDef.setImpl(BadgeDef.class.getName());
-            persistedDef.setData(toMap(def));
+            EngineMessage engineMessage = new EngineMessage();
+            engineMessage.setType(EngineMessage.GAME_RULE_ADDED);
+            engineMessage.setImpl(BadgeDef.class.getName());
+            engineMessage.setData(toMap(def));
 
-            BadgeDef parsed = parser.parse(persistedDef);
+            BadgeDef parsed = parser.parse(engineMessage);
             assertEquals(def.getSpec().getSelector().getMatchEvent(), parsed.getSpec().getSelector().getMatchEvent());
         }
 
         {
             BadgeDef def = createStreak();
-            PersistedDef persistedDef = new PersistedDef();
-            persistedDef.setType(PersistedDef.GAME_RULE_ADDED);
-            persistedDef.setImpl(BadgeDef.class.getName());
-            persistedDef.setData(toMap(def));
+            EngineMessage engineMessage = new EngineMessage();
+            engineMessage.setType(EngineMessage.GAME_RULE_ADDED);
+            engineMessage.setImpl(BadgeDef.class.getName());
+            engineMessage.setData(toMap(def));
 
-            BadgeDef parsed = parser.parse(persistedDef);
+            BadgeDef parsed = parser.parse(engineMessage);
             assertEquals(def.getSpec().getStreaks().size(), parsed.getSpec().getStreaks().size());
         }
     }

@@ -25,7 +25,7 @@ import akka.actor.Extension;
 import com.typesafe.config.Config;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.external.EventStreamFactory;
-import io.github.oasis.core.external.SourceStreamSupport;
+import io.github.oasis.core.external.SourceStreamProvider;
 import io.github.oasis.core.external.messages.FailedGameCommand;
 import io.github.oasis.core.external.messages.GameCommand;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class ExternalPartyImpl implements Extension {
     private static final Logger LOG = LoggerFactory.getLogger(ExternalPartyImpl.class);
 
     private EventStreamFactory streamFactory;
-    private SourceStreamSupport sourceStreamSupport;
+    private SourceStreamProvider sourceStreamProvider;
 
     public ExternalPartyImpl(ExtendedActorSystem system) {
         Config configs = system.settings().config();
@@ -52,7 +52,7 @@ public class ExternalPartyImpl implements Extension {
             try {
                 streamFactory = (EventStreamFactory) dynamicAccess.classLoader()
                         .loadClass(eventStreamImpl).getDeclaredConstructor().newInstance();
-                sourceStreamSupport = streamFactory.getEngineEventSource();
+                sourceStreamProvider = streamFactory.getEngineEventSource();
             } catch (ReflectiveOperationException e) {
                 LOG.error("Unable to create instance of '{}'!", eventStreamImpl);
                 throw new RuntimeException(e.getMessage(), e);
@@ -68,21 +68,21 @@ public class ExternalPartyImpl implements Extension {
 
     public void ackMessage(int gameId, Object messageId) {
         if (Objects.nonNull(messageId)) {
-            sourceStreamSupport.ackMessage(gameId, messageId);
+            sourceStreamProvider.ackMessage(gameId, messageId);
         }
     }
 
     public void nackMessage(int gameId, Object messageId) {
         if (Objects.nonNull(messageId)) {
-            sourceStreamSupport.nackMessage(gameId, messageId);
+            sourceStreamProvider.nackMessage(gameId, messageId);
         }
     }
 
     public void ackGameStateChanged(GameCommand gameCommand) {
-        sourceStreamSupport.handleGameCommand(gameCommand);
+        sourceStreamProvider.handleGameCommand(gameCommand);
     }
 
     public void nackGameStateChanged(GameCommand gameCommand) {
-        sourceStreamSupport.handleGameCommand(new FailedGameCommand(gameCommand));
+        sourceStreamProvider.handleGameCommand(new FailedGameCommand(gameCommand));
     }
 }

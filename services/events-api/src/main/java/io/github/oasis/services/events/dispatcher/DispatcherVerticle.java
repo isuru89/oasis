@@ -19,7 +19,7 @@
 
 package io.github.oasis.services.events.dispatcher;
 
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventDispatcher;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -37,9 +37,9 @@ public class DispatcherVerticle extends AbstractVerticle {
 
     private static final Logger LOG = LoggerFactory.getLogger(DispatcherVerticle.class);
 
-    private final EventDispatchSupport eventDispatcher;
+    private final EventDispatcher eventDispatcher;
 
-    public DispatcherVerticle(EventDispatchSupport eventDispatcher) {
+    public DispatcherVerticle(EventDispatcher eventDispatcher) {
         this.eventDispatcher = eventDispatcher;
     }
 
@@ -82,7 +82,7 @@ public class DispatcherVerticle extends AbstractVerticle {
         return yaml.load(config.toString());
     }
 
-    static class VertxDispatcherContext implements EventDispatchSupport.DispatcherContext {
+    static class VertxDispatcherContext implements EventDispatcher.DispatcherContext {
 
         private Map<String, Object> configs;
 

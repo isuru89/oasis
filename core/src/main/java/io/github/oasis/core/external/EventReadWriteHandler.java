@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -19,23 +19,26 @@
 
 package io.github.oasis.core.external;
 
-import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.core.Event;
 
-import java.io.Closeable;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * Base interface to implement to subscribe for game event messages.
+ * Base interface to implement for storage of individual event data.
+ * This interface will be used by engine to store some of events based
+ * on the rule type to refer them later in execution process.
  *
  * @author Isuru Weerarathna
  */
-public interface SourceStreamSupport extends Closeable {
+public interface EventReadWriteHandler {
 
-    void init(RuntimeContextSupport context, MessageReceiver source) throws Exception;
+    Optional<Event> read(String contextRef, String eventId);
 
-    void handleGameCommand(GameCommand gameCommand);
+    List<Event> bulkRead(String contextRed, String... eventIds);
 
-    void ackMessage(int gameId, Object messageId);
+    boolean write(String contextRef, Event event);
 
-    void nackMessage(int gameId, Object messageId);
+    boolean remove(String contextRef, String... eventIds);
+
 }

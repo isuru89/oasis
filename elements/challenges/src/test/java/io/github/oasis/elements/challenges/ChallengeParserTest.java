@@ -25,7 +25,7 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.elements.spec.PointAwardDef;
 import io.github.oasis.core.elements.spec.SelectorDef;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.elements.challenges.spec.ChallengeRewardDef;
 import io.github.oasis.elements.challenges.spec.ChallengeSpecification;
 import io.github.oasis.elements.challenges.spec.ScopeDef;
@@ -55,12 +55,12 @@ class ChallengeParserTest {
     void parse() {
         ChallengeDef def = createTestChallenge();
 
-        PersistedDef persistedDef = new PersistedDef();
-        persistedDef.setType(PersistedDef.GAME_RULE_ADDED);
-        persistedDef.setImpl(ChallengeDef.class.getName());
-        persistedDef.setData(toMap(def));
+        EngineMessage engineMessage = new EngineMessage();
+        engineMessage.setType(EngineMessage.GAME_RULE_ADDED);
+        engineMessage.setImpl(ChallengeDef.class.getName());
+        engineMessage.setData(toMap(def));
 
-        AbstractDef<? extends BaseSpecification> abstractDef = parser.parse(persistedDef);
+        AbstractDef<? extends BaseSpecification> abstractDef = parser.parse(engineMessage);
 
         Assertions.assertTrue(abstractDef instanceof ChallengeDef);
         ChallengeDef parsed = (ChallengeDef) abstractDef;

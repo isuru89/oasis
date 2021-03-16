@@ -19,7 +19,7 @@
 
 package io.github.oasis.services.events.dispatcher;
 
-import io.github.oasis.core.external.EventAsyncDispatchSupport;
+import io.github.oasis.core.external.EventAsyncDispatcher;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -34,9 +34,9 @@ public class DispatcherAsyncVerticle extends AbstractVerticle {
 
     private static final Logger LOG = LoggerFactory.getLogger(DispatcherAsyncVerticle.class);
 
-    private final EventAsyncDispatchSupport eventDispatcher;
+    private final EventAsyncDispatcher eventDispatcher;
 
-    public DispatcherAsyncVerticle(EventAsyncDispatchSupport eventDispatcher) {
+    public DispatcherAsyncVerticle(EventAsyncDispatcher eventDispatcher) {
         this.eventDispatcher = eventDispatcher;
     }
 
@@ -46,7 +46,7 @@ public class DispatcherAsyncVerticle extends AbstractVerticle {
         JsonObject dispatcherConfigs = config().copy();
         DispatcherVerticle.VertxDispatcherContext ctx = new DispatcherVerticle.VertxDispatcherContext(dispatcherConfigs.getMap());
         try {
-            eventDispatcher.init(ctx, new EventAsyncDispatchSupport.Handler() {
+            eventDispatcher.init(ctx, new EventAsyncDispatcher.Handler() {
                 @Override
                 public void onSuccess(Object result) {
                     WrappedAsyncDispatcherService wrappedDispatcherService = new WrappedAsyncDispatcherService(eventDispatcher);

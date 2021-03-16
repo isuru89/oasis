@@ -26,7 +26,7 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.elements.spec.PointAwardDef;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.challenges.spec.ScopeDef;
@@ -40,7 +40,7 @@ import java.util.Set;
 public class ChallengeParser extends AbstractElementParser {
 
     @Override
-    public AbstractDef<? extends BaseSpecification> parse(PersistedDef persistedObj) {
+    public AbstractDef<? extends BaseSpecification> parse(EngineMessage persistedObj) {
         ChallengeDef def = loadFrom(persistedObj, ChallengeDef.class);
         def.validate();
         return def;

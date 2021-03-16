@@ -19,29 +19,25 @@
 
 package io.github.oasis.core.external;
 
-import io.github.oasis.core.external.messages.PersistedDef;
-
-import java.io.Closeable;
-import java.util.Map;
+import io.github.oasis.core.context.ExecutionContext;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.Signal;
 
 /**
- * Base interface to implement for event dispatching to a different
- * message brokers.
- *
- * For asynchronous dispatch support please see {@link EventAsyncDispatchSupport}.
+ * Used to subscribe to signals emitted by engine.
+ * Useful when Oasis being used as a library.
  *
  * @author Isuru Weerarathna
  */
-public interface EventDispatchSupport extends Closeable {
+public interface SignalSubscription {
 
-    void init(DispatcherContext context) throws Exception;
-
-    void push(PersistedDef message) throws Exception;
-
-    void broadcast(PersistedDef message) throws Exception;
-
-    interface DispatcherContext {
-        Map<String, Object> getConfigs();
-    }
+    /**
+     * Called when signal successfully handled by the corresponding sink.
+     *
+     * @param signal signal instance.
+     * @param rule rule reference.
+     * @param executionContext execution context.
+     */
+    void notifyAfter(Signal signal, AbstractRule rule, ExecutionContext executionContext);
 
 }

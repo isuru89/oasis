@@ -20,12 +20,12 @@
 package io.github.oasis.engine;
 
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.core.external.MessageReceiver;
-import io.github.oasis.core.external.SourceStreamSupport;
+import io.github.oasis.core.external.SourceStreamProvider;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.core.external.messages.PersistedDef;
 
 import java.io.IOException;
 
@@ -34,20 +34,20 @@ import java.io.IOException;
  */
 public class TestEventStreamFactory implements EventStreamFactory {
 
-    private final SourceStreamSupport sourceStreamSupport = new TestStreamSupport();
-    private final EventDispatchSupport dispatchSupport = new TestDispatchSupport();
+    private final SourceStreamProvider sourceStreamProvider = new TestStreamProvider();
+    private final EventDispatcher dispatchSupport = new TestDispatcher();
 
     @Override
-    public SourceStreamSupport getEngineEventSource() {
-        return sourceStreamSupport;
+    public SourceStreamProvider getEngineEventSource() {
+        return sourceStreamProvider;
     }
 
     @Override
-    public EventDispatchSupport getDispatcher() {
+    public EventDispatcher getDispatcher() {
         return dispatchSupport;
     }
 
-    private static class TestStreamSupport implements SourceStreamSupport {
+    private static class TestStreamProvider implements SourceStreamProvider {
 
         @Override
         public void init(RuntimeContextSupport context, MessageReceiver source) throws Exception {
@@ -75,7 +75,7 @@ public class TestEventStreamFactory implements EventStreamFactory {
         }
     }
 
-    private static class TestDispatchSupport implements EventDispatchSupport {
+    private static class TestDispatcher implements EventDispatcher {
 
         @Override
         public void init(DispatcherContext context) throws Exception {
@@ -83,12 +83,12 @@ public class TestEventStreamFactory implements EventStreamFactory {
         }
 
         @Override
-        public void push(PersistedDef message) throws Exception {
+        public void push(EngineMessage message) throws Exception {
 
         }
 
         @Override
-        public void broadcast(PersistedDef message) throws Exception {
+        public void broadcast(EngineMessage message) throws Exception {
 
         }
 

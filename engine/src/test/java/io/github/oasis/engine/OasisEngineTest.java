@@ -33,14 +33,14 @@ import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.core.services.api.beans.GsonSerializer;
 import io.github.oasis.core.services.api.beans.RedisRepository;
 import io.github.oasis.db.redis.RedisDb;
-import io.github.oasis.db.redis.RedisEventLoader;
+import io.github.oasis.db.redis.RedisEventLoaderHandler;
 import io.github.oasis.elements.badges.BadgesModuleFactory;
 import io.github.oasis.elements.challenges.ChallengesModuleFactory;
 import io.github.oasis.elements.milestones.MilestonesModuleFactory;
@@ -103,7 +103,7 @@ public class OasisEngineTest {
 
         EngineContext context = builder.withConfigs(oasisConfigs)
                 .withDb(dbPool)
-                .withEventStore(new RedisEventLoader(dbPool, oasisConfigs))
+                .withEventStore(new RedisEventLoaderHandler(dbPool, oasisConfigs))
                 .installModule(RatingsModuleFactory.class)
                 .installModule(PointsModuleFactory.class)
                 .installModule(MilestonesModuleFactory.class)
@@ -175,9 +175,9 @@ public class OasisEngineTest {
     }
 
     protected List<AbstractRule> submitRules(OasisEngine engine, int gameId, GameDef gameDef) {
-        List<PersistedDef> ruleDefinitions = gameDef.getRuleDefinitions();
+        List<EngineMessage> ruleDefinitions = gameDef.getRuleDefinitions();
         List<AbstractRule> rules = new ArrayList<>();
-        for (PersistedDef def : ruleDefinitions) {
+        for (EngineMessage def : ruleDefinitions) {
             AbstractRule rule = engine.getContext().getParsers().parseToRule(def);
             ElementDef elementDef = ElementDef.builder()
                     .elementId(rule.getId())

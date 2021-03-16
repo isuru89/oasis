@@ -23,8 +23,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.Game;
-import io.github.oasis.core.external.EventDispatchSupport;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.EventDispatcher;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.engine.element.points.PointDef;
 import io.github.oasis.simulations.model.Team;
 import io.github.oasis.simulations.model.User;
@@ -75,7 +75,7 @@ public class Simulation implements Closeable {
 
     private File gameRootDir;
     protected SimulationContext context;
-    private EventDispatchSupport dispatcher;
+    private EventDispatcher dispatcher;
 
     private List<User> users = new ArrayList<>();
     private List<String> acceptedEvents = new ArrayList<>();
@@ -202,35 +202,35 @@ public class Simulation implements Closeable {
         return pairGenerator.generateKeyPair();
     }
 
-    protected void announceGame(PersistedDef def) throws Exception {
+    protected void announceGame(EngineMessage def) throws Exception {
         this.dispatcher.broadcast(def);
     }
 
-    protected void announceRule(PersistedDef def) throws Exception {
+    protected void announceRule(EngineMessage def) throws Exception {
         this.dispatcher.push(def);
     }
 
-    protected void sendEvent(PersistedDef def) throws Exception {
+    protected void sendEvent(EngineMessage def) throws Exception {
         this.dispatcher.push(def);
     }
 
     private void dispatchGameStart() throws Exception {
-        PersistedDef.Scope scope = new PersistedDef.Scope(GAME_ID);
-        PersistedDef gameCreatedDef = new PersistedDef();
-        gameCreatedDef.setType(PersistedDef.GAME_CREATED);
+        EngineMessage.Scope scope = new EngineMessage.Scope(GAME_ID);
+        EngineMessage gameCreatedDef = new EngineMessage();
+        gameCreatedDef.setType(EngineMessage.GAME_CREATED);
         gameCreatedDef.setScope(scope);
         announceGame(gameCreatedDef);
 
-        PersistedDef gameStartCmd = new PersistedDef();
-        gameStartCmd.setType(PersistedDef.GAME_STARTED);
+        EngineMessage gameStartCmd = new EngineMessage();
+        gameStartCmd.setType(EngineMessage.GAME_STARTED);
         gameStartCmd.setScope(scope);
         announceGame(gameStartCmd);
     }
 
     private void dispatchGameEnd() {
-        PersistedDef.Scope scope = new PersistedDef.Scope(GAME_ID);
-        PersistedDef gameRemoved = new PersistedDef();
-        gameRemoved.setType(PersistedDef.GAME_REMOVED);
+        EngineMessage.Scope scope = new EngineMessage.Scope(GAME_ID);
+        EngineMessage gameRemoved = new EngineMessage();
+        gameRemoved.setType(EngineMessage.GAME_REMOVED);
         gameRemoved.setScope(scope);
         try {
             Thread.sleep(2000);
@@ -244,19 +244,19 @@ public class Simulation implements Closeable {
     private void dispatchRules() throws Exception {
         Yaml yaml = new Yaml();
 
-        PersistedDef.Scope scope = new PersistedDef.Scope(GAME_ID);
+        EngineMessage.Scope scope = new EngineMessage.Scope(GAME_ID);
         try (FileInputStream inputStream = new FileInputStream(new File(gameRootDir, "rules/points.yml"))) {
             Map<String, Object> loadedDef = yaml.load(inputStream);
             List<Map<String, Object>> pointDefs = (List<Map<String, Object>>) loadedDef.get("points");
             for (Map<String, Object> def : pointDefs) {
-                PersistedDef persistedDef = new PersistedDef();
-                persistedDef.setType(PersistedDef.GAME_RULE_ADDED);
-                persistedDef.setImpl(PointDef.class.getName());
-                persistedDef.setData(def);
-                persistedDef.setScope(scope);
+                EngineMessage engineMessage = new EngineMessage();
+                engineMessage.setType(EngineMessage.GAME_RULE_ADDED);
+                engineMessage.setImpl(PointDef.class.getName());
+                engineMessage.setData(def);
+                engineMessage.setScope(scope);
                 acceptedEvents.add((String) def.get("event"));
 
-                announceRule(persistedDef);
+                announceRule(engineMessage);
             }
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -265,7 +265,7 @@ public class Simulation implements Closeable {
 
     @SuppressWarnings("unchecked")
     private void dispatchEvents() throws Exception {
-        PersistedDef.Scope scope = new PersistedDef.Scope(GAME_ID);
+        EngineMessage.Scope scope = new EngineMessage.Scope(GAME_ID);
         long startTime = LocalDate.of(2019, Month.JUNE, 1).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         long endTime = LocalDate.of(2020, Month.APRIL, 30).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
@@ -311,8 +311,8 @@ public class Simulation implements Closeable {
             }
             event.put(Event.EVENT_TYPE, eventType);
 
-            PersistedDef def = new PersistedDef();
-            def.setType(PersistedDef.GAME_EVENT);
+            EngineMessage def = new EngineMessage();
+            def.setType(EngineMessage.GAME_EVENT);
             def.setScope(scope);
             def.setData(event);
             sendEvent(def);

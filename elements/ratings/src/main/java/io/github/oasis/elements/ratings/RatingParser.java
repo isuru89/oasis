@@ -28,7 +28,7 @@ import io.github.oasis.core.elements.EventValueResolver;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.elements.spec.PointAwardDef;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Utils;
 
 import java.math.BigDecimal;
@@ -43,7 +43,7 @@ public class RatingParser extends AbstractElementParser {
     private static final EventValueResolver<Integer> ZERO_AWARD = (event, prevRating) -> BigDecimal.ZERO;
 
     @Override
-    public AbstractDef<? extends BaseSpecification> parse(PersistedDef persistedObj) {
+    public AbstractDef<? extends BaseSpecification> parse(EngineMessage persistedObj) {
         RatingDef def = loadFrom(persistedObj, RatingDef.class);
         def.validate();
         return def;

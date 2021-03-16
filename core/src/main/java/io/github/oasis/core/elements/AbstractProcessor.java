@@ -24,7 +24,7 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.core.external.EventReadWriteHandler;
 
 import java.io.Serializable;
 import java.util.List;
@@ -36,7 +36,7 @@ import java.util.function.BiConsumer;
 public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal> implements BiConsumer<Event, ExecutionContext>, Serializable {
 
     protected final Db dbPool;
-    protected final EventReadWrite eventLoader;
+    protected final EventReadWriteHandler eventLoader;
     protected final R rule;
     private final RuleContext<R> ruleContext;
 
@@ -44,7 +44,7 @@ public abstract class AbstractProcessor<R extends AbstractRule, S extends Signal
         this(dbPool, null, ruleCtx);
     }
 
-    public AbstractProcessor(Db dbPool, EventReadWrite eventLoader, RuleContext<R> ruleCtx) {
+    public AbstractProcessor(Db dbPool, EventReadWriteHandler eventLoader, RuleContext<R> ruleCtx) {
         this.dbPool = dbPool;
         this.ruleContext = ruleCtx;
         this.rule = ruleCtx.getRule();

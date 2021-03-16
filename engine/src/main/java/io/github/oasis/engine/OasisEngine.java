@@ -28,9 +28,9 @@ import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.core.external.MessageReceiver;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.OasisCommand;
-import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
 import io.github.oasis.engine.actors.cmds.EventMessage;
@@ -81,7 +81,7 @@ public class OasisEngine implements MessageReceiver {
     }
 
     @Override
-    public void submit(PersistedDef dto) {
+    public void submit(EngineMessage dto) {
         Object message = DefinitionReader.derive(dto, context);
         if (message != null) {
             supervisor.tell(message, supervisor);

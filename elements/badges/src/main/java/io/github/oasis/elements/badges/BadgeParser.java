@@ -27,7 +27,7 @@ import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.elements.spec.TimeUnitDef;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Timestamps;
 import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.badges.rules.BadgeRule;
@@ -62,7 +62,7 @@ import static io.github.oasis.elements.badges.BadgeDef.TIME_BOUNDED_STREAK_KIND;
  */
 public class BadgeParser extends AbstractElementParser {
     @Override
-    public BadgeDef parse(PersistedDef persistedObj) {
+    public BadgeDef parse(EngineMessage persistedObj) {
         return loadFrom(persistedObj, BadgeDef.class);
     }
 

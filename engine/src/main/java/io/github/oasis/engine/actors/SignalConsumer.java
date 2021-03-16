@@ -25,7 +25,7 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.exception.OasisRuntimeException;
-import io.github.oasis.core.external.SignalSubscriptionSupport;
+import io.github.oasis.core.external.SignalSubscription;
 import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
 import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
@@ -48,7 +48,7 @@ public class SignalConsumer extends OasisBaseActor {
 
     private String logId;
     private final Sinks sinks;
-    private final SignalSubscriptionSupport signalSubscription;
+    private final SignalSubscription signalSubscription;
     private final CircuitBreaker breaker;
 
     public SignalConsumer(EngineContext context) {

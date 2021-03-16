@@ -26,7 +26,7 @@ import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.elements.spec.MatchEventsDef;
 import io.github.oasis.core.elements.spec.SelectorDef;
 import io.github.oasis.core.events.BasePointEvent;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.elements.milestones.spec.MilestoneLevel;
 import io.github.oasis.elements.milestones.spec.MilestoneSpecification;
 import io.github.oasis.elements.milestones.spec.ValueExtractorDef;
@@ -67,12 +67,12 @@ class MilestoneParserTest {
     void parse() {
         MilestoneDef def = createMilestone();
 
-        PersistedDef persistedDef = new PersistedDef();
-        persistedDef.setType(PersistedDef.GAME_RULE_ADDED);
-        persistedDef.setImpl(MilestoneDef.class.getName());
-        persistedDef.setData(toMap(def));
+        EngineMessage engineMessage = new EngineMessage();
+        engineMessage.setType(EngineMessage.GAME_RULE_ADDED);
+        engineMessage.setImpl(MilestoneDef.class.getName());
+        engineMessage.setData(toMap(def));
 
-        MilestoneDef parsed = parser.parse(persistedDef);
+        MilestoneDef parsed = parser.parse(engineMessage);
 
         assertEquals(def.getSpec().getValueExtractor(), parsed.getSpec().getValueExtractor());
         assertEquals(def.getSpec().getLevels().size(), parsed.getSpec().getLevels().size());

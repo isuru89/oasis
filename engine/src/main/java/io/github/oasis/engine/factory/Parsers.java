@@ -21,7 +21,7 @@ package io.github.oasis.engine.factory;
 
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.ElementParser;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.engine.EngineContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +59,7 @@ public class Parsers {
                 });
     }
 
-    public AbstractRule parseToRule(PersistedDef dto) {
+    public AbstractRule parseToRule(EngineMessage dto) {
         String type = dto.getImpl();
         ElementParser elementParser = parserCache.get(type);
         if (elementParser != null) {

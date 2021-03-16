@@ -1,6 +1,5 @@
 package io.github.oasis.services.events.utils;
 
-import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.services.events.dispatcher.EventDispatcherService;
 import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.core.AsyncResult;

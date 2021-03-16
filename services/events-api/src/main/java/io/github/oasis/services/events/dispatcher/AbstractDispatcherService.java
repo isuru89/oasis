@@ -19,13 +19,13 @@
 
 package io.github.oasis.services.events.dispatcher;
 
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.core.json.JsonObject;
 
-import static io.github.oasis.core.external.messages.PersistedDef.FIELD_DATA;
-import static io.github.oasis.core.external.messages.PersistedDef.FIELD_IMPL;
-import static io.github.oasis.core.external.messages.PersistedDef.FIELD_TYPE;
+import static io.github.oasis.core.external.messages.EngineMessage.FIELD_DATA;
+import static io.github.oasis.core.external.messages.EngineMessage.FIELD_IMPL;
+import static io.github.oasis.core.external.messages.EngineMessage.FIELD_TYPE;
 
 /**
  * @author Isuru Weerarathna
@@ -34,12 +34,12 @@ public abstract class AbstractDispatcherService implements EventDispatcherServic
 
     private static final JsonObject EMPTY = new JsonObject();
 
-    PersistedDef toPersistDef(EventProxy event) {
-        return PersistedDef.fromEvent(event);
+    EngineMessage toPersistDef(EventProxy event) {
+        return EngineMessage.fromEvent(event);
     }
 
-    PersistedDef toPersistDef(JsonObject message) {
-        PersistedDef def = new PersistedDef();
+    EngineMessage toPersistDef(JsonObject message) {
+        EngineMessage def = new EngineMessage();
         def.setType(message.getString(FIELD_TYPE));
         def.setImpl(message.getString(FIELD_IMPL));
         def.setScope(null);

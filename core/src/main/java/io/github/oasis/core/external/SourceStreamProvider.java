@@ -19,25 +19,23 @@
 
 package io.github.oasis.core.external;
 
-import io.github.oasis.core.context.ExecutionContext;
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.context.RuntimeContextSupport;
+import io.github.oasis.core.external.messages.GameCommand;
+
+import java.io.Closeable;
 
 /**
- * Used to subscribe to signals emitted by engine.
- * Useful when Oasis being used as a library.
+ * Base interface to implement to subscribe for game event messages.
  *
  * @author Isuru Weerarathna
  */
-public interface SignalSubscriptionSupport {
+public interface SourceStreamProvider extends Closeable {
 
-    /**
-     * Called when signal successfully handled by corresponding sink.
-     *
-     * @param signal signal instance.
-     * @param rule rule reference.
-     * @param executionContext execution context.
-     */
-    void notifyAfter(Signal signal, AbstractRule rule, ExecutionContext executionContext);
+    void init(RuntimeContextSupport context, MessageReceiver source) throws Exception;
 
+    void handleGameCommand(GameCommand gameCommand);
+
+    void ackMessage(int gameId, Object messageId);
+
+    void nackMessage(int gameId, Object messageId);
 }

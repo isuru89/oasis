@@ -24,7 +24,7 @@ import io.github.oasis.core.elements.AbstractElementParser;
 import io.github.oasis.core.elements.Scripting;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.events.BasePointEvent;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.elements.milestones.spec.ValueExtractorDef;
 
@@ -39,7 +39,7 @@ import static io.github.oasis.core.VariableNames.RULE_VAR;
  */
 public class MilestoneParser extends AbstractElementParser {
     @Override
-    public MilestoneDef parse(PersistedDef persistedObj) {
+    public MilestoneDef parse(EngineMessage persistedObj) {
         MilestoneDef def = loadFrom(persistedObj, MilestoneDef.class);
         def.validate();
         return def;

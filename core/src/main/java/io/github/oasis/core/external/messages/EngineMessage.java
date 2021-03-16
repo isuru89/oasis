@@ -32,7 +32,7 @@ import java.util.Set;
  */
 @Getter
 @Setter
-public class PersistedDef implements Serializable {
+public class EngineMessage implements Serializable {
 
     public static final String FIELD_TYPE = "type";
     public static final String FIELD_IMPL = "impl";
@@ -70,21 +70,21 @@ public class PersistedDef implements Serializable {
     private Object messageId;
     private Map<String, Object> data;
 
-    public PersistedDef() {
+    public EngineMessage() {
     }
 
-    public static PersistedDef fromEvent(Event event) {
-        PersistedDef def = new PersistedDef();
-        def.setType(PersistedDef.GAME_EVENT);
-        def.setScope(new PersistedDef.Scope(event.getGameId()));
+    public static EngineMessage fromEvent(Event event) {
+        EngineMessage def = new EngineMessage();
+        def.setType(EngineMessage.GAME_EVENT);
+        def.setScope(new EngineMessage.Scope(event.getGameId()));
         def.setData(event.getAllFieldValues());
         return def;
     }
 
-    public static PersistedDef createGameLifecycleEvent(int gameId, GameState gameStatus) {
-        PersistedDef def = new PersistedDef();
+    public static EngineMessage createGameLifecycleEvent(int gameId, GameState gameStatus) {
+        EngineMessage def = new EngineMessage();
         def.setType(gameStatus.getCommand());
-        def.setScope(new PersistedDef.Scope(gameId));
+        def.setScope(new EngineMessage.Scope(gameId));
         return def;
     }
 
@@ -104,7 +104,7 @@ public class PersistedDef implements Serializable {
 
     @Override
     public String toString() {
-        return "PersistedDef{" +
+        return "EngineMessage{" +
                 "type='" + type + '\'' +
                 ", impl='" + impl + '\'' +
                 ", scope=" + scope +

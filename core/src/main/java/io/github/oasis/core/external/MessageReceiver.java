@@ -20,18 +20,18 @@
 package io.github.oasis.core.external;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.external.messages.OasisCommand;
-import io.github.oasis.core.external.messages.PersistedDef;
 
 /**
- * Accepts messages through implementations of {@link SourceStreamSupport}
+ * Accepts messages through implementations of {@link SourceStreamProvider}
  * for game engine.
  *
  * @author Isuru Weerarathna
  */
 public interface MessageReceiver {
 
-    void submit(PersistedDef dto);
+    void submit(EngineMessage dto);
 
     void submit(OasisCommand command);
 

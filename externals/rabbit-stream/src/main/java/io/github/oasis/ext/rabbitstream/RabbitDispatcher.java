@@ -23,8 +23,8 @@ import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import io.github.oasis.core.external.EventDispatchSupport;
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.EventDispatcher;
+import io.github.oasis.core.external.messages.EngineMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ import static io.github.oasis.ext.rabbitstream.RabbitConstants.RETRY_SEED;
 /**
  * @author Isuru Weerarathna
  */
-public class RabbitDispatcher implements EventDispatchSupport {
+public class RabbitDispatcher implements EventDispatcher {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitDispatcher.class);
 
@@ -101,7 +101,7 @@ public class RabbitDispatcher implements EventDispatchSupport {
     }
 
     @Override
-    public void push(PersistedDef message) throws Exception {
+    public void push(EngineMessage message) throws Exception {
         String routingKey = generateRoutingKey(message);
         channel.basicPublish(RabbitConstants.GAME_EXCHANGE,
                 routingKey,
@@ -110,7 +110,7 @@ public class RabbitDispatcher implements EventDispatchSupport {
     }
 
     @Override
-    public void broadcast(PersistedDef message) throws Exception {
+    public void broadcast(EngineMessage message) throws Exception {
         channel.basicPublish(RabbitConstants.ANNOUNCEMENT_EXCHANGE,
                 EMPTY_ROUTING_KEY,
                 null,
@@ -146,8 +146,8 @@ public class RabbitDispatcher implements EventDispatchSupport {
         RabbitUtils.declareAnnouncementExchange(channel);
     }
 
-    static String generateRoutingKey(PersistedDef def) {
-        PersistedDef.Scope scope = def.getScope();
+    static String generateRoutingKey(EngineMessage def) {
+        EngineMessage.Scope scope = def.getScope();
         if (Objects.nonNull(scope)) {
             return generateRoutingKey(scope.getGameId());
         }

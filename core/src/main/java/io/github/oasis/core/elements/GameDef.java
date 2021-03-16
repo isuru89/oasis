@@ -19,7 +19,7 @@
 
 package io.github.oasis.core.elements;
 
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.external.messages.EngineMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ public class GameDef {
 
     private int version;
 
-    private final List<PersistedDef> ruleDefinitions = new ArrayList<>();
+    private final List<EngineMessage> ruleDefinitions = new ArrayList<>();
 
     public int getVersion() {
         return version;
@@ -41,11 +41,11 @@ public class GameDef {
         this.version = version;
     }
 
-    public void addRuleDefinition(PersistedDef def) {
+    public void addRuleDefinition(EngineMessage def) {
         ruleDefinitions.add(def);
     }
 
-    public List<PersistedDef> getRuleDefinitions() {
+    public List<EngineMessage> getRuleDefinitions() {
         return ruleDefinitions;
     }
 }

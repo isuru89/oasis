@@ -20,15 +20,20 @@
 package io.github.oasis.ext.rabbitstream;
 
 import com.google.gson.Gson;
-import com.rabbitmq.client.*;
+import com.rabbitmq.client.CancelCallback;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
+import com.rabbitmq.client.Delivery;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.external.MessageReceiver;
-import io.github.oasis.core.external.SourceStreamSupport;
+import io.github.oasis.core.external.SourceStreamProvider;
+import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.external.messages.FailedGameCommand;
 import io.github.oasis.core.external.messages.GameCommand;
-import io.github.oasis.core.external.messages.PersistedDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +49,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author Isuru Weerarathna
  */
-public class RabbitSource implements SourceStreamSupport, Closeable {
+public class RabbitSource implements SourceStreamProvider, Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitSource.class);
 
@@ -127,10 +132,10 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
     public void handleMessage(String consumerTag, Delivery message) {
         String content = new String(message.getBody(), StandardCharsets.UTF_8);
         LOG.debug("Message received. {}", content);
-        PersistedDef persistedDef = gson.fromJson(content, PersistedDef.class);
+        EngineMessage engineMessage = gson.fromJson(content, EngineMessage.class);
         long deliveryTag = message.getEnvelope().getDeliveryTag();
-        persistedDef.setMessageId(deliveryTag);
-        sourceRef.submit(persistedDef);
+        engineMessage.setMessageId(deliveryTag);
+        sourceRef.submit(engineMessage);
     }
 
     public void handleCancel(String consumerTag) {
@@ -242,10 +247,10 @@ public class RabbitSource implements SourceStreamSupport, Closeable {
             }
 
             String content = new String(message.getBody(), StandardCharsets.UTF_8);
-            PersistedDef persistedDef = gson.fromJson(content, PersistedDef.class);
-            persistedDef.setMessageId(deliveryTag);
-            LOG.info("Game event received in channel {}! [{}]", channel, persistedDef);
-            sourceRef.submit(persistedDef);
+            EngineMessage engineMessage = gson.fromJson(content, EngineMessage.class);
+            engineMessage.setMessageId(deliveryTag);
+            LOG.info("Game event received in channel {}! [{}]", channel, engineMessage);
+            sourceRef.submit(engineMessage);
         }
 
         private void silentAck(long deliveryId) {

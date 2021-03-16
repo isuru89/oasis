@@ -19,13 +19,9 @@
 
 package io.github.oasis.ext.rabbitstream;
 
-import io.github.oasis.core.external.messages.PersistedDef;
-import org.assertj.core.api.Assertions;
+import io.github.oasis.core.external.messages.EngineMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import static io.github.oasis.ext.rabbitstream.RabbitDispatcher.generateRoutingKey;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -235,9 +231,9 @@ public class RabbitMQTest {
 //        Assertions.assertThat(printable.getString("host")).isEqualTo("localhost");
     }
 
-    private PersistedDef createForGame(int gameId) {
-        PersistedDef def = new PersistedDef();
-        def.setScope(new PersistedDef.Scope(gameId));
+    private EngineMessage createForGame(int gameId) {
+        EngineMessage def = new EngineMessage();
+        def.setScope(new EngineMessage.Scope(gameId));
         return def;
     }
 }

@@ -26,10 +26,10 @@ import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.core.external.EventReadWriteHandler;
 import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.db.redis.RedisDb;
-import io.github.oasis.db.redis.RedisEventLoader;
+import io.github.oasis.db.redis.RedisEventLoaderHandler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -57,7 +57,7 @@ public abstract class AbstractRuleTest {
     private final MilestoneParser parser = new MilestoneParser();
 
     protected static Db pool;
-    protected static EventReadWrite eventReadWrite;
+    protected static EventReadWriteHandler eventReadWriteHandler;
 
     @BeforeAll
     public static void beforeAll() {
@@ -66,7 +66,7 @@ public abstract class AbstractRuleTest {
         JedisPool poolRedis = new JedisPool(config, "localhost");
         pool = RedisDb.create(poolRedis);
         pool.init();
-        eventReadWrite = new RedisEventLoader(pool, null);
+        eventReadWriteHandler = new RedisEventLoaderHandler(pool, null);
     }
 
     @AfterAll

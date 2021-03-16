@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -19,26 +19,29 @@
 
 package io.github.oasis.core.external;
 
-import io.github.oasis.core.Event;
+import io.github.oasis.core.external.messages.EngineMessage;
 
-import java.util.List;
-import java.util.Optional;
+import java.io.Closeable;
+import java.util.Map;
 
 /**
- * Base interface to implement for storage of individual event data.
- * This interface will be used by engine to store some of events based
- * on the rule type to refer them later in execution process.
+ * Base interface to implement for event dispatching to a different
+ * message brokers.
+ *
+ * For asynchronous dispatch support please see {@link EventAsyncDispatcher}.
  *
  * @author Isuru Weerarathna
  */
-public interface EventReadWrite {
+public interface EventDispatcher extends Closeable {
 
-    Optional<Event> read(String contextRef, String eventId);
+    void init(DispatcherContext context) throws Exception;
 
-    List<Event> bulkRead(String contextRed, String... eventIds);
+    void push(EngineMessage message) throws Exception;
 
-    boolean write(String contextRef, Event event);
+    void broadcast(EngineMessage message) throws Exception;
 
-    boolean remove(String contextRef, String... eventIds);
+    interface DispatcherContext {
+        Map<String, Object> getConfigs();
+    }
 
 }

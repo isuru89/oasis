@@ -21,7 +21,7 @@ package io.github.oasis.core.context;
 
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.core.external.EventReadWriteHandler;
 
 /**
  * @author Isuru Weerarathna
@@ -32,6 +32,6 @@ public interface RuntimeContextSupport {
 
     Db getDb();
 
-    EventReadWrite getEventStore();
+    EventReadWriteHandler getEventStore();
 
 }
