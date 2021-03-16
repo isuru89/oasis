@@ -23,7 +23,7 @@ import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.PersistedDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ import static io.github.oasis.ext.rabbitstream.RabbitConstants.RETRY_SEED;
 /**
  * @author Isuru Weerarathna
  */
-public class RabbitDispatcher implements EventDispatchSupport {
+public class RabbitDispatcher implements EventDispatcher {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitDispatcher.class);
 

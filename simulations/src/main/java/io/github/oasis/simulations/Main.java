@@ -23,7 +23,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.OasisEngine;
@@ -31,7 +31,6 @@ import io.github.oasis.engine.element.points.PointsModuleFactory;
 import io.github.oasis.ext.rabbitstream.RabbitStreamFactory;
 
 import java.io.File;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,7 +50,7 @@ public class Main {
         OasisConfigs configs = OasisConfigs.defaultConfigs();
 
         // initialize dispatcher first
-        EventDispatchSupport dispatcher = initializeDispatcher(configs.getConfigRef());
+        EventDispatcher dispatcher = initializeDispatcher(configs.getConfigRef());
 
         SimulationContext simulationContext = new SimulationContext();
         simulationContext.setGameDataDir(new File("./simulations/stackoverflow"));
@@ -74,7 +73,7 @@ public class Main {
         builder.withDb(dbPool);
 
         // initialize dispatcher first
-        EventDispatchSupport dispatcher = initializeDispatcher(configs.getConfigRef());
+        EventDispatcher dispatcher = initializeDispatcher(configs.getConfigRef());
 
         OasisEngine engine = new OasisEngine(builder.build());
         engine.start();
@@ -86,9 +85,9 @@ public class Main {
         simulation.run(simulationContext);
     }
 
-    private static EventDispatchSupport initializeDispatcher(Config configs) throws Exception {
+    private static EventDispatcher initializeDispatcher(Config configs) throws Exception {
         RabbitStreamFactory streamFactory = new RabbitStreamFactory();
-        EventDispatchSupport dispatcher = streamFactory.getDispatcher();
+        EventDispatcher dispatcher = streamFactory.getDispatcher();
         ConfigObject dispatcherConfigs = configs.getObject("oasis.dispatcher.configs");
         Map<String, Object> conf = dispatcherConfigs.unwrapped();
         dispatcher.init(() -> conf);

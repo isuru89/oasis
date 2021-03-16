@@ -23,7 +23,7 @@ import io.github.oasis.core.Event;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.core.external.EventReadWriteHandler;
 import io.github.oasis.core.utils.Utils;
 
 import java.io.IOException;
@@ -37,12 +37,12 @@ import java.util.stream.Collectors;
 /**
  * @author Isuru Weerarathna
  */
-public class RedisEventLoader implements EventReadWrite {
+public class RedisEventLoaderHandler implements EventReadWriteHandler {
 
     private final Db dbPool;
     private final OasisConfigs configs;
 
-    public RedisEventLoader(Db dbPool, OasisConfigs configs) {
+    public RedisEventLoaderHandler(Db dbPool, OasisConfigs configs) {
         this.dbPool = dbPool;
         this.configs = configs;
     }

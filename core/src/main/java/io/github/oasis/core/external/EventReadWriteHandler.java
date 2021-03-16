@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -19,29 +19,26 @@
 
 package io.github.oasis.core.external;
 
-import io.github.oasis.core.external.messages.PersistedDef;
+import io.github.oasis.core.Event;
 
-import java.io.Closeable;
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * Base interface to implement for event dispatching to a different
- * message brokers.
- *
- * For asynchronous dispatch support please see {@link EventAsyncDispatchSupport}.
+ * Base interface to implement for storage of individual event data.
+ * This interface will be used by engine to store some of events based
+ * on the rule type to refer them later in execution process.
  *
  * @author Isuru Weerarathna
  */
-public interface EventDispatchSupport extends Closeable {
+public interface EventReadWriteHandler {
 
-    void init(DispatcherContext context) throws Exception;
+    Optional<Event> read(String contextRef, String eventId);
 
-    void push(PersistedDef message) throws Exception;
+    List<Event> bulkRead(String contextRed, String... eventIds);
 
-    void broadcast(PersistedDef message) throws Exception;
+    boolean write(String contextRef, Event event);
 
-    interface DispatcherContext {
-        Map<String, Object> getConfigs();
-    }
+    boolean remove(String contextRef, String... eventIds);
 
 }

@@ -29,7 +29,7 @@ package io.github.oasis.core.external;
  */
 public interface EventStreamFactory {
 
-    SourceStreamSupport getEngineEventSource();
+    SourceStreamProvider getEngineEventSource();
 
-    EventDispatchSupport getDispatcher();
+    EventDispatcher getDispatcher();
 }

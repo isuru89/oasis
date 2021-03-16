@@ -19,9 +19,9 @@
 
 package io.github.oasis.ext.rabbitstream;
 
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.EventStreamFactory;
-import io.github.oasis.core.external.SourceStreamSupport;
+import io.github.oasis.core.external.SourceStreamProvider;
 
 /**
  * @author Isuru Weerarathna
@@ -32,12 +32,12 @@ public class RabbitStreamFactory implements EventStreamFactory {
     private final RabbitDispatcher dispatcher = new RabbitDispatcher();
 
     @Override
-    public SourceStreamSupport getEngineEventSource() {
+    public SourceStreamProvider getEngineEventSource() {
         return source;
     }
 
     @Override
-    public EventDispatchSupport getDispatcher() {
+    public EventDispatcher getDispatcher() {
         return dispatcher;
     }
 }

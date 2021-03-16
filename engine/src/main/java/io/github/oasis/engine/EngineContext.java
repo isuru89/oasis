@@ -26,8 +26,8 @@ import io.github.oasis.core.elements.ElementModuleFactory;
 import io.github.oasis.core.elements.Registrar;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.external.EventReadWrite;
-import io.github.oasis.core.external.SignalSubscriptionSupport;
+import io.github.oasis.core.external.EventReadWriteHandler;
+import io.github.oasis.core.external.SignalSubscription;
 import io.github.oasis.engine.factory.Parsers;
 import io.github.oasis.engine.factory.Processors;
 import io.github.oasis.engine.factory.Sinks;
@@ -46,7 +46,7 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
 
     private OasisConfigs configs;
     private Db db;
-    private EventReadWrite eventStore;
+    private EventReadWriteHandler eventStore;
 
     private Parsers parsers;
     private Processors processors;
@@ -55,7 +55,7 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
     private List<Class<? extends ElementModuleFactory>> moduleFactoryList = new ArrayList<>();
     private final transient List<ElementModule> moduleList = new ArrayList<>();
 
-    private SignalSubscriptionSupport signalSubscription;
+    private SignalSubscription signalSubscription;
 
     public void init() throws OasisException {
         processors = new Processors();
@@ -107,7 +107,7 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
     }
 
     @Override
-    public EventReadWrite getEventStore() {
+    public EventReadWriteHandler getEventStore() {
         return eventStore;
     }
 
@@ -120,7 +120,7 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
         return new Builder();
     }
 
-    public SignalSubscriptionSupport getSignalSubscription() {
+    public SignalSubscription getSignalSubscription() {
         return signalSubscription;
     }
 
@@ -132,7 +132,7 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
         this.db = db;
     }
 
-    private void setEventStore(EventReadWrite eventStore) {
+    private void setEventStore(EventReadWriteHandler eventStore) {
         this.eventStore = eventStore;
     }
 
@@ -140,7 +140,7 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
         this.moduleFactoryList = moduleFactoryList;
     }
 
-    private void setSignalSubscription(SignalSubscriptionSupport signalSubscription) {
+    private void setSignalSubscription(SignalSubscription signalSubscription) {
         this.signalSubscription = signalSubscription;
     }
 
@@ -160,12 +160,12 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
             return this;
         }
 
-        public Builder withEventStore(EventReadWrite eventStore) {
+        public Builder withEventStore(EventReadWriteHandler eventStore) {
             ctx.setEventStore(eventStore);
             return this;
         }
 
-        public Builder withSignalSubscription(SignalSubscriptionSupport signalSubscription) {
+        public Builder withSignalSubscription(SignalSubscription signalSubscription) {
             ctx.setSignalSubscription(signalSubscription);
             return this;
         }

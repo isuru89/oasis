@@ -19,9 +19,8 @@
 
 package io.github.oasis.services.events.dispatcher;
 
-import io.github.oasis.core.Event;
-import io.github.oasis.core.external.EventAsyncDispatchSupport;
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventAsyncDispatcher;
+import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.services.events.EventsApi;
 import io.github.oasis.services.events.model.EventProxy;
@@ -63,7 +62,7 @@ public class ExternalDispatcherTest {
                 .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
-        vertx.deployVerticle(new EventsApi(), options, testContext.completing());
+        vertx.deployVerticle(new EventsApi(), options, testContext.succeedingThenComplete());
         sleepFor(SLEEP_MS);
         testContext.completeNow();
     }
@@ -71,14 +70,14 @@ public class ExternalDispatcherTest {
     @Test
     @DisplayName("Loading asynchronous dispatcher")
     void testLoadASyncDispatcher(Vertx vertx, VertxTestContext testContext) {
-        String impl = AsyncDispatchSupport.class.getName();
+        String impl = AsyncDispatcher.class.getName();
         JsonObject dispatcherConf = new JsonObject().put("impl", "oasis:" + impl).put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
                 .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
-        vertx.deployVerticle(new EventsApi(), options, testContext.completing());
+        vertx.deployVerticle(new EventsApi(), options, testContext.succeedingThenComplete());
         sleepFor(SLEEP_MS);
         testContext.completeNow();
     }
@@ -93,7 +92,7 @@ public class ExternalDispatcherTest {
                 .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
-        vertx.deployVerticle(new EventsApi(), options, testContext.completing());
+        vertx.deployVerticle(new EventsApi(), options, testContext.succeedingThenComplete());
         sleepFor(SLEEP_MS);
         testContext.completeNow();
     }
@@ -108,7 +107,7 @@ public class ExternalDispatcherTest {
                 .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
-        vertx.deployVerticle(new EventsApi(), options, testContext.failing());
+        vertx.deployVerticle(new EventsApi(), options, testContext.failing(e -> {}));
         sleepFor(1000);
         testContext.completeNow();
     }
@@ -123,7 +122,7 @@ public class ExternalDispatcherTest {
                 .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
-        vertx.deployVerticle(new EventsApi(), options, testContext.failing());
+        vertx.deployVerticle(new EventsApi(), options, testContext.failing(e -> {}));
         sleepFor(500);
         testContext.completeNow();
     }
@@ -167,14 +166,14 @@ public class ExternalDispatcherTest {
     @Test
     @DisplayName("ASync push")
     void testASyncPushDispatcher() {
-        AsyncDispatchSupport dispatcher = Mockito.spy(new AsyncDispatchSupport());
+        AsyncDispatcher dispatcher = Mockito.spy(new AsyncDispatcher());
         WrappedAsyncDispatcherService service = new WrappedAsyncDispatcherService(dispatcher);
         EventProxy eventProxy = new EventProxy(TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100));
         service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isTrue();
                 Mockito.verify(dispatcher, Mockito.times(1))
-                        .pushAsync(Mockito.any(PersistedDef.class), Mockito.any(EventAsyncDispatchSupport.Handler.class));
+                        .pushAsync(Mockito.any(PersistedDef.class), Mockito.any(EventAsyncDispatcher.Handler.class));
             } catch (Exception e) {
                 Assertions.fail(e.getMessage());
             }
@@ -184,14 +183,14 @@ public class ExternalDispatcherTest {
     @Test
     @DisplayName("ASync push Fail")
     void testASyncPushFailDispatcher() {
-        AsyncDispatchSupport dispatcher = Mockito.spy(new AsyncDispatchSupport(true));
+        AsyncDispatcher dispatcher = Mockito.spy(new AsyncDispatcher(true));
         WrappedAsyncDispatcherService service = new WrappedAsyncDispatcherService(dispatcher);
         EventProxy eventProxy = new EventProxy(TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100));
         service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isFalse();
                 Mockito.verify(dispatcher, Mockito.times(1))
-                        .pushAsync(Mockito.any(PersistedDef.class), Mockito.any(EventAsyncDispatchSupport.Handler.class));
+                        .pushAsync(Mockito.any(PersistedDef.class), Mockito.any(EventAsyncDispatcher.Handler.class));
             } catch (Exception e) {
                 Assertions.fail(e.getMessage());
             }
@@ -201,14 +200,14 @@ public class ExternalDispatcherTest {
     @Test
     @DisplayName("ASync broadcast")
     void testASyncBroadcastDispatcher() {
-        AsyncDispatchSupport dispatcher = Mockito.spy(new AsyncDispatchSupport());
+        AsyncDispatcher dispatcher = Mockito.spy(new AsyncDispatcher());
         WrappedAsyncDispatcherService service = new WrappedAsyncDispatcherService(dispatcher);
         JsonObject jsonObject = TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100);
         service.broadcast(jsonObject, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isTrue();
                 Mockito.verify(dispatcher, Mockito.times(1))
-                        .broadcastAsync(Mockito.any(), Mockito.any(EventAsyncDispatchSupport.Handler.class));
+                        .broadcastAsync(Mockito.any(), Mockito.any(EventAsyncDispatcher.Handler.class));
             } catch (Throwable e) {
                 Assertions.fail(e.getMessage());
             }
@@ -218,14 +217,14 @@ public class ExternalDispatcherTest {
     @Test
     @DisplayName("ASync broadcast Fail")
     void testASyncBroadcastFailDispatcher() {
-        AsyncDispatchSupport dispatcher = Mockito.spy(new AsyncDispatchSupport(true));
+        AsyncDispatcher dispatcher = Mockito.spy(new AsyncDispatcher(true));
         WrappedAsyncDispatcherService service = new WrappedAsyncDispatcherService(dispatcher);
         JsonObject jsonObject = TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100);
         service.broadcast(jsonObject, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isFalse();
                 Mockito.verify(dispatcher, Mockito.times(1))
-                        .broadcastAsync(Mockito.any(), Mockito.any(EventAsyncDispatchSupport.Handler.class));
+                        .broadcastAsync(Mockito.any(), Mockito.any(EventAsyncDispatcher.Handler.class));
             } catch (Exception e) {
                 Assertions.fail(e.getMessage());
             }
@@ -289,7 +288,7 @@ public class ExternalDispatcherTest {
 
     }
 
-    public static class SyncDispatcherSupport implements EventDispatchSupport {
+    public static class SyncDispatcherSupport implements EventDispatcher {
         private static final RuntimeException NO_IMPL = new RuntimeException();
         private boolean throwError = false;
 
@@ -325,13 +324,13 @@ public class ExternalDispatcherTest {
         }
     }
 
-    public static class AsyncDispatchSupport implements EventAsyncDispatchSupport {
+    public static class AsyncDispatcher implements EventAsyncDispatcher {
         private boolean throwError = false;
 
-        public AsyncDispatchSupport() {
+        public AsyncDispatcher() {
         }
 
-        public AsyncDispatchSupport(boolean throwError) {
+        public AsyncDispatcher(boolean throwError) {
             this.throwError = throwError;
         }
 

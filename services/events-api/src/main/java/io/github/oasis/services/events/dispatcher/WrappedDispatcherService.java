@@ -19,8 +19,7 @@
 
 package io.github.oasis.services.events.dispatcher;
 
-import io.github.oasis.core.Event;
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.services.events.model.EventProxy;
 import io.vertx.core.AsyncResult;
@@ -37,9 +36,9 @@ public class WrappedDispatcherService extends AbstractDispatcherService {
     private final JsonObject EMPTY = new JsonObject();
 
     private final Vertx vertx;
-    private final EventDispatchSupport dispatcher;
+    private final EventDispatcher dispatcher;
 
-    public WrappedDispatcherService(Vertx vertx, EventDispatchSupport dispatcher) {
+    public WrappedDispatcherService(Vertx vertx, EventDispatcher dispatcher) {
         this.vertx = vertx;
         this.dispatcher = dispatcher;
     }

@@ -23,7 +23,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.Game;
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.PersistedDef;
 import io.github.oasis.engine.element.points.PointDef;
 import io.github.oasis.simulations.model.Team;
@@ -75,7 +75,7 @@ public class Simulation implements Closeable {
 
     private File gameRootDir;
     protected SimulationContext context;
-    private EventDispatchSupport dispatcher;
+    private EventDispatcher dispatcher;
 
     private List<User> users = new ArrayList<>();
     private List<String> acceptedEvents = new ArrayList<>();

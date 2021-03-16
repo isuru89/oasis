@@ -24,7 +24,7 @@ import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.core.external.EventReadWriteHandler;
 import io.github.oasis.engine.EngineContext;
 
 import java.io.Serializable;
@@ -66,7 +66,7 @@ public class RuleExecutionContext implements RuleExecutionContextSupport, Serial
     }
 
     @Override
-    public EventReadWrite getEventStore() {
+    public EventReadWriteHandler getEventStore() {
         return engineContext.getEventStore();
     }
 }

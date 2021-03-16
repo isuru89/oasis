@@ -40,7 +40,7 @@ import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.core.services.api.beans.GsonSerializer;
 import io.github.oasis.core.services.api.beans.RedisRepository;
 import io.github.oasis.db.redis.RedisDb;
-import io.github.oasis.db.redis.RedisEventLoader;
+import io.github.oasis.db.redis.RedisEventLoaderHandler;
 import io.github.oasis.elements.badges.BadgesModuleFactory;
 import io.github.oasis.elements.challenges.ChallengesModuleFactory;
 import io.github.oasis.elements.milestones.MilestonesModuleFactory;
@@ -103,7 +103,7 @@ public class OasisEngineTest {
 
         EngineContext context = builder.withConfigs(oasisConfigs)
                 .withDb(dbPool)
-                .withEventStore(new RedisEventLoader(dbPool, oasisConfigs))
+                .withEventStore(new RedisEventLoaderHandler(dbPool, oasisConfigs))
                 .installModule(RatingsModuleFactory.class)
                 .installModule(PointsModuleFactory.class)
                 .installModule(MilestonesModuleFactory.class)

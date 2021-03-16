@@ -19,7 +19,7 @@
 
 package io.github.oasis.simulations;
 
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventDispatcher;
 
 import java.io.File;
 
@@ -30,7 +30,7 @@ public class SimulationContext {
 
     private File gameDataDir;
 
-    private EventDispatchSupport dispatcher;
+    private EventDispatcher dispatcher;
 
     private String apiUrl;
     private String adminApiUrl;
@@ -59,11 +59,11 @@ public class SimulationContext {
         this.gameDataDir = gameDataDir;
     }
 
-    public EventDispatchSupport getDispatcher() {
+    public EventDispatcher getDispatcher() {
         return dispatcher;
     }
 
-    public void setDispatcher(EventDispatchSupport dispatcher) {
+    public void setDispatcher(EventDispatcher dispatcher) {
         this.dispatcher = dispatcher;
     }
 }

@@ -24,11 +24,11 @@ import io.github.oasis.core.external.messages.PersistedDef;
 /**
  * Asynchronous event dispatch support for message brokers.
  *
- * For synchronous dispatch support please see {@link EventDispatchSupport}.
+ * For synchronous dispatch support please see {@link EventDispatcher}.
  *
  * @author Isuru Weerarathna
  */
-public interface EventAsyncDispatchSupport extends EventDispatchSupport {
+public interface EventAsyncDispatcher extends EventDispatcher {
 
     RuntimeException NOT_SUPPORTED = new UnsupportedOperationException("Async handler does not support sync operations!");
 

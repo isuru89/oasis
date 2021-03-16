@@ -19,7 +19,7 @@
 
 package io.github.oasis.simulations.impl;
 
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.PersistedDef;
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * @author Isuru Weerarathna
  */
-public class RedirectedDispatcher implements EventDispatchSupport {
+public class RedirectedDispatcher implements EventDispatcher {
 
     private ManualSourceStream sourceStreamSupport;
 

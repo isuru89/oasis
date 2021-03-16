@@ -29,7 +29,7 @@ import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.core.external.EventReadWriteHandler;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.utils.Constants;
@@ -59,7 +59,7 @@ public class ChallengeProcessor extends AbstractProcessor<ChallengeRule, Signal>
         super(dbPool, ruleCtx);
     }
 
-    public ChallengeProcessor(Db dbPool, EventReadWrite eventLoader, RuleContext<ChallengeRule> ruleCtx) {
+    public ChallengeProcessor(Db dbPool, EventReadWriteHandler eventLoader, RuleContext<ChallengeRule> ruleCtx) {
         super(dbPool, eventLoader, ruleCtx);
     }
 

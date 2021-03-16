@@ -26,7 +26,7 @@ import io.github.oasis.core.elements.ElementModuleFactory;
 import io.github.oasis.core.elements.Registrar;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.external.EventReadWrite;
+import io.github.oasis.core.external.EventReadWriteHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -96,7 +96,7 @@ public class StatsApiContext implements RuntimeContextSupport, Registrar {
     }
 
     @Override
-    public EventReadWrite getEventStore() {
+    public EventReadWriteHandler getEventStore() {
         return null;
     }
 

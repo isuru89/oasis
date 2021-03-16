@@ -21,14 +21,14 @@ package io.github.oasis.simulations.impl;
 
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.external.MessageReceiver;
-import io.github.oasis.core.external.SourceStreamSupport;
+import io.github.oasis.core.external.SourceStreamProvider;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
 
 /**
  * @author Isuru Weerarathna
  */
-public class ManualSourceStream implements SourceStreamSupport {
+public class ManualSourceStream implements SourceStreamProvider {
 
     private MessageReceiver sourceFunction;
 

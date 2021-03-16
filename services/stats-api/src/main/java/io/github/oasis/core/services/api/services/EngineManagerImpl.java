@@ -23,7 +23,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.configs.OasisConfigs;
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.external.messages.PersistedDef;
@@ -53,7 +53,7 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
 
     private final OasisConfigs oasisConfigs;
 
-    private EventDispatchSupport dispatchSupport;
+    private EventDispatcher dispatchSupport;
 
     public EngineManagerImpl(OasisConfigs oasisConfigs) {
         this.oasisConfigs = oasisConfigs;
@@ -77,9 +77,9 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
                 .orElseThrow(() -> new IllegalStateException("Unknown dispatcher implementation provided! " + dispatcherClz));
 
         LOG.info("Dispatcher loaded from {}", dispatcherClz);
-        EventDispatchSupport dispatcher = eventStreamFactory.getDispatcher();
+        EventDispatcher dispatcher = eventStreamFactory.getDispatcher();
         Map<String, Object> config = toMap(oasisConfigs.getConfigRef().getConfig("oasis.dispatcher.configs"));
-        EventDispatchSupport.DispatcherContext context = () -> config;
+        EventDispatcher.DispatcherContext context = () -> config;
         dispatcher.init(context);
         this.dispatchSupport = dispatcher;
         LOG.info("Dispatcher {} successfully loaded!", dispatcherClz);

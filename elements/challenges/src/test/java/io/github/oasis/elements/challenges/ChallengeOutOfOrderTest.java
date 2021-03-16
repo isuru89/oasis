@@ -75,7 +75,7 @@ public class ChallengeOutOfOrderTest extends AbstractRuleTest {
         Assertions.assertEquals(ChallengeRule.ChallengeScope.TEAM, rule.getScope());
         Assertions.assertTrue(rule.doesNotHaveFlag(ChallengeRule.REPEATABLE_WINNERS));
         Assertions.assertTrue(rule.hasFlag(ChallengeRule.OUT_OF_ORDER_WINNERS));
-        ChallengeProcessor processor = new ChallengeProcessor(pool, eventReadWrite, ruleContext);
+        ChallengeProcessor processor = new ChallengeProcessor(pool, eventReadWriteHandler, ruleContext);
         String ruleId = rule.getId();
         ChallengeOverEvent overEvent = ChallengeOverEvent.createFor(e1.getGameId(), ruleId);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8, overEvent);
@@ -107,7 +107,7 @@ public class ChallengeOutOfOrderTest extends AbstractRuleTest {
         RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
         Assertions.assertTrue(rule.hasFlag(ChallengeRule.REPEATABLE_WINNERS));
         Assertions.assertTrue(rule.hasFlag(ChallengeRule.OUT_OF_ORDER_WINNERS));
-        ChallengeProcessor processor = new ChallengeProcessor(pool, eventReadWrite, ruleContext);
+        ChallengeProcessor processor = new ChallengeProcessor(pool, eventReadWriteHandler, ruleContext);
         String ruleId = rule.getId();
         ChallengeOverEvent overEvent = ChallengeOverEvent.createFor(e1.getGameId(), ruleId);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8, overEvent);
@@ -137,7 +137,7 @@ public class ChallengeOutOfOrderTest extends AbstractRuleTest {
         List<Signal> signals = new ArrayList<>();
         ChallengeRule rule = loadRule(CHALLENGES_OUT_OF_ORDER_YML, "TEAM_SCOPED_MULTI_WINNER_OOO_REPEATABLE");
         RuleContext<ChallengeRule> ruleContext = createRule(rule, signals);
-        ChallengeProcessor processor = new ChallengeProcessor(pool, eventReadWrite, ruleContext);
+        ChallengeProcessor processor = new ChallengeProcessor(pool, eventReadWriteHandler, ruleContext);
         submitOrder(processor, e1, e2, e3, e4, e5, e6, e7, e8);
 
         System.out.println(signals);

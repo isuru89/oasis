@@ -19,8 +19,8 @@
 
 package io.github.oasis.services.events.dispatcher;
 
-import io.github.oasis.core.external.EventAsyncDispatchSupport;
-import io.github.oasis.core.external.EventDispatchSupport;
+import io.github.oasis.core.external.EventAsyncDispatcher;
+import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.EventStreamFactory;
 import io.vertx.core.Promise;
 import io.vertx.core.Verticle;
@@ -66,10 +66,10 @@ public class DispatcherFactory implements VerticleFactory {
                 instance = classLoader.loadClass(impl).getDeclaredConstructor().newInstance();
             }
 
-            if (instance instanceof EventDispatchSupport) {
-                EventDispatchSupport dispatchSupport = (EventDispatchSupport) instance;
-                if (instance instanceof EventAsyncDispatchSupport) {
-                    promise.complete(() -> new DispatcherAsyncVerticle((EventAsyncDispatchSupport) instance));
+            if (instance instanceof EventDispatcher) {
+                EventDispatcher dispatchSupport = (EventDispatcher) instance;
+                if (instance instanceof EventAsyncDispatcher) {
+                    promise.complete(() -> new DispatcherAsyncVerticle((EventAsyncDispatcher) instance));
                 } else {
                     promise.complete(() -> new DispatcherVerticle(dispatchSupport));
                 }

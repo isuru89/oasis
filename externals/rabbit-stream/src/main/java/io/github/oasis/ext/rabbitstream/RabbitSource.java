@@ -20,12 +20,17 @@
 package io.github.oasis.ext.rabbitstream;
 
 import com.google.gson.Gson;
-import com.rabbitmq.client.*;
+import com.rabbitmq.client.CancelCallback;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.DeliverCallback;
+import com.rabbitmq.client.Delivery;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.external.MessageReceiver;
-import io.github.oasis.core.external.SourceStreamSupport;
+import io.github.oasis.core.external.SourceStreamProvider;
 import io.github.oasis.core.external.messages.FailedGameCommand;
 import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.PersistedDef;
@@ -44,7 +49,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author Isuru Weerarathna
  */
-public class RabbitSource implements SourceStreamSupport, Closeable {
+public class RabbitSource implements SourceStreamProvider, Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitSource.class);
 

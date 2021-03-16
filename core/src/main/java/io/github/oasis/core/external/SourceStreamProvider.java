@@ -29,7 +29,7 @@ import java.io.Closeable;
  *
  * @author Isuru Weerarathna
  */
-public interface SourceStreamSupport extends Closeable {
+public interface SourceStreamProvider extends Closeable {
 
     void init(RuntimeContextSupport context, MessageReceiver source) throws Exception;
 
