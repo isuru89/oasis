@@ -35,9 +35,14 @@ import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.dao.IEventSourceDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
-import io.github.oasis.core.services.api.dao.dto.*;
+import io.github.oasis.core.services.api.dao.dto.ElementDto;
+import io.github.oasis.core.services.api.dao.dto.EventSourceDto;
+import io.github.oasis.core.services.api.dao.dto.EventSourceSecretsDto;
+import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
+import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.JdbiException;
 import org.springframework.stereotype.Component;
 
@@ -164,7 +169,18 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public Game updateGame(int gameId, Game game) {
-        gameDao.updateGame(gameId, GameUpdatePart.from(game));
+        Game toBeUpdatedGame = gameDao.readGame(gameId);
+        if (toBeUpdatedGame == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.GAME_NOT_EXISTS);
+        }
+
+        GameUpdatePart gameUpdatePart = GameUpdatePart.from(game);
+        if (StringUtils.isBlank(gameUpdatePart.getNewGameStatus())) {
+            // we don't want to override current game status
+            gameUpdatePart.setNewGameStatus(toBeUpdatedGame.getCurrentStatus());
+        }
+
+        gameDao.updateGame(gameId, gameUpdatePart);
         return gameDao.readGame(gameId);
     }
 

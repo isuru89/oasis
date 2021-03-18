@@ -17,18 +17,12 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api;
+package io.github.oasis.engine.actors.cmds;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import io.github.oasis.core.external.messages.OasisCommand;
 
-@SpringBootApplication
-@EnableScheduling
-public class StatsApiApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(StatsApiApplication.class, args);
-	}
-
+/**
+ * @author Isuru Weerarathna
+ */
+public class EngineShutdownCommand implements OasisCommand {
 }

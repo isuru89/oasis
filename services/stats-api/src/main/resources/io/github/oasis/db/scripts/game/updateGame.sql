@@ -3,6 +3,7 @@ UPDATE
 SET
     description = :description,
     motto = :motto,
-    logo_ref = :logoRef
+    logo_ref = :logoRef,
+    status = :newGameStatus
 WHERE
     id = :id

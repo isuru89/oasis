@@ -17,18 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api;
+package io.github.oasis.core.services.api.to;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import io.github.oasis.core.external.messages.EngineStatusChangedMessage;
+import lombok.Getter;
+import org.springframework.context.ApplicationEvent;
 
-@SpringBootApplication
-@EnableScheduling
-public class StatsApiApplication {
+/**
+ * @author Isuru Weerarathna
+ */
+@Getter
+public class EngineStatusChangedEvent extends ApplicationEvent {
 
-	public static void main(String[] args) {
-		SpringApplication.run(StatsApiApplication.class, args);
-	}
+    private final EngineStatusChangedMessage message;
 
+    public EngineStatusChangedEvent(Object source, EngineStatusChangedMessage message) {
+        super(source);
+        this.message = message;
+    }
 }

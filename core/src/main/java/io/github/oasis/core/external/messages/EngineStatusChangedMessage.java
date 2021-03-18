@@ -17,18 +17,23 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api;
+package io.github.oasis.core.external.messages;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@SpringBootApplication
-@EnableScheduling
-public class StatsApiApplication {
+import java.io.Serializable;
 
-	public static void main(String[] args) {
-		SpringApplication.run(StatsApiApplication.class, args);
-	}
+/**
+ * @author Isuru Weerarathna
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class EngineStatusChangedMessage implements Serializable {
+
+    private int gameId;
+    private GameState state;
 
 }

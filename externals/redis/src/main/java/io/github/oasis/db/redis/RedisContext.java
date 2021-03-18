@@ -153,6 +153,23 @@ public class RedisContext implements DbContext {
     }
 
     @Override
+    public void queueOffer(String listName, String data) {
+        jedis.rpush(listName, data);
+    }
+
+    @Override
+    public List<String> queuePoll(String listName, int timeOut) {
+        if (timeOut >= 0) {
+            return jedis.blpop(timeOut, listName);
+        } else {
+            if (jedis.exists(listName)) {
+                return List.of(jedis.lpop(listName));
+            }
+            return List.of();
+        }
+    }
+
+    @Override
     public void incrementAllInSorted(BigDecimal value, String commonMember, List<String> baseKeys) {
         List<String> allArgs = new ArrayList<>();
         allArgs.add(commonMember);

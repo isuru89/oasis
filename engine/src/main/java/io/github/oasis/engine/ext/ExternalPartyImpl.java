@@ -79,10 +79,14 @@ public class ExternalPartyImpl implements Extension {
     }
 
     public void ackGameStateChanged(GameCommand gameCommand) {
-        sourceStreamProvider.handleGameCommand(gameCommand);
+        if (Objects.nonNull(gameCommand.getMessageId())) {
+            sourceStreamProvider.handleGameCommand(gameCommand);
+        }
     }
 
     public void nackGameStateChanged(GameCommand gameCommand) {
-        sourceStreamProvider.handleGameCommand(new FailedGameCommand(gameCommand));
+        if (Objects.nonNull(gameCommand.getMessageId())) {
+            sourceStreamProvider.handleGameCommand(new FailedGameCommand(gameCommand));
+        }
     }
 }

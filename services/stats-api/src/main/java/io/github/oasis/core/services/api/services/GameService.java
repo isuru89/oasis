@@ -44,8 +44,11 @@ public class GameService extends AbstractOasisService {
 
     private final Map<String, GameState> availableStatuses = Map.of(
             "start", GameState.STARTED,
+            "started", GameState.STARTED,
             "pause", GameState.PAUSED,
-            "stop", GameState.STOPPED);
+            "paused", GameState.PAUSED,
+            "stop", GameState.STOPPED,
+            "stopped", GameState.STOPPED);
 
     private final IEngineManager engineManager;
 
@@ -59,6 +62,7 @@ public class GameService extends AbstractOasisService {
 
         validateGameObjectForCreation(game);
 
+        game.setCurrentStatus(GameState.CREATED.name());
         Game addedGame = backendRepository.addNewGame(game);
 
         // add attributes associated with game
@@ -96,6 +100,9 @@ public class GameService extends AbstractOasisService {
         GameState gameState = validateGameState(newStatus);
 
         Game game = backendRepository.readGame(gameId);
+        if (game == null) {
+            throw new OasisApiException(ErrorCodes.GAME_NOT_EXISTS, HttpStatus.NOT_FOUND.value(), "No game is found by id " + gameId);
+        }
         engineManager.changeGameStatus(gameState, game);
         return game;
     }

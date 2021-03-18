@@ -22,19 +22,25 @@ package io.github.oasis.engine.actors;
 import akka.routing.Routee;
 import akka.routing.Router;
 import io.github.oasis.core.Event;
+import io.github.oasis.core.ID;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.context.GameContext;
+import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.GameCommand;
+import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.engine.EngineContext;
+import io.github.oasis.engine.actors.cmds.EngineShutdownCommand;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
 import io.github.oasis.engine.actors.routers.GameRouting;
 import io.github.oasis.engine.ext.ExternalParty;
 import io.github.oasis.engine.ext.ExternalPartyImpl;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -78,10 +84,27 @@ public class OasisSupervisor extends OasisBaseActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
+                .match(EngineShutdownCommand.class, this::publish)
                 .match(EventMessage.class, this::forwardEvent)
                 .match(OasisRuleMessage.class, this::ruleSpecificCommand)
                 .match(GameCommand.class, this::gameSpecificCommand)
                 .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void publish(EngineShutdownCommand command) {
+        if (!gamesRunning.isEmpty()) {
+            try (DbContext db = engineContext.getDb().createContext()) {
+                for (Integer gameId : gamesRunning) {
+                    JSONObject object = new JSONObject();
+                    object.put("gameId", gameId);
+                    object.put("state", GameState.STOPPED);
+                    db.queueOffer(ID.ENGINE_STATUS_CHANNEL, object.toJSONString());
+                }
+            } catch (IOException e) {
+                LOG.error("Error occurred while publishing running games!", e);
+            }
+        }
     }
 
     private void forwardEvent(EventMessage eventMessage) {
@@ -133,5 +156,9 @@ public class OasisSupervisor extends OasisBaseActor {
 
     private GameContext loadGameContext(int gameId) {
         return new GameContext(gameId);
+    }
+
+    public Set<Integer> getGamesRunning() {
+        return gamesRunning;
     }
 }

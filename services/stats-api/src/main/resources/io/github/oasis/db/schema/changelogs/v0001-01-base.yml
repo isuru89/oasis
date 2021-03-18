@@ -242,6 +242,9 @@ databaseChangeLog:
                   name: logo_ref
                   type: varchar(255)
               - column:
+                  name: status
+                  type: varchar(32)
+              - column:
                   name: created_at
                   type: bigint
               - column:

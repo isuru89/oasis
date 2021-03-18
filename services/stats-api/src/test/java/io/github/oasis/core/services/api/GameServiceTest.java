@@ -38,7 +38,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
@@ -68,10 +72,12 @@ public class GameServiceTest extends AbstractServiceTest {
         System.out.println(game);
         Assertions.assertNotNull(game);
         assertGame(game, stackOverflow);
+        assertEquals(GameState.CREATED.name(), game.getCurrentStatus());
 
         System.out.println(promotions);
         Game pGame = controller.addGame(promotions);
         assertGame(pGame, promotions);
+        assertEquals(GameState.CREATED.name(), pGame.getCurrentStatus());
 
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.addGame(stackOverflow))
                 .isInstanceOf(OasisApiRuntimeException.class)
@@ -94,7 +100,8 @@ public class GameServiceTest extends AbstractServiceTest {
 
     @Test
     void updateGame() throws OasisException {
-        int stackId = controller.addGame(stackOverflow).getId();
+        Game stackGame = controller.addGame(stackOverflow);
+        int stackId = stackGame.getId();
 
         assertGame(engineRepo.readGame(stackId), stackOverflow);
         assertGame(adminRepo.readGame(stackId), stackOverflow);
@@ -107,6 +114,27 @@ public class GameServiceTest extends AbstractServiceTest {
                 .build();
         Game updatedGame = controller.updateGame(stackId, updateRequest);
         assertGame(updatedGame, updateRequest);
+        assertEquals(GameState.CREATED.name(), updatedGame.getCurrentStatus());
+    }
+
+    @Test
+    void updateGameWithStatus() throws OasisException {
+        Game stackGame = controller.addGame(stackOverflow);
+        int stackId = stackGame.getId();
+
+        assertGame(engineRepo.readGame(stackId), stackOverflow);
+        assertGame(adminRepo.readGame(stackId), stackOverflow);
+
+        GameObjectRequest updateRequest = stackOverflow.toBuilder()
+                .id(stackId)
+                .motto("new motto")
+                .description("new description")
+                .logoRef("new logo ref")
+                .newGameStatus(GameState.UPDATED.name())
+                .build();
+        Game updatedGame = controller.updateGame(stackId, updateRequest);
+        assertGame(updatedGame, updateRequest);
+        assertEquals(GameState.UPDATED.name(), updatedGame.getCurrentStatus());
     }
 
     @Test

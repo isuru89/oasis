@@ -55,4 +55,6 @@ public interface DbContext extends Closeable {
     BigDecimal incrementCapped(BigDecimal value, String baseKey, String childKey, BigDecimal limit);
     Object runScript(String scriptName, int noOfKeys, String... args);
 
+    void queueOffer(String listName, String data);
+    List<String> queuePoll(String listName, int timeOut);
 }
