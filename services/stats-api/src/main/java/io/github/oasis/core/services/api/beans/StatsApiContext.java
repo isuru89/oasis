@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -83,6 +84,11 @@ public class StatsApiContext implements RuntimeContextSupport, Registrar {
 
     public List<ElementModule> getElementModules() {
         return elementModules;
+    }
+
+    @Override
+    public String id() {
+        return "stats_" + UUID.randomUUID().toString();
     }
 
     @Override

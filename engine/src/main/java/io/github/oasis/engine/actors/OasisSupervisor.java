@@ -33,6 +33,9 @@ import io.github.oasis.engine.actors.cmds.EngineShutdownCommand;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.GameEventMessage;
 import io.github.oasis.engine.actors.cmds.OasisRuleMessage;
+import io.github.oasis.engine.actors.cmds.internal.GameStatusAsk;
+import io.github.oasis.engine.actors.cmds.internal.GameStatusReply;
+import io.github.oasis.engine.actors.cmds.internal.InternalAsk;
 import io.github.oasis.engine.actors.routers.GameRouting;
 import io.github.oasis.engine.ext.ExternalParty;
 import io.github.oasis.engine.ext.ExternalPartyImpl;
@@ -84,6 +87,7 @@ public class OasisSupervisor extends OasisBaseActor {
     @Override
     public Receive createReceive() {
         return receiveBuilder()
+                .match(InternalAsk.class, this::handleInternalQuery)
                 .match(EngineShutdownCommand.class, this::publish)
                 .match(EventMessage.class, this::forwardEvent)
                 .match(OasisRuleMessage.class, this::ruleSpecificCommand)
@@ -91,20 +95,32 @@ public class OasisSupervisor extends OasisBaseActor {
                 .build();
     }
 
-    @SuppressWarnings("unchecked")
+    private void handleInternalQuery(InternalAsk ask) {
+        if (ask instanceof GameStatusAsk) {
+            GameStatusAsk statusAsk = (GameStatusAsk) ask;
+            getSender().tell(new GameStatusReply(statusAsk.getGameId(), gamesRunning.contains(statusAsk.getGameId())), getSelf());
+        }
+    }
+
     private void publish(EngineShutdownCommand command) {
         if (!gamesRunning.isEmpty()) {
             try (DbContext db = engineContext.getDb().createContext()) {
                 for (Integer gameId : gamesRunning) {
-                    JSONObject object = new JSONObject();
-                    object.put("gameId", gameId);
-                    object.put("state", GameState.STOPPED);
-                    db.queueOffer(ID.ENGINE_STATUS_CHANNEL, object.toJSONString());
+                    publishGameRemoval(gameId, db);
                 }
             } catch (IOException e) {
                 LOG.error("Error occurred while publishing running games!", e);
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void publishGameRemoval(int gameId, DbContext db) {
+        JSONObject object = new JSONObject();
+        object.put("gameId", gameId);
+        object.put("state", GameState.STOPPED);
+        object.put("engineId", engineContext.id());
+        db.queueOffer(ID.ENGINE_STATUS_CHANNEL, object.toJSONString());
     }
 
     private void forwardEvent(EventMessage eventMessage) {
@@ -133,13 +149,24 @@ public class OasisSupervisor extends OasisBaseActor {
         int gameId = gameCommand.getGameId();
         ExternalPartyImpl eventSource = ExternalParty.EXTERNAL_PARTY.get(getContext().getSystem());
         if (status == GameCommand.GameLifecycle.CREATE || status == GameCommand.GameLifecycle.START) {
-            createGameRuleRefNx(gameId);
-            gamesRunning.add(gameId);
-            contextMap.put(gameId, loadGameContext(gameId));
-            eventSource.ackGameStateChanged(gameCommand);
+            if (acquireGameLock(gameId, engineContext.id())) {
+                createGameRuleRefNx(gameId);
+                gamesRunning.add(gameId);
+                contextMap.put(gameId, loadGameContext(gameId));
+                eventSource.ackGameStateChanged(gameCommand);
+                LOG.info("Successfully acquired the game {} to be run on this engine having id {}. Game Event: {}",
+                        gameId, engineContext.id(), status);
+            } else {
+                LOG.warn("Cannot acquire game {} for this engine, because it is already owned by another engine!", gameId);
+                eventSource.nackGameStateChanged(gameCommand);
+            }
         } else if (status == GameCommand.GameLifecycle.REMOVE) {
-            gamesRunning.remove(gameId);
-            contextMap.remove(gameId);
+            if (releaseGameLock(gameId, engineContext.id())) {
+                gamesRunning.remove(gameId);
+                contextMap.remove(gameId);
+            } else {
+                LOG.debug("The game {} is not running in this engine. Skipping remove message.", gameId);
+            }
             eventSource.ackGameStateChanged(gameCommand);
         } else if (status == GameCommand.GameLifecycle.UPDATE) {
             if (gamesRunning.contains(gameId)) {
@@ -154,11 +181,42 @@ public class OasisSupervisor extends OasisBaseActor {
         }
     }
 
+    private boolean releaseGameLock(int gameId, String myId) {
+        String gameIdStr = String.valueOf(gameId);
+        try (DbContext context = engineContext.getDb().createContext()) {
+            String owningEngine = context.getValueFromMap(ID.GAME_ENGINES, gameIdStr);
+            if (myId.equals(owningEngine)) {
+                LOG.info("Removing game lock... (gameId: {})", gameId);
+                context.removeKeyFromMap(ID.GAME_ENGINES, gameIdStr);
+                publishGameRemoval(gameId, context);
+                LOG.info("Removed game lock! (gameId: {})", gameId);
+                return true;
+            }
+        } catch (IOException e) {
+            LOG.error("Cannot acquire game lock! Unexpected error!", e);
+        }
+        return false;
+    }
+
+    private boolean acquireGameLock(int gameId, String myId) {
+        String gameIdStr = String.valueOf(gameId);
+        try (DbContext context = engineContext.getDb().createContext()) {
+            boolean locked = context.setIfNotExistsInMap(ID.GAME_ENGINES, gameIdStr, myId);
+            if (!locked) {
+                String currentEngineRunning = context.getValueFromMap(ID.GAME_ENGINES, gameIdStr);
+                LOG.info("Game {} is currently run by the engine having id {}. My engine id = {}",
+                        gameId, currentEngineRunning, myId);
+                return myId.equals(currentEngineRunning);
+            }
+            return true;
+        } catch (IOException e) {
+            LOG.error("Cannot acquire game lock! Unexpected error!", e);
+        }
+        return false;
+    }
+
     private GameContext loadGameContext(int gameId) {
         return new GameContext(gameId);
     }
 
-    public Set<Integer> getGamesRunning() {
-        return gamesRunning;
-    }
 }

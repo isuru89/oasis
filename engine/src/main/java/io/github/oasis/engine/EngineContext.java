@@ -31,11 +31,13 @@ import io.github.oasis.core.external.SignalSubscription;
 import io.github.oasis.engine.factory.Parsers;
 import io.github.oasis.engine.factory.Processors;
 import io.github.oasis.engine.factory.Sinks;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Isuru Weerarathna
@@ -43,6 +45,8 @@ import java.util.List;
 public class EngineContext implements RuntimeContextSupport, Registrar {
 
     private static final Logger LOG = LoggerFactory.getLogger(EngineContext.class);
+
+    private String id;
 
     private OasisConfigs configs;
     private Db db;
@@ -58,6 +62,9 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
     private SignalSubscription signalSubscription;
 
     public void init() throws OasisException {
+        id = deriveEngineId();
+        LOG.info(" ----- Engine ID: {} ----- ", id);
+
         processors = new Processors();
         sinks = new Sinks();
 
@@ -94,6 +101,24 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
 
     public Processors getProcessors() {
         return processors;
+    }
+
+    private String deriveEngineId() {
+        if (StringUtils.isNotBlank(id)) {
+            LOG.debug("User has explicitly set a unique id for this game engine.");
+            return id;
+        }
+
+        String envId = System.getenv("OASIS_ENGINE_ID");
+        if (StringUtils.isNotBlank(envId)) {
+            return envId;
+        }
+        return configs.get("oasis.engine.id", UUID.randomUUID().toString());
+    }
+
+    @Override
+    public String id() {
+        return id;
     }
 
     @Override
@@ -149,6 +174,11 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
         private final List<Class<? extends ElementModuleFactory>> factories = new ArrayList<>();
 
         private Builder() {}
+
+        public Builder havingId(String uniqueEngineId) {
+            ctx.id = uniqueEngineId;
+            return this;
+        }
 
         public Builder withConfigs(OasisConfigs configs) {
             ctx.setConfigs(configs);
