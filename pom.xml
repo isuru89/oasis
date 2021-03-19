@@ -28,6 +28,7 @@
         <commonsio.version>2.8.0</commonsio.version>
         <commonslang.version>3.12.0</commonslang.version>
         <amqp.version>5.11.0</amqp.version>
+        <jackson.version>2.12.2</jackson.version>
         <jsonsimple.version>3.1.1</jsonsimple.version>
         <slf4j.version>1.7.30</slf4j.version>
     </properties>
