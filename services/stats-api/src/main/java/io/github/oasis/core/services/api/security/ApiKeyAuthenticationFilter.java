@@ -42,6 +42,9 @@ public class ApiKeyAuthenticationFilter extends AbstractAuthenticationProcessing
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiKeyAuthenticationFilter.class);
 
+    private static final String X_APP_ID = "X-APP-ID";
+    private static final String X_APP_KEY = "X-APP-KEY";
+
     protected ApiKeyAuthenticationFilter(RequestMatcher requiresAuthenticationRequestMatcher,
                                          AuthenticationManager manager) {
         super(requiresAuthenticationRequestMatcher);
@@ -51,11 +54,9 @@ public class ApiKeyAuthenticationFilter extends AbstractAuthenticationProcessing
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
-        String apiKey = request.getHeader("X-APP-ID");
-        String apiSecret = request.getHeader("X-APP-KEY");
+        String apiKey = request.getHeader(X_APP_ID);
+        String apiSecret = request.getHeader(X_APP_KEY);
 
-        LOG.info(request.getServletPath());
-        LOG.info(apiKey + " " + apiSecret);
         PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(apiKey, apiSecret);
         return getAuthenticationManager().authenticate(token);
     }

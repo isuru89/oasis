@@ -20,18 +20,20 @@
 package io.github.oasis.core.services.api.to;
 
 import io.github.oasis.core.model.UserGender;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@Data
 @Builder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class PlayerCreateRequest implements Serializable {
 
     private Long userId;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api;
+package io.github.oasis.core.services.api.services;
 
 import com.mysql.cj.exceptions.AssertionFailedException;
 import io.github.oasis.core.exception.OasisException;
@@ -31,7 +31,6 @@ import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import io.github.oasis.core.services.api.services.EventSourceService;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
@@ -43,7 +42,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
@@ -245,7 +249,7 @@ public class EventSourceServiceTest extends AbstractServiceTest {
     }
 
     @Override
-    JdbcRepository createJdbcRepository(Jdbi jdbi) {
+    protected JdbcRepository createJdbcRepository(Jdbi jdbi) {
         return new JdbcRepository(jdbi.onDemand(IGameDao.class),
                 jdbi.onDemand(IEventSourceDao.class),
                 null,
@@ -254,7 +258,7 @@ public class EventSourceServiceTest extends AbstractServiceTest {
     }
 
     @Override
-    void createServices(BackendRepository backendRepository) {
+    protected void createServices(BackendRepository backendRepository) {
         esController = new EventSourceController(new EventSourceService(backendRepository, keyGeneratorSupport));
     }
 }

@@ -19,8 +19,10 @@
 
 package io.github.oasis.core.services.api.security;
 
+import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.services.api.dao.IApiKeyDao;
 import io.github.oasis.core.services.api.dao.dto.ApiKeyDto;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,7 +32,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
@@ -53,14 +60,26 @@ public class ApiKeyService implements UserDetailsService {
     private static final List<SimpleGrantedAuthority> PLAYER_AUTHORITIES = Collections.singletonList(A_PLAYER);
 
     private final IApiKeyDao dao;
+    private final OasisConfigs configs;
 
-    public ApiKeyService(IApiKeyDao dao) {
+    public ApiKeyService(IApiKeyDao dao, OasisConfigs configs) {
         this.dao = dao;
+        this.configs = configs;
+    }
+
+    @PostConstruct
+    public void init() {
+        String credentials = configs.get("oasis.defaultApiKey", null);
+        if (StringUtils.isNotBlank(credentials)) {
+            String[] parts = credentials.split("[:]");
+            LOG.info("Default credentials are going to be added for user {}", parts[0]);
+            dao.addNewApiKey(parts[0], parts[1], ROLE_ADMIN_FLAG + ROLE_CURATOR_FLAG + ROLE_PLAYER_FLAG);
+        }
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        LOG.info("Authenticating user {}", username);
+        LOG.trace("Authenticating user {}", username);
         ApiKeyDto apiKeyDto = dao.readApiKey(username);
         if (Objects.isNull(apiKeyDto)) {
             LOG.error("No user found by name {}", username);

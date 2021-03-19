@@ -30,8 +30,17 @@ import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.exception.OasisRuntimeException;
-import io.github.oasis.core.external.*;
-import io.github.oasis.core.model.*;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.external.PaginatedResult;
+import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.model.EventSourceMetadata;
+import io.github.oasis.core.model.EventSourceSecrets;
+import io.github.oasis.core.model.PlayerObject;
+import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.model.UserAssociationInfo;
 import io.github.oasis.core.services.SerializationSupport;
 import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.core.utils.Numbers;
@@ -40,7 +49,13 @@ import io.github.oasis.core.utils.Utils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -763,6 +778,20 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
                 }
             }
             return elementDefinitions;
+        });
+    }
+
+    @Override
+    public List<ElementDef> readElementsByGameId(int gameId) {
+        return withDbContext(db -> {
+            String baseKey = ID.getDetailedElementDefKeyForGame(gameId);
+
+            Mapped elementsMap = db.MAP(baseKey);
+            return elementsMap.getAll()
+                    .values().stream()
+                    .map(content -> serializationSupport.deserialize(content, ElementDef.class))
+                    .peek(def -> def.setData(null))
+                    .collect(Collectors.toList());
         });
     }
 

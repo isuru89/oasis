@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api;
+package io.github.oasis.core.services.api.services;
 
 import com.google.gson.Gson;
 import io.github.oasis.core.configs.OasisConfigs;
@@ -63,7 +63,7 @@ public abstract class AbstractServiceTest {
     protected OasisRepository adminRepo;
     protected BackendRepository combinedRepo;
 
-    Jdbi createJdbcDao() throws IOException, SQLException {
+    public Jdbi createJdbcDao() throws IOException, SQLException {
         Gson gson = new Gson();
         DataSource ds = DataSourceBuilder.create()
                 .url("jdbc:h2:mem:sampledb")
@@ -116,7 +116,7 @@ public abstract class AbstractServiceTest {
         }
     }
 
-    RedisRepository createRedisConnection() {
+    public RedisRepository createRedisConnection() {
         RedisDb redisDb = RedisDb.create(OasisConfigs.defaultConfigs());
         redisDb.init();
         dbPool = redisDb;
@@ -126,14 +126,14 @@ public abstract class AbstractServiceTest {
     }
 
 
-    void cleanRedisData() throws IOException {
+    public void cleanRedisData() throws IOException {
         try (DbContext db = dbPool.createContext()) {
             db.allKeys("*").forEach(db::removeKey);
         }
     }
 
     @BeforeEach
-    void beforeEach() throws IOException, SQLException {
+    public void beforeEach() throws IOException, SQLException {
         Jdbi jdbi = createJdbcDao();
         RedisRepository redisConnection = createRedisConnection();
         engineRepo = redisConnection;
@@ -163,7 +163,7 @@ public abstract class AbstractServiceTest {
         }
     }
 
-    abstract JdbcRepository createJdbcRepository(Jdbi jdbi);
+    protected abstract JdbcRepository createJdbcRepository(Jdbi jdbi);
 
-    abstract void createServices(BackendRepository backendRepository);
+    protected abstract void createServices(BackendRepository backendRepository);
 }

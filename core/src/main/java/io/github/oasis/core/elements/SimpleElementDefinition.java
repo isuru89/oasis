@@ -20,9 +20,8 @@
 package io.github.oasis.core.elements;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -31,10 +30,9 @@ import java.io.Serializable;
  *
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
-@ToString
+@NoArgsConstructor
 public class SimpleElementDefinition implements Serializable {
 
     private String id;

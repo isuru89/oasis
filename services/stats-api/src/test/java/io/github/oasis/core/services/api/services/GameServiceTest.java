@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api;
+package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.exception.OasisException;
@@ -29,8 +29,6 @@ import io.github.oasis.core.services.api.controllers.admin.GamesController;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import io.github.oasis.core.services.api.services.GameService;
-import io.github.oasis.core.services.api.services.IEngineManager;
 import io.github.oasis.core.services.api.to.GameObjectRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.jdbi.v3.core.Jdbi;
@@ -164,6 +162,7 @@ public class GameServiceTest extends AbstractServiceTest {
         assertThrows(OasisRuntimeException.class, () -> engineRepo.readGame(stackId));
     }
 
+
     @Test
     void updateGameStatus() throws OasisException {
         int stackId = controller.addGame(stackOverflow).getId();
@@ -197,7 +196,7 @@ public class GameServiceTest extends AbstractServiceTest {
     }
 
     @Override
-    JdbcRepository createJdbcRepository(Jdbi jdbi) {
+    protected JdbcRepository createJdbcRepository(Jdbi jdbi) {
         return new JdbcRepository(
                 jdbi.onDemand(IGameDao.class),
                 null,
@@ -208,7 +207,7 @@ public class GameServiceTest extends AbstractServiceTest {
     }
 
     @Override
-    void createServices(BackendRepository backendRepository) {
+    protected void createServices(BackendRepository backendRepository) {
         controller = new GamesController(new GameService(backendRepository, engineManager));
     }
 

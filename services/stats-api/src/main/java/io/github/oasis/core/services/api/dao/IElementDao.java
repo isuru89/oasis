@@ -62,6 +62,9 @@ public interface IElementDao {
     @SqlQuery
     List<ElementDto> readElementsByType(@Bind("gameId") int gameId, @Bind("type") String type);
 
+    @SqlQuery
+    List<ElementDto> readElementsByGameId(@Bind("gameId") int gameId);
+
     @SqlUpdate
     void updateElement(@Bind("defId") String elementId, @BindBean ElementDto update);
 

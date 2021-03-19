@@ -87,6 +87,7 @@ public static void main(String[] args) throws Exception {
             .withConfigs(oasisConfigs)
             .withDb(dbPool)
             .withEventStore(eventStore)
+            .withSignalSubscription(subscription)  // OPTIONAL: if you want to tap into produced rewards.
             .installModule(RatingsModuleFactory.class)
             .installModule(PointsModuleFactory.class)
             .installModule(MilestonesModuleFactory.class)

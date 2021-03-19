@@ -55,7 +55,7 @@ public class EngineStatusSubscriber {
 
     @Scheduled(fixedRate = 5000)
     public void subscribeForEngineEvents() {
-        LOG.info("Checking for new engine events... ");
+        LOG.debug("Checking for new engine events... ");
         try (DbContext context = db.createContext()) {
             List<String> events = context.queuePoll(ID.ENGINE_STATUS_CHANNEL, -1);
             if (CollectionUtils.isNotEmpty(events)) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api;
+package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
@@ -31,8 +31,6 @@ import io.github.oasis.core.services.api.controllers.admin.GameAttributesControl
 import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import io.github.oasis.core.services.api.services.ElementService;
-import io.github.oasis.core.services.api.services.GameAttributeService;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.github.oasis.elements.badges.BadgeDef;
 import io.github.oasis.engine.element.points.PointDef;
@@ -45,7 +43,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
@@ -201,7 +204,7 @@ public class ElementServiceTest extends AbstractServiceTest {
     }
 
     @Override
-    JdbcRepository createJdbcRepository(Jdbi jdbi) {
+    protected JdbcRepository createJdbcRepository(Jdbi jdbi) {
         return new JdbcRepository(null,
                 null,
                 jdbi.onDemand(IElementDao.class),
@@ -210,8 +213,8 @@ public class ElementServiceTest extends AbstractServiceTest {
     }
 
     @Override
-    void createServices(BackendRepository backendRepository) {
-        controller = new ElementsController(new ElementService(backendRepository, null));
+    protected void createServices(BackendRepository backendRepository) {
+        controller = new ElementsController(new ElementService(backendRepository));
         attrController = new GameAttributesController(new GameAttributeService(backendRepository));
     }
 
