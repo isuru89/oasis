@@ -19,6 +19,7 @@
 
 package io.github.oasis.simulations;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.Game;
@@ -81,6 +82,8 @@ public class Simulation implements Closeable {
     Map<String, Integer> teamMapping;
 
     public void run(SimulationContext context) {
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         try {
             this.context = context;
             this.dispatcher = context.getDispatcher();
@@ -103,7 +106,12 @@ public class Simulation implements Closeable {
 
             dispatchGameStart();
             dispatchRules();
-            // dispatchEvents();
+
+            System.out.println("Waiting for 5 seconds before event publishing");
+            // wait some time until alll rules are published
+            Thread.sleep(5000);
+
+            dispatchEvents();
 
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);

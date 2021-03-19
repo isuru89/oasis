@@ -30,8 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_RETRY_COUNT;
@@ -61,6 +63,8 @@ public class RabbitDispatcher implements EventDispatcher {
     private Channel channel;
 
     private final ObjectMapper mapper = new ObjectMapper();
+
+    private final Set<String> cachedGameQueues = new HashSet<>();
 
     @Override
     public void init(DispatcherContext context) throws Exception {
@@ -102,6 +106,10 @@ public class RabbitDispatcher implements EventDispatcher {
     @Override
     public void push(EngineMessage message) throws Exception {
         String routingKey = generateRoutingKey(message);
+        if (cachedGameQueues.add(routingKey)) {
+            RabbitUtils.declareGameEventQueue(channel, routingKey);
+        }
+
         channel.basicPublish(RabbitConstants.GAME_EXCHANGE,
                 routingKey,
                 null,
@@ -135,11 +143,7 @@ public class RabbitDispatcher implements EventDispatcher {
         Map<String, Object> configs = context.getConfigs();
         Map<String, Object> eventExchangeOptions = (Map<String, Object>) configs.getOrDefault("eventExchange", EMPTY_CONFIG);
         LOG.debug("Event Exchange Options: {}", eventExchangeOptions);
-        channel.exchangeDeclare(RabbitConstants.GAME_EXCHANGE,
-                RabbitConstants.GAME_EXCHANGE_TYPE,
-                (boolean) eventExchangeOptions.getOrDefault(OPT_DURABLE, DEF_EVENT_EXCHANGE_DURABLE),
-                (boolean) eventExchangeOptions.getOrDefault(OPT_AUTO_DELETE, DEF_EVENT_EXCHANGE_AUTO_DEL),
-                null);
+        RabbitUtils.declareGameExchange(channel);
 
         LOG.debug("Declaring Oasis Announcements Exchange");
         RabbitUtils.declareAnnouncementExchange(channel);

@@ -22,7 +22,7 @@ elements:
       selector:
         matchEvent: stackoverflow.answer.accepted
         filter:
-          expression: e.user == e.askedBy
+          expression: e['userId'] == e['askedBy'];
       rewards:
         badge:
           attribute: 3
@@ -38,6 +38,8 @@ elements:
       period:
         duration: 1
         unit: days
+      aggregatorExtractor:
+        expression: 1
       consecutive: true
       threshold: 1
       streaks:
@@ -64,17 +66,17 @@ elements:
         matchEvent: stackoverflow.question.upvoted
       conditions:
         - priority: 1
-          condition: e.votes == 100
+          condition: e['votes'] == 100
           rewards:
             badge:
               attribute: 1
         - priority: 2
-          condition: e.votes == 50
+          condition: e['votes'] == 50
           rewards:
             badge:
               attribute: 2
         - priority: 3
-          condition: e.votes == 30
+          condition: e['votes'] == 30
           rewards:
             badge:
               attribute: 3
@@ -89,17 +91,17 @@ elements:
         matchEvent: stackoverflow.question.favourite
       conditions:
         - priority: 1
-          condition: e.favourites == 50
+          condition: e['favourites'] == 50
           rewards:
             badge:
               attribute: 1
         - priority: 2
-          condition: e.votes == 25
+          condition: e['favourites'] == 25
           rewards:
             badge:
               attribute: 2
         - priority: 3
-          condition: e.votes == 10
+          condition: e['favourites'] == 10
           rewards:
             badge:
               attribute: 3
@@ -114,17 +116,17 @@ elements:
         matchEvent: stackoverflow.question.viewed
       conditions:
         - priority: 1
-          condition: e.views == 10000
+          condition: e['views'] == 10000
           rewards:
             badge:
               attribute: 1
         - priority: 2
-          condition: e.views == 5000
+          condition: e['views'] == 5000
           rewards:
             badge:
               attribute: 2
         - priority: 3
-          condition: e.views == 1000
+          condition: e['views'] == 1000
           rewards:
             badge:
               attribute: 3

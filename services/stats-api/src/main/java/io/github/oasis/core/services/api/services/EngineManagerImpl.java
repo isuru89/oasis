@@ -99,6 +99,7 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
 
     @Override
     public void changeGameStatus(GameState state, Game game) throws EngineManagerException {
+        LOG.info("Announcing game (id: {}) state change to engine {}", game.getId(), state);
         try {
             if (state == GameState.STARTED) {
                 prepareGameForExecution(game);
@@ -121,6 +122,7 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
         // then game rules
         EngineMessage.Scope eventScope = new EngineMessage.Scope(gameId);
         List<ElementDef> elementDefs = elementService.listElementsFromGameId(gameId);
+        LOG.info("Number of game rules to be sent = {}", elementDefs.size());
         for (ElementDef def : elementDefs) {
             EngineMessage ruleAdded = new EngineMessage();
             if (def.getData() == null) {
@@ -133,6 +135,7 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
             ruleAdded.setType(EngineMessage.GAME_RULE_ADDED);
             ruleAdded.setScope(eventScope);
 
+            LOG.info(" Game rule dispatched: game: {}, rule: {}", gameId, ruleAdded);
             dispatchSupport.broadcast(ruleAdded);
         }
     }
