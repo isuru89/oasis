@@ -50,6 +50,4 @@ class RabbitConstants {
     static final int DEFAULT_RETRY_COUNT = 1;
     static final int DEFAULT_RETRY_DELAY = 5000;
 
-    static final int PREFETCH_COUNT_FOR_ANNOUNCEMENTS = 1;
-
 }

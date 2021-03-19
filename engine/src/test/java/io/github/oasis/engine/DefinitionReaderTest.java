@@ -19,8 +19,9 @@
 
 package io.github.oasis.engine;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.EventJson;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.external.messages.EngineMessage;
@@ -37,7 +38,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -48,14 +49,16 @@ import java.util.UUID;
 public class DefinitionReaderTest {
 
     private static final int GAME_ID = 1;
-    private final Gson gson = new Gson();
-    private final Type type = new TypeToken<Map<String, Object>>() {}.getType();
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final TypeReference<HashMap<String, Object>> typeRef = new TypeReference<>() {
+    };
 
     @Test
     @DisplayName("Parsing Event Messages")
     void testEventParsing() {
         EngineMessage eventDef = createDef(EngineMessage.GAME_EVENT, null, GAME_ID);
-        eventDef.setData(objToMap(TEvent.createKeyValue(System.currentTimeMillis(), "event.a", 100)));
+        EventJson eventJson = TEvent.createKeyValue(System.currentTimeMillis(), "event.a", 100);
+        eventDef.setData(objToMap(eventJson.getAllFieldValues()));
         Object derived = DefinitionReader.derive(eventDef, null);
         Assertions.assertNotNull(derived);
         Assertions.assertEquals(EventMessage.class.getName(), derived.getClass().getName());
@@ -172,8 +175,12 @@ public class DefinitionReaderTest {
     }
 
     private Map<String, Object> objToMap(Object object) {
-        String jsonStr = gson.toJson(object);
-        return gson.fromJson(jsonStr, type);
+        try {
+            String jsonStr = mapper.writeValueAsString(object);
+            return mapper.readValue(jsonStr, typeRef);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Unable to parse to json!", e);
+        }
     }
 
     private EngineMessage createDef(String type, String impl, int gameId) {

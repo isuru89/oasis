@@ -22,8 +22,9 @@ package io.github.oasis.elements.badges.stats.to;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractStatsApiResponse;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,8 +32,8 @@ import java.util.Map;
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class UserBadgeSummary extends AbstractStatsApiResponse {
 
     private Long userId;
@@ -85,14 +86,11 @@ public class UserBadgeSummary extends AbstractStatsApiResponse {
         }
     }
 
-    @Getter
-    @Setter
+    @Data
+    @NoArgsConstructor
     public static class BaseSummaryStat {
         private int count;
         private Long lastWonAt;
-
-        public BaseSummaryStat() {
-        }
 
         public BaseSummaryStat(int count, Long lastWonAt) {
             this.count = count;
@@ -100,14 +98,12 @@ public class UserBadgeSummary extends AbstractStatsApiResponse {
         }
     }
 
-    @Getter
-    @Setter
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    @NoArgsConstructor
     public static class RuleSummaryStat extends BaseSummaryStat {
         private SimpleElementDefinition badgeMetadata;
         private Map<String, AttributeSummaryStat> attributes;
-
-        public RuleSummaryStat() {
-        }
 
         public void addAttributeStat(String attrKey, AttributeSummaryStat stat) {
             if (attributes == null) {
@@ -117,10 +113,12 @@ public class UserBadgeSummary extends AbstractStatsApiResponse {
         }
     }
 
-    @Getter
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    @NoArgsConstructor
     public static class AttributeSummaryStat extends BaseSummaryStat {
-        private final int attribute;
-        private final AttributeInfo attributeMetadata;
+        private int attribute;
+        private AttributeInfo attributeMetadata;
 
         public AttributeSummaryStat(int attribute, AttributeInfo attributeInfo, int count, Long lastWonAt) {
             super(count, lastWonAt);

@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.elements;
 
+import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.external.messages.EngineMessage;
 import org.yaml.snakeyaml.Yaml;
 
@@ -29,7 +30,8 @@ public abstract class AbstractElementParser implements ElementParser {
 
     private final Yaml yaml = new Yaml();
 
-    protected <T extends AbstractDef> T loadFrom(EngineMessage def, Class<T> clz) {
+    protected <T extends AbstractDef<? extends BaseSpecification>> T loadFrom(EngineMessage def, Class<T> clz) {
+        System.out.println(def.getData());
         return yaml.loadAs(yaml.dump(def.getData()), clz);
     }
 

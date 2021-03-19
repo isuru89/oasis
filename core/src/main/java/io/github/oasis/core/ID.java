@@ -25,6 +25,7 @@ package io.github.oasis.core;
 public final class ID {
 
     public static final String ENGINE_STATUS_CHANNEL = "game.status.channel";
+    public static final String GAME_ENGINES = "oasis.engines.games";
 
     public static final String ALL_GAMES = "oasis:games";
     public static final String ALL_USERS = "oasis:users";

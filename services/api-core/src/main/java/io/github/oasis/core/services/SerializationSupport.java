@@ -19,7 +19,7 @@
 
 package io.github.oasis.core.services;
 
-import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -29,7 +29,7 @@ public interface SerializationSupport {
     <T> T deserialize(String data, Class<T> clz);
 
     <T> T deserialize(byte[] data, Class<T> clz);
-    <T> T deserialize(byte[] data, Type type);
+    Map<String, Object> deserializeToMap(byte[] data);
 
     String serialize(Object data);
 

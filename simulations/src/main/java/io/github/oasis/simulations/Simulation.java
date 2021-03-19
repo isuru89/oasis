@@ -19,8 +19,7 @@
 
 package io.github.oasis.simulations;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.external.EventDispatcher;
@@ -68,7 +67,7 @@ public class Simulation implements Closeable {
     static int GAME_ID = 1001;
     static final int TIME_RESOLUTION = 84000 * 5;
 
-    protected final Gson gson = new Gson();
+    protected final ObjectMapper mapper = new ObjectMapper();
 
     private JedisPool dbPool;
     protected KeyPair sourceKeyPair;
@@ -104,7 +103,7 @@ public class Simulation implements Closeable {
 
             dispatchGameStart();
             dispatchRules();
-            dispatchEvents();
+            // dispatchEvents();
 
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -141,7 +140,7 @@ public class Simulation implements Closeable {
             sourceMap.put("games", Collections.singletonList(GAME_ID));
             sourceMap.put("id", SOURCE_ID);
 
-            jedis.hset("oasis.sources", SOURCE_TOKEN, gson.toJson(sourceMap));
+            jedis.hset("oasis.sources", SOURCE_TOKEN, mapper.writeValueAsString(sourceMap));
         }
         return SOURCE_ID;
     }
@@ -151,7 +150,7 @@ public class Simulation implements Closeable {
         game.setId(GAME_ID);
 
         try (Jedis jedis = dbPool.getResource()) {
-            jedis.hset("oasis.games", String.valueOf(game.getId()), gson.toJson(game));
+            jedis.hset("oasis.games", String.valueOf(game.getId()), mapper.writeValueAsString(game));
         }
         return GAME_ID;
     }
@@ -177,7 +176,7 @@ public class Simulation implements Closeable {
         try (Jedis jedis = dbPool.getResource()) {
 
             for (User user : users) {
-                jedis.hset("oasis.users", user.getEmail(), gson.toJson(user));
+                jedis.hset("oasis.users", user.getEmail(), mapper.writeValueAsString(user));
             }
         }
     }
@@ -196,7 +195,7 @@ public class Simulation implements Closeable {
         Map<String, Integer> teamMap = new HashMap<>();
         try (Jedis jedis = dbPool.getResource()) {
             for (Team team : teams) {
-                jedis.hset("oasis.teams", String.valueOf(team.getId()), gson.toJson(team));
+                jedis.hset("oasis.teams", String.valueOf(team.getId()), mapper.writeValueAsString(team));
                 teamMap.put(team.getName(), Integer.parseInt(String.valueOf(team.getId())));
             }
         }
@@ -276,8 +275,7 @@ public class Simulation implements Closeable {
         long endTime = LocalDate.of(2020, Month.APRIL, 30).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
         String eventDistribution = Files.readString(Paths.get(gameRootDir.getAbsolutePath()).resolve("eventtypes.json"));
-        Map<String, Object> eventDist = gson.fromJson(eventDistribution, new TypeToken<Map<String, Object>>() {
-        }.getType());
+        Map<String, Object> eventDist = mapper.readValue(eventDistribution, HashMap.class);
         int distribution = ((Number) eventDist.get("distribution")).intValue();
         Map<String, Double> items = ((List<List<Object>>) eventDist.get("events")).stream()
                 .collect(Collectors.toMap(s -> (String) s.get(0), objects -> (Double) objects.get(1)));

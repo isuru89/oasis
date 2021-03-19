@@ -19,7 +19,8 @@
 
 package io.github.oasis.ext.rabbitstream;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.CancelCallback;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -57,7 +58,7 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
     private Channel channel;
     private final Map<Integer, RabbitGameReader> consumers = new ConcurrentHashMap<>();
     private MessageReceiver sourceRef;
-    private final Gson gson = new Gson();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public void init(RuntimeContextSupport context, MessageReceiver source) throws Exception {
@@ -74,7 +75,6 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
         String queue = RabbitConstants.ANNOUNCEMENT_EXCHANGE + "." + id;
         LOG.info("Connecting to announcement queue {}", queue);
         RabbitUtils.declareAnnouncementExchange(channel);
-        channel.basicQos(RabbitConstants.PREFETCH_COUNT_FOR_ANNOUNCEMENTS);
 
         channel.queueDeclare(queue, true, true, false, null);
         channel.queueBind(queue, RabbitConstants.ANNOUNCEMENT_EXCHANGE, "*");
@@ -134,10 +134,14 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
     public void handleMessage(String consumerTag, Delivery message) {
         String content = new String(message.getBody(), StandardCharsets.UTF_8);
         LOG.debug("Message received. {}", content);
-        EngineMessage engineMessage = gson.fromJson(content, EngineMessage.class);
-        long deliveryTag = message.getEnvelope().getDeliveryTag();
-        engineMessage.setMessageId(deliveryTag);
-        sourceRef.submit(engineMessage);
+        try {
+            EngineMessage engineMessage = mapper.readValue(content, EngineMessage.class);
+            long deliveryTag = message.getEnvelope().getDeliveryTag();
+            engineMessage.setMessageId(deliveryTag);
+            sourceRef.submit(engineMessage);
+        } catch (JsonProcessingException e) {
+            LOG.error("Unable to parse incoming message!", e);
+        }
     }
 
     public void handleCancel(String consumerTag) {
@@ -210,7 +214,7 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
 
     static class RabbitGameReader implements DeliverCallback, CancelCallback, Closeable {
 
-        private final Gson gson = new Gson();
+        private final ObjectMapper mapper = new ObjectMapper();
 
         private final Channel channel;
         private final MessageReceiver sourceRef;
@@ -249,10 +253,14 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
             }
 
             String content = new String(message.getBody(), StandardCharsets.UTF_8);
-            EngineMessage engineMessage = gson.fromJson(content, EngineMessage.class);
-            engineMessage.setMessageId(deliveryTag);
-            LOG.info("Game event received in channel {}! [{}]", channel, engineMessage);
-            sourceRef.submit(engineMessage);
+            try {
+                EngineMessage engineMessage = mapper.readValue(content, EngineMessage.class);
+                engineMessage.setMessageId(deliveryTag);
+                LOG.info("Game event received in channel {}! [{}]", channel, engineMessage);
+                sourceRef.submit(engineMessage);
+            } catch (JsonProcessingException e) {
+                LOG.error("Unable to parse incoming message!", e);
+            }
         }
 
         private void silentAck(long deliveryId) {

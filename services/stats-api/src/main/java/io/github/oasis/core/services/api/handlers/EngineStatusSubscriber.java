@@ -19,11 +19,11 @@
 
 package io.github.oasis.core.services.api.handlers;
 
-import com.google.gson.Gson;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.messages.EngineStatusChangedMessage;
+import io.github.oasis.core.services.api.beans.JsonSerializer;
 import io.github.oasis.core.services.api.to.EngineStatusChangedEvent;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -45,12 +45,12 @@ public class EngineStatusSubscriber {
 
     private final Db db;
     private final ApplicationEventPublisher publisher;
-    private final Gson gson;
+    private final JsonSerializer serializer;
 
-    public EngineStatusSubscriber(Db db, ApplicationEventPublisher publisher, Gson gson) {
+    public EngineStatusSubscriber(Db db, ApplicationEventPublisher publisher, JsonSerializer jsonSerializer) {
         this.db = db;
         this.publisher = publisher;
-        this.gson = gson;
+        this.serializer = jsonSerializer;
     }
 
     @Scheduled(fixedRate = 5000)
@@ -73,7 +73,7 @@ public class EngineStatusSubscriber {
     private void processEvents(List<String> messages) {
         for (String msg : messages) {
             LOG.info("Processing event: {}", msg);
-            EngineStatusChangedMessage message = gson.fromJson(msg, EngineStatusChangedMessage.class);
+            EngineStatusChangedMessage message = serializer.deserialize(msg, EngineStatusChangedMessage.class);
             EngineStatusChangedEvent event = new EngineStatusChangedEvent(this, message);
             publisher.publishEvent(event);
         }

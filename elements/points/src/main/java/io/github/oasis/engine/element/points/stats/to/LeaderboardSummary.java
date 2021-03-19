@@ -21,8 +21,9 @@ package io.github.oasis.engine.element.points.stats.to;
 
 import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.services.AbstractStatsApiResponse;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,8 +32,8 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class LeaderboardSummary extends AbstractStatsApiResponse {
 
     private Integer teamId;
@@ -43,8 +44,8 @@ public class LeaderboardSummary extends AbstractStatsApiResponse {
         records.add(record);
     }
 
-    @Getter
-    @Setter
+    @Data
+    @NoArgsConstructor
     public static class LeaderboardRecord {
 
         private int rank;

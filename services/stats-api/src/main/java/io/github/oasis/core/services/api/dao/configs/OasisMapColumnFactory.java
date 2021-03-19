@@ -19,18 +19,19 @@
 
 package io.github.oasis.core.services.api.dao.configs;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jdbi.v3.core.config.ConfigRegistry;
 import org.jdbi.v3.core.mapper.ColumnMapper;
 import org.jdbi.v3.core.mapper.QualifiedColumnMapperFactory;
 import org.jdbi.v3.core.qualifier.QualifiedType;
 import org.jdbi.v3.core.statement.StatementContext;
 
-import java.lang.reflect.Type;
+import java.io.IOException;
 import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,8 +42,9 @@ public class OasisMapColumnFactory implements QualifiedColumnMapperFactory {
 
     private final MapColumnMapper mapColumnMapper;
 
-    public OasisMapColumnFactory(Gson gson) {
-        mapColumnMapper = new MapColumnMapper(gson);
+
+    public OasisMapColumnFactory(ObjectMapper mapper) {
+        mapColumnMapper = new MapColumnMapper(mapper);
     }
 
 
@@ -55,17 +57,22 @@ public class OasisMapColumnFactory implements QualifiedColumnMapperFactory {
 
     public static class MapColumnMapper implements ColumnMapper<Map<String, Object>> {
 
-        private final Gson gson;
-        private final Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
+        private final ObjectMapper mapper;
+        private final TypeReference<HashMap<String, Object>> typeRef = new TypeReference<>() {
+        };
 
-        private MapColumnMapper(Gson gson) {
-            this.gson = gson;
+        private MapColumnMapper(ObjectMapper mapper) {
+            this.mapper = mapper;
         }
 
         @Override
         public Map<String, Object> map(ResultSet r, int columnNumber, StatementContext ctx) throws SQLException {
             Clob clob = r.getClob(columnNumber);
-            return gson.fromJson(clob.getCharacterStream(), mapType);
+            try {
+                return mapper.readValue(clob.getCharacterStream(), typeRef);
+            } catch (IOException e) {
+                throw new SQLException("Unable to parse clob to json!", e);
+            }
         }
     }
 }

@@ -64,7 +64,7 @@ public class ElementServiceTest extends AbstractServiceTest {
             .impl(PointDef.class.getName())
             .type("point")
             .metadata(new SimpleElementDefinition("test.point1", "Star points", "blah blah blah"))
-            .data(Map.of("f1", "v1", "f2", "v2"))
+            .data(Map.of("f1", "v1", "f2", "v2", "f11", 5))
             .build();
 
     private final ElementDef sampleBadge = ElementDef.builder()
@@ -73,7 +73,7 @@ public class ElementServiceTest extends AbstractServiceTest {
             .impl(BadgeDef.class.getName())
             .type("badge")
             .metadata(new SimpleElementDefinition("test.badge", "Mega badge", "another description"))
-            .data(Map.of("f3", "v3", "f4", "v4"))
+            .data(Map.of("f3", "v3", "f4", "v4", "f9", 3))
             .build();
 
     private final AttributeInfo gold = AttributeInfo.builder()

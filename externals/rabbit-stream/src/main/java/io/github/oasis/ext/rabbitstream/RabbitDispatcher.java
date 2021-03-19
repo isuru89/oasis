@@ -19,7 +19,7 @@
 
 package io.github.oasis.ext.rabbitstream;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -61,7 +60,7 @@ public class RabbitDispatcher implements EventDispatcher {
     private Connection connection;
     private Channel channel;
 
-    private final Gson gson = new Gson();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public void init(DispatcherContext context) throws Exception {
@@ -106,7 +105,7 @@ public class RabbitDispatcher implements EventDispatcher {
         channel.basicPublish(RabbitConstants.GAME_EXCHANGE,
                 routingKey,
                 null,
-                gson.toJson(message).getBytes(StandardCharsets.UTF_8));
+                mapper.writeValueAsBytes(message));
     }
 
     @Override
@@ -114,7 +113,7 @@ public class RabbitDispatcher implements EventDispatcher {
         channel.basicPublish(RabbitConstants.ANNOUNCEMENT_EXCHANGE,
                 EMPTY_ROUTING_KEY,
                 null,
-                gson.toJson(message).getBytes(StandardCharsets.UTF_8));
+                mapper.writeValueAsBytes(message));
     }
 
     @Override

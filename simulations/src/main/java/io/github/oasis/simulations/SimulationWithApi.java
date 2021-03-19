@@ -81,7 +81,7 @@ public class SimulationWithApi extends Simulation {
         source.setName(SOURCE_NAME);
 
         HttpRequest request = adminApiReq("/admin/event-sources")
-                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(source)))
+                .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(source)))
                 .build();
 
         HttpResponse<String> result = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -91,7 +91,7 @@ public class SimulationWithApi extends Simulation {
             throw new IllegalStateException("Cannot add new event source! ");
         }
 
-        EventSource eventSource = gson.fromJson(result.body(), EventSource.class);
+        EventSource eventSource = mapper.readValue(result.body(), EventSource.class);
 
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PublicKey publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(eventSource.getSecrets().getPublicKey())));
@@ -119,7 +119,7 @@ public class SimulationWithApi extends Simulation {
         game.setDescription("This game simulated stackoverflow reputation system");
 
         HttpRequest request = adminApiReq("/games")
-                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(game)))
+                .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(game)))
                 .build();
 
         HttpResponse<String> result = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -129,7 +129,7 @@ public class SimulationWithApi extends Simulation {
             throw new IllegalStateException("Cannot add new game!");
         }
 
-        int gameId = gson.fromJson(result.body(), Game.class).getId();
+        int gameId = mapper.readValue(result.body(), Game.class).getId();
         System.out.println("Game added: " + gameId);
 
         AttributeInfo gold = AttributeInfo.builder().id(1).name("Gold").priority(1).build();
@@ -137,13 +137,13 @@ public class SimulationWithApi extends Simulation {
         AttributeInfo bronze = AttributeInfo.builder().id(3).name("Bronze").priority(3).build();
 
         client.send(adminApiReq("/games/" + gameId + "/attributes")
-                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(gold)))
+                .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(gold)))
                 .build(), HttpResponse.BodyHandlers.discarding());
         client.send(adminApiReq("/games/" + gameId + "/attributes")
-                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(silver)))
+                .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(silver)))
                 .build(), HttpResponse.BodyHandlers.discarding());
         client.send(adminApiReq("/games/" + gameId + "/attributes")
-                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(bronze)))
+                .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(bronze)))
                 .build(), HttpResponse.BodyHandlers.discarding());
 
         System.out.println("Game attributes added!");
@@ -171,7 +171,7 @@ public class SimulationWithApi extends Simulation {
             System.out.println("Adding rule: " + elementDef);
 
             HttpResponse<String> result = client.send(adminApiReq("/games/" + gameId + "/elements")
-                    .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(elementDef)))
+                    .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(elementDef)))
                     .build(), HttpResponse.BodyHandlers.ofString());
             System.out.println("Add result: " + result.body());
         }
@@ -189,13 +189,13 @@ public class SimulationWithApi extends Simulation {
                 System.out.println("Adding team: " + teamObject);
 
                 HttpRequest request = adminApiReq("/teams")
-                        .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(teamObject)))
+                        .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(teamObject)))
                         .build();
                 HttpResponse<String> result = client.send(request, HttpResponse.BodyHandlers.ofString());
                 if (result.statusCode() >= 400) {
                     throw new IOException("Unable to add team " + team);
                 }
-                TeamObject dbTeam = gson.fromJson(result.body(), TeamObject.class);
+                TeamObject dbTeam = mapper.readValue(result.body(), TeamObject.class);
                 System.out.println("Added team " + dbTeam);
                 teamMap.put(dbTeam.getName(), dbTeam.getId());
             }
@@ -218,13 +218,13 @@ public class SimulationWithApi extends Simulation {
                 playerObject.setGender(random.nextInt(2) % 2 == 0 ? UserGender.MALE : UserGender.FEMALE);
 
                 HttpRequest request = adminApiReq("/players")
-                        .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(playerObject)))
+                        .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(playerObject)))
                         .build();
                 HttpResponse<String> result = client.send(request, HttpResponse.BodyHandlers.ofString());
                 if (result.statusCode() >= 400) {
                     throw new IOException("Unable to add user " + user);
                 }
-                PlayerObject dbUser = gson.fromJson(result.body(), PlayerObject.class);
+                PlayerObject dbUser = mapper.readValue(result.body(), PlayerObject.class);
                 System.out.println("Added user " + dbUser);
 
                 long teamId = user.getGames().get(String.valueOf(GAME_ID)).getTeam();
@@ -233,7 +233,7 @@ public class SimulationWithApi extends Simulation {
                         "teamId", teamId);
 
                 request = adminApiReq("/players/" + dbUser.getId() + "/teams")
-                        .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(dataReq)))
+                        .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(dataReq)))
                         .build();
                 HttpResponse<Void> resultTeamAdd = client.send(request, HttpResponse.BodyHandlers.discarding());
                 if (resultTeamAdd.statusCode() >= 400) {
@@ -287,7 +287,7 @@ public class SimulationWithApi extends Simulation {
     protected void sendEvent(EngineMessage def) throws Exception {
         System.out.println(">>> sending event " + def);
         Map<String, Object> body = Map.of("data", def.getData());
-        String msg = gson.toJson(body);
+        String msg = mapper.writeValueAsString(body);
         String signature = signPayload(msg);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(context.getApiUrl() + "/api/event"))

@@ -19,7 +19,6 @@
 
 package io.github.oasis.core.services.api.beans.jdbc;
 
-import com.google.gson.reflect.TypeToken;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
@@ -46,10 +45,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.JdbiException;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -69,8 +66,6 @@ public class JdbcRepository implements OasisRepository {
     private final IElementDao elementDao;
     private final IPlayerTeamDao playerTeamDao;
     private final SerializationSupport serializationSupport;
-
-    private final Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
 
     public JdbcRepository(IGameDao gameDao,
                           IEventSourceDao eventSourceDao,
@@ -414,7 +409,7 @@ public class JdbcRepository implements OasisRepository {
     private ElementDef toElementDef(ElementDto dto) {
         ElementDef resultDef = dto.toDefWithoutData();
         if (Objects.nonNull(dto.getData())) {
-            resultDef.setData(serializationSupport.deserialize(dto.getData(), mapType));
+            resultDef.setData(serializationSupport.deserializeToMap(dto.getData()));
         }
         return resultDef;
     }
