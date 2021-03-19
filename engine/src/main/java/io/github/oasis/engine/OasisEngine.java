@@ -19,9 +19,12 @@
 
 package io.github.oasis.engine;
 
+import akka.Done;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.actor.CoordinatedShutdown;
 import akka.actor.Props;
+import akka.pattern.Patterns;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
@@ -33,13 +36,20 @@ import io.github.oasis.core.external.messages.GameCommand;
 import io.github.oasis.core.external.messages.OasisCommand;
 import io.github.oasis.engine.actors.ActorNames;
 import io.github.oasis.engine.actors.OasisSupervisor;
+import io.github.oasis.engine.actors.cmds.EngineShutdownCommand;
 import io.github.oasis.engine.actors.cmds.EventMessage;
 import io.github.oasis.engine.actors.cmds.Messages;
+import io.github.oasis.engine.actors.cmds.internal.GameStatusAsk;
+import io.github.oasis.engine.actors.cmds.internal.GameStatusReply;
 import io.github.oasis.engine.ext.ExternalParty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Isuru Weerarathna
@@ -64,6 +74,15 @@ public class OasisEngine implements MessageReceiver {
         oasisEngine = ActorSystem.create(engineName, context.getConfigs().getConfigRef());
         supervisor = oasisEngine.actorOf(Props.create(OasisSupervisor.class, context), ActorNames.OASIS_SUPERVISOR);
         LOG.info("Oasis engine initialization invoked...");
+
+        CoordinatedShutdown.get(oasisEngine)
+                .addTask(
+                        CoordinatedShutdown.PhaseBeforeServiceUnbind(),
+                        "engineShutdown",
+                        () -> {
+                            supervisor.tell(new EngineShutdownCommand(), supervisor);
+                            return CompletableFuture.completedFuture(Done.done());
+                        });
 
         LOG.info("Bootstrapping event stream...");
         bootstrapEventStream(oasisEngine);
@@ -106,6 +125,15 @@ public class OasisEngine implements MessageReceiver {
         } else {
             supervisor.tell(message, supervisor);
         }
+    }
+
+    public boolean isGameRunning(int gameId) throws ExecutionException, InterruptedException {
+        CompletionStage<Object> completionStage = Patterns.ask(supervisor, new GameStatusAsk(gameId), Duration.ofSeconds(5))
+                .toCompletableFuture();
+        CompletionStage<GameStatusReply> gameStatusReplyCompletionStage = completionStage.thenApply(v -> (GameStatusReply) v);
+        Patterns.pipe(gameStatusReplyCompletionStage, oasisEngine.dispatcher()).to(supervisor);
+
+        return gameStatusReplyCompletionStage.toCompletableFuture().get().isRunning();
     }
 
     public void submitAll(Object... events) {

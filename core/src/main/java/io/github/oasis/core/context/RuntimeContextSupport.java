@@ -28,6 +28,8 @@ import io.github.oasis.core.external.EventReadWriteHandler;
  */
 public interface RuntimeContextSupport {
 
+    String id();
+
     OasisConfigs getConfigs();
 
     Db getDb();

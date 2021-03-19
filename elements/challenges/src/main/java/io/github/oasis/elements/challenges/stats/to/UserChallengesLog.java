@@ -21,24 +21,25 @@ package io.github.oasis.elements.challenges.stats.to;
 
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractStatsApiResponse;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class UserChallengesLog extends AbstractStatsApiResponse {
 
     private Long userId;
 
     private List<ChallengeRecord> winnings;
 
-    @Getter
-    @Setter
+    @Data
+    @NoArgsConstructor
     public static class ChallengeRecord {
         private String challengeId;
         private SimpleElementDefinition challengeMetadata;

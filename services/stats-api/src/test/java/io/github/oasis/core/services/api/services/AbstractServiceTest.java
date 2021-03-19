@@ -17,16 +17,16 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api;
+package io.github.oasis.core.services.api.services;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.services.SerializationSupport;
 import io.github.oasis.core.services.api.beans.BackendRepository;
-import io.github.oasis.core.services.api.beans.GsonSerializer;
+import io.github.oasis.core.services.api.beans.JsonSerializer;
 import io.github.oasis.core.services.api.beans.RedisRepository;
 import io.github.oasis.core.services.api.beans.jdbc.JdbcRepository;
 import io.github.oasis.core.services.api.configs.DatabaseConfigs;
@@ -36,8 +36,8 @@ import io.github.oasis.core.services.api.dao.configs.OasisEnumColumnFactory;
 import io.github.oasis.db.redis.RedisDb;
 import org.apache.commons.io.FileUtils;
 import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.gson2.Gson2Config;
-import org.jdbi.v3.gson2.Gson2Plugin;
+import org.jdbi.v3.jackson2.Jackson2Config;
+import org.jdbi.v3.jackson2.Jackson2Plugin;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +56,8 @@ import java.util.Map;
  */
 public abstract class AbstractServiceTest {
 
+    protected final ObjectMapper mapper = new ObjectMapper();
+
     protected Db dbPool;
 
     protected SerializationSupport serializationSupport;
@@ -63,8 +65,7 @@ public abstract class AbstractServiceTest {
     protected OasisRepository adminRepo;
     protected BackendRepository combinedRepo;
 
-    Jdbi createJdbcDao() throws IOException, SQLException {
-        Gson gson = new Gson();
+    public Jdbi createJdbcDao(ObjectMapper mapper) throws IOException, SQLException {
         DataSource ds = DataSourceBuilder.create()
                 .url("jdbc:h2:mem:sampledb")
 //                .driverClassName(Driver.class.getName())
@@ -73,11 +74,11 @@ public abstract class AbstractServiceTest {
                 .build();
         Jdbi jdbi = Jdbi.create(ds)
                 .installPlugin(new SqlObjectPlugin())
-                .installPlugin(new Gson2Plugin())
+                .installPlugin(new Jackson2Plugin())
                 .registerColumnMapper(new OasisEnumColumnFactory())
                 .registerArgument(new OasisEnumArgTypeFactory());
 
-        jdbi.getConfig(Gson2Config.class).setGson(gson);
+        jdbi.getConfig(Jackson2Config.class).setMapper(mapper);
 
         try (Connection connection = ds.getConnection()) {
             connection.createStatement().execute("DROP ALL OBJECTS");
@@ -116,25 +117,25 @@ public abstract class AbstractServiceTest {
         }
     }
 
-    RedisRepository createRedisConnection() {
+    public RedisRepository createRedisConnection() {
         RedisDb redisDb = RedisDb.create(OasisConfigs.defaultConfigs());
         redisDb.init();
         dbPool = redisDb;
-        Gson gson = new SerializingConfigs().createSerializer();
-        serializationSupport = new GsonSerializer(gson);
+        ObjectMapper jsonMapper = new SerializingConfigs().createSerializer();
+        serializationSupport = new JsonSerializer(jsonMapper);
         return new RedisRepository(redisDb, serializationSupport);
     }
 
 
-    void cleanRedisData() throws IOException {
+    public void cleanRedisData() throws IOException {
         try (DbContext db = dbPool.createContext()) {
             db.allKeys("*").forEach(db::removeKey);
         }
     }
 
     @BeforeEach
-    void beforeEach() throws IOException, SQLException {
-        Jdbi jdbi = createJdbcDao();
+    public void beforeEach() throws IOException, SQLException {
+        Jdbi jdbi = createJdbcDao(mapper);
         RedisRepository redisConnection = createRedisConnection();
         engineRepo = redisConnection;
 
@@ -163,7 +164,7 @@ public abstract class AbstractServiceTest {
         }
     }
 
-    abstract JdbcRepository createJdbcRepository(Jdbi jdbi);
+    protected abstract JdbcRepository createJdbcRepository(Jdbi jdbi);
 
-    abstract void createServices(BackendRepository backendRepository);
+    protected abstract void createServices(BackendRepository backendRepository);
 }

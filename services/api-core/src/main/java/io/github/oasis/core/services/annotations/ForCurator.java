@@ -33,6 +33,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-@PreAuthorize("hasRole('ROLE_CURATOR')")
+@PreAuthorize("hasRole('ROLE_curator')")
 public @interface ForCurator {
 }

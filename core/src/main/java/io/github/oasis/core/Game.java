@@ -19,7 +19,11 @@
 
 package io.github.oasis.core;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 
@@ -41,6 +45,7 @@ public class Game implements Serializable {
     private String motto;
     private String description;
     private String logoRef;
+    private String currentStatus;
 
     private long createdAt;
     private long updatedAt;

@@ -20,10 +20,10 @@
 package io.github.oasis.engine;
 
 import akka.actor.ActorRef;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonParser;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.ElementDef;
@@ -37,7 +37,7 @@ import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.parser.GameParserYaml;
-import io.github.oasis.core.services.api.beans.GsonSerializer;
+import io.github.oasis.core.services.api.beans.JsonSerializer;
 import io.github.oasis.core.services.api.beans.RedisRepository;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.db.redis.RedisEventLoaderHandler;
@@ -55,7 +55,6 @@ import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -69,10 +68,7 @@ public class OasisEngineTest {
 
     static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    protected final Gson gson = new GsonBuilder()
-            .registerTypeAdapter(LocalDate.class,
-                    (JsonDeserializer<LocalDate>) (json, typeOfT, context) -> LocalDate.parse(json.getAsString()))
-            .create();
+    protected final ObjectMapper mapper = new ObjectMapper();
 
     private static final String TEST_SYSTEM = "test-oasis-system";
 
@@ -94,14 +90,19 @@ public class OasisEngineTest {
 
     @BeforeEach
     public void setup() throws IOException, OasisException {
+        mapper.registerModule(new JavaTimeModule());
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         EngineContext.Builder builder = EngineContext.builder();
         OasisConfigs oasisConfigs = OasisConfigs.defaultConfigs();
         dbPool = RedisDb.create(oasisConfigs);
         dbPool.init();
 
-        metadataSupport = new RedisRepository(dbPool, new GsonSerializer(gson));
+        metadataSupport = new RedisRepository(dbPool, new JsonSerializer(mapper));
 
         EngineContext context = builder.withConfigs(oasisConfigs)
+                .havingId("test-engine")
                 .withDb(dbPool)
                 .withEventStore(new RedisEventLoaderHandler(dbPool, oasisConfigs))
                 .installModule(RatingsModuleFactory.class)
@@ -133,8 +134,8 @@ public class OasisEngineTest {
     }
 
     @AfterEach
-    public void shutdown() throws IOException, InterruptedException {
-
+    public void shutdown() {
+        engine.stopGame(TEvent.GAME_ID);
     }
 
     protected void awaitTerminated() {
@@ -209,13 +210,13 @@ public class OasisEngineTest {
             String reqStr = IOUtils.resourceToString(reqJsonFile, StandardCharsets.UTF_8, clzLoader);
             String resStr = IOUtils.resourceToString(resJsonFile, StandardCharsets.UTF_8, clzLoader);
 
-            T input = gson.fromJson(reqStr, reqClz);
-            System.out.println("Request: " + gson.toJson(input));
+            T input = mapper.readValue(reqStr, reqClz);
+            System.out.println("Request: " + mapper.writeValueAsString(input));
             R result = executable.run(input);
-            String resJsonStr = gson.toJson(result);
-            System.out.println("Expected Response: " + gson.toJson(gson.fromJson(resStr, resClz)));
+            String resJsonStr = mapper.writeValueAsString(result);
+            System.out.println("Expected Response: " + mapper.writeValueAsString(mapper.readValue(resStr, resClz)));
             System.out.println("Actual Response: " + resJsonStr);
-            Assertions.assertEquals(JsonParser.parseString(resStr), JsonParser.parseString(resJsonStr));
+            Assertions.assertEquals(mapper.readTree(resStr), mapper.readTree(resJsonStr));
 
         } catch (Exception e) {
             Assertions.fail("Should not fail when comparing req/res jsons!", e);

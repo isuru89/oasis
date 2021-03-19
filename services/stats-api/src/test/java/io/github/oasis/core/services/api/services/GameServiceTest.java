@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api;
+package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.exception.OasisException;
@@ -29,8 +29,6 @@ import io.github.oasis.core.services.api.controllers.admin.GamesController;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import io.github.oasis.core.services.api.services.GameService;
-import io.github.oasis.core.services.api.services.IEngineManager;
 import io.github.oasis.core.services.api.to.GameObjectRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.jdbi.v3.core.Jdbi;
@@ -38,7 +36,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
@@ -68,10 +70,12 @@ public class GameServiceTest extends AbstractServiceTest {
         System.out.println(game);
         Assertions.assertNotNull(game);
         assertGame(game, stackOverflow);
+        assertEquals(GameState.CREATED.name(), game.getCurrentStatus());
 
         System.out.println(promotions);
         Game pGame = controller.addGame(promotions);
         assertGame(pGame, promotions);
+        assertEquals(GameState.CREATED.name(), pGame.getCurrentStatus());
 
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.addGame(stackOverflow))
                 .isInstanceOf(OasisApiRuntimeException.class)
@@ -94,7 +98,8 @@ public class GameServiceTest extends AbstractServiceTest {
 
     @Test
     void updateGame() throws OasisException {
-        int stackId = controller.addGame(stackOverflow).getId();
+        Game stackGame = controller.addGame(stackOverflow);
+        int stackId = stackGame.getId();
 
         assertGame(engineRepo.readGame(stackId), stackOverflow);
         assertGame(adminRepo.readGame(stackId), stackOverflow);
@@ -107,6 +112,27 @@ public class GameServiceTest extends AbstractServiceTest {
                 .build();
         Game updatedGame = controller.updateGame(stackId, updateRequest);
         assertGame(updatedGame, updateRequest);
+        assertEquals(GameState.CREATED.name(), updatedGame.getCurrentStatus());
+    }
+
+    @Test
+    void updateGameWithStatus() throws OasisException {
+        Game stackGame = controller.addGame(stackOverflow);
+        int stackId = stackGame.getId();
+
+        assertGame(engineRepo.readGame(stackId), stackOverflow);
+        assertGame(adminRepo.readGame(stackId), stackOverflow);
+
+        GameObjectRequest updateRequest = stackOverflow.toBuilder()
+                .id(stackId)
+                .motto("new motto")
+                .description("new description")
+                .logoRef("new logo ref")
+                .newGameStatus(GameState.UPDATED.name())
+                .build();
+        Game updatedGame = controller.updateGame(stackId, updateRequest);
+        assertGame(updatedGame, updateRequest);
+        assertEquals(GameState.UPDATED.name(), updatedGame.getCurrentStatus());
     }
 
     @Test
@@ -135,6 +161,7 @@ public class GameServiceTest extends AbstractServiceTest {
         assertFalse(adminRepo.readGame(stackId).isActive());
         assertThrows(OasisRuntimeException.class, () -> engineRepo.readGame(stackId));
     }
+
 
     @Test
     void updateGameStatus() throws OasisException {
@@ -169,7 +196,7 @@ public class GameServiceTest extends AbstractServiceTest {
     }
 
     @Override
-    JdbcRepository createJdbcRepository(Jdbi jdbi) {
+    protected JdbcRepository createJdbcRepository(Jdbi jdbi) {
         return new JdbcRepository(
                 jdbi.onDemand(IGameDao.class),
                 null,
@@ -180,7 +207,7 @@ public class GameServiceTest extends AbstractServiceTest {
     }
 
     @Override
-    void createServices(BackendRepository backendRepository) {
+    protected void createServices(BackendRepository backendRepository) {
         controller = new GamesController(new GameService(backendRepository, engineManager));
     }
 

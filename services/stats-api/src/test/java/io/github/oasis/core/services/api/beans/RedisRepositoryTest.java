@@ -19,7 +19,7 @@
 
 package io.github.oasis.core.services.api.beans;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.UserMetadata;
@@ -37,11 +37,21 @@ import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.services.api.configs.SerializingConfigs;
 import io.github.oasis.db.redis.RedisDb;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author Isuru Weerarathna
@@ -58,8 +68,8 @@ class RedisRepositoryTest {
         RedisDb redisDb = RedisDb.create(OasisConfigs.defaultConfigs());
         redisDb.init();
         dbPool = redisDb;
-        Gson gson = new SerializingConfigs().createSerializer();
-        redisRepository = new RedisRepository(redisDb, new GsonSerializer(gson));
+        ObjectMapper jsonMapper = new SerializingConfigs().createSerializer();
+        redisRepository = new RedisRepository(redisDb, new JsonSerializer(jsonMapper));
     }
 
     @BeforeEach

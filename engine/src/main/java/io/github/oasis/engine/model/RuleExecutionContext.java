@@ -28,6 +28,7 @@ import io.github.oasis.core.external.EventReadWriteHandler;
 import io.github.oasis.engine.EngineContext;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 /**
  * @author Isuru Weerarathna
@@ -53,6 +54,11 @@ public class RuleExecutionContext implements RuleExecutionContextSupport, Serial
 
     public static RuleExecutionContext from(SignalCollector collector) {
         return new RuleExecutionContext(collector, null);
+    }
+
+    @Override
+    public String id() {
+        return "rule_" + UUID.randomUUID().toString();
     }
 
     @Override

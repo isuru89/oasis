@@ -21,8 +21,10 @@ package io.github.oasis.core.services.api.to;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.AttributeInfo;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -36,6 +38,8 @@ import java.util.List;
 @Setter
 @Builder(toBuilder = true)
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class GameObjectRequest implements Serializable {
 
     private Integer id;
@@ -44,6 +48,7 @@ public class GameObjectRequest implements Serializable {
     private String motto;
     private String description;
     private String logoRef;
+    private String newGameStatus;
 
     private List<AttributeInfo> attributes;
 
@@ -54,6 +59,7 @@ public class GameObjectRequest implements Serializable {
                 .motto(motto)
                 .description(description)
                 .logoRef(logoRef)
+                .currentStatus(newGameStatus)
                 .build();
     }
 }

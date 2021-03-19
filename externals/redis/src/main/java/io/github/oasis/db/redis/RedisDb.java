@@ -21,7 +21,6 @@ package io.github.oasis.db.redis;
 
 import com.github.cliftonlabs.json_simple.Jsoner;
 import io.github.oasis.core.configs.OasisConfigs;
-import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
@@ -106,7 +105,8 @@ public class RedisDb implements Db {
             for (Map.Entry<String, Object> entry : meta.entrySet()) {
                 String scriptName = entry.getKey();
                 if (scriptReferenceMap.containsKey(scriptName)) {
-                    throw new OasisDbException("Script already exists by name '" + scriptName + "'!");
+                    LOG.warn("Script already exists! {}. Skipping registration for this script.", scriptName);
+                    continue;
                 }
 
                 Map<String, Object> ref = (Map<String, Object>) entry.getValue();

@@ -21,19 +21,17 @@ package io.github.oasis.core;
 
 import io.github.oasis.core.model.TeamObject;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-@ToString
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class TeamMetadata implements Serializable {
 
     private int teamId;

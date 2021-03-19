@@ -1,42 +1,90 @@
 version: 1
 
-points:
+elements:
   - name: Question-Ask-Reputation
+    id: P-QAR
     description: Awards 2 reputation when a question asked
-    event: stackoverflow.question.asked
-    award: 2
+    type: core:point
+    spec:
+      selector:
+        matchEvent: stackoverflow.question.asked
+      reward:
+        pointId: stackoverflow.reputation
+        amount: 2
 
   - name: Answer-Accepted
+    id: P-AA
     description: Awards 15 reputations when an answer has been accepted
-    event: stackoverflow.answer.accepted
-    award: 15
+    type: core:point
+    spec:
+      selector:
+        matchEvent: stackoverflow.answer.accepted
+      reward:
+        pointId: stackoverflow.reputation
+        amount: 15
 
   - name: Answer-Upvoted
+    id: P-AUV
     description: Awards 10 reputations when an answer has been up-voted
-    event: stackoverflow.answer.upvoted
-    award: 10
+    type: core:point
+    spec:
+      selector:
+        matchEvent: stackoverflow.answer.upvoted
+      reward:
+        pointId: stackoverflow.reputation
+        amount: 10
 
   - name: Answer-DownVoted
+    id: P-ADV
     description: Awards -2 reputations when an answer has been down-voted
-    event: stackoverflow.answer.downvoted
-    award: -2
+    type: core:point
+    spec:
+      selector:
+        matchEvent: stackoverflow.answer.downvoted
+      reward:
+        pointId: stackoverflow.reputation
+        amount: -2
 
   - name: Question-Upvoted
+    id: P-QUV
     description: Awards 10 reputations when a question has been up-voted
-    event: stackoverflow.question.upvoted
-    award: 10
+    type: core:point
+    spec:
+      selector:
+        matchEvent: stackoverflow.question.upvoted
+      reward:
+        pointId: stackoverflow.reputation
+        amount: 10
 
   - name: Question-DownVoted
+    id: P-QDV
     description: Awards -2 reputations when a question has been down-voted
-    event: stackoverflow.question.downvoted
-    award: -2
+    type: core:point
+    spec:
+      selector:
+        matchEvent: stackoverflow.question.downvoted
+      reward:
+        pointId: stackoverflow.reputation
+        amount: -2
 
   - name: Question-Favourite
+    id: P-QF
     description: Awards 25 reputations when a question has been marked as favourite
-    event: stackoverflow.question.favourite
-    award: 25
+    type: core:point
+    spec:
+      selector:
+        matchEvent: stackoverflow.question.favourite
+      reward:
+        pointId: stackoverflow.reputation
+        amount: 25
 
   - name: Question-UnFavourite
+    id: P-QUF
     description: Awards -25 reputations when a question marked faourite has been removed
-    event: stackoverflow.question.favourite.remove
-    award: -25
+    type: core:point
+    spec:
+      selector:
+        matchEvent: stackoverflow.question.favourite.remove
+      reward:
+        pointId: stackoverflow.reputation
+        amount: -25

@@ -36,6 +36,8 @@ public interface SourceStreamProvider extends Closeable {
     void handleGameCommand(GameCommand gameCommand);
 
     void ackMessage(int gameId, Object messageId);
+    void ackMessage(Object messageId);
 
     void nackMessage(int gameId, Object messageId);
+    void nackMessage(Object messageId);
 }

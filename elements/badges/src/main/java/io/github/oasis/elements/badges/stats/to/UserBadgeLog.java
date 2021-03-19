@@ -22,24 +22,25 @@ package io.github.oasis.elements.badges.stats.to;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractAdminApiResponse;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class UserBadgeLog extends AbstractAdminApiResponse {
 
     private Long userId;
 
     private List<BadgeLogRecord> log;
 
-    @Getter
-    @Setter
+    @Data
+    @NoArgsConstructor
     public static class BadgeLogRecord {
         private String badgeId;
         private SimpleElementDefinition badgeMetadata;

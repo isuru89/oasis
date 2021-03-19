@@ -19,10 +19,10 @@
 
 package io.github.oasis.core.elements;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -30,10 +30,10 @@ import java.util.Map;
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@Data
 @Builder
-@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class ElementDef implements Serializable {
 
     private Integer id;

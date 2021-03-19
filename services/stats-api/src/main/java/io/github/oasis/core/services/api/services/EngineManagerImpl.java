@@ -23,6 +23,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.core.external.messages.EngineMessage;
@@ -38,6 +39,7 @@ import javax.annotation.PostConstruct;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
@@ -52,11 +54,13 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
     private static final Logger LOG = LoggerFactory.getLogger(EngineManagerImpl.class);
 
     private final OasisConfigs oasisConfigs;
+    private final ElementService elementService;
 
     private EventDispatcher dispatchSupport;
 
-    public EngineManagerImpl(OasisConfigs oasisConfigs) {
+    public EngineManagerImpl(OasisConfigs oasisConfigs, ElementService elementService) {
         this.oasisConfigs = oasisConfigs;
+        this.elementService = elementService;
     }
 
     @PostConstruct
@@ -95,12 +99,49 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
 
     @Override
     public void changeGameStatus(GameState state, Game game) throws EngineManagerException {
-        EngineMessage message = EngineMessage.createGameLifecycleEvent(game.getId(), state);
+        LOG.info("Announcing game (id: {}) state change to engine {}", game.getId(), state);
         try {
+            if (state == GameState.STARTED) {
+                prepareGameForExecution(game);
+            }
+
+            EngineMessage message = EngineMessage.createGameLifecycleEvent(game.getId(), state);
             dispatchSupport.broadcast(message);
         } catch (Exception e) {
             throw new EngineManagerException(ErrorCodes.UNABLE_TO_CHANGE_GAME_STATE, e);
         }
+    }
+
+    private void prepareGameForExecution(Game game) throws Exception {
+        Integer gameId = game.getId();
+
+        // first we will send the game create message
+        EngineMessage createdMessage = EngineMessage.createGameLifecycleEvent(gameId, GameState.CREATED);
+        dispatchSupport.broadcast(createdMessage);
+
+        // then game rules
+        EngineMessage.Scope eventScope = new EngineMessage.Scope(gameId);
+        List<ElementDef> elementDefs = elementService.listElementsFromGameId(gameId);
+        LOG.info("Number of game rules to be sent = {}", elementDefs.size());
+        for (ElementDef def : elementDefs) {
+            EngineMessage ruleAdded = new EngineMessage();
+            if (def.getData() == null) {
+                ElementDef elementWithData = elementService.readElement(gameId, def.getElementId(), true);
+                ruleAdded.setData(elementWithData.getData());
+            } else {
+                ruleAdded.setData(def.getData());
+            }
+            ruleAdded.setImpl(def.getImpl());
+            ruleAdded.setType(EngineMessage.GAME_RULE_ADDED);
+            ruleAdded.setScope(eventScope);
+
+            LOG.info(" Game rule dispatched: game: {}, rule: {}", gameId, ruleAdded);
+            dispatchSupport.broadcast(ruleAdded);
+        }
+    }
+
+    void setDispatchSupport(EventDispatcher dispatchSupport) {
+        this.dispatchSupport = dispatchSupport;
     }
 
     @Override

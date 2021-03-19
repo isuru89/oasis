@@ -22,8 +22,8 @@ package io.github.oasis.elements.challenges.stats.to;
 import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractStatsApiResponse;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
@@ -31,14 +31,13 @@ import java.util.Map;
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@Data
 public class GameChallengesSummary extends AbstractStatsApiResponse {
 
     private Map<String, ChallengeSummary> challenges;
 
-    @Getter
-    @Setter
+    @Data
+    @NoArgsConstructor
     public static class ChallengeWinner {
         private Long userId;
         private UserMetadata userMetadata;
@@ -50,8 +49,8 @@ public class GameChallengesSummary extends AbstractStatsApiResponse {
         }
     }
 
-    @Getter
-    @Setter
+    @Data
+    @NoArgsConstructor
     public static class ChallengeSummary {
         private String challengeId;
         private SimpleElementDefinition challengeMetadata;

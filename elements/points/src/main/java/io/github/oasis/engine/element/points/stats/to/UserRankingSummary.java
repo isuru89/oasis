@@ -20,8 +20,9 @@
 package io.github.oasis.engine.element.points.stats.to;
 
 import io.github.oasis.core.services.AbstractStatsApiResponse;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -30,8 +31,8 @@ import java.util.Map;
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class UserRankingSummary extends AbstractStatsApiResponse {
 
     private Long userId;
@@ -45,8 +46,8 @@ public class UserRankingSummary extends AbstractStatsApiResponse {
         rankings.put(key, value);
     }
 
-    @Getter
-    @Setter
+    @Data
+    @NoArgsConstructor
     public static class RankInfo {
         private int rank;
         private BigDecimal score;

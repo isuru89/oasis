@@ -20,7 +20,10 @@
 package io.github.oasis.core.model;
 
 import io.github.oasis.core.utils.Texts;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -30,6 +33,9 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@Builder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class EventSourceSecrets implements Serializable {
 
     private String publicKey;

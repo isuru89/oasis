@@ -38,6 +38,7 @@ public class GameUpdatePart implements Serializable {
     private String description;
     private String motto;
     private String logoRef;
+    private String newGameStatus;
 
     public static GameUpdatePart from(Game game) {
         return GameUpdatePart.builder()
@@ -45,6 +46,7 @@ public class GameUpdatePart implements Serializable {
                 .description(game.getDescription())
                 .motto(game.getMotto())
                 .logoRef(game.getLogoRef())
+                .newGameStatus(game.getCurrentStatus())
                 .build();
     }
 }

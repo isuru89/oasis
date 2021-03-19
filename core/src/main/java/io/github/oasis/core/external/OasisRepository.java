@@ -80,6 +80,7 @@ public interface OasisRepository {
     ElementDef readElement(int gameId, String id);
     ElementDef readElementWithoutData(int gameId, String id);
     List<ElementDef> readElementsByType(int gameId, String type);
+    List<ElementDef> readElementsByGameId(int gameId);
 
     AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute);
     List<AttributeInfo> listAllAttributes(int gameId);

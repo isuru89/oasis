@@ -91,7 +91,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.jdbi</groupId>
-			<artifactId>jdbi3-gson2</artifactId>
+			<artifactId>jdbi3-jackson2</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>

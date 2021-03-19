@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api;
+package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.external.PaginatedResult;
@@ -30,7 +30,6 @@ import io.github.oasis.core.services.api.controllers.admin.PlayerController;
 import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import io.github.oasis.core.services.api.services.PlayerTeamService;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
@@ -41,7 +40,11 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
@@ -328,7 +331,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
     }
 
     @Override
-    JdbcRepository createJdbcRepository(Jdbi jdbi) {
+    protected JdbcRepository createJdbcRepository(Jdbi jdbi) {
         return new JdbcRepository(null,
                 null,
                 null,
@@ -337,7 +340,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
     }
 
     @Override
-    void createServices(BackendRepository backendRepository) {
+    protected void createServices(BackendRepository backendRepository) {
         service = new PlayerController(new PlayerTeamService(backendRepository));
     }
 

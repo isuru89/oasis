@@ -24,6 +24,7 @@ import io.github.oasis.core.services.api.dao.dto.ApiKeyDto;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
+import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
 /**
  * @author Isuru Weerarathna
@@ -35,4 +36,8 @@ public interface IApiKeyDao {
     @SqlQuery
     ApiKeyDto readApiKey(@Bind("token") String token);
 
+    @SqlUpdate
+    void addNewApiKey(@Bind("token") String token,
+                      @Bind("secretKey") String secretKey,
+                      @Bind("roles") int roles);
 }

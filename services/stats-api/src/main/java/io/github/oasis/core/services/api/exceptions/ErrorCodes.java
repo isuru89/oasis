@@ -30,6 +30,7 @@ public final class ErrorCodes {
     public static final String GAME_EXCEEDED_DESC_LEND = "G0004";
     public static final String GAME_ALREADY_EXISTS = "G0005";
     public static final String GAME_UNKNOWN_STATE = "G0006";
+    public static final String GAME_NOT_EXISTS = "G0007";
 
     public static final String UNABLE_TO_CHANGE_GAME_STATE = "EG0001";
 

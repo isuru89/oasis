@@ -72,17 +72,33 @@ public class ExternalPartyImpl implements Extension {
         }
     }
 
+    public void ackMessage(Object messageId) {
+        if (Objects.nonNull(messageId)) {
+            sourceStreamProvider.ackMessage(messageId);
+        }
+    }
+
     public void nackMessage(int gameId, Object messageId) {
         if (Objects.nonNull(messageId)) {
             sourceStreamProvider.nackMessage(gameId, messageId);
         }
     }
 
+    public void nackMessage(Object messageId) {
+        if (Objects.nonNull(messageId)) {
+            sourceStreamProvider.nackMessage(messageId);
+        }
+    }
+
     public void ackGameStateChanged(GameCommand gameCommand) {
-        sourceStreamProvider.handleGameCommand(gameCommand);
+        if (Objects.nonNull(gameCommand.getMessageId())) {
+            sourceStreamProvider.handleGameCommand(gameCommand);
+        }
     }
 
     public void nackGameStateChanged(GameCommand gameCommand) {
-        sourceStreamProvider.handleGameCommand(new FailedGameCommand(gameCommand));
+        if (Objects.nonNull(gameCommand.getMessageId())) {
+            sourceStreamProvider.handleGameCommand(new FailedGameCommand(gameCommand));
+        }
     }
 }

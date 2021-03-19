@@ -19,7 +19,6 @@
 
 package io.github.oasis.core.services.api.beans.jdbc;
 
-import com.google.gson.reflect.TypeToken;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
@@ -35,16 +34,19 @@ import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.dao.IEventSourceDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
-import io.github.oasis.core.services.api.dao.dto.*;
+import io.github.oasis.core.services.api.dao.dto.ElementDto;
+import io.github.oasis.core.services.api.dao.dto.EventSourceDto;
+import io.github.oasis.core.services.api.dao.dto.EventSourceSecretsDto;
+import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
+import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.JdbiException;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,8 +66,6 @@ public class JdbcRepository implements OasisRepository {
     private final IElementDao elementDao;
     private final IPlayerTeamDao playerTeamDao;
     private final SerializationSupport serializationSupport;
-
-    private final Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
 
     public JdbcRepository(IGameDao gameDao,
                           IEventSourceDao eventSourceDao,
@@ -164,7 +164,18 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public Game updateGame(int gameId, Game game) {
-        gameDao.updateGame(gameId, GameUpdatePart.from(game));
+        Game toBeUpdatedGame = gameDao.readGame(gameId);
+        if (toBeUpdatedGame == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.GAME_NOT_EXISTS);
+        }
+
+        GameUpdatePart gameUpdatePart = GameUpdatePart.from(game);
+        if (StringUtils.isBlank(gameUpdatePart.getNewGameStatus())) {
+            // we don't want to override current game status
+            gameUpdatePart.setNewGameStatus(toBeUpdatedGame.getCurrentStatus());
+        }
+
+        gameDao.updateGame(gameId, gameUpdatePart);
         return gameDao.readGame(gameId);
     }
 
@@ -370,6 +381,14 @@ public class JdbcRepository implements OasisRepository {
     }
 
     @Override
+    public List<ElementDef> readElementsByGameId(int gameId) {
+        return elementDao.readElementsByGameId(gameId)
+                .stream()
+                .map(this::toElementDef)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute) {
         int newAttrId = elementDao.insertAttribute(gameId, newAttribute);
         return elementDao.readAttribute(gameId, newAttrId);
@@ -390,7 +409,7 @@ public class JdbcRepository implements OasisRepository {
     private ElementDef toElementDef(ElementDto dto) {
         ElementDef resultDef = dto.toDefWithoutData();
         if (Objects.nonNull(dto.getData())) {
-            resultDef.setData(serializationSupport.deserialize(dto.getData(), mapType));
+            resultDef.setData(serializationSupport.deserializeToMap(dto.getData()));
         }
         return resultDef;
     }

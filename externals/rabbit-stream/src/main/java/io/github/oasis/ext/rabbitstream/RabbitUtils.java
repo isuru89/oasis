@@ -36,4 +36,18 @@ class RabbitUtils {
                 null);
     }
 
+    static void declareGameExchange(Channel channel) throws IOException {
+        channel.exchangeDeclare(RabbitConstants.GAME_EXCHANGE,
+                RabbitConstants.GAME_EXCHANGE_TYPE,
+                true,
+                false,
+                null);
+
+    }
+
+    static void declareGameEventQueue(Channel channel, String queueName) throws IOException {
+        channel.queueDeclare(queueName, true, false, false, null);
+        channel.queueBind(queueName, RabbitConstants.GAME_EXCHANGE, queueName);
+    }
+
 }

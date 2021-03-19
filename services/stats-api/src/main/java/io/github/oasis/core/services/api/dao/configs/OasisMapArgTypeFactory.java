@@ -19,7 +19,8 @@
 
 package io.github.oasis.core.services.api.dao.configs;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jdbi.v3.core.argument.AbstractArgumentFactory;
 import org.jdbi.v3.core.argument.Argument;
 import org.jdbi.v3.core.argument.ArgumentFactory;
@@ -34,22 +35,26 @@ import java.util.Map;
  */
 public class OasisMapArgTypeFactory extends AbstractArgumentFactory<Map> {
 
-    private final Gson gson;
+    private final ObjectMapper mapper;
 
     /**
      * Constructs an {@link ArgumentFactory} for type {@code T}.
      *
      */
-    public OasisMapArgTypeFactory(Gson gson) {
+    public OasisMapArgTypeFactory(ObjectMapper mapper) {
         super(Types.CLOB);
-        this.gson = gson;
+        this.mapper = mapper;
     }
 
     @Override
     protected Argument build(Map value, ConfigRegistry config) {
         return ((position, statement, ctx) -> {
             Clob clob = ctx.getConnection().createClob();
-            clob.setString(1, gson.toJson(value));
+            try {
+                clob.setString(1, mapper.writeValueAsString(value));
+            } catch (JsonProcessingException e) {
+                throw new IllegalArgumentException("Cannot serialize to string!", e);
+            }
             statement.setClob(position, clob);
         });
     }

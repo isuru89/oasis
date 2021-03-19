@@ -77,6 +77,11 @@ public abstract class AbstractEventHandler {
                 }
 
                 handler.handle(Future.succeededFuture(true));
+
+                if (gameIds.isEmpty()) {
+                    LOG.warn("[{}] No related games for this user {}!", event.getExternalId(), userEmail);
+                }
+
             } else {
                 LOG.warn("[{}] User {} does not exist in Oasis!", event.getExternalId(), userEmail);
                 handler.handle(Future.failedFuture(new IllegalArgumentException("No user exists by email " + userEmail + "!")));

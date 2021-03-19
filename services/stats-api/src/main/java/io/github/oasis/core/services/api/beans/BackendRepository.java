@@ -298,6 +298,11 @@ public class BackendRepository implements OasisRepository {
     }
 
     @Override
+    public List<ElementDef> readElementsByGameId(int gameId) {
+        return adminRepository.readElementsByGameId(gameId);
+    }
+
+    @Override
     public AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute) {
         try {
             return adminRepository.addAttribute(gameId, newAttribute);

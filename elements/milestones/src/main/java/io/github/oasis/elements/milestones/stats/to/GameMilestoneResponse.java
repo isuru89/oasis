@@ -24,6 +24,7 @@ import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractStatsApiResponse;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -43,6 +44,7 @@ public class GameMilestoneResponse extends AbstractStatsApiResponse {
 
     @Getter
     @Setter
+    @NoArgsConstructor
     public static class UserMilestoneRecord {
         private long userId;
         private UserMetadata userMetadata;
@@ -69,8 +71,9 @@ public class GameMilestoneResponse extends AbstractStatsApiResponse {
 
     @Getter
     @Setter
+    @NoArgsConstructor
     public static class MilestoneTeamSummary {
-        private final Integer teamId;
+        private Integer teamId;
         private TeamMetadata teamMetadata;
 
         private Map<String, Long> levels;

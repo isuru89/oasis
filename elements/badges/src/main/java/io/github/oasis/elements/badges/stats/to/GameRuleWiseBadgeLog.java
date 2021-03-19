@@ -23,16 +23,17 @@ import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractAdminApiResponse;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class GameRuleWiseBadgeLog extends AbstractAdminApiResponse {
 
     private String badgeId;
@@ -40,8 +41,8 @@ public class GameRuleWiseBadgeLog extends AbstractAdminApiResponse {
 
     private List<RuleBadgeLogRecord> log;
 
-    @Getter
-    @Setter
+    @Data
+    @NoArgsConstructor
     public static class RuleBadgeLogRecord {
         private long userId;
         private UserMetadata userMetadata;

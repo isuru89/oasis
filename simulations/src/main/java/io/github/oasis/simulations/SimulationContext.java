@@ -20,12 +20,16 @@
 package io.github.oasis.simulations;
 
 import io.github.oasis.core.external.EventDispatcher;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 
 /**
  * @author Isuru Weerarathna
  */
+@Getter
+@Setter
 public class SimulationContext {
 
     private File gameDataDir;
@@ -33,37 +37,9 @@ public class SimulationContext {
     private EventDispatcher dispatcher;
 
     private String apiUrl;
+
     private String adminApiUrl;
+    private String adminApiAppId;
+    private String adminApiSecret;
 
-    public String getAdminApiUrl() {
-        return adminApiUrl;
-    }
-
-    public void setAdminApiUrl(String adminApiUrl) {
-        this.adminApiUrl = adminApiUrl;
-    }
-
-    public String getApiUrl() {
-        return apiUrl;
-    }
-
-    public void setApiUrl(String apiUrl) {
-        this.apiUrl = apiUrl;
-    }
-
-    public File getGameDataDir() {
-        return gameDataDir;
-    }
-
-    public void setGameDataDir(File gameDataDir) {
-        this.gameDataDir = gameDataDir;
-    }
-
-    public EventDispatcher getDispatcher() {
-        return dispatcher;
-    }
-
-    public void setDispatcher(EventDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
 }

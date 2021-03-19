@@ -21,8 +21,10 @@ package io.github.oasis.engine.element.points.stats.to;
 
 import io.github.oasis.core.services.AbstractStatsApiResponse;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -33,8 +35,8 @@ import java.util.Map;
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class UserPointSummary extends AbstractStatsApiResponse {
 
     private Long userId;
@@ -62,8 +64,9 @@ public class UserPointSummary extends AbstractStatsApiResponse {
 
     @Getter
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class PointRecord {
-        private final String key;
-        private final BigDecimal value;
+        private String key;
+        private BigDecimal value;
     }
 }
