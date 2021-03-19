@@ -1,96 +1,185 @@
 version: 1
 
-badges:
-  - name: First-Question
+elements:
+  - id: B-FQ
+    name: First-Question
     description: Awards badge when user asks the very first question
-    event: stackoverflow.question.asked
-    attribute: 4
+    type: core:badge
+    spec:
+      kind: firstEvent
+      selector:
+        matchEvent: stackoverflow.question.asked
+      rewards:
+        badge:
+          attribute: 3
 
   - name: First-Accepted
+    id: B-FACC
     description: Awards when a user asks a question and accepts an answer
-    event: stackoverflow.answer.accepted
-    condition: e.user == e.askedBy
-    attribute: 3
+    type: core:badge
+    spec:
+      kind: firstEvent
+      selector:
+        matchEvent: stackoverflow.answer.accepted
+        filter:
+          expression: e.user == e.askedBy
+      rewards:
+        badge:
+          attribute: 3
 
   - name: Visit-Site
+    id: B-VSITE
     description: Awards when user visits site consecutively for N days.
-    event: stackoverflow.site.login
-    consecutive: true
-    timeUnit: daily
-    threshold: 1
-    streaks:
-      - streak: 50
-        attribute: 3
-      - streak: 75
-        attribute: 2
-      - streak: 100
-        attribute: 3
+    type: core:badge
+    spec:
+      kind: periodicAccumulationStreak
+      selector:
+        matchEvent: stackoverflow.site.login
+      period:
+        duration: 1
+        unit: days
+      consecutive: true
+      threshold: 1
+      streaks:
+        - streak: 50
+          rewards:
+            badge:
+              attribute: 3
+        - streak: 75
+          rewards:
+            badge:
+              attribute: 2
+        - streak: 100
+          rewards:
+            badge:
+              attribute: 1
 
   - name: Popular-Question
+    id: B-POPQ
     description: Awards with number of votes recieved for a question
-    event: stackoverflow.question.upvoted
-    conditions:
-      - priority: 1
-        condition: e.votes == 100
-        attribute: 1
-      - priority: 2
-        condition: e.votes == 50
-        attribute: 2
-      - priority: 3
-        condition: e.votes == 30
-        attribute: 3
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: stackoverflow.question.upvoted
+      conditions:
+        - priority: 1
+          condition: e.votes == 100
+          rewards:
+            badge:
+              attribute: 1
+        - priority: 2
+          condition: e.votes == 50
+          rewards:
+            badge:
+              attribute: 2
+        - priority: 3
+          condition: e.votes == 30
+          rewards:
+            badge:
+              attribute: 3
 
   - name: Favourite-Question
+    id: B-FAVQ
     description: Awards with number of favourites recieved for a question
-    event: stackoverflow.question.favourite
-    conditions:
-      - priority: 1
-        condition: e.favourites == 50
-        attribute: 1
-      - priority: 2
-        condition: e.votes == 25
-        attribute: 2
-      - priority: 3
-        condition: e.votes == 10
-        attribute: 3
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: stackoverflow.question.favourite
+      conditions:
+        - priority: 1
+          condition: e.favourites == 50
+          rewards:
+            badge:
+              attribute: 1
+        - priority: 2
+          condition: e.votes == 25
+          rewards:
+            badge:
+              attribute: 2
+        - priority: 3
+          condition: e.votes == 10
+          rewards:
+            badge:
+              attribute: 3
 
   - name: Viewed-Question
+    id: B-VIEWQ
     description: Awards with number of views for a question
-    event: stackoverflow.question.viewed
-    conditions:
-      - priority: 1
-        condition: e.views == 10000
-        attribute: 1
-      - priority: 2
-        condition: e.views == 5000
-        attribute: 2
-      - priority: 3
-        condition: e.views == 1000
-        attribute: 3
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: stackoverflow.question.viewed
+      conditions:
+        - priority: 1
+          condition: e.views == 10000
+          rewards:
+            badge:
+              attribute: 1
+        - priority: 2
+          condition: e.views == 5000
+          rewards:
+            badge:
+              attribute: 2
+        - priority: 3
+          condition: e.views == 1000
+          rewards:
+            badge:
+              attribute: 3
 
   - name: Daily-Reputations
+    id: B-DREP
     description: Awards when user scores 100+ daily.
-    event: stackoverflow.points.awarded
-    timeUnit: daily
-    valueExtractorExpression: "e.points"
-    thresholds:
-      - value: 200
-        attribute: 1
-      - value: 150
-        attribute: 2
-      - value: 100
-        attribute: 3
+    type: core:badge
+    spec:
+      kind: periodicAccumulation
+      selector:
+        matchEvent: stackoverflow.points.awarded
+      period:
+        duration: 1
+        unit: days
+      aggregatorExtractor:
+        expression: "e.points"
+      thresholds:
+        - value: 200
+          rewards:
+            badge:
+              attribute: 1
+        - value: 150
+          rewards:
+            badge:
+              attribute: 2
+        - value: 100
+          rewards:
+            badge:
+              attribute: 3
 
   - name: Max-Reputations
+    id: B-MAXREP
     description: Awards when user reaches max daily reputation for N days.
-    event: stackoverflow.points.awarded
-    timeUnit: daily
-    consecutive: false
-    threshold: 200
-    streaks:
-      - streak: 10
-        attribute: 1
-      - streak: 5
-        attribute: 2
-      - streak: 2
-        attribute: 3
+    type: core:badge
+    spec:
+      kind: periodicAccumulationStreak
+      selector:
+        matchEvent: stackoverflow.points.awarded
+      period:
+        duration: 1
+        unit: days
+      aggregatorExtractor:
+        expression: e.value
+      threshold: 200
+      streaks:
+        - streak: 2
+          rewards:
+            badge:
+              attribute: 3
+        - streak: 5
+          rewards:
+            badge:
+              attribute: 2
+        - streak: 10
+          rewards:
+            badge:
+              attribute: 1

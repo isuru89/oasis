@@ -74,6 +74,8 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
         String queue = RabbitConstants.ANNOUNCEMENT_EXCHANGE + "." + id;
         LOG.info("Connecting to announcement queue {}", queue);
         RabbitUtils.declareAnnouncementExchange(channel);
+        channel.basicQos(RabbitConstants.PREFETCH_COUNT_FOR_ANNOUNCEMENTS);
+
         channel.queueDeclare(queue, true, true, false, null);
         channel.queueBind(queue, RabbitConstants.ANNOUNCEMENT_EXCHANGE, "*");
         channel.basicConsume(queue, false, this::handleMessage, this::handleCancel);

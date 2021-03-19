@@ -57,6 +57,8 @@ public class Main {
         simulationContext.setDispatcher(dispatcher);
         simulationContext.setApiUrl("http://localhost:8050");
         simulationContext.setAdminApiUrl("http://localhost:8081/api");
+        simulationContext.setAdminApiAppId("root");
+        simulationContext.setAdminApiSecret("root");
         Simulation simulation = new SimulationWithApi();
         simulation.run(simulationContext);
 

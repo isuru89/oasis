@@ -97,6 +97,8 @@ public class Simulation implements Closeable {
 
             createUsers();
 
+            defineAllGameRules();
+
             dbPool.close();
             Thread.sleep(3000);
 
@@ -113,6 +115,10 @@ public class Simulation implements Closeable {
     }
 
     protected void cleanUpAllResources() {
+
+    }
+
+    protected void defineAllGameRules() {
 
     }
 
@@ -214,7 +220,7 @@ public class Simulation implements Closeable {
         this.dispatcher.push(def);
     }
 
-    private void dispatchGameStart() throws Exception {
+    protected void dispatchGameStart() throws Exception {
         EngineMessage.Scope scope = new EngineMessage.Scope(GAME_ID);
         EngineMessage gameCreatedDef = new EngineMessage();
         gameCreatedDef.setType(EngineMessage.GAME_CREATED);
@@ -241,7 +247,7 @@ public class Simulation implements Closeable {
     }
 
     @SuppressWarnings("unchecked")
-    private void dispatchRules() throws Exception {
+    protected void dispatchRules() throws Exception {
         Yaml yaml = new Yaml();
 
         EngineMessage.Scope scope = new EngineMessage.Scope(GAME_ID);

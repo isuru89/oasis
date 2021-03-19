@@ -132,7 +132,7 @@ public class OasisSupervisor extends OasisBaseActor {
         GameCommand.GameLifecycle status = gameCommand.getStatus();
         int gameId = gameCommand.getGameId();
         ExternalPartyImpl eventSource = ExternalParty.EXTERNAL_PARTY.get(getContext().getSystem());
-        if (status == GameCommand.GameLifecycle.CREATE) {
+        if (status == GameCommand.GameLifecycle.CREATE || status == GameCommand.GameLifecycle.START) {
             createGameRuleRefNx(gameId);
             gamesRunning.add(gameId);
             contextMap.put(gameId, loadGameContext(gameId));
