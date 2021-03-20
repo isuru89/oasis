@@ -20,6 +20,8 @@ services:
       - "8050:8050"
     volumes:
       - "./buildscripts/events-api.conf:/etc/oasis/events-api.conf"
+    environment:
+      - "WAIT_HOSTS=redis:6379,rabbit:5672"
     depends_on:
       - redis
       - rabbit
@@ -31,6 +33,8 @@ services:
     volumes:
       - "./buildscripts/stats-api.conf:/etc/oasis/stats-api.conf"
       - "./buildscripts/stats-api.properties:/etc/oasis/stats-api.properties"
+    environment:
+      - "WAIT_HOSTS=redis:6379,rabbit:5672"
     depends_on:
       - redis
       - rabbit
