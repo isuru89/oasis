@@ -21,6 +21,7 @@ package io.github.oasis.services.events.dispatcher;
 
 import io.github.oasis.core.external.EventDispatcher;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceBinder;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -72,9 +74,23 @@ public class DispatcherVerticle extends AbstractVerticle {
     }
 
     @Override
-    public void stop() throws Exception {
+    public void stop(Promise<Void> stopPromise) {
         LOG.warn("Stopping event dispatcher...");
-        eventDispatcher.close();
+        vertx.executeBlocking((Handler<Promise<Void>>) promise -> {
+            try {
+                eventDispatcher.close();
+                promise.complete();
+            } catch (IOException e) {
+                promise.fail(e);
+            }
+        }, res -> {
+            LOG.warn("Event dispatcher stopped!");
+            if (res.succeeded()) {
+                stopPromise.complete();
+            } else {
+                stopPromise.fail(res.cause());
+            }
+        });
     }
 
     private Map<String, Object> configToMap(JsonObject config) {

@@ -31,6 +31,7 @@ import io.github.oasis.core.external.messages.GameCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -59,6 +60,17 @@ public class ExternalPartyImpl implements Extension {
             }
         } else {
             LOG.error("No implementation called '{}' found on classpath!", eventStreamImpl);
+        }
+    }
+
+    public void close() {
+        if (sourceStreamProvider != null) {
+            try {
+                LOG.warn("Closing down source stream provider...");
+                sourceStreamProvider.close();
+            } catch (IOException e) {
+                LOG.error("Error occurred while shutting down source!", e);
+            }
         }
     }
 
