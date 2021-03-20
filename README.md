@@ -52,14 +52,13 @@ As of initial version, Redis will act as the database for engine operations cons
 
 ## Running Modes
 
-### Engine as a service
+**Note**: The important thing about Redis.
 
-This is a full deployment with all the components as shown in [Architecture](#architecture-of-oasis).
-This provides out-of-the-box components which can be used by your applications.
-
-For testing purpose, a docker compose setup has been provided to up and running locally.
-
-Kubernetes and AWS solution are still pending.
+> Redis must be configured in [Replication mode](https://redis.io/topics/replication) 
+to not losing data. Because all earned game rewards and current processing states are being stored in the Redis.
+That means primary database for the engine is the Redis. If you want to store those rewards 
+in a more durable database like SQL, MongoDB or any NoSQL solution, you can explicitly
+intercept through engine by providing a custom signal subscription instance.
 
 ### Embedding Engine
 
@@ -121,6 +120,16 @@ public static void main(String[] args) throws Exception {
 **Note:** Once you start the engine, it will keep running until the application goes down.
 
 Check the methods of `OasisEngine` class how you can submit your events/rules/game commands.
+
+### Engine as a service
+
+This is a full deployment with all the components as shown in [Architecture](#architecture-of-oasis).
+This provides out-of-the-box components which can be used by your applications.
+
+For testing purpose, a docker compose setup has been provided to up and running locally.
+
+Kubernetes and AWS solution are still pending.
+
 
 ## Concepts
 
