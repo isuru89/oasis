@@ -41,6 +41,16 @@
 		</dependency>
 		<dependency>
 			<groupId>io.github.oasis</groupId>
+			<artifactId>oasis-mod-challenges</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.oasis</groupId>
+			<artifactId>oasis-mod-ratings</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.oasis</groupId>
 			<artifactId>oasis-ext-rabbitstream</artifactId>
 			<version>${project.version}</version>
 		</dependency>

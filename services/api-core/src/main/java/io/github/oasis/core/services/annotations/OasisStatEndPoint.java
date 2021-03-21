@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.services.annotations;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,9 +42,13 @@ import java.lang.annotation.Target;
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
 )
+@Operation(
+)
 public @interface OasisStatEndPoint {
 
     @AliasFor(annotation = RequestMapping.class, attribute = "value")
     String path();
 
+    @AliasFor(annotation = Operation.class, attribute = "summary")
+    String summary() default "";
 }

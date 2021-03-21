@@ -29,7 +29,15 @@ import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -38,7 +46,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(
-    consumes = MediaType.APPLICATION_JSON_VALUE,
     produces = MediaType.APPLICATION_JSON_VALUE
 )
 @Tag(name = "Game Elements", description = "Game elements API")
@@ -56,7 +63,7 @@ public class ElementsController extends AbstractController {
     @ForPlayer
     @GetMapping(path = "/games/{gameId}/elements/types/{elementType}")
     public List<ElementDef> getElementsByType(@PathVariable("gameId") Integer gameId,
-                                                           @PathVariable("elementType") String elementType) throws OasisException {
+                                              @PathVariable("elementType") String elementType) throws OasisException {
         return elementService.listElementsByType(gameId, elementType);
     }
 
@@ -76,9 +83,9 @@ public class ElementsController extends AbstractController {
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PostMapping(path = "/games/{gameId}/elements")
+    @PostMapping(path = "/games/{gameId}/elements", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ElementDef add(@PathVariable("gameId") Integer gameId,
-                           @RequestBody ElementDef elementDef) {
+                          @RequestBody ElementDef elementDef) {
         return elementService.addElement(gameId, elementDef);
     }
 
@@ -87,7 +94,7 @@ public class ElementsController extends AbstractController {
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PutMapping(path = "/games/{gameId}/elements/{elementId}")
+    @PutMapping(path = "/games/{gameId}/elements/{elementId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ElementDef update(@PathVariable("gameId") Integer gameId,
                              @PathVariable("elementId") String elementId,
                              @RequestBody ElementDef elementDef) {

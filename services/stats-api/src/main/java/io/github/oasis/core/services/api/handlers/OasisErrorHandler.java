@@ -21,8 +21,10 @@ package io.github.oasis.core.services.api.handlers;
 
 import io.github.oasis.core.services.api.configs.ErrorMessages;
 import io.github.oasis.core.services.exceptions.OasisApiException;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -74,8 +76,10 @@ public class OasisErrorHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.valueOf(ex.getStatusCode()));
     }
 
-    @Getter
-    @Setter
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder(toBuilder = true)
     public static class ErrorObject implements Serializable {
         private String timestamp;
         private int status;

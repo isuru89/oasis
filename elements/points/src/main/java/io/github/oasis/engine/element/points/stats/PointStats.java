@@ -181,7 +181,7 @@ public class PointStats extends AbstractStatsApiService {
                             schema = @Schema(implementation = UserRankingSummary.class))
             }
     )
-    @OasisStatEndPoint(path = "/elements/points/rankings/summary")
+    @OasisStatEndPoint(path = "/elements/points/rankings/summary", summary = "Rankings summary")
     @SuppressWarnings("unchecked")
     public Object getUserRankings(@QueryPayload UserRankingRequest request) throws OasisApiException {
         Validators.checkRankingRequest(request);

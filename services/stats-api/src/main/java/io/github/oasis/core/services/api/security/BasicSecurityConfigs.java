@@ -58,13 +58,13 @@ public class BasicSecurityConfigs extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(getFilter(), AnonymousAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers("**/sawagger-ui/**").permitAll()
-                .antMatchers("**/error").permitAll()
+                .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/webjars/swagger-ui/**", "/oasis-api-spec.html").permitAll()
+                .antMatchers("/error").permitAll()
                 .anyRequest().authenticated()
                 .and()
+                .authenticationProvider(authenticationProvider)
+                .addFilterBefore(getFilter(), AnonymousAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
     }
