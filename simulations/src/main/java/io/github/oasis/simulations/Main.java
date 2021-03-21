@@ -189,23 +189,21 @@ public class Main {
         context.getDispatcher().broadcast(EngineMessage.createGameLifecycleEvent(gameId, GameState.STARTED));
     }
 
-    private static void runToEventsAPI() throws Exception {
-        OasisConfigs configs = OasisConfigs.defaultConfigs();
-
-        // initialize dispatcher first
-        EventDispatcher dispatcher = initializeDispatcher(configs.getConfigRef());
+    private static void runToEventsAPI() {
+        String simDir = System.getProperty("game.data.dir", "./simulations/stackoverflow");
+        String eventApiUrl = System.getProperty("event.api.url", "http://localhost:8050");
+        String adminApiUrl = System.getProperty("admin.api.url", "http://localhost:8010/api");
+        String adminApiAppId = System.getProperty("admin.api.appid", "root");
+        String adminApiAppKey = System.getProperty("admin.api.appkey", "root");
 
         SimulationContext simulationContext = new SimulationContext();
-        simulationContext.setGameDataDir(new File("./simulations/stackoverflow"));
-        simulationContext.setDispatcher(dispatcher);
-        simulationContext.setApiUrl("http://localhost:8050");
-        simulationContext.setAdminApiUrl("http://localhost:8010/api");
-        simulationContext.setAdminApiAppId("root");
-        simulationContext.setAdminApiSecret("root");
+        simulationContext.setGameDataDir(new File(simDir));
+        simulationContext.setApiUrl(eventApiUrl);
+        simulationContext.setAdminApiUrl(adminApiUrl);
+        simulationContext.setAdminApiAppId(adminApiAppId);
+        simulationContext.setAdminApiSecret(adminApiAppKey);
         Simulation simulation = new SimulationWithApi();
         simulation.run(simulationContext);
-
-        dispatcher.close();
     }
 
     private static void runToEngine() throws Exception {

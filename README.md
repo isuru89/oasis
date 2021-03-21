@@ -27,6 +27,7 @@ milestones, challenges, and ratings.
 * [Running Modes](#running-modes)
     * [Embedding Engine](#embedding-engine)
     * [Engine as a service](#engine-as-a-service)
+* [Quick Demo](#quick-demo)
 * [Concepts](#concepts)
     * [Participants](#participants)
     * [Game Elements](#game-elements)
@@ -41,7 +42,7 @@ milestones, challenges, and ratings.
 
 * **Events API**: The api can be exposed to public networks where event-sources can publish events to the framework.
   This authorize the event sources and game model before accepting any events.
-* **Stats API**: This api is for manipulating [game model](#gamification-model) (or in other word admin-related operations) and
+* **Admin/Stats API**: This api is for manipulating [game model](#gamification-model) (or in other word admin-related operations) and
   querying statistics. Through this API, model entities can be created/updated/removed and those
   changes will be reflected in engine too. This API is only for internal purpose.
 * **Engine**: This is the heart of the framework which create rewards by evaluating received events based on the defined
@@ -127,9 +128,27 @@ This is a full deployment with all the components as shown in [Architecture](#ar
 This provides out-of-the-box components which can be used by your applications.
 
 For testing purpose, a docker compose setup has been provided to up and running locally.
+[See Quick Demo](#quick-demo) section to test that out.
 
 Kubernetes and AWS solution are still pending.
 
+## Quick Demo
+
+You can run a simulation in your local computer using docker-compose.
+
+Prerequisites:
+  * Docker compose must be installed ([refer official site](https://docs.docker.com/compose/install/))
+  * JDK 11 or higher must be installed
+
+Steps:
+  * Clone this repository
+  * Run `sh build.sh` from the project root directory to build the project and create docker images
+    * Once the script is completed, you will see the components are up and running with the help of docker-compose
+  * Run the simulation using script inside _simulations_ directory. 
+    * Change directory to `cd simulations`
+    * Then execute, `sh run-simulation.sh`
+  * Open the api documentation from here 
+    [http://localhost:8010/api/swagger-ui/index.html?configUrl=/api/v3/api-docs/swagger-config](http://localhost:8010/api/swagger-ui/index.html?configUrl=/api/v3/api-docs/swagger-config)
 
 ## Concepts
 
