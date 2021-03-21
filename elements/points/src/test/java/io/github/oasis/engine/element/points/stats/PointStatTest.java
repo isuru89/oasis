@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 
 /**
@@ -81,8 +80,8 @@ public class PointStatTest {
     private PointRange createRange(TimeScope timeScope, String fromDate, String toDate) {
         PointRange range = new PointRange();
         range.setType(timeScope);
-        range.setFrom(LocalDate.parse(fromDate));
-        range.setTo(LocalDate.parse(toDate));
+        range.setFrom(fromDate);
+        range.setTo(toDate);
         return range;
     }
 }

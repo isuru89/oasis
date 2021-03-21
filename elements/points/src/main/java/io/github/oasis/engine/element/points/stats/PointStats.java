@@ -38,8 +38,13 @@ import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Timestamps;
 import io.github.oasis.core.utils.Utils;
 import io.github.oasis.engine.element.points.PointIDs;
-import io.github.oasis.engine.element.points.stats.to.*;
+import io.github.oasis.engine.element.points.stats.to.LeaderboardRequest;
+import io.github.oasis.engine.element.points.stats.to.LeaderboardSummary;
+import io.github.oasis.engine.element.points.stats.to.UserPointSummary;
+import io.github.oasis.engine.element.points.stats.to.UserPointsRequest;
 import io.github.oasis.engine.element.points.stats.to.UserPointsRequest.PointsFilterScope;
+import io.github.oasis.engine.element.points.stats.to.UserRankingRequest;
+import io.github.oasis.engine.element.points.stats.to.UserRankingSummary;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -48,6 +53,7 @@ import org.springframework.http.MediaType;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -185,7 +191,7 @@ public class PointStats extends AbstractStatsApiService {
             String[] keysToRead = Stream.of(TimeScope.values())
                     .map(timeScope -> {
                         String trait = timeScope.getTrait();
-                        String duration = timeScope == TimeScope.ALL ? null : Timestamps.formatKey(request.getDate(), timeScope);
+                        String duration = timeScope == TimeScope.ALL ? null : Timestamps.formatKey(LocalDate.parse(request.getDate()), timeScope);
                         if (request.isTeamScoped()) {
                             return PointIDs.getGameTeamLeaderboard(request.getGameId(), request.getTeamId(), trait, duration);
                         }
@@ -245,7 +251,10 @@ public class PointStats extends AbstractStatsApiService {
         String prefix = filterScope.getType().name().toLowerCase();
         UserPointsRequest.PointRange range = filterScope.getRange();
         if (range != null) {
-            List<String> timeRanges = Timestamps.timeUnitsWithinRange(range.getFrom(), range.getTo(), range.getType());
+            List<String> timeRanges = Timestamps.timeUnitsWithinRange(
+                    LocalDate.parse(range.getFrom()),
+                    LocalDate.parse(range.getTo()),
+                    range.getType());
             if (Utils.isNotEmpty(filterScope.getValues())) {
                 return timeRanges.stream().flatMap(tr -> filterScope.getValues().stream().map(val -> val + COLON + tr))
                         .map(val -> prefix + COLON + val)

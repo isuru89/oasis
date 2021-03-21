@@ -9,10 +9,15 @@ services:
     volumes:
       - "./buildscripts/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
       - "./buildscripts/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json"
-#      - "./data/rabbit:/var/lib/rabbitmq/mnesia"
+      - "./.tmpdata/rabbit:/var/lib/rabbitmq/mnesia"
 
   redis:
     image: redis:5
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - "./.tmpdata/redis:/data"
+    ports:
+      - "6379:6379"
 
   events-api:
     image: oasis/events-api
@@ -35,6 +40,16 @@ services:
       - "./buildscripts/stats-api.properties:/etc/oasis/stats-api.properties"
     environment:
       - "WAIT_HOSTS=redis:6379,rabbit:5672"
+    depends_on:
+      - redis
+      - rabbit
+
+  engine:
+    image: oasis/engine
+    environment:
+      - "WAIT_HOSTS=redis:6379,rabbit:5672"
+    volumes:
+      - "./buildscripts/engine.conf:/etc/oasis/engine.conf"
     depends_on:
       - redis
       - rabbit

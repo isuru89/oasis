@@ -20,24 +20,20 @@
 package io.github.oasis.engine.element.points.stats.to;
 
 import io.github.oasis.core.services.AbstractStatsApiRequest;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
-import java.time.LocalDate;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-@ToString
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class UserRankingRequest extends AbstractStatsApiRequest {
 
     private Long userId;
     private Integer teamId;
 
-    private LocalDate date;
+    private String date;
 
     private boolean includeTotalCount = false;
     private boolean descendingOrder = true;
