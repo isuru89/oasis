@@ -199,7 +199,7 @@ public class Main {
         simulationContext.setGameDataDir(new File("./simulations/stackoverflow"));
         simulationContext.setDispatcher(dispatcher);
         simulationContext.setApiUrl("http://localhost:8050");
-        simulationContext.setAdminApiUrl("http://localhost:8081/api");
+        simulationContext.setAdminApiUrl("http://localhost:8010/api");
         simulationContext.setAdminApiAppId("root");
         simulationContext.setAdminApiSecret("root");
         Simulation simulation = new SimulationWithApi();

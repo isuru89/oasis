@@ -21,9 +21,13 @@ package io.github.oasis.core.services.api.configs;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 /**
  * @author Isuru Weerarathna
@@ -32,11 +36,21 @@ import org.springframework.context.annotation.Configuration;
 public class SerializingConfigs {
 
     @Bean
+    @Primary
     public ObjectMapper createSerializer() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS, false);
         return mapper;
+    }
+
+    @Bean
+    public MappingJackson2HttpMessageConverter jsonCustomizer() {
+        Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder()
+                .modules(new JavaTimeModule())
+                .failOnUnknownProperties(false);
+        return new MappingJackson2HttpMessageConverter(builder.build());
     }
 
 }

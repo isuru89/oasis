@@ -115,22 +115,22 @@ public class DatabaseConfigs {
                 .registerArgument(new OasisEnumArgTypeFactory());
 
         try (Connection connection = jdbcDataSource.getConnection()) {
-            runDbMigration(connection);
+            runDbMigration(connection, dbSchemaDir);
         }
         return jdbi;
     }
 
 
-    public void runDbMigration(Connection connection) {
+    public void runDbMigration(Connection connection, String dbSchemaDir) {
         LOG.info("Starting to run db migration... [Schema dir: {}]", dbSchemaDir);
         String type = StringUtils.substringBefore(dbSchemaDir, ":");
         String changeLogLocation = StringUtils.substringAfter(dbSchemaDir, ":");
         ResourceAccessor classPathAccessor;
-        if (StringUtils.equals(type, "classpath")) {
-            classPathAccessor = new ClassLoaderResourceAccessor();
-        } else {
+        if (StringUtils.equals(type, "file")) {
             classPathAccessor = new FileSystemResourceAccessor(new File(changeLogLocation).getParentFile());
             changeLogLocation = StringUtils.substringAfterLast(changeLogLocation, "/");
+        } else {
+            classPathAccessor = new ClassLoaderResourceAccessor();
         }
 
         LOG.info("Loading migration scripts from [Schema dir: {}]", changeLogLocation);

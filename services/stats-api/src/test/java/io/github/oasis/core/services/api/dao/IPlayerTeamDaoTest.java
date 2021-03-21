@@ -45,7 +45,12 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
@@ -109,7 +114,7 @@ class IPlayerTeamDaoTest {
 
         DatabaseConfigs configs = new DatabaseConfigs();
         try (Connection connection = ds.getConnection()) {
-            configs.runDbMigration(connection);
+            configs.runDbMigration(connection, "classpath:io/github/oasis/db/schema/oasis-changelog-master.yml");
         }
         dao = jdbi.onDemand(IPlayerTeamDao.class);
     }

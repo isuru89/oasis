@@ -83,19 +83,11 @@ public abstract class AbstractServiceTest {
         try (Connection connection = ds.getConnection()) {
             connection.createStatement().execute("DROP ALL OBJECTS");
         }
-//        dropAll(ds);
 
         DatabaseConfigs configs = new DatabaseConfigs();
         try (Connection connection = ds.getConnection()) {
-            configs.runDbMigration(connection);
+            configs.runDbMigration(connection, "classpath:io/github/oasis/db/schema/oasis-changelog-master.yml");
         }
-//        String schemaScript = IOUtils.resourceToString(
-//                "io/github/oasis/db/schema/schema-sqlite.sql",
-//                StandardCharsets.UTF_8,
-//                Thread.currentThread().getContextClassLoader());
-//        try (Handle h = jdbi.open()) {
-//            h.createScript(schemaScript).executeAsSeparateStatements();
-//        }
         return jdbi;
     }
 
