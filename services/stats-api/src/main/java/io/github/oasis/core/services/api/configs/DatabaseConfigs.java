@@ -22,7 +22,11 @@ package io.github.oasis.core.services.api.configs;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.services.api.dao.*;
+import io.github.oasis.core.services.api.dao.IApiKeyDao;
+import io.github.oasis.core.services.api.dao.IElementDao;
+import io.github.oasis.core.services.api.dao.IEventSourceDao;
+import io.github.oasis.core.services.api.dao.IGameDao;
+import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
 import io.github.oasis.core.services.api.dao.configs.OasisEnumArgTypeFactory;
 import io.github.oasis.core.services.api.dao.configs.OasisEnumColumnFactory;
 import io.github.oasis.core.utils.Texts;
@@ -32,7 +36,9 @@ import liquibase.Liquibase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.slf4j.Logger;
@@ -58,20 +64,14 @@ public class DatabaseConfigs {
     @Value("${oasis.configs.path}")
     private String oasisConfigFilePath;
 
-    @Value("${oasis.jdbc.url}")
-    private String oasisJdbcUrl;
-    @Value("${oasis.jdbc.driver}")
-    private String oasisJdbcDriver;
-    @Value("${oasis.jdbc.user}")
-    private String oasisJdbcUser;
-    @Value("${oasis.jdbc.password}")
-    private String oasisJdbcPassword;
-
     @Value("${oasis.db.retries:5}")
     private int numberOfDbRetries;
 
     @Value("${oasis.db.retry.interval:3000}")
     private int dbRetryInterval;
+
+    @Value("${oasis.schema.dir}")
+    private String dbSchemaDir;
 
     @Bean
     public OasisConfigs loadOasisConfigs() {
@@ -89,7 +89,12 @@ public class DatabaseConfigs {
     }
 
     @Bean
-    public DataSource loadDataSource() {
+    public DataSource loadDataSource(OasisConfigs configs) {
+        String oasisJdbcUrl = configs.get("oasis.jdbc.url", null);
+        String oasisJdbcDriver = configs.get("oasis.jdbc.driver", null);
+        String oasisJdbcUser = configs.get("oasis.jdbc.user", null);
+        String oasisJdbcPassword = configs.get("oasis.jdbc.password", null);
+
         return DataSourceBuilder.create()
             .url(oasisJdbcUrl)
             .driverClassName(oasisJdbcDriver)
@@ -106,17 +111,25 @@ public class DatabaseConfigs {
                 .registerArgument(new OasisEnumArgTypeFactory());
 
         try (Connection connection = jdbcDataSource.getConnection()) {
-            runDbMigration(connection);
+            runDbMigration(connection, dbSchemaDir);
         }
         return jdbi;
     }
 
 
-    public void runDbMigration(Connection connection) {
-        LOG.info("Starting to run db migration...");
-        String changeLogLocation = "classpath:io/github/oasis/db/schema/oasis-changelog-master.yml";
-        ResourceAccessor classPathAccessor = new ClassLoaderResourceAccessor();
+    public void runDbMigration(Connection connection, String dbSchemaDir) {
+        LOG.info("Starting to run db migration... [Schema dir: {}]", dbSchemaDir);
+        String type = StringUtils.substringBefore(dbSchemaDir, ":");
+        String changeLogLocation = StringUtils.substringAfter(dbSchemaDir, ":");
+        ResourceAccessor classPathAccessor;
+        if (StringUtils.equals(type, "file")) {
+            classPathAccessor = new FileSystemResourceAccessor(new File(changeLogLocation).getParentFile());
+            changeLogLocation = StringUtils.substringAfterLast(changeLogLocation, "/");
+        } else {
+            classPathAccessor = new ClassLoaderResourceAccessor();
+        }
 
+        LOG.info("Loading migration scripts from [Schema dir: {}]", changeLogLocation);
         try {
             DatabaseConnection databaseConnection = new JdbcConnection(connection);
             Liquibase liquibase = new Liquibase(changeLogLocation, classPathAccessor, databaseConnection);

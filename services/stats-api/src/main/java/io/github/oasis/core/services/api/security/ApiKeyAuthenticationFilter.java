@@ -19,8 +19,7 @@
 
 package io.github.oasis.core.services.api.security;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.github.oasis.core.services.ApiConstants;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -40,11 +39,6 @@ import java.io.IOException;
  */
 public class ApiKeyAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ApiKeyAuthenticationFilter.class);
-
-    private static final String X_APP_ID = "X-APP-ID";
-    private static final String X_APP_KEY = "X-APP-KEY";
-
     protected ApiKeyAuthenticationFilter(RequestMatcher requiresAuthenticationRequestMatcher,
                                          AuthenticationManager manager) {
         super(requiresAuthenticationRequestMatcher);
@@ -53,9 +47,9 @@ public class ApiKeyAuthenticationFilter extends AbstractAuthenticationProcessing
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
-        String apiKey = request.getHeader(X_APP_ID);
-        String apiSecret = request.getHeader(X_APP_KEY);
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        String apiKey = request.getHeader(ApiConstants.APP_ID_HEADER);
+        String apiSecret = request.getHeader(ApiConstants.APP_KEY_HEADER);
 
         PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(apiKey, apiSecret);
         return getAuthenticationManager().authenticate(token);

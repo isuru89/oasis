@@ -107,11 +107,20 @@ public class OasisSupervisor extends OasisBaseActor {
             try (DbContext db = engineContext.getDb().createContext()) {
                 for (Integer gameId : gamesRunning) {
                     publishGameRemoval(gameId, db);
+                    LOG.warn("Game '{}' has been notified as stopped.", gameId);
                 }
             } catch (IOException e) {
                 LOG.error("Error occurred while publishing running games!", e);
             }
         }
+    }
+
+    @Override
+    public void postStop() throws Exception {
+        super.postStop();
+
+        LOG.warn("Supervisor is going to stop. Notifying running #{} games as stopped...", gamesRunning.size());
+        publish(null);
     }
 
     @SuppressWarnings("unchecked")

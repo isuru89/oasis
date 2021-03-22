@@ -84,8 +84,15 @@ public class OasisEngine implements MessageReceiver {
                             return CompletableFuture.completedFuture(Done.done());
                         });
 
+        CoordinatedShutdown.get(oasisEngine)
+                .addJvmShutdownHook(this::closeSourceStreamProvider);
+
         LOG.info("Bootstrapping event stream...");
         bootstrapEventStream(oasisEngine);
+    }
+
+    private void closeSourceStreamProvider() {
+        ExternalParty.EXTERNAL_PARTY.get(oasisEngine).close();
     }
 
     private void bootstrapEventStream(ActorSystem system) throws OasisException {

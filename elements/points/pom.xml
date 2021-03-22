@@ -11,4 +11,7 @@
 
     <artifactId>oasis-mod-points</artifactId>
 
+    <build>
+        <finalName>oasis-mod-points</finalName>
+    </build>
 </project>

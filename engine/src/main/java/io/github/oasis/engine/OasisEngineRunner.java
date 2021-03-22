@@ -27,8 +27,8 @@ import io.github.oasis.db.redis.RedisDb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.ServiceLoader;
-import java.util.stream.Collectors;
 
 /**
  * Main starter point of Oasis-Engine when run within a container or cli.
@@ -37,11 +37,14 @@ import java.util.stream.Collectors;
  */
 public class OasisEngineRunner {
 
+    private static final String ENGINE_CONFIG_FILE_ENV = "ENGINE_CONFIG_FILE";
+    private static final String ENGINE_CONFIG_FILE_SYS = "engine.config.file";
+
     private static final Logger LOG = LoggerFactory.getLogger(OasisEngineRunner.class);
 
     public static void main(String[] args) throws OasisException {
         EngineContext.Builder builder = EngineContext.builder();
-        OasisConfigs configs = OasisConfigs.defaultConfigs();
+        OasisConfigs configs = loadConfigs();
         builder.withConfigs(configs);
 
         discoverElements(builder);
@@ -51,6 +54,22 @@ public class OasisEngineRunner {
         builder.withDb(dbPool);
 
         new OasisEngine(builder.build()).start();
+    }
+
+    private static OasisConfigs loadConfigs() {
+        String confPath = System.getenv(ENGINE_CONFIG_FILE_ENV);
+        if (Objects.nonNull(confPath) && !confPath.isEmpty()) {
+            LOG.info("Reading configurations from {}", confPath);
+            return OasisConfigs.create(confPath);
+        }
+        confPath = System.getProperty(ENGINE_CONFIG_FILE_SYS);
+        if (Objects.nonNull(confPath) && !confPath.isEmpty()) {
+            LOG.info("Reading configurations from {}", confPath);
+            return OasisConfigs.create(confPath);
+        }
+
+        LOG.warn("Reading default config file bundled with engine, because none of env or system configuration path is specified!");
+        return OasisConfigs.defaultConfigs();
     }
 
     private static void discoverElements(EngineContext.Builder builder) {

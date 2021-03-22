@@ -84,6 +84,13 @@ public class Main {
                 }
             });
         });
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                vertx.close();
+            }
+        });
     }
 
 }

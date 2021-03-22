@@ -45,7 +45,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(
-    consumes = MediaType.APPLICATION_JSON_VALUE,
     produces = MediaType.APPLICATION_JSON_VALUE
 )
 @Tag(name = "Games", description = "Game API")
@@ -62,7 +61,7 @@ public class GamesController extends AbstractController {
             tags = {"admin"}
     )
     @ForAdmin
-    @PostMapping(path = "/games")
+    @PostMapping(path = "/games", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Game addGame(@RequestBody GameObjectRequest request) throws OasisException {
         return gameService.addGame(request);
     }
@@ -100,7 +99,7 @@ public class GamesController extends AbstractController {
             tags = {"admin"}
     )
     @ForAdmin
-    @PutMapping(path = "/games/{gameId}")
+    @PutMapping(path = "/games/{gameId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Game updateGame(@PathVariable("gameId") Integer gameId,
                            @RequestBody GameObjectRequest request) throws OasisException {
         Game game = request.createGame();

@@ -33,6 +33,7 @@
             <groupId>io.github.oasis</groupId>
             <artifactId>oasis-core</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.github.oasis</groupId>

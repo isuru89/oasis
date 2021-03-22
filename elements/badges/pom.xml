@@ -16,6 +16,7 @@
             <groupId>io.github.oasis</groupId>
             <artifactId>oasis-mod-points</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

@@ -21,27 +21,23 @@ package io.github.oasis.engine.element.points.stats.to;
 
 import io.github.oasis.core.model.TimeScope;
 import io.github.oasis.core.services.AbstractStatsApiRequest;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-import java.time.LocalDate;
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-@ToString
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class UserPointsRequest extends AbstractStatsApiRequest {
 
     private Long userId;
 
     private List<PointsFilterScope> filters;
 
-    @Getter
-    @Setter
+    @Data
     public static class PointsFilterScope {
         private String refId;
         private ScopedTypes type;
@@ -49,12 +45,11 @@ public class UserPointsRequest extends AbstractStatsApiRequest {
         private PointRange range;
     }
 
-    @Getter
-    @Setter
+    @Data
     public static class PointRange {
         private TimeScope type;
-        private LocalDate from;
-        private LocalDate to;
+        private String from;
+        private String to;
     }
 
     public enum ScopedTypes {

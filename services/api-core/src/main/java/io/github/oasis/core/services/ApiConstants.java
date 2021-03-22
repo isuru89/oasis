@@ -17,28 +17,16 @@
  * under the License.
  */
 
-package io.github.oasis.engine.element.points.stats.to;
-
-import io.github.oasis.core.services.AbstractStatsApiRequest;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+package io.github.oasis.core.services;
 
 /**
  * @author Isuru Weerarathna
  */
-@EqualsAndHashCode(callSuper = true)
-@Data
-public class UserRankingRequest extends AbstractStatsApiRequest {
+public final class ApiConstants {
 
-    private Long userId;
-    private Integer teamId;
+    public static final String APP_KEY_HEADER = "X-APP-KEY";
+    public static final String APP_ID_HEADER = "X-APP-ID";
 
-    private String date;
+    private ApiConstants() {}
 
-    private boolean includeTotalCount = false;
-    private boolean descendingOrder = true;
-
-    public boolean isTeamScoped() {
-        return teamId != null;
-    }
 }

@@ -45,6 +45,12 @@ public class RedisDb implements Db {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisDb.class);
 
+    private static final String LOCALHOST = "localhost";
+    private static final int DEFAULT_PORT = 6379;
+    private static final int POOL_MAX = 8;
+    private static final int POOL_MAX_IDLE = 2;
+    private static final int POOL_MIN_IDLE = 2;
+
     private final JedisPool pool;
     private final Map<String, RedisScript> scriptReferenceMap = new ConcurrentHashMap<>();
 
@@ -53,12 +59,14 @@ public class RedisDb implements Db {
     }
 
     public static RedisDb create(OasisConfigs configs) {
-        String host = configs.get("oasis.db.host", "localhost");
-        int port = configs.getInt("oasis.db.port", 6379);
-        int poolSize = configs.getInt("oasis.db.pool.max", 5);
-        int maxIdle = configs.getInt("oasis.db.pool.maxIdle", -1);
-        int minIdle = configs.getInt("oasis.db.pool.minIdle", -1);
+        String host = configs.get("oasis.redis.host", LOCALHOST);
+        int port = configs.getInt("oasis.redis.port", DEFAULT_PORT);
+        int poolSize = configs.getInt("oasis.redis.pool.max", POOL_MAX);
+        int maxIdle = configs.getInt("oasis.redis.pool.maxIdle", POOL_MAX_IDLE);
+        int minIdle = configs.getInt("oasis.redis.pool.minIdle", POOL_MIN_IDLE);
 
+        LOG.debug("Connecting to redis in {}:{}...", host, port);
+        LOG.debug("  - With pool configs max: {}, maxIdle: {}, minIdle: {}", poolSize, maxIdle, minIdle);
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         if (maxIdle > 0) poolConfig.setMaxIdle(maxIdle);
         if (minIdle > 0) poolConfig.setMinIdle(minIdle);
