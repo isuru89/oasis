@@ -150,6 +150,16 @@ Steps:
   * Open the api documentation from here 
     [http://localhost:8010/api/swagger-ui/index.html?configUrl=/api/v3/api-docs/swagger-config](http://localhost:8010/api/swagger-ui/index.html?configUrl=/api/v3/api-docs/swagger-config)
 
+**Notes**:
+  1. In a restart, the data stored through admin api will be lost because by default
+it is configured to use in-memory H2 database. MySQL connector is shipped with by default,
+     and you can change jdbc configs in buildscripts/stats-api.config file, 
+     if you want to use it for more durable data.
+   2. Currently, multiple engines are not supported through docker compose. because engine has
+been assigned a static id.
+  3. Redis and RabbitMQ data will be stored across restarts through bounded volumes in `.tmpdata` 
+folder. If you want to clear all the data, delete the contents of _redis_ and _rabbit_ folders.
+
 ## Concepts
 
 This section will introduce you to the concepts around the Oasis framework.

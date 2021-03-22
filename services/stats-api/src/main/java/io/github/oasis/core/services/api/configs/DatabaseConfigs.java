@@ -64,15 +64,6 @@ public class DatabaseConfigs {
     @Value("${oasis.configs.path}")
     private String oasisConfigFilePath;
 
-    @Value("${oasis.jdbc.url}")
-    private String oasisJdbcUrl;
-    @Value("${oasis.jdbc.driver}")
-    private String oasisJdbcDriver;
-    @Value("${oasis.jdbc.user}")
-    private String oasisJdbcUser;
-    @Value("${oasis.jdbc.password}")
-    private String oasisJdbcPassword;
-
     @Value("${oasis.db.retries:5}")
     private int numberOfDbRetries;
 
@@ -98,7 +89,12 @@ public class DatabaseConfigs {
     }
 
     @Bean
-    public DataSource loadDataSource() {
+    public DataSource loadDataSource(OasisConfigs configs) {
+        String oasisJdbcUrl = configs.get("oasis.jdbc.url", null);
+        String oasisJdbcDriver = configs.get("oasis.jdbc.driver", null);
+        String oasisJdbcUser = configs.get("oasis.jdbc.user", null);
+        String oasisJdbcPassword = configs.get("oasis.jdbc.password", null);
+
         return DataSourceBuilder.create()
             .url(oasisJdbcUrl)
             .driverClassName(oasisJdbcDriver)
