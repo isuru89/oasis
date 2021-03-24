@@ -7,7 +7,7 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.8.0/wait
 RUN chmod +x /wait
 
 WORKDIR /usr/share/oasis-stats-api
-CMD /wait && java -classpath ./*:libs/* io.github.oasis.core.services.api.StatsApiApplication --spring.config.location=file:/etc/oasis/stats-api.properties
+CMD /wait && exec java -classpath ./*:libs/* io.github.oasis.core.services.api.StatsApiApplication --spring.config.location=file:/etc/oasis/stats-api.properties
 #ENTRYPOINT ["java", "-classpath", "./*:libs/*", "io.github.oasis.core.services.api.StatsApiApplication", "--spring.config.location=file:/etc/oasis/stats-api.properties"]
 EXPOSE 8010
 

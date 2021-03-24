@@ -44,12 +44,15 @@ import io.github.oasis.engine.actors.cmds.internal.GameStatusReply;
 import io.github.oasis.engine.ext.ExternalParty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.Await;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Isuru Weerarathna
@@ -77,7 +80,7 @@ public class OasisEngine implements MessageReceiver {
 
         CoordinatedShutdown.get(oasisEngine)
                 .addTask(
-                        CoordinatedShutdown.PhaseBeforeServiceUnbind(),
+                        CoordinatedShutdown.PhaseBeforeActorSystemTerminate(),
                         "engineShutdown",
                         () -> {
                             supervisor.tell(new EngineShutdownCommand(), supervisor);
@@ -86,9 +89,22 @@ public class OasisEngine implements MessageReceiver {
 
         CoordinatedShutdown.get(oasisEngine)
                 .addJvmShutdownHook(this::closeSourceStreamProvider);
+        CoordinatedShutdown.get(oasisEngine)
+                .addJvmShutdownHook(this::notifyShutdownToActors);
 
         LOG.info("Bootstrapping event stream...");
         bootstrapEventStream(oasisEngine);
+    }
+
+    private void notifyShutdownToActors() {
+        LOG.info("Shutdown signal received for Oasis engine...");
+        oasisEngine.terminate();
+        try {
+            Await.result(oasisEngine.whenTerminated(), scala.concurrent.duration.Duration.create(30, TimeUnit.SECONDS));
+        } catch (InterruptedException | TimeoutException e) {
+            e.printStackTrace();
+        }
+        LOG.info("Shutdown completed in Oasis engine.");
     }
 
     private void closeSourceStreamProvider() {
