@@ -24,6 +24,7 @@ import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
+import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.EventSource;
@@ -270,8 +271,10 @@ public class BackendRepository implements OasisRepository {
     }
 
     @Override
-    public ElementDef updateElement(int gameId, String id, ElementDef elementDef) {
-        return null;
+    public ElementDef updateElement(int gameId, String id, SimpleElementDefinition elementDef) {
+        ElementDef def = adminRepository.updateElement(gameId, id, elementDef);
+        engineRepository.updateElement(gameId, id, elementDef);
+        return def;
     }
 
     @Override

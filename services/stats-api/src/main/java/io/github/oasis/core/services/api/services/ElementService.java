@@ -20,8 +20,10 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.elements.ElementDef;
+import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.to.ElementUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -58,8 +60,9 @@ public class ElementService extends AbstractOasisService {
         return backendRepository.addNewElement(gameId, elementDef);
     }
 
-    public ElementDef updateElement(int gameId, String elementId, ElementDef elementDef) {
-        return backendRepository.updateElement(gameId, elementId, elementDef);
+    public ElementDef updateElement(int gameId, String elementId, ElementUpdateRequest updateRequest) {
+        SimpleElementDefinition metadata = new SimpleElementDefinition(elementId, updateRequest.getName(), updateRequest.getDescription());
+        return backendRepository.updateElement(gameId, elementId, metadata);
     }
 
     public ElementDef deleteElement(int gameId, String elementId) {

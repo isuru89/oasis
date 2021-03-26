@@ -23,6 +23,7 @@ import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
+import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.EventSource;
@@ -35,6 +36,7 @@ import io.github.oasis.core.services.api.dao.IEventSourceDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
 import io.github.oasis.core.services.api.dao.dto.ElementDto;
+import io.github.oasis.core.services.api.dao.dto.ElementUpdateDto;
 import io.github.oasis.core.services.api.dao.dto.EventSourceDto;
 import io.github.oasis.core.services.api.dao.dto.EventSourceSecretsDto;
 import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
@@ -341,9 +343,17 @@ public class JdbcRepository implements OasisRepository {
     }
 
     @Override
-    public ElementDef updateElement(int gameId, String id, ElementDef elementDef) {
-        var dto = toElementDto(gameId, elementDef);
-        elementDao.updateElement(elementDef.getElementId(), dto);
+    public ElementDef updateElement(int gameId, String id, SimpleElementDefinition elementDef) {
+        ElementDef dbDef = readElementWithoutData(gameId, id);
+        if (dbDef == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.ELEMENT_NOT_EXISTS);
+        }
+
+        ElementUpdateDto dto = new ElementUpdateDto();
+        dto.setName(elementDef.getName());
+        dto.setDescription(elementDef.getDescription());
+
+        elementDao.updateElement(id, dto, System.currentTimeMillis());
         return toElementDef(elementDao.readElement(id));
     }
 

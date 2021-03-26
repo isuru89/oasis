@@ -31,6 +31,7 @@ import io.github.oasis.core.services.api.controllers.admin.GameAttributesControl
 import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.to.ElementUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.github.oasis.elements.badges.BadgeDef;
 import io.github.oasis.engine.element.points.PointDef;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -118,6 +120,30 @@ public class ElementServiceTest extends AbstractServiceTest {
 
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.read(1, "non.existing.id", true))
                 .isInstanceOf(OasisApiException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.ELEMENT_NOT_EXISTS);
+    }
+
+    @Test
+    void testUpdate() {
+        ElementDef addedPoint = controller.add(1, samplePoint);
+        {
+            ElementUpdateRequest request = new ElementUpdateRequest();
+            request.setName("Star Points 234");
+            request.setDescription("buha buha buha buha");
+            assertNotEquals(request.getName(), addedPoint.getMetadata().getName());
+            assertNotEquals(request.getDescription(), addedPoint.getMetadata().getDescription());
+
+            ElementDef updatedElements = controller.update(1, samplePoint.getElementId(), request);
+            assertEquals(request.getName(), updatedElements.getMetadata().getName());
+            assertEquals(request.getDescription(), updatedElements.getMetadata().getDescription());
+            assertEquals(samplePoint.getElementId(), updatedElements.getMetadata().getId());
+        }
+
+        ElementUpdateRequest uReq = new ElementUpdateRequest();
+        uReq.setName("unknown name");
+        uReq.setDescription("unknown des");
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.update(1, "non.existing.id", uReq))
+                .isInstanceOf(OasisApiRuntimeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.ELEMENT_NOT_EXISTS);
     }
 

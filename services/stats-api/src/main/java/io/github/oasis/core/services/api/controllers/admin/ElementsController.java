@@ -25,15 +25,16 @@ import io.github.oasis.core.services.annotations.ForCurator;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.ElementService;
+import io.github.oasis.core.services.api.to.ElementUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -90,15 +91,15 @@ public class ElementsController extends AbstractController {
     }
 
     @Operation(
-            summary = "Updates an existing game element",
+            summary = "Updates metadata of an existing game element",
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PutMapping(path = "/games/{gameId}/elements/{elementId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(path = "/games/{gameId}/elements/{elementId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ElementDef update(@PathVariable("gameId") Integer gameId,
                              @PathVariable("elementId") String elementId,
-                             @RequestBody ElementDef elementDef) {
-        return elementService.updateElement(gameId, elementId, elementDef);
+                             @RequestBody ElementUpdateRequest updateRequest) {
+        return elementService.updateElement(gameId, elementId, updateRequest);
     }
 
     @Operation(

@@ -693,9 +693,9 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public ElementDef updateElement(int gameId, String id, ElementDef elementDef) {
+    public ElementDef updateElement(int gameId, String id, SimpleElementDefinition elementDef) {
         return withDbContext(db -> {
-            if (!id.equals(elementDef.getElementId())) {
+            if (!id.equals(elementDef.getId())) {
                 throw new OasisRuntimeException("Provided id and element id mismatches!");
             }
             String baseKey = ID.getDetailedElementDefKeyForGame(gameId);
@@ -704,10 +704,12 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
                 throw new OasisRuntimeException("Element by given id does not exist!");
             }
 
-            db.setValueInMap(baseKey, id, serializationSupport.serialize(elementDef));
-            updateElementMetadata(elementDef, db);
-            setToElementByType(elementDef, db);
-            return elementDef;
+            ElementDef dbElement = readElement(gameId, id);
+            dbElement.setMetadata(elementDef);
+            db.setValueInMap(baseKey, id, serializationSupport.serialize(dbElement));
+            updateElementMetadata(elementDef, gameId, db);
+            setToElementByType(dbElement, db);
+            return dbElement;
         });
     }
 
@@ -959,8 +961,12 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
     private void updateElementMetadata(ElementDef def, DbContext db) {
         SimpleElementDefinition simpleElementDefinition = def.getMetadata();
-        db.setValueInMap(ID.getBasicElementDefKeyForGame(def.getGameId()),
-                def.getElementId(), serializationSupport.serialize(simpleElementDefinition));
+        updateElementMetadata(simpleElementDefinition, def.getGameId(), db);
+    }
+
+    private void updateElementMetadata(SimpleElementDefinition simpleElementDefinition, int gameId, DbContext db) {
+        db.setValueInMap(ID.getBasicElementDefKeyForGame(gameId),
+                simpleElementDefinition.getId(), serializationSupport.serialize(simpleElementDefinition));
     }
 
     private void setToElementByType(ElementDef def, DbContext db) {
