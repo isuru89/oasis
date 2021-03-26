@@ -125,7 +125,7 @@ public class GamesController extends AbstractController {
     @PutMapping(path = "/games/{gameId}/{status}")
     public Game updateGameStatus(@PathVariable("gameId") Integer gameId,
                                  @PathVariable("status") String status) throws OasisException {
-        return gameService.changeStatusOfGame(gameId, status);
+        return gameService.changeStatusOfGame(gameId, status, System.currentTimeMillis());
     }
 
 }

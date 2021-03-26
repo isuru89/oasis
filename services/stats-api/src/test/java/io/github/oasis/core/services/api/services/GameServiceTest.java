@@ -116,7 +116,7 @@ public class GameServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    void updateGameWithStatus() throws OasisException {
+    void shouldNotUpdateGameWithStatus() throws OasisException {
         Game stackGame = controller.addGame(stackOverflow);
         int stackId = stackGame.getId();
 
@@ -132,7 +132,19 @@ public class GameServiceTest extends AbstractServiceTest {
                 .build();
         Game updatedGame = controller.updateGame(stackId, updateRequest);
         assertGame(updatedGame, updateRequest);
-        assertEquals(GameState.UPDATED.name(), updatedGame.getCurrentStatus());
+        assertEquals(GameState.CREATED.name(), updatedGame.getCurrentStatus());
+    }
+
+    @Test
+    void updateGameStatusOnly() throws OasisException {
+        Game stackGame = controller.addGame(stackOverflow);
+        int stackId = stackGame.getId();
+
+        assertGame(engineRepo.readGame(stackId), stackOverflow);
+        assertGame(adminRepo.readGame(stackId), stackOverflow);
+
+        Game updatedGame = controller.updateGameStatus(stackId, GameState.STARTED.name());
+        assertEquals(GameState.STARTED.name(), updatedGame.getCurrentStatus());
     }
 
     @Test

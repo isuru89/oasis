@@ -50,7 +50,7 @@ public interface IGameDao {
     Game readGame(@Bind("id") int gameId);
 
     @SqlUpdate
-    void updateGame(@Bind("id") int gameId, @BindBean GameUpdatePart gameNew);
+    void updateGame(@Bind("id") int gameId, @BindBean GameUpdatePart gameNew, @Bind("ts") long ts);
 
     @SqlUpdate
     void deleteGame(@Bind("id") int gameId);
@@ -61,4 +61,6 @@ public interface IGameDao {
     @SqlQuery
     Game readGameByName(@Bind("name") String name);
 
+    @SqlUpdate
+    void updateGameStatus(@Bind("id") int gameId, @Bind("newGameStatus") String newGameStatus, @Bind("ts") long statusChangedTs);
 }

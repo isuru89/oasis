@@ -4,6 +4,6 @@ SET
     description = :description,
     motto = :motto,
     logo_ref = :logoRef,
-    status = :newGameStatus
+    updated_at = :ts
 WHERE
     id = :id

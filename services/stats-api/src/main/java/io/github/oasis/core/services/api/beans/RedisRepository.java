@@ -243,6 +243,15 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
+    public Game updateGameStatus(int gameId, String status, long updatedAt) {
+        Game game = readGame(gameId);
+        game.setCurrentStatus(status);
+        game.setUpdatedAt(updatedAt);
+
+        return updateGame(gameId, game);
+    }
+
+    @Override
     public Game readGame(int gameId) {
         return withDbContext(db -> {
             String gameStr = db.getValueFromMap(ID.ALL_GAMES, String.valueOf(gameId));

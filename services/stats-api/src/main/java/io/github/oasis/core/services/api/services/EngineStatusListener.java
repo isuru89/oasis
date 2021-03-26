@@ -54,7 +54,7 @@ public class EngineStatusListener {
             }
             Game updatedGame = game.toBuilder().currentStatus(message.getState().name()).build();
             gameService.updateGame(message.getGameId(), updatedGame);
-            gameService.changeStatusOfGame(message.getGameId(), message.getState().name().toLowerCase());
+            gameService.changeStatusOfGame(message.getGameId(), message.getState().name().toLowerCase(), message.getTs());
         } catch (OasisApiException e) {
             LOG.error("Unable to change game status in admin database!", e);
         }

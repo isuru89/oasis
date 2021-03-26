@@ -43,7 +43,6 @@ import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
 import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.JdbiException;
 import org.springframework.stereotype.Component;
 
@@ -172,12 +171,13 @@ public class JdbcRepository implements OasisRepository {
         }
 
         GameUpdatePart gameUpdatePart = GameUpdatePart.from(game);
-        if (StringUtils.isBlank(gameUpdatePart.getNewGameStatus())) {
-            // we don't want to override current game status
-            gameUpdatePart.setNewGameStatus(toBeUpdatedGame.getCurrentStatus());
-        }
+        gameDao.updateGame(gameId, gameUpdatePart, System.currentTimeMillis());
+        return gameDao.readGame(gameId);
+    }
 
-        gameDao.updateGame(gameId, gameUpdatePart);
+    @Override
+    public Game updateGameStatus(int gameId, String status, long updatedAt) {
+        gameDao.updateGameStatus(gameId, status, updatedAt);
         return gameDao.readGame(gameId);
     }
 

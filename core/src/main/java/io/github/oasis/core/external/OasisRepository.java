@@ -48,6 +48,7 @@ public interface OasisRepository {
 
     Game addNewGame(Game game);
     Game updateGame(int gameId, Game game);
+    Game updateGameStatus(int gameId, String status, long updatedAt);
     Game readGame(int gameId);
     Game deleteGame(int gameId);
     boolean existsGame(String gameName);

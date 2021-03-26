@@ -96,15 +96,16 @@ public class GameService extends AbstractOasisService {
         return backendRepository.readGameByName(name);
     }
 
-    public Game changeStatusOfGame(int gameId, String newStatus) throws OasisApiException {
+    public Game changeStatusOfGame(int gameId, String newStatus, long updatedAt) throws OasisApiException {
         GameState gameState = validateGameState(newStatus);
 
         Game game = backendRepository.readGame(gameId);
         if (game == null) {
             throw new OasisApiException(ErrorCodes.GAME_NOT_EXISTS, HttpStatus.NOT_FOUND.value(), "No game is found by id " + gameId);
         }
-        engineManager.changeGameStatus(gameState, game);
-        return game;
+        Game updatedGame = backendRepository.updateGameStatus(gameId, gameState.name(), updatedAt);
+        engineManager.changeGameStatus(gameState, updatedGame);
+        return updatedGame;
     }
 
     private GameState validateGameState(String status) throws OasisApiException {
@@ -113,7 +114,7 @@ public class GameService extends AbstractOasisService {
                     HttpStatus.BAD_REQUEST.value(), "Unknown game state!");
         }
 
-        GameState gameState = availableStatuses.get(status);
+        GameState gameState = availableStatuses.get(status.toLowerCase());
         if (Objects.isNull(gameState)) {
             throw new OasisApiException(ErrorCodes.GAME_UNKNOWN_STATE,
                     HttpStatus.BAD_REQUEST.value(), "Unknown game state!");

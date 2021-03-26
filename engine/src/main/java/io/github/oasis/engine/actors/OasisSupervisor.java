@@ -106,7 +106,7 @@ public class OasisSupervisor extends OasisBaseActor {
         if (!gamesRunning.isEmpty()) {
             try (DbContext db = engineContext.getDb().createContext()) {
                 for (Integer gameId : gamesRunning) {
-                    publishGameRemoval(gameId, db);
+                    publishGameState(gameId, GameState.STOPPED, db);
                     LOG.warn("Game '{}' has been notified as stopped.", gameId);
                 }
             } catch (IOException e) {
@@ -123,12 +123,21 @@ public class OasisSupervisor extends OasisBaseActor {
         publish(null);
     }
 
+    private void publishGameState(int gameId, GameState gameState) {
+        try (DbContext db = engineContext.getDb().createContext()) {
+            publishGameState(gameId, gameState, db);
+        } catch (IOException e) {
+            LOG.error("Error occurred while publishing running games!", e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    private void publishGameRemoval(int gameId, DbContext db) {
+    private void publishGameState(int gameId, GameState gameState, DbContext db) {
         JSONObject object = new JSONObject();
         object.put("gameId", gameId);
-        object.put("state", GameState.STOPPED);
+        object.put("state", gameState);
         object.put("engineId", engineContext.id());
+        object.put("ts", System.currentTimeMillis());
         db.queueOffer(ID.ENGINE_STATUS_CHANNEL, object.toJSONString());
     }
 
@@ -162,6 +171,7 @@ public class OasisSupervisor extends OasisBaseActor {
                 gamesRunning.add(gameId);
                 contextMap.put(gameId, loadGameContext(gameId));
                 eventSource.ackGameStateChanged(gameCommand);
+                publishGameState(gameId, GameState.STARTED);
                 LOG.info("Successfully acquired the game {} to be run on this engine having id {}. Game Event: {}",
                         gameId, engineContext.id(), status);
             } else {
@@ -173,8 +183,9 @@ public class OasisSupervisor extends OasisBaseActor {
                 gamesRunning.remove(gameId);
                 contextMap.remove(gameId);
             } else {
-                LOG.debug("The game {} is not running in this engine. Skipping remove message.", gameId);
+                LOG.info("The game {} is not running in this engine. Skipping remove message.", gameId);
             }
+            publishGameState(gameId, GameState.STOPPED);
             eventSource.ackGameStateChanged(gameCommand);
         } else if (status == GameCommand.GameLifecycle.UPDATE) {
             if (gamesRunning.contains(gameId)) {
@@ -196,7 +207,7 @@ public class OasisSupervisor extends OasisBaseActor {
             if (myId.equals(owningEngine)) {
                 LOG.info("Removing game lock... (gameId: {})", gameId);
                 context.removeKeyFromMap(ID.GAME_ENGINES, gameIdStr);
-                publishGameRemoval(gameId, context);
+                publishGameState(gameId, GameState.STOPPED, context);
                 LOG.info("Removed game lock! (gameId: {})", gameId);
                 return true;
             }

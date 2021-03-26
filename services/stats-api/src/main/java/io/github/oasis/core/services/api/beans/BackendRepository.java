@@ -128,6 +128,13 @@ public class BackendRepository implements OasisRepository {
     }
 
     @Override
+    public Game updateGameStatus(int gameId, String status, long updatedAt) {
+        Game game = adminRepository.updateGameStatus(gameId, status, updatedAt);
+        engineRepository.updateGameStatus(gameId, status, updatedAt);
+        return game;
+    }
+
+    @Override
     public Game readGame(int gameId) {
         return adminRepository.readGame(gameId);
     }
