@@ -184,7 +184,6 @@ public class BackendRepository implements OasisRepository {
     @Override
     public boolean existsPlayer(long userId) {
         PlayerObject dbPlayer = adminRepository.readPlayer(userId);
-        System.out.println(dbPlayer);
         return Objects.nonNull(dbPlayer) && dbPlayer.isActive();
     }
 

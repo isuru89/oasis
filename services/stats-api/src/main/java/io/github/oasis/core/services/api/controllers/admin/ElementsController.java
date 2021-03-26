@@ -20,7 +20,6 @@
 package io.github.oasis.core.services.api.controllers.admin;
 
 import io.github.oasis.core.elements.ElementDef;
-import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.services.annotations.ForCurator;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
@@ -64,7 +63,7 @@ public class ElementsController extends AbstractController {
     @ForPlayer
     @GetMapping(path = "/games/{gameId}/elements/types/{elementType}")
     public List<ElementDef> getElementsByType(@PathVariable("gameId") Integer gameId,
-                                              @PathVariable("elementType") String elementType) throws OasisException {
+                                              @PathVariable("elementType") String elementType) {
         return elementService.listElementsByType(gameId, elementType);
     }
 
@@ -88,6 +87,16 @@ public class ElementsController extends AbstractController {
     public ElementDef add(@PathVariable("gameId") Integer gameId,
                           @RequestBody ElementDef elementDef) {
         return elementService.addElement(gameId, elementDef);
+    }
+
+    @Operation(
+            summary = "Gets all active elements of a game",
+            tags = {"player"}
+    )
+    @ForCurator
+    @GetMapping(path = "/games/{gameId}/elements", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public List<ElementDef> getElementsOfGame(@PathVariable("gameId") Integer gameId) {
+        return elementService.listElementsFromGameId(gameId);
     }
 
     @Operation(

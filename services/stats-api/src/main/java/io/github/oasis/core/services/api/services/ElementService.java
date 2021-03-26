@@ -19,10 +19,12 @@
 
 package io.github.oasis.core.services.api.services;
 
+import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.to.ElementUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.springframework.http.HttpStatus;
@@ -74,6 +76,11 @@ public class ElementService extends AbstractOasisService {
     }
 
     public List<ElementDef> listElementsFromGameId(int gameId) {
+        Game game = backendRepository.readGame(gameId);
+        if (game == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.GAME_NOT_EXISTS);
+        }
+
         return backendRepository.readElementsByGameId(gameId);
     }
 }

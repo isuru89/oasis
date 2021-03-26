@@ -11,3 +11,5 @@ FROM
     OA_ELEMENT
 WHERE
     game_id = :gameId
+    AND
+    is_active = 1

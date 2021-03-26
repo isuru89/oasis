@@ -28,10 +28,13 @@ import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.beans.jdbc.JdbcRepository;
 import io.github.oasis.core.services.api.controllers.admin.ElementsController;
 import io.github.oasis.core.services.api.controllers.admin.GameAttributesController;
+import io.github.oasis.core.services.api.controllers.admin.GamesController;
 import io.github.oasis.core.services.api.dao.IElementDao;
+import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.to.ElementUpdateRequest;
+import io.github.oasis.core.services.api.to.GameObjectRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.github.oasis.elements.badges.BadgeDef;
 import io.github.oasis.engine.element.points.PointDef;
@@ -59,6 +62,7 @@ public class ElementServiceTest extends AbstractServiceTest {
 
     private ElementsController controller;
     private GameAttributesController attrController;
+    private GamesController gamesController;
 
     private final ElementDef samplePoint = ElementDef.builder()
             .elementId("test.point1")
@@ -148,7 +152,7 @@ public class ElementServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    void testReadByType() throws OasisException {
+    void testReadByType() {
         controller.add(1, samplePoint);
         controller.add(1, sampleBadge);
 
@@ -159,6 +163,30 @@ public class ElementServiceTest extends AbstractServiceTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.read(1, "non.existing.id", true))
                 .isInstanceOf(OasisApiException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.ELEMENT_NOT_EXISTS);
+    }
+
+    @Test
+    void testListInGame() throws OasisException {
+        GameObjectRequest request = GameObjectRequest.builder()
+                .name("sample game")
+                .description("description here")
+                .build();
+        gamesController.addGame(request);
+
+        controller.add(1, samplePoint);
+        controller.add(1, sampleBadge);
+
+        List<ElementDef> allElements = controller.getElementsOfGame(1);
+        assertEquals(2, allElements.size());
+        assertTrue(allElements.stream().anyMatch(t -> t.getElementId().equals(sampleBadge.getElementId())));
+        assertTrue(allElements.stream().anyMatch(t -> t.getElementId().equals(samplePoint.getElementId())));
+
+        controller.delete(1, samplePoint.getElementId());
+        assertEquals(1, controller.getElementsOfGame(1).size());
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.getElementsOfGame(999))
+                .isInstanceOf(OasisApiRuntimeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.GAME_NOT_EXISTS);
     }
 
     @Test
@@ -181,7 +209,11 @@ public class ElementServiceTest extends AbstractServiceTest {
             assertElement(engineRepo.readElement(1, sampleBadge.getElementId()), sampleBadge, true);
         }
 
-        controller.delete(1, samplePoint.getElementId());
+        List<ElementDef> elementsByType = controller.getElementsByType(1, samplePoint.getType());
+        assertEquals(1, elementsByType.size());
+
+        ElementDef delete = controller.delete(1, samplePoint.getElementId());
+        assertElement(delete, samplePoint, false);
 
         {
             assertThrows(OasisRuntimeException.class, () -> engineRepo.readElement(1, samplePoint.getElementId()));
@@ -231,7 +263,7 @@ public class ElementServiceTest extends AbstractServiceTest {
 
     @Override
     protected JdbcRepository createJdbcRepository(Jdbi jdbi) {
-        return new JdbcRepository(null,
+        return new JdbcRepository(jdbi.onDemand(IGameDao.class),
                 null,
                 jdbi.onDemand(IElementDao.class),
                 null,
@@ -242,6 +274,7 @@ public class ElementServiceTest extends AbstractServiceTest {
     protected void createServices(BackendRepository backendRepository) {
         controller = new ElementsController(new ElementService(backendRepository));
         attrController = new GameAttributesController(new GameAttributeService(backendRepository));
+        gamesController = new GamesController(new GameService(backendRepository, null));
     }
 
     private void assertAttribute(AttributeInfo db, AttributeInfo other) {
