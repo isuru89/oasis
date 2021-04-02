@@ -33,11 +33,11 @@ import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.ElementUpdateRequest;
-import io.github.oasis.core.services.api.to.GameObjectRequest;
+import io.github.oasis.core.services.api.to.GameAttributeCreateRequest;
+import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
-import io.github.oasis.elements.badges.BadgeDef;
-import io.github.oasis.engine.element.points.PointDef;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
 
@@ -64,29 +64,25 @@ public class ElementServiceTest extends AbstractServiceTest {
     private GameAttributesController attrController;
     private GamesController gamesController;
 
-    private final ElementDef samplePoint = ElementDef.builder()
-            .elementId("test.point1")
+    private final ElementCreateRequest samplePoint = ElementCreateRequest.builder()
             .gameId(1)
-            .impl(PointDef.class.getName())
-            .type("point")
+            .type("core:point")
             .metadata(new SimpleElementDefinition("test.point1", "Star points", "blah blah blah"))
             .data(Map.of("f1", "v1", "f2", "v2", "f11", 5))
             .build();
 
-    private final ElementDef sampleBadge = ElementDef.builder()
-            .elementId("test.badge")
+    private final ElementCreateRequest sampleBadge = ElementCreateRequest.builder()
             .gameId(1)
-            .impl(BadgeDef.class.getName())
-            .type("badge")
+            .type("core:badge")
             .metadata(new SimpleElementDefinition("test.badge", "Mega badge", "another description"))
             .data(Map.of("f3", "v3", "f4", "v4", "f9", 3))
             .build();
 
-    private final AttributeInfo gold = AttributeInfo.builder()
+    private final GameAttributeCreateRequest gold = GameAttributeCreateRequest.builder()
             .name("gold").colorCode("#FFD700").priority(1).build();
-    private final AttributeInfo silver = AttributeInfo.builder()
+    private final GameAttributeCreateRequest silver = GameAttributeCreateRequest.builder()
             .name("silver").colorCode("#C0C0C0").priority(2).build();
-    private final AttributeInfo bronze = AttributeInfo.builder()
+    private final GameAttributeCreateRequest bronze = GameAttributeCreateRequest.builder()
             .name("bronze").colorCode("#cd7f32").priority(3).build();
 
     @Test
@@ -110,13 +106,13 @@ public class ElementServiceTest extends AbstractServiceTest {
     void testRead() throws OasisApiException {
         controller.add(1, samplePoint);
         {
-            ElementDef withData = controller.read(1, samplePoint.getElementId(), true);
+            ElementDef withData = controller.read(1, samplePoint.getMetadata().getId(), true);
             assertNotNull(withData);
             assertElement(withData, samplePoint, true);
         }
 
         {
-            ElementDef withData = controller.read(1, samplePoint.getElementId(), false);
+            ElementDef withData = controller.read(1, samplePoint.getMetadata().getId(), false);
             assertNotNull(withData);
             assertElement(withData, samplePoint, false);
             assertNull(withData.getData());
@@ -137,10 +133,10 @@ public class ElementServiceTest extends AbstractServiceTest {
             assertNotEquals(request.getName(), addedPoint.getMetadata().getName());
             assertNotEquals(request.getDescription(), addedPoint.getMetadata().getDescription());
 
-            ElementDef updatedElements = controller.update(1, samplePoint.getElementId(), request);
+            ElementDef updatedElements = controller.update(1, samplePoint.getMetadata().getId(), request);
             assertEquals(request.getName(), updatedElements.getMetadata().getName());
             assertEquals(request.getDescription(), updatedElements.getMetadata().getDescription());
-            assertEquals(samplePoint.getElementId(), updatedElements.getMetadata().getId());
+            assertEquals(samplePoint.getMetadata().getId(), updatedElements.getMetadata().getId());
         }
 
         ElementUpdateRequest uReq = new ElementUpdateRequest();
@@ -156,9 +152,9 @@ public class ElementServiceTest extends AbstractServiceTest {
         controller.add(1, samplePoint);
         controller.add(1, sampleBadge);
 
-        List<ElementDef> badgeTypes = controller.getElementsByType(1, "badge");
+        List<ElementDef> badgeTypes = controller.getElementsByType(1, "core:badge");
         assertEquals(1, badgeTypes.size());
-        assertTrue(badgeTypes.stream().anyMatch(t -> t.getElementId().equals(sampleBadge.getElementId())));
+        assertTrue(badgeTypes.stream().anyMatch(t -> t.getElementId().equals(sampleBadge.getMetadata().getId())));
 
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.read(1, "non.existing.id", true))
                 .isInstanceOf(OasisApiException.class)
@@ -167,7 +163,7 @@ public class ElementServiceTest extends AbstractServiceTest {
 
     @Test
     void testListInGame() throws OasisException {
-        GameObjectRequest request = GameObjectRequest.builder()
+        GameCreateRequest request = GameCreateRequest.builder()
                 .name("sample game")
                 .description("description here")
                 .build();
@@ -178,10 +174,10 @@ public class ElementServiceTest extends AbstractServiceTest {
 
         List<ElementDef> allElements = controller.getElementsOfGame(1);
         assertEquals(2, allElements.size());
-        assertTrue(allElements.stream().anyMatch(t -> t.getElementId().equals(sampleBadge.getElementId())));
-        assertTrue(allElements.stream().anyMatch(t -> t.getElementId().equals(samplePoint.getElementId())));
+        assertTrue(allElements.stream().anyMatch(t -> t.getElementId().equals(sampleBadge.getMetadata().getId())));
+        assertTrue(allElements.stream().anyMatch(t -> t.getElementId().equals(samplePoint.getMetadata().getId())));
 
-        controller.delete(1, samplePoint.getElementId());
+        controller.delete(1, samplePoint.getMetadata().getId());
         assertEquals(1, controller.getElementsOfGame(1).size());
 
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.getElementsOfGame(999))
@@ -191,8 +187,8 @@ public class ElementServiceTest extends AbstractServiceTest {
 
     @Test
     void testDelete() {
-        assertThrows(OasisRuntimeException.class, () -> engineRepo.readElement(1, samplePoint.getElementId()));
-        assertThrows(OasisRuntimeException.class, () -> engineRepo.readElement(1, sampleBadge.getElementId()));
+        assertThrows(OasisRuntimeException.class, () -> engineRepo.readElement(1, samplePoint.getMetadata().getId()));
+        assertThrows(OasisRuntimeException.class, () -> engineRepo.readElement(1, sampleBadge.getMetadata().getId()));
 
         ElementDef addedElement = controller.add(1, samplePoint);
         System.out.println(addedElement);
@@ -205,19 +201,19 @@ public class ElementServiceTest extends AbstractServiceTest {
         assertElement(addedBadge, sampleBadge, true);
 
         {
-            assertElement(engineRepo.readElement(1, samplePoint.getElementId()), samplePoint, true);
-            assertElement(engineRepo.readElement(1, sampleBadge.getElementId()), sampleBadge, true);
+            assertElement(engineRepo.readElement(1, samplePoint.getMetadata().getId()), samplePoint, true);
+            assertElement(engineRepo.readElement(1, sampleBadge.getMetadata().getId()), sampleBadge, true);
         }
 
         List<ElementDef> elementsByType = controller.getElementsByType(1, samplePoint.getType());
         assertEquals(1, elementsByType.size());
 
-        ElementDef delete = controller.delete(1, samplePoint.getElementId());
+        ElementDef delete = controller.delete(1, samplePoint.getMetadata().getId());
         assertElement(delete, samplePoint, false);
 
         {
-            assertThrows(OasisRuntimeException.class, () -> engineRepo.readElement(1, samplePoint.getElementId()));
-            assertElement(engineRepo.readElement(1, sampleBadge.getElementId()), sampleBadge, true);
+            assertThrows(OasisRuntimeException.class, () -> engineRepo.readElement(1, samplePoint.getMetadata().getId()));
+            assertElement(engineRepo.readElement(1, sampleBadge.getMetadata().getId()), sampleBadge, true);
         }
     }
 
@@ -277,18 +273,17 @@ public class ElementServiceTest extends AbstractServiceTest {
         gamesController = new GamesController(new GameService(backendRepository, null));
     }
 
-    private void assertAttribute(AttributeInfo db, AttributeInfo other) {
+    private void assertAttribute(AttributeInfo db, GameAttributeCreateRequest other) {
         assertTrue(db.getId() > 0);
         assertEquals(other.getColorCode(), db.getColorCode());
         assertEquals(other.getName(), db.getName());
         assertEquals(other.getPriority(), db.getPriority());
     }
 
-    private void assertElement(ElementDef db, ElementDef other, boolean withData) {
+    private void assertElement(ElementDef db, ElementCreateRequest other, boolean withData) {
         assertTrue(db.getId() > 0);
-        assertEquals(other.getElementId(), db.getElementId());
+        assertEquals(other.getMetadata().getId(), db.getElementId());
         assertEquals(other.getType(), db.getType());
-        assertEquals(other.getImpl(), db.getImpl());
         assertEquals(other.getMetadata().getId(), db.getMetadata().getId());
         assertEquals(other.getMetadata().getName(), db.getMetadata().getName());
         assertEquals(other.getMetadata().getDescription(), db.getMetadata().getDescription());

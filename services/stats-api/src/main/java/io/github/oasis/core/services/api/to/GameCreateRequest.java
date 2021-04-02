@@ -17,20 +17,38 @@
  * under the License.
  */
 
-package io.github.oasis.core.services;
+package io.github.oasis.core.services.api.to;
 
-import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.Game;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-import java.security.KeyPair;
-import java.security.PublicKey;
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface KeyGeneratorSupport {
+@Getter
+@Builder(toBuilder = true)
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+public class GameCreateRequest implements Serializable {
 
-    KeyPair generate(String sourceId) throws OasisException;
+    private String name;
+    private String motto;
+    private String description;
+    private String logoRef;
 
-    PublicKey readPublicKey(byte[] keyData) throws OasisException;
-
+    public Game createGame() {
+        return Game.builder()
+                .name(name)
+                .motto(motto)
+                .description(description)
+                .logoRef(logoRef)
+                .build();
+    }
 }

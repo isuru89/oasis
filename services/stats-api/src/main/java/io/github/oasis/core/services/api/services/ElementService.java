@@ -25,8 +25,11 @@ import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.ElementUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +46,6 @@ public class ElementService extends AbstractOasisService {
         super(backendRepository);
     }
 
-
     public ElementDef readElement(int gameId, String elementId, boolean withData) throws OasisApiException {
         ElementDef def;
         if (withData) {
@@ -58,7 +60,15 @@ public class ElementService extends AbstractOasisService {
                         "Element not found!"));
     }
 
-    public ElementDef addElement(int gameId, ElementDef elementDef) {
+    public ElementDef addElement(int gameId, ElementCreateRequest request) {
+        ElementDef elementDef = ElementDef.builder()
+                .data(request.getData())
+                .gameId(request.getGameId())
+                .elementId(request.getMetadata().getId())
+                .metadata(request.getMetadata())
+                .type(request.getType())
+                .build();
+
         return backendRepository.addNewElement(gameId, elementDef);
     }
 

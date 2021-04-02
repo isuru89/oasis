@@ -159,12 +159,11 @@ public class SimulationWithApi extends Simulation {
             String id = ruleDefinition.getData().get("id").toString();
             String name = ruleDefinition.getData().get("name").toString();
             String description = ruleDefinition.getData().get("description").toString();
+            String type = ruleDefinition.getData().get("type").toString();
             ElementDef elementDef = ElementDef.builder()
-                    .type(ruleDefinition.getType())
-                    .impl(ruleDefinition.getImpl())
+                    .type(type)
                     .gameId(gameId)
                     .data(ruleDefinition.getData())
-                    .elementId(id)
                     .metadata(new SimpleElementDefinition(id, name, description))
                     .build();
 

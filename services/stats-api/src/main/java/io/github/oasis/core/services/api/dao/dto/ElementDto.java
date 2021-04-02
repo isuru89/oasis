@@ -21,7 +21,11 @@ package io.github.oasis.core.services.api.dao.dto;
 
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 
@@ -50,7 +54,6 @@ public class ElementDto implements Serializable {
     public static ElementDto fromWithoutData(ElementDef def) {
         return ElementDto.builder()
                 .gameId(def.getGameId())
-                .impl(def.getImpl())
                 .id(def.getId())
                 .elementName(def.getMetadata().getName())
                 .elementDescription(def.getMetadata().getDescription())
@@ -66,7 +69,6 @@ public class ElementDto implements Serializable {
                 .elementId(elementId)
                 .type(type)
                 .gameId(gameId)
-                .impl(impl)
                 .metadata(meta)
                 .build();
     }

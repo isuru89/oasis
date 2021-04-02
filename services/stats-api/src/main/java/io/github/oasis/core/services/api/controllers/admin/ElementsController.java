@@ -24,6 +24,7 @@ import io.github.oasis.core.services.annotations.ForCurator;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.ElementService;
+import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.ElementUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -85,8 +86,8 @@ public class ElementsController extends AbstractController {
     @ForCurator
     @PostMapping(path = "/games/{gameId}/elements", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ElementDef add(@PathVariable("gameId") Integer gameId,
-                          @RequestBody ElementDef elementDef) {
-        return elementService.addElement(gameId, elementDef);
+                          @RequestBody ElementCreateRequest request) {
+        return elementService.addElement(gameId, request);
     }
 
     @Operation(

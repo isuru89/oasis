@@ -131,7 +131,7 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
             } else {
                 ruleAdded.setData(def.getData());
             }
-            ruleAdded.setImpl(def.getImpl());
+            ruleAdded.setImpl(def.getType());
             ruleAdded.setType(EngineMessage.GAME_RULE_ADDED);
             ruleAdded.setScope(eventScope);
 

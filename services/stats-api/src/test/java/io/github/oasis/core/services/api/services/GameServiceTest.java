@@ -29,7 +29,8 @@ import io.github.oasis.core.services.api.controllers.admin.GamesController;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import io.github.oasis.core.services.api.to.GameObjectRequest;
+import io.github.oasis.core.services.api.to.GameCreateRequest;
+import io.github.oasis.core.services.api.to.GameUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Assertions;
@@ -50,14 +51,14 @@ public class GameServiceTest extends AbstractServiceTest {
     private GamesController controller;
     private final IEngineManager engineManager = Mockito.mock(IEngineManager.class);
 
-    private final GameObjectRequest stackOverflow = GameObjectRequest.builder()
+    private final GameCreateRequest stackOverflow = GameCreateRequest.builder()
             .name("Stack-overflow")
             .description("Stackoverflow badges and points system")
             .logoRef("https://oasis.io/assets/so.jpeg")
             .motto("Help the community")
             .build();
 
-    private final GameObjectRequest promotions = GameObjectRequest.builder()
+    private final GameCreateRequest promotions = GameCreateRequest.builder()
             .name("Promotions")
             .description("Provides promotions for customers based on their loyality")
             .logoRef("https://oasis.io/assets/pm.jpeg")
@@ -104,7 +105,7 @@ public class GameServiceTest extends AbstractServiceTest {
         assertGame(engineRepo.readGame(stackId), stackOverflow);
         assertGame(adminRepo.readGame(stackId), stackOverflow);
 
-        GameObjectRequest updateRequest = stackOverflow.toBuilder()
+        GameUpdateRequest updateRequest = GameUpdateRequest.builder()
                 .id(stackId)
                 .motto("new motto")
                 .description("new description")
@@ -123,12 +124,11 @@ public class GameServiceTest extends AbstractServiceTest {
         assertGame(engineRepo.readGame(stackId), stackOverflow);
         assertGame(adminRepo.readGame(stackId), stackOverflow);
 
-        GameObjectRequest updateRequest = stackOverflow.toBuilder()
+        GameUpdateRequest updateRequest = GameUpdateRequest.builder()
                 .id(stackId)
                 .motto("new motto")
                 .description("new description")
                 .logoRef("new logo ref")
-                .newGameStatus(GameState.UPDATED.name())
                 .build();
         Game updatedGame = controller.updateGame(stackId, updateRequest);
         assertGame(updatedGame, updateRequest);
@@ -223,9 +223,16 @@ public class GameServiceTest extends AbstractServiceTest {
         controller = new GamesController(new GameService(backendRepository, engineManager));
     }
 
-    private void assertGame(Game db, GameObjectRequest other) {
+    private void assertGame(Game db, GameCreateRequest other) {
         assertTrue(db.getId() > 0);
         assertEquals(other.getName(), db.getName());
+        assertEquals(other.getDescription(), db.getDescription());
+        assertEquals(other.getLogoRef(), db.getLogoRef());
+        assertEquals(other.getMotto(), db.getMotto());
+    }
+
+    private void assertGame(Game db, GameUpdateRequest other) {
+        assertTrue(db.getId() > 0);
         assertEquals(other.getDescription(), db.getDescription());
         assertEquals(other.getLogoRef(), db.getLogoRef());
         assertEquals(other.getMotto(), db.getMotto());

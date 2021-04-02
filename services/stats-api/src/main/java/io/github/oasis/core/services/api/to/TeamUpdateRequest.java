@@ -19,47 +19,23 @@
 
 package io.github.oasis.core.services.api.to;
 
-import io.github.oasis.core.Game;
-import io.github.oasis.core.elements.AttributeInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
 @Getter
-@Setter
-@Builder(toBuilder = true)
-@ToString
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameObjectRequest implements Serializable {
+public class TeamUpdateRequest implements Serializable {
 
-    private Integer id;
+    private String colorCode;
+    private String avatarRef;
 
-    private String name;
-    private String motto;
-    private String description;
-    private String logoRef;
-    private String newGameStatus;
-
-    private List<AttributeInfo> attributes;
-
-    public Game createGame() {
-        return Game.builder()
-                .id(id)
-                .name(name)
-                .motto(motto)
-                .description(description)
-                .logoRef(logoRef)
-                .currentStatus(newGameStatus)
-                .build();
-    }
 }

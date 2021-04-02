@@ -108,7 +108,7 @@ public class Simulation implements Closeable {
             dispatchRules();
 
             System.out.println("Waiting for 5 seconds before event publishing");
-            // wait some time until alll rules are published
+            // wait some time until all rules are published
             Thread.sleep(5000);
 
             dispatchEvents();

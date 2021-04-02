@@ -21,6 +21,7 @@ package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.services.api.beans.BackendRepository;
+import io.github.oasis.core.services.api.to.GameAttributeCreateRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,7 +36,13 @@ public class GameAttributeService extends AbstractOasisService {
         super(backendRepository);
     }
 
-    public AttributeInfo addAttribute(int gameId, AttributeInfo attributeInfo) {
+    public AttributeInfo addAttribute(int gameId, GameAttributeCreateRequest request) {
+        AttributeInfo attributeInfo = AttributeInfo.builder()
+                .name(request.getName())
+                .colorCode(request.getColorCode())
+                .priority(request.getPriority())
+                .build();
+
         return backendRepository.addAttribute(gameId, attributeInfo);
     }
 

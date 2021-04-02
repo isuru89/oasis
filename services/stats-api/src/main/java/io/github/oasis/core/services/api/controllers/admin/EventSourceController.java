@@ -24,6 +24,7 @@ import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.EventSourceService;
+import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,8 +63,8 @@ public class EventSourceController extends AbstractController {
     )
     @ForAdmin
     @PostMapping(path = "/admin/event-sources", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public EventSource registerEventSource(@RequestBody EventSource eventSource) throws OasisException {
-        return eventSourceService.registerEventSource(eventSource);
+    public EventSource registerEventSource(@RequestBody EventSourceCreateRequest request) throws OasisException {
+        return eventSourceService.registerEventSource(request);
     }
 
     @Operation(

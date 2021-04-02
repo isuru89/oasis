@@ -30,15 +30,18 @@ import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.PlayerTeamService;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
+import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
+import io.github.oasis.core.services.api.to.TeamCreateRequest;
+import io.github.oasis.core.services.api.to.TeamUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -73,7 +76,7 @@ public class PlayerController extends AbstractController {
     }
 
     @Operation(
-            summary = "Gets a single player by email"
+            summary = "Gets a player by email"
     )
     @ForPlayer
     @GetMapping("/players")
@@ -82,7 +85,7 @@ public class PlayerController extends AbstractController {
     }
 
     @Operation(
-            summary = "Gets a single player by user id"
+            summary = "Gets a player by user id"
     )
     @ForPlayer
     @GetMapping("/players/{playerId}")
@@ -104,10 +107,10 @@ public class PlayerController extends AbstractController {
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PutMapping(value = "/players/{playerId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/players/{playerId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public PlayerObject updatePlayer(@PathVariable("playerId") Long playerId,
-                                     @RequestBody PlayerObject playerObject) {
-        return playerTeamService.updatePlayer(playerId, playerObject);
+                                     @RequestBody PlayerUpdateRequest updateRequest) {
+        return playerTeamService.updatePlayer(playerId, updateRequest);
     }
 
     @Operation(
@@ -126,8 +129,8 @@ public class PlayerController extends AbstractController {
     )
     @ForCurator
     @PostMapping(value = "/teams", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public TeamObject addTeam(@RequestBody TeamObject team) {
-        return playerTeamService.addTeam(team);
+    public TeamObject addTeam(@RequestBody TeamCreateRequest request) {
+        return playerTeamService.addTeam(request);
     }
 
     @Operation(
@@ -155,7 +158,7 @@ public class PlayerController extends AbstractController {
     @GetMapping("/teams/search")
     public PaginatedResult<TeamMetadata> searchTeams(@RequestParam(name = "name") String teamPrefix,
                                                      @RequestParam(name = "offset") String offset,
-                                                     @RequestParam(name = "pageSize") Integer pageSize) throws OasisApiException {
+                                                     @RequestParam(name = "pageSize") Integer pageSize) {
         return playerTeamService.searchTeam(teamPrefix, offset, pageSize);
     }
 
@@ -164,10 +167,10 @@ public class PlayerController extends AbstractController {
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PutMapping(value = "/teams/{teamId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(value = "/teams/{teamId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public TeamObject updateTeam(@PathVariable("teamId") Integer teamId,
-                                 @RequestBody TeamObject teamObject) {
-        return playerTeamService.updateTeam(teamId, teamObject);
+                                 @RequestBody TeamUpdateRequest request) {
+        return playerTeamService.updateTeam(teamId, request);
     }
 
     @Operation(
@@ -186,17 +189,17 @@ public class PlayerController extends AbstractController {
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @DeleteMapping("/players/{playerId}/teams")
+    @DeleteMapping("/teams/{teamId}/players/{playerId}")
     public void removePlayerFromTeam(@PathVariable("playerId") Long playerId,
-                                @RequestBody PlayerGameAssociationRequest request) {
-        playerTeamService.removePlayerFromTeam(playerId, request.getGameId(), request.getTeamId());
+                                    @PathVariable("teamId") Integer teamId) {
+        playerTeamService.removePlayerFromTeam(playerId, teamId);
     }
 
     @Operation(
             summary = "Gets all teams a user has been associated with"
     )
     @ForPlayer
-    @GetMapping("/players/{userId}/teams")
+    @GetMapping("/players/{playerId}/teams")
     public List<TeamObject> browsePlayerTeams(@PathVariable("playerId") Long playerId) {
         return playerTeamService.getTeamsOfPlayer(playerId);
     }

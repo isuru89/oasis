@@ -20,7 +20,6 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
-import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.GameState;
@@ -30,9 +29,8 @@ import io.github.oasis.core.services.api.controllers.admin.ElementsController;
 import io.github.oasis.core.services.api.controllers.admin.GamesController;
 import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
-import io.github.oasis.core.services.api.to.GameObjectRequest;
-import io.github.oasis.elements.badges.BadgeDef;
-import io.github.oasis.engine.element.points.PointDef;
+import io.github.oasis.core.services.api.to.ElementCreateRequest;
+import io.github.oasis.core.services.api.to.GameCreateRequest;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -51,25 +49,21 @@ public class GameStatusChangeTest extends AbstractServiceTest {
     private GamesController gamesController;
     private ElementsController elementsController;
 
-    private final ElementDef samplePoint = ElementDef.builder()
-            .elementId("test.point1")
+    private final ElementCreateRequest samplePoint = ElementCreateRequest.builder()
             .gameId(1)
-            .impl(PointDef.class.getName())
-            .type("point")
+            .type("core:point")
             .metadata(new SimpleElementDefinition("test.point1", "Star points", "blah blah blah"))
             .data(Map.of("f1", "v1", "f2", "v2"))
             .build();
 
-    private final ElementDef sampleBadge = ElementDef.builder()
-            .elementId("test.badge")
+    private final ElementCreateRequest sampleBadge = ElementCreateRequest.builder()
             .gameId(1)
-            .impl(BadgeDef.class.getName())
-            .type("badge")
+            .type("core:badge")
             .metadata(new SimpleElementDefinition("test.badge", "Mega badge", "another description"))
             .data(Map.of("f3", "v3", "f4", "v4"))
             .build();
 
-    private final GameObjectRequest stackOverflow = GameObjectRequest.builder()
+    private final GameCreateRequest stackOverflow = GameCreateRequest.builder()
             .name("Stack-overflow")
             .description("Stackoverflow badges and points system")
             .logoRef("https://oasis.io/assets/so.jpeg")
