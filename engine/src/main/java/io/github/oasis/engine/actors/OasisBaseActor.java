@@ -30,8 +30,8 @@ import akka.event.LoggingAdapter;
 import akka.japi.pf.DeciderBuilder;
 import akka.routing.ActorRefRoutee;
 import akka.routing.Routee;
-import io.github.oasis.engine.EngineContext;
 import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.ext.Rules;
 import io.github.oasis.engine.ext.RulesImpl;
 import scala.Option;
@@ -55,7 +55,9 @@ public abstract class OasisBaseActor extends AbstractActor {
                     .build()
     );
 
-    protected LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
+    protected LoggingAdapter mainLog = Logging.getLogger(getContext().getSystem(), this);
+    protected LoggingAdapter log = Logging.getLogger(getContext().getSystem(), "oasisEvents");
+    protected LoggingAdapter sinkLog = Logging.getLogger(getContext().getSystem(), "oasisSink");
 
     protected EngineContext engineContext;
     protected OasisConfigs configs;

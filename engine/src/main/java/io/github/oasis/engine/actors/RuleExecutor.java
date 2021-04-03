@@ -93,7 +93,7 @@ public class RuleExecutor extends OasisBaseActor {
     private void assignRules(StartRuleExecutionCommand command) {
         this.parentId = command.getParentId();
         this.ruleExecutionContext = RuleExecutionContext.from(engineContext, command.getRuleExecutionContext());
-        log.info("[{}] Initialization from {}", myId, parentId);
+        mainLog.info("[{}] Initialization from {}", myId, parentId);
         getContext().become(executing);
     }
 

@@ -24,28 +24,57 @@
             <level>INFO</level>
         </filter>
         <encoder>
-            <pattern>[%date{ISO8601}] [%level] [%-30logger{10}] [%thread] - %msg%n</pattern>
+            <pattern>[%date{ISO8601}] [%level] [%-30logger{10}] - %msg%n</pattern>
         </encoder>
     </appender>
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>engine.log</file>
+    <appender name="BOOT-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>engine-bootstrap.log</file>
         <immediateFlush>false</immediateFlush>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>engine_%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>engine-bootstrap_%d{yyyy-MM-dd}.log</fileNamePattern>
         </rollingPolicy>
         <encoder>
-            <pattern>[%date{ISO8601}] [%level] [%-30logger{10}] [%thread] - %msg%n</pattern>
+            <pattern>[%date{ISO8601}] [%level] [%-30logger{10}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="SINK-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>engine-sink.log</file>
+        <immediateFlush>false</immediateFlush>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>engine-sink_%d{yyyy-MM-dd}.log</fileNamePattern>
+        </rollingPolicy>
+        <encoder>
+            <pattern>[%date{ISO8601}] [%level] - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="EVENT-FILE" class="ch.qos.logback.core.FileAppender">
+        <file>engine-events.log</file>
+        <encoder>
+            <pattern>[%date{ISO8601}] [%level] - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+    <appender name="ASYNC-BOOT" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>8192</queueSize>
         <neverBlock>true</neverBlock>
-        <appender-ref ref="FILE" />
+        <appender-ref ref="BOOT-FILE" />
+    </appender>
+    <appender name="ASYNC-SINKS" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>8192</queueSize>
+        <neverBlock>true</neverBlock>
+        <appender-ref ref="SINK-FILE" />
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="ASYNC"/>
         <appender-ref ref="STDOUT"/>
     </root>
+    <logger name="oasisSink" level="INFO">
+        <appender-ref ref="ASYNC-SINKS"/>
+    </logger>
+    <logger name="io.github.oasis.engine" level="INFO">
+        <appender-ref ref="ASYNC-BOOT"/>
+    </logger>
+    <logger name="oasisEvents" level="INFO">
+        <appender-ref ref="EVENT-FILE"/>
+    </logger>
 </configuration>
