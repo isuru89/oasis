@@ -23,11 +23,23 @@ package io.github.oasis.core.exception;
  * @author Isuru Weerarathna
  */
 public class OasisParseException extends OasisRuntimeException {
+
+    private String errorCode;
+
     public OasisParseException(String message) {
-        super(message);
+        this(message, (String) null);
     }
 
     public OasisParseException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public OasisParseException(String message, String errorCode) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
     }
 }

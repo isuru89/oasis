@@ -19,12 +19,15 @@
 
 package io.github.oasis.core.services.api.handlers;
 
+import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.services.api.configs.ErrorMessages;
+import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -74,6 +77,25 @@ public class OasisErrorHandler extends ResponseEntityExceptionHandler {
         }
         request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
         return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.valueOf(ex.getStatusCode()));
+    }
+
+    @ExceptionHandler(value = { OasisParseException.class })
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ResponseEntity<ErrorObject> handleParseError(OasisParseException ex, WebRequest request) {
+        ErrorObject errorObject = new ErrorObject();
+        String errorCode = StringUtils.defaultIfEmpty(ex.getErrorCode(), ErrorCodes.ELEMENT_SPEC_INVALID);
+        errorObject.setTimestamp(Instant.now().toString());
+        errorObject.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorObject.setErrorCode(errorCode);
+        errorObject.setErrorCodeDescription(errorMessages.getErrorMessage(errorCode));
+        errorObject.setMessage(ex.getMessage());
+        if (request instanceof ServletWebRequest) {
+            errorObject.setPath(((ServletWebRequest) request).getRequest().getServletPath());
+        } else {
+            errorObject.setPath(request.getContextPath());
+        }
+        request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
+        return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.valueOf(HttpStatus.BAD_REQUEST.value()));
     }
 
     @Data

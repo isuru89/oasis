@@ -21,12 +21,18 @@ package io.github.oasis.core.services.api.beans;
 
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.context.RuntimeContextSupport;
+import io.github.oasis.core.elements.AbstractDef;
+import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.ElementModule;
 import io.github.oasis.core.elements.ElementModuleFactory;
+import io.github.oasis.core.elements.ElementParser;
 import io.github.oasis.core.elements.Registrar;
+import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.EventReadWriteHandler;
+import io.github.oasis.core.external.messages.EngineMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -34,9 +40,12 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Isuru Weerarathna
@@ -50,6 +59,8 @@ public class StatsApiContext implements RuntimeContextSupport, Registrar {
     private final OasisConfigs configs;
 
     private final List<ElementModule> elementModules = new ArrayList<>();
+
+    private final Map<String, ElementParser> parserCache = new ConcurrentHashMap<>();
 
     public StatsApiContext(Db dbPool, OasisConfigs oasisConfigs) {
         this.db = dbPool;
@@ -80,10 +91,46 @@ public class StatsApiContext implements RuntimeContextSupport, Registrar {
         for (ElementModule module : elementModules) {
             module.init(this);
         }
+
+        elementModules
+            .forEach(mod -> {
+                ElementParser elementParser = mod.getParser();
+
+                Stream.concat(
+                    mod.getSupportedDefinitionKeys().stream().map(String::toLowerCase),
+                    mod.getSupportedDefinitions().stream().map(Class::getName)
+                )
+                .peek(key -> LOG.info("Definition {} will be parsed with {}", key, elementParser.getClass().getName()))
+                .forEach(key -> parserCache.put(key, elementParser));
+            });
     }
 
     public List<ElementModule> getElementModules() {
         return elementModules;
+    }
+
+    public void validateElement(ElementDef def) {
+        String type = def.getType();
+        ElementParser elementParser = parserCache.get(type);
+        if (elementParser != null) {
+            EngineMessage message = new EngineMessage();
+            message.setImpl(def.getType());
+            message.setType(EngineMessage.GAME_RULE_ADDED);
+            message.setScope(new EngineMessage.Scope(def.getGameId()));
+            message.setData(def.getData());
+
+            try {
+                AbstractDef<? extends BaseSpecification> elementSpec = elementParser.parse(message);
+                elementSpec.validate();
+            } catch (RuntimeException e) {
+                if (e instanceof OasisParseException) {
+                    throw e;
+                }
+                throw new OasisParseException("Unable to parse element definition! [Cause: " + e.getMessage() + "]", e);
+            }
+        } else {
+            throw new OasisParseException("Unknown element type!");
+        }
     }
 
     @Override

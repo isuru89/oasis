@@ -20,10 +20,14 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
-import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.GameState;
+import io.github.oasis.core.services.api.TestUtils;
 import io.github.oasis.core.services.api.beans.BackendRepository;
+import io.github.oasis.core.services.api.beans.StatsApiContext;
 import io.github.oasis.core.services.api.beans.jdbc.JdbcRepository;
 import io.github.oasis.core.services.api.controllers.admin.ElementsController;
 import io.github.oasis.core.services.api.controllers.admin.GamesController;
@@ -35,7 +39,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
@@ -49,19 +53,7 @@ public class GameStatusChangeTest extends AbstractServiceTest {
     private GamesController gamesController;
     private ElementsController elementsController;
 
-    private final ElementCreateRequest samplePoint = ElementCreateRequest.builder()
-            .gameId(1)
-            .type("core:point")
-            .metadata(new SimpleElementDefinition("test.point1", "Star points", "blah blah blah"))
-            .data(Map.of("f1", "v1", "f2", "v2"))
-            .build();
-
-    private final ElementCreateRequest sampleBadge = ElementCreateRequest.builder()
-            .gameId(1)
-            .type("core:badge")
-            .metadata(new SimpleElementDefinition("test.badge", "Mega badge", "another description"))
-            .data(Map.of("f3", "v3", "f4", "v4"))
-            .build();
+    private StatsApiContext statsApiContext;
 
     private final GameCreateRequest stackOverflow = GameCreateRequest.builder()
             .name("Stack-overflow")
@@ -70,10 +62,14 @@ public class GameStatusChangeTest extends AbstractServiceTest {
             .motto("Help the community")
             .build();
 
-
     @Test
     void updateGameStatusWithElements() throws Exception {
         int stackId = gamesController.addGame(stackOverflow).getId();
+
+        List<ElementCreateRequest> elementCreateRequests = TestUtils.parseElementRules("rules.yml", stackId);
+        ElementCreateRequest samplePoint = TestUtils.findById("testpoint", elementCreateRequests);
+        ElementCreateRequest sampleBadge = TestUtils.findById("testbadge", elementCreateRequests);
+
         elementsController.add(stackId, samplePoint);
         elementsController.add(stackId, sampleBadge);
 
@@ -94,6 +90,12 @@ public class GameStatusChangeTest extends AbstractServiceTest {
     }
 
     @Override
+    protected void prepareContext(Db dbPool, OasisConfigs configs) throws OasisException {
+        statsApiContext = new StatsApiContext(dbPool, configs);
+        statsApiContext.init();
+    }
+
+    @Override
     protected JdbcRepository createJdbcRepository(Jdbi jdbi) {
         return new JdbcRepository(
                 jdbi.onDemand(IGameDao.class),
@@ -106,7 +108,7 @@ public class GameStatusChangeTest extends AbstractServiceTest {
 
     @Override
     protected void createServices(BackendRepository backendRepository) {
-        ElementService elementService = new ElementService(backendRepository);
+        ElementService elementService = new ElementService(backendRepository, statsApiContext);
         EngineManagerImpl manager = new EngineManagerImpl(null, elementService);
         manager.setDispatchSupport(dispatcher);
         engineManager = manager;
