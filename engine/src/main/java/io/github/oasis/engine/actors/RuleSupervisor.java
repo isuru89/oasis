@@ -33,8 +33,6 @@ import io.github.oasis.engine.actors.cmds.StartRuleExecutionCommand;
 import io.github.oasis.engine.actors.routers.UserRouting;
 import io.github.oasis.engine.model.ActorSignalCollector;
 import io.github.oasis.engine.model.RuleExecutionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,8 +41,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Isuru Weerarathna
  */
 public class RuleSupervisor extends OasisBaseActor {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RuleSupervisor.class);
 
     private static final AtomicInteger counter = new AtomicInteger(0);
 
@@ -99,7 +95,7 @@ public class RuleSupervisor extends OasisBaseActor {
 
     private void createExecutors() {
         int executors = configs.getInt(OasisConfigs.RULE_EXECUTOR_COUNT, EXECUTORS);
-        LOG.info("[{}] Rule Executor count {}", myId, executors);
+        log.info("[{}] Rule Executor count {}", myId, executors);
         List<Routee> allRoutes = createChildRouteActorsOfType(RuleExecutor.class,
                 index -> ActorNames.RULE_EXECUTOR_PREFIX + index,
                 executors);
@@ -132,7 +128,7 @@ public class RuleSupervisor extends OasisBaseActor {
     }
 
     private void forwardRuleModifiedEvent(OasisRuleMessage ruleMessage) {
-        LOG.info("[{}] Rule message received. {}", myId, ruleMessage);
+        log.info("[{}] Rule message received. {}", myId, ruleMessage);
         executor.route(ruleMessage, getSelf());
     }
 
