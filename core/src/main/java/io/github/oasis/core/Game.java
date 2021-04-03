@@ -21,9 +21,8 @@ package io.github.oasis.core;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -32,24 +31,23 @@ import java.io.Serializable;
  *
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-@ToString
+@Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class Game implements Serializable {
 
-    private Integer id;
+    @EqualsAndHashCode.Include private Integer id;
 
-    private String name;
-    private String motto;
-    private String description;
-    private String logoRef;
-    private String currentStatus;
+    @EqualsAndHashCode.Include private String name;
+    @EqualsAndHashCode.Include private String motto;
+    @EqualsAndHashCode.Include private String description;
+    @EqualsAndHashCode.Include private String logoRef;
+    @EqualsAndHashCode.Include private String currentStatus;
 
     private long createdAt;
     private long updatedAt;
-    private boolean active;
+    @EqualsAndHashCode.Include private boolean active;
 
     public Game() {}
 

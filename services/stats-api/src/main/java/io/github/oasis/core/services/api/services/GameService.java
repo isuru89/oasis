@@ -67,7 +67,7 @@ public class GameService extends AbstractOasisService {
         return backendRepository.addNewGame(game);
     }
 
-    public Game updateGame(int gameId, GameUpdateRequest updateRequest) throws OasisApiException {
+    public Game updateGame(int gameId, GameUpdateRequest updateRequest) {
         Game dbGame = backendRepository.readGame(gameId);
         Game updatingGame = dbGame.toBuilder()
                 .motto(StringUtils.defaultIfEmpty(updateRequest.getMotto(), dbGame.getMotto()))
@@ -78,7 +78,17 @@ public class GameService extends AbstractOasisService {
         return backendRepository.updateGame(gameId, updatingGame);
     }
 
-    public Game deleteGame(int gameId) {
+    public Game deleteGame(int gameId) throws OasisApiException {
+        changeStatusOfGame(gameId, GameState.STOPPED.name(), System.currentTimeMillis());
+
+        // deleting game elements
+        backendRepository.readElementsByGameId(gameId)
+                .forEach(def -> backendRepository.deleteElement(gameId, def.getElementId()));
+
+        // deleting event sources
+        backendRepository.listAllEventSourcesOfGame(gameId)
+                .forEach(eventSource -> backendRepository.removeEventSourceFromGame(eventSource.getId(), gameId));
+
         return backendRepository.deleteGame(gameId);
     }
 

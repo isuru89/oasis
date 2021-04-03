@@ -28,6 +28,7 @@ import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.GameService;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
+import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
@@ -114,7 +115,7 @@ public class GamesController extends AbstractController {
     )
     @ForAdmin
     @DeleteMapping(path = "/games/{gameId}")
-    public Game deleteGame(@PathVariable("gameId") Integer gameId) {
+    public Game deleteGame(@PathVariable("gameId") Integer gameId) throws OasisApiException {
         return gameService.deleteGame(gameId);
     }
 

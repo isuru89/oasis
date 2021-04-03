@@ -19,16 +19,27 @@
 
 package io.github.oasis.core.services.api.services;
 
+import com.mysql.cj.exceptions.AssertionFailedException;
 import io.github.oasis.core.Game;
+import io.github.oasis.core.elements.ElementDef;
+import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.messages.GameState;
+import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.services.api.beans.BackendRepository;
+import io.github.oasis.core.services.api.beans.KeyGeneratorHelper;
 import io.github.oasis.core.services.api.beans.jdbc.JdbcRepository;
+import io.github.oasis.core.services.api.controllers.admin.ElementsController;
+import io.github.oasis.core.services.api.controllers.admin.EventSourceController;
 import io.github.oasis.core.services.api.controllers.admin.GamesController;
+import io.github.oasis.core.services.api.dao.IElementDao;
+import io.github.oasis.core.services.api.dao.IEventSourceDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.to.ElementCreateRequest;
+import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
@@ -36,6 +47,9 @@ import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -49,6 +63,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class GameServiceTest extends AbstractServiceTest {
 
     private GamesController controller;
+    private ElementsController elementsController;
+    private EventSourceController sourceController;
+    private final KeyGeneratorHelper keyGeneratorSupport = new KeyGeneratorHelper();
     private final IEngineManager engineManager = Mockito.mock(IEngineManager.class);
 
     private final GameCreateRequest stackOverflow = GameCreateRequest.builder()
@@ -64,6 +81,14 @@ public class GameServiceTest extends AbstractServiceTest {
             .logoRef("https://oasis.io/assets/pm.jpeg")
             .motto("Serve your customers")
             .build();
+
+    public GameServiceTest() {
+        try {
+            keyGeneratorSupport.init();
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionFailedException("Cannot initialize key generator!");
+        }
+    }
 
     @Test
     void addGame() throws OasisException {
@@ -163,12 +188,43 @@ public class GameServiceTest extends AbstractServiceTest {
 
     @Test
     void deleteGame() throws OasisException {
+        Mockito.reset(engineManager);
+
         int stackId = controller.addGame(stackOverflow).getId();
+        Game dbGame = controller.readGame(stackId);
+        EventSource eventSource = sourceController.registerEventSource(EventSourceCreateRequest.builder().name("test-1").build());
+        sourceController.associateEventSourceToGame(stackId, eventSource.getId());
+        ElementDef elementPoint = elementsController.add(stackId, ElementCreateRequest.builder()
+                .gameId(stackId)
+                .data(new HashMap<>())
+                .metadata(new SimpleElementDefinition("point1", "pointname", "description"))
+                .type("core:point")
+                .build());
+        ElementDef elementBadge = elementsController.add(stackId, ElementCreateRequest.builder()
+                .gameId(stackId)
+                .data(new HashMap<>())
+                .metadata(new SimpleElementDefinition("badge1", "badgename", "description"))
+                .type("core:badge")
+                .build());
 
         assertGame(engineRepo.readGame(stackId), stackOverflow);
         assertGame(adminRepo.readGame(stackId), stackOverflow);
+        assertEquals(1, sourceController.getEventSourcesOfGame(stackId).size());
+        assertEquals(elementBadge.getElementId(), elementsController.read(stackId, "badge1", false).getElementId());
+        assertEquals(elementPoint.getElementId(), elementsController.read(stackId, "point1", false).getElementId());
 
         assertNotNull(controller.deleteGame(stackId));
+
+        assertTrue(sourceController.getEventSourcesOfGame(stackId).isEmpty());
+        // but still event source must exist
+        EventSource dbSource = sourceController.getEventSource(eventSource.getId());
+        assertNotNull(dbSource);
+        assertTrue(dbSource.isActive());
+        assertThrows(OasisApiException.class, () -> elementsController.read(stackId, "badge1", false));
+        assertThrows(OasisApiException.class, () -> elementsController.read(stackId, "point1", false));
+
+        // game stopped message should dispatch
+        assertEngineManagerOnceCalledWithState(GameState.STOPPED, dbGame.toBuilder().currentStatus(GameState.STOPPED.name()).build());
 
         assertFalse(adminRepo.readGame(stackId).isActive());
         assertThrows(OasisRuntimeException.class, () -> engineRepo.readGame(stackId));
@@ -211,16 +267,18 @@ public class GameServiceTest extends AbstractServiceTest {
     protected JdbcRepository createJdbcRepository(Jdbi jdbi) {
         return new JdbcRepository(
                 jdbi.onDemand(IGameDao.class),
+                jdbi.onDemand(IEventSourceDao.class),
+                jdbi.onDemand(IElementDao.class),
                 null,
-                null,
-                null,
-                null
+                serializationSupport
         );
     }
 
     @Override
     protected void createServices(BackendRepository backendRepository) {
         controller = new GamesController(new GameService(backendRepository, engineManager));
+        elementsController = new ElementsController(new ElementService(backendRepository));
+        sourceController = new EventSourceController(new EventSourceService(backendRepository, keyGeneratorSupport));
     }
 
     private void assertGame(Game db, GameCreateRequest other) {
