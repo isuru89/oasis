@@ -36,5 +36,6 @@ public class EngineStatusChangedMessage implements Serializable {
     private int gameId;
     private GameState state;
     private String engineId;
+    private long ts;
 
 }

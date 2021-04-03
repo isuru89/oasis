@@ -23,6 +23,7 @@ import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
+import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.model.EventSourceSecrets;
 import io.github.oasis.core.model.PlayerObject;
@@ -47,6 +48,7 @@ public interface OasisRepository {
 
     Game addNewGame(Game game);
     Game updateGame(int gameId, Game game);
+    Game updateGameStatus(int gameId, String status, long updatedAt);
     Game readGame(int gameId);
     Game deleteGame(int gameId);
     boolean existsGame(String gameName);
@@ -75,7 +77,7 @@ public interface OasisRepository {
     List<PlayerObject> getTeamPlayers(int teamId);
 
     ElementDef addNewElement(int gameId, ElementDef elementDef);
-    ElementDef updateElement(int gameId, String id, ElementDef elementDef);
+    ElementDef updateElement(int gameId, String id, SimpleElementDefinition elementDef);
     ElementDef deleteElement(int gameId, String id);
     ElementDef readElement(int gameId, String id);
     ElementDef readElementWithoutData(int gameId, String id);

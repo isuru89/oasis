@@ -7,7 +7,7 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.8.0/wait
 RUN chmod +x /wait
 
 WORKDIR /usr/share/oasis-events-api
-CMD /wait && java -classpath ./*:libs/* io.github.oasis.services.events.Main
+CMD /wait && exec java -classpath ./*:libs/* io.github.oasis.services.events.Main
 #ENTRYPOINT ["java", "-classpath", "./*:libs/*", "io.github.oasis.services.events.Main"]
 EXPOSE 8050
 

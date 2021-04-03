@@ -31,6 +31,7 @@ import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
@@ -67,7 +68,7 @@ public class EventSourceServiceTest extends AbstractServiceTest {
 
     @Test
     void testRegisterEventSource() throws OasisException {
-        EventSource source = EventSource.builder().name("test-1").build();
+        EventSourceCreateRequest source = new EventSourceCreateRequest("test-1");
         EventSource dbSource = esController.registerEventSource(source);
         System.out.println(dbSource);
         assertSource(dbSource, source, true);
@@ -76,14 +77,14 @@ public class EventSourceServiceTest extends AbstractServiceTest {
                 .isInstanceOf(OasisApiRuntimeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_ALREADY_EXISTS);
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> esController.registerEventSource(EventSource.builder().name("").build()))
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> esController.registerEventSource(new EventSourceCreateRequest("")))
                 .isInstanceOf(DataValidationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_NO_NAME);
     }
 
     @Test
     void testDownloadEventSourceKeys() throws OasisException {
-        EventSource source = EventSource.builder().name("test-1").build();
+        EventSourceCreateRequest source = new EventSourceCreateRequest("test-1");
         EventSource dbSource = esController.registerEventSource(source);
         System.out.println(dbSource);
         assertSource(dbSource, source, true);
@@ -99,7 +100,7 @@ public class EventSourceServiceTest extends AbstractServiceTest {
 
     @Test
     void testReadEventSourceInfo() throws OasisException {
-        EventSource source = EventSource.builder().name("test-1").build();
+        EventSourceCreateRequest source = new EventSourceCreateRequest("test-1");
         EventSource dbSource = esController.registerEventSource(source);
         System.out.println(dbSource);
         assertSource(dbSource, source, true);
@@ -118,9 +119,9 @@ public class EventSourceServiceTest extends AbstractServiceTest {
     void testListAllEventSources() throws OasisException {
         assertEquals(0, esController.getAllEventSources().size());
 
-        EventSource src1 = EventSource.builder().name("test-1").build();
-        EventSource src2 = EventSource.builder().name("test-2").build();
-        EventSource src3 = EventSource.builder().name("test-3").build();
+        EventSourceCreateRequest src1 = EventSourceCreateRequest.builder().name("test-1").build();
+        EventSourceCreateRequest src2 = EventSourceCreateRequest.builder().name("test-2").build();
+        EventSourceCreateRequest src3 = EventSourceCreateRequest.builder().name("test-3").build();
         esController.registerEventSource(src1);
 
         assertEquals(1, esController.getAllEventSources().size());
@@ -139,9 +140,9 @@ public class EventSourceServiceTest extends AbstractServiceTest {
     void testDeleteEventSources() throws OasisException {
         assertEquals(0, esController.getAllEventSources().size());
 
-        EventSource src1 = EventSource.builder().name("test-1").build();
-        EventSource src2 = EventSource.builder().name("test-2").build();
-        EventSource src3 = EventSource.builder().name("test-3").build();
+        EventSourceCreateRequest src1 = EventSourceCreateRequest.builder().name("test-1").build();
+        EventSourceCreateRequest src2 = EventSourceCreateRequest.builder().name("test-2").build();
+        EventSourceCreateRequest src3 = EventSourceCreateRequest.builder().name("test-3").build();
         int id1 = esController.registerEventSource(src1).getId();
         int id2 = esController.registerEventSource(src2).getId();
         int id3 = esController.registerEventSource(src3).getId();
@@ -162,9 +163,9 @@ public class EventSourceServiceTest extends AbstractServiceTest {
     void testRegisterSourcesToGame() throws OasisException {
         assertEquals(0, esController.getAllEventSources().size());
 
-        EventSource src1 = EventSource.builder().name("test-1").build();
-        EventSource src2 = EventSource.builder().name("test-2").build();
-        EventSource src3 = EventSource.builder().name("test-3").build();
+        EventSourceCreateRequest src1 = EventSourceCreateRequest.builder().name("test-1").build();
+        EventSourceCreateRequest src2 = EventSourceCreateRequest.builder().name("test-2").build();
+        EventSourceCreateRequest src3 = EventSourceCreateRequest.builder().name("test-3").build();
         int id1 = esController.registerEventSource(src1).getId();
         int id2 = esController.registerEventSource(src2).getId();
         int id3 = esController.registerEventSource(src3).getId();
@@ -203,9 +204,9 @@ public class EventSourceServiceTest extends AbstractServiceTest {
     void testDeRegisterSourcesToGame() throws OasisException {
         assertEquals(0, esController.getAllEventSources().size());
 
-        EventSource src1 = EventSource.builder().name("test-1").build();
-        EventSource src2 = EventSource.builder().name("test-2").build();
-        EventSource src3 = EventSource.builder().name("test-3").build();
+        EventSourceCreateRequest src1 = EventSourceCreateRequest.builder().name("test-1").build();
+        EventSourceCreateRequest src2 = EventSourceCreateRequest.builder().name("test-2").build();
+        EventSourceCreateRequest src3 = EventSourceCreateRequest.builder().name("test-3").build();
         int id1 = esController.registerEventSource(src1).getId();
         int id2 = esController.registerEventSource(src2).getId();
         int id3 = esController.registerEventSource(src3).getId();
@@ -234,6 +235,18 @@ public class EventSourceServiceTest extends AbstractServiceTest {
             assertTrue(game1Names.contains(src3.getName()));
         }
 
+    }
+
+    private void assertSource(EventSource db, EventSourceCreateRequest other, boolean withKeys) {
+        assertTrue(db.getId() > 0);
+        assertEquals(other.getName(), db.getName());
+        assertTrue(db.getToken().length() > 0);
+        if (withKeys) {
+            assertNotNull(db.getSecrets());
+            assertTrue(db.getSecrets().isValid());
+        } else {
+            assertNull(db.getSecrets());
+        }
     }
 
     private void assertSource(EventSource db, EventSource other, boolean withKeys) {

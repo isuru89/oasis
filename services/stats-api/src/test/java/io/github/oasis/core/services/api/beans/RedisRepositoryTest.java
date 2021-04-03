@@ -629,15 +629,16 @@ class RedisRepositoryTest {
         ElementDef element = createElement("ELE0001", "Bonus Points", "points");
         ElementDef elementDef = redisRepository.addNewElement(element.getGameId(), element);
 
-        elementDef.getMetadata().setName("Bonus Points 2");
-        redisRepository.updateElement(elementDef.getGameId(), elementDef.getElementId(), elementDef);
+        SimpleElementDefinition md = new SimpleElementDefinition(element.getElementId(), "Bonus Points 2",
+                elementDef.getMetadata().getDescription());
+        redisRepository.updateElement(elementDef.getGameId(), elementDef.getElementId(), md);
         ElementDef updatedElement = redisRepository.readElement(elementDef.getGameId(), elementDef.getElementId());
         Assertions.assertEquals("Bonus Points 2", updatedElement.getMetadata().getName());
 
         // update non-existing element
         elementDef.setElementId("NEX00000");
-        assertError(() -> redisRepository.updateElement(element.getGameId(), elementDef.getElementId(), elementDef));
-        assertError(() -> redisRepository.updateElement(element.getGameId(), "NEX9999", elementDef));
+        assertError(() -> redisRepository.updateElement(element.getGameId(), elementDef.getElementId(), md));
+        assertError(() -> redisRepository.updateElement(element.getGameId(), "NEX9999", md));
     }
 
     @Test
@@ -711,11 +712,13 @@ class RedisRepositoryTest {
         Assertions.assertEquals(0, redisRepository.listAllElementDefinitions(1, "challenges").size());
 
         ElementDef bonusPoints = redisRepository.readElement(1, "ELE0001");
-        bonusPoints.getMetadata().setName("Bonus Points 2");
-        redisRepository.updateElement(1, bonusPoints.getElementId(), bonusPoints);
+        SimpleElementDefinition md = new SimpleElementDefinition(bonusPoints.getElementId(),
+                "Bonus Points 2", bonusPoints.getMetadata().getDescription());
+        redisRepository.updateElement(1, bonusPoints.getElementId(), md);
 
-        Assertions.assertEquals(2, redisRepository.listAllElementDefinitions(1, "points").size());
-        Assertions.assertTrue(redisRepository.listAllElementDefinitions(1, "points").stream().anyMatch(e -> e.getName().equals("Bonus Points 2")));
+        List<SimpleElementDefinition> points = redisRepository.listAllElementDefinitions(1, "points");
+        Assertions.assertEquals(2, points.size());
+        Assertions.assertTrue(points.stream().anyMatch(e -> e.getName().equals("Bonus Points 2")));
         Assertions.assertEquals(1, redisRepository.listAllElementDefinitions(1, "badges").size());
 
         // delete now

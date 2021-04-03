@@ -23,6 +23,7 @@ import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
+import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.EventSource;
@@ -35,13 +36,13 @@ import io.github.oasis.core.services.api.dao.IEventSourceDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
 import io.github.oasis.core.services.api.dao.dto.ElementDto;
+import io.github.oasis.core.services.api.dao.dto.ElementUpdateDto;
 import io.github.oasis.core.services.api.dao.dto.EventSourceDto;
 import io.github.oasis.core.services.api.dao.dto.EventSourceSecretsDto;
 import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
 import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import org.apache.commons.lang3.StringUtils;
 import org.jdbi.v3.core.JdbiException;
 import org.springframework.stereotype.Component;
 
@@ -170,12 +171,13 @@ public class JdbcRepository implements OasisRepository {
         }
 
         GameUpdatePart gameUpdatePart = GameUpdatePart.from(game);
-        if (StringUtils.isBlank(gameUpdatePart.getNewGameStatus())) {
-            // we don't want to override current game status
-            gameUpdatePart.setNewGameStatus(toBeUpdatedGame.getCurrentStatus());
-        }
+        gameDao.updateGame(gameId, gameUpdatePart, System.currentTimeMillis());
+        return gameDao.readGame(gameId);
+    }
 
-        gameDao.updateGame(gameId, gameUpdatePart);
+    @Override
+    public Game updateGameStatus(int gameId, String status, long updatedAt) {
+        gameDao.updateGameStatus(gameId, status, updatedAt);
         return gameDao.readGame(gameId);
     }
 
@@ -341,9 +343,17 @@ public class JdbcRepository implements OasisRepository {
     }
 
     @Override
-    public ElementDef updateElement(int gameId, String id, ElementDef elementDef) {
-        var dto = toElementDto(gameId, elementDef);
-        elementDao.updateElement(elementDef.getElementId(), dto);
+    public ElementDef updateElement(int gameId, String id, SimpleElementDefinition elementDef) {
+        ElementDef dbDef = readElementWithoutData(gameId, id);
+        if (dbDef == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.ELEMENT_NOT_EXISTS);
+        }
+
+        ElementUpdateDto dto = new ElementUpdateDto();
+        dto.setName(elementDef.getName());
+        dto.setDescription(elementDef.getDescription());
+
+        elementDao.updateElement(id, dto, System.currentTimeMillis());
         return toElementDef(elementDao.readElement(id));
     }
 

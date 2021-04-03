@@ -48,6 +48,7 @@ public final class ErrorCodes {
 
     public static final String ELEMENT_ALREADY_EXISTS = "EL0001";
     public static final String ELEMENT_NOT_EXISTS = "EL0002";
+    public static final String ELEMENT_SPEC_INVALID = "EL0003";
 
     public static final String ATTRIBUTE_EXISTS = "AT0001";
 }

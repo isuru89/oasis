@@ -20,7 +20,6 @@
 package io.github.oasis.core.services.api.beans;
 
 import io.github.oasis.core.exception.OasisException;
-import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.services.KeyGeneratorSupport;
 import org.springframework.stereotype.Component;
 
@@ -51,7 +50,7 @@ public class KeyGeneratorHelper implements KeyGeneratorSupport {
     }
 
     @Override
-    public KeyPair generate(EventSource source) {
+    public KeyPair generate(String sourceId) {
         return keyPairGenerator.generateKeyPair();
     }
 

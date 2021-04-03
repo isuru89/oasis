@@ -26,7 +26,12 @@ import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
+import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
+import io.github.oasis.core.services.api.to.TeamCreateRequest;
+import io.github.oasis.core.services.api.to.TeamUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -67,8 +72,16 @@ public class PlayerTeamService extends AbstractOasisService {
         return backendRepository.readPlayer(userEmail);
     }
 
-    public PlayerObject updatePlayer(long userId, PlayerObject updatingUser) {
-        return backendRepository.updatePlayer(userId, updatingUser);
+    public PlayerObject updatePlayer(long userId, PlayerUpdateRequest updatingUser) {
+        PlayerObject dbPlayer = backendRepository.readPlayer(userId);
+        PlayerObject playerUpdating = dbPlayer.toBuilder()
+                .displayName(StringUtils.defaultIfBlank(updatingUser.getDisplayName(), dbPlayer.getDisplayName()))
+                .avatarRef(updatingUser.getAvatarRef())
+                .gender(ObjectUtils.defaultIfNull(updatingUser.getGender(), dbPlayer.getGender()))
+                .timeZone(StringUtils.defaultIfBlank(updatingUser.getTimeZone(), dbPlayer.getTimeZone()))
+                .build();
+
+        return backendRepository.updatePlayer(userId, playerUpdating);
     }
 
     public PlayerObject deactivatePlayer(long userId) {
@@ -82,8 +95,13 @@ public class PlayerTeamService extends AbstractOasisService {
         return backendRepository.getPlayerTeams(userId);
     }
 
-    public TeamObject addTeam(TeamObject teamObject) {
-        return backendRepository.addTeam(teamObject);
+    public TeamObject addTeam(TeamCreateRequest request) {
+        return backendRepository.addTeam(TeamObject.builder()
+                .name(request.getName())
+                .colorCode(request.getColorCode())
+                .gameId(request.getGameId())
+                .avatarRef(request.getAvatarRef())
+                .build());
     }
 
     public TeamObject readTeam(String name) throws OasisApiException {
@@ -99,8 +117,13 @@ public class PlayerTeamService extends AbstractOasisService {
 
     }
 
-    public TeamObject updateTeam(int teamId, TeamObject updatingTeam) {
-        return backendRepository.updateTeam(teamId, updatingTeam);
+    public TeamObject updateTeam(int teamId, TeamUpdateRequest request) {
+        TeamObject dbTeam = backendRepository.readTeam(teamId);
+
+        return backendRepository.updateTeam(teamId, dbTeam.toBuilder()
+                .avatarRef(ObjectUtils.defaultIfNull(request.getAvatarRef(), dbTeam.getAvatarRef()))
+                .colorCode(StringUtils.defaultIfBlank(request.getColorCode(), dbTeam.getColorCode()))
+                .build());
     }
 
     public List<PlayerObject> listAllUsersInTeam(int teamId) {
@@ -111,8 +134,9 @@ public class PlayerTeamService extends AbstractOasisService {
         backendRepository.addPlayerToTeam(userId, gameId, teamId);
     }
 
-    public void removePlayerFromTeam(long playerId, int gameId, int teamId) {
-        backendRepository.removePlayerFromTeam(playerId, gameId, teamId);
+    public void removePlayerFromTeam(long playerId, int teamId) {
+        TeamObject dbTeam = backendRepository.readTeam(teamId);
+        backendRepository.removePlayerFromTeam(playerId, dbTeam.getGameId(), teamId);
     }
 
     public PaginatedResult<TeamMetadata> searchTeam(String teamPrefix, String offset, int maxSize) {

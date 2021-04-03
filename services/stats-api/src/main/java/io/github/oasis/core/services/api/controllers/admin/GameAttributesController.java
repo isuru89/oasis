@@ -24,6 +24,7 @@ import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.GameAttributeService;
+import io.github.oasis.core.services.api.to.GameAttributeCreateRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
@@ -59,7 +60,7 @@ public class GameAttributesController extends AbstractController {
     @ForAdmin
     @PostMapping(path = "/games/{gameId}/attributes", consumes = MediaType.APPLICATION_JSON_VALUE)
     public AttributeInfo addAttribute(@PathVariable("gameId") Integer gameId,
-                                      @RequestBody AttributeInfo request) {
+                                      @RequestBody GameAttributeCreateRequest request) {
         return gameAttributeService.addAttribute(gameId, request);
     }
 

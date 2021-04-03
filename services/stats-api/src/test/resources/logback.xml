@@ -28,10 +28,10 @@
         </encoder>
     </appender>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>engine.log</file>
+        <file>stats-test.log</file>
         <immediateFlush>false</immediateFlush>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>engine_%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>myapp_%d{yyyy-MM-dd}.log</fileNamePattern>
         </rollingPolicy>
         <encoder>
             <pattern>[%date{ISO8601}] [%level] [%-30logger{10}] [%thread] - %msg%n</pattern>

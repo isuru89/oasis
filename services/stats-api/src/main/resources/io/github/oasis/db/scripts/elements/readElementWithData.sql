@@ -1,7 +1,6 @@
 SELECT
     oa.id,
     oa.type,
-    oa.impl,
     oa.game_id AS gameId,
     oa.name AS elementName,
     oa.def_id AS elementId,

@@ -1,7 +1,6 @@
 SELECT
     id,
     type,
-    impl,
     game_id AS gameId,
     name AS elementName,
     def_id AS elementId,

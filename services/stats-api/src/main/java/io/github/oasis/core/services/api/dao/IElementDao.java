@@ -22,6 +22,7 @@ package io.github.oasis.core.services.api.dao;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.services.api.dao.configs.UseOasisSqlLocator;
 import io.github.oasis.core.services.api.dao.dto.ElementDto;
+import io.github.oasis.core.services.api.dao.dto.ElementUpdateDto;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.customizer.BindBean;
@@ -66,7 +67,7 @@ public interface IElementDao {
     List<ElementDto> readElementsByGameId(@Bind("gameId") int gameId);
 
     @SqlUpdate
-    void updateElement(@Bind("defId") String elementId, @BindBean ElementDto update);
+    void updateElement(@Bind("defId") String elementId, @BindBean ElementUpdateDto update, @Bind("ts") long updatedAt);
 
     @SqlUpdate
     void deleteElementById(@Bind("id") int id);

@@ -20,7 +20,6 @@
 package io.github.oasis.core.services;
 
 import io.github.oasis.core.exception.OasisException;
-import io.github.oasis.core.model.EventSource;
 
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -30,7 +29,7 @@ import java.security.PublicKey;
  */
 public interface KeyGeneratorSupport {
 
-    KeyPair generate(EventSource source) throws OasisException;
+    KeyPair generate(String sourceId) throws OasisException;
 
     PublicKey readPublicKey(byte[] keyData) throws OasisException;
 

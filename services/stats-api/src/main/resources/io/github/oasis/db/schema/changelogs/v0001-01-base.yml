@@ -134,11 +134,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: impl
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
-              - column:
                   name: def_id
                   type: varchar(128)
                   constraints:

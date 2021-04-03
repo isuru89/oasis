@@ -32,6 +32,9 @@ import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
+import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
+import io.github.oasis.core.services.api.to.TeamCreateRequest;
+import io.github.oasis.core.services.api.to.TeamUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.assertj.core.api.Assertions;
 import org.jdbi.v3.core.Jdbi;
@@ -51,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class PlayerTeamServiceTest extends AbstractServiceTest {
 
-    private PlayerController service;
+    private PlayerController controller;
 
     private final PlayerCreateRequest reqAlice = PlayerCreateRequest.builder()
             .email("alice@oasis.io")
@@ -68,13 +71,13 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
             .gender(UserGender.MALE)
             .build();
 
-    private final TeamObject teamWarriors = TeamObject.builder()
+    private final TeamCreateRequest teamWarriors = TeamCreateRequest.builder()
             .name("Wuhan Warriors")
             .avatarRef("https://oasis.io/assets/wuhanw.jpeg")
             .gameId(1)
             .colorCode("#000000")
             .build();
-    private final TeamObject teamRenegades = TeamObject.builder()
+    private final TeamCreateRequest teamRenegades = TeamCreateRequest.builder()
             .name("Ruthless Renegade")
             .avatarRef("https://oasis.io/assets/rr.jpeg")
             .gameId(1)
@@ -87,46 +90,48 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         assertFalse(engineRepo.existsPlayer(reqAlice.getEmail()));
         assertFalse(adminRepo.existsPlayer(reqAlice.getEmail()));
 
-        PlayerObject addedPlayer = service.registerPlayer(reqAlice);
+        PlayerObject addedPlayer = controller.registerPlayer(reqAlice);
         System.out.println(addedPlayer);
         assertFalse(addedPlayer.getId() <= 0);
         assertTrue(engineRepo.existsPlayer(reqAlice.getEmail()));
         assertTrue(adminRepo.existsPlayer(reqAlice.getEmail()));
 
-        assertThrows(OasisApiRuntimeException.class, () -> service.registerPlayer(reqAlice));
+        assertThrows(OasisApiRuntimeException.class, () -> controller.registerPlayer(reqAlice));
     }
 
     @Test
     void readPlayer() {
-        PlayerObject bob = service.registerPlayer(reqBob);
+        PlayerObject bob = controller.registerPlayer(reqBob);
         System.out.println(bob);
         assertPlayerWithAnother(bob, reqBob);
 
-        PlayerObject bobById = service.readPlayerProfile(bob.getId());
+        PlayerObject bobById = controller.readPlayerProfile(bob.getId());
         System.out.println(bobById);
         assertPlayerWithAnother(bobById, reqBob);
 
-        PlayerObject nonExistencePlayer = service.readPlayerProfile(Long.MAX_VALUE);
+        PlayerObject nonExistencePlayer = controller.readPlayerProfile(Long.MAX_VALUE);
         assertNull(nonExistencePlayer);
 
-        PlayerObject bobByEmail = service.readPlayerProfileByEmail(bob.getEmail());
+        PlayerObject bobByEmail = controller.readPlayerProfileByEmail(bob.getEmail());
         assertPlayerWithAnother(bobByEmail, bobById);
     }
 
     @Test
     void updatePlayer() {
-        PlayerObject alice = service.registerPlayer(reqAlice);
+        PlayerObject alice = controller.registerPlayer(reqAlice);
 
         assertTrue(adminRepo.existsPlayer(reqAlice.getEmail()));
         assertTrue(engineRepo.existsPlayer(reqAlice.getEmail()));
 
-        PlayerObject toUpdateAlice = alice.toBuilder()
+        PlayerUpdateRequest toUpdateAlice = PlayerUpdateRequest.builder()
                 .displayName("new alice name")
                 .avatarRef("https://oasis.io/assets/alice_new.jpg")
                 .build();
 
-        PlayerObject aliceUpdated = service.updatePlayer(alice.getId(), toUpdateAlice);
-        assertPlayerWithAnother(aliceUpdated, toUpdateAlice);
+        PlayerObject aliceUpdated = controller.updatePlayer(alice.getId(), toUpdateAlice);
+        assertEquals(toUpdateAlice.getDisplayName(), aliceUpdated.getDisplayName());
+        assertEquals(toUpdateAlice.getAvatarRef(), aliceUpdated.getAvatarRef());
+        assertEquals(alice.getGender(), aliceUpdated.getGender());
 
         {
             PlayerObject engineAlice = engineRepo.readPlayer(reqAlice.getEmail());
@@ -136,14 +141,15 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void deactivatePlayer() {
-        PlayerObject bob = service.registerPlayer(reqBob);
+        PlayerObject bob = controller.registerPlayer(reqBob);
         System.out.println(bob);
         assertPlayerWithAnother(bob, reqBob);
 
         assertTrue(adminRepo.existsPlayer(bob.getId()));
         assertTrue(engineRepo.existsPlayer(bob.getId()));
 
-        service.deactivatePlayer(bob.getId());
+        PlayerObject deletedPlayer = controller.deactivatePlayer(bob.getId());
+        assertPlayerWithAnother(bob, deletedPlayer);
 
         assertFalse(combinedRepo.existsPlayer(bob.getId()));
         assertFalse(engineRepo.existsPlayer(bob.getId()));
@@ -157,10 +163,10 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         assertFalse(adminRepo.existsTeam(teamWarriors.getName()));
         assertFalse(engineRepo.existsTeam(teamWarriors.getName()));
 
-        TeamObject warriors = service.addTeam(teamWarriors);
+        TeamObject warriors = controller.addTeam(teamWarriors);
         System.out.println(warriors);
 
-        TeamObject renegades = service.addTeam(teamRenegades);
+        TeamObject renegades = controller.addTeam(teamRenegades);
         System.out.println(renegades);
 
         assertTrue(adminRepo.existsTeam(teamWarriors.getName()));
@@ -168,31 +174,31 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         assertTrue(adminRepo.existsTeam(warriors.getId()));
         assertTrue(engineRepo.existsTeam(warriors.getId()));
 
-        assertThrows(OasisApiRuntimeException.class, () -> service.addTeam(teamWarriors));
+        assertThrows(OasisApiRuntimeException.class, () -> controller.addTeam(teamWarriors));
     }
 
     @Test
     void readTeam() throws OasisApiException {
-        TeamObject warriors = service.addTeam(teamWarriors);
+        TeamObject warriors = controller.addTeam(teamWarriors);
         System.out.println(warriors);
         assertTeamWithAnother(warriors, teamWarriors);
 
         {
             // by name
-            TeamObject readWarriors = service.readTeamInfoByName(teamWarriors.getName());
+            TeamObject readWarriors = controller.readTeamInfoByName(teamWarriors.getName());
             assertTeamWithAnother(readWarriors, teamWarriors);
         }
         {
             // by id
-            TeamObject readWarriors = service.readTeamInfo(warriors.getId());
+            TeamObject readWarriors = controller.readTeamInfo(warriors.getId());
             assertTeamWithAnother(readWarriors, teamWarriors);
         }
 
-        Assertions.assertThatThrownBy(() -> service.readTeamInfoByName("Non existing team"))
+        Assertions.assertThatThrownBy(() -> controller.readTeamInfoByName("Non existing team"))
                 .isInstanceOf(OasisApiException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.TEAM_NOT_EXISTS)
                 .hasFieldOrPropertyWithValue("statusCode", HttpStatus.NOT_FOUND.value());
-        Assertions.assertThatThrownBy(() -> service.readTeamInfo(999999))
+        Assertions.assertThatThrownBy(() -> controller.readTeamInfo(999999))
                 .isInstanceOf(OasisApiException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.TEAM_NOT_EXISTS)
                 .hasFieldOrPropertyWithValue("statusCode", HttpStatus.NOT_FOUND.value());
@@ -200,80 +206,80 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void updateTeam() {
-        TeamObject renegades = service.addTeam(teamRenegades);
+        TeamObject renegades = controller.addTeam(teamRenegades);
         System.out.println(renegades);
 
-        TeamObject toBeUpdatedTeam = renegades.toBuilder().colorCode("#00ff00")
+        TeamUpdateRequest toBeUpdatedTeam = TeamUpdateRequest.builder()
+                .colorCode("#00ff00")
                 .avatarRef("https://oasis.io/assets/new_rr.jpeg")
                 .build();
-        TeamObject updatedTeam = service.updateTeam(renegades.getId(), toBeUpdatedTeam);
+        TeamObject updatedTeam = controller.updateTeam(renegades.getId(), toBeUpdatedTeam);
         System.out.println(updatedTeam);
-        assertEquals(toBeUpdatedTeam.getId(), updatedTeam.getId());
-        assertTeamWithAnother(updatedTeam, toBeUpdatedTeam);
+        assertTeamWithAnother(updatedTeam, toBeUpdatedTeam, renegades);
     }
 
     @Test
     void addPlayerToTeam() {
-        PlayerObject alice = service.registerPlayer(reqAlice);
+        PlayerObject alice = controller.registerPlayer(reqAlice);
 
-        TeamObject renegades = service.addTeam(teamRenegades);
-        TeamObject warriors = service.addTeam(teamWarriors);
+        TeamObject renegades = controller.addTeam(teamRenegades);
+        TeamObject warriors = controller.addTeam(teamWarriors);
 
-        service.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId()));
-        service.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 101, warriors.getId()));
+        controller.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId()));
+        controller.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 101, warriors.getId()));
 
-        System.out.println(service.browsePlayerTeams(alice.getId()));
+        System.out.println(controller.browsePlayerTeams(alice.getId()));
 
         // can't add same user in multiple teams of same game
         Assertions.assertThatThrownBy(
-                () -> service.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId())))
+                () -> controller.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId())))
             .isInstanceOf(OasisApiRuntimeException.class)
             .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.PLAYER_ALREADY_IN_TEAM);
     }
 
     @Test
     void addPlayersToTeam() {
-        TeamObject warriors = service.addTeam(teamWarriors);
+        TeamObject warriors = controller.addTeam(teamWarriors);
 
-        PlayerObject bob = service.registerPlayer(reqBob);
-        PlayerObject alice = service.registerPlayer(reqAlice);
-        PlayerObject candy = service.registerPlayer(reqAlice.toBuilder()
+        PlayerObject bob = controller.registerPlayer(reqBob);
+        PlayerObject alice = controller.registerPlayer(reqAlice);
+        PlayerObject candy = controller.registerPlayer(reqAlice.toBuilder()
                                 .displayName("Candy").email("candy@oasis.io")
                                 .avatarRef("https://oasis.io/assets/cnd.png")
                                 .build());
 
-        service.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        controller.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
 
         // if one user failed, other status will depend on order
-        Assertions.assertThatThrownBy(() -> service.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), candy.getId())))
+        Assertions.assertThatThrownBy(() -> controller.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), candy.getId())))
                 .isInstanceOf(OasisApiRuntimeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.PLAYER_ALREADY_IN_TEAM);
-        assertEquals(0, service.browsePlayerTeams(candy.getId()).size());
+        assertEquals(0, controller.browsePlayerTeams(candy.getId()).size());
 
         // candy first in order
-        Assertions.assertThatThrownBy(() -> service.addPlayersToTeam(warriors.getId(), List.of(candy.getId(), bob.getId())))
+        Assertions.assertThatThrownBy(() -> controller.addPlayersToTeam(warriors.getId(), List.of(candy.getId(), bob.getId())))
                 .isInstanceOf(OasisApiRuntimeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.PLAYER_ALREADY_IN_TEAM);
-        assertEquals(1, service.browsePlayerTeams(candy.getId()).size());
+        assertEquals(1, controller.browsePlayerTeams(candy.getId()).size());
     }
 
 
     @Test
     void getTeamsOfPlayer() {
-        TeamObject warriors = service.addTeam(teamWarriors);
-        TeamObject renegades = service.addTeam(teamRenegades);
+        TeamObject warriors = controller.addTeam(teamWarriors);
+        TeamObject renegades = controller.addTeam(teamRenegades);
 
-        PlayerObject bob = service.registerPlayer(reqBob);
-        PlayerObject alice = service.registerPlayer(reqAlice);
+        PlayerObject bob = controller.registerPlayer(reqBob);
+        PlayerObject alice = controller.registerPlayer(reqAlice);
 
-        service.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
-        service.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId()));
+        controller.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        controller.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId()));
 
-        List<TeamObject> bobTeams = service.browsePlayerTeams(bob.getId());
+        List<TeamObject> bobTeams = controller.browsePlayerTeams(bob.getId());
         assertEquals(1, bobTeams.size());
         assertEquals(warriors.getName(), bobTeams.get(0).getName());
 
-        List<TeamObject> aliceTeams = service.browsePlayerTeams(alice.getId());
+        List<TeamObject> aliceTeams = controller.browsePlayerTeams(alice.getId());
         assertEquals(2, aliceTeams.size());
         assertTrue(aliceTeams.stream().anyMatch(t -> t.getName().equals(warriors.getName())));
         assertTrue(aliceTeams.stream().anyMatch(t -> t.getName().equals(renegades.getName())));
@@ -282,16 +288,16 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void listAllUsersInTeam() {
-        TeamObject warriors = service.addTeam(teamWarriors);
-        TeamObject renegades = service.addTeam(teamRenegades);
+        TeamObject warriors = controller.addTeam(teamWarriors);
+        TeamObject renegades = controller.addTeam(teamRenegades);
 
-        PlayerObject bob = service.registerPlayer(reqBob);
-        PlayerObject alice = service.registerPlayer(reqAlice);
+        PlayerObject bob = controller.registerPlayer(reqBob);
+        PlayerObject alice = controller.registerPlayer(reqAlice);
 
-        service.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
-        service.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId()));
+        controller.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        controller.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId()));
 
-        List<PlayerObject> playersInWarriors = service.browsePlayers(warriors.getId());
+        List<PlayerObject> playersInWarriors = controller.browsePlayers(warriors.getId());
         assertEquals(2, playersInWarriors.size());
         assertTrue(playersInWarriors.stream().anyMatch(p -> p.getEmail().equals(bob.getEmail())));
         assertTrue(playersInWarriors.stream().anyMatch(p -> p.getEmail().equals(alice.getEmail())));
@@ -299,35 +305,35 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void removePlayerFromTeam() {
-        TeamObject warriors = service.addTeam(teamWarriors);
+        TeamObject warriors = controller.addTeam(teamWarriors);
 
-        PlayerObject bob = service.registerPlayer(reqBob);
-        PlayerObject alice = service.registerPlayer(reqAlice);
+        PlayerObject bob = controller.registerPlayer(reqBob);
+        PlayerObject alice = controller.registerPlayer(reqAlice);
 
-        service.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        controller.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
 
-        assertEquals(2, service.browsePlayers(warriors.getId()).size());
-        assertEquals(1, service.browsePlayerTeams(bob.getId()).size());
+        assertEquals(2, controller.browsePlayers(warriors.getId()).size());
+        assertEquals(1, controller.browsePlayerTeams(bob.getId()).size());
 
-        service.removePlayerFromTeam(bob.getId(), new PlayerGameAssociationRequest(bob.getId(), warriors.getGameId(), warriors.getId()));
+        controller.removePlayerFromTeam(bob.getId(), warriors.getId());
 
-        assertEquals(1, service.browsePlayers(warriors.getId()).size());
-        assertEquals(0, service.browsePlayerTeams(bob.getId()).size());
+        assertEquals(1, controller.browsePlayers(warriors.getId()).size());
+        assertEquals(0, controller.browsePlayerTeams(bob.getId()).size());
     }
 
     @Test
     void searchTeam() throws OasisApiException {
-        service.addTeam(teamWarriors);
-        service.addTeam(teamWarriors.toBuilder().name("wuh war").build());
-        service.addTeam(teamWarriors.toBuilder().name("toronto tiq").build());
-        service.addTeam(teamWarriors.toBuilder().name("WUHAN WAR").build());
-        service.addTeam(teamWarriors.toBuilder().name("la liga").build());
+        controller.addTeam(teamWarriors);
+        controller.addTeam(teamWarriors.toBuilder().name("wuh war").build());
+        controller.addTeam(teamWarriors.toBuilder().name("toronto tiq").build());
+        controller.addTeam(teamWarriors.toBuilder().name("WUHAN WAR").build());
+        controller.addTeam(teamWarriors.toBuilder().name("la liga").build());
 
-        PaginatedResult<TeamMetadata> wuhResults = service.searchTeams("wuh", "0", 5);
+        PaginatedResult<TeamMetadata> wuhResults = controller.searchTeams("wuh", "0", 5);
         assertEquals(3, wuhResults.getRecords().size());
-        assertEquals(2, service.searchTeams("wuh", "1", 5).getRecords().size());
-        assertEquals(0, service.searchTeams("wuh", "4", 1).getRecords().size());
-        assertEquals(1, service.searchTeams("wuh", "0", 1).getRecords().size());
+        assertEquals(2, controller.searchTeams("wuh", "1", 5).getRecords().size());
+        assertEquals(0, controller.searchTeams("wuh", "4", 1).getRecords().size());
+        assertEquals(1, controller.searchTeams("wuh", "0", 1).getRecords().size());
     }
 
     @Override
@@ -341,7 +347,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Override
     protected void createServices(BackendRepository backendRepository) {
-        service = new PlayerController(new PlayerTeamService(backendRepository));
+        controller = new PlayerController(new PlayerTeamService(backendRepository));
     }
 
     private void assertPlayerWithAnother(PlayerObject player, PlayerCreateRequest request) {
@@ -368,7 +374,18 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         assertTrue(dbPlayer.isActive());
     }
 
-    private void assertTeamWithAnother(TeamObject dbTeam, TeamObject other) {
+    private void assertTeamWithAnother(TeamObject dbTeam, TeamUpdateRequest other, TeamObject originalTeam) {
+        assertTrue(dbTeam.getId() > 0);
+        assertEquals(originalTeam.getName(), dbTeam.getName());
+        assertEquals(other.getAvatarRef(), dbTeam.getAvatarRef());
+        assertEquals(other.getColorCode(), dbTeam.getColorCode());
+        assertEquals(originalTeam.getGameId(), dbTeam.getGameId());
+        assertTrue(dbTeam.getCreatedAt() > 0);
+        assertTrue(dbTeam.getUpdatedAt() > 0);
+        assertTrue(dbTeam.isActive());
+    }
+
+    private void assertTeamWithAnother(TeamObject dbTeam, TeamCreateRequest other) {
         assertTrue(dbTeam.getId() > 0);
         assertEquals(other.getName(), dbTeam.getName());
         assertEquals(other.getAvatarRef(), dbTeam.getAvatarRef());

@@ -20,16 +20,17 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
-import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
-import io.github.oasis.core.services.api.to.GameObjectRequest;
+import io.github.oasis.core.services.api.to.GameCreateRequest;
+import io.github.oasis.core.services.api.to.GameUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.github.oasis.core.utils.Texts;
-import io.github.oasis.core.utils.Utils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -57,30 +58,37 @@ public class GameService extends AbstractOasisService {
         this.engineManager = engineManager;
     }
 
-    public Game addGame(GameObjectRequest gameObjectRequest) throws OasisApiException {
-        Game game = gameObjectRequest.createGame();
+    public Game addGame(GameCreateRequest gameCreateRequest) throws OasisApiException {
+        Game game = gameCreateRequest.createGame();
 
         validateGameObjectForCreation(game);
 
         game.setCurrentStatus(GameState.CREATED.name());
-        Game addedGame = backendRepository.addNewGame(game);
-
-        // add attributes associated with game
-        if (Utils.isNotEmpty(gameObjectRequest.getAttributes())) {
-            for (AttributeInfo attribute : gameObjectRequest.getAttributes()) {
-                backendRepository.addAttribute(addedGame.getId(), attribute);
-            }
-        }
-        return addedGame;
+        return backendRepository.addNewGame(game);
     }
 
-    public Game updateGame(int gameId, Game game) throws OasisApiException {
-        validateGameObjectForEdit(game);
+    public Game updateGame(int gameId, GameUpdateRequest updateRequest) {
+        Game dbGame = backendRepository.readGame(gameId);
+        Game updatingGame = dbGame.toBuilder()
+                .motto(StringUtils.defaultIfEmpty(updateRequest.getMotto(), dbGame.getMotto()))
+                .logoRef(ObjectUtils.defaultIfNull(updateRequest.getLogoRef(), dbGame.getLogoRef()))
+                .description(StringUtils.defaultIfEmpty(updateRequest.getDescription(), dbGame.getDescription()))
+                .build();
 
-        return backendRepository.updateGame(gameId, game);
+        return backendRepository.updateGame(gameId, updatingGame);
     }
 
-    public Game deleteGame(int gameId) {
+    public Game deleteGame(int gameId) throws OasisApiException {
+        changeStatusOfGame(gameId, GameState.STOPPED.name(), System.currentTimeMillis());
+
+        // deleting game elements
+        backendRepository.readElementsByGameId(gameId)
+                .forEach(def -> backendRepository.deleteElement(gameId, def.getElementId()));
+
+        // deleting event sources
+        backendRepository.listAllEventSourcesOfGame(gameId)
+                .forEach(eventSource -> backendRepository.removeEventSourceFromGame(eventSource.getId(), gameId));
+
         return backendRepository.deleteGame(gameId);
     }
 
@@ -96,15 +104,16 @@ public class GameService extends AbstractOasisService {
         return backendRepository.readGameByName(name);
     }
 
-    public Game changeStatusOfGame(int gameId, String newStatus) throws OasisApiException {
+    public Game changeStatusOfGame(int gameId, String newStatus, long updatedAt) throws OasisApiException {
         GameState gameState = validateGameState(newStatus);
 
         Game game = backendRepository.readGame(gameId);
         if (game == null) {
             throw new OasisApiException(ErrorCodes.GAME_NOT_EXISTS, HttpStatus.NOT_FOUND.value(), "No game is found by id " + gameId);
         }
-        engineManager.changeGameStatus(gameState, game);
-        return game;
+        Game updatedGame = backendRepository.updateGameStatus(gameId, gameState.name(), updatedAt);
+        engineManager.changeGameStatus(gameState, updatedGame);
+        return updatedGame;
     }
 
     private GameState validateGameState(String status) throws OasisApiException {
@@ -113,7 +122,7 @@ public class GameService extends AbstractOasisService {
                     HttpStatus.BAD_REQUEST.value(), "Unknown game state!");
         }
 
-        GameState gameState = availableStatuses.get(status);
+        GameState gameState = availableStatuses.get(status.toLowerCase());
         if (Objects.isNull(gameState)) {
             throw new OasisApiException(ErrorCodes.GAME_UNKNOWN_STATE,
                     HttpStatus.BAD_REQUEST.value(), "Unknown game state!");
@@ -124,13 +133,6 @@ public class GameService extends AbstractOasisService {
     private void validateGameObjectForCreation(Game game) throws OasisApiException {
         if (Texts.isEmpty(game.getName())) {
             throw new DataValidationException(ErrorCodes.GAME_ID_SHOULD_NOT_SPECIFIED);
-        }
-        validateCommonGameAttributes(game);
-    }
-
-    private void validateGameObjectForEdit(Game game) throws OasisApiException {
-        if (Objects.isNull(game.getId())) {
-            throw new DataValidationException(ErrorCodes.GAME_ID_NOT_SPECIFIED);
         }
         validateCommonGameAttributes(game);
     }

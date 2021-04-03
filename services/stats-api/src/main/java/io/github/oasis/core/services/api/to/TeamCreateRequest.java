@@ -17,29 +17,27 @@
  * under the License.
  */
 
-package io.github.oasis.core.exception;
+package io.github.oasis.core.services.api.to;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public class OasisParseException extends OasisRuntimeException {
+@Getter
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class TeamCreateRequest implements Serializable {
 
-    private String errorCode;
+    private Integer gameId;
+    private String name;
+    private String colorCode;
+    private String avatarRef;
 
-    public OasisParseException(String message) {
-        this(message, (String) null);
-    }
-
-    public OasisParseException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public OasisParseException(String message, String errorCode) {
-        super(message);
-        this.errorCode = errorCode;
-    }
-
-    public String getErrorCode() {
-        return errorCode;
-    }
 }

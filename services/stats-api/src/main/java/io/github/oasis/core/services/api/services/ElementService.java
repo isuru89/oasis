@@ -19,9 +19,16 @@
 
 package io.github.oasis.core.services.api.services;
 
+import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.ElementDef;
+import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.services.api.beans.BackendRepository;
+import io.github.oasis.core.services.api.beans.StatsApiContext;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.to.ElementCreateRequest;
+import io.github.oasis.core.services.api.to.ElementUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,10 +42,12 @@ import java.util.Optional;
 @Service
 public class ElementService extends AbstractOasisService {
 
-    public ElementService(BackendRepository backendRepository) {
-        super(backendRepository);
-    }
+    private final StatsApiContext statsApiContext;
 
+    public ElementService(BackendRepository backendRepository, StatsApiContext statsApiContext) {
+        super(backendRepository);
+        this.statsApiContext = statsApiContext;
+    }
 
     public ElementDef readElement(int gameId, String elementId, boolean withData) throws OasisApiException {
         ElementDef def;
@@ -54,12 +63,23 @@ public class ElementService extends AbstractOasisService {
                         "Element not found!"));
     }
 
-    public ElementDef addElement(int gameId, ElementDef elementDef) {
+    public ElementDef addElement(int gameId, ElementCreateRequest request) throws OasisParseException {
+        ElementDef elementDef = ElementDef.builder()
+                .data(request.getData())
+                .gameId(request.getGameId())
+                .elementId(request.getMetadata().getId())
+                .metadata(request.getMetadata())
+                .type(request.getType())
+                .build();
+
+        statsApiContext.validateElement(elementDef);
+
         return backendRepository.addNewElement(gameId, elementDef);
     }
 
-    public ElementDef updateElement(int gameId, String elementId, ElementDef elementDef) {
-        return backendRepository.updateElement(gameId, elementId, elementDef);
+    public ElementDef updateElement(int gameId, String elementId, ElementUpdateRequest updateRequest) {
+        SimpleElementDefinition metadata = new SimpleElementDefinition(elementId, updateRequest.getName(), updateRequest.getDescription());
+        return backendRepository.updateElement(gameId, elementId, metadata);
     }
 
     public ElementDef deleteElement(int gameId, String elementId) {
@@ -71,6 +91,11 @@ public class ElementService extends AbstractOasisService {
     }
 
     public List<ElementDef> listElementsFromGameId(int gameId) {
+        Game game = backendRepository.readGame(gameId);
+        if (game == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.GAME_NOT_EXISTS);
+        }
+
         return backendRepository.readElementsByGameId(gameId);
     }
 }

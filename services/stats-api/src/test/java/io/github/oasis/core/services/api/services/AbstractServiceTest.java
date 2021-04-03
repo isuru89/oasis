@@ -21,6 +21,7 @@ package io.github.oasis.core.services.api.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.OasisRepository;
@@ -65,12 +66,9 @@ public abstract class AbstractServiceTest {
     protected OasisRepository adminRepo;
     protected BackendRepository combinedRepo;
 
-    public Jdbi createJdbcDao(ObjectMapper mapper) throws IOException, SQLException {
+    public Jdbi createJdbcDao(ObjectMapper mapper) throws SQLException {
         DataSource ds = DataSourceBuilder.create()
                 .url("jdbc:h2:mem:sampledb")
-//                .driverClassName(Driver.class.getName())
-//                .username("root")
-//                .password("root")
                 .build();
         Jdbi jdbi = Jdbi.create(ds)
                 .installPlugin(new SqlObjectPlugin())
@@ -126,12 +124,14 @@ public abstract class AbstractServiceTest {
     }
 
     @BeforeEach
-    public void beforeEach() throws IOException, SQLException {
+    public void beforeEach() throws IOException, SQLException, OasisException {
         Jdbi jdbi = createJdbcDao(mapper);
         RedisRepository redisConnection = createRedisConnection();
         engineRepo = redisConnection;
 
         cleanRedisData();
+
+        prepareContext(dbPool, OasisConfigs.defaultConfigs());
 
         JdbcRepository jdbcRepository = createJdbcRepository(jdbi);
         adminRepo = jdbcRepository;
@@ -154,6 +154,10 @@ public abstract class AbstractServiceTest {
         if (file.exists()) {
             FileUtils.forceDelete(file);
         }
+    }
+
+    protected void prepareContext(Db dbPool, OasisConfigs configs) throws OasisException {
+
     }
 
     protected abstract JdbcRepository createJdbcRepository(Jdbi jdbi);

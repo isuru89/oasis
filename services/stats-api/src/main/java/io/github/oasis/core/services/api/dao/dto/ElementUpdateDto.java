@@ -17,29 +17,19 @@
  * under the License.
  */
 
-package io.github.oasis.core.exception;
+package io.github.oasis.core.services.api.dao.dto;
+
+import lombok.Data;
+
+import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-public class OasisParseException extends OasisRuntimeException {
+@Data
+public class ElementUpdateDto implements Serializable {
 
-    private String errorCode;
+    private String name;
+    private String description;
 
-    public OasisParseException(String message) {
-        this(message, (String) null);
-    }
-
-    public OasisParseException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public OasisParseException(String message, String errorCode) {
-        super(message);
-        this.errorCode = errorCode;
-    }
-
-    public String getErrorCode() {
-        return errorCode;
-    }
 }

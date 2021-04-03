@@ -26,13 +26,15 @@ import io.github.oasis.core.services.KeyGeneratorSupport;
 import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import io.github.oasis.core.utils.Texts;
-import io.github.oasis.core.utils.Utils;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyPair;
-import java.util.*;
+import java.util.Base64;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Isuru Weerarathna
@@ -48,29 +50,21 @@ public class EventSourceService extends AbstractOasisService {
         this.keyGeneratorSupport = keyGeneratorSupport;
     }
 
-    public EventSource registerEventSource(EventSource source) throws OasisException {
-        validateEventSource(source);
+    public EventSource registerEventSource(EventSourceCreateRequest request) throws OasisException {
+        validateEventSource(request);
 
-        source.setGames(null);
-        source.setToken(generateRandomToken());
+        EventSource.EventSourceBuilder sourceBuilder = EventSource.builder()
+                .name(request.getName())
+                .token(generateRandomToken());
 
         // assign keys
-        KeyPair oasisKeyPair = keyGeneratorSupport.generate(source);
+        KeyPair oasisKeyPair = keyGeneratorSupport.generate(request.getName());
         EventSourceSecrets sourceSecrets = new EventSourceSecrets();
         sourceSecrets.setPublicKey(Base64.getEncoder().encodeToString(oasisKeyPair.getPublic().getEncoded()));
         sourceSecrets.setPrivateKey(Base64.getEncoder().encodeToString(oasisKeyPair.getPrivate().getEncoded()));
-        source.setSecrets(sourceSecrets);
+        EventSource source = sourceBuilder.secrets(sourceSecrets).build();
 
-        EventSource dbSource = backendRepository.addEventSource(source);
-
-        if (Utils.isNotEmpty(source.getGames())) {
-            Set<Integer> gameIds = new HashSet<>(source.getGames());
-            for (Integer gameId : gameIds) {
-                backendRepository.addEventSourceToGame(dbSource.getId(), gameId);
-            }
-        }
-
-        return dbSource;
+        return backendRepository.addEventSource(source);
     }
 
     public EventSource readEventSource(int eventSourceId) {
@@ -114,8 +108,8 @@ public class EventSourceService extends AbstractOasisService {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    private void validateEventSource(EventSource source) throws DataValidationException {
-        if (Texts.isEmpty(source.getName())) {
+    private void validateEventSource(EventSourceCreateRequest request) throws DataValidationException {
+        if (Texts.isEmpty(request.getName())) {
             throw new DataValidationException(ErrorCodes.EVENT_SOURCE_NO_NAME);
         }
     }

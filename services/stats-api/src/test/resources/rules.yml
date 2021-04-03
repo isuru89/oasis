@@ -1,0 +1,38 @@
+version: 1
+
+elements:
+  - id: testpoint
+    name: Answer-Accepted
+    description: Awards 15 reputations when an answer has been accepted
+    type: core:point
+    spec:
+      selector:
+        matchEvent: stackoverflow.answer.accepted
+      reward:
+        pointId: stackoverflow.reputation
+        amount: 15
+
+  - id: testbadge
+    name: Question-Quality
+    description: Awards badges based on how many scores got for the question
+    type: core:badge
+    spec:
+      kind: conditional
+      selector:
+        matchEvent: question.scored
+      conditions:
+        - priority: 1
+          condition: "e.score >= 100"
+          rewards:
+            badge:
+              attribute: 30
+        - priority: 2
+          condition: "e.score >= 25"
+          rewards:
+            badge:
+              attribute: 20
+        - priority: 3
+          condition: "e.score >= 10"
+          rewards:
+            badge:
+              attribute: 10
