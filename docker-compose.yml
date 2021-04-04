@@ -38,6 +38,7 @@ services:
     volumes:
       - "./buildscripts/stats-api.conf:/etc/oasis/stats-api.conf"
       - "./buildscripts/stats-api.properties:/etc/oasis/stats-api.properties"
+      - "./buildscripts/modules:/etc/oasis/modules"
     environment:
       - "WAIT_HOSTS=redis:6379,rabbit:5672"
     depends_on:
@@ -50,6 +51,7 @@ services:
       - "WAIT_HOSTS=redis:6379,rabbit:5672"
     volumes:
       - "./buildscripts/engine.conf:/etc/oasis/engine.conf"
+      - "./buildscripts/modules:/etc/oasis/modules"
     depends_on:
       - redis
       - rabbit

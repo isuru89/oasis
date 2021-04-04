@@ -7,7 +7,7 @@ ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.8.0/wait
 RUN chmod +x /wait
 
 WORKDIR /usr/share/oasis-engine
-CMD /wait && exec java -classpath ./*:libs/* io.github.oasis.engine.OasisEngineRunner
+CMD /wait && exec java -classpath ./*:libs/*:/etc/oasis/modules/* io.github.oasis.engine.OasisEngineRunner
 
 RUN mkdir -p /etc/oasis
 ENV ENGINE_CONFIG_FILE "/etc/oasis/engine.conf"
