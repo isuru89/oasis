@@ -856,6 +856,17 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
+    public ElementDef readFullElementDef(int gameId, String ruleId) {
+        return withDbContext(db -> {
+            String baseKey = ID.getDetailedElementDefKeyForGame(gameId);
+
+            Mapped elementsMap = db.MAP(baseKey);
+            String elementData = elementsMap.getValue(ruleId);
+            return serializationSupport.deserialize(elementData, ElementDef.class);
+        });
+    }
+
+    @Override
     public AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute) {
         return withDbContext(db -> {
             String baseKey = ID.getGameAttributesInfoKey(gameId);
@@ -925,7 +936,9 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     private UserMetadata createUserFromValue(long id, String val) {
-        return new UserMetadata(id, val);
+        UserMetadata userMetadata = serializationSupport.deserialize(val, UserMetadata.class);
+        userMetadata.setUserId(id);
+        return userMetadata;
     }
 
     private TeamMetadata createTeamFromValue(int id, String val) {
@@ -965,7 +978,11 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     private void updateUserMetadata(PlayerObject playerObject, DbContext db) {
-        db.setValueInMap(ID.ALL_USERS_NAMES, String.valueOf(playerObject.getId()), playerObject.getDisplayName());
+        UserMetadata metadata = new UserMetadata(playerObject.getId(),
+                playerObject.getDisplayName(),
+                playerObject.getTimeZone(),
+                playerObject.getGender() != null ? playerObject.getGender().name() : null);
+        db.setValueInMap(ID.ALL_USERS_NAMES, String.valueOf(playerObject.getId()), serializationSupport.serialize(metadata));
     }
 
     private void updateElementMetadata(ElementDef def, DbContext db) {

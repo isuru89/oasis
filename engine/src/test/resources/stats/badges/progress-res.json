@@ -1,0 +1,9 @@
+{
+  "gameId": 1,
+  "userId": 1,
+  "progressRecords": {
+    "BDG00001": {
+      "currentStreak": 1
+    }
+  }
+}

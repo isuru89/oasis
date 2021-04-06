@@ -26,7 +26,14 @@ import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.stats.BadgeStats;
-import io.github.oasis.elements.badges.stats.to.*;
+import io.github.oasis.elements.badges.stats.to.GameRuleWiseBadgeLog;
+import io.github.oasis.elements.badges.stats.to.GameRuleWiseBadgeLogRequest;
+import io.github.oasis.elements.badges.stats.to.UserBadgeLog;
+import io.github.oasis.elements.badges.stats.to.UserBadgeLogRequest;
+import io.github.oasis.elements.badges.stats.to.UserBadgeRequest;
+import io.github.oasis.elements.badges.stats.to.UserBadgeSummary;
+import io.github.oasis.elements.badges.stats.to.UserBadgesProgressRequest;
+import io.github.oasis.elements.badges.stats.to.UserBadgesProgressResponse;
 import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
@@ -59,13 +66,14 @@ public class EngineBadgesTest extends OasisEngineTest {
         Event e4 = TEvent.createKeyValue(U1, TSZ("2020-04-01 07:15", UTC), EVT_A, 88);
         Event e5 = TEvent.createKeyValue(U1, TSZ("2020-03-24 11:15", UTC), EVT_A, 76);
         Event e6 = TEvent.createKeyValue(U1, TSZ("2020-04-05 11:15", UTC), EVT_A, 26);
+        Event e7 = TEvent.createKeyValue(U1, TSZ("2020-04-06 11:15", UTC), EVT_A, 66);
 
         GameDef gameDef = loadRulesFromResource("rules/badges-basic.yml");
 
         List<AbstractRule> rules = engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
-        addRulesToMetadata(TEvent.GAME_ID, rules);
+        addRulesToMetadata(TEvent.GAME_ID, rules, gameDef);
 
-        engine.submitAll(e1, e2, e3, e4, e5, e6);
+        engine.submitAll(e1, e2, e3, e4, e5, e6, e7);
         awaitTerminated();
 
         String rid = findRuleByName(rules, "test.badge.rule").getId();
@@ -111,23 +119,27 @@ public class EngineBadgesTest extends OasisEngineTest {
                         rid + ":20:" + e1.getTimestamp(), e5.getTimestamp()
                 ));
 
-        BadgeStats stats = new BadgeStats(dbPool, metadataSupport);
+        BadgeStats stats = new BadgeStats(dbPool, metadataSupport, metadataSupport);
+
+        compareStatReqRes("stats/badges/progress-req.json", UserBadgesProgressRequest.class,
+                "stats/badges/progress-res.json", UserBadgesProgressResponse.class,
+                stats::getUserProgress);
 
         compareStatReqRes("stats/badges/summary-attr-req.json", UserBadgeRequest.class,
                 "stats/badges/summary-attr-res.json", UserBadgeSummary.class,
-                req ->(UserBadgeSummary) stats.getBadgeSummary(req));
+                stats::getBadgeSummary);
 
         compareStatReqRes("stats/badges/summary-rules-req.json", UserBadgeRequest.class,
                 "stats/badges/summary-rules-res.json", UserBadgeSummary.class,
-                req ->(UserBadgeSummary) stats.getBadgeSummary(req));
+                stats::getBadgeSummary);
 
         compareStatReqRes("stats/badges/log-req.json", UserBadgeLogRequest.class,
                 "stats/badges/log-res.json", UserBadgeLog.class,
-                req ->(UserBadgeLog) stats.getBadgeLog(req));
+                stats::getBadgeLog);
 
         compareStatReqRes("stats/badges/rulewise-log-offset-req.json", GameRuleWiseBadgeLogRequest.class,
                 "stats/badges/rulewise-log-offset-res.json", GameRuleWiseBadgeLog.class,
-                req ->(GameRuleWiseBadgeLog) stats.getRuleWiseBadgeLog(req));
+                stats::getRuleWiseBadgeLog);
     }
 
     @Test

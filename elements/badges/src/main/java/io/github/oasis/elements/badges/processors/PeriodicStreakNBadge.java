@@ -216,8 +216,8 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
             return signals;
         }
 
-        long lastBadgeTs = 0L;
-        int lastBadgeStreak = 0;
+        long lastBadgeTs;
+        int lastBadgeStreak;
         String badgeMetaKey = BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser());
         List<String> badgeInfos = db.getValuesFromMap(badgeMetaKey, getMetaEndTimeKey(rule), getMetaStreakKey(rule));
         lastBadgeTs = asLong(badgeInfos.get(0));
@@ -257,7 +257,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
         List<Record> currentPartition = new ArrayList<>();
         List<List<Record>> partitions = new ArrayList<>();
         for (Record tuple : tuples) {
-            String[] parts = tuple.getMember().split(":");
+            String[] parts = tuple.getMember().split(COLON);
             BigDecimal metric = asDecimal(parts[1]);
             if (metric.compareTo(options.getThreshold()) >= 0) {
                 currentPartition.add(tuple);

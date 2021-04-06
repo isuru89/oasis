@@ -20,6 +20,7 @@
 package io.github.oasis.core.external.messages;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.ElementDef;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -71,6 +72,15 @@ public class EngineMessage implements Serializable {
     private Map<String, Object> data;
 
     public EngineMessage() {
+    }
+
+    public static EngineMessage fromElementDef(int gameId, ElementDef elementDef) {
+        EngineMessage def = new EngineMessage();
+        def.setType(EngineMessage.GAME_RULE_ADDED);
+        def.setScope(new EngineMessage.Scope(gameId));
+        def.setData(elementDef.getData());
+        def.setImpl(elementDef.getType());
+        return def;
     }
 
     public static EngineMessage fromEvent(Event event) {

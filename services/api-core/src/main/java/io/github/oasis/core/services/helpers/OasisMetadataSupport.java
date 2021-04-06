@@ -22,6 +22,7 @@ package io.github.oasis.core.services.helpers;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
 
@@ -47,6 +48,7 @@ public interface OasisMetadataSupport {
     TeamMetadata readTeamMetadata(int teamId) throws OasisException;
 
     List<SimpleElementDefinition> listAllElementDefinitions(int gameId, String type) throws OasisException;
+    ElementDef readFullElementDef(int gameId, String ruleId) throws OasisException;
     SimpleElementDefinition readElementDefinition(int gameId, String id) throws OasisException;
     Map<String, SimpleElementDefinition> readElementDefinitions(int gameId, Collection<String> ids) throws OasisException;
     Map<Integer, AttributeInfo> readAttributesInfo(int gameId) throws OasisException;

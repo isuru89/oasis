@@ -9,11 +9,11 @@ elements:
       kind: streak
       selector:
         matchEvent: event.a
-        filter:
-          expression: e.value >= 50
       retainTime:
         duration: 7
         unit: days
+      condition:
+        expression: e.value >= 50
       streaks:
         - streak: 3
           rewards:

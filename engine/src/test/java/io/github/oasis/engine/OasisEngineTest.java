@@ -165,13 +165,24 @@ public class OasisEngineTest {
     }
 
     protected void addRulesToMetadata(int gameId, List<AbstractRule> rules) {
+        addRulesToMetadata(gameId, rules, null);
+    }
+
+    protected void addRulesToMetadata(int gameId, List<AbstractRule> rules, GameDef gameDef) {
         for (AbstractRule rule : rules) {
-            ElementDef elementDef = ElementDef.builder()
+            ElementDef.ElementDefBuilder elementDef = ElementDef.builder()
                     .elementId(rule.getId())
                     .gameId(gameId)
-                    .metadata(new SimpleElementDefinition(rule.getId(), rule.getName(), rule.getDescription()))
-                    .build();
-            metadataSupport.addNewElement(gameId, elementDef);
+                    .metadata(new SimpleElementDefinition(rule.getId(), rule.getName(), rule.getDescription()));
+
+            if (gameDef != null) {
+                EngineMessage message = gameDef.getRuleDefinitions().stream()
+                        .filter(r -> r.getData().get("id").equals(rule.getId())).findFirst()
+                        .orElseThrow();
+                elementDef.data(message.getData());
+            }
+
+            metadataSupport.addNewElement(gameId, elementDef.build());
         }
     }
 

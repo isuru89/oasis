@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -17,27 +17,23 @@
  * under the License.
  */
 
-package io.github.oasis.elements.badges.signals;
+package io.github.oasis.elements.badges.stats.to;
 
-import io.github.oasis.core.Event;
-import io.github.oasis.elements.badges.StreakSupport;
-import lombok.ToString;
+import io.github.oasis.core.services.AbstractAdminApiResponse;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@ToString(callSuper = true)
-public class StreakBadgeSignal extends BadgeSignal implements StreakSupport {
+@EqualsAndHashCode(callSuper = true)
+@Data
+public class UserBadgesProgressRequest extends AbstractAdminApiResponse {
 
-    private final int streak;
+    private Long userId;
 
-    public StreakBadgeSignal(String ruleId, Event causedEvent, int streak, int attribute, long st, long et, String sid, String eid) {
-        super(ruleId, causedEvent, causedEvent.getTimestamp(), attribute, st, et, sid, eid);
-        this.streak = streak;
-    }
+    private List<String> ruleIds;
 
-    @Override
-    public int getStreak() {
-        return streak;
-    }
 }

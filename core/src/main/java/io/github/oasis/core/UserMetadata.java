@@ -20,22 +20,22 @@
 package io.github.oasis.core;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.io.Serializable;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserMetadata implements Serializable {
 
     private long userId;
     private String displayName;
+    private String tz;
+    private String gender;
 
 }
