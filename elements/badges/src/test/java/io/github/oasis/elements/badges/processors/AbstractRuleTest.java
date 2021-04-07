@@ -144,6 +144,7 @@ public abstract class AbstractRuleTest {
     }
 
     protected void printSignals(Collection<Signal> signals) {
+        System.out.println(">>> Received Signals:");
         for (Signal signal : signals) {
             System.out.println(signal);
         }

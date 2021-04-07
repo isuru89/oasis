@@ -96,8 +96,8 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
         sortedRange.add(timestamp + COLON + updatedValue.toString(), timestamp);
         if (isThresholdCrossedUp(prev, updatedValue, rule.getThreshold())) {
             List<Record> seq = sortedRange.getRangeByScoreWithScores(
-                    timestamp - rule.getTimeUnit() * rule.getMaxStreak(),
-                    timestamp + rule.getTimeUnit() * rule.getMaxStreak());
+                    timestamp - (rule.getTimeUnit() * rule.getMaxStreak()),
+                    timestamp + (rule.getTimeUnit() * rule.getMaxStreak()));
 
             if (rule.isConsecutive()) {
                 return fold(seq, event, rule, db, false);
@@ -205,7 +205,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
             return Long.parseLong(parts[0]) > ts;
         }).map(tuple -> new Record(tuple.getMember(), tuple.getScore()))
                 .collect(Collectors.toCollection(LinkedList::new));
-        signals.addAll(fold(futureTuples, event, rule, db, false));
+        signals.addAll(fold(futureTuples, event, rule, db, true));
         return signals;
     }
 
@@ -224,17 +224,30 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
         lastBadgeStreak = asInt(badgeInfos.get(1));
 
         List<Integer> streaks = rule.getStreaks();
-        partitionStart: for (List<Record> partition : partitions) {
+        partitionStart: for (List<Record> partitionSet : partitions) {
+            List<Record> partition = partitionSet;
+            if (!skipOldCheck && lastBadgeStreak == rule.getMaxStreak()) {
+                partition = partitionSet.stream().filter(r -> r.getScore() > lastBadgeTs).collect(Collectors.toList());
+            }
+
             int n = partition.size();
+            if (n == 0) continue;
+
             Record firstTuple = partition.get(0);
             long startTs = Math.round(firstTuple.getScore());
             for (int streak : streaks) {
                 if (n >= streak) {
                     Record tupleAtStreak = partition.get(streak - 1);
                     long ts = Math.round(tupleAtStreak.getScore());
+
+                    // time span is greater than what allowed.
+                    // this is to remove streaks with holes in the middle
                     if (ts - startTs >= rule.getTimeUnit() * streak) {
                         continue partitionStart;
                     }
+
+                    // starting time of this streak should not be lesser than last streak end time
+                    // this is to prevent overlapping
                     if (!skipOldCheck && lastBadgeStreak == streak && startTs <= lastBadgeTs) {
                         continue;
                     }
