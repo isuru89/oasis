@@ -393,9 +393,7 @@ class RedisRepositoryTest {
 
         Assertions.assertFalse(redisRepository.existsPlayer("john@oasis.io"));
 
-        UserMetadata userMetadata = redisRepository.readUserMetadata(userId);
-        Assertions.assertNull(userMetadata.getDisplayName());
-
+        assertError(() -> redisRepository.readUserMetadata(userId));
         assertError(() -> redisRepository.getPlayerTeams(userId));
 
         // non-existing user

@@ -46,6 +46,7 @@ import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Utils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -353,6 +354,9 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     public UserMetadata readUserMetadata(long userId) {
         return withDbContext(db -> {
             String valuesFromMap = db.getValueFromMap(ID.ALL_USERS_NAMES, String.valueOf(userId));
+            if (StringUtils.isEmpty(valuesFromMap)) {
+                throw new OasisRuntimeException("No user metadata found for given user id! [" + userId + "]");
+            }
             return createUserFromValue(userId, valuesFromMap);
         });
     }
