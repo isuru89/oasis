@@ -940,6 +940,9 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     private UserMetadata createUserFromValue(long id, String val) {
+        if (StringUtils.isEmpty(val)) {
+            return null;
+        }
         UserMetadata userMetadata = serializationSupport.deserialize(val, UserMetadata.class);
         userMetadata.setUserId(id);
         return userMetadata;
