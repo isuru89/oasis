@@ -88,7 +88,7 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7);
 
         Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
+        printSignals(signals);
         assertStrict(signals,
                 new StreakBadgeSignal(rule.getId(), e3, 3, ATTR_SILVER, 100, 120, e1.getExternalId(), e3.getExternalId()),
                 new StreakBadgeSignal(rule.getId(), e6, 3, ATTR_SILVER, 130, 160, e4.getExternalId(), e6.getExternalId()));
@@ -112,10 +112,37 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         submitOrder(streakN, e1, e2, e3, e4, e5, e6);
 
         Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
+        printSignals(signals);
         assertStrict(signals,
                 new StreakBadgeSignal(rule.getId(), e3, 3, ATTR_SILVER, 100, 120, e1.getExternalId(), e3.getExternalId()),
                 new StreakBadgeSignal(rule.getId(), e5, 5, ATTR_GOLD, 100, 150, e1.getExternalId(), e5.getExternalId()));
+    }
+
+    @DisplayName("Multi streaks: multiple badges + partial")
+    @Test
+    public void testMultiStreakNAndPartialWithinTUnit() {
+        TEvent e1 = TEvent.createKeyValue(100, EVENT_TYPE, 75);
+        TEvent e2 = TEvent.createKeyValue(110, EVENT_TYPE, 63);
+        TEvent e3 = TEvent.createKeyValue(120, EVENT_TYPE, 50);
+        TEvent e4 = TEvent.createKeyValue(130, EVENT_TYPE, 81);
+        TEvent e5 = TEvent.createKeyValue(150, EVENT_TYPE, 77);
+        TEvent e6 = TEvent.createKeyValue(151, EVENT_TYPE, 87);
+        TEvent e7 = TEvent.createKeyValue(153, EVENT_TYPE, 88);
+        TEvent e8 = TEvent.createKeyValue(160, EVENT_TYPE, 89);
+
+        List<Signal> signalsRef = new ArrayList<>();
+        TimeBoundedStreakNRule rule = loadRule("kinds/timeBoundedStreakN.yml", "MULTI_STREAK");
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
+        Assertions.assertEquals(5, rule.getMaxStreak());
+        StreakNBadgeProcessor streakN = new TimeBoundedStreakNBadge(pool, ruleContext);
+        submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8);
+
+        Set<Signal> signals = mergeSignals(signalsRef);
+        printSignals(signals);
+        assertStrict(signals,
+                new StreakBadgeSignal(rule.getId(), e3, 3, ATTR_SILVER, 100, 120, e1.getExternalId(), e3.getExternalId()),
+                new StreakBadgeSignal(rule.getId(), e5, 5, ATTR_GOLD, 100, 150, e1.getExternalId(), e5.getExternalId()),
+                new StreakBadgeSignal(rule.getId(), e6, 3, ATTR_SILVER, 151, 160, e6.getExternalId(), e8.getExternalId()));
     }
 
     @DisplayName("Multi streaks: Out-of-order event breaks latest streak")
@@ -135,7 +162,7 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         submitOrder(streakN, e1, e2, e3, e4, e5, e6);
 
         Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
+        printSignals(signals);
         assertStrict(signals,
                 new StreakBadgeSignal(rule.getId(), e3, 3, ATTR_SILVER, 100, 120, e1.getExternalId(), e3.getExternalId()),
                 new StreakBadgeSignal(rule.getId(), e5, 5, ATTR_GOLD, 100, 150, e1.getExternalId(), e5.getExternalId()),
@@ -158,7 +185,7 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
+        printSignals(signals);
         Assertions.assertEquals(0, signals.size());
     }
 
@@ -178,7 +205,7 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
+        printSignals(signals);
         Assertions.assertEquals(1, signals.size());
         assertStrict(signals,
                 new StreakBadgeSignal(ruleContext.getRule().getId(), e3, 3, ATTR_SILVER, 110, 120, e2.getExternalId(), e3.getExternalId()));
@@ -200,7 +227,7 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
+        printSignals(signals);
         Assertions.assertEquals(0, signals.size());
     }
 
@@ -220,7 +247,7 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
+        printSignals(signals);
         assertStrict(signals,
                 new StreakBadgeSignal(ruleContext.getRule().getId(), e4, 3, ATTR_SILVER, 110, 130, e2.getExternalId(), e4.getExternalId()),
                 new BadgeRemoveSignal(ruleContext.getRule().getId(), e4.asEventScope(), ATTR_SILVER, 110, 130, e2.getExternalId(), e4.getExternalId()));
@@ -242,7 +269,7 @@ public class TimeBoundedStreakNTest extends AbstractRuleTest {
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
         Set<Signal> signals = mergeSignals(signalsRef);
-        System.out.println(signals);
+        printSignals(signals);
         assertStrict(signals,
                 new StreakBadgeSignal(ruleContext.getRule().getId(), e4, 3, ATTR_SILVER, 110, 140, e2.getExternalId(), e4.getExternalId()));
     }

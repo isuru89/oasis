@@ -38,6 +38,7 @@ import java.util.Map;
 public class UserBadgesProgressResponse extends AbstractAdminApiResponse {
 
     private Long userId;
+    private Long inTime;
 
     private Map<String, ProgressEntry> progressRecords;
 

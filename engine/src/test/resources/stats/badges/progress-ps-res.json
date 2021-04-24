@@ -3,8 +3,9 @@
   "userId": 1,
   "inTime": 1585872000000,
   "progressRecords": {
-    "BDG00001": {
-      "currentStreak": 1
+    "MULTIPLE_THRESHOLDS": {
+      "currentStreak": 2,
+      "currentThreshold": 96.00
     }
   }
 }

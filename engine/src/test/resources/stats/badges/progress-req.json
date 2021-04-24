@@ -2,5 +2,6 @@
   "gameId": 1,
   "userId": 1,
 
+  "inTime": 1585872000000,
   "ruleIds": ["BDG00001"]
 }

@@ -36,4 +36,5 @@ public class UserBadgesProgressRequest extends AbstractAdminApiResponse {
 
     private List<String> ruleIds;
 
+    private Long inTime;
 }

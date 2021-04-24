@@ -55,6 +55,7 @@ import io.github.oasis.elements.badges.stats.to.UserBadgeRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgeSummary;
 import io.github.oasis.elements.badges.stats.to.UserBadgesProgressRequest;
 import io.github.oasis.elements.badges.stats.to.UserBadgesProgressResponse;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
@@ -72,12 +73,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static io.github.oasis.core.utils.Constants.COLON;
+import static io.github.oasis.core.utils.Constants.DASH;
 
 /**
  * @author Isuru Weerarathna
  */
 @OasisQueryService
 public class BadgeStats extends AbstractStatsApiService {
+
+    private static final String RULE_PFX = "rule:";
+    private static final String ATTR_PFX = "attr:";
+    private static final String ZERO = "0";
 
     private final Map<Integer, Map<Integer, AttributeInfo>> gameAttributes = new ConcurrentHashMap<>();
     private final Map<Integer, Map<String, BadgeDef>> gameWiseRuleCache = new ConcurrentHashMap<>();
@@ -103,19 +109,19 @@ public class BadgeStats extends AbstractStatsApiService {
             subKeys.add("all");
             Map<String, SimpleElementDefinition> elementDefinitions = new HashMap<>();
             if (Utils.isNotEmpty(request.getRuleFilters())) {
-                subKeys.addAll(request.getRuleFilters().stream().map(rule -> "rule:" + rule)
+                subKeys.addAll(request.getRuleFilters().stream().map(rule -> RULE_PFX + rule)
                         .collect(Collectors.toList()));
 
                 if (Utils.isNotEmpty(request.getAttributeFilters())) {
                     subKeys.addAll(request.getRuleFilters().stream()
-                            .flatMap(rule -> request.getAttributeFilters().stream().map(attr -> "rule:" + rule + COLON + attr))
+                            .flatMap(rule -> request.getAttributeFilters().stream().map(attr -> RULE_PFX + rule + COLON + attr))
                             .collect(Collectors.toList()));
                 }
 
                 elementDefinitions = getContextHelper().readElementDefinitions(request.getGameId(), request.getRuleFilters());
 
             } else if (Utils.isNotEmpty(request.getAttributeFilters())) {
-                subKeys.addAll(request.getAttributeFilters().stream().map(attr -> "attr:" + attr)
+                subKeys.addAll(request.getAttributeFilters().stream().map(attr -> ATTR_PFX + attr)
                         .collect(Collectors.toList()));
             }
 
@@ -176,7 +182,7 @@ public class BadgeStats extends AbstractStatsApiService {
                 }
 
                 badgeIds.add(parts[0]);
-                if (parts[2].contains("-")) {
+                if (parts[2].contains(DASH)) {
                     logRecords.add(new BadgeLogRecord(parts[0], Numbers.asInt(parts[1]), parts[2], awardedTime));
                 } else {
                     logRecords.add(new BadgeLogRecord(parts[0], Numbers.asInt(parts[1]), Numbers.asLong(parts[2]), awardedTime));
@@ -257,6 +263,7 @@ public class BadgeStats extends AbstractStatsApiService {
             UserBadgesProgressResponse response = new UserBadgesProgressResponse();
             response.setGameId(request.getGameId());
             response.setUserId(request.getUserId());
+            response.setInTime(ObjectUtils.defaultIfNull(request.getInTime(), System.currentTimeMillis()));
 
             UserMetadata userMetadata = getContextHelper().readUserMetadata(request.getUserId());
             long timeOffset = StringUtils.isEmpty(userMetadata.getTz())
@@ -311,13 +318,16 @@ public class BadgeStats extends AbstractStatsApiService {
 
     private void handleStreakStatus(DbContext db, String ruleId, UserBadgesProgressResponse response) {
         String streakKey = BadgeIDs.getUserBadgeStreakKey(response.getGameId(), response.getUserId(), ruleId);
+        String badgesMetaKey = BadgeIDs.getUserBadgesMetaKey(response.getGameId(), response.getUserId());
         Sorted streakMap = db.SORTED(streakKey);
 
-        List<Record> memberList = streakMap.getRangeByRankWithScores(0, -1);
+        String lastTimeAwarded = db.getValueFromMap(badgesMetaKey, ruleId);
+        long beginTs = StringUtils.isEmpty(lastTimeAwarded) ? 0 : Long.parseLong(lastTimeAwarded);
+        List<Record> memberList = streakMap.getRangeByScoreWithScores(beginTs, System.currentTimeMillis());
         int streakCount = 0;
         for (int i = memberList.size() - 1; i >= 0; i--) {
             String memberStatus = memberList.get(i).getMember().split(COLON)[1];
-            if ("0".equals(memberStatus)) break;
+            if (ZERO.equals(memberStatus)) break;
             streakCount++;
         }
         response.addStreakProgress(ruleId, streakCount);
@@ -333,20 +343,28 @@ public class BadgeStats extends AbstractStatsApiService {
         Sorted sorted = db.SORTED(streakKey);
 
         long timeUnit = BadgeParser.toLongTimeUnit(badgeDef.getSpec().getPeriod());
-        long ts = System.currentTimeMillis() + userTimeOffset;
+        long ts = response.getInTime() + userTimeOffset;
         long score = ts - (ts % timeUnit);
 
         Optional<String> memberByScore = sorted.getMemberByScore(score);
         if (memberByScore.isPresent()) {
             String member = memberByScore.get();
 
-            long rank = sorted.getRank(member);
-            List<Record> rangeByRankWithScores = sorted.getRangeByRankWithScores(rank - maxStreakRef.get(), rank + 1);
+            if (!isConsecutive(badgeDef)) {
+                String badgesMetaKey = BadgeIDs.getUserBadgesMetaKey(response.getGameId(), response.getUserId());
+                response.addThresholdStreakProgress(ruleId,
+                        Numbers.asDecimal(member.split(COLON)[1]),
+                        Numbers.asInt(db.getValueFromMap(badgesMetaKey, ruleId + ":total")));
+                return;
+            }
+
+            long beginScore = score - (timeUnit * maxStreakRef.get() - 1);
+            List<Record> rangeByRankWithScores = sorted.getRangeByScoreWithScores(beginScore, score);
             int currStreak = 0;
             long currTs = score;
             for (int i = rangeByRankWithScores.size() - 1; i >= 0; i--) {
                 Record record = rangeByRankWithScores.get(i);
-                if (record.getScore() < currTs - timeUnit) {
+                if (record.getScore() < currTs) {
                     break;
                 }
                 currTs -= timeUnit;
@@ -365,6 +383,11 @@ public class BadgeStats extends AbstractStatsApiService {
         return def.getSpec().getStreaks().stream()
                 .max(Comparator.comparing(Streak::getStreak))
                 .map(Streak::getStreak);
+    }
+
+    private boolean isConsecutive(BadgeDef def) {
+        Boolean consecutive = def.getSpec().getConsecutive();
+        return consecutive != null ? consecutive : true;
     }
 
     private Map<Integer, AttributeInfo> loadGameAttributes(int gameId) {
