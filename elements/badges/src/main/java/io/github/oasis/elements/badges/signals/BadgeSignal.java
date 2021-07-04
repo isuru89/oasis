@@ -24,11 +24,14 @@ import io.github.oasis.core.EventJson;
 import io.github.oasis.core.EventScope;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.EventCreatable;
+import io.github.oasis.core.elements.FeedEntry;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCreatable;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.elements.badges.BadgePointsEvent;
 import io.github.oasis.elements.badges.BadgeSink;
+import io.github.oasis.elements.badges.BadgesModule;
+import io.github.oasis.elements.badges.spec.BadgeFeedData;
 import lombok.ToString;
 
 import java.math.BigDecimal;
@@ -96,6 +99,20 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
             return Optional.of(new BadgePointsEvent(pointId, points, BadgeRefEvent.create(this)));
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<FeedEntry> generateFeedEntry() {
+        return Optional.of(FeedEntry.builder()
+                .byPlugin(BadgesModule.ID)
+                .eventTimestamp(getOccurredTimestamp())
+                .eventType("BADGE_EARNED")
+                .scope(getEventScope())
+                .data(BadgeFeedData.builder()
+                    .ruleId(getRuleId())
+                    .attribute(attribute)
+                    .build()
+                ).build());
     }
 
     @Override

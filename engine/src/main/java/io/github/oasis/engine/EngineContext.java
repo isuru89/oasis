@@ -27,10 +27,12 @@ import io.github.oasis.core.elements.Registrar;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.EventReadWriteHandler;
+import io.github.oasis.core.external.FeedHandler;
 import io.github.oasis.core.external.SignalSubscription;
 import io.github.oasis.engine.factory.Parsers;
 import io.github.oasis.engine.factory.Processors;
 import io.github.oasis.engine.factory.Sinks;
+import io.github.oasis.engine.model.NoopSignalSubscription;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +62,7 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
     private final transient List<ElementModule> moduleList = new ArrayList<>();
 
     private SignalSubscription signalSubscription;
+    private FeedHandler feedHandler;
 
     public void init() throws OasisException {
         id = deriveEngineId();
@@ -169,6 +172,14 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
         this.signalSubscription = signalSubscription;
     }
 
+    public void setFeedHandler(FeedHandler feedHandler) {
+        this.feedHandler = feedHandler;
+    }
+
+    public FeedHandler getFeedHandler() {
+        return feedHandler;
+    }
+
     public static class Builder {
         private final EngineContext ctx = new EngineContext();
         private final List<Class<? extends ElementModuleFactory>> factories = new ArrayList<>();
@@ -205,6 +216,11 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
             return this;
         }
 
+        public Builder withFeedHandler(FeedHandler feedHandler) {
+            ctx.setFeedHandler(feedHandler);
+            return this;
+        }
+
         public Builder installModule(Class<? extends ElementModuleFactory> moduleFactory) {
             factories.add(moduleFactory);
             return this;
@@ -212,6 +228,9 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
 
         public EngineContext build() {
             ctx.setModuleFactoryList(factories);
+            if (ctx.getSignalSubscription() == null) {
+                ctx.setSignalSubscription(NoopSignalSubscription.INSTANCE);
+            }
             return ctx;
         }
 

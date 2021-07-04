@@ -29,12 +29,10 @@ import java.util.Objects;
  */
 public class EventScope implements Comparable<EventScope> {
 
-    public static final EventScope NO_SCOPE = new EventScope(0, 0, 0, 0);
-
-    private int gameId;
-    private int sourceId;
-    private long userId;
-    private long teamId;
+    private final int gameId;
+    private final int sourceId;
+    private final long userId;
+    private final long teamId;
 
     public EventScope(int gameId, int sourceId, long userId, long teamId) {
         this.gameId = gameId;
