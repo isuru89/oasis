@@ -324,4 +324,12 @@ public class BackendRepository implements OasisRepository {
     public List<AttributeInfo> listAllAttributes(int gameId) {
         return adminRepository.listAllAttributes(gameId);
     }
+
+    public OasisRepository getEngineRepository() {
+        return engineRepository;
+    }
+
+    public OasisRepository getAdminRepository() {
+        return adminRepository;
+    }
 }

@@ -109,7 +109,7 @@ public class GameStatusChangeTest extends AbstractServiceTest {
     @Override
     protected void createServices(BackendRepository backendRepository) {
         ElementService elementService = new ElementService(backendRepository, statsApiContext);
-        EngineManagerImpl manager = new EngineManagerImpl(null, elementService);
+        EngineManagerImpl manager = new EngineManagerImpl(null, elementService, dispatcher);
         manager.setDispatchSupport(dispatcher);
         engineManager = manager;
         gamesController = new GamesController(new GameService(backendRepository, engineManager));

@@ -19,6 +19,8 @@
 
 package io.github.oasis.core.services.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.parser.GameParserYaml;
@@ -31,6 +33,16 @@ import java.util.stream.Collectors;
  * @author Isuru Weerarathna
  */
 public class TestUtils {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    public static String toJson(Object value) {
+        try {
+            return MAPPER.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Unable to perform serialization!");
+        }
+    }
 
     public static List<ElementCreateRequest> parseElementRules(String clzPath, int gameId) {
         GameDef gameDef = GameParserYaml.fromClasspath(clzPath, Thread.currentThread().getContextClassLoader());

@@ -58,13 +58,19 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
 
     private EventDispatcher dispatchSupport;
 
-    public EngineManagerImpl(OasisConfigs oasisConfigs, ElementService elementService) {
+    public EngineManagerImpl(OasisConfigs oasisConfigs, ElementService elementService, EventDispatcher eventDispatcher) {
         this.oasisConfigs = oasisConfigs;
         this.elementService = elementService;
+        this.dispatchSupport = eventDispatcher;
     }
 
     @PostConstruct
     public void initialize() throws Exception {
+        if (dispatchSupport != null) {
+            LOG.warn("Dispatcher has been already integrated with core services. Skipping new registrations.");
+            return;
+        }
+
         String dispatcherImpl = oasisConfigs.get("oasis.dispatcher.impl", null);
         if (StringUtils.isBlank(dispatcherImpl)) {
             throw new IllegalStateException("Mandatory dispatcher implementation has not specified!");
@@ -74,7 +80,7 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
         LOG.info("Initializing dispatcher implementation {}...", dispatcherClz);
         EventStreamFactory eventStreamFactory = ServiceLoader.load(EventStreamFactory.class)
                 .stream()
-                .peek(eventStreamFactoryProvider -> LOG.debug("Found dispatcher implementation: {}", eventStreamFactoryProvider.type().getName()))
+                .peek(eventStreamFactoryProvider -> LOG.info("Found dispatcher implementation: {}", eventStreamFactoryProvider.type().getName()))
                 .filter(eventStreamFactoryProvider -> dispatcherClz.equals(eventStreamFactoryProvider.type().getName()))
                 .map(ServiceLoader.Provider::get)
                 .findFirst()

@@ -24,6 +24,9 @@ package io.github.oasis.core.services.api.exceptions;
  */
 public final class ErrorCodes {
 
+    public static final String AUTH_BAD_CREDENTIALS = "AUTH001";
+    public static final String AUTH_NO_SUCH_CREDENTIALS = "AUTH002";
+
     public static final String GAME_ID_SHOULD_NOT_SPECIFIED = "G0001";
     public static final String GAME_ID_NOT_SPECIFIED = "G0002";
     public static final String GAME_EXCEEDED_MOTTO_LEN = "G0003";
