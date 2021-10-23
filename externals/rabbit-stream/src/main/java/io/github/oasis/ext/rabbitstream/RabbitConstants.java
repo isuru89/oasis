@@ -28,6 +28,7 @@ class RabbitConstants {
 
     static final String GAME_EXCHANGE = "oasis.game.exchange";
     static final String ANNOUNCEMENT_EXCHANGE = "oasis.announcements";
+    static final String ENGINE_STATUS_QUEUE = "oasis.engine.events";
 
     static final String ANNOUNCEMENT_EXCHANGE_TYPE = "fanout";
     static final String GAME_EXCHANGE_TYPE = "direct";
