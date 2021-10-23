@@ -56,6 +56,17 @@ public class GameCommand implements OasisCommand {
         START,
         PAUSE,
         UPDATE,
-        REMOVE
+        REMOVE;
+
+        public static GameState convertTo(GameLifecycle lifecycle) {
+            switch (lifecycle) {
+                case CREATE: return GameState.CREATED;
+                case START: return GameState.STARTED;
+                case REMOVE: return GameState.STOPPED;
+                case PAUSE: return GameState.PAUSED;
+                case UPDATE: return GameState.UPDATED;
+                default: return null;
+            }
+        }
     }
 }

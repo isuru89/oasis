@@ -27,10 +27,12 @@ import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
+import io.github.oasis.core.services.events.GameStatusChangeEvent;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.github.oasis.core.utils.Texts;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +43,7 @@ import java.util.Objects;
  * @author Isuru Weerarathna
  */
 @Service
-public class GameService extends AbstractOasisService {
+public class GameService extends AbstractOasisService implements IGameService {
 
     private final Map<String, GameState> availableStatuses = Map.of(
             "start", GameState.STARTED,
@@ -51,13 +53,14 @@ public class GameService extends AbstractOasisService {
             "stop", GameState.STOPPED,
             "stopped", GameState.STOPPED);
 
-    private final IEngineManager engineManager;
+    private final ApplicationEventPublisher publisher;
 
-    public GameService(BackendRepository backendRepository, IEngineManager engineManager) {
+    public GameService(BackendRepository backendRepository, ApplicationEventPublisher eventPublisher) {
         super(backendRepository);
-        this.engineManager = engineManager;
+        this.publisher = eventPublisher;
     }
 
+    @Override
     public Game addGame(GameCreateRequest gameCreateRequest) throws OasisApiException {
         Game game = gameCreateRequest.createGame();
 
@@ -67,6 +70,7 @@ public class GameService extends AbstractOasisService {
         return backendRepository.addNewGame(game);
     }
 
+    @Override
     public Game updateGame(int gameId, GameUpdateRequest updateRequest) {
         Game dbGame = backendRepository.readGame(gameId);
         Game updatingGame = dbGame.toBuilder()
@@ -78,6 +82,7 @@ public class GameService extends AbstractOasisService {
         return backendRepository.updateGame(gameId, updatingGame);
     }
 
+    @Override
     public Game deleteGame(int gameId) throws OasisApiException {
         changeStatusOfGame(gameId, GameState.STOPPED.name(), System.currentTimeMillis());
 
@@ -92,27 +97,40 @@ public class GameService extends AbstractOasisService {
         return backendRepository.deleteGame(gameId);
     }
 
+    @Override
     public Game readGame(int gameId) {
         return backendRepository.readGame(gameId);
     }
 
+    @Override
     public PaginatedResult<Game> listAllGames(String offset, int pageSize) {
         return backendRepository.listGames(offset, pageSize);
     }
 
+    @Override
     public Game getGameByName(String name) {
         return backendRepository.readGameByName(name);
     }
 
-    public Game changeStatusOfGame(int gameId, String newStatus, long updatedAt) throws OasisApiException {
+    @Override
+    public Game changeStatusOfGameWithoutPublishing(int gameId, String newStatus, long updatedAt) throws OasisApiException {
         GameState gameState = validateGameState(newStatus);
 
         Game game = backendRepository.readGame(gameId);
         if (game == null) {
             throw new OasisApiException(ErrorCodes.GAME_NOT_EXISTS, HttpStatus.NOT_FOUND.value(), "No game is found by id " + gameId);
         }
-        Game updatedGame = backendRepository.updateGameStatus(gameId, gameState.name(), updatedAt);
-        engineManager.changeGameStatus(gameState, updatedGame);
+        return backendRepository.updateGameStatus(gameId, gameState.name(), updatedAt);
+    }
+
+    @Override
+    public Game changeStatusOfGame(int gameId, String newStatus, long updatedAt) throws OasisApiException {
+        GameState gameState = validateGameState(newStatus);
+
+        Game updatedGame = changeStatusOfGameWithoutPublishing(gameId, newStatus, updatedAt);
+
+        GameStatusChangeEvent statusChangeEvent = new GameStatusChangeEvent(gameState, updatedGame);
+        publisher.publishEvent(statusChangeEvent);
         return updatedGame;
     }
 

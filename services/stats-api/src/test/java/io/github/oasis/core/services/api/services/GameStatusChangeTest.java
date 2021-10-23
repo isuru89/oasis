@@ -19,11 +19,9 @@
 
 package io.github.oasis.core.services.api.services;
 
-import io.github.oasis.core.Game;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.services.api.TestUtils;
 import io.github.oasis.core.services.api.beans.BackendRepository;
@@ -35,8 +33,11 @@ import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
+import io.github.oasis.core.services.events.GameStatusChangeEvent;
 import org.jdbi.v3.core.Jdbi;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.List;
@@ -45,10 +46,6 @@ import java.util.List;
  * @author Isuru Weerarathna
  */
 public class GameStatusChangeTest extends AbstractServiceTest {
-
-    private IEngineManager engineManager;
-
-    private final EventDispatcher dispatcher = Mockito.mock(EventDispatcher.class);
 
     private GamesController gamesController;
     private ElementsController elementsController;
@@ -65,6 +62,7 @@ public class GameStatusChangeTest extends AbstractServiceTest {
     @Test
     void updateGameStatusWithElements() throws Exception {
         int stackId = gamesController.addGame(stackOverflow).getId();
+        ArgumentCaptor<GameStatusChangeEvent> eventArgumentCaptor = ArgumentCaptor.forClass(GameStatusChangeEvent.class);
 
         List<ElementCreateRequest> elementCreateRequests = TestUtils.parseElementRules("rules.yml", stackId);
         ElementCreateRequest samplePoint = TestUtils.findById("testpoint", elementCreateRequests);
@@ -73,20 +71,19 @@ public class GameStatusChangeTest extends AbstractServiceTest {
         elementsController.add(stackId, samplePoint);
         elementsController.add(stackId, sampleBadge);
 
-        Mockito.reset(dispatcher);
+        Mockito.reset(eventPublisher);
         gamesController.updateGameStatus(stackId, "start");
-        Mockito.verify(dispatcher,
-                Mockito.times(4)).broadcast(Mockito.any());
+        Mockito.verify(eventPublisher,
+                Mockito.times(1)).publishEvent(eventArgumentCaptor.capture());
+        GameStatusChangeEvent capturedEvent = eventArgumentCaptor.getValue();
+        Assertions.assertEquals(GameState.STARTED, capturedEvent.getNewGameState());
 
-        Mockito.reset(dispatcher);
+
+        Mockito.reset(eventPublisher);
         gamesController.updateGameStatus(stackId, "stop");
-        Mockito.verify(dispatcher,
-                Mockito.times(1)).broadcast(Mockito.any());
-    }
-
-    private void assertEngineManagerOnceCalledWithState(GameState state, Game game) {
-        Mockito.verify(engineManager,
-                Mockito.times(1)).changeGameStatus(state, game);
+        Mockito.verify(eventPublisher,
+                Mockito.times(1)).publishEvent(eventArgumentCaptor.capture());
+        Assertions.assertEquals(GameState.STOPPED, eventArgumentCaptor.getValue().getNewGameState());
     }
 
     @Override
@@ -109,10 +106,9 @@ public class GameStatusChangeTest extends AbstractServiceTest {
     @Override
     protected void createServices(BackendRepository backendRepository) {
         ElementService elementService = new ElementService(backendRepository, statsApiContext);
-        EngineManagerImpl manager = new EngineManagerImpl(null, elementService);
-        manager.setDispatchSupport(dispatcher);
-        engineManager = manager;
-        gamesController = new GamesController(new GameService(backendRepository, engineManager));
+
+        // TODO fix this subscription is null
+        gamesController = new GamesController(new GameService(backendRepository, eventPublisher));
         elementsController = new ElementsController(elementService);
     }
 }

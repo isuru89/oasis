@@ -29,7 +29,27 @@ package io.github.oasis.core.external;
  */
 public interface EventStreamFactory {
 
+    /**
+     * Provides an event stream consumer to automatically register for games and then read game events.
+     *
+     * @return event stream consumer
+     */
     SourceStreamProvider getEngineEventSource();
 
+    /**
+     * Provides an instance to dispatch game related events to necessary streams.
+     *
+     * @return event dispatcher instance.
+     */
     EventDispatcher getDispatcher();
+
+    /**
+     * This will provide an instance to consume all engine execution related notifications.
+     * Currently this stream will have only engine status changes events.
+     *
+     * @return engine event subscription
+     */
+    default EngineManagerSubscription getEngineManagerSubscription() {
+        return null;
+    }
 }

@@ -30,7 +30,7 @@ public interface Db extends Closeable {
 
     void init();
 
-   void registerScripts(String baseClzPath, ClassLoader classLoader) throws OasisException;
+    void registerScripts(String baseClzPath, ClassLoader classLoader) throws OasisException;
 
     DbContext createContext();
 
