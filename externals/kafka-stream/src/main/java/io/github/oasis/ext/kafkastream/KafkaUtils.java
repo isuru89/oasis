@@ -71,15 +71,18 @@ final class KafkaUtils {
         Properties props = new Properties();
 
         props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigs.getBrokerUrls());
-        props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
         String consumerGroupId = KafkaConstants.DEFAULT_ENGINE_EVENT_CONSUMER_GROUP;
         if (kafkaConfigs.getGameEventsConsumer() != null) {
             if (Utils.isNotEmpty(kafkaConfigs.getGameEventsConsumer().getProps())) {
                 props.putAll(kafkaConfigs.getGameEventsConsumer().getProps());
             }
-            consumerGroupId = kafkaConfigs.getGameEventsConsumer().getGroupId();
+
+            if (Texts.isNotEmpty(kafkaConfigs.getGameEventsConsumer().getGroupId())) {
+                consumerGroupId = kafkaConfigs.getGameEventsConsumer().getGroupId();
+            }
         }
 
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId);
@@ -122,14 +125,15 @@ final class KafkaUtils {
         props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
         // if user has specified custom kafka configs for game event topics...
-        String consumerGroupId;
+        String consumerGroupId = null;
         if (kafkaConfigs.getGameEventsConsumer() != null && Utils.isNotEmpty(kafkaConfigs.getGameEventsConsumer().getProps())) {
             props.putAll(kafkaConfigs.getGameEventsConsumer().getProps());
             consumerGroupId = kafkaConfigs.getGameEventsConsumer().getGroupId();
-        } else {
-            consumerGroupId = UUID.randomUUID().toString();
         }
 
+        if (Texts.isEmpty(consumerGroupId)) {
+            consumerGroupId = UUID.randomUUID().toString();
+        }
         String consumerGroupInstanceId = Texts.isEmpty(engineId) ? UUID.randomUUID().toString() : engineId;
 
         props.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, engineId);

@@ -35,7 +35,7 @@ import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.OasisEngine;
 import io.github.oasis.engine.element.points.PointsModuleFactory;
-import io.github.oasis.ext.rabbitstream.RabbitStreamFactory;
+import io.github.oasis.ext.kafkastream.KafkaStreamFactory;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -229,7 +229,7 @@ public class Main {
     }
 
     private static EventDispatcher initializeDispatcher(Config configs) throws Exception {
-        RabbitStreamFactory streamFactory = new RabbitStreamFactory();
+        KafkaStreamFactory streamFactory = new KafkaStreamFactory();
         EventDispatcher dispatcher = streamFactory.getDispatcher();
         ConfigObject dispatcherConfigs = configs.getObject("oasis.dispatcher.configs");
         Map<String, Object> conf = dispatcherConfigs.unwrapped();

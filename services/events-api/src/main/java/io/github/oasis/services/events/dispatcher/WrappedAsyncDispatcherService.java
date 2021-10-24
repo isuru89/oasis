@@ -39,7 +39,7 @@ public class WrappedAsyncDispatcherService extends AbstractDispatcherService {
 
     @Override
     public EventDispatcherService pushEvent(EventProxy event, Handler<AsyncResult<JsonObject>> handler) {
-        asyncDispatcher.pushAsync(toPersistDef(event), new EventAsyncDispatcher.Handler() {
+        asyncDispatcher.pushAsync(toEngineMessage(event), new EventAsyncDispatcher.Handler() {
             @Override
             public void onSuccess(Object result) {
                 handler.handle(Future.succeededFuture());
@@ -55,7 +55,7 @@ public class WrappedAsyncDispatcherService extends AbstractDispatcherService {
 
     @Override
     public EventDispatcherService push(JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
-        asyncDispatcher.pushAsync(toPersistDef(message), new EventAsyncDispatcher.Handler() {
+        asyncDispatcher.pushAsync(toEngineMessage(message), new EventAsyncDispatcher.Handler() {
             @Override
             public void onSuccess(Object result) {
                 handler.handle(Future.succeededFuture());
@@ -71,7 +71,7 @@ public class WrappedAsyncDispatcherService extends AbstractDispatcherService {
 
     @Override
     public EventDispatcherService broadcast(JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
-        asyncDispatcher.broadcastAsync(toPersistDef(message), new EventAsyncDispatcher.Handler() {
+        asyncDispatcher.broadcastAsync(toEngineMessage(message), new EventAsyncDispatcher.Handler() {
             @Override
             public void onSuccess(Object result) {
                 handler.handle(Future.succeededFuture());

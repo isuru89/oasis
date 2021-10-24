@@ -61,7 +61,7 @@ class KafkaEngineManagerSubscription implements EngineManagerSubscription {
 
     @Override
     public void init(OasisConfigs oasisConfigs) {
-        Map<String, Object> configs = oasisConfigs.getConfigRef().getObject("oasis.streamengine.configs").unwrapped();
+        Map<String, Object> configs = oasisConfigs.getConfigRef().getObject("oasis.dispatcher.configs").unwrapped();
 
         try {
             KafkaConfigs kafkaConfigs = KafkaUtils.parseFrom(configs);

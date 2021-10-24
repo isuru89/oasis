@@ -54,16 +54,15 @@ public class StreamConfigs {
             throw new IllegalStateException("Mandatory dispatcher implementation has not specified!");
         }
 
-        String dispatcherClz = StringUtils.substringAfter(dispatcherImpl, ":");
-        LOG.info("Initializing dispatcher implementation {}...", dispatcherClz);
+        LOG.info("Initializing dispatcher implementation {}...", dispatcherImpl);
 
         return ServiceLoader.load(EventStreamFactory.class)
                 .stream()
-                .peek(eventStreamFactoryProvider -> LOG.debug("Found dispatcher implementation: {}", eventStreamFactoryProvider.type().getName()))
-                .filter(eventStreamFactoryProvider -> dispatcherClz.equals(eventStreamFactoryProvider.type().getName()))
+                .peek(eventStreamFactoryProvider -> LOG.info("Found dispatcher implementation: {}", eventStreamFactoryProvider.type().getName()))
+                .filter(eventStreamFactoryProvider -> dispatcherImpl.equals(eventStreamFactoryProvider.type().getName()))
                 .map(ServiceLoader.Provider::get)
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Unknown dispatcher implementation provided! " + dispatcherClz));
+                .orElseThrow(() -> new IllegalStateException("Unknown dispatcher implementation provided! " + dispatcherImpl));
     }
 
     @Bean
