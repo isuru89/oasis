@@ -108,7 +108,8 @@ final class KafkaUtils {
         }
         props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigs.getBrokerUrls());
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId);
-        props.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, engineId);
+        // think later how uniquely can identify client
+        // props.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, engineId);
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST);
 
         // disable auto commit
@@ -136,7 +137,8 @@ final class KafkaUtils {
         }
         String consumerGroupInstanceId = Texts.isEmpty(engineId) ? UUID.randomUUID().toString() : engineId;
 
-        props.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, engineId);
+        // think later how uniquely can identify client
+        // props.setProperty(ConsumerConfig.CLIENT_ID_CONFIG, engineId);
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId);
         props.setProperty(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, consumerGroupInstanceId);
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST);
