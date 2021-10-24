@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.events;
 
+import io.github.oasis.services.events.db.RedisVerticle;
 import io.github.oasis.services.events.http.HttpServiceVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;

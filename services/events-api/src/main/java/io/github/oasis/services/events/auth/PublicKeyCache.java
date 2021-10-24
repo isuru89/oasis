@@ -44,6 +44,7 @@ public class PublicKeyCache {
     }
 
     public PublicKey createOrLoad(String token, String keyAsBase64String) {
+        System.out.println(keyStringCache);
         String currKey = keyStringCache.computeIfAbsent(token, s -> keyAsBase64String);
         if (keyAsBase64String.equals(currKey)) {
             return keyCache.computeIfAbsent(token, s -> this.loadKey(keyAsBase64String));
