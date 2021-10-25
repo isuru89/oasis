@@ -20,11 +20,14 @@
 package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.FeedEntry;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.elements.challenges.spec.ChallengeFeedData;
 import lombok.ToString;
 
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
@@ -59,6 +62,22 @@ public class ChallengeWinSignal extends AbstractChallengeSignal {
 
     public String getWonEventId() {
         return wonEventId;
+    }
+
+    @Override
+    public Optional<FeedEntry> generateFeedEntry() {
+        return Optional.of(FeedEntry.builder()
+                        .byPlugin(ChallengesModule.ID)
+                        .eventTimestamp(getOccurredTimestamp())
+                        .scope(getEventScope())
+                        .eventType("CHALLENGE_WON")
+                        .data(ChallengeFeedData.builder()
+                                .ruleId(getRuleId())
+                                .position(getPosition())
+                                .userId(getWinnerUserId())
+                                .build()
+                        ).build()
+        );
     }
 
     @Override

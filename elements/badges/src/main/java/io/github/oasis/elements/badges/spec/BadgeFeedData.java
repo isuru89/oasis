@@ -19,21 +19,19 @@
 
 package io.github.oasis.elements.badges.spec;
 
+import io.github.oasis.core.elements.spec.AbstractFeedDataDef;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
+import lombok.experimental.SuperBuilder;
 
 /**
  * @author Isuru Weerarathna
  */
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class BadgeFeedData implements Serializable {
+@SuperBuilder
+public class BadgeFeedData extends AbstractFeedDataDef {
 
-    private String ruleId;
     private int attribute;
 
 }

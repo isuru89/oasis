@@ -21,12 +21,15 @@ package io.github.oasis.elements.milestones;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.FeedEntry;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.elements.milestones.spec.MilestoneFeedData;
 import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
@@ -68,6 +71,25 @@ public class MilestoneSignal extends Signal {
     @Override
     public Class<? extends AbstractSink> sinkHandler() {
         return MilestonesSink.class;
+    }
+
+    @Override
+    public Optional<FeedEntry> generateFeedEntry() {
+        if (currentLevel != previousLevel) {
+            return Optional.of(FeedEntry.builder()
+                    .byPlugin(MilestonesModule.ID)
+                    .eventTimestamp(getOccurredTimestamp())
+                    .eventType("MILESTONE_REACHED")
+                    .scope(getEventScope())
+                    .data(MilestoneFeedData.builder()
+                            .ruleId(getRuleId())
+                            .currentLevel(currentLevel)
+                            .previousLevel(previousLevel)
+                            .build()
+                    ).build()
+            );
+        }
+        return Optional.empty();
     }
 
     @Override

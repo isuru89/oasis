@@ -30,9 +30,9 @@ import java.util.List;
  */
 public class RatingsModule extends ElementModule {
 
-    private static final String RATINGS = "core:rating";
+    public static final String ID = "core:rating";
 
-    private final List<String> keysSupported = List.of(RATINGS);
+    private final List<String> keysSupported = List.of(ID);
     private final List<Class<? extends AbstractSink>> sinks = List.of(RatingsSink.class);
     private final ElementParser parser = new RatingParser();
 
