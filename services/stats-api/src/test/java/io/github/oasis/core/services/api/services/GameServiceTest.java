@@ -45,20 +45,18 @@ import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
+import io.github.oasis.core.services.events.GameStatusChangeEvent;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Isuru Weerarathna
@@ -223,7 +221,8 @@ public class GameServiceTest extends AbstractServiceTest {
         assertThrows(OasisApiException.class, () -> elementsController.read(stackId, TESTPOINT, false));
 
         // game stopped message should dispatch
-        assertEngineManagerOnceCalledWithState(GameState.STOPPED, dbGame.toBuilder().currentStatus(GameState.STOPPED.name()).build());
+        ArgumentCaptor<GameStatusChangeEvent> eventArgumentCaptor = ArgumentCaptor.forClass(GameStatusChangeEvent.class);
+        assertEngineManagerOnceCalledWithState(GameState.STOPPED, dbGame.toBuilder().currentStatus(GameState.STOPPED.name()).build(), eventArgumentCaptor);
 
         assertFalse(adminRepo.readGame(stackId).isActive());
         assertThrows(OasisRuntimeException.class, () -> engineRepo.readGame(stackId));
@@ -233,18 +232,19 @@ public class GameServiceTest extends AbstractServiceTest {
     @Test
     void updateGameStatus() throws OasisException {
         int stackId = controller.addGame(stackOverflow).getId();
+        ArgumentCaptor<GameStatusChangeEvent> eventArgumentCaptor = ArgumentCaptor.forClass(GameStatusChangeEvent.class);
 
-        Mockito.reset(engineManager);
+        Mockito.reset(eventPublisher);
         Game gameRef = controller.updateGameStatus(stackId, "start");
-        assertEngineManagerOnceCalledWithState(GameState.STARTED, gameRef);
+        assertEngineManagerOnceCalledWithState(GameState.STARTED, gameRef, eventArgumentCaptor);
 
-        Mockito.reset(engineManager);
+        Mockito.reset(eventPublisher);
         gameRef = controller.updateGameStatus(stackId, "stop");
-        assertEngineManagerOnceCalledWithState(GameState.STOPPED, gameRef);
+        assertEngineManagerOnceCalledWithState(GameState.STOPPED, gameRef, eventArgumentCaptor);
 
-        Mockito.reset(engineManager);
+        Mockito.reset(eventPublisher);
         gameRef = controller.updateGameStatus(stackId, "pause");
-        assertEngineManagerOnceCalledWithState(GameState.PAUSED, gameRef);
+        assertEngineManagerOnceCalledWithState(GameState.PAUSED, gameRef, eventArgumentCaptor);
 
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> controller.updateGameStatus(stackId, null))
                 .isInstanceOf(OasisApiException.class)
@@ -257,9 +257,13 @@ public class GameServiceTest extends AbstractServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.GAME_UNKNOWN_STATE);
     }
 
-    private void assertEngineManagerOnceCalledWithState(GameState state, Game game) {
-        Mockito.verify(engineManager,
-                Mockito.times(1)).changeGameStatus(state, game);
+    private void assertEngineManagerOnceCalledWithState(GameState state, Game game, ArgumentCaptor<GameStatusChangeEvent> captor) {
+        Mockito.verify(eventPublisher,
+                Mockito.times(1)).publishEvent(captor.capture());
+
+        GameStatusChangeEvent value = captor.getValue();
+        Assertions.assertEquals(state, value.getNewGameState());
+        Assertions.assertEquals(game, value.getGameRef());
     }
 
     @Override
@@ -281,7 +285,7 @@ public class GameServiceTest extends AbstractServiceTest {
 
     @Override
     protected void createServices(BackendRepository backendRepository) {
-        controller = new GamesController(new GameService(backendRepository, engineManager));
+        controller = new GamesController(new GameService(backendRepository, eventPublisher));
         elementsController = new ElementsController(new ElementService(backendRepository, statsApiContext));
         sourceController = new EventSourceController(new EventSourceService(backendRepository, keyGeneratorSupport));
     }

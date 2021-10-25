@@ -19,16 +19,13 @@
 
 package io.github.oasis.core.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * @author Isuru Weerarathna
@@ -80,12 +77,30 @@ public class Utils {
         return bb.array();
     }
 
+    public static boolean isEmpty(Map<?, ?> map) {
+        return map == null || map.isEmpty();
+    }
+
+    public static boolean isNotEmpty(Map<?, ?> map) {
+        return map != null && map.size() > 0;
+    }
+
     public static boolean isNotEmpty(Collection<?> collection) {
         return collection != null && !collection.isEmpty();
     }
 
     public static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
+    }
+
+    public static void silentClose(Closeable closeable, Consumer<IOException> exceptionHandler) {
+        try {
+            closeable.close();
+        } catch (IOException e) {
+            if (exceptionHandler != null) {
+                exceptionHandler.accept(e);
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

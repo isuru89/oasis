@@ -19,29 +19,23 @@
 
 package io.github.oasis.core.services.api.services;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigValue;
 import io.github.oasis.core.Game;
-import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.ElementDef;
+import io.github.oasis.core.external.EngineManagerSubscription;
 import io.github.oasis.core.external.EventDispatcher;
-import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.core.external.messages.EngineMessage;
+import io.github.oasis.core.external.messages.EngineStatusChangedMessage;
 import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.services.api.exceptions.EngineManagerException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
-import org.apache.commons.lang3.StringUtils;
+import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.ServiceLoader;
 
 /**
  * Default implementation for engine manager through an external plugin.
@@ -53,54 +47,22 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(EngineManagerImpl.class);
 
-    private final OasisConfigs oasisConfigs;
     private final ElementService elementService;
+    private final IGameService gameService;
 
-    private EventDispatcher dispatchSupport;
+    private final EventDispatcher dispatchSupport;
+    private final EngineManagerSubscription engineManagerSubscription;
 
-    public EngineManagerImpl(OasisConfigs oasisConfigs, ElementService elementService, EventDispatcher eventDispatcher) {
-        this.oasisConfigs = oasisConfigs;
+    public EngineManagerImpl(ElementService elementService,
+                             IGameService gameService,
+                             EventDispatcher eventDispatcher,
+                             EngineManagerSubscription engineManagerSubscription) {
         this.elementService = elementService;
+        this.gameService = gameService;
         this.dispatchSupport = eventDispatcher;
-    }
+        this.engineManagerSubscription = engineManagerSubscription;
 
-    @PostConstruct
-    public void initialize() throws Exception {
-        if (dispatchSupport != null) {
-            LOG.warn("Dispatcher has been already integrated with core services. Skipping new registrations.");
-            return;
-        }
-
-        String dispatcherImpl = oasisConfigs.get("oasis.dispatcher.impl", null);
-        if (StringUtils.isBlank(dispatcherImpl)) {
-            throw new IllegalStateException("Mandatory dispatcher implementation has not specified!");
-        }
-
-        String dispatcherClz = StringUtils.substringAfter(dispatcherImpl, ":");
-        LOG.info("Initializing dispatcher implementation {}...", dispatcherClz);
-        EventStreamFactory eventStreamFactory = ServiceLoader.load(EventStreamFactory.class)
-                .stream()
-                .peek(eventStreamFactoryProvider -> LOG.info("Found dispatcher implementation: {}", eventStreamFactoryProvider.type().getName()))
-                .filter(eventStreamFactoryProvider -> dispatcherClz.equals(eventStreamFactoryProvider.type().getName()))
-                .map(ServiceLoader.Provider::get)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Unknown dispatcher implementation provided! " + dispatcherClz));
-
-        LOG.info("Dispatcher loaded from {}", dispatcherClz);
-        EventDispatcher dispatcher = eventStreamFactory.getDispatcher();
-        Map<String, Object> config = toMap(oasisConfigs.getConfigRef().getConfig("oasis.dispatcher.configs"));
-        EventDispatcher.DispatcherContext context = () -> config;
-        dispatcher.init(context);
-        this.dispatchSupport = dispatcher;
-        LOG.info("Dispatcher {} successfully loaded!", dispatcherClz);
-    }
-
-    private Map<String, Object> toMap(Config config) {
-        Map<String, Object> destination = new HashMap<>();
-        for (Map.Entry<String, ConfigValue> entry : config.entrySet()) {
-            destination.put(entry.getKey(), entry.getValue().unwrapped());
-        }
-        return destination;
+        this.initEngineStatusSubscription();
     }
 
     @Override
@@ -146,8 +108,25 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
         }
     }
 
-    void setDispatchSupport(EventDispatcher dispatchSupport) {
-        this.dispatchSupport = dispatchSupport;
+    void initEngineStatusSubscription() {
+        if (engineManagerSubscription != null) {
+            LOG.info("Subscribing to engine status stream {}", engineManagerSubscription.getClass().getName());
+            engineManagerSubscription.subscribe(this::consume);
+        }
+    }
+
+    private void consume(EngineStatusChangedMessage message) {
+        LOG.info("Engine status change event received! {}", message);
+        try {
+            Game game = gameService.readGame(message.getGameId());
+            if (game == null) {
+                LOG.error("No game definition is found by game id {}!", message.getGameId());
+                return;
+            }
+            gameService.changeStatusOfGameWithoutPublishing(message.getGameId(), message.getState().name().toLowerCase(), message.getTs());
+        } catch (OasisApiException e) {
+            LOG.error("Unable to change game status in admin database!", e);
+        }
     }
 
     @Override

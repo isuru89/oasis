@@ -19,6 +19,7 @@
 
 package io.github.oasis.ext.rabbitstream;
 
+import io.github.oasis.core.external.EngineManagerSubscription;
 import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.core.external.SourceStreamProvider;
@@ -30,6 +31,7 @@ public class RabbitStreamFactory implements EventStreamFactory {
 
     private final RabbitSource source = new RabbitSource();
     private final RabbitDispatcher dispatcher = new RabbitDispatcher();
+    private final RabbitEngineManagerSubscription engineManagerSubscription = new RabbitEngineManagerSubscription();
 
     @Override
     public SourceStreamProvider getEngineEventSource() {
@@ -39,5 +41,10 @@ public class RabbitStreamFactory implements EventStreamFactory {
     @Override
     public EventDispatcher getDispatcher() {
         return dispatcher;
+    }
+
+    @Override
+    public EngineManagerSubscription getEngineManagerSubscription() {
+        return engineManagerSubscription;
     }
 }

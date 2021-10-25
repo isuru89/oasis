@@ -43,21 +43,20 @@ import static io.github.oasis.ext.rabbitstream.RabbitConstants.DEFAULT_RETRY_DEL
 import static io.github.oasis.ext.rabbitstream.RabbitConstants.RETRY_SEED;
 
 /**
+ * RabbitMQ event dispatcher.
+ *
+ * Here it will create two different queues for games and announcements.
+ * Announcements channel will only be used in {@link #broadcast(EngineMessage)} method.
+ *
  * @author Isuru Weerarathna
  */
 public class RabbitDispatcher implements EventDispatcher {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitDispatcher.class);
 
-    private static final String OPT_DURABLE = "durable";
-    private static final String OPT_AUTO_DELETE = "autoDelete";
-
-    static final boolean DEF_EVENT_EXCHANGE_DURABLE = true;
-    static final boolean DEF_EVENT_EXCHANGE_AUTO_DEL = false;
-
     private static final String EMPTY_ROUTING_KEY = "";
     private static final Map<String, Object> EMPTY_CONFIG = new HashMap<>();
-    public static final String OASIS_GAME_ROUTING_PREFIX = "oasis.game.";
+    private static final String OASIS_GAME_ROUTING_PREFIX = "oasis.game.";
 
     private Connection connection;
     private Channel channel;
@@ -75,32 +74,10 @@ public class RabbitDispatcher implements EventDispatcher {
 
         int maxRetries = (int) configs.getOrDefault(CONFIG_RETRY_COUNT, DEFAULT_RETRY_COUNT);
         int delay = (int) configs.getOrDefault(CONFIG_RETRY_DELAY, DEFAULT_RETRY_DELAY);
-        retryRabbitConnection(RETRY_SEED, maxRetries, delay, factory);
+        connection = RabbitUtils.retryRabbitConnection(RETRY_SEED, maxRetries, delay, factory);
         channel = connection.createChannel();
 
         initializeExchanges(channel, context);
-    }
-
-    private void retryRabbitConnection(int retry, int maxRetries, int delay, ConnectionFactory factory) throws IOException, TimeoutException {
-        try {
-            connection = factory.newConnection();
-        } catch (IOException | TimeoutException e) {
-            if (retry > maxRetries) {
-                LOG.error("RabbitMq connection establishment exhausted after {} failures! No more tries!", retry);
-                throw e;
-            }
-            LOG.error("Error occurred while connecting to RabbitMq! [Retry: {}] Retrying again after {}ms...", retry, delay, e);
-            sleepWell(delay);
-            retryRabbitConnection(retry + 1, maxRetries, delay, factory);
-        }
-    }
-
-    private void sleepWell(int delay) {
-        try {
-            Thread.sleep(delay);
-        } catch (InterruptedException e) {
-            LOG.error("Error while sleeping interval while connecting to RabbitMQ!", e);
-        }
     }
 
     @Override
@@ -139,7 +116,7 @@ public class RabbitDispatcher implements EventDispatcher {
     }
 
     @SuppressWarnings("unchecked")
-    void initializeExchanges(Channel channel, DispatcherContext context) throws IOException {
+    private void initializeExchanges(Channel channel, DispatcherContext context) throws IOException {
         Map<String, Object> configs = context.getConfigs();
         Map<String, Object> eventExchangeOptions = (Map<String, Object>) configs.getOrDefault("eventExchange", EMPTY_CONFIG);
         LOG.debug("Event Exchange Options: {}", eventExchangeOptions);

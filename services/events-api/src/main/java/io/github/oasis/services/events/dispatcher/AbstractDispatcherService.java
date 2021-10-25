@@ -34,11 +34,11 @@ public abstract class AbstractDispatcherService implements EventDispatcherServic
 
     private static final JsonObject EMPTY = new JsonObject();
 
-    EngineMessage toPersistDef(EventProxy event) {
+    EngineMessage toEngineMessage(EventProxy event) {
         return EngineMessage.fromEvent(event);
     }
 
-    EngineMessage toPersistDef(JsonObject message) {
+    EngineMessage toEngineMessage(JsonObject message) {
         EngineMessage def = new EngineMessage();
         def.setType(message.getString(FIELD_TYPE));
         def.setImpl(message.getString(FIELD_IMPL));

@@ -25,7 +25,7 @@ import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
-import io.github.oasis.core.services.api.services.GameService;
+import io.github.oasis.core.services.api.services.IGameService;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
@@ -53,9 +53,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Games", description = "Game API")
 public class GamesController extends AbstractController {
 
-    private final GameService gameService;
+    private final IGameService gameService;
 
-    public GamesController(GameService gameService) {
+    public GamesController(IGameService gameService) {
         this.gameService = gameService;
     }
 

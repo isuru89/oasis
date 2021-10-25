@@ -1,15 +1,41 @@
 version: '3'
 
 services:
-  rabbit:
-    image: rabbitmq:3.7-management-alpine
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - "./buildscripts/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
-      - "./buildscripts/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json"
-      - "./.tmpdata/rabbit:/var/lib/rabbitmq/mnesia"
+      - 22181:2181
+    logging:
+      driver: none
+
+  kafka:
+    image: confluentinc/cp-kafka:6.2.1
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    logging:
+      driver: none
+
+#  rabbit:
+#    image: rabbitmq:3.7-management-alpine
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672"
+#    volumes:
+#      - "./buildscripts/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
+#      - "./buildscripts/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json"
+#      - "./.tmpdata/rabbit:/var/lib/rabbitmq/mnesia"
 
   redis:
     image: redis:5
@@ -26,10 +52,10 @@ services:
     volumes:
       - "./buildscripts/events-api.conf:/etc/oasis/events-api.conf"
     environment:
-      - "WAIT_HOSTS=redis:6379,rabbit:5672"
+      - "WAIT_HOSTS=redis:6379,kafka:9092"
     depends_on:
       - redis
-      - rabbit
+      - kafka
 
   stats-api:
     image: oasis/stats-api
@@ -40,18 +66,18 @@ services:
       - "./buildscripts/stats-api.properties:/etc/oasis/stats-api.properties"
       - "./buildscripts/modules:/etc/oasis/modules"
     environment:
-      - "WAIT_HOSTS=redis:6379,rabbit:5672"
+      - "WAIT_HOSTS=redis:6379,kafka:9092"
     depends_on:
       - redis
-      - rabbit
+      - kafka
 
   engine:
     image: oasis/engine
     environment:
-      - "WAIT_HOSTS=redis:6379,rabbit:5672"
+      - "WAIT_HOSTS=redis:6379,kafka:9092"
     volumes:
       - "./buildscripts/engine.conf:/etc/oasis/engine.conf"
       - "./buildscripts/modules:/etc/oasis/modules"
     depends_on:
       - redis
-      - rabbit
+      - kafka
