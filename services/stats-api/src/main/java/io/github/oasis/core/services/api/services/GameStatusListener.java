@@ -22,6 +22,7 @@ package io.github.oasis.core.services.api.services;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.external.messages.EngineStatusChangedMessage;
 import io.github.oasis.core.services.api.to.EngineStatusChangedEvent;
+import io.github.oasis.core.services.events.GameStatusChangeEvent;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,33 +30,24 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
+ * Listen to all game state events produced by {@link GameService}.
+ * Having this listener separately will remove a cycle dependency between
+ * {@link GameService} vs {@link IEngineManager} services.
+ *
  * @author Isuru Weerarathna
  */
 @Component
-public class EngineStatusListener {
+public class GameStatusListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EngineStatusListener.class);
+    private final IEngineManager engineManager;
 
-    private final GameService gameService;
-
-    public EngineStatusListener(GameService gameService) {
-        this.gameService = gameService;
+    public GameStatusListener(IEngineManager engineManager) {
+        this.engineManager = engineManager;
     }
 
     @EventListener
-    public void handleEngineStatusChangedEvent(EngineStatusChangedEvent event) {
-        EngineStatusChangedMessage message = event.getMessage();
-        LOG.info("Engine status change event received! {}", message);
-        try {
-            Game game = gameService.readGame(message.getGameId());
-            if (game == null) {
-                LOG.error("No game definition is found by game id {}!", message.getGameId());
-                return;
-            }
-            gameService.changeStatusOfGame(message.getGameId(), message.getState().name().toLowerCase(), message.getTs());
-        } catch (OasisApiException e) {
-            LOG.error("Unable to change game status in admin database!", e);
-        }
+    public void handleEngineStatusChangedEvent(GameStatusChangeEvent event) {
+        engineManager.changeGameStatus(event.getNewGameState(), event.getGameRef());
     }
 
 }

@@ -44,12 +44,12 @@ public class EventsApi extends AbstractVerticle {
         JsonObject oasisConfigs = config().getJsonObject("oasis", new JsonObject());
         JsonObject httpConfigs = config().getJsonObject("http", new JsonObject());
 
-        Promise<String> redisDeployment = Promise.promise();
-        DeploymentOptions redisOptions = new DeploymentOptions()
-                .setConfig(oasisConfigs.getJsonObject("redis"));
-        vertx.deployVerticle(new RedisVerticle(), redisOptions, redisDeployment);
+        JsonObject cacheConfigs = oasisConfigs.getJsonObject("cache", new JsonObject());
+        Promise<String> cacheDeployment = Promise.promise();
+        DeploymentOptions cacheOptions = new DeploymentOptions().setConfig(cacheConfigs.getJsonObject("configs"));
+        vertx.deployVerticle(cacheConfigs.getString("impl"), cacheOptions, cacheDeployment);
 
-        redisDeployment.future()
+        cacheDeployment.future()
             .compose(id -> {
                 JsonObject dispatcherConf = oasisConfigs.getJsonObject(KEY_DISPATCHER);
                 Promise<String> dispatcherDeployment = Promise.promise();

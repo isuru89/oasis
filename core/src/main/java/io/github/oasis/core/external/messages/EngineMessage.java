@@ -20,8 +20,10 @@
 package io.github.oasis.core.external.messages;
 
 import io.github.oasis.core.Event;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -76,7 +78,7 @@ public class EngineMessage implements Serializable {
     public static EngineMessage fromEvent(Event event) {
         EngineMessage def = new EngineMessage();
         def.setType(EngineMessage.GAME_EVENT);
-        def.setScope(new EngineMessage.Scope(event.getGameId()));
+        def.setScope(new EngineMessage.Scope(event.getGameId(), event.getUser()));
         def.setData(event.getAllFieldValues());
         return def;
     }
@@ -100,8 +102,6 @@ public class EngineMessage implements Serializable {
         return ALL_RULE_TYPES.contains(type);
     }
 
-
-
     @Override
     public String toString() {
         return "EngineMessage{" +
@@ -113,8 +113,10 @@ public class EngineMessage implements Serializable {
                 '}';
     }
 
+    @Data
     public static class Scope implements Serializable {
         private Integer gameId;
+        private Long userId;
 
         public Scope() {
         }
@@ -123,19 +125,9 @@ public class EngineMessage implements Serializable {
             this.gameId = gameId;
         }
 
-        public Integer getGameId() {
-            return gameId;
-        }
-
-        public void setGameId(Integer gameId) {
+        public Scope(Integer gameId, Long userId) {
             this.gameId = gameId;
-        }
-
-        @Override
-        public String toString() {
-            return "Scope{" +
-                    "gameId=" + gameId +
-                    '}';
+            this.userId = userId;
         }
     }
 }

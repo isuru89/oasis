@@ -41,4 +41,5 @@ public enum GameState {
     public String getCommand() {
         return command;
     }
+
 }

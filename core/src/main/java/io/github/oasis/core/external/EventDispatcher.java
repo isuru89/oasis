@@ -34,10 +34,38 @@ import java.util.Map;
  */
 public interface EventDispatcher extends Closeable {
 
+    /**
+     * Initialization method of dispatcher. This must be called before
+     * {@link #push(EngineMessage)} or {@link #broadcast(EngineMessage)}.
+     *
+     * Calling multiple times this method may produce undesired result.
+     *
+     * @param context dispatcher configs
+     * @throws Exception any exception thrown while initializing
+     */
     void init(DispatcherContext context) throws Exception;
 
+    /**
+     * This will push a game event to the corresponding game stream. This method
+     * should be called by event-apis.
+     * These events are actual game events generated from different registered event sources.
+     * Hence <code>game id</code> and <code>user id</code> is mandatory.
+     *
+     * @param message game event message.
+     * @throws Exception any exception thrown while pushing this event message.
+     */
     void push(EngineMessage message) throws Exception;
 
+    /**
+     * This method can be used to broadcast game engine related event messages which will
+     * be primarily used to control engines. This should be called by admin api where the
+     * game statuses are being controlled.
+     *
+     * Providing <code>game id</code> is mandatory.
+     *
+     * @param message engine message.
+     * @throws Exception any exception thrown while inserting to engine broadcast stream.
+     */
     void broadcast(EngineMessage message) throws Exception;
 
     interface DispatcherContext {

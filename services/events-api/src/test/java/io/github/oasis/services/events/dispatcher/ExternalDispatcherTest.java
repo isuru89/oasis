@@ -23,6 +23,7 @@ import io.github.oasis.core.external.EventAsyncDispatcher;
 import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.services.events.EventsApi;
+import io.github.oasis.services.events.db.RedisVerticle;
 import io.github.oasis.services.events.model.EventProxy;
 import io.github.oasis.services.events.utils.TestDispatcherVerticle;
 import io.github.oasis.services.events.utils.TestUtils;
@@ -59,7 +60,7 @@ public class ExternalDispatcherTest {
         JsonObject dispatcherConf = new JsonObject().put("impl", "oasis:" + impl).put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
-                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
+                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf).put("cache", getDefaultRedisCacheConfigs()));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
         vertx.deployVerticle(new EventsApi(), options, testContext.succeedingThenComplete());
@@ -74,7 +75,7 @@ public class ExternalDispatcherTest {
         JsonObject dispatcherConf = new JsonObject().put("impl", "oasis:" + impl).put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
-                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
+                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf).put("cache", getDefaultRedisCacheConfigs()));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
         vertx.deployVerticle(new EventsApi(), options, testContext.succeedingThenComplete());
@@ -89,7 +90,7 @@ public class ExternalDispatcherTest {
         JsonObject dispatcherConf = new JsonObject().put("impl", "oasis:" + impl).put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
-                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
+                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf).put("cache", getDefaultRedisCacheConfigs()));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
         vertx.deployVerticle(new EventsApi(), options, testContext.succeedingThenComplete());
@@ -132,7 +133,9 @@ public class ExternalDispatcherTest {
     void testSyncPushDispatcher(Vertx vertx, VertxTestContext testContext) {
         SyncDispatcherSupport dispatcher = Mockito.spy(new SyncDispatcherSupport());
         WrappedDispatcherService service = new WrappedDispatcherService(vertx, dispatcher);
-        EventProxy eventProxy = new EventProxy(TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100));
+        EventProxy eventProxy = new EventProxy(
+                TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100).put(EventProxy.USER_ID, 1)
+        );
         service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isTrue();
@@ -150,7 +153,9 @@ public class ExternalDispatcherTest {
     void testSyncPushFailDispatcher(Vertx vertx, VertxTestContext testContext) {
         SyncDispatcherSupport dispatcher = Mockito.spy(new SyncDispatcherSupport(true));
         WrappedDispatcherService service = new WrappedDispatcherService(vertx, dispatcher);
-        EventProxy eventProxy = new EventProxy(TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100));
+        EventProxy eventProxy = new EventProxy(
+                TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100).put(EventProxy.USER_ID, 1)
+        );
         service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isFalse();
@@ -168,7 +173,9 @@ public class ExternalDispatcherTest {
     void testASyncPushDispatcher() {
         AsyncDispatcher dispatcher = Mockito.spy(new AsyncDispatcher());
         WrappedAsyncDispatcherService service = new WrappedAsyncDispatcherService(dispatcher);
-        EventProxy eventProxy = new EventProxy(TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100));
+        EventProxy eventProxy = new EventProxy(
+                TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100).put(EventProxy.USER_ID, 1)
+        );
         service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isTrue();
@@ -185,7 +192,9 @@ public class ExternalDispatcherTest {
     void testASyncPushFailDispatcher() {
         AsyncDispatcher dispatcher = Mockito.spy(new AsyncDispatcher(true));
         WrappedAsyncDispatcherService service = new WrappedAsyncDispatcherService(dispatcher);
-        EventProxy eventProxy = new EventProxy(TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100));
+        EventProxy eventProxy = new EventProxy(
+                TestUtils.aEvent("admin@oasis.com", System.currentTimeMillis(), "event.a", 100).put(EventProxy.USER_ID, 1)
+        );
         service.pushEvent(eventProxy, res -> {
             try {
                 Assertions.assertThat(res.succeeded()).isFalse();
@@ -270,6 +279,10 @@ public class ExternalDispatcherTest {
     @AfterEach
     void afterEach(Vertx vertx, VertxTestContext testContext) {
         testContext.completeNow();
+    }
+
+    private JsonObject getDefaultRedisCacheConfigs() {
+        return new JsonObject().put("impl", RedisVerticle.class.getName());
     }
 
     private void sleepFor(long ms) {

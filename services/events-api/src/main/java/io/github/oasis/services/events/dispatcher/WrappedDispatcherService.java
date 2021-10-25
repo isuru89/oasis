@@ -45,19 +45,19 @@ public class WrappedDispatcherService extends AbstractDispatcherService {
 
     @Override
     public EventDispatcherService pushEvent(EventProxy event, Handler<AsyncResult<JsonObject>> handler) {
-        handle(toPersistDef(event), handler);
+        handle(toEngineMessage(event), handler);
         return this;
     }
 
     @Override
     public EventDispatcherService push(JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
-        handle(toPersistDef(message), handler);
+        handle(toEngineMessage(message), handler);
         return this;
     }
 
     @Override
     public EventDispatcherService broadcast(JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
-        broadcastSync(toPersistDef(message), handler);
+        broadcastSync(toEngineMessage(message), handler);
         return this;
     }
 

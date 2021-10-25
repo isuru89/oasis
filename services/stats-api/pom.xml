@@ -54,6 +54,11 @@
 			<artifactId>oasis-ext-rabbitstream</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.github.oasis</groupId>
+			<artifactId>oasis-ext-kafkastream</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

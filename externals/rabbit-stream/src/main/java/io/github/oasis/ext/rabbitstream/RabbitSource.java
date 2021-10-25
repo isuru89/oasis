@@ -34,6 +34,7 @@ import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.external.MessageReceiver;
 import io.github.oasis.core.external.SourceStreamProvider;
 import io.github.oasis.core.external.messages.EngineMessage;
+import io.github.oasis.core.external.messages.EngineStatusChangedMessage;
 import io.github.oasis.core.external.messages.FailedGameCommand;
 import io.github.oasis.core.external.messages.GameCommand;
 import org.slf4j.Logger;
@@ -57,14 +58,17 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
 
     private Connection connection;
     private Channel channel;
+    private Channel engineEventsChannel;
     private final Map<Integer, RabbitGameReader> consumers = new ConcurrentHashMap<>();
     private MessageReceiver sourceRef;
+    private String engineId;
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public void init(RuntimeContextSupport context, MessageReceiver source) throws Exception {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
+        engineId = context.id();
         String id = UUID.randomUUID().toString();
         LOG.info("Rabbit consumer id: {}", id);
         Config configs = context.getConfigs().getConfigRef();
@@ -74,11 +78,13 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
 
         connection = factory.newConnection();
         channel = connection.createChannel();
+        engineEventsChannel = connection.createChannel();
 
         String queue = RabbitConstants.ANNOUNCEMENT_EXCHANGE + "." + id;
         LOG.info("Connecting to announcement queue {}", queue);
         RabbitUtils.declareAnnouncementExchange(channel);
         RabbitUtils.declareGameExchange(channel);
+        RabbitUtils.declareEngineStatusQueue(engineEventsChannel);
 
         channel.queueDeclare(queue, true, true, false, null);
         channel.queueBind(queue, RabbitConstants.ANNOUNCEMENT_EXCHANGE, "*");
@@ -90,6 +96,7 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
         if (gameCommand instanceof FailedGameCommand) {
             LOG.warn("Failed game command received! [{}]", gameCommand);
             silentNack((long) gameCommand.getMessageId());
+            publishEngineStatusMessage(createEngineStatusMessage(gameCommand));
             return;
         }
 
@@ -114,6 +121,8 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
                     consumers.remove(gameId);
                     silentClose(gameReader);
                 }
+                publishEngineStatusMessage(createEngineStatusMessage(GameCommand.create(gameId, GameCommand.GameLifecycle.REMOVE)));
+                return;
             }
         } else if (gameCommand.getStatus() == GameCommand.GameLifecycle.REMOVE) {
             Closeable removedRef = consumers.remove(gameId);
@@ -124,6 +133,32 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
             }
         } else {
             silentAck((long) gameCommand.getMessageId());
+        }
+
+        publishEngineStatusMessage(createEngineStatusMessage(gameCommand));
+    }
+
+    private EngineStatusChangedMessage createEngineStatusMessage(GameCommand command) {
+        EngineStatusChangedMessage message = new EngineStatusChangedMessage();
+        message.setGameId(command.getGameId());
+        message.setTagData(command.getMessageId());
+        message.setTs(System.currentTimeMillis());
+        message.setEngineId(engineId);
+        message.setState(GameCommand.GameLifecycle.convertTo(command.getStatus()));
+        return message;
+    }
+
+    private void publishEngineStatusMessage(EngineStatusChangedMessage message) {
+        if (engineEventsChannel != null) {
+            try {
+                engineEventsChannel.basicPublish(
+                        "",
+                        RabbitConstants.ENGINE_STATUS_QUEUE,
+                        null,
+                        mapper.writeValueAsBytes(message));
+            } catch (IOException e) {
+                LOG.error("Unable to publish game engine status! Invalid message format!", e);
+            }
         }
     }
 
@@ -186,6 +221,13 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
         if (channel != null) {
             try {
                 channel.close();
+            } catch (TimeoutException e) {
+                LOG.warn(e.getMessage(), e);
+            }
+        }
+        if (engineEventsChannel != null) {
+            try {
+                engineEventsChannel.close();
             } catch (TimeoutException e) {
                 LOG.warn(e.getMessage(), e);
             }

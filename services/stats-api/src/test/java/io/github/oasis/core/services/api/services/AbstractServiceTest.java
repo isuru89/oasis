@@ -42,7 +42,9 @@ import org.jdbi.v3.jackson2.Jackson2Plugin;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mockito;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.ApplicationEventPublisher;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -65,6 +67,8 @@ public abstract class AbstractServiceTest {
     protected OasisRepository engineRepo;
     protected OasisRepository adminRepo;
     protected BackendRepository combinedRepo;
+
+    protected final ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
 
     public Jdbi createJdbcDao(ObjectMapper mapper) throws SQLException {
         DataSource ds = DataSourceBuilder.create()
@@ -130,6 +134,8 @@ public abstract class AbstractServiceTest {
         engineRepo = redisConnection;
 
         cleanRedisData();
+
+        Mockito.reset(eventPublisher);
 
         prepareContext(dbPool, OasisConfigs.defaultConfigs());
 
