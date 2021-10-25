@@ -4,6 +4,7 @@ import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.EngineMessage;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.io.IOException;
 public class TestEngineConfigs {
 
     @Bean
+    @Primary
     public EventDispatcher create() {
         return new EventDispatcher() {
             @Override

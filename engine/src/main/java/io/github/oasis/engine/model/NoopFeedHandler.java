@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.model;
 
+import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.FeedEntry;
 import io.github.oasis.core.external.FeedHandler;
 
@@ -35,7 +36,17 @@ public final class NoopFeedHandler implements FeedHandler {
     private NoopFeedHandler() {}
 
     @Override
+    public void init(OasisConfigs oasisConfigs) {
+
+    }
+
+    @Override
     public void publish(FeedEntry feedEntry) {
+
+    }
+
+    @Override
+    public void close() {
 
     }
 }

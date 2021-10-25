@@ -88,6 +88,11 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
         parsers = Parsers.from(this);
         processors.init(this);
         sinks.init(this);
+
+        // initialize feed handler, if specified
+        if (feedHandler != null) {
+            feedHandler.init(configs);
+        }
     }
 
     public Parsers getParsers() {

@@ -23,11 +23,14 @@ import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.ElementModuleFactory;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.FeedHandler;
 import io.github.oasis.db.redis.RedisDb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 /**
@@ -53,6 +56,9 @@ public class OasisEngineRunner {
         dbPool.init();
         builder.withDb(dbPool);
 
+        // find out feed handler
+        discoverFeedHandler(configs).ifPresent(builder::withFeedHandler);
+
         new OasisEngine(builder.build()).start();
     }
 
@@ -70,6 +76,39 @@ public class OasisEngineRunner {
 
         LOG.warn("Reading default config file bundled with engine, because none of env or system configuration path is specified!");
         return OasisConfigs.defaultConfigs();
+    }
+
+    private static Optional<FeedHandler> discoverFeedHandler(OasisConfigs configs) {
+        Optional<String> providedFeedImplClz = findProvidedFeedImplClz(configs);
+
+        if (providedFeedImplClz.isPresent()) {
+            String providedImpl = providedFeedImplClz.get();
+
+            Class<? extends FeedHandler> foundClz = ServiceLoader.load(FeedHandler.class)
+                    .stream()
+                    .map(ServiceLoader.Provider::type)
+                    .peek(clz -> LOG.info("Found feed handler implementation in classpath: {}", clz.getName()))
+                    .filter(clz -> clz.getName().equals(providedImpl))
+                    .findFirst()
+                    .orElseThrow();
+
+            try {
+                return Optional.of(foundClz.getDeclaredConstructor().newInstance());
+            } catch (ReflectiveOperationException e) {
+                LOG.error("Cannot initialize feed handler impl {} because a new instance cannot be created!", providedImpl);
+                LOG.error("Error: ", e);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<String> findProvidedFeedImplClz(OasisConfigs configs) {
+        try {
+            return Optional.ofNullable(configs.getConfigRef().getString("oasis.feedHandler"));
+        } catch (Exception e) {
+            LOG.warn("No feed handler is specified for this engine!");
+            return Optional.empty();
+        }
     }
 
     private static void discoverElements(EngineContext.Builder builder) {

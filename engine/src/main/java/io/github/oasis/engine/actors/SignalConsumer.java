@@ -101,7 +101,9 @@ public class SignalConsumer extends OasisBaseActor {
                 newSignalList.forEach(newSignal -> getContext().getParent().tell(new SignalMessage(newSignal, context, rule), getSelf()));
             }
 
-            signal.generateFeedEntry().ifPresent(feedHandler::publish);
+            if (feedHandler != null) {
+                signal.generateFeedEntry().ifPresent(feedHandler::publish);
+            }
 
             sinkLog.debug("[{}] {} notifying subscriber", logId, sink);
             signalSubscription.notifyAfter(signal, rule, context);

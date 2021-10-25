@@ -19,7 +19,10 @@
 
 package io.github.oasis.core.external;
 
+import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.FeedEntry;
+
+import java.io.Closeable;
 
 /**
  * Handles {@link io.github.oasis.core.elements.FeedEntry} instances and push them
@@ -27,7 +30,14 @@ import io.github.oasis.core.elements.FeedEntry;
  *
  * @author Isuru Weerarathna
  */
-public interface FeedHandler {
+public interface FeedHandler extends Closeable {
+
+    /**
+     * Initialize feed handler by providing app configs instance.
+     *
+     * @param oasisConfigs oasis configs
+     */
+    void init(OasisConfigs oasisConfigs);
 
     /**
      * Publishes the feed entry to the external party.
