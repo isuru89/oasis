@@ -22,6 +22,7 @@ package io.github.oasis.core.elements;
 import io.github.oasis.core.EventScope;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
@@ -41,6 +42,7 @@ import java.io.Serializable;
  *
  * @author Isuru Weerarathna
  */
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

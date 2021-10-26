@@ -30,6 +30,7 @@ final class KafkaConstants {
     static final String TOPIC_GAME_EVENTS = "oasis.game.events";
     static final String TOPIC_GAME_ANNOUNCEMENTS = "oasis.game.announcements";
     static final String TOPIC_ENGINE_RELATED_EVENTS = "oasis.engine.events";
+    static final String TOPIC_FEEDS = "oasis.feeds";
 
     static final String TOPIC_DELIMITER = ".";
 
