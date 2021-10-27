@@ -55,13 +55,12 @@ public class StreamConfigs {
 
         LOG.info("Initializing dispatcher implementation {}...", dispatcherImpl);
 
-        return ServiceLoader.load(EventStreamFactory.class)
-                .stream()
-                .peek(eventStreamFactoryProvider -> LOG.info("Found dispatcher implementation: {}", eventStreamFactoryProvider.type().getName()))
-                .filter(eventStreamFactoryProvider -> dispatcherImpl.equals(eventStreamFactoryProvider.type().getName()))
-                .map(ServiceLoader.Provider::get)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Unknown dispatcher implementation provided! " + dispatcherImpl));
+        if (StringUtils.startsWith(dispatcherImpl, "classpath:")) {
+            String dispatcherClz = StringUtils.substringAfter(dispatcherImpl, "classpath:");
+            return loadFromClasspathReflection(dispatcherClz);
+        } else {
+            return loadFromServiceLoader(dispatcherImpl);
+        }
     }
 
     @Bean
@@ -83,6 +82,26 @@ public class StreamConfigs {
         EngineManagerSubscription subscription = eventStreamFactory.getEngineManagerSubscription();
         subscription.init(oasisConfigs);
         return subscription;
+    }
+
+    private EventStreamFactory loadFromClasspathReflection(String dispatcherImpl) {
+        try {
+            Class<?> referredClz = Thread.currentThread().getContextClassLoader().loadClass(dispatcherImpl);
+            return (EventStreamFactory) referredClz.getDeclaredConstructor().newInstance();
+
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Dispatcher implementation cannot be found in classpath! " + dispatcherImpl);
+        }
+    }
+
+    private EventStreamFactory loadFromServiceLoader(String dispatcherImpl) {
+        return ServiceLoader.load(EventStreamFactory.class)
+                .stream()
+                .peek(eventStreamFactoryProvider -> LOG.info("Found dispatcher implementation: {}", eventStreamFactoryProvider.type().getName()))
+                .filter(eventStreamFactoryProvider -> dispatcherImpl.equals(eventStreamFactoryProvider.type().getName()))
+                .map(ServiceLoader.Provider::get)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Unknown dispatcher implementation provided! " + dispatcherImpl));
     }
 
     private Map<String, Object> toMap(Config config) {
