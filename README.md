@@ -304,6 +304,7 @@ TBW
 This project could not have existed thanks to these awesome open-source projects.
 
 * [Redis](https://redis.io/)
+* [Kafka](https://kafka.apache.org/)
 * [Akka](https://akka.io/)
 * [Vert.x](https://vertx.io/)
 * [Spring-boot](https://spring.io/projects/spring-boot)
