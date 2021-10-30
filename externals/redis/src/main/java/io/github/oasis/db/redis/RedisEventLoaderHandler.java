@@ -27,8 +27,8 @@ import io.github.oasis.core.external.EventReadWriteHandler;
 import io.github.oasis.core.utils.Utils;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,9 +50,9 @@ public class RedisEventLoaderHandler implements EventReadWriteHandler {
     @Override
     public Optional<Event> read(String contextRef, String eventId) {
         try (DbContext db = dbPool.createContext()) {
-            byte[] data = db.getValueFromMap(contextRef, eventId.getBytes(StandardCharsets.US_ASCII));
+            String data = db.getValueFromMap(contextRef, eventId);
             if (Objects.nonNull(data)) {
-                return Optional.ofNullable(Utils.fromSerializedContent(data));
+                return Optional.ofNullable(Utils.fromSerializedContent(Base64.getDecoder().decode(data)));
             }
             return Optional.empty();
         } catch (IOException e) {
@@ -63,10 +63,10 @@ public class RedisEventLoaderHandler implements EventReadWriteHandler {
     @Override
     public List<Event> bulkRead(String contextRef, String... eventIds) {
         try (DbContext db = dbPool.createContext()) {
-            List<byte[]> data = db.getRawValuesFromMap(contextRef, eventIds);
+            List<String> data = db.getValuesFromMap(contextRef, eventIds);
             if (Objects.nonNull(data)) {
                 return data.stream()
-                        .map(raw -> (Event) Utils.fromSerializedContent(raw))
+                        .map(raw -> (Event) Utils.fromSerializedContent(Base64.getDecoder().decode(raw)))
                         .collect(Collectors.toList());
             }
             return new ArrayList<>();
@@ -78,7 +78,7 @@ public class RedisEventLoaderHandler implements EventReadWriteHandler {
     @Override
     public boolean write(String contextRef, Event event) {
         try (DbContext db = dbPool.createContext()) {
-            db.setRawValueInMap(contextRef, event.getExternalId(), Utils.toSerializableContent(event));
+            db.setValueInMap(contextRef, event.getExternalId(), Base64.getEncoder().encodeToString(Utils.toSerializableContent(event)));
             return true;
         } catch (IOException e) {
             return false;

@@ -33,16 +33,15 @@ public interface Sorted {
 
     boolean add(String member, long value);
     Pair<Long, Long> addAndGetRankSize(String member, long value);
-    void add(byte[] member, long value);
     void add(String number, double value);
 
     void addRef(String member, long value, String refKey, String refValue);
 
     List<Record> getRangeByScoreWithScores(long from, long to);
     List<Record> getRangeByScoreWithScores(BigDecimal from, BigDecimal to);
-    List<Record> getRangeByRankWithScores(long from, long to);
-    List<Record> getRevRangeByRankWithScores(long from, long to);
-    List<Record> getRefRangeByRankWithScores(long from, long to, String refKey);
+    List<Record> getRangeByRankWithScores(int from, int to);
+    List<Record> getRevRangeByRankWithScores(int from, int to);
+    List<Record> getRefRangeByRankWithScores(int from, int to, String refKey);
 
     BigDecimal incrementScore(String member, BigDecimal byScore);
 
@@ -52,7 +51,12 @@ public interface Sorted {
 
     boolean memberExists(String member);
 
-    long getRank(String member);
+    /**
+     * Returns rank of given member. If member is not found, then will return -1.
+     * @param member member to check rank for.
+     * @return rank of the member or -1.
+     */
+    int getRank(String member);
 
     Optional<String> getMemberByScore(long score);
 

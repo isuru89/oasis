@@ -195,8 +195,9 @@ public class PointsTest extends AbstractRuleTest {
 
         System.out.println(signals);
         String pointId = ruleContext.getRule().getPointId();
+        System.out.println(signals);
         assertStrict(signals,
-                new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(67), e1),
+                new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(67.0), e1),
                 new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(33), e2));
     }
 
@@ -220,8 +221,8 @@ public class PointsTest extends AbstractRuleTest {
         System.out.println(signals);
         String pointId = ruleContext.getRule().getPointId();
         assertStrict(signals,
-                new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(67), e1),
-                new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(33), e2));
+                new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(67.0), e1),
+                new PointSignal(ruleContext.getRule().getId(), pointId, BigDecimal.valueOf(33.0), e2));
     }
 
     private BigDecimal awards(Event event, ExecutionContext context) {

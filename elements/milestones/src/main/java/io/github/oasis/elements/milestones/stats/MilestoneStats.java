@@ -124,16 +124,16 @@ public class MilestoneStats extends AbstractStatsApiService {
 
             } else if (request.isMultiUserRequest()) {
                 String milestoneLog = MilestoneIDs.getGameMilestoneKey(request.getGameId(), request.getMilestoneId());
-                List<String> args = new ArrayList<>();
+                List<Object> args = new ArrayList<>();
                 args.add(milestoneLog);
                 args.addAll(request.getUserIds().stream().map(String::valueOf).collect(Collectors.toList()));
 
-                List<Object> values = (List<Object>) db.runScript(ZMRANKSCORE, args.size(), args.toArray(new String[0]));
+                List<Object> values = (List<Object>) db.runScript(ZMRANKSCORE, args);
                 Map<Long, UserMetadata> userMap = getContextHelper().readUsersByIds(request.getUserIds());
 
                 List<UserMilestoneRecord> records = new ArrayList<>();
                 for (int i = 0; i < values.size(); i += 2) {
-                    long userId = Numbers.asLong(args.get(i / 2 + 1));
+                    long userId = Numbers.asLong((String) args.get(i / 2 + 1));
                     if (values.get(i) != null) {
                         records.add(new UserMilestoneRecord(userId,
                                 userMap.get(userId),

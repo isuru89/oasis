@@ -22,19 +22,22 @@ package io.github.oasis.db.redis;
 import io.github.oasis.core.collect.Pair;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.PaginatedResult;
-import io.github.oasis.core.utils.Numbers;
-import io.github.oasis.core.utils.Texts;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.ScanParams;
-import redis.clients.jedis.ScanResult;
+import org.redisson.api.RMap;
+import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.ByteArrayCodec;
+import org.redisson.client.codec.DoubleCodec;
+import org.redisson.client.codec.IntegerCodec;
+import org.redisson.client.codec.LongCodec;
+import org.redisson.client.codec.StringCodec;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static io.github.oasis.core.utils.Numbers.asDecimal;
 import static io.github.oasis.core.utils.Numbers.asInt;
@@ -46,57 +49,63 @@ import static io.github.oasis.core.utils.Numbers.asLong;
 public class RedisHashSet implements Mapped {
 
     private final String baseKey;
-    private final Jedis jedis;
+    private final RedissonClient client;
 
-    public RedisHashSet(Jedis jedis, String baseKey) {
+    public RedisHashSet(RedissonClient redisson, String baseKey) {
         this.baseKey = baseKey;
-        this.jedis = jedis;
+        this.client = redisson;
     }
 
     @Override
     public Map<String, String> getAll() {
-        return jedis.hgetAll(baseKey);
+        RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
+        return map.getAll(map.keySet());
     }
 
     @Override
     public boolean existKey(String key) {
-        return jedis.hexists(baseKey, key);
+        RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
+        return map.containsKey(key);
     }
 
     @Override
     public String getValue(String key) {
-        return jedis.hget(baseKey, key);
+        RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
+        return map.get(key);
     }
 
     @Override
     public void setValue(String key, String value) {
-        jedis.hset(baseKey, key, value);
+        RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
+        map.put(key, value);
     }
 
     @Override
     public void setValue(String key, byte[] data) {
-        jedis.hset(baseKey.getBytes(StandardCharsets.US_ASCII), key.getBytes(StandardCharsets.US_ASCII), data);
+        RMap<String, byte[]> map = client.getMap(baseKey, ByteArrayCodec.INSTANCE);
+        map.put(key, data);
     }
 
     @Override
     public byte[] readValue(String key) {
-        return jedis.hget(baseKey.getBytes(StandardCharsets.US_ASCII), key.getBytes(StandardCharsets.US_ASCII));
+        RMap<String, byte[]> map = client.getMap(baseKey, ByteArrayCodec.INSTANCE);
+        return map.get(key);
     }
 
     @Override
     public void setValues(String... keyValuePairs) {
-        Map<String, String> map = new HashMap<>();
+        RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
         for (int i = 0; i < keyValuePairs.length; i += 2) {
             map.put(keyValuePairs[i], keyValuePairs[i + 1]);
         }
-        jedis.hmset(baseKey, map);
     }
 
     @Override
     public BigDecimal setValueIfMax(String key, BigDecimal value) {
-        String existVal = jedis.hget(baseKey, key);
+        RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
+        String existVal = map.getOrDefault(key, "0");
         if (Objects.isNull(existVal) || value.compareTo(asDecimal(existVal)) > 0) {
-            jedis.hset(baseKey, key, value.toString());
+            map.put(key, value.toString());
             return value;
         }
         return asDecimal(existVal);
@@ -104,38 +113,50 @@ public class RedisHashSet implements Mapped {
 
     @Override
     public long incrementBy(String key, long byValue) {
-        return asLong(jedis.hincrBy(baseKey, key, byValue));
+        RMap<String, Long> map = client.getMap(baseKey, LongCodec.INSTANCE);
+        return asLong(map.addAndGet(key, byValue));
     }
 
     @Override
     public int incrementByInt(String key, int byValue) {
-        return asInt(jedis.hincrBy(baseKey, key, byValue));
+        RMap<String, Integer> map = client.getMap(baseKey, IntegerCodec.INSTANCE);
+        return asInt(map.addAndGet(key, byValue));
     }
 
     @Override
     public BigDecimal incrementByDecimal(String key, BigDecimal byValue) {
-        return BigDecimal.valueOf(jedis.hincrByFloat(baseKey, key, byValue.doubleValue()));
+        RMap<String, Double> map = client.getMap(baseKey, DoubleCodec.INSTANCE);
+        return BigDecimal.valueOf(map.addAndGet(key, byValue.doubleValue()));
     }
 
     @Override
     public Mapped expireIn(long milliseconds) {
-        jedis.expire(baseKey, (int) Math.ceil(milliseconds / 1000.0));
+        RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
+        map.expire(milliseconds, TimeUnit.MILLISECONDS);
         return this;
     }
 
     @Override
     public void remove(String key) {
-        jedis.hdel(baseKey, key);
+        RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
+        map.remove(key);
     }
 
     @Override
     public List<String> getValues(String... keys) {
-        return jedis.hmget(baseKey, keys);
+        RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
+        Map<String, String> subValues = map.getAll(Set.of(keys));
+        List<String> vals = new LinkedList<>();
+        for (String k : keys) {
+            vals.add(subValues.get(k));
+        }
+        return vals;
     }
 
     @Override
     public boolean setIfNotExists(String key, String value) {
-        return Numbers.isFirstOne(jedis.hsetnx(baseKey, key, value));
+        RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
+        return map.fastPutIfAbsent(key, value);
     }
 
     @Override
@@ -147,14 +168,17 @@ public class RedisHashSet implements Mapped {
     @Override
     @SuppressWarnings("unchecked")
     public PaginatedResult<Pair<String, String>> search(String pattern, int count, String cursor) {
-        ScanParams params = new ScanParams();
-        params.count(count);
-        params.match(pattern);
-        String cur = Texts.isEmpty(cursor) ? "0" : cursor;
-        ScanResult<Map.Entry<String, String>> scanResult = jedis.hscan(baseKey, cur, params);
-        List<Pair<String, String>> records = scanResult.getResult().stream()
-                .map(entry -> Pair.of(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
-        return new PaginatedResult<>(scanResult.isCompleteIteration() ? null : scanResult.getCursor(), records);
+        // todo provide searcheable index using reddisson
+        RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
+        Iterator<String> iterator = map.keySet().iterator();
+        List<Pair<String, String>> records = new LinkedList<>();
+        for (int i = 0; i < count; i++) {
+            if (!iterator.hasNext()) {
+                break;
+            }
+            String key = iterator.next();
+            records.add(Pair.of(key, map.get(key)));
+        }
+        return new PaginatedResult<>(null, records);
     }
 }

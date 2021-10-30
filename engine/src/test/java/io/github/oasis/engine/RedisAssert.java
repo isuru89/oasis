@@ -65,7 +65,7 @@ public class RedisAssert {
 
     public static void assertSortedRef(Db dbPool, String sortedKey, String refKey, NavigableMap<String, Long> entries) {
         try (DbContext db = dbPool.createContext()) {
-            Map<String, Long> all = db.SORTED(sortedKey).getRefRangeByRankWithScores(0, Long.MAX_VALUE, refKey)
+            Map<String, Long> all = db.SORTED(sortedKey).getRefRangeByRankWithScores(0, Integer.MAX_VALUE, refKey)
                     .stream().collect(Collectors.toMap(Record::getMember, Record::getScoreAsLong));
             if (all.size() > entries.size()) {
                 Set<String> expected = entries.keySet();
@@ -93,7 +93,7 @@ public class RedisAssert {
 
     public static void assertSorted(Db dbPool, String key, NavigableMap<String, Long> entries) {
         try (DbContext db = dbPool.createContext()) {
-            Map<String, Long> all = db.SORTED(key).getRangeByRankWithScores(0, Long.MAX_VALUE)
+            Map<String, Long> all = db.SORTED(key).getRangeByRankWithScores(0, Integer.MAX_VALUE)
                     .stream().collect(Collectors.toMap(Record::getMember, Record::getScoreAsLong));
             if (all.size() > entries.size()) {
                 Set<String> expected = entries.keySet();

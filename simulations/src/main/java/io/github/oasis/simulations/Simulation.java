@@ -28,10 +28,10 @@ import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.engine.element.points.PointDef;
 import io.github.oasis.simulations.model.Team;
 import io.github.oasis.simulations.model.User;
+import org.redisson.Redisson;
+import org.redisson.api.RMap;
+import org.redisson.api.RedissonClient;
 import org.yaml.snakeyaml.Yaml;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.Closeable;
 import java.io.File;
@@ -70,7 +70,7 @@ public class Simulation implements Closeable {
 
     protected final ObjectMapper mapper = new ObjectMapper();
 
-    private JedisPool dbPool;
+    private RedissonClient dbPool;
     protected KeyPair sourceKeyPair;
 
     private File gameRootDir;
@@ -101,7 +101,7 @@ public class Simulation implements Closeable {
 
             defineAllGameRules();
 
-            dbPool.close();
+            dbPool.shutdown();
             Thread.sleep(3000);
 
             dispatchGameStart();
@@ -130,15 +130,15 @@ public class Simulation implements Closeable {
     }
 
     private void bootstrapDb() {
-        JedisPoolConfig config = new JedisPoolConfig();
-        config.setMaxTotal(1);
+//        JedisPoolConfig config = new JedisPoolConfig();
+//        config.setMaxTotal(1);
         String host = "localhost";
         int port = 6379;
-        dbPool = new JedisPool(config, host, port);
+        dbPool = Redisson.create();
     }
 
     protected int createEventSourceToken() throws Exception {
-        try (Jedis jedis = dbPool.getResource()) {
+//        try (Jedis jedis = dbPool.getResource()) {
             sourceKeyPair = generateKeyPair();
             Map<String, Object> sourceMap = new HashMap<>();
             String key = Base64.getEncoder().encodeToString(sourceKeyPair.getPublic().getEncoded());
@@ -148,8 +148,9 @@ public class Simulation implements Closeable {
             sourceMap.put("games", Collections.singletonList(GAME_ID));
             sourceMap.put("id", SOURCE_ID);
 
-            jedis.hset("oasis.sources", SOURCE_TOKEN, mapper.writeValueAsString(sourceMap));
-        }
+            RMap<String, String> map = dbPool.getMap("oasis.sources");
+            map.fastPut(SOURCE_TOKEN, mapper.writeValueAsString(sourceMap));
+//        }
         return SOURCE_ID;
     }
 
@@ -157,9 +158,8 @@ public class Simulation implements Closeable {
         Game game = new Game();
         game.setId(GAME_ID);
 
-        try (Jedis jedis = dbPool.getResource()) {
-            jedis.hset("oasis.games", String.valueOf(game.getId()), mapper.writeValueAsString(game));
-        }
+        RMap<String, String> map = dbPool.getMap("oasis.games");
+        map.fastPut(String.valueOf(game.getId()), mapper.writeValueAsString(game));
         return GAME_ID;
     }
 
@@ -181,12 +181,11 @@ public class Simulation implements Closeable {
     }
 
     protected void persistUsers(List<User> users) throws IOException {
-        try (Jedis jedis = dbPool.getResource()) {
 
+        RMap<String, String> map = dbPool.getMap("oasis.users");
             for (User user : users) {
-                jedis.hset("oasis.users", user.getEmail(), mapper.writeValueAsString(user));
+                map.put(user.getEmail(), mapper.writeValueAsString(user));
             }
-        }
     }
 
     private Map<String, Integer> createTeams() throws IOException {
@@ -201,12 +200,12 @@ public class Simulation implements Closeable {
 
     protected Map<String, Integer> persistTeams(List<Team> teams) throws IOException {
         Map<String, Integer> teamMap = new HashMap<>();
-        try (Jedis jedis = dbPool.getResource()) {
+
+        RMap<String, String> map = dbPool.getMap("oasis.teams");
             for (Team team : teams) {
-                jedis.hset("oasis.teams", String.valueOf(team.getId()), mapper.writeValueAsString(team));
+                map.put(String.valueOf(team.getId()), mapper.writeValueAsString(team));
                 teamMap.put(team.getName(), Integer.parseInt(String.valueOf(team.getId())));
             }
-        }
         return teamMap;
     }
 
@@ -337,7 +336,7 @@ public class Simulation implements Closeable {
     @Override
     public void close() {
         if (dbPool != null) {
-            dbPool.close();
+            dbPool.shutdown();
         }
     }
 }
