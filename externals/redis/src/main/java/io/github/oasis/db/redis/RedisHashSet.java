@@ -22,6 +22,8 @@ package io.github.oasis.db.redis;
 import io.github.oasis.core.collect.Pair;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.PaginatedResult;
+import org.redisson.RedissonKeys;
+import org.redisson.api.RKeys;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.ByteArrayCodec;
@@ -170,7 +172,7 @@ public class RedisHashSet implements Mapped {
     public PaginatedResult<Pair<String, String>> search(String pattern, int count, String cursor) {
         // todo provide searcheable index using reddisson
         RMap<String, String> map = client.getMap(baseKey, StringCodec.INSTANCE);
-        Iterator<String> iterator = map.keySet().iterator();
+        Iterator<String> iterator = map.keySet(pattern).iterator();
         List<Pair<String, String>> records = new LinkedList<>();
         for (int i = 0; i < count; i++) {
             if (!iterator.hasNext()) {

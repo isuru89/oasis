@@ -17,5 +17,11 @@
             <artifactId>redisson</artifactId>
             <version>3.16.3</version>
         </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-resolver-dns-native-macos</artifactId>
+            <version>4.1.69.Final</version>
+            <classifier>osx-x86_64</classifier>
+        </dependency>
     </dependencies>
 </project>

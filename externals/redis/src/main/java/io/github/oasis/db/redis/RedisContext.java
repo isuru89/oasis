@@ -68,7 +68,7 @@ public class RedisContext implements DbContext {
 
     @Override
     public boolean mapKeyExists(String baseKey, String subKey) {
-        return client.getMap(baseKey).containsKey(subKey);
+        return client.getMap(baseKey, StringCodec.INSTANCE).containsKey(subKey);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class RedisContext implements DbContext {
 
     @Override
     public boolean removeKeyFromMap(String contextKey, String... keys) {
-        RMap<String, Object> map = client.getMap(contextKey);
+        RMap<String, Object> map = client.getMap(contextKey, StringCodec.INSTANCE);
         return map.fastRemove(keys) > 0;
     }
 
