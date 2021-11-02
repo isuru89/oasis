@@ -1,20 +1,31 @@
 {
   "O.INCRALL": {
-    "filename": "scripts/INCRALL.lua"
+    "filename": "scripts/INCRALL.lua",
+    "returnType": "int",
+    "readOnly": false
   },
   "O.ZINCRALL": {
-    "filename": "scripts/ZINCRALL.lua"
+    "filename": "scripts/ZINCRALL.lua",
+    "returnType": "int",
+    "readOnly": false
   },
   "O.HACQUIRE": {
-    "filename": "scripts/HACQUIRE.lua"
+    "filename": "scripts/HACQUIRE.lua",
+    "readOnly": false
   },
   "O.INCRCAPPED": {
-    "filename": "scripts/INCRCAPPED.lua"
+    "filename": "scripts/INCRCAPPED.lua",
+    "returnType": "double",
+    "readOnly": false
   },
   "O.HVALUEMOVE": {
-    "filename": "scripts/HVALUEMOV.lua"
+    "filename": "scripts/HVALUEMOV.lua",
+    "returnType": "int",
+    "readOnly": false
   },
   "O.ZMRANKSCORE": {
-    "filename": "scripts/ZMRANKSCORE.lua"
+    "filename": "scripts/ZMRANKSCORE.lua",
+    "returnType": "list",
+    "readOnly": true
   }
 }

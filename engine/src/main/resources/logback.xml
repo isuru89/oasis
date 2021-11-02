@@ -77,4 +77,5 @@
     <logger name="oasisEvents" level="INFO">
         <appender-ref ref="EVENT-FILE"/>
     </logger>
+    <logger name="org.redisson" level="INFO"/>
 </configuration>

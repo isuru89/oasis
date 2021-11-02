@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,6 +50,7 @@ public class MilestonesSink extends AbstractSink {
     public static final String COMPLETED = "completed";
     public static final String NEXT_LEVEL = "nextlevel";
     public static final String NEXT_LEVEL_VALUE = "nextlevelvalue";
+    public static final String HVALUEMOVE = "O.HVALUEMOVE";
 
     public MilestonesSink(Db dbPool) {
         super(dbPool);
@@ -80,16 +82,15 @@ public class MilestonesSink extends AbstractSink {
                 milestoneMap.setValue(rulePfx + NEXT_LEVEL_VALUE, nextLevel.getMilestone().toString());
             }
 
-            String[] args = new String[]{
-                    MilestoneIDs.getGameMilestoneSummaryKey(gameId, milestoneRule.getId()),
+            List<Object> keys = Collections.singletonList(MilestoneIDs.getGameMilestoneSummaryKey(gameId, milestoneRule.getId()));
+
+            db.runScript(HVALUEMOVE, keys,
+                    1,
+                    -1,
                     "level:" + signal.getCurrentLevel(),
                     "level:" + signal.getPreviousLevel(),
                     String.format("team:%d:level:%d", signal.getEventScope().getTeamId(), signal.getCurrentLevel()),
-                    String.format("team:%d:level:%d", signal.getEventScope().getTeamId(), signal.getPreviousLevel()),
-                    "1",
-                    "-1"
-            };
-            db.runScript("O.HVALUEMOVE", 5, args);
+                    String.format("team:%d:level:%d", signal.getEventScope().getTeamId(), signal.getPreviousLevel()));
 
         } catch (IOException e) {
             throw new OasisRuntimeException("Error while processing milestone signal!", e);

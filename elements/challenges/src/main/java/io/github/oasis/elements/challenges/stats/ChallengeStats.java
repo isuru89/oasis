@@ -43,6 +43,7 @@ import io.github.oasis.elements.challenges.stats.to.UserChallengesLog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -134,17 +135,16 @@ public class ChallengeStats extends AbstractStatsApiService {
             winLog.setGameId(request.getGameId());
             winLog.setUserId(request.getUserId());
 
-            String[] args = new String[] {
-                    mainKey,
-                    summaryRefKey,
+            List<Object> keys = new LinkedList<>();
+            keys.add(mainKey);
+            keys.add(summaryRefKey);
+            List<UserChallengesLog.ChallengeRecord> records = new ArrayList<>();
+            List<String> values = (List<String>) db.runScript(SCRIPT_CHALLENGE_LOG, keys,
                     String.valueOf(request.isBasedOnTimeRange() ? request.getStartTime() : request.getOffset()),
                     String.valueOf(request.isBasedOnTimeRange() ? request.getEndTime() : request.getLimit() + request.getOffset()),
                     request.isDescendingOrder() ? "rev" : "natural",
                     request.isBasedOnRanking() ? "byrank" : "bytime"
-            };
-
-            List<UserChallengesLog.ChallengeRecord> records = new ArrayList<>();
-            List<String> values = (List<String>) db.runScript(SCRIPT_CHALLENGE_LOG, 2, args);
+            );
             for (int i = 0; i < values.size(); i += 2) {
                 String[] parts = values.get(i).split(Constants.COLON);
                 long wonAt = Numbers.asLong(values.get(i + 1));

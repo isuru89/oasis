@@ -40,8 +40,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import org.redisson.Redisson;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -67,11 +66,8 @@ public abstract class AbstractRuleTest {
     protected static EventReadWriteHandler eventReadWriteHandler;
 
     @BeforeAll
-    public static void beforeAll() throws IOException {
-        JedisPoolConfig config = new JedisPoolConfig();
-        config.setMaxTotal(5);
-        JedisPool poolRedis = new JedisPool(config, "localhost");
-        pool = RedisDb.create(poolRedis);
+    public static void beforeAll() {
+        pool = RedisDb.create(Redisson.create());
         pool.init();
         eventReadWriteHandler = new RedisEventLoaderHandler(pool, null);
     }
