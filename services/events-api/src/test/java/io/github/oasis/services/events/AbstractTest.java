@@ -1,5 +1,6 @@
 package io.github.oasis.services.events;
 
+import io.github.oasis.services.events.db.RedisVerticle;
 import io.github.oasis.services.events.utils.TestDispatcherFactory;
 import io.github.oasis.services.events.utils.TestDispatcherService;
 import io.github.oasis.services.events.utils.TestDispatcherVerticle;
@@ -30,10 +31,11 @@ public abstract class AbstractTest {
 
     @BeforeEach
     void beforeEach(Vertx vertx, VertxTestContext testContext) {
+        JsonObject cacheConfigs = new JsonObject().put("impl", RedisVerticle.class.getName());
         JsonObject dispatcherConf = new JsonObject().put("impl", "test:any").put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
-                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
+                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf).put("cache", cacheConfigs));
         dispatcherService = Mockito.spy(new TestDispatcherService());
         TestDispatcherVerticle dispatcherVerticle = new TestDispatcherVerticle(dispatcherService);
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);

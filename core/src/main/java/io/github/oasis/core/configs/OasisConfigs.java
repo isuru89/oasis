@@ -60,6 +60,10 @@ public class OasisConfigs implements Serializable {
         return new OasisConfigs(config);
     }
 
+    public static OasisConfigs create(Config config) {
+        return new OasisConfigs(config);
+    }
+
     public static OasisConfigs create(String filePath) {
         Config config = ConfigFactory.parseFile(new File(filePath));
         return new OasisConfigs(config);

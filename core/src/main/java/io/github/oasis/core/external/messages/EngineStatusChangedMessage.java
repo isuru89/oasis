@@ -38,4 +38,6 @@ public class EngineStatusChangedMessage implements Serializable {
     private String engineId;
     private long ts;
 
+    private Object tagData;
+
 }

@@ -40,7 +40,8 @@ class EventErrorHandler implements Handler<RoutingContext> {
         JsonObject errorJson = new JsonObject();
         Throwable failure = ctx.failure();
         if (failure != null) {
-            LOG.error("Error occurred while processing {}", ctx.request().path(), failure);
+            LOG.error("Error occurred while processing {}", ctx.request().path());
+            LOG.error("Error: ", failure);
             errorJson.put("error", failure.getMessage());
         }
 

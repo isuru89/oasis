@@ -29,19 +29,15 @@ public final class MilestoneIDs {
     }
 
     public static String getGameUserMilestonesSummary(int gameId, long userId) {
-        return String.format("g%d:u%d:milestones", gameId, userId);
-    }
-
-    public static String getUserGameMilestonesKey(int gameId, long userId) {
-        return String.format("u%d:g%d:milestones", userId, gameId);
+        return String.format("{g%d}:u%d:milestones", gameId, userId);
     }
 
     public static String getGameMilestoneKey(int gameId, String milestoneId) {
-        return String.format("g%d:ms:%s", gameId, milestoneId);
+        return String.format("{g%d}:ms:%s", gameId, milestoneId);
     }
 
     public static String getGameMilestoneSummaryKey(int gameId, String milestoneId) {
-        return String.format("g%d:ms:%s:summary", gameId, milestoneId);
+        return String.format("{g%d}:ms:%s:summary", gameId, milestoneId);
     }
 
     private MilestoneIDs() {}

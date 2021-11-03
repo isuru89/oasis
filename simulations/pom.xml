@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.oasis</groupId>
-            <artifactId>oasis-ext-rabbitstream</artifactId>
+            <artifactId>oasis-ext-kafkastream</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

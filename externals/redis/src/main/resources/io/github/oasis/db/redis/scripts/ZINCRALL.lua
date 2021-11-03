@@ -1,5 +1,5 @@
 local length = table.getn(KEYS);
-for i = 2, length, 1 do
-  redis.call("zincrby", KEYS[i], ARGV[1], KEYS[1])
+for i = 1, length, 1 do
+  redis.call("zincrby", KEYS[i], ARGV[1], ARGV[2])
 end
 return 1

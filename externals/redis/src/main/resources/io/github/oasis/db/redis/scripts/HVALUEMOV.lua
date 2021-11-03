@@ -1,6 +1,6 @@
-local length = table.getn(KEYS);
-for i = 2, length, 2 do
-    redis.call("hincrby", KEYS[1], KEYS[i], ARGV[1]);
-    redis.call("hincrby", KEYS[1], KEYS[i+1], ARGV[2]);
+local length = table.getn(ARGV);
+for i = 3, length, 2 do
+    redis.call("hincrby", KEYS[1], ARGV[i], ARGV[1]);
+    redis.call("hincrby", KEYS[1], ARGV[i+1], ARGV[2]);
 end
-return 0;
+return 0

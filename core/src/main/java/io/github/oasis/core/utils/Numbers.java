@@ -89,6 +89,19 @@ public final class Numbers {
         return val == null ? BigDecimal.ZERO : new BigDecimal(val);
     }
 
+    public static BigDecimal asDecimal(Object val) {
+        if (val == null) {
+            return BigDecimal.ZERO;
+        }
+
+        if (val instanceof Number) {
+            return BigDecimal.valueOf(((Number) val).doubleValue());
+        } else if (val instanceof String) {
+            return asDecimal((String) val);
+        }
+        return null;
+    }
+
     public static int ifNull(Integer val, int defaultValue) {
         return val == null ? defaultValue : val;
     }

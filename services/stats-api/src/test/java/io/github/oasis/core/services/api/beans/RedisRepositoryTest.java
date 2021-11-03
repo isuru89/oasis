@@ -515,7 +515,8 @@ class RedisRepositoryTest {
         System.out.println(result.getRecords());
 
         result = redisRepository.searchTeam("r", null, 2);
-        Assertions.assertEquals(4, result.getRecords().size());
+        System.out.println(result.getRecords());
+        Assertions.assertEquals(2, result.getRecords().size());
     }
 
     @Test

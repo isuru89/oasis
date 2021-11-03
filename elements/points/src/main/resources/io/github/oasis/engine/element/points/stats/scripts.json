@@ -1,8 +1,12 @@
 {
   "O.PLEADRANKS": {
-    "filename": "scripts/PLEADRANKS.lua"
+    "filename": "scripts/PLEADRANKS.lua",
+    "returnType": "list",
+    "readOnly": true
   },
   "O.PLEADRANKSREV": {
-    "filename": "scripts/PLEADRANKSREV.lua"
+    "filename": "scripts/PLEADRANKSREV.lua",
+    "returnType": "list",
+    "readOnly": true
   }
 }
