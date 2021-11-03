@@ -70,15 +70,24 @@ public class StreakNBadgeProcessor extends AbstractBadgeProcessor<StreakNBadgeRu
             String member = ts + ONE_DELIM + event.getExternalId();
             sortedRange.add(member, ts);
             int rank = sortedRange.getRank(member);
-            int start = Math.max(0, rank - rule.getMaxStreak());
+            int start = Math.max(0, rank - rule.getMaxStreak() + 1);
             List<Record> tupleRange = sortedRange.getRangeByRankWithScores(start, rank + rule.getMaxStreak());
-            return fold(tupleRange, event, rule, db);
+            List<String> badgeInfos = db.getValuesFromMap(BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser()),
+                    getMetaEndTimeKey(rule), getMetaStreakKey(rule));
+            long lastBadgeTs = asLong(badgeInfos.get(0));
+            int lastBadgeStreak = asInt(badgeInfos.get(1));
+
+            List<Record> tuples = tupleRange;
+            if (lastBadgeStreak == rule.getMaxStreak()) {
+                tuples = tupleRange.stream().filter(tp -> tp.getScore() > lastBadgeTs).collect(Collectors.toList());
+            }
+            return fold(tuples, event, rule, db);
         } else {
             String member = ts + ZERO_DELIM + event.getExternalId();
             sortedRange.add(member, ts);
             sortedRange.removeRangeByScore(0, ts - rule.getRetainTime());
             int rank = sortedRange.getRank(member);
-            int start = Math.max(0, rank - rule.getMaxStreak());
+            int start = Math.max(0, rank - rule.getMaxStreak() + 1);
             List<Record> tupleRange = sortedRange.getRangeByRankWithScores(start, rank + rule.getMaxStreak());
             return unfold(tupleRange, event, ts, rule, db);
         }

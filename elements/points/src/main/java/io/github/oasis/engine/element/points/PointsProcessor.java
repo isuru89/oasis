@@ -66,7 +66,6 @@ public class PointsProcessor extends AbstractProcessor<PointRule, PointSignal> {
             TimeOffset tcx = new TimeOffset(event.getTimestamp(), context.getUserTimeZone());
             String childKey = PointsSink.RULE_PFX + rule.getPointId() + COLON + tcx.getByType(rule.getCapDuration());
             BigDecimal residue = db.incrementCapped(score, baseKey, childKey, rule.getCapLimit());
-            System.out.println(residue);
             if (Numbers.isNegative(residue)) {
                 // cannot increment due to limit already exceeded. Hence skipping.
                 return null;

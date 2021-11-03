@@ -1,0 +1,26 @@
+version: 1
+
+elements:
+  - id: MULTIPLE_THRESHOLDS
+    name: Daily-Reputations
+    description: Accumulates user reputation daily and awards badges if user scores 50+ reputations on 3+ consecutive days
+    type: core:badge
+    spec:
+      kind: periodicAccumulationStreak
+      selector:
+        matchEvent: event.a
+      period:
+        duration: 1
+        unit: day
+      aggregatorExtractor:
+        expression: e.value
+      threshold: 80
+      streaks:
+        - streak: 3
+          rewards:
+            badge:
+              attribute: 10
+        - streak: 5
+          rewards:
+            badge:
+              attribute: 20

@@ -139,6 +139,13 @@ public abstract class AbstractRuleTest {
         Assertions.assertTrue(signal.isPresent(), "Provided signal has different attributes! " + signalRef.toString());
     }
 
+    protected void printSignals(Collection<Signal> signals) {
+        System.out.println(">>> Received Signals:");
+        for (Signal signal : signals) {
+            System.out.println(signal);
+        }
+    }
+
     protected void assertStrict(Collection<Signal> signals, Signal... challengeSignals) {
         if (challengeSignals == null) {
             Assertions.assertTrue(signals.isEmpty(), "No signals excepted but found many!");

@@ -1,0 +1,7 @@
+{
+  "gameId": 1,
+  "userId": 1,
+
+  "ruleIds": ["MULTIPLE_THRESHOLDS"],
+  "inTime": 1585872000000
+}

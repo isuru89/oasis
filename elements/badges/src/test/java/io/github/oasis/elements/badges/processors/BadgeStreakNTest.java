@@ -251,7 +251,7 @@ public class BadgeStreakNTest extends AbstractRuleTest {
                 new StreakBadgeSignal(rule.getId(), e2, 3, ATTR_SILVER, 100, 104, e1.getExternalId(), e2.getExternalId()));
     }
 
-    @DisplayName("Single streak: Out-of-order modifies existing streak end time")
+    @DisplayName("Single streak: Out-of-order does not modifies existing streak end time")
     @Test
     public void testStreakN() {
         TEvent e1 = TEvent.createKeyValue(100, EVT_A, 75);
@@ -266,10 +266,9 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
         submitOrder(streakN, e1, e2, e3, e4, e5);
 
-        System.out.println(signals);
+        printSignals(signals);
         assertStrict(signals,
-                new StreakBadgeSignal(rule.getId(), e3, 3, ATTR_SILVER, 100, 105, e1.getExternalId(), e3.getExternalId()),
-                new StreakBadgeSignal(rule.getId(), e2, 3, ATTR_SILVER, 100, 104, e1.getExternalId(), e2.getExternalId()));
+                new StreakBadgeSignal(rule.getId(), e3, 3, ATTR_SILVER, 100, 105, e1.getExternalId(), e3.getExternalId()));
     }
 
     // ---------------------------------------
@@ -297,6 +296,61 @@ public class BadgeStreakNTest extends AbstractRuleTest {
         assertStrict(signals,
                 new StreakBadgeSignal(rule.getId(), e3, 3, ATTR_SILVER, 100, 105, e1.getExternalId(), e3.getExternalId()),
                 new StreakBadgeSignal(rule.getId(), e5, 5, ATTR_GOLD, 100, 107, e1.getExternalId(), e5.getExternalId()));
+    }
+
+    @DisplayName("Multi streaks: consecutive badges")
+    @Test
+    public void testMultiStreakNConsecutive() {
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 75);
+        TEvent e2 = TEvent.createKeyValue(104, EVT_A, 63);
+        TEvent e3 = TEvent.createKeyValue(105, EVT_A, 57); //
+        TEvent e4 = TEvent.createKeyValue(106, EVT_A, 88);
+        TEvent e5 = TEvent.createKeyValue(107, EVT_A, 76); //
+        TEvent e6 = TEvent.createKeyValue(108, EVT_A, 81);
+        TEvent e7 = TEvent.createKeyValue(109, EVT_A, 97);
+        TEvent e8 = TEvent.createKeyValue(110, EVT_A, 77); //
+
+        List<Signal> signalsRef = new ArrayList<>();
+        StreakNBadgeRule rule = loadRule(STREAK_N_YML, MULTI_STREAK);
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
+        Assertions.assertEquals(5, rule.getMaxStreak());
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
+        submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8);
+
+        Set<Signal> signals = mergeSignals(signalsRef);
+        printSignals(signals);
+        assertStrict(signals,
+                new StreakBadgeSignal(rule.getId(), e3, 3, ATTR_SILVER, 100, 105, e1.getExternalId(), e3.getExternalId()),
+                new StreakBadgeSignal(rule.getId(), e5, 5, ATTR_GOLD, 100, 107, e1.getExternalId(), e5.getExternalId()),
+                new StreakBadgeSignal(rule.getId(), e8, 3, ATTR_SILVER, 108, 110, e6.getExternalId(), e8.getExternalId()));
+    }
+
+    @DisplayName("Multi streaks: Non consecutive badges")
+    @Test
+    public void testMultiStreakNNonConsecutive() {
+        TEvent e1 = TEvent.createKeyValue(100, EVT_A, 75);
+        TEvent e2 = TEvent.createKeyValue(104, EVT_A, 63);
+        TEvent e3 = TEvent.createKeyValue(105, EVT_A, 57); //
+        TEvent e4 = TEvent.createKeyValue(106, EVT_A, 88);
+        TEvent e5 = TEvent.createKeyValue(107, EVT_A, 76); //
+        TEvent e6 = TEvent.createKeyValue(108, EVT_A, 3);
+        TEvent e7 = TEvent.createKeyValue(109, EVT_A, 97);
+        TEvent e8 = TEvent.createKeyValue(110, EVT_A, 77);
+        TEvent e9 = TEvent.createKeyValue(111, EVT_A, 77); //
+
+        List<Signal> signalsRef = new ArrayList<>();
+        StreakNBadgeRule rule = loadRule(STREAK_N_YML, MULTI_STREAK);
+        RuleContext<StreakNBadgeRule> ruleContext = createRule(rule, signalsRef::add);
+        Assertions.assertEquals(5, rule.getMaxStreak());
+        StreakNBadgeProcessor streakN = new StreakNBadgeProcessor(pool, ruleContext);
+        submitOrder(streakN, e1, e2, e3, e4, e5, e6, e7, e8, e9);
+
+        Set<Signal> signals = mergeSignals(signalsRef);
+        printSignals(signals);
+        assertStrict(signals,
+                new StreakBadgeSignal(rule.getId(), e3, 3, ATTR_SILVER, 100, 105, e1.getExternalId(), e3.getExternalId()),
+                new StreakBadgeSignal(rule.getId(), e5, 5, ATTR_GOLD, 100, 107, e1.getExternalId(), e5.getExternalId()),
+                new StreakBadgeSignal(rule.getId(), e9, 3, ATTR_SILVER, 109, 111, e7.getExternalId(), e9.getExternalId()));
     }
 
     @DisplayName("Multi streaks: Out-of-order creates multiple streaks")

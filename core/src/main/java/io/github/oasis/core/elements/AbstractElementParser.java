@@ -31,7 +31,6 @@ public abstract class AbstractElementParser implements ElementParser {
     private final Yaml yaml = new Yaml();
 
     protected <T extends AbstractDef<? extends BaseSpecification>> T loadFrom(EngineMessage def, Class<T> clz) {
-        System.out.println(def.getData());
         return yaml.loadAs(yaml.dump(def.getData()), clz);
     }
 

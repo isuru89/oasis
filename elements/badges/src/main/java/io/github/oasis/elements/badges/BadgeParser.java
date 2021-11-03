@@ -191,7 +191,7 @@ public class BadgeParser extends AbstractElementParser {
                 }));
     }
 
-    private long toLongTimeUnit(TimeUnitDef timeUnit) {
+    public static long toLongTimeUnit(TimeUnitDef timeUnit) {
         if (Objects.isNull(timeUnit)) {
             return 0;
         }

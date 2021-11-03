@@ -1,0 +1,10 @@
+{
+  "gameId": 1,
+  "userId": 1,
+  "inTime": 1585872000000,
+  "progressRecords": {
+    "BDG00001": {
+      "currentStreak": 1
+    }
+  }
+}

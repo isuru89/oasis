@@ -28,5 +28,6 @@ public final class Constants {
 
     public static final String COLON = ":";
     public static final String COMMA = ",";
+    public static final String DASH = "-";
 
 }

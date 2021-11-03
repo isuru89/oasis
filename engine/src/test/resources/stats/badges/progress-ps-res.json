@@ -1,0 +1,11 @@
+{
+  "gameId": 1,
+  "userId": 1,
+  "inTime": 1585872000000,
+  "progressRecords": {
+    "MULTIPLE_THRESHOLDS": {
+      "currentStreak": 2,
+      "currentThreshold": 96.00
+    }
+  }
+}
