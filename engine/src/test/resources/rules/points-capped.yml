@@ -1,0 +1,16 @@
+version: 1
+
+elements:
+  - id: PNT00003
+    name: Capped-Reputation
+    description: Awards points based on the score but no more than exceeding 75 per day
+    type: core:point
+    spec:
+      selector:
+        matchEvent: event.a
+      reward:
+        pointId: test.reputation
+        expression: e.value
+      cap:
+        duration: daily
+        limit: 75
