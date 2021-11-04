@@ -23,7 +23,12 @@ import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.element.points.stats.PointStats;
-import io.github.oasis.engine.element.points.stats.to.*;
+import io.github.oasis.engine.element.points.stats.to.LeaderboardRequest;
+import io.github.oasis.engine.element.points.stats.to.LeaderboardSummary;
+import io.github.oasis.engine.element.points.stats.to.UserPointSummary;
+import io.github.oasis.engine.element.points.stats.to.UserPointsRequest;
+import io.github.oasis.engine.element.points.stats.to.UserRankingRequest;
+import io.github.oasis.engine.element.points.stats.to.UserRankingSummary;
 import io.github.oasis.engine.model.TEvent;
 import org.junit.jupiter.api.Test;
 
@@ -312,6 +317,110 @@ public class EnginePointsTest extends OasisEngineTest {
         compareStatReqRes("stats/leaderboard/game-daily-req.json", LeaderboardRequest.class,
                 "stats/leaderboard/game-daily-res.json", LeaderboardSummary.class,
                 req -> (LeaderboardSummary) stats.getLeaderboard(req));
+    }
+
+    @Test
+    public void testCappedPoints() {
+        Event e1 = TEvent.createWithTeam(U1, T2, TS("2021-10-04 07:15"), EVT_A, 55);
+        Event e3 = TEvent.createWithTeam(U1, T1, TS("2021-10-04 15:15"), EVT_A, 56);
+        Event e5 = TEvent.createWithTeam(U1, T2, TS("2021-10-07 07:15"), EVT_A, 61);
+        Event e7 = TEvent.createWithTeam(U1, T1, TS("2021-10-08 07:15"), EVT_A, 83);
+        Event e2 = TEvent.createWithTeam(U2, T2, TS("2021-10-05 11:45"), EVT_A, 98);
+        Event e4 = TEvent.createWithTeam(U2, T1, TS("2021-10-06 11:45"), EVT_A, 87);
+        Event e6 = TEvent.createWithTeam(U2, T2, TS("2021-10-06 17:45"), EVT_A, 59);
+        Event e8 = TEvent.createWithTeam(U2, T1, TS("2021-10-09 11:45"), EVT_A, 78);
+
+        GameDef gameDef = loadRulesFromResource("rules/points-capped.yml");
+
+        engine.createGame(TEvent.GAME_ID).startGame(TEvent.GAME_ID, gameDef);
+
+        engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
+        awaitTerminated();
+
+        // 11 + 1 + 24
+        String rid = "test.reputation";
+        long tid1 = e3.getTeam();
+        long tid2 = e1.getTeam();
+        RedisAssert.assertMap(dbPool,
+                PointIDs.getGameUserPointsSummary(TEvent.GAME_ID, U1),
+                RedisAssert.ofEntries("all", "211",
+                        "source:" + e1.getSource(), "211",
+                        "all:Y2021", "211",
+                        "all:Q202104", "211",
+                        "all:M202110", "211",
+                        "all:W202140", "211",
+                        "all:D20211004", "75",
+                        "all:D20211007", "61",
+                        "all:D20211008", "75",
+                        "rule:"+rid, "211",
+                        "rule:"+rid+":Y2021", "211",
+                        "rule:"+rid+":Q202104", "211",
+                        "rule:"+rid+":M202110", "211",
+                        "rule:"+rid+":W202140", "211",
+                        "rule:"+rid+":D20211004", "75",
+                        "rule:"+rid+":D20211007", "61",
+                        "rule:"+rid+":D20211008", "75",
+                        "rule:"+rid+":XD20211004", "75",
+                        "rule:"+rid+":XD20211007", "61",
+                        "rule:"+rid+":XD20211008", "75",
+                        "team:"+tid1, "95",
+                        "team:"+tid2, "116",
+                        "team:"+tid1+":Y2021", "95",
+                        "team:"+tid1+":Q202104", "95",
+                        "team:"+tid1+":M202110", "95",
+                        "team:"+tid1+":W202140", "95",
+                        "team:"+tid1+":D20211004", "20",
+                        "team:"+tid1+":D20211008", "75",
+                        "team:"+tid2+":Y2021", "116",
+                        "team:"+tid2+":Q202104", "116",
+                        "team:"+tid2+":M202110", "116",
+                        "team:"+tid2+":W202140", "116",
+                        "team:"+tid2+":D20211004", "55",
+                        "team:"+tid2+":D20211007", "61"
+                ));
+
+        RedisAssert.assertMap(dbPool,
+                PointIDs.getGameUserPointsSummary(TEvent.GAME_ID, U2),
+                RedisAssert.ofEntries("all", "225",
+                        "source:" + e1.getSource(), "225",
+                        "all:Y2021", "225",
+                        "all:Q202104", "225",
+                        "all:M202110", "225",
+                        "all:W202140", "225",
+                        "all:D20211005", "75",
+                        "all:D20211006", "75",
+                        "all:D20211009", "75",
+                        "rule:"+rid, "225",
+                        "rule:"+rid+":Y2021", "225",
+                        "rule:"+rid+":Q202104", "225",
+                        "rule:"+rid+":M202110", "225",
+                        "rule:"+rid+":W202140", "225",
+                        "rule:"+rid+":D20211005", "75",
+                        "rule:"+rid+":D20211006", "75",
+                        "rule:"+rid+":D20211009", "75",
+                        "rule:"+rid+":XD20211005", "75",
+                        "rule:"+rid+":XD20211006", "75",
+                        "rule:"+rid+":XD20211009", "75",
+                        "team:"+tid1, "150",
+                        "team:"+tid2, "75",
+                        "team:"+tid1+":Y2021", "150",
+                        "team:"+tid1+":Q202104", "150",
+                        "team:"+tid1+":M202110", "150",
+                        "team:"+tid1+":W202140", "150",
+                        "team:"+tid1+":D20211006", "75",
+                        "team:"+tid1+":D20211009", "75",
+                        "team:"+tid2+":Y2021", "75",
+                        "team:"+tid2+":Q202104", "75",
+                        "team:"+tid2+":M202110", "75",
+                        "team:"+tid2+":W202140", "75",
+                        "team:"+tid2+":D20211005", "75"
+                ));
+
+        PointStats stats = new PointStats(dbPool, metadataSupport);
+
+        compareStatReqRes("stats/points/points-cap-req.json", UserPointsRequest.class,
+                "stats/points/points-cap-res.json", UserPointSummary.class,
+                req -> (UserPointSummary) stats.getUserPoints(req));
     }
 
 }

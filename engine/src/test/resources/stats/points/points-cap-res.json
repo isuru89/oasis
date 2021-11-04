@@ -1,0 +1,23 @@
+{
+  "gameId": 1,
+  "userId": 1,
+  "totalPoints": 211,
+  "points": {
+    "rule": {
+      "records": [
+        {
+          "key": "rule:test.reputation:D20211004",
+          "value": 75
+        },
+        {
+          "key": "rule:test.reputation:D20211007",
+          "value": 61
+        },
+        {
+          "key": "rule:test.reputation:D20211008",
+          "value": 75
+        }
+      ]
+    }
+  }
+}

@@ -123,10 +123,8 @@ public class PointsSink extends AbstractSink {
                             PointIDs.getGameTeamLeaderboard(gameId, teamId, WEEKLY, tcx.getWeek()),
                             PointIDs.getGameTeamLeaderboard(gameId, teamId, DAILY, tcx.getDay())
                     ));
-            System.out.println(">>>");
 
         } catch (Throwable e) {
-            e.printStackTrace();
             throw new OasisRuntimeException("Error while processing point signal!", e);
         }
         return null;
