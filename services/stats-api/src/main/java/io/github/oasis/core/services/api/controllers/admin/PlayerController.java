@@ -27,7 +27,9 @@ import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.annotations.ForCurator;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
-import io.github.oasis.core.services.api.services.PlayerTeamService;
+import io.github.oasis.core.services.api.services.IPlayerAssignmentService;
+import io.github.oasis.core.services.api.services.IPlayerManagementService;
+import io.github.oasis.core.services.api.services.ITeamManagementService;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
 import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
@@ -56,13 +58,19 @@ import java.util.List;
 @RequestMapping(
         produces = MediaType.APPLICATION_JSON_VALUE
 )
-@Tag(name = "Players", description = "Players related APIs")
+@Tag(name = "Players and Teams", description = "Players and Team management related APIs")
 public class PlayerController extends AbstractController {
 
-    private final PlayerTeamService playerTeamService;
+    private final IPlayerManagementService playerManagementService;
+    private final IPlayerAssignmentService playerAssignmentService;
+    private final ITeamManagementService teamManagementService;
 
-    public PlayerController(PlayerTeamService playerTeamService) {
-        this.playerTeamService = playerTeamService;
+    public PlayerController(IPlayerManagementService playerManagementService,
+                            IPlayerAssignmentService assignmentService,
+                            ITeamManagementService teamManagementService) {
+        this.playerAssignmentService = assignmentService;
+        this.playerManagementService = playerManagementService;
+        this.teamManagementService = teamManagementService;
     }
 
     @Operation(
@@ -72,7 +80,7 @@ public class PlayerController extends AbstractController {
     @ForAdmin
     @PostMapping(value = "/players", consumes = MediaType.APPLICATION_JSON_VALUE)
     public PlayerObject registerPlayer(@RequestBody PlayerCreateRequest user) {
-        return playerTeamService.addPlayer(user);
+        return playerManagementService.addPlayer(user);
     }
 
     @Operation(
@@ -81,7 +89,7 @@ public class PlayerController extends AbstractController {
     @ForPlayer
     @GetMapping("/players")
     public PlayerObject readPlayerProfileByEmail(@RequestParam(name = "email") String email) {
-        return playerTeamService.readPlayer(email);
+        return playerManagementService.readPlayerByEmail(email);
     }
 
     @Operation(
@@ -90,7 +98,7 @@ public class PlayerController extends AbstractController {
     @ForPlayer
     @GetMapping("/players/{playerId}")
     public PlayerObject readPlayerProfile(@PathVariable("playerId") Long playerId) {
-        return playerTeamService.readPlayer(playerId);
+        return playerManagementService.readPlayer(playerId);
     }
 
     @Operation(
@@ -99,7 +107,7 @@ public class PlayerController extends AbstractController {
     @ForPlayer
     @GetMapping("/teams/{teamId}/players")
     public List<PlayerObject> browsePlayers(@PathVariable("teamId") Integer teamId) {
-        return playerTeamService.listAllUsersInTeam(teamId);
+        return playerAssignmentService.listAllUsersInTeam(teamId);
     }
 
     @Operation(
@@ -110,7 +118,7 @@ public class PlayerController extends AbstractController {
     @PatchMapping(value = "/players/{playerId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public PlayerObject updatePlayer(@PathVariable("playerId") Long playerId,
                                      @RequestBody PlayerUpdateRequest updateRequest) {
-        return playerTeamService.updatePlayer(playerId, updateRequest);
+        return playerManagementService.updatePlayer(playerId, updateRequest);
     }
 
     @Operation(
@@ -120,7 +128,7 @@ public class PlayerController extends AbstractController {
     @ForAdmin
     @DeleteMapping("/players/{playerId}")
     public PlayerObject deactivatePlayer(@PathVariable("playerId") Long playerId) {
-        return playerTeamService.deactivatePlayer(playerId);
+        return playerManagementService.deactivatePlayer(playerId);
     }
 
     @Operation(
@@ -130,7 +138,7 @@ public class PlayerController extends AbstractController {
     @ForCurator
     @PostMapping(value = "/teams", consumes = MediaType.APPLICATION_JSON_VALUE)
     public TeamObject addTeam(@RequestBody TeamCreateRequest request) {
-        return playerTeamService.addTeam(request);
+        return teamManagementService.addTeam(request);
     }
 
     @Operation(
@@ -139,7 +147,7 @@ public class PlayerController extends AbstractController {
     @ForPlayer
     @GetMapping("/teams/{teamId}")
     public TeamObject readTeamInfo(@PathVariable("teamId") Integer teamId) throws OasisApiException {
-        return playerTeamService.readTeam(teamId);
+        return teamManagementService.readTeam(teamId);
     }
 
     @Operation(
@@ -148,7 +156,7 @@ public class PlayerController extends AbstractController {
     @ForPlayer
     @GetMapping("/teams")
     public TeamObject readTeamInfoByName(@RequestParam(name = "name") String name) throws OasisApiException {
-        return playerTeamService.readTeam(name);
+        return teamManagementService.readTeamByName(name);
     }
 
     @Operation(
@@ -159,7 +167,7 @@ public class PlayerController extends AbstractController {
     public PaginatedResult<TeamMetadata> searchTeams(@RequestParam(name = "name") String teamPrefix,
                                                      @RequestParam(name = "offset") String offset,
                                                      @RequestParam(name = "pageSize") Integer pageSize) {
-        return playerTeamService.searchTeam(teamPrefix, offset, pageSize);
+        return teamManagementService.searchTeam(teamPrefix, offset, pageSize);
     }
 
     @Operation(
@@ -170,7 +178,7 @@ public class PlayerController extends AbstractController {
     @PatchMapping(value = "/teams/{teamId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public TeamObject updateTeam(@PathVariable("teamId") Integer teamId,
                                  @RequestBody TeamUpdateRequest request) {
-        return playerTeamService.updateTeam(teamId, request);
+        return teamManagementService.updateTeam(teamId, request);
     }
 
     @Operation(
@@ -181,7 +189,7 @@ public class PlayerController extends AbstractController {
     @PostMapping(value = "/players/{playerId}/teams", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void addPlayerToTeam(@PathVariable("playerId") Long playerId,
                                 @RequestBody PlayerGameAssociationRequest request) {
-        playerTeamService.addPlayerToTeam(playerId, request.getGameId(), request.getTeamId());
+        playerAssignmentService.addPlayerToTeam(playerId, request.getGameId(), request.getTeamId());
     }
 
     @Operation(
@@ -192,7 +200,7 @@ public class PlayerController extends AbstractController {
     @DeleteMapping("/teams/{teamId}/players/{playerId}")
     public void removePlayerFromTeam(@PathVariable("playerId") Long playerId,
                                     @PathVariable("teamId") Integer teamId) {
-        playerTeamService.removePlayerFromTeam(playerId, teamId);
+        playerAssignmentService.removePlayerFromTeam(playerId, teamId);
     }
 
     @Operation(
@@ -201,7 +209,7 @@ public class PlayerController extends AbstractController {
     @ForPlayer
     @GetMapping("/players/{playerId}/teams")
     public List<TeamObject> browsePlayerTeams(@PathVariable("playerId") Long playerId) {
-        return playerTeamService.getTeamsOfPlayer(playerId);
+        return playerAssignmentService.getTeamsOfPlayer(playerId);
     }
 
     @Operation(
@@ -212,6 +220,6 @@ public class PlayerController extends AbstractController {
     @PostMapping(value = "/teams/{teamId}/players", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void addPlayersToTeam(@PathVariable("teamId") Integer teamId,
                                 @RequestParam("playerIds") List<Long> playerId) {
-        playerTeamService.addPlayersToTeam(teamId, playerId);
+        playerAssignmentService.addPlayersToTeam(teamId, playerId);
     }
 }

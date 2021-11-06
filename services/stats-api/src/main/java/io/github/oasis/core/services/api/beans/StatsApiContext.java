@@ -33,8 +33,10 @@ import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.EventReadWriteHandler;
 import io.github.oasis.core.external.messages.EngineMessage;
+import io.github.oasis.core.services.annotations.EngineDbPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -62,7 +64,7 @@ public class StatsApiContext implements RuntimeContextSupport, Registrar {
 
     private final Map<String, ElementParser> parserCache = new ConcurrentHashMap<>();
 
-    public StatsApiContext(Db dbPool, OasisConfigs oasisConfigs) {
+    public StatsApiContext(@EngineDbPool Db dbPool, OasisConfigs oasisConfigs) {
         this.db = dbPool;
         this.configs = oasisConfigs;
     }

@@ -54,8 +54,8 @@ public class RedisDb implements Db {
         this.client = client;
     }
 
-    public static RedisDb create(OasisConfigs configs) {
-        Config config = RedisFactory.createRedissonConfigs(configs);
+    public static RedisDb create(OasisConfigs configs, String redisConfKey) {
+        Config config = RedisFactory.createRedissonConfigs(configs, redisConfKey);
         RedissonClient redissonClient = Redisson.create(config);
         return new RedisDb(redissonClient);
     }

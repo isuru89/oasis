@@ -22,6 +22,7 @@ package io.github.oasis.engine;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.elements.milestones.MilestoneIDs;
 import io.github.oasis.elements.milestones.stats.MilestoneStats;
 import io.github.oasis.elements.milestones.stats.to.GameMilestoneRequest;
@@ -70,7 +71,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
                         rid + ":nextlevelvalue", "500"
                 ));
 
-        MilestoneStats stats = new MilestoneStats(dbPool, metadataSupport);
+        MilestoneStats stats = new MilestoneStats(new EngineDataReader(dbPool), metadataSupport);
 
         compareStatReqRes("stats/milestones/user-req.json", UserMilestoneRequest.class,
                 "stats/milestones/user-res.json", UserMilestoneSummary.class,
@@ -99,7 +100,7 @@ public class EngineMilestoneTest extends OasisEngineTest {
         engine.submitAll(e1, e2, e3, e4, e5, e6, e7, e8);
         awaitTerminated();
 
-        MilestoneStats stats = new MilestoneStats(dbPool, metadataSupport);
+        MilestoneStats stats = new MilestoneStats(new EngineDataReader(dbPool), metadataSupport);
 
         compareStatReqRes("stats/milestones/game-users-req.json", GameMilestoneRequest.class,
                 "stats/milestones/game-users-res.json", GameMilestoneResponse.class,

@@ -23,7 +23,7 @@ import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
-import io.github.oasis.core.services.api.services.GameAttributeService;
+import io.github.oasis.core.services.api.services.impl.GameRankingService;
 import io.github.oasis.core.services.api.to.GameAttributeCreateRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -47,10 +47,10 @@ import java.util.List;
 @Tag(name = "Attributes", description = "Game Attributes API")
 public class GameAttributesController extends AbstractController {
 
-    private final GameAttributeService gameAttributeService;
+    private final GameRankingService gameRankingService;
 
-    public GameAttributesController(GameAttributeService gameAttributeService) {
-        this.gameAttributeService = gameAttributeService;
+    public GameAttributesController(GameRankingService gameRankingService) {
+        this.gameRankingService = gameRankingService;
     }
 
     @Operation(
@@ -61,7 +61,7 @@ public class GameAttributesController extends AbstractController {
     @PostMapping(path = "/games/{gameId}/attributes", consumes = MediaType.APPLICATION_JSON_VALUE)
     public AttributeInfo addAttribute(@PathVariable("gameId") Integer gameId,
                                       @RequestBody GameAttributeCreateRequest request) {
-        return gameAttributeService.addAttribute(gameId, request);
+        return gameRankingService.addAttribute(gameId, request);
     }
 
     @Operation(
@@ -71,6 +71,6 @@ public class GameAttributesController extends AbstractController {
     @ForPlayer
     @GetMapping(path = "/games/{gameId}/attributes")
     public List<AttributeInfo> listAttributes(@PathVariable("gameId") Integer gameId) {
-        return gameAttributeService.listAttributes(gameId);
+        return gameRankingService.listAttributes(gameId);
     }
 }

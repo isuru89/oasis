@@ -26,6 +26,7 @@ import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.core.services.annotations.OasisQueryService;
 import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
@@ -58,8 +59,8 @@ public class MilestoneStats extends AbstractStatsApiService {
 
     public static final String ZMRANKSCORE = "O.ZMRANKSCORE";
 
-    public MilestoneStats(Db dbPool, OasisMetadataSupport contextSupport) {
-        super(dbPool, contextSupport);
+    public MilestoneStats(EngineDataReader dataReader, OasisMetadataSupport contextSupport) {
+        super(dataReader, contextSupport);
     }
 
     @OasisStatEndPoint(path = "/elements/milestones/game")

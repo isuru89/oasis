@@ -47,6 +47,8 @@ import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -66,7 +68,7 @@ import static io.github.oasis.core.utils.Constants.COMMA;
  * @author Isuru Weerarathna
  */
 @Component("redis")
-public class RedisRepository implements OasisRepository, OasisMetadataSupport {
+public class RedisRepository implements OasisRepository {
 
     private static final String ALL_PATTERN = "*";
 
@@ -75,7 +77,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     private final Db dbPool;
     private final SerializationSupport serializationSupport;
 
-    public RedisRepository(Db dbPool, SerializationSupport serializationSupport) {
+    public RedisRepository(@Qualifier("cache") Db dbPool, SerializationSupport serializationSupport) {
         this.dbPool = dbPool;
         this.serializationSupport = serializationSupport;
     }
@@ -141,7 +143,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
     @Override
     public EventSourceSecrets readEventSourceSecrets(int id) {
-        // Not allowed to read secrets from engine database.
+        // Not allowed reading secrets from engine database or cache.
         throw new UnsupportedOperationException();
     }
 
@@ -316,7 +318,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         });
     }
 
-    @Override
     public Map<String, UserMetadata> readUsersByIdStrings(Collection<String> userIds) {
         return withDbContext(db -> {
             if (Utils.isEmpty(userIds)) {
@@ -336,7 +337,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         });
     }
 
-    @Override
     public Map<Long, UserMetadata> readUsersByIds(Collection<Long> userIds) {
         return withDbContext(db -> {
             String[] keys = userIds.stream().map(String::valueOf).toArray(String[]::new);
@@ -350,21 +350,12 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         });
     }
 
-    @Override
-    public UserMetadata readUserMetadata(long userId) {
-        return withDbContext(db -> {
-            String valuesFromMap = db.getValueFromMap(ID.ALL_USERS_NAMES, String.valueOf(userId));
-            if (StringUtils.isEmpty(valuesFromMap)) {
-                throw new OasisRuntimeException("No user metadata found for given user id! [" + userId + "]");
-            }
-            return createUserFromValue(userId, valuesFromMap);
-        });
-    }
-
-    @Override
     public UserMetadata readUserMetadata(String userId) {
         return withDbContext(db -> {
             String valuesFromMap = db.getValueFromMap(ID.ALL_USERS_NAMES, userId);
+            if (StringUtils.isEmpty(valuesFromMap)) {
+                throw new OasisRuntimeException("No user metadata found for given user id! [" + userId + "]");
+            }
             return createUserFromValue(Long.parseLong(userId), valuesFromMap);
         });
     }
@@ -392,7 +383,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         });
     }
 
-    @Override
     public Map<String, TeamMetadata> readTeamsByIdStrings(Collection<String> teamIds) {
         return withDbContext(db -> {
             String[] keys = teamIds.stream().map(String::valueOf).toArray(String[]::new);
@@ -406,7 +396,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         });
     }
 
-    @Override
     public Map<Integer, TeamMetadata> readTeamsById(Collection<Integer> teamIds) {
         return withDbContext(db -> {
             String[] keys = teamIds.stream().map(String::valueOf).toArray(String[]::new);
@@ -420,7 +409,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         });
     }
 
-    @Override
     public TeamMetadata readTeamMetadata(String teamId) {
         return withDbContext(db -> {
             String valuesFromMap = db.getValueFromMap(ID.ALL_TEAMS_NAMES, teamId);
@@ -430,11 +418,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
 
             return createTeamFromValue(Integer.parseInt(teamId), valuesFromMap);
         });
-    }
-
-    @Override
-    public TeamMetadata readTeamMetadata(int teamId) {
-        return readTeamMetadata(String.valueOf(teamId));
     }
 
     @Override
@@ -810,7 +793,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         });
     }
 
-    @Override
     public SimpleElementDefinition readElementDefinition(int gameId, String id) {
         return withDbContext(db -> {
             String baseKey = ID.getBasicElementDefKeyForGame(gameId);
@@ -825,7 +807,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         });
     }
 
-    @Override
     public Map<String, SimpleElementDefinition> readElementDefinitions(int gameId, Collection<String> ids) {
         return withDbContext(db -> {
             String baseKey = ID.getBasicElementDefKeyForGame(gameId);
@@ -842,7 +823,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         });
     }
 
-    @Override
     public List<SimpleElementDefinition> listAllElementDefinitions(int gameId, String type) {
         return withDbContext(db -> {
             String baseKey = ID.getElementMetadataByTypeForGame(gameId, type);
@@ -859,7 +839,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         });
     }
 
-    @Override
     public ElementDef readFullElementDef(int gameId, String ruleId) {
         return withDbContext(db -> {
             String baseKey = ID.getDetailedElementDefKeyForGame(gameId);
@@ -892,8 +871,8 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
     }
 
     @Override
-    public Map<Integer, AttributeInfo> readAttributesInfo(int gameId) {
-        return withDbContext(db -> {
+    public List<AttributeInfo> listAllAttributes(int gameId) {
+        Map<Integer, AttributeInfo> attributeInfoMap = withDbContext(db -> {
             String baseKey = ID.getGameAttributesInfoKey(gameId);
             String attributes = db.getValueFromMap(baseKey, ALL_ATTRIBUTES_KEY);
             if (Texts.isEmpty(attributes)) {
@@ -909,11 +888,6 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
             }
             return defs;
         });
-    }
-
-    @Override
-    public List<AttributeInfo> listAllAttributes(int gameId) {
-        Map<Integer, AttributeInfo> attributeInfoMap = readAttributesInfo(gameId);
         return new ArrayList<>(attributeInfoMap.values());
     }
 
@@ -1017,7 +991,7 @@ public class RedisRepository implements OasisRepository, OasisMetadataSupport {
         }
     }
 
-    private interface Handler<T> {
+    interface Handler<T> {
 
         T execute(DbContext db) throws OasisException;
 

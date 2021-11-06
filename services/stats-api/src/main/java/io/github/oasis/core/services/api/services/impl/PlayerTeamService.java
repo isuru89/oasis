@@ -1,30 +1,37 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *  * Licensed to the Apache Software Foundation (ASF) under one
+ *  * or more contributor license agreements.  See the NOTICE file
+ *  * distributed with this work for additional information
+ *  * regarding copyright ownership.  The ASF licenses this file
+ *  * to you under the Apache License, Version 2.0 (the
+ *  * "License"); you may not use this file except in compliance
+ *  * with the License.  You may obtain a copy of the License at
+ *  *
+ *  *    http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing,
+ *  * software distributed under the License is distributed on an
+ *  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  * KIND, either express or implied.  See the License for the
+ *  * specific language governing permissions and limitations
+ *  * under the License.
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
  */
 
-package io.github.oasis.core.services.api.services;
+package io.github.oasis.core.services.api.services.impl;
 
 import io.github.oasis.core.TeamMetadata;
+import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
-import io.github.oasis.core.services.api.beans.BackendRepository;
+import io.github.oasis.core.services.annotations.AdminDbRepository;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.services.IPlayerAssignmentService;
+import io.github.oasis.core.services.api.services.IPlayerManagementService;
+import io.github.oasis.core.services.api.services.ITeamManagementService;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
 import io.github.oasis.core.services.api.to.TeamCreateRequest;
@@ -42,12 +49,13 @@ import java.util.Optional;
  * @author Isuru Weerarathna
  */
 @Service
-public class PlayerTeamService extends AbstractOasisService {
+public class PlayerTeamService extends AbstractOasisService implements IPlayerManagementService, ITeamManagementService, IPlayerAssignmentService {
 
-    public PlayerTeamService(BackendRepository backendRepository) {
+    public PlayerTeamService(@AdminDbRepository OasisRepository backendRepository) {
         super(backendRepository);
     }
 
+    @Override
     public PlayerObject addPlayer(PlayerCreateRequest request) {
         PlayerObject playerObject = new PlayerObject();
         playerObject.setDisplayName(request.getDisplayName());
@@ -56,22 +64,20 @@ public class PlayerTeamService extends AbstractOasisService {
         playerObject.setAvatarRef(request.getAvatarRef());
         playerObject.setTimeZone(request.getTimeZone());
 
-        PlayerObject oasisUser = backendRepository.addPlayer(playerObject);
-
-        request.setUserId(playerObject.getId());
-        //userManagementSupport.createUser(request);
-
-        return oasisUser;
+        return backendRepository.addPlayer(playerObject);
     }
 
+    @Override
     public PlayerObject readPlayer(long userId) {
         return backendRepository.readPlayer(userId);
     }
 
-    public PlayerObject readPlayer(String userEmail) {
+    @Override
+    public PlayerObject readPlayerByEmail(String userEmail) {
         return backendRepository.readPlayer(userEmail);
     }
 
+    @Override
     public PlayerObject updatePlayer(long userId, PlayerUpdateRequest updatingUser) {
         PlayerObject dbPlayer = backendRepository.readPlayer(userId);
         PlayerObject playerUpdating = dbPlayer.toBuilder()
@@ -84,17 +90,12 @@ public class PlayerTeamService extends AbstractOasisService {
         return backendRepository.updatePlayer(userId, playerUpdating);
     }
 
+    @Override
     public PlayerObject deactivatePlayer(long userId) {
-        PlayerObject playerObject = backendRepository.deletePlayer(userId);
-
-        //userManagementSupport.deleteUser(playerObject.getEmail());
-        return playerObject;
+        return backendRepository.deletePlayer(userId);
     }
 
-    public List<TeamObject> getTeamsOfPlayer(long userId) {
-        return backendRepository.getPlayerTeams(userId);
-    }
-
+    @Override
     public TeamObject addTeam(TeamCreateRequest request) {
         return backendRepository.addTeam(TeamObject.builder()
                 .name(request.getName())
@@ -104,19 +105,21 @@ public class PlayerTeamService extends AbstractOasisService {
                 .build());
     }
 
-    public TeamObject readTeam(String name) throws OasisApiException {
+    @Override
+    public TeamObject readTeamByName(String name) throws OasisApiException {
         return Optional.ofNullable(backendRepository.readTeam(name))
                 .orElseThrow(() -> new OasisApiException(ErrorCodes.TEAM_NOT_EXISTS, HttpStatus.NOT_FOUND.value(),
                         "Provided team is not found!"));
     }
 
+    @Override
     public TeamObject readTeam(int teamId) throws OasisApiException {
         return Optional.ofNullable(backendRepository.readTeam(teamId))
                 .orElseThrow(() -> new OasisApiException(ErrorCodes.TEAM_NOT_EXISTS, HttpStatus.NOT_FOUND.value(),
                         "Provided team is not found!"));
-
     }
 
+    @Override
     public TeamObject updateTeam(int teamId, TeamUpdateRequest request) {
         TeamObject dbTeam = backendRepository.readTeam(teamId);
 
@@ -126,23 +129,33 @@ public class PlayerTeamService extends AbstractOasisService {
                 .build());
     }
 
+    @Override
+    public PaginatedResult<TeamMetadata> searchTeam(String teamPrefix, String offset, int maxSize) {
+        return backendRepository.searchTeam(teamPrefix, offset, maxSize);
+    }
+
+    @Override
     public List<PlayerObject> listAllUsersInTeam(int teamId) {
         return backendRepository.getTeamPlayers(teamId);
     }
 
+    @Override
+    public List<TeamObject> getTeamsOfPlayer(long userId) {
+        return backendRepository.getPlayerTeams(userId);
+    }
+
+    @Override
     public void addPlayerToTeam(long userId, int gameId, int teamId) {
         backendRepository.addPlayerToTeam(userId, gameId, teamId);
     }
 
+    @Override
     public void removePlayerFromTeam(long playerId, int teamId) {
         TeamObject dbTeam = backendRepository.readTeam(teamId);
         backendRepository.removePlayerFromTeam(playerId, dbTeam.getGameId(), teamId);
     }
 
-    public PaginatedResult<TeamMetadata> searchTeam(String teamPrefix, String offset, int maxSize) {
-        return backendRepository.searchTeam(teamPrefix, offset, maxSize);
-    }
-
+    @Override
     public void addPlayersToTeam(int teamId, List<Long> userIds) {
         TeamObject teamObject = backendRepository.readTeam(teamId);
         int gameId = teamObject.getGameId();

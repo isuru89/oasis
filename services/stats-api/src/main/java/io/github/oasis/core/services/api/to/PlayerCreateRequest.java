@@ -43,6 +43,4 @@ public class PlayerCreateRequest implements Serializable {
     private UserGender gender;
     private String timeZone;
 
-    private String initialPassword;
-
 }

@@ -21,6 +21,7 @@ package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.GameDef;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.engine.element.points.PointIDs;
 import io.github.oasis.engine.element.points.stats.PointStats;
 import io.github.oasis.engine.element.points.stats.to.LeaderboardRequest;
@@ -159,7 +160,7 @@ public class EnginePointsTest extends OasisEngineTest {
         assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "d", "D20200402"), ofSortedEntries(U2, 33));
         assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "d", "D20200403"), ofSortedEntries(U1, 24));
 
-        PointStats stats = new PointStats(dbPool, metadataSupport);
+        PointStats stats = new PointStats(new EngineDataReader(dbPool), metadataSupport);
 
         compareStatReqRes("stats/points/points01-req.json", UserPointsRequest.class,
                 "stats/points/points01-res.json", UserPointSummary.class,
@@ -223,7 +224,7 @@ public class EnginePointsTest extends OasisEngineTest {
         assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "d", "D20200402"), ofSortedEntries(U1, 11));
         assertSorted(dbPool, PointIDs.getGameTeamLeaderboard(gameId, T2, "d", "D20200403"), ofSortedEntries(U2, 9));
 
-        PointStats stats = new PointStats(dbPool, metadataSupport);
+        PointStats stats = new PointStats(new EngineDataReader(dbPool), metadataSupport);
 
         compareStatReqRes("stats/leaderboard/team-basic-req.json", LeaderboardRequest.class,
                 "stats/leaderboard/team-basic-res.json", LeaderboardSummary.class,
@@ -308,7 +309,7 @@ public class EnginePointsTest extends OasisEngineTest {
                         "team:"+tid+":D20200702", "33"
                 ));
 
-        PointStats stats = new PointStats(dbPool, metadataSupport);
+        PointStats stats = new PointStats(new EngineDataReader(dbPool), metadataSupport);
 
         compareStatReqRes("stats/leaderboard/game-all-req.json", LeaderboardRequest.class,
                 "stats/leaderboard/game-all-res.json", LeaderboardSummary.class,
@@ -416,7 +417,7 @@ public class EnginePointsTest extends OasisEngineTest {
                         "team:"+tid2+":D20211005", "75"
                 ));
 
-        PointStats stats = new PointStats(dbPool, metadataSupport);
+        PointStats stats = new PointStats(new EngineDataReader(dbPool), metadataSupport);
 
         compareStatReqRes("stats/points/points-cap-req.json", UserPointsRequest.class,
                 "stats/points/points-cap-res.json", UserPointSummary.class,

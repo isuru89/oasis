@@ -19,26 +19,22 @@
 
 package io.github.oasis.core.services.api.services;
 
-import com.mysql.cj.exceptions.AssertionFailedException;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.services.api.beans.BackendRepository;
-import io.github.oasis.core.services.api.beans.KeyGeneratorHelper;
 import io.github.oasis.core.services.api.beans.jdbc.JdbcRepository;
-import io.github.oasis.core.services.api.controllers.admin.EventSourceController;
 import io.github.oasis.core.services.api.dao.IEventSourceDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.services.impl.EventSourceService;
 import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -55,29 +51,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class EventSourceServiceTest extends AbstractServiceTest {
 
-    private EventSourceController esController;
-    private final KeyGeneratorHelper keyGeneratorSupport = new KeyGeneratorHelper();
-
-    public EventSourceServiceTest() {
-        try {
-            keyGeneratorSupport.init();
-        } catch (NoSuchAlgorithmException e) {
-            throw new AssertionFailedException("Cannot initialize key generator!");
-        }
-    }
+    @Autowired
+    private EventSourceService eventSourceService;
 
     @Test
     void testRegisterEventSource() throws OasisException {
         EventSourceCreateRequest source = new EventSourceCreateRequest("test-1");
-        EventSource dbSource = esController.registerEventSource(source);
+        EventSource dbSource = eventSourceService.registerEventSource(source);
         System.out.println(dbSource);
         assertSource(dbSource, source, true);
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> esController.registerEventSource(source))
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> eventSourceService.registerEventSource(source))
                 .isInstanceOf(OasisApiRuntimeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_ALREADY_EXISTS);
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> esController.registerEventSource(new EventSourceCreateRequest("")))
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> eventSourceService.registerEventSource(new EventSourceCreateRequest("")))
                 .isInstanceOf(DataValidationException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_NO_NAME);
     }
@@ -85,15 +73,15 @@ public class EventSourceServiceTest extends AbstractServiceTest {
     @Test
     void testDownloadEventSourceKeys() throws OasisException {
         EventSourceCreateRequest source = new EventSourceCreateRequest("test-1");
-        EventSource dbSource = esController.registerEventSource(source);
+        EventSource dbSource = eventSourceService.registerEventSource(source);
         System.out.println(dbSource);
         assertSource(dbSource, source, true);
 
-        ResponseEntity<EventSourceKeysResponse> keyset = esController.fetchEventSourceKeys(dbSource.getId());
-        assertNotNull(keyset.getBody());
-        assertEquals(dbSource.getSecrets().getPrivateKey(), keyset.getBody().getPrivateKeyB64Encoded());
+        EventSourceKeysResponse keyset = eventSourceService.downloadEventSourceKeys(dbSource.getId());
+        assertNotNull(keyset);
+        assertEquals(dbSource.getSecrets().getPrivateKey(), keyset.getPrivateKeyB64Encoded());
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> esController.fetchEventSourceKeys(dbSource.getId()))
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> eventSourceService.downloadEventSourceKeys(dbSource.getId()))
                 .isInstanceOf(OasisApiRuntimeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_DOWNLOAD_LIMIT_EXCEEDED);
     }
@@ -101,133 +89,128 @@ public class EventSourceServiceTest extends AbstractServiceTest {
     @Test
     void testReadEventSourceInfo() throws OasisException {
         EventSourceCreateRequest source = new EventSourceCreateRequest("test-1");
-        EventSource dbSource = esController.registerEventSource(source);
+        EventSource dbSource = eventSourceService.registerEventSource(source);
         System.out.println(dbSource);
         assertSource(dbSource, source, true);
 
-        EventSource eventSource = esController.getEventSource(dbSource.getId());
+        EventSource eventSource = eventSourceService.readEventSource(dbSource.getId());
         System.out.println(eventSource);
         assertNull(eventSource.getSecrets());
         assertSource(eventSource, dbSource, false);
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> esController.getEventSource(dbSource.getId() + 500))
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> eventSourceService.readEventSource(dbSource.getId() + 500))
                 .isInstanceOf(OasisApiRuntimeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_NOT_EXISTS);
     }
 
     @Test
     void testListAllEventSources() throws OasisException {
-        assertEquals(0, esController.getAllEventSources().size());
+        assertEquals(0, eventSourceService.listAllEventSources().size());
 
         EventSourceCreateRequest src1 = EventSourceCreateRequest.builder().name("test-1").build();
         EventSourceCreateRequest src2 = EventSourceCreateRequest.builder().name("test-2").build();
         EventSourceCreateRequest src3 = EventSourceCreateRequest.builder().name("test-3").build();
-        esController.registerEventSource(src1);
+        eventSourceService.registerEventSource(src1);
 
-        assertEquals(1, esController.getAllEventSources().size());
-        esController.registerEventSource(src2);
-        esController.registerEventSource(src3);
+        assertEquals(1, eventSourceService.listAllEventSources().size());
+        eventSourceService.registerEventSource(src2);
+        eventSourceService.registerEventSource(src3);
 
-        assertEquals(3, esController.getAllEventSources().size());
-        assertThrows(OasisApiRuntimeException.class, () -> esController.registerEventSource(src2));
-        assertEquals(3, esController.getAllEventSources().size());
+        assertEquals(3, eventSourceService.listAllEventSources().size());
+        assertThrows(OasisApiRuntimeException.class, () -> eventSourceService.registerEventSource(src2));
+        assertEquals(3, eventSourceService.listAllEventSources().size());
 
-        List<EventSource> allSrc = esController.getAllEventSources();
+        List<EventSource> allSrc = eventSourceService.listAllEventSources();
         assertEquals(3, (int) allSrc.stream().filter(s -> Objects.isNull(s.getSecrets())).count());
     }
 
     @Test
     void testDeleteEventSources() throws OasisException {
-        assertEquals(0, esController.getAllEventSources().size());
+        assertEquals(0, eventSourceService.listAllEventSources().size());
 
         EventSourceCreateRequest src1 = EventSourceCreateRequest.builder().name("test-1").build();
         EventSourceCreateRequest src2 = EventSourceCreateRequest.builder().name("test-2").build();
         EventSourceCreateRequest src3 = EventSourceCreateRequest.builder().name("test-3").build();
-        int id1 = esController.registerEventSource(src1).getId();
-        int id2 = esController.registerEventSource(src2).getId();
-        int id3 = esController.registerEventSource(src3).getId();
+        int id1 = eventSourceService.registerEventSource(src1).getId();
+        int id2 = eventSourceService.registerEventSource(src2).getId();
+        int id3 = eventSourceService.registerEventSource(src3).getId();
 
-        assertEquals(3, esController.getAllEventSources().size());
+        assertEquals(3, eventSourceService.listAllEventSources().size());
 
-        esController.deleteEventSource(id1);
+        eventSourceService.deleteEventSource(id1);
 
-        assertEquals(2, esController.getAllEventSources().size());
+        assertEquals(2, eventSourceService.listAllEventSources().size());
 
-        esController.deleteEventSource(id2);
-        esController.deleteEventSource(id3);
+        eventSourceService.deleteEventSource(id2);
+        eventSourceService.deleteEventSource(id3);
 
-        assertEquals(0, esController.getAllEventSources().size());
+        assertEquals(0, eventSourceService.listAllEventSources().size());
     }
 
     @Test
     void testRegisterSourcesToGame() throws OasisException {
-        assertEquals(0, esController.getAllEventSources().size());
+        assertEquals(0, eventSourceService.listAllEventSources().size());
 
         EventSourceCreateRequest src1 = EventSourceCreateRequest.builder().name("test-1").build();
         EventSourceCreateRequest src2 = EventSourceCreateRequest.builder().name("test-2").build();
         EventSourceCreateRequest src3 = EventSourceCreateRequest.builder().name("test-3").build();
-        int id1 = esController.registerEventSource(src1).getId();
-        int id2 = esController.registerEventSource(src2).getId();
-        int id3 = esController.registerEventSource(src3).getId();
+        int id1 = eventSourceService.registerEventSource(src1).getId();
+        int id2 = eventSourceService.registerEventSource(src2).getId();
+        int id3 = eventSourceService.registerEventSource(src3).getId();
 
-        assertEquals(3, esController.getAllEventSources().size());
+        assertEquals(3, eventSourceService.listAllEventSources().size());
 
-        ResponseEntity<String> response = esController.associateEventSourceToGame(1, id1);
-        assertEquals("OK", response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        esController.associateEventSourceToGame(1, id2);
-        esController.associateEventSourceToGame(1, id3);
+        eventSourceService.assignEventSourceToGame(id1, 1);
+        eventSourceService.assignEventSourceToGame(id2, 1);
+        eventSourceService.assignEventSourceToGame(id3, 1);
 
-        esController.associateEventSourceToGame(2, id2);
-        esController.associateEventSourceToGame(2, id1);
+        eventSourceService.assignEventSourceToGame(id2, 2);
+        eventSourceService.assignEventSourceToGame(id1, 2);
 
-        List<EventSource> game1Sources = esController.getEventSourcesOfGame(1);
+        List<EventSource> game1Sources = eventSourceService.listAllEventSourcesOfGame(1);
         assertEquals(3, game1Sources.size());
         List<String> game1Names = game1Sources.stream().map(EventSource::getName).collect(Collectors.toList());
         assertTrue(game1Names.contains(src1.getName()));
         assertTrue(game1Names.contains(src2.getName()));
         assertTrue(game1Names.contains(src3.getName()));
 
-        List<EventSource> game2Sources = esController.getEventSourcesOfGame(2);
+        List<EventSource> game2Sources = eventSourceService.listAllEventSourcesOfGame(2);
         assertEquals(2, game2Sources.size());
         List<String> game2Names = game2Sources.stream().map(EventSource::getName).collect(Collectors.toList());
         assertTrue(game2Names.contains(src1.getName()));
         assertTrue(game2Names.contains(src2.getName()));
         assertFalse(game2Names.contains(src3.getName()));
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> esController.associateEventSourceToGame(1, id1))
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> eventSourceService.assignEventSourceToGame(id1, 1))
                 .isInstanceOf(OasisApiRuntimeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_ALREADY_MAPPED);
     }
 
     @Test
     void testDeRegisterSourcesToGame() throws OasisException {
-        assertEquals(0, esController.getAllEventSources().size());
+        assertEquals(0, eventSourceService.listAllEventSources().size());
 
         EventSourceCreateRequest src1 = EventSourceCreateRequest.builder().name("test-1").build();
         EventSourceCreateRequest src2 = EventSourceCreateRequest.builder().name("test-2").build();
         EventSourceCreateRequest src3 = EventSourceCreateRequest.builder().name("test-3").build();
-        int id1 = esController.registerEventSource(src1).getId();
-        int id2 = esController.registerEventSource(src2).getId();
-        int id3 = esController.registerEventSource(src3).getId();
+        int id1 = eventSourceService.registerEventSource(src1).getId();
+        int id2 = eventSourceService.registerEventSource(src2).getId();
+        int id3 = eventSourceService.registerEventSource(src3).getId();
 
-        assertEquals(3, esController.getAllEventSources().size());
+        assertEquals(3, eventSourceService.listAllEventSources().size());
 
-        esController.associateEventSourceToGame(1, id1);
-        esController.associateEventSourceToGame(1, id2);
-        esController.associateEventSourceToGame(1, id3);
+        eventSourceService.assignEventSourceToGame(id1, 1);
+        eventSourceService.assignEventSourceToGame(id2, 1);
+        eventSourceService.assignEventSourceToGame(id3, 1);
 
-        esController.associateEventSourceToGame(2, id2);
-        esController.associateEventSourceToGame(2, id1);
+        eventSourceService.assignEventSourceToGame(id2, 2);
+        eventSourceService.assignEventSourceToGame(id1, 2);
 
-        assertEquals(3, esController.getEventSourcesOfGame(1).size());
+        assertEquals(3, eventSourceService.listAllEventSourcesOfGame(1).size());
 
-        ResponseEntity<String> response = esController.removeEventSourceFromGame(1, id2);
+        eventSourceService.removeEventSourceFromGame(id2, 1);
         {
-            assertEquals("OK", response.getBody());
-            assertEquals(HttpStatus.OK, response.getStatusCode());
-
-            List<EventSource> game1Sources = esController.getEventSourcesOfGame(1);
+            List<EventSource> game1Sources = eventSourceService.listAllEventSourcesOfGame(1);
             assertEquals(2, game1Sources.size());
             List<String> game1Names = game1Sources.stream().map(EventSource::getName).collect(Collectors.toList());
             assertTrue(game1Names.contains(src1.getName()));
@@ -261,17 +244,4 @@ public class EventSourceServiceTest extends AbstractServiceTest {
         }
     }
 
-    @Override
-    protected JdbcRepository createJdbcRepository(Jdbi jdbi) {
-        return new JdbcRepository(jdbi.onDemand(IGameDao.class),
-                jdbi.onDemand(IEventSourceDao.class),
-                null,
-                null,
-                null);
-    }
-
-    @Override
-    protected void createServices(BackendRepository backendRepository) {
-        esController = new EventSourceController(new EventSourceService(backendRepository, keyGeneratorSupport));
-    }
 }

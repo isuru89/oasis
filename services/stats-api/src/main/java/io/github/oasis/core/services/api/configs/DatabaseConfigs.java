@@ -19,9 +19,12 @@
 
 package io.github.oasis.core.services.api.configs;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.external.Db;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.core.services.api.dao.IApiKeyDao;
 import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.dao.IEventSourceDao;
@@ -43,6 +46,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -140,10 +144,21 @@ public class DatabaseConfigs {
         }
     }
 
-    @Bean
+    @Bean("enginedb")
     public Db createDbService(OasisConfigs oasisConfigs) throws Exception {
-        LOG.info("Trying to create database connection... (with retries {})", numberOfDbRetries);
-        return loadDbService(oasisConfigs, numberOfDbRetries);
+        LOG.info("Trying to create engine db connection... (with retries {})", numberOfDbRetries);
+        return loadDbService(oasisConfigs, "oasis.enginedb", numberOfDbRetries);
+    }
+
+    @Bean("cache")
+    public Db createCacheService(OasisConfigs oasisConfigs) throws Exception {
+        LOG.info("Trying to create cache connection... (with retries {})", numberOfDbRetries);
+        return loadDbService(oasisConfigs, "oasis.cache", numberOfDbRetries);
+    }
+
+    @Bean
+    public EngineDataReader createEngineDataReader(@Qualifier("enginedb") Db db) {
+        return new EngineDataReader(db);
     }
 
     @Bean
@@ -171,16 +186,16 @@ public class DatabaseConfigs {
         return jdbi.onDemand(IPlayerTeamDao.class);
     }
 
-    private Db loadDbService(OasisConfigs oasisConfigs, int retries) throws Exception {
+    private Db loadDbService(OasisConfigs oasisConfigs, String keyPrefix, int retries) throws Exception {
         if (retries > 0) {
             try {
-                RedisDb redisDb = RedisDb.create(oasisConfigs);
+                RedisDb redisDb = RedisDb.create(oasisConfigs, keyPrefix);
                 redisDb.init();
                 return redisDb;
             } catch (Throwable e) {
                 LOG.error("Could not load redis connection! Trying again later after {}ms... [Remaining: {}]", dbRetryInterval, retries);
                 Thread.sleep(dbRetryInterval);
-                return loadDbService(oasisConfigs, retries - 1);
+                return loadDbService(oasisConfigs, keyPrefix, retries - 1);
             }
         }
         throw new OasisDbException("Unable to create a redis connection!");

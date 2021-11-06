@@ -20,6 +20,7 @@
 package io.github.oasis.core.services.api.beans.jdbc;
 
 import io.github.oasis.core.Game;
+import io.github.oasis.core.ID;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
@@ -44,9 +45,12 @@ import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import org.jdbi.v3.core.JdbiException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -244,12 +248,14 @@ public class JdbcRepository implements OasisRepository {
         return Objects.nonNull(playerTeamDao.readPlayer(playerId));
     }
 
+    @CacheEvict(value = ID.CACHE_USERS_META, key = "#playerId")
     @Override
     public PlayerObject updatePlayer(long playerId, PlayerObject updatedPlayer) {
         playerTeamDao.updatePlayer(playerId, PlayerUpdatePart.from(updatedPlayer));
         return playerTeamDao.readPlayer(playerId);
     }
 
+    @CacheEvict(value = ID.CACHE_USERS_META, key = "#playerId")
     @Override
     public PlayerObject deletePlayer(long playerId) {
         PlayerObject player = playerTeamDao.readPlayer(playerId);
@@ -277,6 +283,7 @@ public class JdbcRepository implements OasisRepository {
         return playerTeamDao.readTeamByName(teamName);
     }
 
+    @CacheEvict(value = ID.CACHE_TEAMS_META, key = "#teamId")
     @Override
     public TeamObject updateTeam(int teamId, TeamObject updatedTeam) {
         playerTeamDao.updateTeam(teamId, updatedTeam);
@@ -342,6 +349,11 @@ public class JdbcRepository implements OasisRepository {
         }
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = ID.CACHE_ELEMENTS, key = "{#gameId, #id}"),
+            @CacheEvict(value = ID.CACHE_ELEMENTS_META, key = "{#gameId, #id}")
+            // to do - remove from element type cache
+    })
     @Override
     public ElementDef updateElement(int gameId, String id, SimpleElementDefinition elementDef) {
         ElementDef dbDef = readElementWithoutData(gameId, id);
@@ -357,6 +369,11 @@ public class JdbcRepository implements OasisRepository {
         return toElementDef(elementDao.readElement(id));
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = ID.CACHE_ELEMENTS, key = "{#gameId, #id}"),
+            @CacheEvict(value = ID.CACHE_ELEMENTS_META, key = "{#gameId, #id}")
+            // to do - remove from element type cache
+    })
     @Override
     public ElementDef deleteElement(int gameId, String id) {
         ElementDef elementDef = toElementDef(elementDao.readElementWithData(id));
@@ -398,10 +415,15 @@ public class JdbcRepository implements OasisRepository {
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(value = ID.CACHE_ATTRIBUTES, key = "#gameId")
     @Override
     public AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute) {
-        int newAttrId = elementDao.insertAttribute(gameId, newAttribute);
-        return elementDao.readAttribute(gameId, newAttrId);
+        try {
+            int newAttrId = elementDao.insertAttribute(gameId, newAttribute);
+            return elementDao.readAttribute(gameId, newAttrId);
+        } catch (Exception e) {
+            throw new OasisApiRuntimeException(ErrorCodes.ATTRIBUTE_EXISTS, e);
+        }
     }
 
     @Override

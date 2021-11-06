@@ -23,7 +23,7 @@ import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.api.controllers.AbstractController;
-import io.github.oasis.core.services.api.services.EventSourceService;
+import io.github.oasis.core.services.api.services.impl.EventSourceService;
 import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import io.swagger.v3.oas.annotations.Operation;
