@@ -50,7 +50,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -352,7 +351,6 @@ public class JdbcRepository implements OasisRepository {
     @Caching(evict = {
             @CacheEvict(value = ID.CACHE_ELEMENTS, key = "{#gameId, #id}"),
             @CacheEvict(value = ID.CACHE_ELEMENTS_META, key = "{#gameId, #id}")
-            // to do - remove from element type cache
     })
     @Override
     public ElementDef updateElement(int gameId, String id, SimpleElementDefinition elementDef) {
@@ -372,7 +370,6 @@ public class JdbcRepository implements OasisRepository {
     @Caching(evict = {
             @CacheEvict(value = ID.CACHE_ELEMENTS, key = "{#gameId, #id}"),
             @CacheEvict(value = ID.CACHE_ELEMENTS_META, key = "{#gameId, #id}")
-            // to do - remove from element type cache
     })
     @Override
     public ElementDef deleteElement(int gameId, String id) {

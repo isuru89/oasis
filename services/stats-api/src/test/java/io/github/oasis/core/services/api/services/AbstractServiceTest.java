@@ -20,7 +20,6 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.services.SerializationSupport;
 import io.github.oasis.core.services.annotations.EngineDbPool;
 import io.github.oasis.core.services.api.TestUtils;
@@ -51,20 +50,10 @@ public abstract class AbstractServiceTest {
     @Autowired
     protected SerializationSupport serializationSupport;
 
-    public void cleanRedisData() throws IOException {
-        try (DbContext db = dbPool.createContext()) {
-            db.allKeys("*").forEach(db::removeKey);
-        }
-    }
-
-    public void cleanJdbcData() throws SQLException {
-        TestUtils.truncateData(dataSource);
-    }
-
     @BeforeEach
     public void beforeEach() throws IOException, SQLException {
-        cleanRedisData();
-        cleanJdbcData();
+        TestUtils.cleanRedisData(dbPool);
+        TestUtils.truncateData(dataSource);
     }
 
     @AfterEach

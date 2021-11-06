@@ -21,10 +21,13 @@ package io.github.oasis.core.services.api;
 
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.core.services.api.to.ElementCreateRequest;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -55,6 +58,12 @@ public class TestUtils {
         return requests.stream()
                 .filter(req -> req.getMetadata().getId().equals(id))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Given rule id not found!"));
+    }
+
+    public static void cleanRedisData(Db dbPool) throws IOException {
+        try (DbContext db = dbPool.createContext()) {
+            db.allKeys("*").forEach(db::removeKey);
+        }
     }
 
 

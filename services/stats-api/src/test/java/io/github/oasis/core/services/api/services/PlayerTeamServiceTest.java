@@ -20,13 +20,11 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.TeamMetadata;
+import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserGender;
-import io.github.oasis.core.services.api.beans.BackendRepository;
-import io.github.oasis.core.services.api.beans.jdbc.JdbcRepository;
-import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
@@ -35,7 +33,6 @@ import io.github.oasis.core.services.api.to.TeamCreateRequest;
 import io.github.oasis.core.services.api.to.TeamUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.assertj.core.api.Assertions;
-import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -122,7 +119,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    void updatePlayer() {
+    void updatePlayer() throws OasisException {
         PlayerObject alice = playerManagementService.addPlayer(reqAlice);
 
         assertNotNull(playerManagementService.readPlayerByEmail(reqAlice.getEmail()));

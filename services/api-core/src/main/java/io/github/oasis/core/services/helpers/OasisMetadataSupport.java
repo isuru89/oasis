@@ -27,7 +27,6 @@ import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,14 +43,12 @@ public interface OasisMetadataSupport {
     }
 
     Map<String, TeamMetadata> readTeamsByIdStrings(Collection<String> teamIds) throws OasisException;
-    Map<Integer, TeamMetadata> readTeamsById(Collection<Integer> teamIds) throws OasisException;
 
     TeamMetadata readTeamMetadata(String teamId) throws OasisException;
     default TeamMetadata readTeamMetadata(int teamId) throws OasisException {
         return readTeamMetadata(String.valueOf(teamId));
     }
 
-    List<SimpleElementDefinition> listAllElementDefinitions(int gameId, String type) throws OasisException;
     ElementDef readFullElementDef(int gameId, String ruleId) throws OasisException;
     SimpleElementDefinition readElementDefinition(int gameId, String id) throws OasisException;
     Map<String, SimpleElementDefinition> readElementDefinitions(int gameId, Collection<String> ids) throws OasisException;

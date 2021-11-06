@@ -75,8 +75,12 @@ public class ApiKeyService implements UserDetailsService {
 
             for (String client : clients) {
                 String[] parts = client.split("[:]");
-                LOG.info("Default credentials are going to be added for user {}", parts[0]);
-                dao.addNewApiKey(parts[0], parts[1], ROLE_ADMIN_FLAG + ROLE_CURATOR_FLAG + ROLE_PLAYER_FLAG);
+                int defaultPermissions = ROLE_ADMIN_FLAG | ROLE_CURATOR_FLAG | ROLE_PLAYER_FLAG;
+                if (parts.length > 2 && StringUtils.isNumeric(parts[2])) {
+                    defaultPermissions = Integer.parseInt(parts[2]);
+                }
+                LOG.info("Default credentials are going to be added for user {} with permissions {}", parts[0], defaultPermissions);
+                dao.addNewApiKey(parts[0], parts[1], defaultPermissions);
             }
         }
     }

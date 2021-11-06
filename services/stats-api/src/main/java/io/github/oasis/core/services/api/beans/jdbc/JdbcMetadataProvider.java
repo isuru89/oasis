@@ -28,7 +28,6 @@ import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
-import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
@@ -40,10 +39,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -57,7 +54,7 @@ import java.util.stream.Collectors;
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class JdbcMetadataProvider implements OasisMetadataSupport {
 
-    private final OasisRepository adminDbRepository;
+    private OasisRepository adminDbRepository;
 
     // we use this self reference to activate caching within instance itself.
     @Autowired
@@ -124,42 +121,23 @@ public class JdbcMetadataProvider implements OasisMetadataSupport {
     }
 
     @Override
-    public Map<Integer, TeamMetadata> readTeamsById(Collection<Integer> teamIds) {
-        Map<Integer, TeamMetadata> metadataMap = new HashMap<>();
-        for (Integer teamId : teamIds) {
-            metadataMap.put(teamId, self.readTeamMetadata(teamId));
-        }
-        return metadataMap;
-    }
-
-    @Override
     public TeamMetadata readTeamMetadata(String teamId) {
         return self.readTeamMetadata(Integer.parseInt(teamId));
     }
 
-    @Cacheable(ID.CACHE_ELEMENTS_BY_TYPE_META)
+    @Cacheable(value = ID.CACHE_ELEMENTS, key = "{#gameId, #id}", unless = "#result == null")
     @Override
-    public List<SimpleElementDefinition> listAllElementDefinitions(int gameId, String type) {
-        List<ElementDef> elementDefs = adminDbRepository.readElementsByType(gameId, type);
-        List<SimpleElementDefinition> elementDefinitions = new ArrayList<>();
-        for (ElementDef elementDef : elementDefs) {
-            elementDefinitions.add(new SimpleElementDefinition(elementDef.getElementId(),
-                    elementDef.getMetadata().getName(),
-                    elementDef.getMetadata().getDescription()));
-        }
-        return elementDefinitions;
+    public ElementDef readFullElementDef(int gameId, String id) {
+        return adminDbRepository.readElement(gameId, id);
     }
 
-    @Cacheable(ID.CACHE_ELEMENTS)
-    @Override
-    public ElementDef readFullElementDef(int gameId, String ruleId) {
-        return adminDbRepository.readElement(gameId, ruleId);
-    }
-
-    @Cacheable(ID.CACHE_ELEMENTS_META)
+    @Cacheable(value = ID.CACHE_ELEMENTS_META, key = "{#gameId, #id}", unless = "#result == null")
     @Override
     public SimpleElementDefinition readElementDefinition(int gameId, String id) {
         ElementDef elementDef = adminDbRepository.readElement(gameId, id);
+        if (elementDef == null) {
+            return null;
+        }
 
         return new SimpleElementDefinition(
             elementDef.getMetadata().getId(),
@@ -169,7 +147,7 @@ public class JdbcMetadataProvider implements OasisMetadataSupport {
     }
 
     @Override
-    public Map<String, SimpleElementDefinition> readElementDefinitions(int gameId, Collection<String> ids) throws OasisException {
+    public Map<String, SimpleElementDefinition> readElementDefinitions(int gameId, Collection<String> ids) {
         Map<String, SimpleElementDefinition> metadataMap = new HashMap<>();
         for (String elementId : ids) {
             metadataMap.put(elementId, self.readElementDefinition(gameId, elementId));
@@ -186,5 +164,9 @@ public class JdbcMetadataProvider implements OasisMetadataSupport {
 
     public void setSelf(JdbcMetadataProvider self) {
         this.self = self;
+    }
+
+    public void setAdminDbRepository(OasisRepository adminDbRepository) {
+        this.adminDbRepository = adminDbRepository;
     }
 }
