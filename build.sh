@@ -3,7 +3,7 @@
 echo "==============================================================================="
 echo "Building Oasis..."
 echo "==============================================================================="
-mvn clean install -DskipTests
+#mvn clean install -DskipTests
 
 echo "==============================================================================="
 echo "Building Events API Docker Image..."
@@ -29,8 +29,8 @@ docker build -t oasis/engine .
 
 cd ..
 
-mkdir -p .tmpdata/redis
-mkdir -p .tmpdata/rabbit
+mkdir -p .tmpdata/enginedb
+mkdir -p .tmpdata/cache
 
 echo "==============================================================================="
 echo "Starting Oasis..."
