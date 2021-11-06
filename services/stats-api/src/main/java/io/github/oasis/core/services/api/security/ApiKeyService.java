@@ -80,7 +80,12 @@ public class ApiKeyService implements UserDetailsService {
                     defaultPermissions = Integer.parseInt(parts[2]);
                 }
                 LOG.info("Default credentials are going to be added for user {} with permissions {}", parts[0], defaultPermissions);
-                dao.addNewApiKey(parts[0], parts[1], defaultPermissions);
+                ApiKeyDto keyInDb = dao.readApiKey(parts[0]);
+                if (keyInDb == null) {
+                    dao.addNewApiKey(parts[0], parts[1], defaultPermissions);
+                } else {
+                    LOG.warn("API key already exists in db. Hence skipping.");
+                }
             }
         }
     }
