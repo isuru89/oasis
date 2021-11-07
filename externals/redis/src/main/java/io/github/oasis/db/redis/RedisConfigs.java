@@ -34,14 +34,24 @@ import java.io.Serializable;
 @Data
 public class RedisConfigs implements Serializable {
 
+    private static final String LOCALHOST = "localhost";
+    private static final int DEFAULT_PORT = 6379;
+    private static final int POOL_MAX = 8;
+    private static final int POOL_MAX_IDLE = 2;
+    private static final int POOL_MIN_IDLE = 2;
+    private static final int DEF_TIMEOUT = 3000;
+    private static final int DEF_RETRY_COUNT = 3;
+    private static final int DEF_RETRY_INTERVAL = 2000;
+    private static final String MODE_DEFAULT = "default";
+
     private String host;
-    private Integer port;
+    private Integer port = DEFAULT_PORT;
 
-    private String mode;
+    private String mode = MODE_DEFAULT;
 
-    private int timeout;
-    private int retryCount;
-    private int retryInterval;
+    private int timeout = DEF_TIMEOUT;
+    private int retryCount = DEF_RETRY_COUNT;
+    private int retryInterval = DEF_RETRY_INTERVAL;
 
     private PoolConfigs pool;
 

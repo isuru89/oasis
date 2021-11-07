@@ -19,7 +19,6 @@
 
 package io.github.oasis.db.redis;
 
-import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.configs.OasisConfigs;
@@ -38,15 +37,6 @@ class RedisFactory {
 
     public static final ObjectMapper DESERIALIZER = new ObjectMapper();
 
-    private static final String LOCALHOST = "localhost";
-    private static final int DEFAULT_PORT = 6379;
-    private static final int POOL_MAX = 8;
-    private static final int POOL_MAX_IDLE = 2;
-    private static final int POOL_MIN_IDLE = 2;
-    private static final int DEF_TIMEOUT = 3000;
-    private static final int DEF_RETRY_COUNT = 3;
-    private static final int DEF_RETRY_INTERVAL = 2000;
-    private static final String MODE_DEFAULT = "default";
     private static final String MODE_SENTINEL = "sentinel";
     private static final String MODE_CLUSTER = "cluster";
 

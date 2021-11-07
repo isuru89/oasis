@@ -28,6 +28,7 @@ import org.redisson.api.RQueue;
 import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RScript;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.RedisException;
 import org.redisson.client.codec.DoubleCodec;
 import org.redisson.client.codec.IntegerCodec;
 import org.redisson.client.codec.StringCodec;
@@ -169,14 +170,28 @@ public class RedisContext implements DbContext {
 
     @Override
     public Object runScript(String scriptName, List<Object> keys, Object... values) {
+        return runScript(scriptName, keys, true, values);
+    }
+
+    private Object runScript(String scriptName, List<Object> keys, boolean reloadScripts, Object... values) {
         RedisDb.RedisScript scriptSha = db.getScriptSha(scriptName);
-        RScript script = createScriptInstance(scriptSha);
-        return script.evalSha(
-                scriptSha.isReadOnly() ? RScript.Mode.READ_ONLY : RScript.Mode.READ_WRITE,
-                scriptSha.getSha(),
-                deriveScriptReturnType(scriptSha),
-                keys,
-                values);
+        try {
+            RScript script = createScriptInstance(scriptSha);
+            return script.evalSha(
+                    scriptSha.isReadOnly() ? RScript.Mode.READ_ONLY : RScript.Mode.READ_WRITE,
+                    scriptSha.getSha(),
+                    deriveScriptReturnType(scriptSha),
+                    keys,
+                    values);
+        } catch (RedisException e) {
+            // this may be due to script is not loaded yet or redis has gone down and came back.
+            // Let's try after reloading
+            if (reloadScripts) {
+                db.loadScriptToRedis(scriptSha);
+                return runScript(scriptName, keys, false, values);
+            }
+            throw e;
+        }
     }
 
     private RScript createScriptInstance(RedisDb.RedisScript redisScript) {
