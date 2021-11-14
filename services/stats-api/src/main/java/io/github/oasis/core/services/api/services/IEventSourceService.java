@@ -40,6 +40,8 @@ public interface IEventSourceService {
 
     EventSource readEventSource(int eventSourceId);
 
+    EventSource readEventSourceByToken(String token);
+
     void deleteEventSource(int eventSourceId);
 
     EventSourceKeysResponse downloadEventSourceKeys(int eventSourceId);

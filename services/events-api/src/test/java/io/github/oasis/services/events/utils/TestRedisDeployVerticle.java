@@ -61,6 +61,11 @@ public class TestRedisDeployVerticle extends AbstractVerticle {
         return this;
     }
 
+    public TestRedisDeployVerticle addUser(String email, JsonObject userWithTeams) {
+        users.put(email, userWithTeams);
+        return this;
+    }
+
     public TestRedisDeployVerticle addSource(String token, int id, PublicKey publicKey, List<Integer> gameIds) {
         sources.put(token, new JsonObject()
             .put("token", token)

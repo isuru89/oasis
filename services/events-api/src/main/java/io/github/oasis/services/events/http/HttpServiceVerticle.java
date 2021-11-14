@@ -22,7 +22,7 @@ package io.github.oasis.services.events.http;
 import io.github.oasis.services.events.auth.AuthService;
 import io.github.oasis.services.events.auth.EventAuthHandler;
 import io.github.oasis.services.events.auth.EventAuthProvider;
-import io.github.oasis.services.events.db.RedisService;
+import io.github.oasis.services.events.db.DataService;
 import io.github.oasis.services.events.dispatcher.EventDispatcherService;
 import io.github.oasis.services.events.http.routers.PingRoute;
 import io.github.oasis.services.events.http.routers.PutBulkEventsRoute;
@@ -40,7 +40,10 @@ import io.vertx.ext.web.handler.BodyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.github.oasis.services.events.http.Constants.*;
+import static io.github.oasis.services.events.http.Constants.CONF_PORT;
+import static io.github.oasis.services.events.http.Constants.ROUTE_BULK_EVENT_PUSH;
+import static io.github.oasis.services.events.http.Constants.ROUTE_EVENT_PUSH;
+import static io.github.oasis.services.events.http.Constants.ROUTE_PING;
 
 /**
  * @author Isuru Weerarathna
@@ -61,7 +64,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
         LOG.info("HTTP configs {}", httpConf.encodePrettily());
 
         AuthService authService = AuthService.createProxy(vertx, AuthService.AUTH_SERVICE_QUEUE);
-        RedisService redisService = RedisService.createProxy(vertx, RedisService.DB_SERVICE_QUEUE);
+        DataService clientService = DataService.createProxy(vertx, DataService.DATA_SERVICE_QUEUE);
         EventDispatcherService dispatcherService = EventDispatcherService.createProxy(vertx, EventDispatcherService.DISPATCHER_SERVICE_QUEUE);
 
         AuthenticationHandler authHandler = new EventAuthHandler(new EventAuthProvider(authService));
@@ -72,8 +75,8 @@ public class HttpServiceVerticle extends AbstractVerticle {
         EventIntegrityHandler integrityHandler = new EventIntegrityHandler();
         EventErrorHandler eventErrorHandler = new EventErrorHandler();
 
-        PutEventRoute putEventRoute = new PutEventRoute(redisService, dispatcherService);
-        PutBulkEventsRoute putBulkEventsRoute = new PutBulkEventsRoute(redisService, dispatcherService);
+        PutEventRoute putEventRoute = new PutEventRoute(clientService, dispatcherService);
+        PutBulkEventsRoute putBulkEventsRoute = new PutBulkEventsRoute(clientService, dispatcherService);
 
         Router router = Router.router(vertx);
         router.get(ROUTE_PING)

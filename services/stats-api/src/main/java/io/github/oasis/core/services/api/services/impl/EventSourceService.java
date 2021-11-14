@@ -28,13 +28,14 @@ import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.model.EventSourceSecrets;
 import io.github.oasis.core.services.KeyGeneratorSupport;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
-import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.services.IEventSourceService;
 import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import io.github.oasis.core.utils.Texts;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyPair;
@@ -78,6 +79,18 @@ public class EventSourceService extends AbstractOasisService implements IEventSo
     @Override
     public EventSource readEventSource(int eventSourceId) {
         return backendRepository.readEventSource(eventSourceId);
+    }
+
+    @Override
+    public EventSource readEventSourceByToken(String token) {
+        EventSource eventSource = backendRepository.readEventSource(token);
+        if (eventSource == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_NOT_EXISTS, HttpStatus.NOT_FOUND);
+        }
+        EventSourceSecrets eventSourceSecrets = backendRepository.readEventSourceSecrets(eventSource.getId());
+        eventSourceSecrets.setPrivateKey(null);
+        eventSource.setSecrets(eventSourceSecrets);
+        return eventSource;
     }
 
     @Override

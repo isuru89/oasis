@@ -26,9 +26,11 @@ import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.PlayerObject;
+import io.github.oasis.core.model.PlayerWithTeams;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.services.IPlayerAssignmentService;
 import io.github.oasis.core.services.api.services.IPlayerManagementService;
 import io.github.oasis.core.services.api.services.ITeamManagementService;
@@ -75,6 +77,24 @@ public class PlayerTeamService extends AbstractOasisService implements IPlayerMa
     @Override
     public PlayerObject readPlayerByEmail(String userEmail) {
         return backendRepository.readPlayer(userEmail);
+    }
+
+    @Override
+    public PlayerObject readPlayerByEmail(String userEmail, boolean verbose) {
+        PlayerObject playerObject = backendRepository.readPlayer(userEmail);
+
+        if (playerObject == null) {
+            throw new OasisApiRuntimeException("User by email " + userEmail + " not found!", HttpStatus.NOT_FOUND);
+        }
+
+        if (verbose) {
+            PlayerWithTeams playerWithTeams = new PlayerWithTeams();
+            List<TeamObject> teamsOfPlayer = getTeamsOfPlayer(playerObject.getId());
+            playerWithTeams.setTeams(teamsOfPlayer);
+            return playerWithTeams;
+        } else {
+            return playerObject;
+        }
     }
 
     @Override

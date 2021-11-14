@@ -88,8 +88,9 @@ public class PlayerController extends AbstractController {
     )
     @ForPlayer
     @GetMapping("/players")
-    public PlayerObject readPlayerProfileByEmail(@RequestParam(name = "email") String email) {
-        return playerManagementService.readPlayerByEmail(email);
+    public PlayerObject readPlayerProfileByEmail(@RequestParam(name = "email") String email,
+                                                 @RequestParam(name = "verbose", required = false, defaultValue = "False") Boolean verbose) {
+        return playerManagementService.readPlayerByEmail(email, verbose);
     }
 
     @Operation(

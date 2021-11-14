@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -117,7 +118,7 @@ public class EventSourceController extends AbstractController {
     @ForAdmin
     @DeleteMapping("/admin/games/{gameId}/event-sources/{eventSourceId}")
     public ResponseEntity<String> removeEventSourceFromGame(@PathVariable("gameId") Integer gameId,
-                                                             @PathVariable("eventSourceId") Integer eventSourceId) {
+                                                            @PathVariable("eventSourceId") Integer eventSourceId) {
         eventSourceService.removeEventSourceFromGame(eventSourceId, gameId);
         return ResponseEntity.ok("OK");
     }
@@ -130,6 +131,16 @@ public class EventSourceController extends AbstractController {
     @GetMapping("/admin/event-sources")
     public List<EventSource> getAllEventSources() {
         return eventSourceService.listAllEventSources();
+    }
+
+    @Operation(
+            summary = "Returns the event source by the given token",
+            tags = {"admin"}
+    )
+    @ForAdmin
+    @GetMapping("/admin/event-source")
+    public EventSource getEventSourceByToken(@RequestParam(name = "token") String token) {
+        return eventSourceService.readEventSourceByToken(token);
     }
 
     @Operation(

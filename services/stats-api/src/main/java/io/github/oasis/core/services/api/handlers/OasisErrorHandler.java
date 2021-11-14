@@ -22,6 +22,7 @@ package io.github.oasis.core.services.api.handlers;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.services.api.configs.ErrorMessages;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -77,6 +78,24 @@ public class OasisErrorHandler extends ResponseEntityExceptionHandler {
         }
         request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
         return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.valueOf(ex.getStatusCode()));
+    }
+
+    @ExceptionHandler(value = { OasisApiRuntimeException.class })
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected ResponseEntity<ErrorObject> handleApiRuntimeException(OasisApiRuntimeException ex, WebRequest request) {
+        ErrorObject errorObject = new ErrorObject();
+        errorObject.setTimestamp(Instant.now().toString());
+        errorObject.setStatus(ex.getStatus().value());
+        errorObject.setErrorCode(ex.getErrorCode());
+        errorObject.setErrorCodeDescription(errorMessages.getErrorMessage(ex.getErrorCode()));
+        errorObject.setMessage(ex.getMessage());
+        if (request instanceof ServletWebRequest) {
+            errorObject.setPath(((ServletWebRequest) request).getRequest().getServletPath());
+        } else {
+            errorObject.setPath(request.getContextPath());
+        }
+        request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
+        return new ResponseEntity<>(errorObject, ERROR_HEADERS, ex.getStatus());
     }
 
     @ExceptionHandler(value = { OasisParseException.class })

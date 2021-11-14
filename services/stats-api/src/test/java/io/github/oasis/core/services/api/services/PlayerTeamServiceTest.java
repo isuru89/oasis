@@ -23,6 +23,7 @@ import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.PlayerObject;
+import io.github.oasis.core.model.PlayerWithTeams;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserGender;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
@@ -116,6 +117,35 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
         PlayerObject bobByEmail = playerManagementService.readPlayerByEmail(bob.getEmail());
         assertPlayerWithAnother(bobByEmail, bobById);
+    }
+
+    @Test
+    void readPlayerWithTeams() {
+        PlayerObject bob = playerManagementService.addPlayer(reqBob);
+        System.out.println(bob);
+        assertPlayerWithAnother(bob, reqBob);
+
+        PlayerObject playerObject = playerManagementService.readPlayerByEmail(bob.getEmail(), true);
+        Assertions.assertThat(playerObject).isInstanceOf(PlayerWithTeams.class);
+        Assertions.assertThat(((PlayerWithTeams)playerObject).getTeams()).isEmpty();
+
+        TeamObject renegades = teamManagementService.addTeam(teamRenegades);
+        TeamObject warriors = teamManagementService.addTeam(teamWarriors);
+
+        assignmentService.addPlayerToTeam(bob.getId(), 100, renegades.getId());
+        assignmentService.addPlayerToTeam(bob.getId(), 101, warriors.getId());
+
+        PlayerObject bobPlayer = playerManagementService.readPlayerByEmail(bob.getEmail(), true);
+        Assertions.assertThat(bobPlayer).isInstanceOf(PlayerWithTeams.class);
+        List<TeamObject> teams = ((PlayerWithTeams) bobPlayer).getTeams();
+        Assertions.assertThat(teams).hasSize(2);
+
+        TeamObject renegadesInDb = teams.stream().filter(t -> t.getName().equals(renegades.getName())).findFirst().orElseThrow();
+        assertTeamWithAnother(renegadesInDb, teamRenegades);
+        TeamObject warriorsInDb = teams.stream().filter(t -> t.getName().equals(warriors.getName())).findFirst().orElseThrow();
+        assertTeamWithAnother(warriorsInDb, teamWarriors);
+
+        assertThrows(OasisApiRuntimeException.class, () -> playerManagementService.readPlayerByEmail("nonexist@oasis.io", true));
     }
 
     @Test

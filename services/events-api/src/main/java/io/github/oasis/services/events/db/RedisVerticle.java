@@ -19,17 +19,18 @@
 
 package io.github.oasis.services.events.db;
 
-import io.github.oasis.services.events.auth.AuthService;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Redis;
+import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.RedisOptions;
 import io.vertx.serviceproxy.ServiceBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
 
 /**
  * @author Isuru Weerarathna
@@ -38,10 +39,13 @@ public class RedisVerticle extends AbstractVerticle {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisVerticle.class);
 
+    private static final int DEFAULT_REDIS_MAX_RETRIES = 1;
+    private static final int DEFAULT_REDIS_RETRY_DELAY = 5000;
+
     private Redis redisClient;
 
-    private int maxRetries = 1;
-    private int retryDelay = 5000;
+    private int maxRetries = DEFAULT_REDIS_MAX_RETRIES;
+    private int retryDelay = DEFAULT_REDIS_RETRY_DELAY;
 
     @Override
     public void start(Promise<Void> promise) {
@@ -51,12 +55,12 @@ public class RedisVerticle extends AbstractVerticle {
         RedisOptions configs = new RedisOptions(redisConfigs);
 
         redisClient = Redis.createClient(vertx, configs);
-        maxRetries = redisConfigs.getInteger("connectionRetries", 1);
-        retryDelay = redisConfigs.getInteger("connectionRetryDelay", 2000);
+        maxRetries = redisConfigs.getInteger("connectionRetries", DEFAULT_REDIS_MAX_RETRIES);
+        retryDelay = redisConfigs.getInteger("connectionRetryDelay", DEFAULT_REDIS_RETRY_DELAY);
 
         redisClient.connect(onConnect -> {
             if (onConnect.succeeded()) {
-                bindAuthService(promise);
+                checkConnectionHealth(promise);
             } else {
                 LOG.error("Redis connection establishment failed!", onConnect.cause());
                 retryConnection(1, promise, null);
@@ -72,7 +76,7 @@ public class RedisVerticle extends AbstractVerticle {
             vertx.setTimer(retryDelay, timer -> redisClient.connect(onConnect -> {
                 if (onConnect.succeeded()) {
                     LOG.info("Redis connection successful. Initializing...");
-                    bindAuthService(promise);
+                    checkConnectionHealth(promise);
                 } else {
                     LOG.error("Redis connection establishment failed! [Retry: {}]", retry, onConnect.cause());
                     retryConnection(retry + 1, promise, onConnect.cause());
@@ -81,41 +85,35 @@ public class RedisVerticle extends AbstractVerticle {
         }
     }
 
-    private void bindAuthService(Promise<Void> promise) {
-        Future<Object> authFuture = Future.future(authServicePromise -> {
-            RedisAuthService.create(redisClient, res -> {
-                if (res.succeeded()) {
-                    new ServiceBinder(vertx)
-                            .setAddress(AuthService.AUTH_SERVICE_QUEUE)
-                            .register(AuthService.class, res.result());
-                    authServicePromise.complete();
-                } else {
-                    authServicePromise.fail(res.cause());
-                }
-            });
+    private void checkConnectionHealth(Promise<Void> promise) {
+        RedisAPI.api(redisClient).ping(Collections.singletonList("oasis test"), res -> {
+            if (res.succeeded()) {
+                bindRedisService(promise);
+            } else {
+                promise.fail(res.cause());
+            }
         });
 
-        Future<Object> dbFuture = Future.future(dbServicePromise -> {
-            RedisServiceImpl.create(redisClient, res -> {
-                if (res.succeeded()) {
-                    new ServiceBinder(vertx)
-                            .setAddress(RedisService.DB_SERVICE_QUEUE)
-                            .register(RedisService.class, res.result());
-                    dbServicePromise.complete();
-                } else {
-                    dbServicePromise.fail(res.cause());
-                }
-            });
-        });
-        CompositeFuture.all(authFuture, dbFuture).onComplete(result -> {
+    }
+
+    private void bindRedisService(Promise<Void> promise) {
+        Future.future(dbServicePromise -> RedisServiceImpl.create(redisClient, res -> {
+            if (res.succeeded()) {
+                new ServiceBinder(vertx)
+                        .setAddress(RedisService.DB_SERVICE_QUEUE)
+                        .register(RedisService.class, res.result());
+                dbServicePromise.complete();
+            } else {
+                dbServicePromise.fail(res.cause());
+            }
+        })).onComplete(result -> {
             if (result.succeeded()) {
                 LOG.info("Redis connection successfully established.");
                 promise.complete();
             } else {
-                LOG.error("Redis connection establishment failed!", result.cause());
                 promise.fail(result.cause());
             }
-        });
+        }).onFailure(promise::fail);
     }
 
     @Override

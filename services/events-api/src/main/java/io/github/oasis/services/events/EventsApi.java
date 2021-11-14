@@ -19,7 +19,7 @@
 
 package io.github.oasis.services.events;
 
-import io.github.oasis.services.events.db.RedisVerticle;
+import io.github.oasis.services.events.client.ClientVerticle;
 import io.github.oasis.services.events.http.HttpServiceVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
@@ -50,6 +50,12 @@ public class EventsApi extends AbstractVerticle {
         vertx.deployVerticle(cacheConfigs.getString("impl"), cacheOptions, cacheDeployment);
 
         cacheDeployment.future()
+            .compose(id -> {
+                Promise<String> clientDeployment = Promise.promise();
+                DeploymentOptions clientOptions = new DeploymentOptions().setConfig(oasisConfigs);
+                vertx.deployVerticle(ClientVerticle.class, clientOptions, clientDeployment);
+                return clientDeployment.future();
+            })
             .compose(id -> {
                 JsonObject dispatcherConf = oasisConfigs.getJsonObject(KEY_DISPATCHER);
                 Promise<String> dispatcherDeployment = Promise.promise();

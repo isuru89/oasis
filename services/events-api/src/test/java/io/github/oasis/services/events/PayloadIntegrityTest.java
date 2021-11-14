@@ -1,5 +1,6 @@
 package io.github.oasis.services.events;
 
+import io.github.oasis.core.collect.Pair;
 import io.github.oasis.services.events.utils.TestUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,15 +26,20 @@ public class PayloadIntegrityTest extends AbstractEventPushTest {
     @DisplayName("Payload changed after hash is generated")
     void hashIncorrect(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        awaitRedisInitialization(vertx, testContext, createKnownUser(createKnownSource(keyPair)));
+        String sourceToken = UUID.randomUUID().toString();
+        String userEmail = "mom.attack@oasis.io";
+        setSourceExists(sourceToken, createEventSource(sourceToken, 1, Set.of(1), keyPair.getPublic()));
+        setPlayerExists(userEmail, createPlayerWithTeam(userEmail, 500, Pair.of(200,1)));
 
-        String hash = TestUtils.signPayload(VALID_PAYLOAD, keyPair.getPrivate());
-        JsonObject modified = VALID_PAYLOAD.copy();
-        modified.getJsonObject("data").put("email", "player2@oasis.com");
+        JsonObject validPayload = new JsonObject()
+                .put("data", TestUtils.aEvent(userEmail, System.currentTimeMillis(), "event.a", 100));
+        String hash = TestUtils.signPayload(validPayload, keyPair.getPrivate());
+        JsonObject modified = validPayload.copy();
+        modified.getJsonObject("data").put("email", "hacked.user@oasis.io");
         assertThat(modified.getJsonObject("data").getString("email"))
-                .isNotEqualTo(VALID_PAYLOAD.getJsonObject("data").getString("email"));
+                .isNotEqualTo(validPayload.getJsonObject("data").getString("email"));
 
-        callForEvent(vertx, KNOWN_SOURCE + ":" + hash)
+        callForEvent(vertx, sourceToken + ":" + hash)
                 .sendJson(
                         modified,
                         testContext.succeeding(res -> assert403Response(res, testContext))
@@ -42,13 +50,18 @@ public class PayloadIntegrityTest extends AbstractEventPushTest {
     @DisplayName("Payload with correct hash")
     void correctHash(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        awaitRedisInitialization(vertx, testContext, createKnownUser(createKnownSource(keyPair)));
+        String sourceToken = UUID.randomUUID().toString();
+        String userEmail = "mom.attack@oasis.io";
+        setSourceExists(sourceToken, createEventSource(sourceToken, 1, Set.of(1), keyPair.getPublic()));
+        setPlayerExists(userEmail, createPlayerWithTeam(userEmail, 500, Pair.of(200,1)));
 
-        String hash = TestUtils.signPayload(VALID_PAYLOAD, keyPair.getPrivate());
+        JsonObject validPayload = new JsonObject()
+                .put("data", TestUtils.aEvent(userEmail, System.currentTimeMillis(), "event.a", 100));
+        String hash = TestUtils.signPayload(validPayload, keyPair.getPrivate());
 
-        callForEvent(vertx, KNOWN_SOURCE + ":" + hash)
+        callForEvent(vertx, sourceToken + ":" + hash)
                 .sendJson(
-                        VALID_PAYLOAD,
+                        validPayload,
                         testContext.succeeding(res -> assertAcceptedResponse(res, testContext))
                 );
     }

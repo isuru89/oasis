@@ -21,17 +21,12 @@ package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.model.EventSource;
-import io.github.oasis.core.services.api.beans.BackendRepository;
-import io.github.oasis.core.services.api.beans.jdbc.JdbcRepository;
-import io.github.oasis.core.services.api.dao.IEventSourceDao;
-import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.services.impl.EventSourceService;
 import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
-import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -99,6 +94,24 @@ public class EventSourceServiceTest extends AbstractServiceTest {
         assertSource(eventSource, dbSource, false);
 
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> eventSourceService.readEventSource(dbSource.getId() + 500))
+                .isInstanceOf(OasisApiRuntimeException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_NOT_EXISTS);
+    }
+
+    @Test
+    void testReadEventSourceInfoWithKeys() throws OasisException {
+        EventSourceCreateRequest source = new EventSourceCreateRequest("test-1");
+        EventSource dbSource = eventSourceService.registerEventSource(source);
+        System.out.println(dbSource);
+        assertSource(dbSource, source, true);
+
+        EventSource eventSource = eventSourceService.readEventSourceByToken(dbSource.getToken());
+        System.out.println(eventSource);
+        assertNotNull(eventSource.getSecrets());
+        assertNotNull(eventSource.getSecrets().getPublicKey());
+        assertNull(eventSource.getSecrets().getPrivateKey());
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> eventSourceService.readEventSourceByToken("unknown token"))
                 .isInstanceOf(OasisApiRuntimeException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.EVENT_SOURCE_NOT_EXISTS);
     }

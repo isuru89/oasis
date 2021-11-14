@@ -20,6 +20,7 @@ public class TestDispatcherService implements EventDispatcherService {
     @Override
     public EventDispatcherService pushEvent(EventProxy event, Handler<AsyncResult<JsonObject>> result) {
         if (returnSuccess) {
+            System.out.println(">>> pushing: " + event);
             result.handle(Future.succeededFuture(new JsonObject()
                     .put("success", true)
                     .put("eventId", event.getExternalId())));

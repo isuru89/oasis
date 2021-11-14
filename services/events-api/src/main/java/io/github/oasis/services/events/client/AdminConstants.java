@@ -20,27 +20,29 @@
  *
  */
 
-package io.github.oasis.core.services.api.services;
-
-import io.github.oasis.core.model.PlayerObject;
-import io.github.oasis.core.services.api.to.PlayerCreateRequest;
-import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
+package io.github.oasis.services.events.client;
 
 /**
  * @author Isuru Weerarathna
  */
-public interface IPlayerManagementService {
+class AdminConstants {
 
-    PlayerObject addPlayer(PlayerCreateRequest request);
+    static final String EVENT_API_USER_AGENT = "Oasis-EventApi/v1";
 
-    PlayerObject readPlayer(long userId);
+    static final String HEADER_ACCEPT = "accept";
+    static final String MEDIA_TYPE_JSON = "application/json";
 
-    PlayerObject readPlayerByEmail(String userEmail);
+    static final String HEADER_APP_ID = "X-APP-ID";
+    static final String HEADER_APP_KEY = "X-APP-KEY";
 
-    PlayerObject readPlayerByEmail(String userEmail, boolean verbose);
+    static final String QUERY_PARAM_EMAIL = "email";
+    static final String QUERY_PARAM_TOKEN = "token";
+    static final String QUERY_PARAM_VERBOSE = "verbose";
+    static final String QUERY_PARAM_WITH_KEY = "withKey";
 
-    PlayerObject updatePlayer(long userId, PlayerUpdateRequest updatingUser);
+    static final String TRUE = "true";
 
-    PlayerObject deactivatePlayer(long userId);
+    static final int STATUS_NOT_FOUND = 404;
+    static final int STATUS_SUCCESS = 200;
 
 }
