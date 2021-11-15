@@ -36,6 +36,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
@@ -55,6 +57,8 @@ import static io.github.oasis.services.events.client.AdminConstants.TRUE;
  * @author Isuru Weerarathna
  */
 public class AdminApiClient implements DataService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AdminApiClient.class);
 
     private static final JsonObject EMPTY = new JsonObject();
 
@@ -100,6 +104,7 @@ public class AdminApiClient implements DataService {
                     }
 
                     PlayerWithTeams playerObject = res.bodyAsJson(PlayerWithTeams.class);
+                    LOG.debug("User received for email {}:  {}", email, playerObject);
                     JsonObject jsonObject = new JsonObject()
                             .put(UserInfo.ID, playerObject.getId())
                             .put(UserInfo.EMAIL, playerObject.getEmail());
@@ -113,7 +118,7 @@ public class AdminApiClient implements DataService {
                         jsonObject.put(UserInfo.GAMES, EMPTY);
                     }
 
-                    UserInfo userInfo = new UserInfo(jsonObject);
+                    UserInfo userInfo = UserInfo.create(email, jsonObject);
                     resultHandler.handle(Future.succeededFuture(userInfo));
 
                 }).onFailure(err -> resultHandler.handle(Future.failedFuture(err)));

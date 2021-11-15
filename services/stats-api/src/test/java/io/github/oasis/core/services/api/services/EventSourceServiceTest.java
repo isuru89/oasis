@@ -27,6 +27,7 @@ import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.services.impl.EventSourceService;
 import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -102,6 +103,7 @@ public class EventSourceServiceTest extends AbstractServiceTest {
     void testReadEventSourceInfoWithKeys() throws OasisException {
         EventSourceCreateRequest source = new EventSourceCreateRequest("test-1");
         EventSource dbSource = eventSourceService.registerEventSource(source);
+        eventSourceService.assignEventSourceToGame(dbSource.getId(), 1);
         System.out.println(dbSource);
         assertSource(dbSource, source, true);
 
@@ -110,6 +112,8 @@ public class EventSourceServiceTest extends AbstractServiceTest {
         assertNotNull(eventSource.getSecrets());
         assertNotNull(eventSource.getSecrets().getPublicKey());
         assertNull(eventSource.getSecrets().getPrivateKey());
+        Assertions.assertEquals(1, eventSource.getGames().size());
+        Assertions.assertTrue(eventSource.getGames().contains(1));
 
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> eventSourceService.readEventSourceByToken("unknown token"))
                 .isInstanceOf(OasisApiRuntimeException.class)

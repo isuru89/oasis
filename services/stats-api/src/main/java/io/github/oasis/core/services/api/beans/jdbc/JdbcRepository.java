@@ -53,6 +53,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -104,6 +105,11 @@ public class JdbcRepository implements OasisRepository {
     public EventSource readEventSource(int id) {
         return Optional.ofNullable(eventSourceDao.readEventSource(id))
                 .map(EventSourceDto::toEventSource)
+                .map(src -> {
+                    List<Integer> gameIds = eventSourceDao.readEventSourceGames(src.getId());
+                    src.setGames(Set.copyOf(gameIds));
+                    return src;
+                })
                 .orElseThrow(() -> new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_NOT_EXISTS));
     }
 
@@ -111,7 +117,20 @@ public class JdbcRepository implements OasisRepository {
     public EventSource readEventSource(String token) {
         return Optional.ofNullable(eventSourceDao.readEventSourceByToken(token))
                 .map(EventSourceDto::toEventSource)
+                .map(src -> {
+                    List<Integer> gameIds = eventSourceDao.readEventSourceGames(src.getId());
+                    src.setGames(Set.copyOf(gameIds));
+                    return src;
+                })
                 .orElseThrow(() -> new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_NOT_EXISTS));
+    }
+
+    @Override
+    public EventSourceSecrets readEventSourcePublicSecrets(int id) {
+        EventSourceSecretsDto eventSourceKeys = eventSourceDao.readEventSourceKeys(id);
+        EventSourceSecrets secrets = new EventSourceSecrets();
+        secrets.setPublicKey(eventSourceKeys.getPublicKey());
+        return secrets;
     }
 
     @Override

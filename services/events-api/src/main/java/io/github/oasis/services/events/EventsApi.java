@@ -19,12 +19,15 @@
 
 package io.github.oasis.services.events;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.services.events.client.ClientVerticle;
 import io.github.oasis.services.events.http.HttpServiceVerticle;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.jackson.DatabindCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +44,8 @@ public class EventsApi extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> promise) {
+        modifyJacksonCodec();
+
         JsonObject oasisConfigs = config().getJsonObject("oasis", new JsonObject());
         JsonObject httpConfigs = config().getJsonObject("http", new JsonObject());
 
@@ -86,5 +91,10 @@ public class EventsApi extends AbstractVerticle {
                 .setInstances(http.getInteger("instances", 2))
                 .setHa(http.getBoolean("highAvailability", false))
                 .setConfig(http);
+    }
+
+    private void modifyJacksonCodec() {
+        ObjectMapper mapper = DatabindCodec.mapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 }

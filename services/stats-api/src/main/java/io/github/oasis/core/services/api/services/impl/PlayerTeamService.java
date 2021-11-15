@@ -89,6 +89,15 @@ public class PlayerTeamService extends AbstractOasisService implements IPlayerMa
 
         if (verbose) {
             PlayerWithTeams playerWithTeams = new PlayerWithTeams();
+            playerWithTeams.setId(playerObject.getId());
+            playerWithTeams.setEmail(playerObject.getEmail());
+            playerWithTeams.setGender(playerObject.getGender());
+            playerWithTeams.setDisplayName(playerObject.getDisplayName());
+            playerWithTeams.setTimeZone(playerObject.getTimeZone());
+            playerWithTeams.setAvatarRef(playerObject.getAvatarRef());
+            playerWithTeams.setActive(playerObject.isActive());
+            playerWithTeams.setCreatedAt(playerObject.getCreatedAt());
+            playerWithTeams.setUpdatedAt(playerObject.getUpdatedAt());
             List<TeamObject> teamsOfPlayer = getTeamsOfPlayer(playerObject.getId());
             playerWithTeams.setTeams(teamsOfPlayer);
             return playerWithTeams;

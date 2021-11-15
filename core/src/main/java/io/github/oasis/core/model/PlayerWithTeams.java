@@ -21,6 +21,7 @@ package io.github.oasis.core.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -29,6 +30,7 @@ import java.util.List;
  */
 @Getter
 @Setter
+@ToString
 public class PlayerWithTeams extends PlayerObject {
 
     private List<TeamObject> teams;

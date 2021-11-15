@@ -40,6 +40,7 @@ public interface OasisRepository {
     EventSource deleteEventSource(int id);
     EventSource readEventSource(int id);
     EventSource readEventSource(String token);
+    EventSourceSecrets readEventSourcePublicSecrets(int id);
     EventSourceSecrets readEventSourceSecrets(int id);
     List<EventSource> listAllEventSources();
     List<EventSource> listAllEventSourcesOfGame(int gameId);

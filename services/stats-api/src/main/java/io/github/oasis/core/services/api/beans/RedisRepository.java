@@ -42,13 +42,11 @@ import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserAssociationInfo;
 import io.github.oasis.core.services.SerializationSupport;
-import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -139,6 +137,12 @@ public class RedisRepository implements OasisRepository {
             String val = db.getValueFromMap(ID.ALL_SOURCES, String.valueOf(meta.getId()));
             return serializationSupport.deserialize(val, EventSource.class);
         });
+    }
+
+    @Override
+    public EventSourceSecrets readEventSourcePublicSecrets(int id) {
+        // Not allowed reading secrets from engine database or cache.
+        throw new UnsupportedOperationException();
     }
 
     @Override

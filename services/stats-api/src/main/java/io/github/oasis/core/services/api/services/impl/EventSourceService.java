@@ -87,9 +87,10 @@ public class EventSourceService extends AbstractOasisService implements IEventSo
         if (eventSource == null) {
             throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_NOT_EXISTS, HttpStatus.NOT_FOUND);
         }
-        EventSourceSecrets eventSourceSecrets = backendRepository.readEventSourceSecrets(eventSource.getId());
+        EventSourceSecrets eventSourceSecrets = backendRepository.readEventSourcePublicSecrets(eventSource.getId());
         eventSourceSecrets.setPrivateKey(null);
         eventSource.setSecrets(eventSourceSecrets);
+
         return eventSource;
     }
 
