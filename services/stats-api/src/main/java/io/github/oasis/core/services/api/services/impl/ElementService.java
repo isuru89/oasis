@@ -104,7 +104,7 @@ public class ElementService extends AbstractOasisService implements IElementServ
     public List<ElementDef> listElementsFromGameId(int gameId) {
         Game game = backendRepository.readGame(gameId);
         if (game == null) {
-            throw new OasisApiRuntimeException(ErrorCodes.GAME_NOT_EXISTS);
+            throw new OasisApiRuntimeException(ErrorCodes.GAME_NOT_EXISTS, HttpStatus.NOT_FOUND);
         }
 
         return backendRepository.readElementsByGameId(gameId);

@@ -47,6 +47,7 @@ import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import org.jdbi.v3.core.JdbiException;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -90,7 +91,7 @@ public class JdbcRepository implements OasisRepository {
             EventSourceDto dto = eventSourceDao.insertEventSource(EventSourceDto.from(eventSource));
             return dto.toEventSource();
         } catch (JdbiException e) {
-            throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_ALREADY_EXISTS, e);
+            throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -110,7 +111,7 @@ public class JdbcRepository implements OasisRepository {
                     src.setGames(Set.copyOf(gameIds));
                     return src;
                 })
-                .orElseThrow(() -> new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_NOT_EXISTS));
+                .orElseThrow(() -> new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_NOT_EXISTS, HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -122,7 +123,7 @@ public class JdbcRepository implements OasisRepository {
                     src.setGames(Set.copyOf(gameIds));
                     return src;
                 })
-                .orElseThrow(() -> new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_NOT_EXISTS));
+                .orElseThrow(() -> new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_NOT_EXISTS, HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -205,7 +206,11 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public Game readGame(int gameId) {
-        return gameDao.readGame(gameId);
+        Game game = gameDao.readGame(gameId);
+        if (game == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.GAME_NOT_EXISTS, HttpStatus.NOT_FOUND);
+        }
+        return game;
     }
 
     @Override
@@ -375,7 +380,7 @@ public class JdbcRepository implements OasisRepository {
     public ElementDef updateElement(int gameId, String id, SimpleElementDefinition elementDef) {
         ElementDef dbDef = readElementWithoutData(gameId, id);
         if (dbDef == null) {
-            throw new OasisApiRuntimeException(ErrorCodes.ELEMENT_NOT_EXISTS);
+            throw new OasisApiRuntimeException(ErrorCodes.ELEMENT_NOT_EXISTS, HttpStatus.NOT_FOUND);
         }
 
         ElementUpdateDto dto = new ElementUpdateDto();
@@ -419,6 +424,7 @@ public class JdbcRepository implements OasisRepository {
     public List<ElementDef> readElementsByType(int gameId, String type) {
         return elementDao.readElementsByType(gameId, type)
                 .stream()
+                .filter(ElementDto::isActive)
                 .map(this::toElementDef)
                 .collect(Collectors.toList());
     }

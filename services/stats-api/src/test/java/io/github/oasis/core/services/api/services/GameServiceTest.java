@@ -22,11 +22,11 @@ package io.github.oasis.core.services.api.services;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.services.api.TestUtils;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
-import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.services.impl.GameService;
 import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
@@ -40,6 +40,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -85,40 +86,40 @@ public class GameServiceTest extends AbstractServiceTest {
             .build();
 
     @Test
-    void addGame() throws OasisException {
-        Game game = gameService.addGame(stackOverflow);
+    void addGame() {
+        Game game = doPostSuccess("/games", stackOverflow, Game.class);
         System.out.println(game);
         Assertions.assertNotNull(game);
         assertGame(game, stackOverflow);
         assertEquals(GameState.CREATED.name(), game.getCurrentStatus());
 
         System.out.println(promotions);
-        Game pGame = gameService.addGame(promotions);
+        Game pGame = doPostSuccess("/games", promotions, Game.class);
         assertGame(pGame, promotions);
         assertEquals(GameState.CREATED.name(), pGame.getCurrentStatus());
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> gameService.addGame(stackOverflow))
-                .isInstanceOf(OasisApiRuntimeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.GAME_ALREADY_EXISTS);
+        doPostError("/games", stackOverflow, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCodes.GAME_ALREADY_EXISTS);
     }
 
     @Test
-    void listGames() throws OasisException {
-        assertEquals(0, gameService.listAllGames("0", 50).getRecords().size());
+    void listGames() {
+        assertEquals(0, doGetSuccess("/games", PaginatedResult.class).getRecords().size());
 
-        gameService.addGame(stackOverflow);
-        assertEquals(1, gameService.listAllGames("0", 50).getRecords().size());
+        doPostSuccess("/games", stackOverflow, Game.class);
+        assertEquals(1, doGetSuccess("/games", PaginatedResult.class).getRecords().size());
 
-        gameService.addGame(promotions);
-        assertEquals(2, gameService.listAllGames("0", 50).getRecords().size());
+        doPostSuccess("/games", promotions, Game.class);
+        assertEquals(2, doGetSuccess("/games", PaginatedResult.class).getRecords().size());
+        assertEquals(1, doGetSuccess("/games?page=0&pageSize=1", PaginatedResult.class).getRecords().size());
+        assertEquals(1, doGetSuccess("/games?page=1&pageSize=1", PaginatedResult.class).getRecords().size());
 
-        Assertions.assertThrows(OasisApiRuntimeException.class, () -> gameService.addGame(stackOverflow));
-        assertEquals(2, gameService.listAllGames("0", 50).getRecords().size());
+        doPostError("/games", stackOverflow, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCodes.GAME_ALREADY_EXISTS);
+        assertEquals(2, doGetSuccess("/games", PaginatedResult.class).getRecords().size());
     }
 
     @Test
-    void updateGame() throws OasisException {
-        Game stackGame = gameService.addGame(stackOverflow);
+    void updateGame() {
+        Game stackGame = doPostSuccess("/games", stackOverflow, Game.class);
         int stackId = stackGame.getId();
 
         GameUpdateRequest updateRequest = GameUpdateRequest.builder()
@@ -127,14 +128,14 @@ public class GameServiceTest extends AbstractServiceTest {
                 .description("new description")
                 .logoRef("new logo ref")
                 .build();
-        Game updatedGame = gameService.updateGame(stackId, updateRequest);
+        Game updatedGame = doPatchSuccess("/games/" + stackId, updateRequest, Game.class);
         assertGame(updatedGame, updateRequest);
         assertEquals(GameState.CREATED.name(), updatedGame.getCurrentStatus());
     }
 
     @Test
-    void shouldNotUpdateGameWithStatus() throws OasisException {
-        Game stackGame = gameService.addGame(stackOverflow);
+    void shouldNotUpdateGameWithStatus() {
+        Game stackGame = doPostSuccess("/games", stackOverflow, Game.class);
         int stackId = stackGame.getId();
 
         GameUpdateRequest updateRequest = GameUpdateRequest.builder()
@@ -143,30 +144,33 @@ public class GameServiceTest extends AbstractServiceTest {
                 .description("new description")
                 .logoRef("new logo ref")
                 .build();
-        Game updatedGame = gameService.updateGame(stackId, updateRequest);
+        Game updatedGame = doPatchSuccess("/games/" + stackId, updateRequest, Game.class);
         assertGame(updatedGame, updateRequest);
         assertEquals(GameState.CREATED.name(), updatedGame.getCurrentStatus());
     }
 
     @Test
-    void updateGameStatusOnly() throws OasisException {
-        Game stackGame = gameService.addGame(stackOverflow);
+    void updateGameStatusOnly() {
+        Game stackGame = doPostSuccess("/games", stackOverflow, Game.class);
         int stackId = stackGame.getId();
 
-        Game updatedGame = gameService.changeStatusOfGame(stackId, GameState.STARTED.name(), System.currentTimeMillis());
+        Game updatedGame = doPutSuccess("/games/" + stackId + "/start", null, Game.class);
         assertEquals(GameState.STARTED.name(), updatedGame.getCurrentStatus());
     }
 
     @Test
-    void readGame() throws OasisException {
-        int stackId = gameService.addGame(stackOverflow).getId();
-        Game stackGame = gameService.readGame(stackId);
+    void readGame() {
+        int stackId = doPostSuccess("/games", stackOverflow, Game.class).getId();
+        Game stackGame = doGetSuccess("/games/" + stackId, Game.class);
         assertGame(stackGame, stackOverflow);
+
+        // read nonexisting game
+        doGetError("/games/99999", HttpStatus.NOT_FOUND, ErrorCodes.GAME_NOT_EXISTS);
     }
 
     @Test
-    void readGameByName() throws OasisException {
-        gameService.addGame(stackOverflow);
+    void readGameByName() {
+        doPostSuccess("/games", stackOverflow, Game.class);
         Game stackGame = gameService.getGameByName(stackOverflow.getName());
         assertGame(stackGame, stackOverflow);
     }
@@ -180,8 +184,8 @@ public class GameServiceTest extends AbstractServiceTest {
             ((GameService) gameService).setPublisher(spy);
         }
 
-        int stackId = gameService.addGame(stackOverflow).getId();
-        Game dbGame = gameService.readGame(stackId);
+        int stackId = doPostSuccess("/games", stackOverflow, Game.class).getId();
+        Game dbGame = doGetSuccess("/games/" + stackId, Game.class);
         EventSource eventSource = eventSourceService.registerEventSource(EventSourceCreateRequest.builder().name("test-1").build());
         eventSourceService.assignEventSourceToGame(eventSource.getId(), stackId);
 
@@ -194,7 +198,7 @@ public class GameServiceTest extends AbstractServiceTest {
         assertEquals(elementPoint.getElementId(), elementService.readElement(stackId, TESTPOINT, false).getElementId());
 
         Mockito.reset(spy);
-        assertNotNull(gameService.deleteGame(stackId));
+        assertNotNull(doDeleteSuccess("/games/" + stackId, Game.class));
 
         assertTrue(eventSourceService.listAllEventSourcesOfGame(stackId).isEmpty());
         // but still event source must exist
@@ -211,37 +215,31 @@ public class GameServiceTest extends AbstractServiceTest {
 
 
     @Test
-    void updateGameStatus() throws OasisException {
+    void updateGameStatus() {
         ApplicationEventPublisher spy = Mockito.spy(eventPublisher);
         if (gameService instanceof GameService) {
             // we know this is the service
             ((GameService) gameService).setPublisher(spy);
         }
 
-        int stackId = gameService.addGame(stackOverflow).getId();
+        int stackId = doPostSuccess("/games", stackOverflow, Game.class).getId();
         ArgumentCaptor<GameStatusChangeEvent> eventArgumentCaptor = ArgumentCaptor.forClass(GameStatusChangeEvent.class);
 
         Mockito.reset(spy);
-        Game gameRef = gameService.changeStatusOfGame(stackId, "start", System.currentTimeMillis());
+        Game gameRef = doPutSuccess("/games/" + stackId + "/start", null, Game.class);
         assertEngineManagerOnceCalledWithState(spy, GameState.STARTED, gameRef, eventArgumentCaptor);
 
         Mockito.reset(spy);
-        gameRef = gameService.changeStatusOfGame(stackId, "stop", System.currentTimeMillis());
+        gameRef = doPutSuccess("/games/" + stackId + "/stop", null, Game.class);
         assertEngineManagerOnceCalledWithState(spy, GameState.STOPPED, gameRef, eventArgumentCaptor);
 
         Mockito.reset(spy);
-        gameRef = gameService.changeStatusOfGame(stackId, "pause", System.currentTimeMillis());
+        gameRef = doPutSuccess("/games/" + stackId + "/pause", null, Game.class);
         assertEngineManagerOnceCalledWithState(spy, GameState.PAUSED, gameRef, eventArgumentCaptor);
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> gameService.changeStatusOfGame(stackId, null, System.currentTimeMillis()))
-                .isInstanceOf(OasisApiException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.GAME_UNKNOWN_STATE);
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> gameService.changeStatusOfGame(stackId, "", System.currentTimeMillis()))
-                .isInstanceOf(OasisApiException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.GAME_UNKNOWN_STATE);
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> gameService.changeStatusOfGameWithoutPublishing(stackId, "hello", System.currentTimeMillis()))
-                .isInstanceOf(OasisApiException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.GAME_UNKNOWN_STATE);
+        doPutError("/games/" + stackId + "/null", null, HttpStatus.BAD_REQUEST, ErrorCodes.GAME_UNKNOWN_STATE);
+        doPutError("/games/" + stackId + "/", null, HttpStatus.METHOD_NOT_ALLOWED, null);
+        doPutError("/games/" + stackId + "/hello", null, HttpStatus.BAD_REQUEST, ErrorCodes.GAME_UNKNOWN_STATE);
     }
 
     private void assertEngineManagerOnceCalledWithState(ApplicationEventPublisher publisher, GameState state, Game game, ArgumentCaptor<GameStatusChangeEvent> captor) {

@@ -58,7 +58,7 @@ public class GameAttributesController extends AbstractController {
             tags = {"admin"}
     )
     @ForAdmin
-    @PostMapping(path = "/games/{gameId}/attributes", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/games/{gameId}/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public AttributeInfo addAttribute(@PathVariable("gameId") Integer gameId,
                                       @RequestBody GameAttributeCreateRequest request) {
         return gameRankingService.addAttribute(gameId, request);
@@ -69,7 +69,7 @@ public class GameAttributesController extends AbstractController {
             tags = {"admin"}
     )
     @ForPlayer
-    @GetMapping(path = "/games/{gameId}/attributes")
+    @GetMapping(path = "/games/{gameId}/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<AttributeInfo> listAttributes(@PathVariable("gameId") Integer gameId) {
         return gameRankingService.listAttributes(gameId);
     }

@@ -95,7 +95,7 @@ public class ElementsController extends AbstractController {
             tags = {"player"}
     )
     @ForCurator
-    @GetMapping(path = "/games/{gameId}/elements", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/games/{gameId}/elements")
     public List<ElementDef> getElementsOfGame(@PathVariable("gameId") Integer gameId) {
         return elementService.listElementsFromGameId(gameId);
     }

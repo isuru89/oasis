@@ -28,7 +28,9 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,6 +45,18 @@ public class JsonSerializer implements SerializationSupport {
 
     public JsonSerializer(ObjectMapper objectMapper) {
         this.mapper = objectMapper;
+    }
+
+    @Override
+    public <T> List<T> deserializeList(String data, Class<T> listType) {
+        try {
+            if (data == null) {
+                return null;
+            }
+            return mapper.readValue(data, mapper.getTypeFactory().constructCollectionType(ArrayList.class, listType));
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to deserialize given object!", e);
+        }
     }
 
     @Override
