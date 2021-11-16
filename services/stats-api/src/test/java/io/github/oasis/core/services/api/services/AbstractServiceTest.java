@@ -20,6 +20,7 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.services.ApiConstants;
 import io.github.oasis.core.services.SerializationSupport;
 import io.github.oasis.core.services.annotations.EngineDbPool;
@@ -167,6 +168,21 @@ public abstract class AbstractServiceTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    protected <T> PaginatedResult<T> doGetPaginatedSuccess(String pathUrl, Class<T> clz, Object... params) {
+        try {
+            MvcResult mvcResult = doGet(pathUrl, params).andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
+
+            return serializationSupport.deserializeParameterized(mvcResult.getResponse().getContentAsString(),
+                    PaginatedResult.class,
+                    clz);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     protected void doGetListError(String pathUrl, HttpStatus status, String errorCode, Object... params) {
         try {
             MvcResult mvcResult = doGet(pathUrl, params).andExpect(MockMvcResultMatchers.status().is(status.value())).andReturn();
@@ -185,7 +201,9 @@ public abstract class AbstractServiceTest {
         try {
             MvcResult mvcResult = doGet(pathUrl).andExpect(MockMvcResultMatchers.status().is(status.value())).andReturn();
             OasisErrorHandler.ErrorObject errorObject = serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), OasisErrorHandler.ErrorObject.class);
-            Assertions.assertEquals(errorCode, errorObject.getErrorCode());
+            if (errorCode != null) {
+                Assertions.assertEquals(errorCode, errorObject.getErrorCode());
+            }
             Assertions.assertNotNull(errorObject.getTimestamp());
 
         } catch (Exception e) {

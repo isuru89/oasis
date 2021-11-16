@@ -20,46 +20,33 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.TeamMetadata;
-import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.PlayerWithTeams;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserGender;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
-import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
+import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
 import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
 import io.github.oasis.core.services.api.to.TeamCreateRequest;
 import io.github.oasis.core.services.api.to.TeamUpdateRequest;
-import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Isuru Weerarathna
  */
 public class PlayerTeamServiceTest extends AbstractServiceTest {
-
-    @Autowired
-    private IPlayerManagementService playerManagementService;
-
-    @Autowired
-    private ITeamManagementService teamManagementService;
-
-    @Autowired
-    private IPlayerAssignmentService assignmentService;
 
     private final PlayerCreateRequest reqAlice = PlayerCreateRequest.builder()
             .email("alice@oasis.io")
@@ -92,52 +79,52 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void addPlayer() {
-        assertNull(playerManagementService.readPlayerByEmail(reqAlice.getEmail()));
+        doGetError("/players?email=" + reqAlice.getEmail(), HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
 
-        PlayerObject addedPlayer = playerManagementService.addPlayer(reqAlice);
+        PlayerObject addedPlayer = callPlayerAdd(reqAlice);
         System.out.println(addedPlayer);
         assertFalse(addedPlayer.getId() <= 0);
-        assertNotNull(playerManagementService.readPlayerByEmail(reqAlice.getEmail()));
+        PlayerObject aliceInDb = doGetSuccess("/players?email=" + reqAlice.getEmail(), PlayerObject.class);
+        System.out.println(aliceInDb);
+        assertNotNull(aliceInDb);
+        assertEquals(reqAlice.getEmail(), aliceInDb.getEmail());
 
-        assertThrows(OasisApiRuntimeException.class, () -> playerManagementService.addPlayer(reqAlice));
+        doPostError("/players", reqAlice, HttpStatus.BAD_REQUEST, ErrorCodes.PLAYER_EXISTS);
     }
 
     @Test
     void readPlayer() {
-        PlayerObject bob = playerManagementService.addPlayer(reqBob);
+        PlayerObject bob = callPlayerAdd(reqBob);
         System.out.println(bob);
         assertPlayerWithAnother(bob, reqBob);
 
-        PlayerObject bobById = playerManagementService.readPlayer(bob.getId());
+        PlayerObject bobById = doGetSuccess("/players/" + bob.getId(), PlayerObject.class);
         System.out.println(bobById);
         assertPlayerWithAnother(bobById, reqBob);
 
-        PlayerObject nonExistencePlayer = playerManagementService.readPlayer(Long.MAX_VALUE);
-        assertNull(nonExistencePlayer);
+        doGetError("/players/" + (Long.MAX_VALUE-1), HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
 
-        PlayerObject bobByEmail = playerManagementService.readPlayerByEmail(bob.getEmail());
+        PlayerObject bobByEmail = doGetSuccess("/players?email=" + bob.getEmail(), PlayerObject.class);
         assertPlayerWithAnother(bobByEmail, bobById);
     }
 
     @Test
     void readPlayerWithTeams() {
-        PlayerObject bob = playerManagementService.addPlayer(reqBob);
+        PlayerObject bob = callPlayerAdd(reqBob);
         System.out.println(bob);
         assertPlayerWithAnother(bob, reqBob);
 
-        PlayerObject playerObject = playerManagementService.readPlayerByEmail(bob.getEmail(), true);
-        Assertions.assertThat(playerObject).isInstanceOf(PlayerWithTeams.class);
-        Assertions.assertThat(((PlayerWithTeams)playerObject).getTeams()).isEmpty();
+        PlayerWithTeams playerObject = doGetSuccess("/players?verbose=true&email=" + bob.getEmail(), PlayerWithTeams.class);
+        Assertions.assertThat(playerObject.getTeams()).isEmpty();
 
-        TeamObject renegades = teamManagementService.addTeam(teamRenegades);
-        TeamObject warriors = teamManagementService.addTeam(teamWarriors);
+        TeamObject renegades = callTeamAdd(teamRenegades);
+        TeamObject warriors = callTeamAdd(teamWarriors);
 
-        assignmentService.addPlayerToTeam(bob.getId(), 100, renegades.getId());
-        assignmentService.addPlayerToTeam(bob.getId(), 101, warriors.getId());
+        callAddPlayerToTeam(bob.getId(), 100, renegades.getId());
+        callAddPlayerToTeam(bob.getId(), 101, warriors.getId());
 
-        PlayerObject bobPlayer = playerManagementService.readPlayerByEmail(bob.getEmail(), true);
-        Assertions.assertThat(bobPlayer).isInstanceOf(PlayerWithTeams.class);
-        List<TeamObject> teams = ((PlayerWithTeams) bobPlayer).getTeams();
+        PlayerWithTeams bobPlayer = doGetSuccess("/players?verbose=true&email=" + bob.getEmail(), PlayerWithTeams.class);
+        List<TeamObject> teams = bobPlayer.getTeams();
         Assertions.assertThat(teams).hasSize(2);
 
         TeamObject renegadesInDb = teams.stream().filter(t -> t.getName().equals(renegades.getName())).findFirst().orElseThrow();
@@ -145,164 +132,153 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         TeamObject warriorsInDb = teams.stream().filter(t -> t.getName().equals(warriors.getName())).findFirst().orElseThrow();
         assertTeamWithAnother(warriorsInDb, teamWarriors);
 
-        assertThrows(OasisApiRuntimeException.class, () -> playerManagementService.readPlayerByEmail("nonexist@oasis.io", true));
+        doGetError("/players?verbose=true&email=nonexist@oasis.io", HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
     }
 
     @Test
-    void updatePlayer() throws OasisException {
-        PlayerObject alice = playerManagementService.addPlayer(reqAlice);
+    void updatePlayer() {
+        PlayerObject alice = callPlayerAdd(reqAlice);
 
-        assertNotNull(playerManagementService.readPlayerByEmail(reqAlice.getEmail()));
+        assertNotNull(doGetSuccess("/players?verbose=true&email=" + reqAlice.getEmail(), PlayerWithTeams.class));
 
         PlayerUpdateRequest toUpdateAlice = PlayerUpdateRequest.builder()
                 .displayName("new alice name")
                 .avatarRef("https://oasis.io/assets/alice_new.jpg")
                 .build();
 
-        PlayerObject aliceUpdated = playerManagementService.updatePlayer(alice.getId(), toUpdateAlice);
+        PlayerObject aliceUpdated = callPlayerUpdate(alice.getId(), toUpdateAlice);
         assertEquals(toUpdateAlice.getDisplayName(), aliceUpdated.getDisplayName());
         assertEquals(toUpdateAlice.getAvatarRef(), aliceUpdated.getAvatarRef());
         assertEquals(alice.getGender(), aliceUpdated.getGender());
-
-        {
-//            PlayerObject engineAlice = engineRepo.readPlayer(reqAlice.getEmail());
-//            assertPlayerWithAnother(engineAlice, aliceUpdated);
-        }
     }
 
     @Test
     void deactivatePlayer() {
-        PlayerObject bob = playerManagementService.addPlayer(reqBob);
+        PlayerObject bob = callPlayerAdd(reqBob);
         System.out.println(bob);
         assertPlayerWithAnother(bob, reqBob);
 
-        PlayerObject deletedPlayer = playerManagementService.deactivatePlayer(bob.getId());
+        PlayerObject deletedPlayer = callPlayerDelete(bob.getId());
         assertPlayerWithAnother(bob, deletedPlayer);
 
-//        assertFalse(combinedRepo.existsPlayer(bob.getId()));
-//        assertFalse(engineRepo.existsPlayer(bob.getId()));
-//        assertFalse(engineRepo.existsPlayer(bob.getEmail()));
-//        assertTrue(adminRepo.existsPlayer(bob.getId()));
-//        assertTrue(adminRepo.existsPlayer(bob.getEmail()));
+        // delete non existing player
+        // doDeletetError("/players/" + bob.getId(), HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
     }
 
     @Test
-    void addTeam() throws OasisApiException {
-        TeamObject warriors = teamManagementService.addTeam(teamWarriors);
+    void addTeam() {
+        TeamObject warriors = callTeamAdd(teamWarriors);
         System.out.println(warriors);
 
-        TeamObject renegades = teamManagementService.addTeam(teamRenegades);
+        TeamObject renegades = callTeamAdd(teamRenegades);
         System.out.println(renegades);
 
-        assertTeamWithAnother(teamManagementService.readTeam(warriors.getId()), teamWarriors);
-        assertTeamWithAnother(teamManagementService.readTeam(renegades.getId()), teamRenegades);
+        assertTeamWithAnother(doGetSuccess("/teams/" + warriors.getId(), TeamObject.class), teamWarriors);
+        assertTeamWithAnother(doGetSuccess("/teams/" + renegades.getId(), TeamObject.class), teamRenegades);
 
-        assertThrows(OasisApiRuntimeException.class, () -> teamManagementService.addTeam(teamWarriors));
+        doPostError("/teams", teamWarriors, HttpStatus.BAD_REQUEST, ErrorCodes.TEAM_EXISTS);
     }
 
     @Test
-    void readTeam() throws OasisApiException {
-        TeamObject warriors = teamManagementService.addTeam(teamWarriors);
+    void readTeam() {
+        TeamObject warriors = callTeamAdd(teamWarriors);
         System.out.println(warriors);
         assertTeamWithAnother(warriors, teamWarriors);
 
         {
             // by name
-            TeamObject readWarriors = teamManagementService.readTeamByName(teamWarriors.getName());
+            TeamObject readWarriors = doGetSuccess("/teams?name=" + teamWarriors.getName(), TeamObject.class);
             assertTeamWithAnother(readWarriors, teamWarriors);
         }
         {
             // by id
-            TeamObject readWarriors = teamManagementService.readTeam(warriors.getId());
+            TeamObject readWarriors = doGetSuccess("/teams/" + warriors.getId(), TeamObject.class);
             assertTeamWithAnother(readWarriors, teamWarriors);
         }
 
-        Assertions.assertThatThrownBy(() -> teamManagementService.readTeamByName("Non existing team"))
-                .isInstanceOf(OasisApiException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.TEAM_NOT_EXISTS)
-                .hasFieldOrPropertyWithValue("statusCode", HttpStatus.NOT_FOUND.value());
-        Assertions.assertThatThrownBy(() -> teamManagementService.readTeam(999999))
-                .isInstanceOf(OasisApiException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.TEAM_NOT_EXISTS)
-                .hasFieldOrPropertyWithValue("statusCode", HttpStatus.NOT_FOUND.value());
+        doGetError("/teams?name=nonexistingteamname", HttpStatus.NOT_FOUND, ErrorCodes.TEAM_NOT_EXISTS);
+        doGetError("/teams/999999", HttpStatus.NOT_FOUND, ErrorCodes.TEAM_NOT_EXISTS);
     }
 
     @Test
     void updateTeam() {
-        TeamObject renegades = teamManagementService.addTeam(teamRenegades);
+        TeamObject renegades = callTeamAdd(teamRenegades);
         System.out.println(renegades);
 
         TeamUpdateRequest toBeUpdatedTeam = TeamUpdateRequest.builder()
                 .colorCode("#00ff00")
                 .avatarRef("https://oasis.io/assets/new_rr.jpeg")
                 .build();
-        TeamObject updatedTeam = teamManagementService.updateTeam(renegades.getId(), toBeUpdatedTeam);
+        TeamObject updatedTeam = callTeamUpdate(renegades.getId(), toBeUpdatedTeam);
         System.out.println(updatedTeam);
         assertTeamWithAnother(updatedTeam, toBeUpdatedTeam, renegades);
     }
 
     @Test
     void addPlayerToTeam() {
-        PlayerObject alice = playerManagementService.addPlayer(reqAlice);
+        PlayerObject alice = callPlayerAdd(reqAlice);
 
-        TeamObject renegades = teamManagementService.addTeam(teamRenegades);
-        TeamObject warriors = teamManagementService.addTeam(teamWarriors);
+        TeamObject renegades = callTeamAdd(teamRenegades);
+        TeamObject warriors = callTeamAdd(teamWarriors);
 
-        assignmentService.addPlayerToTeam(alice.getId(), 100, renegades.getId());
-        assignmentService.addPlayerToTeam(alice.getId(), 101, warriors.getId());
+        callAddPlayerToTeam(alice.getId(), 100, renegades.getId());
+        callAddPlayerToTeam(alice.getId(), 101, warriors.getId());
 
-        System.out.println(assignmentService.getTeamsOfPlayer(alice.getId()));
+        List<TeamObject> teamObjects = doGetListSuccess("/players/" + alice.getId() + "/teams", TeamObject.class);
+        Assertions.assertThat(teamObjects).hasSize(2);
 
         // can't add same user in multiple teams of same game
-        Assertions.assertThatThrownBy(
-                () -> assignmentService.addPlayerToTeam(alice.getId(), 100, renegades.getId()))
-            .isInstanceOf(OasisApiRuntimeException.class)
-            .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.PLAYER_ALREADY_IN_TEAM);
+        doPostError("/players/" + alice.getId() + "/teams",
+                PlayerGameAssociationRequest.builder().gameId(100).teamId(renegades.getId()).userId(alice.getId()).build(),
+                HttpStatus.BAD_REQUEST,
+                ErrorCodes.PLAYER_ALREADY_IN_TEAM);
     }
 
     @Test
     void addPlayersToTeam() {
-        TeamObject warriors = teamManagementService.addTeam(teamWarriors);
+        TeamObject warriors = callTeamAdd(teamWarriors);
 
-        PlayerObject bob = playerManagementService.addPlayer(reqBob);
-        PlayerObject alice = playerManagementService.addPlayer(reqAlice);
-        PlayerObject candy = playerManagementService.addPlayer(reqAlice.toBuilder()
+        PlayerObject bob = callPlayerAdd(reqBob);
+        PlayerObject alice = callPlayerAdd(reqAlice);
+        PlayerObject candy = callPlayerAdd(reqAlice.toBuilder()
                                 .displayName("Candy").email("candy@oasis.io")
                                 .avatarRef("https://oasis.io/assets/cnd.png")
                                 .build());
 
-        assignmentService.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        callAddPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
 
-        // if one user failed, other status will depend on order
-        Assertions.assertThatThrownBy(() -> assignmentService.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), candy.getId())))
-                .isInstanceOf(OasisApiRuntimeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.PLAYER_ALREADY_IN_TEAM);
-        assertEquals(0, assignmentService.getTeamsOfPlayer(candy.getId()).size());
+        List<PlayerObject> playerObjects = doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class);
+        Assertions.assertThat(playerObjects).hasSize(2);
+
+        // if one user failed, all should fail
+        doPostError("/teams/" + warriors.getId() + "/players?playerIds=" + join(List.of(bob.getId(), candy.getId())), null,
+                HttpStatus.BAD_REQUEST,
+                ErrorCodes.PLAYER_ALREADY_IN_TEAM);
+        assertEquals(0, doGetListSuccess("/players/" + candy.getId() + "/teams", TeamObject.class).size());
 
         // candy first in order
-        Assertions.assertThatThrownBy(() -> assignmentService.addPlayersToTeam(warriors.getId(), List.of(candy.getId(), bob.getId())))
-                .isInstanceOf(OasisApiRuntimeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.PLAYER_ALREADY_IN_TEAM);
-        assertEquals(1, assignmentService.getTeamsOfPlayer(candy.getId()).size());
+        doPostError("/teams/" + warriors.getId() + "/players?playerIds=" + join(List.of(candy.getId(), bob.getId())), null,
+                HttpStatus.BAD_REQUEST,
+                ErrorCodes.PLAYER_ALREADY_IN_TEAM);
+        assertEquals(0, doGetListSuccess("/players/" + candy.getId() + "/teams", TeamObject.class).size());
     }
-
 
     @Test
     void getTeamsOfPlayer() {
-        TeamObject warriors = teamManagementService.addTeam(teamWarriors);
-        TeamObject renegades = teamManagementService.addTeam(teamRenegades);
+        TeamObject warriors = callTeamAdd(teamWarriors);
+        TeamObject renegades = callTeamAdd(teamRenegades);
 
-        PlayerObject bob = playerManagementService.addPlayer(reqBob);
-        PlayerObject alice = playerManagementService.addPlayer(reqAlice);
+        PlayerObject bob = callPlayerAdd(reqBob);
+        PlayerObject alice = callPlayerAdd(reqAlice);
 
-        assignmentService.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
-        assignmentService.addPlayerToTeam(alice.getId(), 100, renegades.getId());
+        callAddPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        callAddPlayerToTeam(alice.getId(), 100, renegades.getId());
 
-        List<TeamObject> bobTeams = assignmentService.getTeamsOfPlayer(bob.getId());
+        List<TeamObject> bobTeams = doGetListSuccess("/players/" + bob.getId() + "/teams", TeamObject.class);
         assertEquals(1, bobTeams.size());
         assertEquals(warriors.getName(), bobTeams.get(0).getName());
 
-        List<TeamObject> aliceTeams = assignmentService.getTeamsOfPlayer(alice.getId());
+        List<TeamObject> aliceTeams = doGetListSuccess("/players/" + alice.getId() + "/teams", TeamObject.class);
         assertEquals(2, aliceTeams.size());
         assertTrue(aliceTeams.stream().anyMatch(t -> t.getName().equals(warriors.getName())));
         assertTrue(aliceTeams.stream().anyMatch(t -> t.getName().equals(renegades.getName())));
@@ -311,16 +287,16 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void listAllUsersInTeam() {
-        TeamObject warriors = teamManagementService.addTeam(teamWarriors);
-        TeamObject renegades = teamManagementService.addTeam(teamRenegades);
+        TeamObject warriors = callTeamAdd(teamWarriors);
+        TeamObject renegades = callTeamAdd(teamRenegades);
 
-        PlayerObject bob = playerManagementService.addPlayer(reqBob);
-        PlayerObject alice = playerManagementService.addPlayer(reqAlice);
+        PlayerObject bob = callPlayerAdd(reqBob);
+        PlayerObject alice = callPlayerAdd(reqAlice);
 
-        assignmentService.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
-        assignmentService.addPlayerToTeam(alice.getId(), 100, renegades.getId());
+        callAddPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        callAddPlayerToTeam(alice.getId(), 100, renegades.getId());
 
-        List<PlayerObject> playersInWarriors = assignmentService.listAllUsersInTeam(warriors.getId());
+        List<PlayerObject> playersInWarriors = doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class);
         assertEquals(2, playersInWarriors.size());
         assertTrue(playersInWarriors.stream().anyMatch(p -> p.getEmail().equals(bob.getEmail())));
         assertTrue(playersInWarriors.stream().anyMatch(p -> p.getEmail().equals(alice.getEmail())));
@@ -328,35 +304,68 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void removePlayerFromTeam() {
-        TeamObject warriors = teamManagementService.addTeam(teamWarriors);
+        TeamObject warriors = callTeamAdd(teamWarriors);
 
-        PlayerObject bob = playerManagementService.addPlayer(reqBob);
-        PlayerObject alice = playerManagementService.addPlayer(reqAlice);
+        PlayerObject bob = callPlayerAdd(reqBob);
+        PlayerObject alice = callPlayerAdd(reqAlice);
 
-        assignmentService.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        callAddPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
 
-        assertEquals(2, assignmentService.listAllUsersInTeam(warriors.getId()).size());
-        assertEquals(1, assignmentService.getTeamsOfPlayer(bob.getId()).size());
+        assertEquals(2, doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class).size());
+        assertEquals(1, doGetListSuccess("/players/" + bob.getId() + "/teams", TeamObject.class).size());
 
-        assignmentService.removePlayerFromTeam(bob.getId(), warriors.getId());
+        doDeleteSuccess("/teams/" + warriors.getId() + "/players/" + bob.getId(), null);
 
-        assertEquals(1, assignmentService.listAllUsersInTeam(warriors.getId()).size());
-        assertEquals(0, assignmentService.getTeamsOfPlayer(bob.getId()).size());
+        assertEquals(1, doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class).size());
+        assertEquals(0, doGetListSuccess("/players/" + bob.getId() + "/teams", TeamObject.class).size());
     }
 
     @Test
     void searchTeam() {
-        teamManagementService.addTeam(teamWarriors);
-        teamManagementService.addTeam(teamWarriors.toBuilder().name("wuh war").build());
-        teamManagementService.addTeam(teamWarriors.toBuilder().name("toronto tiq").build());
-        teamManagementService.addTeam(teamWarriors.toBuilder().name("WUHAN WAR").build());
-        teamManagementService.addTeam(teamWarriors.toBuilder().name("la liga").build());
+        callTeamAdd(teamWarriors);
+        callTeamAdd(teamWarriors.toBuilder().name("wuh war").build());
+        callTeamAdd(teamWarriors.toBuilder().name("toronto tiq").build());
+        callTeamAdd(teamWarriors.toBuilder().name("WUHAN WAR").build());
+        callTeamAdd(teamWarriors.toBuilder().name("la liga").build());
 
-        PaginatedResult<TeamMetadata> wuhResults = teamManagementService.searchTeam("wuh", "0", 5);
+        PaginatedResult<TeamMetadata> wuhResults = doGetPaginatedSuccess("/teams/search?name=wu&offset=0&pageSize=5", TeamMetadata.class);
         assertEquals(3, wuhResults.getRecords().size());
-        assertEquals(2, teamManagementService.searchTeam("wuh", "1", 5).getRecords().size());
-        assertEquals(0, teamManagementService.searchTeam("wuh", "4", 1).getRecords().size());
-        assertEquals(1, teamManagementService.searchTeam("wuh", "0", 1).getRecords().size());
+        assertEquals(2, doGetPaginatedSuccess("/teams/search?name=wuh&offset=1&pageSize=5", TeamMetadata.class).getRecords().size());
+        assertEquals(0, doGetPaginatedSuccess("/teams/search?name=wuh&offset=4&pageSize=1", TeamMetadata.class).getRecords().size());
+        assertEquals(1, doGetPaginatedSuccess("/teams/search?name=wuh&offset=0&pageSize=1", TeamMetadata.class).getRecords().size());
+    }
+
+    private PlayerObject callPlayerAdd(PlayerCreateRequest request) {
+        return doPostSuccess("/players", request, PlayerObject.class);
+    }
+
+    private TeamObject callTeamAdd(TeamCreateRequest request) {
+        return doPostSuccess("/teams", request, TeamObject.class);
+    }
+
+    private PlayerObject callPlayerUpdate(long playerId, PlayerUpdateRequest request) {
+        return doPatchSuccess("/players/" + playerId, request, PlayerObject.class);
+    }
+
+    private PlayerObject callPlayerDelete(long playerId) {
+        return doDeleteSuccess("/players/" + playerId, PlayerObject.class);
+    }
+
+    private void callAddPlayerToTeam(long playerId, int gameId, int teamId) {
+        doPostSuccess("/players/" + playerId + "/teams", PlayerGameAssociationRequest.builder()
+                .teamId(teamId).gameId(gameId).userId(playerId).build(), null);
+    }
+
+    private void callAddPlayersToTeam(int teamId, List<Long> playerIds) {
+        doPostSuccess("/teams/" + teamId + "/players?playerIds=" + join(playerIds), null, null);
+    }
+
+    private TeamObject callTeamUpdate(int teamId, TeamUpdateRequest request) {
+        return doPatchSuccess("/teams/" + teamId, request, TeamObject.class);
+    }
+
+    private String join(List<Long> ids) {
+        return ids.stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 
     private void assertPlayerWithAnother(PlayerObject player, PlayerCreateRequest request) {

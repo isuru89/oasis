@@ -42,6 +42,7 @@ public final class ErrorCodes {
 
     public static final String PLAYER_EXISTS = "PL0001";
     public static final String PLAYER_ALREADY_IN_TEAM = "PL0002";
+    public static final String PLAYER_DOES_NOT_EXISTS = "PL0003";
 
     public static final String TEAM_EXISTS = "TM0001";
     public static final String TEAM_NOT_EXISTS = "TM0002";

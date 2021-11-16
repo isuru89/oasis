@@ -27,6 +27,8 @@ import java.util.Map;
  */
 public interface SerializationSupport {
 
+    <T, P> T deserializeParameterized(String data, Class<T> mainClass, Class<P> parameterClz);
+
     <T> List<T> deserializeList(String data, Class<T> listType);
 
     <T> T deserialize(String data, Class<T> clz);

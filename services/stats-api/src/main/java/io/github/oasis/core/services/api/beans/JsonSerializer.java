@@ -48,6 +48,18 @@ public class JsonSerializer implements SerializationSupport {
     }
 
     @Override
+    public <T, P> T deserializeParameterized(String data, Class<T> mainClass, Class<P> parameterClz) {
+        try {
+            if (data == null) {
+                return null;
+            }
+            return mapper.readValue(data, mapper.getTypeFactory().constructParametricType(mainClass, parameterClz));
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to deserialize given object!", e);
+        }
+    }
+
+    @Override
     public <T> List<T> deserializeList(String data, Class<T> listType) {
         try {
             if (data == null) {

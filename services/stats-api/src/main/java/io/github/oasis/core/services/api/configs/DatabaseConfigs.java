@@ -19,8 +19,6 @@
 
 package io.github.oasis.core.services.api.configs;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.external.Db;
@@ -51,6 +49,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -109,7 +108,8 @@ public class DatabaseConfigs {
 
     @Bean
     public Jdbi createJdbiInterface(DataSource jdbcDataSource) throws SQLException {
-        Jdbi jdbi = Jdbi.create(jdbcDataSource);
+        TransactionAwareDataSourceProxy proxy = new TransactionAwareDataSourceProxy(jdbcDataSource);
+        Jdbi jdbi = Jdbi.create(proxy);
         jdbi.installPlugin(new SqlObjectPlugin())
                 .registerColumnMapper(new OasisEnumColumnFactory())
                 .registerArgument(new OasisEnumArgTypeFactory());

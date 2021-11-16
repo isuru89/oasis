@@ -243,12 +243,20 @@ public class JdbcRepository implements OasisRepository {
 
     @Override
     public PlayerObject readPlayer(long playerId) {
-        return playerTeamDao.readPlayer(playerId);
+        var player = playerTeamDao.readPlayer(playerId);
+        if (player == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_DOES_NOT_EXISTS, HttpStatus.NOT_FOUND);
+        }
+        return player;
     }
 
     @Override
     public PlayerObject readPlayer(String email) {
-        return playerTeamDao.readPlayerByEmail(email);
+        var player = playerTeamDao.readPlayerByEmail(email);
+        if (player == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_DOES_NOT_EXISTS, HttpStatus.NOT_FOUND);
+        }
+        return player;
     }
 
     @Override
@@ -257,7 +265,7 @@ public class JdbcRepository implements OasisRepository {
             long newId = playerTeamDao.insertPlayer(newPlayer);
             return playerTeamDao.readPlayer(newId);
         } catch (JdbiException e) {
-            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_EXISTS, e);
+            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_EXISTS, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -292,7 +300,7 @@ public class JdbcRepository implements OasisRepository {
             int newId = playerTeamDao.insertTeam(teamObject);
             return playerTeamDao.readTeam(newId);
         } catch (JdbiException e) {
-            throw new OasisApiRuntimeException(ErrorCodes.TEAM_EXISTS, e);
+            throw new OasisApiRuntimeException(ErrorCodes.TEAM_EXISTS, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -345,7 +353,7 @@ public class JdbcRepository implements OasisRepository {
         try {
             playerTeamDao.insertPlayerToTeam(gameId, playerId, teamId);
         } catch (JdbiException e) {
-            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_ALREADY_IN_TEAM, e);
+            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_ALREADY_IN_TEAM, HttpStatus.BAD_REQUEST);
         }
     }
 

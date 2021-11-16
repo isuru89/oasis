@@ -21,8 +21,6 @@ package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.ElementDef;
-import io.github.oasis.core.exception.OasisException;
-import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.services.api.TestUtils;
@@ -33,7 +31,6 @@ import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
 import io.github.oasis.core.services.events.GameStatusChangeEvent;
-import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -46,7 +43,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -56,12 +52,6 @@ public class GameServiceTest extends AbstractServiceTest {
 
     @Autowired
     private IGameService gameService;
-
-    @Autowired
-    private IEventSourceService eventSourceService;
-
-    @Autowired
-    private IElementService elementService;
 
     public static final String TESTPOINT = "testpoint";
     public static final String TESTBADGE = "testbadge";
@@ -103,18 +93,18 @@ public class GameServiceTest extends AbstractServiceTest {
 
     @Test
     void listGames() {
-        assertEquals(0, doGetSuccess("/games", PaginatedResult.class).getRecords().size());
+        assertEquals(0, doGetPaginatedSuccess("/games", Game.class).getRecords().size());
 
         doPostSuccess("/games", stackOverflow, Game.class);
-        assertEquals(1, doGetSuccess("/games", PaginatedResult.class).getRecords().size());
+        assertEquals(1, doGetPaginatedSuccess("/games", Game.class).getRecords().size());
 
         doPostSuccess("/games", promotions, Game.class);
-        assertEquals(2, doGetSuccess("/games", PaginatedResult.class).getRecords().size());
-        assertEquals(1, doGetSuccess("/games?page=0&pageSize=1", PaginatedResult.class).getRecords().size());
-        assertEquals(1, doGetSuccess("/games?page=1&pageSize=1", PaginatedResult.class).getRecords().size());
+        assertEquals(2, doGetPaginatedSuccess("/games", Game.class).getRecords().size());
+        assertEquals(1, doGetPaginatedSuccess("/games?page=0&pageSize=1", Game.class).getRecords().size());
+        assertEquals(1, doGetPaginatedSuccess("/games?page=1&pageSize=1", Game.class).getRecords().size());
 
         doPostError("/games", stackOverflow, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCodes.GAME_ALREADY_EXISTS);
-        assertEquals(2, doGetSuccess("/games", PaginatedResult.class).getRecords().size());
+        assertEquals(2, doGetPaginatedSuccess("/games", Game.class).getRecords().size());
     }
 
     @Test
@@ -176,7 +166,7 @@ public class GameServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    void deleteGame() throws OasisException {
+    void deleteGame() {
         Mockito.reset(engineManager);
         ApplicationEventPublisher spy = Mockito.spy(eventPublisher);
         if (gameService instanceof GameService) {
@@ -186,27 +176,29 @@ public class GameServiceTest extends AbstractServiceTest {
 
         int stackId = doPostSuccess("/games", stackOverflow, Game.class).getId();
         Game dbGame = doGetSuccess("/games/" + stackId, Game.class);
-        EventSource eventSource = eventSourceService.registerEventSource(EventSourceCreateRequest.builder().name("test-1").build());
-        eventSourceService.assignEventSourceToGame(eventSource.getId(), stackId);
+        EventSource eventSource = doPostSuccess("/admin/event-sources", EventSourceCreateRequest.builder().name("test-1").build(), EventSource.class);
+        doPostSuccess("/admin/games/" + stackId + "/event-sources/" + eventSource.getId(), null, null);
 
         List<ElementCreateRequest> elementCreateRequests = TestUtils.parseElementRules("rules.yml", stackId);
-        ElementDef elementPoint = elementService.addElement(stackId, TestUtils.findById(TESTPOINT, elementCreateRequests));
-        ElementDef elementBadge = elementService.addElement(stackId, TestUtils.findById(TESTBADGE, elementCreateRequests));
+        ElementDef elementPoint = doPostSuccess("/games/" + stackId + "/elements", TestUtils.findById(TESTPOINT, elementCreateRequests), ElementDef.class);
+        ElementDef elementBadge = doPostSuccess("/games/" + stackId + "/elements", TestUtils.findById(TESTBADGE, elementCreateRequests), ElementDef.class);
 
-        assertEquals(1, eventSourceService.listAllEventSourcesOfGame(stackId).size());
-        assertEquals(elementBadge.getElementId(), elementService.readElement(stackId, TESTBADGE, false).getElementId());
-        assertEquals(elementPoint.getElementId(), elementService.readElement(stackId, TESTPOINT, false).getElementId());
+        assertEquals(1, doGetListSuccess("/admin/games/" + stackId + "/event-sources", EventSource.class).size());
+
+        assertEquals(elementBadge.getElementId(), doGetSuccess("/games/" + stackId + "/elements/" + TESTBADGE + "?withData=false", ElementDef.class).getElementId());
+        assertEquals(elementPoint.getElementId(), doGetSuccess("/games/" + stackId + "/elements/" + TESTPOINT + "?withData=false", ElementDef.class).getElementId());
 
         Mockito.reset(spy);
         assertNotNull(doDeleteSuccess("/games/" + stackId, Game.class));
 
-        assertTrue(eventSourceService.listAllEventSourcesOfGame(stackId).isEmpty());
+        assertTrue(doGetListSuccess("/admin/games/" + stackId + "/event-sources", EventSource.class).isEmpty());
         // but still event source must exist
-        EventSource dbSource = eventSourceService.readEventSource(eventSource.getId());
+
+        EventSource dbSource = doGetSuccess("/admin/event-sources/" + eventSource.getId(), EventSource.class);
         assertNotNull(dbSource);
         assertTrue(dbSource.isActive());
-        assertThrows(OasisApiException.class, () -> elementService.readElement(stackId, TESTBADGE, false));
-        assertThrows(OasisApiException.class, () -> elementService.readElement(stackId, TESTPOINT, false));
+        doGetError("/games/" + stackId + "/elements/" + TESTBADGE + "?withData=false", HttpStatus.NOT_FOUND, ErrorCodes.ELEMENT_NOT_EXISTS);
+        doGetError("/games/" + stackId + "/elements/" + TESTPOINT + "?withData=false", HttpStatus.NOT_FOUND, ErrorCodes.ELEMENT_NOT_EXISTS);
 
         // game stopped message should dispatch
         ArgumentCaptor<GameStatusChangeEvent> eventArgumentCaptor = ArgumentCaptor.forClass(GameStatusChangeEvent.class);
