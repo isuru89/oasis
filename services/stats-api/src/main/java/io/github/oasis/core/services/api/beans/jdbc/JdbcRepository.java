@@ -293,8 +293,10 @@ public class JdbcRepository implements OasisRepository {
     @Override
     public PlayerObject deletePlayer(long playerId) {
         PlayerObject player = playerTeamDao.readPlayer(playerId);
-        if (player == null || !player.isActive()) {
+        if (player == null) {
             throw new OasisApiRuntimeException(ErrorCodes.PLAYER_DOES_NOT_EXISTS, HttpStatus.NOT_FOUND);
+        } else if (!player.isActive()) {
+            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_IS_DEACTIVATED, HttpStatus.BAD_REQUEST);
         }
         playerTeamDao.deletePlayer(playerId);
         return player;

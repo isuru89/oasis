@@ -35,12 +35,14 @@ public class PlayerUpdatePart implements Serializable {
     private String displayName;
     private String avatarRef;
     private int gender;
+    private boolean active;
 
     public static PlayerUpdatePart from(PlayerObject playerObject) {
         PlayerUpdatePart part = new PlayerUpdatePart();
         part.setGender(playerObject.getGender().getId());
         part.setDisplayName(playerObject.getDisplayName());
         part.setAvatarRef(playerObject.getAvatarRef());
+        part.setActive(playerObject.isActive());
         return part;
     }
 

@@ -196,13 +196,45 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
         // delete already deleted player
         Mockito.reset(cacheClearanceListener);
-        doDeletetError("/players/" + bob.getId(), HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+        doDeletetError("/players/" + bob.getId(), HttpStatus.BAD_REQUEST, ErrorCodes.PLAYER_IS_DEACTIVATED);
         assertNeverCacheClearanceCalled();
 
         // delete non-existing player
         Mockito.reset(cacheClearanceListener);
         doDeletetError("/players/9999999", HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
         assertNeverCacheClearanceCalled();
+    }
+
+    @Test
+    void reactivatePlayer() {
+        PlayerObject bob = callPlayerAdd(reqBob);
+        System.out.println(bob);
+        assertPlayerWithAnother(bob, reqBob);
+
+        PlayerObject deletedPlayer = callPlayerDelete(bob.getId());
+        assertOnceCacheClearanceCalled(deletedPlayer.getEmail(), EntityChangeType.REMOVED);
+        assertPlayerWithAnother(bob, deletedPlayer);
+
+        // delete already deleted player
+        Mockito.reset(cacheClearanceListener);
+        doDeletetError("/players/" + bob.getId(), HttpStatus.BAD_REQUEST, ErrorCodes.PLAYER_IS_DEACTIVATED);
+        assertNeverCacheClearanceCalled();
+
+        {
+            PlayerObject playerObject = doGetSuccess("/players/" + bob.getId(), PlayerObject.class);
+            org.junit.jupiter.api.Assertions.assertFalse(playerObject.isActive());
+        }
+
+        PlayerUpdateRequest updateRequest = PlayerUpdateRequest.builder()
+                .isActive(true)
+                .build();
+        callPlayerUpdate(bob.getId(), updateRequest);
+
+        {
+            PlayerObject playerObject = doGetSuccess("/players/" + bob.getId(), PlayerObject.class);
+            org.junit.jupiter.api.Assertions.assertTrue(playerObject.isActive());
+        }
+
     }
 
     @Test

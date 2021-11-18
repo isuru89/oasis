@@ -123,6 +123,7 @@ public class PlayerTeamService extends AbstractOasisService implements IPlayerMa
                 .avatarRef(updatingUser.getAvatarRef())
                 .gender(ObjectUtils.defaultIfNull(updatingUser.getGender(), dbPlayer.getGender()))
                 .timeZone(StringUtils.defaultIfBlank(updatingUser.getTimeZone(), dbPlayer.getTimeZone()))
+                .active(ObjectUtils.defaultIfNull(updatingUser.getIsActive(), Boolean.TRUE))
                 .build();
 
         PlayerObject updatedPlayer = backendRepository.updatePlayer(playerId, playerUpdating);
