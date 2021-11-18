@@ -85,7 +85,7 @@ public class ElementServiceTest extends AbstractServiceTest {
         assertElement(addedBadge, sampleBadge, true);
 
         // add same element will throw error
-        doPostError(DEF_ELEMENTS_URL, samplePoint, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCodes.ELEMENT_ALREADY_EXISTS);
+        doPostError(DEF_ELEMENTS_URL, samplePoint, HttpStatus.BAD_REQUEST, ErrorCodes.ELEMENT_ALREADY_EXISTS);
     }
 
     @Test
@@ -222,7 +222,7 @@ public class ElementServiceTest extends AbstractServiceTest {
         AttributeInfo dbGold = doPostSuccess("/games/" + GAME_ID + "/attributes", gold, AttributeInfo.class);
         assertAttribute(dbGold, gold);
 
-        doPostError("/games/" + GAME_ID + "/attributes", gold, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCodes.ATTRIBUTE_EXISTS);
+        doPostError("/games/" + GAME_ID + "/attributes", gold, HttpStatus.BAD_REQUEST, ErrorCodes.ATTRIBUTE_EXISTS);
 
         // can add same attribute to different game
         doPostSuccess("/games/2/attributes", gold, AttributeInfo.class);

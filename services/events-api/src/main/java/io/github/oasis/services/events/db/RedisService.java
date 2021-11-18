@@ -51,4 +51,7 @@ public interface RedisService {
 
     @Fluent
     RedisService persistSourceInfo(String sourceId, EventSource eventSource, Handler<AsyncResult<EventSource>> resultHandler);
+
+    @Fluent
+    RedisService deleteKey(String key, Handler<AsyncResult<Boolean>> resultHandler);
 }

@@ -88,7 +88,7 @@ public class GameServiceTest extends AbstractServiceTest {
         assertGame(pGame, promotions);
         assertEquals(GameState.CREATED.name(), pGame.getCurrentStatus());
 
-        doPostError("/games", stackOverflow, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCodes.GAME_ALREADY_EXISTS);
+        doPostError("/games", stackOverflow, HttpStatus.BAD_REQUEST, ErrorCodes.GAME_ALREADY_EXISTS);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class GameServiceTest extends AbstractServiceTest {
         assertEquals(1, doGetPaginatedSuccess("/games?page=0&pageSize=1", Game.class).getRecords().size());
         assertEquals(1, doGetPaginatedSuccess("/games?page=1&pageSize=1", Game.class).getRecords().size());
 
-        doPostError("/games", stackOverflow, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCodes.GAME_ALREADY_EXISTS);
+        doPostError("/games", stackOverflow, HttpStatus.BAD_REQUEST, ErrorCodes.GAME_ALREADY_EXISTS);
         assertEquals(2, doGetPaginatedSuccess("/games", Game.class).getRecords().size());
     }
 

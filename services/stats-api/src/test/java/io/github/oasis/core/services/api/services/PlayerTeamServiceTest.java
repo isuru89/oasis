@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.services.api.services;
 
+import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.PlayerObject;
@@ -26,16 +27,25 @@ import io.github.oasis.core.model.PlayerWithTeams;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserGender;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.handlers.CacheClearanceListener;
+import io.github.oasis.core.services.api.handlers.events.BasePlayerRelatedEvent;
+import io.github.oasis.core.services.api.handlers.events.EntityChangeType;
+import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
 import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
 import io.github.oasis.core.services.api.to.TeamCreateRequest;
 import io.github.oasis.core.services.api.to.TeamUpdateRequest;
+import org.apache.commons.collections4.SetUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,6 +57,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Isuru Weerarathna
  */
 public class PlayerTeamServiceTest extends AbstractServiceTest {
+
+    @SpyBean
+    private CacheClearanceListener cacheClearanceListener;
+
+    private final GameCreateRequest stackOverflow = GameCreateRequest.builder()
+            .name("Stack-overflow")
+            .description("Stackoverflow badges and points system")
+            .logoRef("https://oasis.io/assets/so.jpeg")
+            .motto("Help the community")
+            .build();
+
+    private final GameCreateRequest promotions = GameCreateRequest.builder()
+            .name("Promotions")
+            .description("Provides promotions for customers based on their loyality")
+            .logoRef("https://oasis.io/assets/pm.jpeg")
+            .motto("Serve your customers")
+            .build();
 
     private final PlayerCreateRequest reqAlice = PlayerCreateRequest.builder()
             .email("alice@oasis.io")
@@ -110,6 +137,8 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void readPlayerWithTeams() {
+        Integer gameId1 = callAddGame(stackOverflow).getId();
+        Integer gameId2 = callAddGame(promotions).getId();
         PlayerObject bob = callPlayerAdd(reqBob);
         System.out.println(bob);
         assertPlayerWithAnother(bob, reqBob);
@@ -120,8 +149,8 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         TeamObject renegades = callTeamAdd(teamRenegades);
         TeamObject warriors = callTeamAdd(teamWarriors);
 
-        callAddPlayerToTeam(bob.getId(), 100, renegades.getId());
-        callAddPlayerToTeam(bob.getId(), 101, warriors.getId());
+        callAddPlayerToTeam(bob.getId(), gameId1, renegades.getId());
+        callAddPlayerToTeam(bob.getId(), gameId2, warriors.getId());
 
         PlayerWithTeams bobPlayer = doGetSuccess("/players?verbose=true&email=" + bob.getEmail(), PlayerWithTeams.class);
         List<TeamObject> teams = bobPlayer.getTeams();
@@ -146,7 +175,10 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
                 .avatarRef("https://oasis.io/assets/alice_new.jpg")
                 .build();
 
+        Mockito.reset(cacheClearanceListener);
         PlayerObject aliceUpdated = callPlayerUpdate(alice.getId(), toUpdateAlice);
+        assertOnceCacheClearanceCalled(aliceUpdated.getEmail(), EntityChangeType.MODIFIED);
+
         assertEquals(toUpdateAlice.getDisplayName(), aliceUpdated.getDisplayName());
         assertEquals(toUpdateAlice.getAvatarRef(), aliceUpdated.getAvatarRef());
         assertEquals(alice.getGender(), aliceUpdated.getGender());
@@ -159,10 +191,18 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         assertPlayerWithAnother(bob, reqBob);
 
         PlayerObject deletedPlayer = callPlayerDelete(bob.getId());
+        assertOnceCacheClearanceCalled(deletedPlayer.getEmail(), EntityChangeType.REMOVED);
         assertPlayerWithAnother(bob, deletedPlayer);
 
-        // delete non existing player
-        // doDeletetError("/players/" + bob.getId(), HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+        // delete already deleted player
+        Mockito.reset(cacheClearanceListener);
+        doDeletetError("/players/" + bob.getId(), HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
+
+        // delete non-existing player
+        Mockito.reset(cacheClearanceListener);
+        doDeletetError("/players/9999999", HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
     }
 
     @Test
@@ -216,22 +256,62 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void addPlayerToTeam() {
+        Integer gameId1 = callAddGame(stackOverflow).getId();
+        Integer gameId2 = callAddGame(promotions).getId();
         PlayerObject alice = callPlayerAdd(reqAlice);
 
         TeamObject renegades = callTeamAdd(teamRenegades);
         TeamObject warriors = callTeamAdd(teamWarriors);
 
-        callAddPlayerToTeam(alice.getId(), 100, renegades.getId());
-        callAddPlayerToTeam(alice.getId(), 101, warriors.getId());
+        Mockito.reset(cacheClearanceListener);
+        callAddPlayerToTeam(alice.getId(), gameId1, renegades.getId());
+        assertOnceCacheClearanceCalled(alice.getEmail(), EntityChangeType.MODIFIED);
+
+        callAddPlayerToTeam(alice.getId(), gameId2, warriors.getId());
 
         List<TeamObject> teamObjects = doGetListSuccess("/players/" + alice.getId() + "/teams", TeamObject.class);
         Assertions.assertThat(teamObjects).hasSize(2);
 
         // can't add same user in multiple teams of same game
+        Mockito.reset(cacheClearanceListener);
         doPostError("/players/" + alice.getId() + "/teams",
-                PlayerGameAssociationRequest.builder().gameId(100).teamId(renegades.getId()).userId(alice.getId()).build(),
+                PlayerGameAssociationRequest.builder().gameId(gameId1).teamId(renegades.getId()).userId(alice.getId()).build(),
                 HttpStatus.BAD_REQUEST,
                 ErrorCodes.PLAYER_ALREADY_IN_TEAM);
+        assertNeverCacheClearanceCalled();
+    }
+
+    @Test
+    void addPlayerToTeamFailures() {
+        Integer gameId = callAddGame(stackOverflow).getId();
+        PlayerObject alice = callPlayerAdd(reqAlice);
+        TeamObject renegades = callTeamAdd(teamRenegades);
+
+        callAddPlayerToTeam(alice.getId(), gameId, renegades.getId());
+
+        // can't add non-existing user
+        Mockito.reset(cacheClearanceListener);
+        doPostError("/players/999999/teams",
+                PlayerGameAssociationRequest.builder().gameId(gameId).teamId(renegades.getId()).userId(999999L).build(),
+                HttpStatus.NOT_FOUND,
+                ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
+
+        // can't add non-existing team
+        Mockito.reset(cacheClearanceListener);
+        doPostError("/players/" + alice.getId() + "/teams",
+                PlayerGameAssociationRequest.builder().gameId(gameId).teamId(999999).userId(alice.getId()).build(),
+                HttpStatus.NOT_FOUND,
+                ErrorCodes.TEAM_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
+
+        // can't add non-existing game
+        Mockito.reset(cacheClearanceListener);
+        doPostError("/players/" + alice.getId() + "/teams",
+                PlayerGameAssociationRequest.builder().gameId(999999).teamId(renegades.getId()).userId(alice.getId()).build(),
+                HttpStatus.NOT_FOUND,
+                ErrorCodes.GAME_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
     }
 
     @Test
@@ -245,16 +325,20 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
                                 .avatarRef("https://oasis.io/assets/cnd.png")
                                 .build());
 
+        Mockito.reset(cacheClearanceListener);
         callAddPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        assertNTimesCacheClearanceCalled(2, EntityChangeType.MODIFIED, Set.of(bob.getEmail(), alice.getEmail()));
 
         List<PlayerObject> playerObjects = doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class);
         Assertions.assertThat(playerObjects).hasSize(2);
 
         // if one user failed, all should fail
+        Mockito.reset(cacheClearanceListener);
         doPostError("/teams/" + warriors.getId() + "/players?playerIds=" + join(List.of(bob.getId(), candy.getId())), null,
                 HttpStatus.BAD_REQUEST,
                 ErrorCodes.PLAYER_ALREADY_IN_TEAM);
         assertEquals(0, doGetListSuccess("/players/" + candy.getId() + "/teams", TeamObject.class).size());
+        assertNeverCacheClearanceCalled();
 
         // candy first in order
         doPostError("/teams/" + warriors.getId() + "/players?playerIds=" + join(List.of(candy.getId(), bob.getId())), null,
@@ -265,6 +349,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void getTeamsOfPlayer() {
+        Integer gameId = callAddGame(stackOverflow).getId();
         TeamObject warriors = callTeamAdd(teamWarriors);
         TeamObject renegades = callTeamAdd(teamRenegades);
 
@@ -272,7 +357,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         PlayerObject alice = callPlayerAdd(reqAlice);
 
         callAddPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
-        callAddPlayerToTeam(alice.getId(), 100, renegades.getId());
+        callAddPlayerToTeam(alice.getId(), gameId, renegades.getId());
 
         List<TeamObject> bobTeams = doGetListSuccess("/players/" + bob.getId() + "/teams", TeamObject.class);
         assertEquals(1, bobTeams.size());
@@ -287,6 +372,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void listAllUsersInTeam() {
+        Integer gameId = callAddGame(stackOverflow).getId();
         TeamObject warriors = callTeamAdd(teamWarriors);
         TeamObject renegades = callTeamAdd(teamRenegades);
 
@@ -294,7 +380,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         PlayerObject alice = callPlayerAdd(reqAlice);
 
         callAddPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
-        callAddPlayerToTeam(alice.getId(), 100, renegades.getId());
+        callAddPlayerToTeam(alice.getId(), gameId, renegades.getId());
 
         List<PlayerObject> playersInWarriors = doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class);
         assertEquals(2, playersInWarriors.size());
@@ -304,6 +390,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void removePlayerFromTeam() {
+        Integer gameId = callAddGame(stackOverflow).getId();
         TeamObject warriors = callTeamAdd(teamWarriors);
 
         PlayerObject bob = callPlayerAdd(reqBob);
@@ -314,10 +401,43 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         assertEquals(2, doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class).size());
         assertEquals(1, doGetListSuccess("/players/" + bob.getId() + "/teams", TeamObject.class).size());
 
+        Mockito.reset(cacheClearanceListener);
         doDeleteSuccess("/teams/" + warriors.getId() + "/players/" + bob.getId(), null);
+        assertOnceCacheClearanceCalled(bob.getEmail(), EntityChangeType.MODIFIED);
 
         assertEquals(1, doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class).size());
         assertEquals(0, doGetListSuccess("/players/" + bob.getId() + "/teams", TeamObject.class).size());
+
+        // ability to add again
+        Mockito.reset(cacheClearanceListener);
+        callAddPlayerToTeam(bob.getId(), gameId, warriors.getId());
+        assertOnceCacheClearanceCalled(bob.getEmail(), EntityChangeType.MODIFIED);
+
+        assertEquals(2, doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class).size());
+        assertEquals(1, doGetListSuccess("/players/" + bob.getId() + "/teams", TeamObject.class).size());
+    }
+
+    @Test
+    void removePlayerFromTeamFailures() {
+        Integer gameId = callAddGame(stackOverflow).getId();
+        PlayerObject alice = callPlayerAdd(reqAlice);
+        TeamObject renegades = callTeamAdd(teamRenegades);
+
+        callAddPlayerToTeam(alice.getId(), gameId, renegades.getId());
+
+        // can't remove non-existing user
+        Mockito.reset(cacheClearanceListener);
+        doDeletetError("/teams/" + renegades.getId() + "/players/999999",
+                HttpStatus.NOT_FOUND,
+                ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
+
+        // can't remove from non-existing team
+        Mockito.reset(cacheClearanceListener);
+        doDeletetError("/teams/9999999/players/" + alice.getId(),
+                HttpStatus.NOT_FOUND,
+                ErrorCodes.TEAM_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
     }
 
     @Test
@@ -362,6 +482,10 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     private TeamObject callTeamUpdate(int teamId, TeamUpdateRequest request) {
         return doPatchSuccess("/teams/" + teamId, request, TeamObject.class);
+    }
+
+    private Game callAddGame(GameCreateRequest request) {
+        return doPostSuccess("/games", request, Game.class);
     }
 
     private String join(List<Long> ids) {
@@ -412,5 +536,37 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         assertTrue(dbTeam.getCreatedAt() > 0);
         assertTrue(dbTeam.getUpdatedAt() > 0);
         assertTrue(dbTeam.isActive());
+    }
+
+    private void assertNTimesCacheClearanceCalled(int n, EntityChangeType changeType, Set<String> emails) {
+        ArgumentCaptor<BasePlayerRelatedEvent> captor = ArgumentCaptor.forClass(BasePlayerRelatedEvent.class);
+
+        Mockito.verify(cacheClearanceListener, Mockito.times(n))
+                .handlePlayerUpdateEvent(captor.capture());
+
+        List<BasePlayerRelatedEvent> allValues = captor.getAllValues();
+        allValues.forEach(v -> {
+            org.junit.jupiter.api.Assertions.assertEquals(changeType, v.getChangeType());
+        });
+        Set<String> collectedEmails = allValues.stream().map(BasePlayerRelatedEvent::getEmail).collect(Collectors.toSet());
+        org.junit.jupiter.api.Assertions.assertTrue(SetUtils.isEqualSet(emails, collectedEmails));
+        Mockito.reset(cacheClearanceListener);
+    }
+
+    private void assertOnceCacheClearanceCalled(String email, EntityChangeType changeType) {
+        ArgumentCaptor<BasePlayerRelatedEvent> captor = ArgumentCaptor.forClass(BasePlayerRelatedEvent.class);
+
+        Mockito.verify(cacheClearanceListener, Mockito.times(1))
+                .handlePlayerUpdateEvent(captor.capture());
+
+        org.junit.jupiter.api.Assertions.assertEquals(email, captor.getValue().getEmail());
+        assertEquals(changeType, captor.getValue().getChangeType());
+        Mockito.reset(cacheClearanceListener);
+    }
+
+    private void assertNeverCacheClearanceCalled() {
+        Mockito.verify(cacheClearanceListener, Mockito.never())
+                .handlePlayerUpdateEvent(Mockito.any(BasePlayerRelatedEvent.class));
+        Mockito.reset(cacheClearanceListener);
     }
 }

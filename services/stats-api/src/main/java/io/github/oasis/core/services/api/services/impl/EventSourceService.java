@@ -31,10 +31,13 @@ import io.github.oasis.core.services.annotations.AdminDbRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.handlers.events.BaseEventSourceChangedEvent;
+import io.github.oasis.core.services.api.handlers.events.EntityChangeType;
 import io.github.oasis.core.services.api.services.IEventSourceService;
 import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import io.github.oasis.core.utils.Texts;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -50,12 +53,15 @@ import java.util.UUID;
 public class EventSourceService extends AbstractOasisService implements IEventSourceService {
 
     private final KeyGeneratorSupport keyGeneratorSupport;
+    private final ApplicationEventPublisher eventPublisher;
 
     public EventSourceService(@AdminDbRepository OasisRepository backendRepository,
-                              KeyGeneratorSupport keyGeneratorSupport) {
+                              KeyGeneratorSupport keyGeneratorSupport,
+                              ApplicationEventPublisher eventPublisher) {
         super(backendRepository);
 
         this.keyGeneratorSupport = keyGeneratorSupport;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -96,7 +102,15 @@ public class EventSourceService extends AbstractOasisService implements IEventSo
 
     @Override
     public void deleteEventSource(int eventSourceId) {
-        backendRepository.deleteEventSource(eventSourceId);
+        EventSource deletedSource = backendRepository.deleteEventSource(eventSourceId);
+
+        if (deletedSource != null) {
+            eventPublisher.publishEvent(BaseEventSourceChangedEvent.builder()
+                    .changeType(EntityChangeType.REMOVED)
+                    .sourceId(eventSourceId)
+                    .token(deletedSource.getToken())
+                    .build());
+        }
     }
 
     @Override
@@ -107,12 +121,26 @@ public class EventSourceService extends AbstractOasisService implements IEventSo
 
     @Override
     public void assignEventSourceToGame(int eventSource, int gameId) {
-        backendRepository.addEventSourceToGame(eventSource, gameId);
+        EventSource eventSourceInDb = readEventSource(eventSource);
+        backendRepository.addEventSourceToGame(eventSourceInDb.getId(), backendRepository.readGame(gameId).getId());
+
+        eventPublisher.publishEvent(BaseEventSourceChangedEvent.builder()
+                .changeType(EntityChangeType.MODIFIED)
+                .sourceId(eventSource)
+                .token(eventSourceInDb.getToken())
+                .build());
     }
 
     @Override
     public void removeEventSourceFromGame(int eventSource, int gameId) {
-        backendRepository.removeEventSourceFromGame(eventSource, gameId);
+        EventSource eventSourceInDb = readEventSource(eventSource);
+        backendRepository.removeEventSourceFromGame(eventSourceInDb.getId(), backendRepository.readGame(gameId).getId());
+
+        eventPublisher.publishEvent(BaseEventSourceChangedEvent.builder()
+                .changeType(EntityChangeType.MODIFIED)
+                .sourceId(eventSource)
+                .token(eventSourceInDb.getToken())
+                .build());
     }
 
     @Override

@@ -34,7 +34,6 @@ import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.services.IElementService;
 import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.ElementUpdateRequest;
-import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +54,7 @@ public class ElementService extends AbstractOasisService implements IElementServ
     }
 
     @Override
-    public ElementDef readElement(int gameId, String elementId, boolean withData) throws OasisApiException {
+    public ElementDef readElement(int gameId, String elementId, boolean withData) {
         ElementDef def;
         if (withData) {
             def = backendRepository.readElement(gameId, elementId);
@@ -63,10 +62,9 @@ public class ElementService extends AbstractOasisService implements IElementServ
             def = backendRepository.readElementWithoutData(gameId, elementId);
         }
         return Optional.ofNullable(def)
-                .orElseThrow(() -> new OasisApiException(
+                .orElseThrow(() -> new OasisApiRuntimeException(
                         ErrorCodes.ELEMENT_NOT_EXISTS,
-                        HttpStatus.NOT_FOUND.value(),
-                        "Element not found!"));
+                        HttpStatus.NOT_FOUND));
     }
 
     @Override

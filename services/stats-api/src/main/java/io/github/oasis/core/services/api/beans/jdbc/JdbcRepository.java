@@ -98,8 +98,11 @@ public class JdbcRepository implements OasisRepository {
     @Override
     public EventSource deleteEventSource(int id) {
         EventSourceDto toBeRemoved = eventSourceDao.readEventSource(id);
-        eventSourceDao.deleteEventSource(id);
-        return toBeRemoved.toEventSource();
+        if (toBeRemoved != null) {
+            eventSourceDao.deleteEventSource(id);
+            return toBeRemoved.toEventSource();
+        }
+        throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_NOT_EXISTS, HttpStatus.BAD_REQUEST);
     }
 
     @Override
@@ -138,7 +141,7 @@ public class JdbcRepository implements OasisRepository {
     public EventSourceSecrets readEventSourceSecrets(int id) {
         EventSourceSecretsDto dto = eventSourceDao.readKeysAndIncrement(id, KEY_DOWNLOAD_LIMIT);
         if (dto.getDownloadCount() >= KEY_DOWNLOAD_LIMIT) {
-            throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_DOWNLOAD_LIMIT_EXCEEDED);
+            throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_DOWNLOAD_LIMIT_EXCEEDED, HttpStatus.FORBIDDEN);
         }
         EventSourceSecrets secrets = new EventSourceSecrets();
         secrets.setPrivateKey(dto.getPrivateKey());
@@ -167,7 +170,7 @@ public class JdbcRepository implements OasisRepository {
         try {
             eventSourceDao.addEventSourceToGame(gameId, sourceId);
         } catch (JdbiException e) {
-            throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_ALREADY_MAPPED, e);
+            throw new OasisApiRuntimeException(ErrorCodes.EVENT_SOURCE_ALREADY_MAPPED, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -182,7 +185,7 @@ public class JdbcRepository implements OasisRepository {
             int newGameId = gameDao.insertGame(game);
             return gameDao.readGame(newGameId);
         } catch (JdbiException e) {
-            throw new OasisApiRuntimeException(ErrorCodes.GAME_ALREADY_EXISTS, e);
+            throw new OasisApiRuntimeException(ErrorCodes.GAME_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -290,6 +293,9 @@ public class JdbcRepository implements OasisRepository {
     @Override
     public PlayerObject deletePlayer(long playerId) {
         PlayerObject player = playerTeamDao.readPlayer(playerId);
+        if (player == null || !player.isActive()) {
+            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_DOES_NOT_EXISTS, HttpStatus.NOT_FOUND);
+        }
         playerTeamDao.deletePlayer(playerId);
         return player;
     }
@@ -376,7 +382,7 @@ public class JdbcRepository implements OasisRepository {
             elementDao.insertNewElement(dto);
             return toElementDef(elementDao.readElementWithData(elementDef.getElementId()));
         } catch (JdbiException ex) {
-            throw new OasisApiRuntimeException(ErrorCodes.ELEMENT_ALREADY_EXISTS, ex);
+            throw new OasisApiRuntimeException(ErrorCodes.ELEMENT_ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -452,7 +458,7 @@ public class JdbcRepository implements OasisRepository {
             int newAttrId = elementDao.insertAttribute(gameId, newAttribute);
             return elementDao.readAttribute(gameId, newAttrId);
         } catch (Exception e) {
-            throw new OasisApiRuntimeException(ErrorCodes.ATTRIBUTE_EXISTS, e);
+            throw new OasisApiRuntimeException(ErrorCodes.ATTRIBUTE_EXISTS, HttpStatus.BAD_REQUEST);
         }
     }
 

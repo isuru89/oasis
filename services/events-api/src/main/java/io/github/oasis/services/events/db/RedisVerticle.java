@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.events.db;
 
+import io.github.oasis.services.events.Constants;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -58,17 +59,20 @@ public class RedisVerticle extends AbstractVerticle {
         maxRetries = redisConfigs.getInteger("connectionRetries", DEFAULT_REDIS_MAX_RETRIES);
         retryDelay = redisConfigs.getInteger("connectionRetryDelay", DEFAULT_REDIS_RETRY_DELAY);
 
+        RedisSettings settings = new RedisSettings();
+        settings.setEventSourceTTL(redisConfigs.getInteger("eventSourcesTTL", Constants.DEFAULT_TTL_EVENT_SOURCE));
+
         redisClient.connect(onConnect -> {
             if (onConnect.succeeded()) {
-                checkConnectionHealth(promise);
+                checkConnectionHealth(promise, settings);
             } else {
                 LOG.error("Redis connection establishment failed!", onConnect.cause());
-                retryConnection(1, promise, null);
+                retryConnection(1, settings, promise, null);
             }
         });
     }
 
-    private void retryConnection(int retry, Promise<Void> promise, Throwable error) {
+    private void retryConnection(int retry, RedisSettings redisSettings, Promise<Void> promise, Throwable error) {
         if (retry > maxRetries) {
             LOG.error("Redis connection establishment exhausted after {} failures! No more tries!", retry);
             promise.fail(error);
@@ -76,19 +80,19 @@ public class RedisVerticle extends AbstractVerticle {
             vertx.setTimer(retryDelay, timer -> redisClient.connect(onConnect -> {
                 if (onConnect.succeeded()) {
                     LOG.info("Redis connection successful. Initializing...");
-                    checkConnectionHealth(promise);
+                    checkConnectionHealth(promise, redisSettings);
                 } else {
                     LOG.error("Redis connection establishment failed! [Retry: {}]", retry, onConnect.cause());
-                    retryConnection(retry + 1, promise, onConnect.cause());
+                    retryConnection(retry + 1, redisSettings, promise, onConnect.cause());
                 }
             }));
         }
     }
 
-    private void checkConnectionHealth(Promise<Void> promise) {
+    private void checkConnectionHealth(Promise<Void> promise, RedisSettings redisSettings) {
         RedisAPI.api(redisClient).ping(Collections.singletonList("oasis test"), res -> {
             if (res.succeeded()) {
-                bindRedisService(promise);
+                bindRedisService(promise, redisSettings);
             } else {
                 promise.fail(res.cause());
             }
@@ -96,8 +100,8 @@ public class RedisVerticle extends AbstractVerticle {
 
     }
 
-    private void bindRedisService(Promise<Void> promise) {
-        Future.future(dbServicePromise -> RedisServiceImpl.create(redisClient, res -> {
+    private void bindRedisService(Promise<Void> promise, RedisSettings redisSettings) {
+        Future.future(dbServicePromise -> RedisServiceImpl.create(redisClient, redisSettings, res -> {
             if (res.succeeded()) {
                 new ServiceBinder(vertx)
                         .setAddress(RedisService.DB_SERVICE_QUEUE)

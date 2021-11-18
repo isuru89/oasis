@@ -3,7 +3,7 @@ package io.github.oasis.services.events;
 /**
  * @author Isuru Weerarathna
  */
-public class Constants {
+public final class Constants {
 
     static final String ENV_CONFIG_FILE = "OASIS_CONFIG_FILE";
 
@@ -13,7 +13,6 @@ public class Constants {
     static final String KEY_DISPATCHER_IMPL = "impl";
     static final String KEY_DISPATCHER_CONFIGS = "configs";
 
-    public static final String CACHE_USERS_KEY = "oasis.eventapi.users";
-    public static final String CACHE_SOURCES_KEY = "oasis.eventapi.sources";
+    public static final int DEFAULT_TTL_EVENT_SOURCE = 900;
 
 }

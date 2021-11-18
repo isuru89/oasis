@@ -1,6 +1,5 @@
 package io.github.oasis.services.events;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.collect.Pair;
 import io.github.oasis.services.events.db.RedisVerticle;
@@ -40,15 +39,11 @@ import java.util.Set;
 @ExtendWith({ VertxExtension.class, MockServerExtension.class})
 public abstract class AbstractTest {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
     public static final int TEST_PORT = 8010;
 
     protected TestDispatcherService dispatcherService;
 
     protected ClientAndServer clientAndServer;
-
-    protected
 
     @BeforeEach
     void beforeEach(Vertx vertx, VertxTestContext testContext, ClientAndServer clientAndServer) {
@@ -75,8 +70,8 @@ public abstract class AbstractTest {
         redisConfigs.useSingleServer()
                         .setAddress("redis://localhost:6379");
         RedissonClient redissonClient = Redisson.create(redisConfigs);
-        redissonClient.getMap(ID.ALL_USERS_TEAMS, StringCodec.INSTANCE).delete();
-        redissonClient.getMap(ID.ALL_SOURCES_INDEX, StringCodec.INSTANCE).delete();
+        redissonClient.getMap(ID.EVENT_API_CACHE_USERS_KEY, StringCodec.INSTANCE).delete();
+        redissonClient.getMap(ID.EVENT_API_CACHE_SOURCES_KEY, StringCodec.INSTANCE).delete();
         redissonClient.shutdown();
     }
 
@@ -196,4 +191,8 @@ public abstract class AbstractTest {
         return client.get(TEST_PORT, "localhost", endPoint);
     }
 
+    protected HttpRequest<Buffer> callToDeleteEndPoint(String endPoint, Vertx vertx) {
+        WebClient client = WebClient.create(vertx);
+        return client.delete(TEST_PORT, "localhost", endPoint);
+    }
 }
