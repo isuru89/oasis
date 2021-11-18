@@ -19,12 +19,17 @@
 
 package io.github.oasis.core.services;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
 public interface SerializationSupport {
+
+    <T, P> T deserializeParameterized(String data, Class<T> mainClass, Class<P> parameterClz);
+
+    <T> List<T> deserializeList(String data, Class<T> listType);
 
     <T> T deserialize(String data, Class<T> clz);
 

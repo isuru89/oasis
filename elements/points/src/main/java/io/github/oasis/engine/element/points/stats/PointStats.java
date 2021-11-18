@@ -28,6 +28,7 @@ import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.model.TimeScope;
 import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.core.services.annotations.OasisQueryService;
 import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
@@ -73,8 +74,8 @@ public class PointStats extends AbstractStatsApiService {
     private static final String LEADERBOARD_RANK_REVERSE = "O.PLEADRANKSREV";
     private static final String WITH_CARDINALITY = "withcard";
 
-    public PointStats(Db pool, OasisMetadataSupport contextSupport) {
-        super(pool, contextSupport);
+    public PointStats(EngineDataReader dataReader, OasisMetadataSupport contextSupport) {
+        super(dataReader, contextSupport);
     }
 
     @ApiResponse(
@@ -85,7 +86,7 @@ public class PointStats extends AbstractStatsApiService {
             }
     )
     @OasisStatEndPoint(path = "/elements/points/summary")
-    public Object getUserPoints(@QueryPayload UserPointsRequest request) throws OasisApiException {
+    public UserPointSummary getUserPoints(@QueryPayload UserPointsRequest request) throws OasisApiException {
         Validators.checkPointRequest(request);
 
         try (DbContext db = getDbPool().createContext()) {

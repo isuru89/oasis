@@ -26,14 +26,12 @@ import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.exception.OasisRuntimeException;
-import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
-import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.services.AbstractStatsApiService;
-import io.github.oasis.core.services.annotations.AdminDbRepository;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.core.services.annotations.OasisQueryService;
 import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
@@ -93,8 +91,8 @@ public class BadgeStats extends AbstractStatsApiService {
     private final Set<String> THRESHOLD_KINDS = Set.of(BadgeDef.PERIODIC_ACCUMULATIONS_KIND, BadgeDef.PERIODIC_OCCURRENCES_KIND);
     private final Set<String> PERIODIC_THRESHOLD_KINDS = Set.of(BadgeDef.PERIODIC_ACCUMULATIONS_STREAK_KIND, BadgeDef.PERIODIC_OCCURRENCES_STREAK_KIND);
 
-    public BadgeStats(Db dbPool, OasisMetadataSupport contextSupport, @AdminDbRepository OasisRepository adminRepo) {
-        super(dbPool, contextSupport, adminRepo);
+    public BadgeStats(EngineDataReader dataReader, OasisMetadataSupport contextSupport) {
+        super(dataReader, contextSupport);
     }
 
     @OasisStatEndPoint(path = "/elements/badges/summary")

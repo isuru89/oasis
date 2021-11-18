@@ -24,6 +24,9 @@ package io.github.oasis.core;
  */
 public final class ID {
 
+    public static final String EVENT_API_CACHE_USERS_KEY = "oasis.eventapi.users";
+    public static final String EVENT_API_CACHE_SOURCES_KEY = "oasis.eventapi.sources";
+
     public static final String ENGINE_STATUS_CHANNEL = "game.status.channel";
     public static final String GAME_ENGINES = "oasis.engines.games";
 
@@ -31,6 +34,12 @@ public final class ID {
     public static final String ALL_USERS = "oasis:users";
     public static final String ALL_TEAMS = "oasis:teams";
     public static final String ALL_SOURCES = "oasis:sources";
+    public static final String CACHE_USERS_META = "oasis:cache:users";
+    public static final String CACHE_TEAMS_META = "oasis:cache:teams";
+    public static final String CACHE_ELEMENTS_META = "oasis:cache:elementmeta";
+    public static final String CACHE_ELEMENTS_BY_TYPE_META = "oasis:cache:elementtypemeta";
+    public static final String CACHE_ELEMENTS = "oasis:cache:elements";
+    public static final String CACHE_ATTRIBUTES = "oasis:cache:attrs";
     public static final String ALL_TEAMS_INDEX = "oasis:teams:index";
     public static final String ALL_USERS_INDEX = "oasis:users:index";
     public static final String ALL_GAMES_INDEX = "oasis:games:index";

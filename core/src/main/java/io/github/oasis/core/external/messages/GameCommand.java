@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.external.messages;
 
+import io.github.oasis.core.Game;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -40,11 +41,20 @@ public class GameCommand implements OasisCommand {
     private int gameId;
     private Object messageId;
     private GameLifecycle status;
+    private Game game;
 
     public static GameCommand create(int gameId, GameLifecycle status) {
         GameCommand cmd = new GameCommand();
         cmd.setGameId(gameId);
         cmd.setStatus(status);
+        return cmd;
+    }
+
+    public static GameCommand create(int gameId, GameLifecycle status, Game gameObject) {
+        GameCommand cmd = new GameCommand();
+        cmd.setGameId(gameId);
+        cmd.setStatus(status);
+        cmd.setGame(gameObject);
         return cmd;
     }
 

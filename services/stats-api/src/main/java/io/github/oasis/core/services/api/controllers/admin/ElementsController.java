@@ -23,7 +23,7 @@ import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.services.annotations.ForCurator;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
-import io.github.oasis.core.services.api.services.ElementService;
+import io.github.oasis.core.services.api.services.impl.ElementService;
 import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.ElementUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
@@ -95,7 +95,7 @@ public class ElementsController extends AbstractController {
             tags = {"player"}
     )
     @ForCurator
-    @GetMapping(path = "/games/{gameId}/elements", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/games/{gameId}/elements")
     public List<ElementDef> getElementsOfGame(@PathVariable("gameId") Integer gameId) {
         return elementService.listElementsFromGameId(gameId);
     }

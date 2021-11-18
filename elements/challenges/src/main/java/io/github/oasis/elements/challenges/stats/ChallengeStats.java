@@ -27,6 +27,7 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.core.services.annotations.OasisQueryService;
 import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
@@ -58,8 +59,8 @@ public class ChallengeStats extends AbstractStatsApiService {
 
     private static final String SCRIPT_CHALLENGE_LOG = "O.CHLNGLOG";
 
-    public ChallengeStats(Db dbPool, OasisMetadataSupport contextSupport) {
-        super(dbPool, contextSupport);
+    public ChallengeStats(EngineDataReader dataReader, OasisMetadataSupport contextSupport) {
+        super(dataReader, contextSupport);
     }
 
     @OasisStatEndPoint(path = "/elements/challenges/game")

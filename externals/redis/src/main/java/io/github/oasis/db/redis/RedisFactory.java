@@ -19,10 +19,14 @@
 
 package io.github.oasis.db.redis;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.configs.OasisConfigs;
 import org.redisson.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -31,66 +35,66 @@ class RedisFactory {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisFactory.class);
 
-    private static final String LOCALHOST = "localhost";
-    private static final int DEFAULT_PORT = 6379;
-    private static final int POOL_MAX = 8;
-    private static final int POOL_MAX_IDLE = 2;
-    private static final int POOL_MIN_IDLE = 2;
-    private static final int DEF_TIMEOUT = 3000;
-    private static final int DEF_RETRY_COUNT = 3;
-    private static final int DEF_RETRY_INTERVAL = 2000;
-    private static final String MODE_DEFAULT = "default";
+    public static final ObjectMapper DESERIALIZER = new ObjectMapper();
+
     private static final String MODE_SENTINEL = "sentinel";
     private static final String MODE_CLUSTER = "cluster";
 
-    static Config createRedissonConfigs(OasisConfigs configs) {
-        String host = configs.get("oasis.redis.host", LOCALHOST);
-        String mode = configs.get("oasis.redis.mode", MODE_DEFAULT);
-        int port = configs.getInt("oasis.redis.port", DEFAULT_PORT);
-        int timeout = configs.getInt("oasis.redis.timeout", DEF_TIMEOUT);
-        int retryCount = configs.getInt("oasis.redis.retryCount", DEF_RETRY_COUNT);
-        int retryInterval = configs.getInt("oasis.redis.retryInterval", DEF_RETRY_INTERVAL);
-        int poolSize = configs.getInt("oasis.redis.pool.max", POOL_MAX);
-        int maxIdle = configs.getInt("oasis.redis.pool.maxIdle", POOL_MAX_IDLE);
-        int minIdle = configs.getInt("oasis.redis.pool.minIdle", POOL_MIN_IDLE);
+    static {
+        DESERIALIZER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
-        LOG.debug("Connecting to redis in {}:{} with mode {}...", host, port, mode);
-        LOG.debug("  - With pool configs max: {}, maxIdle: {}, minIdle: {}", poolSize, maxIdle, minIdle);
+    static Config createRedissonConfigs(RedisConfigs redisConfigs) {
+        // initialize with default values, if not specified
+        redisConfigs.hydrate();
 
+        LOG.info("Initializing with redis configs {}", redisConfigs);
+
+        String mode = redisConfigs.getMode();
         Config config = new Config();
 
         if (MODE_CLUSTER.equals(mode)) {
-            String[] masterHosts = host.split("[,]");
-            int scanInterval = configs.getInt("oasis.redis.cluster.scanInterval", 2000);
+            String[] masterHosts = redisConfigs.getHost().split("[,]");
+            int scanInterval = redisConfigs.getCluster().getScanInterval();
             config.useClusterServers()
                     .setScanInterval(scanInterval)
                     .addNodeAddress(masterHosts)
-                    .setTimeout(timeout)
-                    .setRetryAttempts(retryCount)
-                    .setRetryInterval(retryInterval)
-                    .setMasterConnectionPoolSize(poolSize)
-                    .setMasterConnectionMinimumIdleSize(minIdle);
+                    .setTimeout(redisConfigs.getTimeout())
+                    .setRetryAttempts(redisConfigs.getRetryCount())
+                    .setRetryInterval(redisConfigs.getRetryInterval())
+                    .setMasterConnectionPoolSize(redisConfigs.getPool().getMax())
+                    .setMasterConnectionMinimumIdleSize(redisConfigs.getPool().getMinIdle());
         } else if (MODE_SENTINEL.equals(mode)) {
-            String[] hosts = host.split("[,]");
-            String masterName = configs.get("oasis.redis.masterName", "");
+            String[] hosts = redisConfigs.getHost().split("[,]");
+            String masterName = redisConfigs.getSentinel().getMasterName();
             config.useSentinelServers()
                     .setMasterName(masterName)
                     .addSentinelAddress(hosts)
-                    .setTimeout(timeout)
-                    .setRetryAttempts(retryCount)
-                    .setRetryInterval(retryInterval)
-                    .setMasterConnectionPoolSize(poolSize)
-                    .setMasterConnectionMinimumIdleSize(minIdle);
+                    .setTimeout(redisConfigs.getTimeout())
+                    .setRetryAttempts(redisConfigs.getRetryCount())
+                    .setRetryInterval(redisConfigs.getRetryInterval())
+                    .setMasterConnectionPoolSize(redisConfigs.getPool().getMax())
+                    .setMasterConnectionMinimumIdleSize(redisConfigs.getPool().getMinIdle());
         } else {
             config.useSingleServer()
-                    .setAddress("redis://" + host + ":" + port)
-                    .setRetryAttempts(retryCount)
-                    .setRetryInterval(retryInterval)
-                    .setConnectionPoolSize(poolSize)
-                    .setConnectionMinimumIdleSize(minIdle)
-                    .setConnectTimeout(timeout);
+                    .setAddress("redis://" + redisConfigs.getHost() + ":" + redisConfigs.getPort())
+                    .setRetryAttempts(redisConfigs.getRetryCount())
+                    .setRetryInterval(redisConfigs.getRetryInterval())
+                    .setConnectionPoolSize(redisConfigs.getPool().getMax())
+                    .setConnectionMinimumIdleSize(redisConfigs.getPool().getMinIdle())
+                    .setConnectTimeout(redisConfigs.getTimeout());
         }
         return config;
+    }
+
+    static Config createRedissonConfigs(OasisConfigs configs, String configKeyPrefix) {
+        return createRedissonConfigs(convertToRedisConfigs(configs, configKeyPrefix));
+    }
+
+    public static RedisConfigs convertToRedisConfigs(OasisConfigs configs, String configKeyPrefix) {
+        Map<String, Object> unwrapped = configs.getConfigRef().getObject(configKeyPrefix).unwrapped();
+
+        return DESERIALIZER.convertValue(unwrapped, RedisConfigs.class);
     }
 
 }

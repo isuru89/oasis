@@ -45,4 +45,13 @@ public interface RedisService {
 
     @Fluent
     RedisService readSourceInfo(String sourceId, Handler<AsyncResult<EventSource>> resultHandler);
+
+    @Fluent
+    RedisService persistUserInfo(String email, UserInfo userInfo, Handler<AsyncResult<UserInfo>> resultHandler);
+
+    @Fluent
+    RedisService persistSourceInfo(String sourceId, EventSource eventSource, Handler<AsyncResult<EventSource>> resultHandler);
+
+    @Fluent
+    RedisService deleteKey(String key, Handler<AsyncResult<Boolean>> resultHandler);
 }

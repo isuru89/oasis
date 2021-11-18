@@ -24,6 +24,7 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.stats.BadgeStats;
 import io.github.oasis.elements.badges.stats.to.GameRuleWiseBadgeLog;
@@ -52,10 +53,10 @@ public class EngineBadgesTest extends OasisEngineTest {
     public void setupDbBefore(DbContext db) throws IOException {
         super.setupDbBefore(db);
 
-        metadataSupport.addAttribute(TEvent.GAME_ID, new AttributeInfo(10, "Bronze", 100));
-        metadataSupport.addAttribute(TEvent.GAME_ID, new AttributeInfo(20, "Silver", 50));
-        metadataSupport.addAttribute(TEvent.GAME_ID, new AttributeInfo(30, "Gold", 20));
-        metadataSupport.addAttribute(TEvent.GAME_ID, new AttributeInfo(40, "Platinum", 10));
+        oasisRepository.addAttribute(TEvent.GAME_ID, new AttributeInfo(10, "Bronze", 100));
+        oasisRepository.addAttribute(TEvent.GAME_ID, new AttributeInfo(20, "Silver", 50));
+        oasisRepository.addAttribute(TEvent.GAME_ID, new AttributeInfo(30, "Gold", 20));
+        oasisRepository.addAttribute(TEvent.GAME_ID, new AttributeInfo(40, "Platinum", 10));
     }
 
     @Test
@@ -125,7 +126,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         "rule:MULTIPLE_THRESHOLDS:20:Y2020","1"
                 ));
 
-        BadgeStats stats = new BadgeStats(dbPool, metadataSupport, metadataSupport);
+        BadgeStats stats = new BadgeStats(new EngineDataReader(dbPool), metadataSupport);
 
         compareStatReqRes("stats/badges/progress-ps-req.json", UserBadgesProgressRequest.class,
                 "stats/badges/progress-ps-res.json", UserBadgesProgressResponse.class,
@@ -193,7 +194,7 @@ public class EngineBadgesTest extends OasisEngineTest {
                         rid + ":20:" + e1.getTimestamp(), e5.getTimestamp()
                 ));
 
-        BadgeStats stats = new BadgeStats(dbPool, metadataSupport, metadataSupport);
+        BadgeStats stats = new BadgeStats(new EngineDataReader(dbPool), metadataSupport);
 
         compareStatReqRes("stats/badges/progress-req.json", UserBadgesProgressRequest.class,
                 "stats/badges/progress-res.json", UserBadgesProgressResponse.class,

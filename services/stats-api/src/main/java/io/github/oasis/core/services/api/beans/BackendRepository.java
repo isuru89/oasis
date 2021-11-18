@@ -86,6 +86,11 @@ public class BackendRepository implements OasisRepository {
     }
 
     @Override
+    public EventSourceSecrets readEventSourcePublicSecrets(int id) {
+        return adminRepository.readEventSourcePublicSecrets(id);
+    }
+
+    @Override
     public EventSourceSecrets readEventSourceSecrets(int id) {
         return adminRepository.readEventSourceSecrets(id);
     }
@@ -323,5 +328,13 @@ public class BackendRepository implements OasisRepository {
     @Override
     public List<AttributeInfo> listAllAttributes(int gameId) {
         return adminRepository.listAllAttributes(gameId);
+    }
+
+    public OasisRepository getEngineRepository() {
+        return engineRepository;
+    }
+
+    public OasisRepository getAdminRepository() {
+        return adminRepository;
     }
 }

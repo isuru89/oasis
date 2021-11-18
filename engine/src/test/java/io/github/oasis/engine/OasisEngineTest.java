@@ -33,12 +33,15 @@ import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.core.services.api.beans.JsonSerializer;
 import io.github.oasis.core.services.api.beans.RedisRepository;
+import io.github.oasis.core.services.api.beans.jdbc.JdbcMetadataProvider;
+import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 import io.github.oasis.db.redis.RedisDb;
 import io.github.oasis.db.redis.RedisEventLoaderHandler;
 import io.github.oasis.elements.badges.BadgesModuleFactory;
@@ -86,7 +89,8 @@ public class OasisEngineTest {
     protected OasisEngine engine;
 
     protected Db dbPool;
-    protected RedisRepository metadataSupport;
+    protected OasisMetadataSupport metadataSupport;
+    protected OasisRepository oasisRepository;
 
     @BeforeEach
     public void setup() throws IOException, OasisException {
@@ -94,12 +98,18 @@ public class OasisEngineTest {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
+        var jsonSerializer = new JsonSerializer(mapper);
+
         EngineContext.Builder builder = EngineContext.builder();
         OasisConfigs oasisConfigs = OasisConfigs.defaultConfigs();
-        dbPool = RedisDb.create(oasisConfigs);
+        dbPool = RedisDb.create(oasisConfigs, "oasis.redis");
         dbPool.init();
 
-        metadataSupport = new RedisRepository(dbPool, new JsonSerializer(mapper));
+        RedisRepository redisRepository = new RedisRepository(dbPool, jsonSerializer);
+        oasisRepository = redisRepository;
+        var metadataProvider = new JdbcMetadataProvider(oasisRepository);
+        metadataProvider.setSelf(metadataProvider);
+        metadataSupport = metadataProvider;
 
         EngineContext context = builder.withConfigs(oasisConfigs)
                 .havingId("test-engine")
@@ -117,13 +127,13 @@ public class OasisEngineTest {
         try (DbContext db = dbPool.createContext()) {
             db.allKeys("*").forEach(db::removeKey);
 
-            metadataSupport.addPlayer(new PlayerObject(1, "Jakob Floyd", "jakob@oasis.io"));
-            metadataSupport.addPlayer(new PlayerObject(2, "Thierry Hines", "thierry@oasis.io"));
-            metadataSupport.addPlayer(new PlayerObject(3, "Ray Glenn", "ray@oasis.io"));
-            metadataSupport.addPlayer(new PlayerObject(4, "Lilia Stewart", "lilia@oasis.io"));
-            metadataSupport.addPlayer(new PlayerObject(5, "Archer Roberts", "archer@oasis.io"));
+            redisRepository.addPlayer(new PlayerObject(1, "Jakob Floyd", "jakob@oasis.io"));
+            redisRepository.addPlayer(new PlayerObject(2, "Thierry Hines", "thierry@oasis.io"));
+            redisRepository.addPlayer(new PlayerObject(3, "Ray Glenn", "ray@oasis.io"));
+            redisRepository.addPlayer(new PlayerObject(4, "Lilia Stewart", "lilia@oasis.io"));
+            redisRepository.addPlayer(new PlayerObject(5, "Archer Roberts", "archer@oasis.io"));
 
-            metadataSupport.addTeam(TeamObject.builder().id(1).gameId(1).name("Warriors").build());
+            redisRepository.addTeam(TeamObject.builder().id(1).gameId(1).name("Warriors").build());
 
             setupDbBefore(db);
         }
@@ -182,7 +192,7 @@ public class OasisEngineTest {
                 elementDef.data(message.getData());
             }
 
-            metadataSupport.addNewElement(gameId, elementDef.build());
+            oasisRepository.addNewElement(gameId, elementDef.build());
         }
     }
 
@@ -198,7 +208,7 @@ public class OasisEngineTest {
                     .gameId(gameId)
                     .metadata(new SimpleElementDefinition(rule.getId(), rule.getName(), rule.getDescription()))
                     .build();
-            metadataSupport.addNewElement(gameId, elementDef);
+            oasisRepository.addNewElement(gameId, elementDef);
             engine.submit(Messages.createRuleAddMessage(gameId, rule, null));
             rules.add(rule);
         }

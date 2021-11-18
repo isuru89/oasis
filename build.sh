@@ -29,8 +29,8 @@ docker build -t oasis/engine .
 
 cd ..
 
-mkdir -p .tmpdata/redis
-mkdir -p .tmpdata/rabbit
+mkdir -p .tmpdata/enginedb
+mkdir -p .tmpdata/cache
 
 echo "==============================================================================="
 echo "Starting Oasis..."

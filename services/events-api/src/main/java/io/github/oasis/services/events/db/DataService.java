@@ -17,19 +17,31 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.services;
+package io.github.oasis.services.events.db;
 
-import io.github.oasis.core.services.api.beans.BackendRepository;
+import io.github.oasis.services.events.model.EventSource;
+import io.github.oasis.services.events.model.UserInfo;
+import io.vertx.codegen.annotations.Fluent;
+import io.vertx.codegen.annotations.ProxyGen;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 
 /**
  * @author Isuru Weerarathna
  */
-public abstract class AbstractOasisService {
+@ProxyGen
+public interface DataService {
 
-    protected final BackendRepository backendRepository;
+    String DATA_SERVICE_QUEUE = "data.service.queue";
 
-    AbstractOasisService(BackendRepository backendRepository) {
-        this.backendRepository = backendRepository;
+    static DataService createProxy(Vertx vertx, String address) {
+        return new DataServiceVertxEBProxy(vertx, address);
     }
 
+    @Fluent
+    DataService readUserInfo(String email, Handler<AsyncResult<UserInfo>> resultHandler);
+
+    @Fluent
+    DataService readSourceInfo(String sourceId, Handler<AsyncResult<EventSource>> resultHandler);
 }

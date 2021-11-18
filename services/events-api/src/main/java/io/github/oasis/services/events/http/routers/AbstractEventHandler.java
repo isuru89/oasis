@@ -19,7 +19,7 @@
 
 package io.github.oasis.services.events.http.routers;
 
-import io.github.oasis.services.events.db.RedisService;
+import io.github.oasis.services.events.db.DataService;
 import io.github.oasis.services.events.dispatcher.EventDispatcherService;
 import io.github.oasis.services.events.model.EventProxy;
 import io.github.oasis.services.events.model.EventSource;
@@ -44,21 +44,27 @@ public abstract class AbstractEventHandler {
 
     static final String EVENTS_PAYLOAD_FORMAT_IS_INCORRECT = "Events payload format is incorrect!";
 
-    private final RedisService redisService;
+    private final DataService clientService;
     private final EventDispatcherService dispatcherService;
 
-    protected AbstractEventHandler(RedisService redisService, EventDispatcherService dispatcherService) {
-        this.redisService = redisService;
+    protected AbstractEventHandler(DataService dataService, EventDispatcherService dispatcherService) {
+        this.clientService = dataService;
         this.dispatcherService = dispatcherService;
     }
 
     protected void putEvent(EventProxy event, EventSource source, Handler<AsyncResult<Boolean>> handler) {
         String userEmail = event.getUserEmail();
 
-        redisService.readUserInfo(userEmail, res -> {
+        clientService.readUserInfo(userEmail, res -> {
             if (res.succeeded()) {
                 LOG.info("[{}] User {} exists in Oasis", event.getExternalId(), userEmail);
                 UserInfo user = res.result();
+                if (user == null) {
+                    LOG.warn("[{}] User {} does not exist in Oasis!", event.getExternalId(), userEmail);
+                    handler.handle(Future.failedFuture(new IllegalArgumentException("No user exists by email " + userEmail + "!")));
+                    return;
+                }
+
                 List<Integer> gameIds = source.getGameIds().stream()
                         .filter(gId -> user.getTeamId(gId).isPresent())
                         .collect(Collectors.toList());
@@ -83,8 +89,9 @@ public abstract class AbstractEventHandler {
                 }
 
             } else {
-                LOG.warn("[{}] User {} does not exist in Oasis!", event.getExternalId(), userEmail);
-                handler.handle(Future.failedFuture(new IllegalArgumentException("No user exists by email " + userEmail + "!")));
+                LOG.warn("[{}] Cannot access user info for user {} from cache or service!", event.getExternalId(), userEmail);
+                LOG.error("Error:", res.cause());
+                handler.handle(Future.failedFuture(new IllegalArgumentException("Cannot accept this event at this moment " + userEmail + "!")));
             }
         });
     }

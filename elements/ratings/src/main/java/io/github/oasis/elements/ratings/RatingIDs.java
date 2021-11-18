@@ -28,10 +28,6 @@ public final class RatingIDs {
         return String.format("{g%d}:u%d:ratingslog", gameId, userId);
     }
 
-    public static String getUserRatingsKey(int gameId, long userId, String ratingId) {
-        return String.format("u%d:{g%d}:rt:%s", userId, gameId, ratingId);
-    }
-
     public static String getGameRatingKey(int gameId, String ratingId) {
         return String.format("{g%d}:rating:%s", gameId, ratingId);
     }

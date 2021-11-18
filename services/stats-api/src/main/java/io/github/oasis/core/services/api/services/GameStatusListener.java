@@ -19,13 +19,8 @@
 
 package io.github.oasis.core.services.api.services;
 
-import io.github.oasis.core.Game;
-import io.github.oasis.core.external.messages.EngineStatusChangedMessage;
-import io.github.oasis.core.services.api.to.EngineStatusChangedEvent;
+import io.github.oasis.core.services.api.services.impl.GameService;
 import io.github.oasis.core.services.events.GameStatusChangeEvent;
-import io.github.oasis.core.services.exceptions.OasisApiException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 

@@ -54,8 +54,8 @@ public class RedisDb implements Db {
         this.client = client;
     }
 
-    public static RedisDb create(OasisConfigs configs) {
-        Config config = RedisFactory.createRedissonConfigs(configs);
+    public static RedisDb create(OasisConfigs configs, String redisConfKey) {
+        Config config = RedisFactory.createRedissonConfigs(configs, redisConfKey);
         RedissonClient redissonClient = Redisson.create(config);
         return new RedisDb(redissonClient);
     }
@@ -111,7 +111,19 @@ public class RedisDb implements Db {
             boolean isReadOnly = Utils.toBoolean(ref.get("readOnly"), true);
             String returnType = (String) ref.get("returnType");
             RedisScript script = new RedisScript(hash, isReadOnly, returnType);
+            script.setContent(content);
             scriptReferenceMap.put(scriptName, script);
+        }
+    }
+
+    void loadScriptToRedis(RedisScript script) {
+        RScript rScript = client.getScript();
+        if (!rScript.scriptExists(script.sha).get(0)) {
+            LOG.warn("Seems Redis does not have the script {} at this time. Let's reload it again!", script.sha);
+            String sha1 = rScript.scriptLoad(script.getContent());
+            LOG.warn("Successfully reloaded redis script {}", sha1);
+        } else {
+            LOG.warn("Redis script already exist in db by id {}! Hence skipping.", script.sha);
         }
     }
 
@@ -143,11 +155,20 @@ public class RedisDb implements Db {
         private final String sha;
         private final boolean readOnly;
         private final String returnType;
+        private String content;
 
         RedisScript(String sha, boolean isReadOnly, String returnType) {
             this.sha = sha;
             this.readOnly = isReadOnly;
             this.returnType = returnType;
+        }
+
+        String getContent() {
+            return content;
+        }
+
+        void setContent(String content) {
+            this.content = content;
         }
 
         public String getReturnType() {

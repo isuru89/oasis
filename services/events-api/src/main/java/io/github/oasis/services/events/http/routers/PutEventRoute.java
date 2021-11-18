@@ -19,7 +19,7 @@
 
 package io.github.oasis.services.events.http.routers;
 
-import io.github.oasis.services.events.db.RedisService;
+import io.github.oasis.services.events.db.DataService;
 import io.github.oasis.services.events.dispatcher.EventDispatcherService;
 import io.github.oasis.services.events.model.EventProxy;
 import io.github.oasis.services.events.model.EventSource;
@@ -44,8 +44,8 @@ public class PutEventRoute extends AbstractEventHandler implements Handler<Routi
 
     private static final Logger LOG = LoggerFactory.getLogger(PutEventRoute.class);
 
-    public PutEventRoute(RedisService redisService, EventDispatcherService dispatcherService) {
-        super(redisService, dispatcherService);
+    public PutEventRoute(DataService dataService, EventDispatcherService dispatcherService) {
+        super(dataService, dispatcherService);
     }
 
     @Override

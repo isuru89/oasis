@@ -1,5 +1,6 @@
 package io.github.oasis.services.events;
 
+import io.github.oasis.core.utils.CacheUtils;
 import io.github.oasis.services.events.model.EventProxy;
 import io.github.oasis.services.events.utils.TestRedisDeployVerticle;
 import io.github.oasis.services.events.utils.TestUtils;
@@ -13,8 +14,12 @@ import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
 
 import java.security.KeyPair;
 import java.util.List;
@@ -82,6 +87,16 @@ public abstract class AbstractEventPushTest extends AbstractTest {
             verifyPushTimes(invocations);
             ctx.completeNow();
         });
+    }
+
+    protected void assertSourceExistsInCache(RedissonClient redissonClient, String token, boolean checkExists) {
+        String sourceCacheKey = CacheUtils.getSourceCacheKey(token);
+        RBucket<String> bucket = redissonClient.getBucket(sourceCacheKey, StringCodec.INSTANCE);
+        if (checkExists) {
+            Assertions.assertTrue(bucket.isExists());
+        } else {
+            Assertions.assertFalse(bucket.isExists());
+        }
     }
 
     protected void assertSuccess(HttpResponse<String> response, VertxTestContext ctx) {

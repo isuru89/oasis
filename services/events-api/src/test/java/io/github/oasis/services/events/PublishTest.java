@@ -19,18 +19,23 @@
 
 package io.github.oasis.services.events;
 
-import io.github.oasis.services.events.utils.TestRedisDeployVerticle;
+import io.github.oasis.core.collect.Pair;
 import io.github.oasis.services.events.utils.TestUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * @author Isuru Weerarathna
@@ -42,11 +47,13 @@ public class PublishTest extends AbstractEventPushTest {
     @DisplayName("Publish once success")
     void successPublish(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        awaitRedisInitialization(vertx, testContext, createKnownUser(createKnownSource(keyPair)));
+        String token = UUID.randomUUID().toString();
+        setSourceExists(token, createEventSource(token, 1, Set.of(1), keyPair.getPublic()));
+        setPlayerExists(KNOWN_USER, createPlayerWithTeam(KNOWN_USER, 500, Pair.of(200, 1)));
 
         String hash = TestUtils.signPayload(VALID_PAYLOAD, keyPair.getPrivate());
 
-        callForEvent(vertx, KNOWN_SOURCE + ":" + hash)
+        callForEvent(vertx, token + ":" + hash)
                 .sendJson(
                         VALID_PAYLOAD,
                         testContext.succeeding(res -> assertSuccessWithInvocations(res, testContext, 1))
@@ -57,17 +64,15 @@ public class PublishTest extends AbstractEventPushTest {
     @DisplayName("Server: Publish only for user assigned subset of games")
     void successPublishForOnlyGames(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        awaitRedisInitialization(vertx, testContext, new TestRedisDeployVerticle()
-                        .addSource("abc", 1, keyPair.getPublic(), List.of(1, 2, 3))
-                        .addUser("isuru@oasis.com", 500,
-                                Map.of("1", new JsonObject().put("team", 200), "2", new JsonObject().put("team", 201))
-                        ));
+        String token = UUID.randomUUID().toString();
+        setSourceExists(token, createEventSource(token, 1, Set.of(1,2,3), keyPair.getPublic()));
+        setPlayerExists("isuru@oasis.com", createPlayerWith2Teams("isuru@oasis.com", 500, Pair.of(200,1), Pair.of(201, 2)));
 
         JsonObject event = TestUtils.aEvent("isuru@oasis.com", System.currentTimeMillis(), "test.a", 100);
         JsonObject payload = new JsonObject().put("data", event);
         String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
 
-        callForEvent(vertx, KNOWN_SOURCE + ":" + hash)
+        callForEvent(vertx, token + ":" + hash)
                 .sendJson(
                         payload,
                         testContext.succeeding(res -> {
@@ -80,17 +85,16 @@ public class PublishTest extends AbstractEventPushTest {
     @DisplayName("Server: Publish only for existing games")
     void successPublishForOnlyExistingGames(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        awaitRedisInitialization(vertx, testContext, new TestRedisDeployVerticle()
-                        .addSource("abc", 1, keyPair.getPublic(), List.of(1, 2))
-                        .addUser("isuru@oasis.com", 500,
-                                Map.of("1", new JsonObject().put("team", 200), "3", new JsonObject().put("team", 201))
-                        ));
+        String sourceToken = UUID.randomUUID().toString();
+        String userEmail = "success.publish@oasis.io";
+        setSourceExists(sourceToken, createEventSource(sourceToken, 1, Set.of(1,2), keyPair.getPublic()));
+        setPlayerExists(userEmail, createPlayerWith2Teams(userEmail, 500, Pair.of(200,1), Pair.of(201, 3)));
 
-        JsonObject event = TestUtils.aEvent("isuru@oasis.com", System.currentTimeMillis(), "test.a", 100);
+        JsonObject event = TestUtils.aEvent(userEmail, System.currentTimeMillis(), "test.a", 100);
         JsonObject payload = new JsonObject().put("data", event);
         String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
 
-        callForEvent(vertx, KNOWN_SOURCE + ":" + hash)
+        callForEvent(vertx, sourceToken + ":" + hash)
                 .sendJson(payload, testContext.succeeding(res -> assertSuccessWithInvocations(res, testContext, 1)));
     }
 
@@ -99,15 +103,55 @@ public class PublishTest extends AbstractEventPushTest {
     void dispatcherFailed(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
         dispatcherService.setReturnSuccess(false);
-        awaitRedisInitialization(vertx, testContext, createKnownUser(createKnownSource(keyPair)));
+        String token = UUID.randomUUID().toString();
+        setSourceExists(token, createEventSource(token, 1, Set.of(1,2), keyPair.getPublic()));
+        setPlayerExists(KNOWN_USER, createPlayerWithTeam(KNOWN_USER, 500, Pair.of(200,1)));
+
 
         String hash = TestUtils.signPayload(VALID_PAYLOAD, keyPair.getPrivate());
 
-        callForEvent(vertx, KNOWN_SOURCE + ":" + hash)
+        callForEvent(vertx, token + ":" + hash)
                 .sendJson(
                         VALID_PAYLOAD,
                         testContext.succeeding(res -> assertSuccessWithInvocations(res, testContext, 1))
                 );
     }
+
+
+    @Test
+    @DisplayName("Cache clear for event source reference")
+    void sourceCacheClearSuccess(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        String token = UUID.randomUUID().toString();
+        String userId = "temp.source.cache@oasis.io";
+        setSourceExists(token, createEventSource(token, 1, Set.of(1), keyPair.getPublic()));
+        setPlayerExists(userId, createPlayerWithTeam(userId, 500, Pair.of(200, 1)));
+
+        JsonObject validPayload = new JsonObject()
+                .put("data", TestUtils.aEvent(userId, System.currentTimeMillis(), "event.a", 100));
+        String hash = TestUtils.signPayload(validPayload, keyPair.getPrivate());
+
+        Config redisConfigs = new Config();
+        redisConfigs.useSingleServer()
+                .setAddress("redis://localhost:6379");
+        RedissonClient redissonClient = Redisson.create(redisConfigs);
+
+        callForEvent(vertx, token + ":" + hash)
+                .sendJson(validPayload,
+                        testContext.succeeding(res -> {
+                            assertSourceExistsInCache(redissonClient, token, true);
+                            callToDeleteEndPoint("/_cache/sources/" + token, vertx)
+                                    .as(BodyCodec.jsonObject())
+                                    .send(testContext.succeeding(resDel -> {
+                                        testContext.verify(() -> {
+                                            Assertions.assertEquals(200, resDel.statusCode());
+                                            assertSourceExistsInCache(redissonClient, token, false);
+                                            testContext.completeNow();
+                                        });
+                                    }));
+                        })
+                );
+    }
+
 
 }
