@@ -59,7 +59,7 @@ public class UnauthorizedTest extends AbstractEventPushTest {
     @DisplayName("Event source does not exist")
     void sourceDoeNotExist(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         new MockServerClient("localhost", clientAndServer.getLocalPort())
-                .when(org.mockserver.model.HttpRequest.request("/api/admin/event-sources")
+                .when(org.mockserver.model.HttpRequest.request("/api/admin/event-source")
                                 .withMethod("GET")
                                 .withQueryStringParameter("token", "pqrs")
                 ).respond(org.mockserver.model.HttpResponse.response().withStatusCode(404));
@@ -120,13 +120,6 @@ public class UnauthorizedTest extends AbstractEventPushTest {
     private HttpRequest<String> callForEvent(Vertx vertx) {
         return super.callPushEvent(vertx)
                 .as(BodyCodec.string());
-    }
-
-    private void assert401Response(HttpResponse<String> response, VertxTestContext ctx) {
-        ctx.verify(() -> {
-            assertThat(response.statusCode()).isEqualTo(401);
-            ctx.completeNow();
-        });
     }
 
     private void assert400Response(HttpResponse<String> response, VertxTestContext ctx) {

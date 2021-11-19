@@ -57,12 +57,17 @@ public abstract class AbstractTest {
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
                 .put("oasis", new JsonObject().put("dispatcher", dispatcherConf)
-                        .put("cache", cacheConfigs).put("adminApi", adminConfigs));
+                .put("cache", cacheConfigs).put("adminApi", adminConfigs));
+        modifyConfigs(testConfigs);
         dispatcherService = Mockito.spy(new TestDispatcherService());
         TestDispatcherVerticle dispatcherVerticle = new TestDispatcherVerticle(dispatcherService);
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new TestDispatcherFactory(dispatcherVerticle));
         vertx.deployVerticle(new EventsApi(), options, testContext.completing());
+    }
+
+    protected void modifyConfigs(JsonObject jsonObject) {
+        // do nothing
     }
 
     private void cleanRedis() {
@@ -78,7 +83,7 @@ public abstract class AbstractTest {
     private JsonObject getAdminApiConfigs(ClientAndServer clientAndServer) {
         return new JsonObject()
                 .put("baseUrl", "http://localhost:" + clientAndServer.getLocalPort() + "/api")
-                .put("eventSourceGet", "/admin/event-sources")
+                .put("eventSourceGet", "/admin/event-source")
                 .put("playerGet", "/players")
                 .put("apiKey", "eventapi")
                 .put("secretKey", "eventapi");
@@ -95,7 +100,7 @@ public abstract class AbstractTest {
 
     protected void setSourceDoesNotExists(String token) {
         new MockServerClient("localhost", clientAndServer.getLocalPort())
-                .when(org.mockserver.model.HttpRequest.request("/api/admin/event-sources")
+                .when(org.mockserver.model.HttpRequest.request("/api/admin/event-source")
                         .withMethod("GET")
                         .withQueryStringParameter("token", token)
                         .withQueryStringParameter("withKey", "true")
@@ -116,7 +121,7 @@ public abstract class AbstractTest {
 
     protected void setSourceExists(String token, JsonObject eventSource) {
         new MockServerClient("localhost", clientAndServer.getLocalPort())
-                .when(org.mockserver.model.HttpRequest.request("/api/admin/event-sources")
+                .when(org.mockserver.model.HttpRequest.request("/api/admin/event-source")
                         .withMethod("GET")
                         .withQueryStringParameter("token", token)
                         .withQueryStringParameter("withKey", "true")
