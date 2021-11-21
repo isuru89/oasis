@@ -29,14 +29,17 @@ import io.github.oasis.services.events.http.routers.CacheRoute;
 import io.github.oasis.services.events.http.routers.PingRoute;
 import io.github.oasis.services.events.http.routers.PutBulkEventsRoute;
 import io.github.oasis.services.events.http.routers.PutEventRoute;
+import io.github.oasis.services.events.model.EventApiConfigs;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import org.slf4j.Logger;
@@ -76,7 +79,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
         HttpServerOptions serverOptions = new HttpServerOptions(httpConf);
         server = vertx.createHttpServer(serverOptions);
 
-        EventIntegrityHandler integrityHandler = new EventIntegrityHandler();
+        Handler<RoutingContext> integrityHandler = EventIntegrityHandler.create(EventApiConfigs.create(httpConf));
         EventErrorHandler eventErrorHandler = new EventErrorHandler();
 
         CacheRoute cacheRoute = new CacheRoute(redisService);

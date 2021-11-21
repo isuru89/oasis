@@ -51,6 +51,8 @@ import java.util.Objects;
 public class GameService extends AbstractOasisService implements IGameService {
 
     private final Map<String, GameState> availableStatuses = Map.of(
+            "create", GameState.CREATED,
+            "created", GameState.CREATED,
             "start", GameState.STARTED,
             "started", GameState.STARTED,
             "pause", GameState.PAUSED,
@@ -142,13 +144,13 @@ public class GameService extends AbstractOasisService implements IGameService {
     private GameState validateGameState(String status) throws OasisApiException {
         if (Objects.isNull(status)) {
             throw new OasisApiException(ErrorCodes.GAME_UNKNOWN_STATE,
-                    HttpStatus.BAD_REQUEST.value(), "Unknown game state!");
+                    HttpStatus.BAD_REQUEST.value(), "Game state cannot be null or empty!");
         }
 
         GameState gameState = availableStatuses.get(status.toLowerCase());
         if (Objects.isNull(gameState)) {
             throw new OasisApiException(ErrorCodes.GAME_UNKNOWN_STATE,
-                    HttpStatus.BAD_REQUEST.value(), "Unknown game state!");
+                    HttpStatus.BAD_REQUEST.value(), "Unknown game state for given status " + status + "!");
         }
         return gameState;
     }

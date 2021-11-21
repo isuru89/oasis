@@ -120,4 +120,10 @@ public abstract class AbstractEventPushTest extends AbstractTest {
         }
     }
 
+    protected void assert401Response(HttpResponse<String> response, VertxTestContext ctx) {
+        ctx.verify(() -> {
+            assertThat(response.statusCode()).isEqualTo(401);
+            ctx.completeNow();
+        });
+    }
 }

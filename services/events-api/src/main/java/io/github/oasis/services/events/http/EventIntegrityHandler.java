@@ -20,6 +20,7 @@
 package io.github.oasis.services.events.http;
 
 import io.github.oasis.services.events.auth.AuthService;
+import io.github.oasis.services.events.model.EventApiConfigs;
 import io.github.oasis.services.events.model.EventSource;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
@@ -41,6 +42,14 @@ class EventIntegrityHandler implements Handler<RoutingContext> {
 
     private static final String EVENTS_PAYLOAD_VERIFICATION_FAILED = "Event payload verification failed!";
 
+    static Handler<RoutingContext> create(EventApiConfigs configs) {
+        if (configs.isSkipEventIntegrityCheck()) {
+            LOG.warn(">>>>> WARN: Event API Integrity check has been disabled! <<<<<");
+            return new NoIntegrityCheckHandler();
+        }
+        return new EventIntegrityHandler();
+    }
+
     @Override
     public void handle(RoutingContext ctx) {
         EventSource eventSource = (EventSource) ctx.user();
@@ -50,6 +59,13 @@ class EventIntegrityHandler implements Handler<RoutingContext> {
         } else {
             LOG.warn("[Source={}] Payload verification failed!", eventSource.getSourceId());
             ctx.fail(HttpResponseStatus.FORBIDDEN.code(), new IllegalArgumentException(EVENTS_PAYLOAD_VERIFICATION_FAILED));
+        }
+    }
+
+    static class NoIntegrityCheckHandler implements Handler<RoutingContext> {
+        @Override
+        public void handle(RoutingContext ctx) {
+            ctx.next();
         }
     }
 }
