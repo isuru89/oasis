@@ -6,4 +6,4 @@ FROM
 WHERE
     oesg.event_source_id = :eventSourceId
     AND
-    oes.is_active = 1
+    oes.is_active = true

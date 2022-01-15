@@ -1,6 +1,6 @@
 UPDATE
     OA_ELEMENT_DATA
 SET
-    is_active = 0
+    is_active = false
 WHERE
     element_id = :id

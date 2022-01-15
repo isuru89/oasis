@@ -11,27 +11,25 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <flink.version>1.9.1</flink.version>
         <java.version>11</java.version>
         <scala.binary.version>2.11</scala.binary.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <jackson.version>2.9.9</jackson.version>
-        <jdbi.version>3.20.1</jdbi.version>
+        <jdbi.version>3.27.0</jdbi.version>
         <vertx.version>4.0.2</vertx.version>
         <junit.version>5.7.1</junit.version>
         <lombok.version>1.18.18</lombok.version>
-        <jedis.version>3.5.1</jedis.version>
         <akka.version>2.6.13</akka.version>
-        <logback.version>1.2.3</logback.version>
-        <springboot.version>2.4.3</springboot.version>
+        <logback.version>1.2.10</logback.version>
+        <springboot.version>2.4.13</springboot.version>
         <commonsio.version>2.8.0</commonsio.version>
         <commonslang.version>3.12.0</commonslang.version>
         <amqp.version>5.11.0</amqp.version>
         <jackson.version>2.12.2</jackson.version>
         <jsonsimple.version>3.1.1</jsonsimple.version>
-        <slf4j.version>1.7.30</slf4j.version>
+        <slf4j.version>1.7.33</slf4j.version>
         <redisson.version>3.16.3</redisson.version>
+        <h2.db.version>2.0.206</h2.db.version>
     </properties>
 
     <modules>
@@ -47,7 +45,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.18</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

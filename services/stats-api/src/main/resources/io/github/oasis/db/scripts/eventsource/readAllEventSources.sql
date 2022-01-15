@@ -6,4 +6,4 @@ SELECT
 FROM
     OA_EVENT_SOURCE
 WHERE
-    is_active = 1
+    is_active = true

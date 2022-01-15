@@ -1,6 +1,6 @@
 UPDATE
     OA_GAME
 SET
-    is_active = 0
+    is_active = false
 WHERE
     id = :id
