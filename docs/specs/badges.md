@@ -19,7 +19,7 @@ A badge can be awarded using below ways.
 * An event is occurred for the first time.
     * e.g. First time login.
 * Based on a simple condition satisfying within an event.
-    * Based on multiple conditions with different thresholds, sub-badges can be awarded
+    * Sub badges can be awarded based on multiple conditions with different thresholds.
 * Streaks: Continuously satisfy a condition
     * Can be combined with time constraints. e.g. should have the streak within last N days/hours.
 * When some condition is satisfied N times within a time constraint.
@@ -34,7 +34,8 @@ A badge can be awarded using below ways.
 * Manually.
 
 ## Specification
-TBW
+
+Refer example to understand more details of spec values.
 
 ## Time Constraints
 

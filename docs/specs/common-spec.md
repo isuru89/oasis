@@ -2,8 +2,8 @@
 
 ## selector
 
-Selector field matches the incoming event and filter out events which should be
-send for processing by the respective rule.
+Selector field matches the incoming events, filter them out and forward for further
+processing by the respective rule.
 
 This field is mandatory for every rule.
 
@@ -35,7 +35,7 @@ selector:
 
 ### acceptsWithin
 This field will determine how events should be matched based on its timestamp.
-This is suitable, if you want to filter event based on time or season. This
+This is appropriate, if you want to filter event based on time or season. This
 should be specified using `type` field followed by relevant fields for each type.
 
 Every criterion must belong to either `anyOf` or `allOf` field to indicate the behaviour
@@ -44,7 +44,7 @@ when multiple criteria are specified.
 There are in-built several types supported by the framework. Such as,
 
   * `seasonal`: Allows you to specify range of months or day-of-month. The allowed format is `MM-DD`.
-  * `time`: Allows you to specify a range of time-of-day. The allowed format is `HH:mm:ss`.
+  * `time`: Allows you to specify a range for a time-of-day. The allowed format is `HH:mm:ss`.
   * `weekly`: Allows you to specify weekdays.
   * `custom`: Allows you to specify a custom predicate to evaluate with given event timestamp
 
@@ -71,7 +71,7 @@ acceptsWithin:
       to: "03-01"
 ```
 
-* Filter out Dinner time (assuming its 6pm to 11pm)
+* Filter out Dinner time (assuming its from 6pm to 11pm)
 ```yaml
 acceptsWithin:
   anyOf:
@@ -90,6 +90,7 @@ acceptsWithin:
 ```
 
 * Filter out Weekend days. Should specify days in a comma separated string on `when` property.
+  - Days must be any of `Sunday`,`Monday`,`Tueday`,`Wednesday`,`Thursday`,`Friday`, and `Saturday`
 ```yaml
 acceptsWithin:
   anyOf:
@@ -107,7 +108,7 @@ acceptsWithin:
         ts.getDayOfMonth() >= currMonth.lengthOfMonth() - 7
 ```
 
-* Filter out events only in December evenings. To match all criteria, we can use `allOf` parameter.
+* Filter out events only in evenings on December months. To match all criteria, we can use `allOf` parameter.
 ```yaml
 acceptsWithin:
   allOf:

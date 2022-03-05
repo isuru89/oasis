@@ -1,13 +1,13 @@
 # Points
 
-Points is the only core game element shipped with while all other elements has to add explicitly.
+Points is the **only** core game element shipped while all other elements has to add explicitly.
 
  * Points are always accurate no more than up to 2 decimal points
  * Only players can score points
  * Each point is associated with a type
  * The timestamp, team and event source id will be recorded against each point event scored.
  * Once scored, points cannot be deleted or modified
-   * To simulate a delete, same amount of penalty points needs to be added against same player manually.
+   * To simulate delete, a compensated points must be awarded to the same user.
    
 ## Scoring Methods:
  * By raw events
@@ -17,7 +17,7 @@ Points is the only core game element shipped with while all other elements has t
  * When earned a badge
  * When milestone level reached
  * Becoming a winner of a challenge
- * Manually can be awarded by a Curator or Admin
+ * Manually awarded by a Curator or Admin
 
 ## Tips
 * You can combine multiple rules to emit same point type by having same id for `pointId` field.
@@ -36,7 +36,8 @@ Points is the only core game element shipped with while all other elements has t
  [See here](common-spec.md#selector) for more details
 
 ### reward
- For points, rewards can be either a constant amount or a dynamic expression.
+ For points, rewards can be either a constant amount or based on a runtime expression. 
+Expression could take and derive a score based on other event attributes.
 
 Note: It is mandatory to provide `pointId` with either one of `amount` or `expression`.
 If `amount` and `expression` both have been specified, it will throw an error.
@@ -80,7 +81,7 @@ elements:
         amount: 15
 ```
 
-* Award amount of points based on the field in the event (no condition)
+* Award amount of points based on a field in the event (no condition)
 ```yaml
   - id: POINT-GSR
     name: General-Spending-Rule
@@ -94,7 +95,7 @@ elements:
         expression: "e.total"
 ```
 
-* Reward is based on set of conditions
+* Reward is based on a set of conditions
 ```yaml
   - id: P_BIG_PURCHASE
     name: Big-Purchase-Bonus
@@ -116,7 +117,7 @@ elements:
           return 0;
 ```
 
-* Based on any type of events with a filter
+* Scores bonus points when event attribute is greater than value 50, and only for `event.a` and `event.c` types.
 ```yaml
   - id: PNT00001
     name: Bonus-Half-Century
