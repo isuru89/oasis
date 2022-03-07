@@ -77,7 +77,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), e1, e1.getTimestamp(), rule.getAttributeId(), 110, 110, e1.getExternalId(), e1.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), rule.getId(), e1, e1.getTimestamp(), rule.getAttributeId(), 110, 110, e1.getExternalId(), e1.getExternalId()));
     }
 
     @DisplayName("No Condition: with point awards")
@@ -98,7 +98,7 @@ public class FirstEventTest extends AbstractRuleTest {
         Assertions.assertEquals(1, signals.size());
 
         assertSignal(signals,
-                new BadgeSignal(rule.getId(), e1, e1.getTimestamp(), rule.getAttributeId(), 110, 110, e1.getExternalId(), e1.getExternalId())
+                new BadgeSignal(rule.getId(), rule.getId(), e1, e1.getTimestamp(), rule.getAttributeId(), 110, 110, e1.getExternalId(), e1.getExternalId())
                     .setPointAwards(rule.getPointId(), rule.getPointAwards()));
     }
 
@@ -119,7 +119,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), e1, e1.getTimestamp(), rule.getAttributeId(), 110, 110, e1.getExternalId(), e1.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), rule.getId(), e1, e1.getTimestamp(), rule.getAttributeId(), 110, 110, e1.getExternalId(), e1.getExternalId()));
     }
 
     @DisplayName("No Condition: mixed event types")
@@ -139,7 +139,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), e1, e1.getTimestamp(), rule.getAttributeId(), 110, 110, e1.getExternalId(), e1.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), rule.getId(), e1, e1.getTimestamp(), rule.getAttributeId(), 110, 110, e1.getExternalId(), e1.getExternalId()));
     }
 
     @DisplayName("With Condition: same event types")
@@ -159,7 +159,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), e2, e2.getTimestamp(), rule.getAttributeId(), 144, 144, e2.getExternalId(), e2.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), rule.getId(), e2, e2.getTimestamp(), rule.getAttributeId(), 144, 144, e2.getExternalId(), e2.getExternalId()));
     }
 
     @DisplayName("With Condition: different event types")
@@ -179,7 +179,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), e2, e2.getTimestamp(), rule.getAttributeId(), 144, 144, e2.getExternalId(), e2.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), rule.getId(), e2, e2.getTimestamp(), rule.getAttributeId(), 144, 144, e2.getExternalId(), e2.getExternalId()));
     }
 
     @DisplayName("With Condition: mixed event types")
@@ -199,7 +199,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), e2, e2.getTimestamp(), rule.getAttributeId(), 144, 144, e2.getExternalId(), e2.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), rule.getId(), e2, e2.getTimestamp(), rule.getAttributeId(), 144, 144, e2.getExternalId(), e2.getExternalId()));
     }
 
     @DisplayName("With Condition: no event types")
@@ -253,7 +253,7 @@ public class FirstEventTest extends AbstractRuleTest {
         System.out.println(signals);
         Assertions.assertEquals(1, signals.size());
 
-        assertSignal(signals, new BadgeSignal(rule.getId(), e2, e2.getTimestamp(), rule.getAttributeId(), 144, 144, e2.getExternalId(), e2.getExternalId()));
+        assertSignal(signals, new BadgeSignal(rule.getId(), rule.getId(), e2, e2.getTimestamp(), rule.getAttributeId(), 144, 144, e2.getExternalId(), e2.getExternalId()));
     }
 
     private RuleContext<FirstEventBadgeRule> createRule(FirstEventBadgeRule rule, List<Signal> collectTo) {

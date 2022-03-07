@@ -25,6 +25,7 @@ import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
+import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
@@ -88,6 +89,7 @@ public class PeriodicBadgeProcessor extends AbstractBadgeProcessor<PeriodicBadge
 
     private BadgeSignal badgeCreation(PeriodicBadgeRule rule, PeriodicBadgeRule.Threshold threshold, Event event, long tsUnit) {
         return new TemporalBadgeSignal(rule.getId(),
+                Utils.firstNonNull(threshold.getBadgeId(), rule.getId()),
                 event,
                 threshold.getAttribute(),
                 tsUnit,
@@ -98,6 +100,7 @@ public class PeriodicBadgeProcessor extends AbstractBadgeProcessor<PeriodicBadge
 
     private BadgeSignal badgeRemoval(PeriodicBadgeRule rule, PeriodicBadgeRule.Threshold threshold, Event event, long tsUnit) {
         return new BadgeRemoveSignal(rule.getId(),
+                Utils.firstNonNull(threshold.getBadgeId(), rule.getId()),
                 event.asEventScope(),
                 threshold.getAttribute(),
                 tsUnit,

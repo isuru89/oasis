@@ -29,11 +29,15 @@ import java.util.Comparator;
  */
 public class HistogramBadgeRemovalSignal extends BadgeRemoveSignal {
     public HistogramBadgeRemovalSignal(BadgeSignal prevBadge) {
-        this(prevBadge.getRuleId(), prevBadge.getEventScope(), prevBadge.getAttribute(), prevBadge.getStartTime(), prevBadge.getEndTime());
+        this(prevBadge.getRuleId(), prevBadge.getBadgeId(), prevBadge.getEventScope(), prevBadge.getAttribute(), prevBadge.getStartTime(), prevBadge.getEndTime());
     }
 
     public HistogramBadgeRemovalSignal(String ruleId, EventScope eventScope, int streak, long st, long et) {
-        super(ruleId, eventScope, streak, st, et, null, null);
+        super(ruleId, ruleId, eventScope, streak, st, et, null, null);
+    }
+
+    public HistogramBadgeRemovalSignal(String ruleId, String badgeId, EventScope eventScope, int streak, long st, long et) {
+        super(ruleId, badgeId, eventScope, streak, st, et, null, null);
     }
 
     @Override
@@ -43,6 +47,7 @@ public class HistogramBadgeRemovalSignal extends BadgeRemoveSignal {
                 .thenComparing(BadgeSignal::getEndTime)
                 .thenComparing(BadgeSignal::getAttribute)
                 .thenComparing(BadgeSignal::getRuleId)
+                .thenComparing(BadgeSignal::getBadgeId)
                 .thenComparing(Signal::getEventScope)
                 .compare(this, (BadgeSignal) o);
     }

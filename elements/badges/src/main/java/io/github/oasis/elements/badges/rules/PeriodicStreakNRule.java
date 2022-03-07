@@ -107,6 +107,10 @@ public class PeriodicStreakNRule extends BadgeRule {
         return streakMap.getOrDefault(streak, StreakNBadgeRule.DEFAULT_STREAK_PROPS).getAttribute();
     }
 
+    public String findBadgeIdOfStreak(int streak) {
+        return streakMap.getOrDefault(streak, StreakNBadgeRule.DEFAULT_STREAK_PROPS).getBadgeId();
+    }
+
     public void setStreaks(Map<Integer, StreakNBadgeRule.StreakProps> streaks) {
         this.streakMap = new TreeMap<>(streaks);
         this.orderedStreakList = new ArrayList<>(streaks.keySet());

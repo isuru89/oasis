@@ -31,7 +31,11 @@ import java.util.Comparator;
 @ToString(callSuper = true)
 public class HistogramBadgeSignal extends StreakBadgeSignal {
     public HistogramBadgeSignal(String ruleId, Event causedEvent, int streak, int attribute, long st, long et, String eid) {
-        super(ruleId, causedEvent, streak, attribute, st, et, null, eid);
+        super(ruleId, ruleId, causedEvent, streak, attribute, st, et, null, eid);
+    }
+
+    public HistogramBadgeSignal(String ruleId, String badgeId, Event causedEvent, int streak, int attribute, long st, long et, String eid) {
+        super(ruleId, badgeId, causedEvent, streak, attribute, st, et, null, eid);
     }
 
     @Override
@@ -40,6 +44,7 @@ public class HistogramBadgeSignal extends StreakBadgeSignal {
                 .comparingLong(BadgeSignal::getStartTime)
                 .thenComparing(BadgeSignal::getAttribute)
                 .thenComparing(BadgeSignal::getRuleId)
+                .thenComparing(BadgeSignal::getBadgeId)
                 .thenComparing(Signal::getEventScope)
                 .thenComparingLong(BadgeSignal::getEndTime)
                 .compare(this, (BadgeSignal) o);

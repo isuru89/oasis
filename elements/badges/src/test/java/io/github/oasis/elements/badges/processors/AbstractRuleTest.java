@@ -169,7 +169,7 @@ public abstract class AbstractRuleTest {
     protected Map<Integer, StreakNBadgeRule.StreakProps> toStreakMap(Map<Integer, Integer> streaks) {
         return streaks.entrySet().stream()
                 .map(e -> Pair.of(e.getKey(), e.getValue()))
-                .collect(Collectors.toMap(Pair::getLeft, pair -> new StreakNBadgeRule.StreakProps(pair.getRight())));
+                .collect(Collectors.toMap(Pair::getLeft, pair -> new StreakNBadgeRule.StreakProps(null, pair.getRight())));
     }
 
 }

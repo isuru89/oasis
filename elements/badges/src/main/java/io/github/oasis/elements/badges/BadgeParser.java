@@ -182,11 +182,15 @@ public class BadgeParser extends AbstractElementParser {
                     streak -> {
                     RewardDef mergedRewards = RewardDef.merge(streak.getRewards(), def.getSpec().getRewards());
                     if (mergedRewards.getPoints() != null) {
-                        return new StreakNBadgeRule.StreakProps(mergedRewards.getBadge().getAttribute(),
+                        return new StreakNBadgeRule.StreakProps(
+                                mergedRewards.getBadge().getId(),
+                                mergedRewards.getBadge().getAttribute(),
                                 mergedRewards.getPoints().getId(),
                                 mergedRewards.getPoints().getAmount());
                     } else {
-                        return new StreakNBadgeRule.StreakProps(mergedRewards.getBadge().getAttribute());
+                        return new StreakNBadgeRule.StreakProps(
+                                mergedRewards.getBadge().getId(),
+                                mergedRewards.getBadge().getAttribute());
                     }
                 }));
     }

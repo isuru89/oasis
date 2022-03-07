@@ -30,16 +30,22 @@ import java.util.Optional;
  * @author Isuru Weerarathna
  */
 public class BadgeRemoveSignal extends BadgeSignal {
+
     public BadgeRemoveSignal(String ruleId, EventScope event, int attribute, long st, long et, String sid, String eid) {
-        super(ruleId, event, st, attribute, st, et, sid, eid);
+        super(ruleId, ruleId, event, st, attribute, st, et, sid, eid);
     }
 
-    public BadgeRemoveSignal(String ruleId, EventScope eventScope, int attribute, long st) {
-        super(ruleId, eventScope, st, attribute, st, -1, null, null);
+    public BadgeRemoveSignal(String ruleId, String badgeId, EventScope event, int attribute, long st, long et, String sid, String eid) {
+        super(ruleId, badgeId, event, st, attribute, st, et, sid, eid);
+    }
+
+    public BadgeRemoveSignal(String ruleId, String badgeId, EventScope eventScope, int attribute, long st) {
+        super(ruleId, badgeId, eventScope, st, attribute, st, -1, null, null);
     }
 
     public BadgeRemoveSignal(BadgeSignal prevBadge) {
         super(prevBadge.getRuleId(),
+                prevBadge.getBadgeId(),
                 prevBadge.getEventScope(),
                 prevBadge.getStartTime(),
                 prevBadge.getAttribute(),

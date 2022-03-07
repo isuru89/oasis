@@ -24,6 +24,7 @@ import io.github.oasis.core.context.ExecutionContext;
 import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
@@ -50,8 +51,14 @@ public class BadgeFirstEvent extends AbstractBadgeProcessor<FirstEventBadgeRule>
         String id = event.getExternalId();
         String subKey = rule.getEventName();
         String value = ts + COLON + id + COLON + System.currentTimeMillis();
+
         if (isFirstOne(db.setIfNotExistsInMap(key, subKey, value))) {
-            return List.of(BadgeSignal.firstEvent(rule.getId(), event, rule.getAttributeId()));
+            return List.of(
+                    BadgeSignal.firstEvent(rule.getId(),
+                            Utils.firstNonNull(rule.getBadgeId(), rule.getId()),
+                            event,
+                            rule.getAttributeId())
+            );
         }
         return null;
     }

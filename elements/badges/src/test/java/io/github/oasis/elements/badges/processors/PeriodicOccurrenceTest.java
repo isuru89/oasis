@@ -146,7 +146,7 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()));
     }
 
     @DisplayName("Single Threshold: badge creation with points")
@@ -168,7 +168,7 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId())
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId())
                         .setPointAwards("point.a", BigDecimal.valueOf(100)));
     }
 
@@ -191,7 +191,7 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadgeSignal(rule.getId(), e4, ATTR_1, 100, 150, e4.getTimestamp(), e4.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e4, ATTR_1, 100, 150, e4.getTimestamp(), e4.getExternalId()));
     }
 
     @DisplayName("Single Threshold: badges in different time units")
@@ -213,8 +213,8 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadgeSignal(rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()),
-                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()));
     }
 
     @DisplayName("Single Threshold: Out-of-order badge creation")
@@ -236,7 +236,7 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadgeSignal(rule.getId(), e6, ATTR_1, 100, 150, e6.getTimestamp(), e6.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e6, ATTR_1, 100, 150, e6.getTimestamp(), e6.getExternalId()));
     }
 
     // ------------------------------------------------------
@@ -302,7 +302,7 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadgeSignal(rule.getId(), e5, ATTR_1, 100, 150, e5.getTimestamp(), e5.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e5, ATTR_1, 100, 150, e5.getTimestamp(), e5.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: many badges creation")
@@ -325,8 +325,8 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
-                new TemporalBadgeSignal(rule.getId(), e6, ATTR_2, 100, 150, e6.getTimestamp(), e6.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e6, ATTR_2, 100, 150, e6.getTimestamp(), e6.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: many badges creation to exact threshold")
@@ -348,8 +348,8 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
-                new TemporalBadgeSignal(rule.getId(), e6, ATTR_2, 100, 150, e6.getTimestamp(), e6.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e6, ATTR_2, 100, 150, e6.getTimestamp(), e6.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: many badges in different time unit creation")
@@ -374,9 +374,9 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadgeSignal(rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
-                new TemporalBadgeSignal(rule.getId(), e5, ATTR_2, 100, 150, e5.getTimestamp(), e5.getExternalId()),
-                new TemporalBadgeSignal(rule.getId(), e9, ATTR_1, 150, 200, e9.getTimestamp(), e9.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e3, ATTR_1, 100, 150, e3.getTimestamp(), e3.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e5, ATTR_2, 100, 150, e5.getTimestamp(), e5.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e9, ATTR_1, 150, 200, e9.getTimestamp(), e9.getExternalId()));
     }
 
     @DisplayName("Multi Threshold: Out-of-order badges creation")
@@ -399,16 +399,16 @@ public class PeriodicOccurrenceTest extends AbstractRuleTest {
 
         System.out.println(signals);
         assertStrict(signals,
-                new TemporalBadgeSignal(rule.getId(), e7, ATTR_1, 100, 150, e7.getTimestamp(), e7.getExternalId()),
-                new TemporalBadgeSignal(rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()));
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e7, ATTR_1, 100, 150, e7.getTimestamp(), e7.getExternalId()),
+                new TemporalBadgeSignal(rule.getId(), rule.getId(), e6, ATTR_1, 150, 200, e6.getTimestamp(), e6.getExternalId()));
     }
 
     private PeriodicBadgeRule.Threshold aT(int attr, long threshold) {
-        return new PeriodicBadgeRule.Threshold(attr, BigDecimal.valueOf(threshold));
+        return new PeriodicBadgeRule.Threshold(null, attr, BigDecimal.valueOf(threshold));
     }
 
     private PeriodicBadgeRule.Threshold aTPoints(int attr, long threshold, String pointId, BigDecimal points) {
-        return new PeriodicBadgeRule.Threshold(attr, BigDecimal.valueOf(threshold), pointId, points);
+        return new PeriodicBadgeRule.Threshold(null, attr, BigDecimal.valueOf(threshold), pointId, points);
     }
 
     private RuleContext<PeriodicBadgeRule> createRule(long timeUnit, Collection<Signal> collection, PeriodicBadgeRule.Threshold... thresholds) {

@@ -32,6 +32,11 @@ import java.io.Serializable;
 public class BadgeAwardDef implements Validator, Serializable {
 
     /**
+     * A custom badge id to be used instead of rule id.
+     */
+    private String id;
+
+    /**
      * Maximum how many time should a user be awarded this badge.
      */
     private Integer maxAwardTimes;

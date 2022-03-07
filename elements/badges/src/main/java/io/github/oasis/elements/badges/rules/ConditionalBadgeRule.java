@@ -70,6 +70,7 @@ public class ConditionalBadgeRule extends BadgeRule {
     @Getter
     @Builder
     public static class Condition implements Comparable<Condition> {
+        private final String badgeId;
         private final int priority;
         private final EventExecutionFilter condition;
         private final int attribute;
@@ -77,13 +78,14 @@ public class ConditionalBadgeRule extends BadgeRule {
         private final String pointId;
         private final BigDecimal pointAwards;
 
-        public Condition(int priority, EventExecutionFilter condition, int attribute, Integer maxBadgesAllowed) {
-            this(priority, condition, attribute, maxBadgesAllowed, null, null);
+        public Condition(String badgeId, int priority, EventExecutionFilter condition, int attribute, Integer maxBadgesAllowed) {
+            this(badgeId, priority, condition, attribute, maxBadgesAllowed, null, null);
         }
 
-        public Condition(int priority, EventExecutionFilter condition,
+        public Condition(String badgeId, int priority, EventExecutionFilter condition,
                          int attribute, Integer maxBadgesAllowed,
                          String pointId, BigDecimal pointAwards) {
+            this.badgeId = badgeId;
             this.priority = priority;
             this.condition = condition;
             this.attribute = attribute;

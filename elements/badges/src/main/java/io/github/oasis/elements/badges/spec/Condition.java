@@ -51,14 +51,18 @@ public class Condition implements Validator, Serializable {
         RewardDef mergedRewards = RewardDef.merge(rewards, def.getSpec().getRewards());
         EventExecutionFilter filter = EventExecutionFilterFactory.create(condition);
         if (mergedRewards.getPoints() != null) {
-            return new ConditionalBadgeRule.Condition(priority,
+            return new ConditionalBadgeRule.Condition(
+                    rewards.getBadge().getId(),
+                    priority,
                     filter,
                     mergedRewards.getBadge().getAttribute(),
                     mergedRewards.getBadge().getMaxAwardTimes(),
                     mergedRewards.getPoints().getId(),
                     mergedRewards.getPoints().getAmount());
         } else {
-            return new ConditionalBadgeRule.Condition(priority,
+            return new ConditionalBadgeRule.Condition(
+                    rewards.getBadge().getId(),
+                    priority,
                     filter,
                     mergedRewards.getBadge().getAttribute(),
                     mergedRewards.getBadge().getMaxAwardTimes());

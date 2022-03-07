@@ -26,6 +26,7 @@ import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Sorted;
+import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
@@ -145,6 +146,7 @@ public class TimeBoundedStreakNBadge extends StreakNBadgeProcessor {
                     firstId = startTuple.getMember().split(COLON)[1];
                 }
                 StreakBadgeSignal signal = new StreakBadgeSignal(rule.getId(),
+                        Utils.firstNonNullAsStr(rule.getBadgeIdForStreak(currStreak), rule.getBadgeId(), rule.getId()),
                         event,
                         currStreak,
                         rule.getAttributeForStreak(currStreak),
@@ -232,6 +234,7 @@ public class TimeBoundedStreakNBadge extends StreakNBadgeProcessor {
                     }
                     signals.add(new StreakBadgeSignal(
                             options.getId(),
+                            Utils.firstNonNullAsStr(rule.getBadgeIdForStreak(streak), rule.getBadgeId(), options.getId()),
                             event,
                             streak,
                             rule.getAttributeForStreak(streak),
@@ -264,6 +267,7 @@ public class TimeBoundedStreakNBadge extends StreakNBadgeProcessor {
             }).map(t -> {
                 String[] parts = t.getMember().split(COLON);
                 return new BadgeRemoveSignal(options.getId(),
+                        options.getBadgeId(),
                         event.asEventScope(),
                         Integer.parseInt(parts[3]),
                         BigDecimal.valueOf(t.getScore()).longValue());

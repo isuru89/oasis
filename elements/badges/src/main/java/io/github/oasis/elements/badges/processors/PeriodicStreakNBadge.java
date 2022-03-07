@@ -27,6 +27,7 @@ import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
+import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
 import io.github.oasis.elements.badges.signals.BadgeSignal;
@@ -122,6 +123,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
                     lastTs = lastTs - (lastTs % rule.getTimeUnit());
                     map.setValue(lastHitSubKey, event.getTimestamp() + COLON + event.getExternalId());
                     return Collections.singletonList(new HistogramBadgeSignal(rule.getId(),
+                            Utils.firstNonNullAsStr(rule.findBadgeIdOfStreak(total), rule.getBadgeId(), rule.getId()),
                             event,
                             total,
                             rule.findAttributeOfStreak(total),
@@ -163,6 +165,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
                     lastTs = lastTs - (lastTs % rule.getTimeUnit());
                     map.setValue(lastHitSubKey, event.getTimestamp() + COLON + event.getExternalId());
                     return Collections.singletonList(new HistogramBadgeRemovalSignal(rule.getId(),
+                            Utils.firstNonNullAsStr(rule.findBadgeIdOfStreak(total + 1), rule.getBadgeId(), rule.getId()),
                             event.asEventScope(),
                             rule.findAttributeOfStreak(total + 1),
                             ts - (ts % rule.getTimeUnit()),
@@ -253,6 +256,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
                     }
                     signals.add(new HistogramBadgeSignal(
                             rule.getId(),
+                            Utils.firstNonNullAsStr(rule.findBadgeIdOfStreak(streak), rule.getBadgeId(), rule.getId()),
                             event,
                             streak,
                             rule.findAttributeOfStreak(streak),

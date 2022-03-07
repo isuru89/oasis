@@ -51,10 +51,12 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
     private final String endId;
     private final int attribute;
 
+    private String badgeId;
     private String pointId;
     private BigDecimal points;
 
     public BadgeSignal(String ruleId,
+                String badgeId,
                 EventScope eventScope,
                 long occurredTs,
                 int attributeId,
@@ -63,13 +65,15 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
         super(ruleId, eventScope, occurredTs);
 
         this.attribute = attributeId;
-        startTime = st;
-        endTime = et;
-        startId = sid;
-        endId = eid;
+        this.badgeId = badgeId;
+        this.startTime = st;
+        this.endTime = et;
+        this.startId = sid;
+        this.endId = eid;
     }
 
     public BadgeSignal(String ruleId,
+                       String badgeId,
                        Event event,
                        long occurredTs,
                        int attributeId,
@@ -78,14 +82,15 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
         super(ruleId, event, occurredTs);
 
         this.attribute = attributeId;
+        this.badgeId = badgeId;
         this.startTime = st;
         this.endTime = et;
         this.startId = sid;
         this.endId = eid;
     }
 
-    public static BadgeSignal firstEvent(String ruleId, Event causedEvent, int attributeId) {
-        return new BadgeSignal(ruleId, causedEvent, causedEvent.getTimestamp(), attributeId,
+    public static BadgeSignal firstEvent(String ruleId, String badgeId, Event causedEvent, int attributeId) {
+        return new BadgeSignal(ruleId, badgeId, causedEvent, causedEvent.getTimestamp(), attributeId,
                 causedEvent.getTimestamp(), causedEvent.getTimestamp(),
                 causedEvent.getExternalId(), causedEvent.getExternalId());
     }
@@ -138,6 +143,10 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
 
     public String getEndId() {
         return endId;
+    }
+
+    public String getBadgeId() {
+        return badgeId;
     }
 
     public String getUniqueId() {

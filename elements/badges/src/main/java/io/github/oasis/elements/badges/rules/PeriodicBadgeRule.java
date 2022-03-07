@@ -74,16 +74,18 @@ public class PeriodicBadgeRule extends BadgeRule {
     @Getter
     @Builder
     public static class Threshold implements Comparable<Threshold> {
+        private final String badgeId;
         private final int attribute;
         private final BigDecimal value;
         private final String pointId;
         private final BigDecimal pointAwards;
 
-        public Threshold(int attribute, BigDecimal value) {
-            this(attribute, value, null, null);
+        public Threshold(String badgeId, int attribute, BigDecimal value) {
+            this(badgeId, attribute, value, null, null);
         }
 
-        public Threshold(int attribute, BigDecimal value, String pointId, BigDecimal pointAwards) {
+        public Threshold(String badgeId, int attribute, BigDecimal value, String pointId, BigDecimal pointAwards) {
+            this.badgeId = badgeId;
             this.attribute = attribute;
             this.value = value;
             this.pointId = pointId;

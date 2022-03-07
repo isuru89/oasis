@@ -90,7 +90,7 @@ public class PeriodicConsecutiveStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         printSignals(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), e7, 3, ATTR_SILVER, 100, 200, e7.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), ruleContext.getRule().getId(), e7, 3, ATTR_SILVER, 100, 200, e7.getExternalId()));
     }
 
     @DisplayName("Multiple streaks")
@@ -114,8 +114,8 @@ public class PeriodicConsecutiveStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         printSignals(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
-                new HistogramBadgeSignal(rule.getId(), e8, 5, ATTR_GOLD, 100, 300, e8.getExternalId()));
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e8, 5, ATTR_GOLD, 100, 300, e8.getExternalId()));
     }
 
     @DisplayName("Consecutive Multiple streaks")
@@ -142,9 +142,9 @@ public class PeriodicConsecutiveStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         printSignals(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
-                new HistogramBadgeSignal(rule.getId(), e8, 5, ATTR_GOLD, 100, 300, e8.getExternalId()),
-                new HistogramBadgeSignal(rule.getId(), e11, 3, ATTR_SILVER, 350, 450, e11.getExternalId()));
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e8, 5, ATTR_GOLD, 100, 300, e8.getExternalId()),
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e11, 3, ATTR_SILVER, 350, 450, e11.getExternalId()));
     }
 
     @DisplayName("Non Consecutive Multiple streaks")
@@ -172,9 +172,9 @@ public class PeriodicConsecutiveStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         printSignals(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
-                new HistogramBadgeSignal(rule.getId(), e8, 5, ATTR_GOLD, 100, 300, e8.getExternalId()),
-                new HistogramBadgeSignal(rule.getId(), e12, 3, ATTR_SILVER, 400, 500, e12.getExternalId()));
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e8, 5, ATTR_GOLD, 100, 300, e8.getExternalId()),
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e12, 3, ATTR_SILVER, 400, 500, e12.getExternalId()));
     }
 
     @DisplayName("Multiple streaks: Breaks all in multiple streaks and creates a new streak/badge")
@@ -199,11 +199,11 @@ public class PeriodicConsecutiveStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         printSignals(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
-                new HistogramBadgeSignal(rule.getId(), e8, 5, ATTR_GOLD, 100, 300, e8.getExternalId()),
-                new HistogramBadgeRemovalSignal(rule.getId(), e9.asEventScope(), ATTR_SILVER, 100, 200),
-                new HistogramBadgeRemovalSignal(rule.getId(), e9.asEventScope(), ATTR_GOLD, 100, 300),
-                new HistogramBadgeSignal(rule.getId(), e8, 3, ATTR_SILVER, 200, 300, e8.getExternalId()));
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e8, 5, ATTR_GOLD, 100, 300, e8.getExternalId()),
+                new HistogramBadgeRemovalSignal(rule.getId(), rule.getId(), e9.asEventScope(), ATTR_SILVER, 100, 200),
+                new HistogramBadgeRemovalSignal(rule.getId(), rule.getId(), e9.asEventScope(), ATTR_GOLD, 100, 300),
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e8, 3, ATTR_SILVER, 200, 300, e8.getExternalId()));
     }
 
     @DisplayName("Multiple streaks: Breaks the latest streak in multiple streaks")
@@ -228,9 +228,9 @@ public class PeriodicConsecutiveStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         printSignals(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
-                new HistogramBadgeSignal(rule.getId(), e8, 5, ATTR_GOLD, 100, 300, e8.getExternalId()),
-                new HistogramBadgeRemovalSignal(rule.getId(), e9.asEventScope(), ATTR_GOLD, 100, 300));
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e8, 5, ATTR_GOLD, 100, 300, e8.getExternalId()),
+                new HistogramBadgeRemovalSignal(rule.getId(), rule.getId(), e9.asEventScope(), ATTR_GOLD, 100, 300));
     }
 
     @DisplayName("Multiple streaks: Out-of-order breaks the latest streak in multiple streaks")
@@ -254,8 +254,8 @@ public class PeriodicConsecutiveStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         printSignals(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
-                new HistogramBadgeRemovalSignal(rule.getId(), e9.asEventScope(), ATTR_SILVER, 100, 200));
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e6, 3, ATTR_SILVER, 100, 200, e6.getExternalId()),
+                new HistogramBadgeRemovalSignal(rule.getId(), rule.getId(), e9.asEventScope(), ATTR_SILVER, 100, 200));
     }
 
     @DisplayName("Single streak: No streaks available yet")
@@ -323,7 +323,7 @@ public class PeriodicConsecutiveStreakTest extends AbstractRuleTest {
         printSignals(signals);
         Assertions.assertEquals(1, signals.size());
         assertStrict(signals,
-                new HistogramBadgeSignal(ruleContext.getRule().getId(), e7, 3, ATTR_SILVER, 100, 200, e7.getExternalId()));
+                new HistogramBadgeSignal(ruleContext.getRule().getId(), ruleContext.getRule().getId(), e7, 3, ATTR_SILVER, 100, 200, e7.getExternalId()));
     }
 
     @DisplayName("Single streak: Out-of-order breaks the only single streak")
@@ -346,8 +346,8 @@ public class PeriodicConsecutiveStreakTest extends AbstractRuleTest {
         Set<Signal> signals = mergeSignals(signalsRef);
         printSignals(signals);
         assertStrict(signals,
-                new HistogramBadgeSignal(rule.getId(), e5, 3, ATTR_SILVER, 100, 200, e5.getExternalId()),
-                new HistogramBadgeRemovalSignal(rule.getId(), e7.asEventScope(), ATTR_SILVER, 100, 200));
+                new HistogramBadgeSignal(rule.getId(), rule.getId(), e5, 3, ATTR_SILVER, 100, 200, e5.getExternalId()),
+                new HistogramBadgeRemovalSignal(rule.getId(), rule.getId(), e7.asEventScope(), ATTR_SILVER, 100, 200));
     }
 
     private RuleContext<PeriodicStreakNRule> createRule(PeriodicStreakNRule rule, Consumer<Signal> consumer) {

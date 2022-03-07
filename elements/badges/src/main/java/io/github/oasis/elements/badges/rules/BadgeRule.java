@@ -34,6 +34,8 @@ import java.math.BigDecimal;
 @Setter
 public abstract class BadgeRule extends AbstractRule {
 
+    private String badgeId;
+
     private String pointId;
     private BigDecimal pointAwards;
 

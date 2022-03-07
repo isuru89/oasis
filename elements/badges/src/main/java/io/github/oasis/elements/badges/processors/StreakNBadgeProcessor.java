@@ -26,6 +26,7 @@ import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Sorted;
+import io.github.oasis.core.utils.Utils;
 import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.signals.BadgeRemoveSignal;
@@ -142,6 +143,7 @@ public class StreakNBadgeProcessor extends AbstractBadgeProcessor<StreakNBadgeRu
             if (prev < now && start != null) {
                 String[] startParts = start.getMember().split(COLON);
                 BadgeSignal signal = new StreakBadgeSignal(rule.getId(),
+                        Utils.firstNonNullAsStr(rule.getBadgeIdForStreak(now), rule.getBadgeId(), rule.getId()),
                         event,
                         now,
                         rule.getAttributeForStreak(now),

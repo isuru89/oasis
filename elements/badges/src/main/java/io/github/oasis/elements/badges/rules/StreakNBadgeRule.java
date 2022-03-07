@@ -38,7 +38,7 @@ import java.util.TreeMap;
  */
 public class StreakNBadgeRule extends BadgeRule {
 
-    static final StreakProps DEFAULT_STREAK_PROPS = new StreakProps(0);
+    static final StreakProps DEFAULT_STREAK_PROPS = new StreakProps(null, 0);
 
     private int maxStreak = 0;
     private int minStreak = Integer.MAX_VALUE;
@@ -93,6 +93,10 @@ public class StreakNBadgeRule extends BadgeRule {
         return streakProps.getOrDefault(streak, DEFAULT_STREAK_PROPS).getAttribute();
     }
 
+    public String getBadgeIdForStreak(int streak) {
+        return streakProps.getOrDefault(streak, DEFAULT_STREAK_PROPS).getBadgeId();
+    }
+
     public void setStreaks(Map<Integer, StreakProps> streaks) {
         this.streakProps = new TreeMap<>(streaks);
         this.streakProps.put(0, DEFAULT_STREAK_PROPS);
@@ -123,21 +127,24 @@ public class StreakNBadgeRule extends BadgeRule {
     @Getter
     @Builder(toBuilder = true)
     public static class StreakProps {
+        private final String badgeId;
         private final int attribute;
         private final String pointId;
         private final BigDecimal points;
 
-        public StreakProps(int attribute) {
-            this(attribute, null);
+        public StreakProps(String badgeId, int attribute) {
+            this(badgeId, attribute, null);
         }
 
-        public StreakProps(int attribute, BigDecimal points) {
+        public StreakProps(String badgeId, int attribute, BigDecimal points) {
+            this.badgeId = badgeId;
             this.attribute = attribute;
             this.points = points;
             this.pointId = null;
         }
 
-        public StreakProps(int attribute, String pointId, BigDecimal points) {
+        public StreakProps(String badgeId, int attribute, String pointId, BigDecimal points) {
+            this.badgeId = badgeId;
             this.attribute = attribute;
             this.pointId = pointId;
             this.points = points;
