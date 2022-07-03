@@ -1,15 +1,18 @@
 # Milestones
 
-* All milestones are pre-defined before gameplay.
+* All milestones are pre-defined before the gameplay start.
 * Can be defined only by Admin.
-* Milestones never ends. They are played by players forever.
+* A milestone never ends. They are played by players forever.
     * Milestone should be defined in a way which can play forever.
-* At least two levels must be there for a milestone.
+* Milestone can be partitioned to reward differently, and they are called 'Levels'.
+* Milestone must have at least two levels.
 * A milestone can have only **finite** number of levels.
 * When a player has reached maximum level of a milestone, Oasis considers that player has completed the milestone.
+  * Depending on the rule parameters (See [flags](#flags)), player will continuously reward in last level or Oasis will stop processing milestone for that particular user.
 * ~~Milestone aggregating values must be monotonically increasing.~~
     * ~~Penalty values (negative values) will be accumulated separately along with positive values.~~
-* Once a player achieved/surpassed a level, it cannot be undone.
+* Once a player achieved/surpassed a level, it cannot be undone. (See [flags](#flags))
+  * Milestone can be defined in a way not to accept penalty points, so levels cannot be undone.
   * Due to the penalty values, it might go below the current level. But, it does not
   affect to the player's achieved level.
   
@@ -32,18 +35,22 @@
 | [`flags`](#flags) | Custom set of features to be applied for milestone definition | default: `null` |
 
 ### selector
+Selects events which are eligible for processing under this milestone.
 [See here](common-spec.md#selector) for more details
 
 ### valueExtractor
-Function/expression to extract the value from the event for accumulation. The expression must always
-evaluate to a number, otherwise it will fail.
+Function/expression to extract the value from the event for accumulation. 
+The expression **must always be evaluated to a number**, otherwise the processing will fail.
 
-Currently, this accepts `expression` as a text.
+Either `expression` or `amount` must be specified. When specified both, rule validation will fail.
+
+Expression can be written using MVEL script language.
 ```yaml
 valueExtractor:
   expression: "e.value"
 ```
 
+Amount should be a number and will accumulate towards player level when a event gets matched.
 If you want to make count the filtered out event, just simply specify `1` in amount field.
 ```yaml
 valueExtractor:
@@ -51,14 +58,14 @@ valueExtractor:
 ```
 
 ### levels
-Levels of this milestones. Each level has two mandatory field to specify.
+Levels of the milestone. Each level has two mandatory field to specify.
 
 * `level`: level number.
 * `milestone`: Threshold value to achieve this level. Must always be a number.
 
 **_Notes_**: 
 1. At least one level must be specified in every milestone. Otherwise, it will fail.
-2. `level` field must be a number and cannot have duplicates.
+2. `level` field must be a number and cannot have duplicates. Also, must be consecutive numbers.
 
 
 ### flags
@@ -109,7 +116,7 @@ More comprehensive set of examples can be found in this [file](elements/mileston
         matchPointIds:
           anyOf:
             - star.points
-            - coupan.points
+            - coupon.points
       flags:
         - SKIP_NEGATIVE_VALUES      # prevents reducing milestone scores due to negative values
       levels:
@@ -125,7 +132,8 @@ More comprehensive set of examples can be found in this [file](elements/mileston
 ```yaml
   - id: MILE-00030
     name: Milestone-with-Event-Count
-    description: This is a milestone counting events based on a criteria.
+    description: This is a milestone counting events based on a criteria. |
+      This will count when question is answered within 5 minutes.
     type: core:milestone
     spec:
       selector:

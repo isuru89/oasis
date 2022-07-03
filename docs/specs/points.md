@@ -5,9 +5,9 @@ Points is the only core game element shipped with while all other elements has t
  * Points are always accurate no more than up to 2 decimal points
  * Only players can score points
  * Each point is associated with a type
- * The timestamp, team and event source id will be recorded against each point event scored.
+ * The timestamp, team and caused event source will be recorded against each point event scored.
  * Once scored, points cannot be deleted or modified
-   * To simulate a delete, same amount of penalty points needs to be added against same player manually.
+   * To simulate a deleted, same amount of compensation points needs to be added against same player manually.
    
 ## Scoring Methods:
  * By raw events
@@ -22,6 +22,7 @@ Points is the only core game element shipped with while all other elements has t
 ## Tips
 * You can combine multiple rules to emit same point type by having same id for `pointId` field.
   This is useful to combine awards based on multiple time ranges.
+* One point rule can award only one reward. If you want to reward multiple points, create a different rule for each one.
 
 ## Specification
 
@@ -50,7 +51,7 @@ reward:
 ```
 
 ### cap
-Optional maximum achievable points per unit time. This will be checked
+(Optional) maximum achievable points per unit time. This will be checked
 against the points as mentioned in `pointId` in `reward` section. 
 
 ```yaml
