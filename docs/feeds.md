@@ -29,6 +29,51 @@ As depicted in the image,
   2. The notification service will read those feed messages and optionally will correlate subscription details with admin database.
   3. And then, those notifications will be delivered via 3rd party messaging systems.
 
+#### Feed Payload
+A sample feed will consist of below information.
+
+```json
+{
+  "byPlugin": "<plugin-id>",
+  "eventType": "<type-of-feed>",
+  "eventTimestamp": 1656921284867,
+  "scope": {
+    "gameId": 2893,
+    "sourceId": 9328212,
+    "userId": 7084328432473,
+    "teamId": 2241
+  },
+  "data": {
+    // ... payload depends on plugin and eventType
+  }
+  
+}
+```
+
+| Field            | Type | Description                                                                                                                                           |                                                                                                                             
+|------------------| ----- |-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `byPlugin`       | string | Indicates which plugin generated this feed event. Default plguins: `core:point`, `core:badge`, `core:milestone`, `core:challenge`, and `core:rating`. |
+| `eventType`      | string | Type of feed scoped to the plugin. Some plugins may emit different type of feed events. Based on the type, the content of `data` field may vary.      |
+| `eventTimestamp` | number | Actual timestamp of this reward achieved. This will contain the timestamp of the caused event to generate the reward in epoch milliseconds.           |
+| `scope`          | object | Scope object of this feed.                                                                                                                            |
+| `scope.gameId`   | number | Game id this feed belongs to. This field will be there with every feed.                                                                               |
+| `scope.userId`   | number | User id this feed belongs to.                                                                                                                         |
+| `scope.teamId`   | number | Team id this user belongs to.                                                                                                                         |
+| `scope.sourceId` | number | External source id of the event that caused to generated this feed.                                                                                   |
+| `data`           | object | This field will contain the actual feed data depending on the plugin and its type.                                                                    |
+
+##### Available Feed Types and their data payload by Plugin
+
+| Plugin           | Type              | Data Payload                                                                                                                               |
+|------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `core:point`     | POINT_SCORED      | { "ruleId": number, "pointsScored": number }                                                                                               |
+| `core:badge`     | BADGE_EARNED      | { "ruleId": number, "attribute": number }                                                                                                  |
+| `core:milestone` | MILESTONE_REACHED | { "ruleId": number, "currentLevel": number, "previousLevel": number }                                                                      |
+| `core:challenge` | CHALLENGE_WON     | { "ruleId": number, "position": number }                                                                                                   |
+| `core:challenge` | CHALLENGE_OVER    | { "ruleId": number, "reason": "\<string\>" }  <br><br>  The `reason` field can take two forms either `TIME_EXPIRED` or `ALL_WINNERS_FOUND` |
+| `core:rating`    | RATING_CHANGED    | { "ruleId": number, "previousRating": number, "currentRating": number }                                                                    |
+
+
 ### Last-mile Delivery
 
 Last mile feed delivery to actual end users will be done by well popular and stable existing 
