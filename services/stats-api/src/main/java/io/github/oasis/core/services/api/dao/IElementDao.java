@@ -82,6 +82,7 @@ public interface IElementDao {
 
 
     @SqlUpdate
+    @GetGeneratedKeys("id")
     int insertAttribute(@Bind("gameId") int gameId, @BindBean AttributeInfo newAttr);
 
     @SqlQuery

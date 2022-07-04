@@ -30,7 +30,6 @@ import io.github.oasis.core.utils.TimeOffset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -125,7 +124,7 @@ public class PointsSink extends AbstractSink {
                             PointIDs.getGameTeamLeaderboard(gameId, teamId, DAILY, tcx.getDay())
                     ));
 
-        } catch (IOException e) {
+        } catch (Throwable e) {
             throw new OasisRuntimeException("Error while processing point signal!", e);
         }
         return null;

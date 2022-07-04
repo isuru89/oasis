@@ -22,25 +22,34 @@ package io.github.oasis.services.events.http;
 import io.github.oasis.services.events.auth.AuthService;
 import io.github.oasis.services.events.auth.EventAuthHandler;
 import io.github.oasis.services.events.auth.EventAuthProvider;
+import io.github.oasis.services.events.db.DataService;
 import io.github.oasis.services.events.db.RedisService;
 import io.github.oasis.services.events.dispatcher.EventDispatcherService;
+import io.github.oasis.services.events.http.routers.CacheRoute;
 import io.github.oasis.services.events.http.routers.PingRoute;
 import io.github.oasis.services.events.http.routers.PutBulkEventsRoute;
 import io.github.oasis.services.events.http.routers.PutEventRoute;
+import io.github.oasis.services.events.model.EventApiConfigs;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.github.oasis.services.events.http.Constants.*;
+import static io.github.oasis.services.events.http.Constants.CONF_PORT;
+import static io.github.oasis.services.events.http.Constants.ROUTE_BULK_EVENT_PUSH;
+import static io.github.oasis.services.events.http.Constants.ROUTE_CACHE_DELETE;
+import static io.github.oasis.services.events.http.Constants.ROUTE_EVENT_PUSH;
+import static io.github.oasis.services.events.http.Constants.ROUTE_PING;
 
 /**
  * @author Isuru Weerarathna
@@ -61,6 +70,7 @@ public class HttpServiceVerticle extends AbstractVerticle {
         LOG.info("HTTP configs {}", httpConf.encodePrettily());
 
         AuthService authService = AuthService.createProxy(vertx, AuthService.AUTH_SERVICE_QUEUE);
+        DataService clientService = DataService.createProxy(vertx, DataService.DATA_SERVICE_QUEUE);
         RedisService redisService = RedisService.createProxy(vertx, RedisService.DB_SERVICE_QUEUE);
         EventDispatcherService dispatcherService = EventDispatcherService.createProxy(vertx, EventDispatcherService.DISPATCHER_SERVICE_QUEUE);
 
@@ -69,16 +79,21 @@ public class HttpServiceVerticle extends AbstractVerticle {
         HttpServerOptions serverOptions = new HttpServerOptions(httpConf);
         server = vertx.createHttpServer(serverOptions);
 
-        EventIntegrityHandler integrityHandler = new EventIntegrityHandler();
+        Handler<RoutingContext> integrityHandler = EventIntegrityHandler.create(EventApiConfigs.create(httpConf));
         EventErrorHandler eventErrorHandler = new EventErrorHandler();
 
-        PutEventRoute putEventRoute = new PutEventRoute(redisService, dispatcherService);
-        PutBulkEventsRoute putBulkEventsRoute = new PutBulkEventsRoute(redisService, dispatcherService);
+        CacheRoute cacheRoute = new CacheRoute(redisService);
+        PutEventRoute putEventRoute = new PutEventRoute(clientService, dispatcherService);
+        PutBulkEventsRoute putBulkEventsRoute = new PutBulkEventsRoute(clientService, dispatcherService);
 
         Router router = Router.router(vertx);
         router.get(ROUTE_PING)
                 .produces(APPLICATION_JSON)
                 .handler(PingRoute.create());
+
+        router.delete(ROUTE_CACHE_DELETE)
+                .produces(APPLICATION_JSON)
+                .handler(cacheRoute);
 
         Route eventsRouter = router.route("/api/event*");
         eventsRouter

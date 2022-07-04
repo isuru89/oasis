@@ -17,15 +17,22 @@
  * under the License.
  */
 
-package io.github.oasis.core.services.api.dao.dto;
+package io.github.oasis.core.model;
 
-import java.io.Serializable;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-public class TeamUpdatePart implements Serializable {
+@Getter
+@Setter
+@ToString
+public class PlayerWithTeams extends PlayerObject {
 
-    private String avatarUrl;
+    private List<TeamObject> teams;
 
 }

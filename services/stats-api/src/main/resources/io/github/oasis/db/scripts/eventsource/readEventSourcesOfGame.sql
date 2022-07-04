@@ -9,4 +9,4 @@ FROM
 WHERE
     oesg.game_id = :gameId
     AND
-    oes.is_active = 1
+    oes.is_active = true

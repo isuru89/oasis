@@ -27,23 +27,21 @@ services:
     logging:
       driver: none
 
-#  rabbit:
-#    image: rabbitmq:3.7-management-alpine
-#    ports:
-#      - "5672:5672"
-#      - "15672:15672"
-#    volumes:
-#      - "./buildscripts/rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config"
-#      - "./buildscripts/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json"
-#      - "./.tmpdata/rabbit:/var/lib/rabbitmq/mnesia"
-
-  redis:
+  enginedb:
     image: redis:5
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
-      - "./.tmpdata/redis:/data"
+      - "./.tmpdata/enginedata:/data"
     ports:
       - "6379:6379"
+
+  apicache:
+    image: redis:5
+    command: [ "redis-server", "--appendonly", "yes", "--port", "6381"]
+    volumes:
+      - "./.tmpdata/cache:/data"
+    ports:
+      - "6381:6381"
 
   events-api:
     image: oasis/events-api
@@ -52,9 +50,9 @@ services:
     volumes:
       - "./buildscripts/events-api.conf:/etc/oasis/events-api.conf"
     environment:
-      - "WAIT_HOSTS=redis:6379,kafka:9092"
+      - "WAIT_HOSTS=apicache:6381,kafka:9092"
     depends_on:
-      - redis
+      - apicache
       - kafka
 
   stats-api:
@@ -66,18 +64,18 @@ services:
       - "./buildscripts/stats-api.properties:/etc/oasis/stats-api.properties"
       - "./buildscripts/modules:/etc/oasis/modules"
     environment:
-      - "WAIT_HOSTS=redis:6379,kafka:9092"
+      - "WAIT_HOSTS=apicache:6381,kafka:9092"
     depends_on:
-      - redis
+      - apicache
       - kafka
 
   engine:
     image: oasis/engine
     environment:
-      - "WAIT_HOSTS=redis:6379,kafka:9092"
+      - "WAIT_HOSTS=enginedb:6379,kafka:9092"
     volumes:
       - "./buildscripts/engine.conf:/etc/oasis/engine.conf"
       - "./buildscripts/modules:/etc/oasis/modules"
     depends_on:
-      - redis
+      - enginedb
       - kafka

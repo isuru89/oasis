@@ -20,24 +20,39 @@
 package io.github.oasis.core.services.api.exceptions;
 
 
+import org.springframework.http.HttpStatus;
+
 /**
  * @author Isuru Weerarathna
  */
 public class OasisApiRuntimeException extends RuntimeException {
 
     private final String errorCode;
+    private final HttpStatus status;
 
     public OasisApiRuntimeException(String errorCode, Throwable cause) {
         super(cause);
         this.errorCode = errorCode;
+        this.status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
     public OasisApiRuntimeException(String errorCode) {
         super();
         this.errorCode = errorCode;
+        this.status = HttpStatus.INTERNAL_SERVER_ERROR;
+    }
+
+    public OasisApiRuntimeException(String errorCode, HttpStatus status) {
+        super();
+        this.errorCode = errorCode;
+        this.status = status;
     }
 
     public String getErrorCode() {
         return errorCode;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
     }
 }

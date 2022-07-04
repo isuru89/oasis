@@ -19,139 +19,60 @@
 
 package io.github.oasis.core.services.api.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.oasis.core.configs.OasisConfigs;
-import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.external.PaginatedResult;
+import io.github.oasis.core.services.ApiConstants;
 import io.github.oasis.core.services.SerializationSupport;
-import io.github.oasis.core.services.api.beans.BackendRepository;
-import io.github.oasis.core.services.api.beans.JsonSerializer;
-import io.github.oasis.core.services.api.beans.RedisRepository;
-import io.github.oasis.core.services.api.beans.jdbc.JdbcRepository;
-import io.github.oasis.core.services.api.configs.DatabaseConfigs;
-import io.github.oasis.core.services.api.configs.SerializingConfigs;
-import io.github.oasis.core.services.api.dao.configs.OasisEnumArgTypeFactory;
-import io.github.oasis.core.services.api.dao.configs.OasisEnumColumnFactory;
-import io.github.oasis.db.redis.RedisDb;
+import io.github.oasis.core.services.annotations.EngineDbPool;
+import io.github.oasis.core.services.api.TestUtils;
+import io.github.oasis.core.services.api.handlers.OasisErrorHandler;
 import org.apache.commons.io.FileUtils;
-import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.jackson2.Jackson2Config;
-import org.jdbi.v3.jackson2.Jackson2Plugin;
-import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mockito;
-import org.springframework.boot.jdbc.DataSourceBuilder;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
+@SpringBootTest
+@AutoConfigureMockMvc
 public abstract class AbstractServiceTest {
 
-    protected final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private DataSource dataSource;
 
-    protected Db dbPool;
+    @Autowired
+    @EngineDbPool
+    private Db dbPool;
 
+    @Autowired
     protected SerializationSupport serializationSupport;
-    protected OasisRepository engineRepo;
-    protected OasisRepository adminRepo;
-    protected BackendRepository combinedRepo;
 
-    protected final ApplicationEventPublisher eventPublisher = Mockito.mock(ApplicationEventPublisher.class);
-
-    public Jdbi createJdbcDao(ObjectMapper mapper) throws SQLException {
-        DataSource ds = DataSourceBuilder.create()
-                .url("jdbc:h2:mem:sampledb")
-                .build();
-        Jdbi jdbi = Jdbi.create(ds)
-                .installPlugin(new SqlObjectPlugin())
-                .installPlugin(new Jackson2Plugin())
-                .registerColumnMapper(new OasisEnumColumnFactory())
-                .registerArgument(new OasisEnumArgTypeFactory());
-
-        jdbi.getConfig(Jackson2Config.class).setMapper(mapper);
-
-        try (Connection connection = ds.getConnection()) {
-            connection.createStatement().execute("DROP ALL OBJECTS");
-        }
-
-        DatabaseConfigs configs = new DatabaseConfigs();
-        try (Connection connection = ds.getConnection()) {
-            configs.runDbMigration(connection, "classpath:io/github/oasis/db/schema/oasis-changelog-master.yml");
-        }
-        return jdbi;
-    }
-
-    private void dropAll(DataSource ds) throws SQLException {
-        try (Connection connection = ds.getConnection()) {
-            connection.createStatement().execute("DROP TABLE IF EXISTS DATABASECHANGELOG");
-            connection.createStatement().execute("DROP TABLE IF EXISTS DATABASECHANGELOGLOCK");
-            connection.createStatement().execute("DROP TABLE IF EXISTS OA_PLAYER");
-            connection.createStatement().execute("DROP TABLE IF EXISTS OA_TEAM");
-            connection.createStatement().execute("DROP TABLE IF EXISTS OA_PLAYER_TEAM");
-            connection.createStatement().execute("DROP TABLE IF EXISTS OA_ELEMENT");
-            connection.createStatement().execute("DROP TABLE IF EXISTS OA_ELEMENT_DATA");
-            connection.createStatement().execute("DROP TABLE IF EXISTS OA_ATTRIBUTE_DEF");
-            connection.createStatement().execute("DROP TABLE IF EXISTS OA_GAME");
-            connection.createStatement().execute("DROP TABLE IF EXISTS OA_EVENT_SOURCE");
-            connection.createStatement().execute("DROP TABLE IF EXISTS OA_EVENT_SOURCE_KEY");
-            connection.createStatement().execute("DROP TABLE IF EXISTS OA_EVENT_SOURCE_GAME");
-            connection.createStatement().execute("DROP TABLE IF EXISTS OA_API_KEY");
-        }
-    }
-
-    public RedisRepository createRedisConnection() {
-        RedisDb redisDb = RedisDb.create(OasisConfigs.defaultConfigs());
-        redisDb.init();
-        dbPool = redisDb;
-        ObjectMapper jsonMapper = new SerializingConfigs().createSerializer();
-        serializationSupport = new JsonSerializer(jsonMapper);
-        return new RedisRepository(redisDb, serializationSupport);
-    }
-
-
-    public void cleanRedisData() throws IOException {
-        try (DbContext db = dbPool.createContext()) {
-            db.allKeys("*").forEach(db::removeKey);
-        }
-    }
+    @Autowired
+    private MockMvc mockMvc;
 
     @BeforeEach
-    public void beforeEach() throws IOException, SQLException, OasisException {
-        Jdbi jdbi = createJdbcDao(mapper);
-        RedisRepository redisConnection = createRedisConnection();
-        engineRepo = redisConnection;
-
-        cleanRedisData();
-
-        Mockito.reset(eventPublisher);
-
-        prepareContext(dbPool, OasisConfigs.defaultConfigs());
-
-        JdbcRepository jdbcRepository = createJdbcRepository(jdbi);
-        adminRepo = jdbcRepository;
-        Map<String, Object> configData = new HashMap<>();
-        configData.put("oasis.db.admin", "jdbc");
-        configData.put("oasis.db.engine", "redis");
-        OasisConfigs configs = OasisConfigs.create(configData);
-        Map<String, OasisRepository> repositoryMap = new HashMap<>();
-        repositoryMap.put("redis", redisConnection);
-        repositoryMap.put("jdbc", jdbcRepository);
-        BackendRepository backendRepository = new BackendRepository(repositoryMap, configs);
-        combinedRepo = backendRepository;
-
-        createServices(backendRepository);
+    public void beforeEach() throws IOException, SQLException {
+        TestUtils.cleanRedisData(dbPool);
+        TestUtils.truncateData(dataSource);
     }
 
     @AfterEach
@@ -162,11 +83,236 @@ public abstract class AbstractServiceTest {
         }
     }
 
-    protected void prepareContext(Db dbPool, OasisConfigs configs) throws OasisException {
-
+    private ResultActions doCallWithBody(HttpMethod httpMethod, String pathUrl, Object body) throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.request(httpMethod, pathUrl)
+                .header(ApiConstants.APP_ID_HEADER, "root")
+                .header(ApiConstants.APP_KEY_HEADER, "root")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON);
+        if (body != null) {
+            requestBuilder.content(serializationSupport.serialize(body));
+        }
+        return mockMvc.perform(requestBuilder);
     }
 
-    protected abstract JdbcRepository createJdbcRepository(Jdbi jdbi);
+    protected ResultActions doPost(String pathUrl, Object body) throws Exception {
+        return doCallWithBody(HttpMethod.POST, pathUrl, body);
+    }
 
-    protected abstract void createServices(BackendRepository backendRepository);
+    protected ResultActions doPut(String pathUrl, Object body) throws Exception {
+        return doCallWithBody(HttpMethod.PUT, pathUrl, body);
+    }
+
+    protected ResultActions doPatch(String pathUrl, Object body) throws Exception {
+        return doCallWithBody(HttpMethod.PATCH, pathUrl, body);
+    }
+
+    protected ResultActions doGet(String pathUrl) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders.get(pathUrl)
+                .header(ApiConstants.APP_ID_HEADER, "root")
+                .header(ApiConstants.APP_KEY_HEADER, "root")
+                .accept(MediaType.APPLICATION_JSON)
+        );
+    }
+
+    protected ResultActions doGet(String pathUrl, Object... pathParams) throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(pathUrl, pathParams)
+                .header(ApiConstants.APP_ID_HEADER, "root")
+                .header(ApiConstants.APP_KEY_HEADER, "root")
+                .accept(MediaType.APPLICATION_JSON);
+        return mockMvc.perform(requestBuilder);
+    }
+
+    protected ResultActions doDelete(String pathUrl) throws Exception {
+        return mockMvc.perform(MockMvcRequestBuilders.delete(pathUrl)
+                .header(ApiConstants.APP_ID_HEADER, "root")
+                .header(ApiConstants.APP_KEY_HEADER, "root")
+                .accept(MediaType.APPLICATION_JSON)
+        );
+    }
+
+    protected <T> T doDeleteSuccess(String pathUrl, Class<T> clz) {
+        try {
+            MvcResult mvcResult = doDelete(pathUrl).andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
+            if (clz != null) {
+                return serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), clz);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected <T> T doGetSuccess(String pathUrl, Class<T> clz) {
+        try {
+            MvcResult mvcResult = doGet(pathUrl).andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
+            return serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), clz);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected <T> List<T> doGetListSuccess(String pathUrl, Class<T> clz, Object... params) {
+        try {
+            MvcResult mvcResult = doGet(pathUrl, params).andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
+            return serializationSupport.deserializeList(mvcResult.getResponse().getContentAsString(), clz);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T> PaginatedResult<T> doGetPaginatedSuccess(String pathUrl, Class<T> clz, Object... params) {
+        try {
+            MvcResult mvcResult = doGet(pathUrl, params).andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
+
+            return serializationSupport.deserializeParameterized(mvcResult.getResponse().getContentAsString(),
+                    PaginatedResult.class,
+                    clz);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected void doGetListError(String pathUrl, HttpStatus status, String errorCode, Object... params) {
+        try {
+            MvcResult mvcResult = doGet(pathUrl, params).andExpect(MockMvcResultMatchers.status().is(status.value())).andReturn();
+            OasisErrorHandler.ErrorObject errorObject = serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), OasisErrorHandler.ErrorObject.class);
+            Assertions.assertEquals(errorCode, errorObject.getErrorCode());
+            Assertions.assertNotNull(errorObject.getTimestamp());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected void doGetError(String pathUrl, HttpStatus status, String errorCode) {
+        try {
+            MvcResult mvcResult = doGet(pathUrl).andExpect(MockMvcResultMatchers.status().is(status.value())).andReturn();
+            OasisErrorHandler.ErrorObject errorObject = serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), OasisErrorHandler.ErrorObject.class);
+            if (errorCode != null) {
+                Assertions.assertEquals(errorCode, errorObject.getErrorCode());
+            }
+            Assertions.assertNotNull(errorObject.getTimestamp());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected void doDeletetError(String pathUrl, HttpStatus status, String errorCode) {
+        try {
+            MvcResult mvcResult = doDelete(pathUrl).andExpect(MockMvcResultMatchers.status().is(status.value())).andReturn();
+            OasisErrorHandler.ErrorObject errorObject = serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), OasisErrorHandler.ErrorObject.class);
+            Assertions.assertEquals(errorCode, errorObject.getErrorCode());
+            Assertions.assertNotNull(errorObject.getTimestamp());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected void doPostError(String pathUrl, Object body, HttpStatus status, String errorCode) {
+        try {
+            MvcResult mvcResult = doPost(pathUrl, body).andExpect(MockMvcResultMatchers.status().is(status.value())).andReturn();
+            OasisErrorHandler.ErrorObject errorObject = serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), OasisErrorHandler.ErrorObject.class);
+            Assertions.assertEquals(errorCode, errorObject.getErrorCode());
+            Assertions.assertNotNull(errorObject.getTimestamp());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected void doPutError(String pathUrl, Object body, HttpStatus status, String errorCode) {
+        try {
+            MvcResult mvcResult = doPut(pathUrl, body).andExpect(MockMvcResultMatchers.status().is(status.value())).andReturn();
+            if (errorCode != null) {
+                OasisErrorHandler.ErrorObject errorObject = serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), OasisErrorHandler.ErrorObject.class);
+                Assertions.assertEquals(errorCode, errorObject.getErrorCode());
+                Assertions.assertNotNull(errorObject.getTimestamp());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected void doPatchError(String pathUrl, Object body, HttpStatus status, String errorCode) {
+        try {
+            MvcResult mvcResult = doPatch(pathUrl, body).andExpect(MockMvcResultMatchers.status().is(status.value())).andReturn();
+            OasisErrorHandler.ErrorObject errorObject = serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), OasisErrorHandler.ErrorObject.class);
+            Assertions.assertEquals(errorCode, errorObject.getErrorCode());
+            Assertions.assertNotNull(errorObject.getTimestamp());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected <T> T doPostSuccess(String pathUrl, Object body, Class<T> clz) {
+        try {
+            MvcResult mvcResult = doPost(pathUrl, body).andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
+            if (clz != null) {
+                return serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), clz);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected <T> T doPutSuccess(String pathUrl, Object body, Class<T> clz) {
+        try {
+            MvcResult mvcResult = doPut(pathUrl, body).andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
+            if (clz != null) {
+                return serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), clz);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    protected <T> T doPatchSuccess(String pathUrl, Object body, Class<T> clz) {
+        try {
+            MvcResult mvcResult = doPatch(pathUrl, body).andExpect(MockMvcResultMatchers.status().is2xxSuccessful()).andReturn();
+            if (clz != null) {
+                return serializationSupport.deserialize(mvcResult.getResponse().getContentAsString(), clz);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 }

@@ -64,7 +64,7 @@ public class PointsProcessor extends AbstractProcessor<PointRule, PointSignal> {
         if (rule.isCapped()) {
             String baseKey = PointIDs.getGameUserPointsSummary(event.getGameId(), event.getUser());
             TimeOffset tcx = new TimeOffset(event.getTimestamp(), context.getUserTimeZone());
-            String childKey = PointsSink.RULE_PFX + rule.getPointId() + COLON + tcx.getByType(rule.getCapDuration());
+            String childKey = PointsSink.RULE_PFX + rule.getPointId() + COLON + "X" + tcx.getByType(rule.getCapDuration());
             BigDecimal residue = db.incrementCapped(score, baseKey, childKey, rule.getCapLimit());
             if (Numbers.isNegative(residue)) {
                 // cannot increment due to limit already exceeded. Hence skipping.

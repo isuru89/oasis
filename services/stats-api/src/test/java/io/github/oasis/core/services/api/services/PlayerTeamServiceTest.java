@@ -19,34 +19,38 @@
 
 package io.github.oasis.core.services.api.services;
 
+import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.PlayerObject;
+import io.github.oasis.core.model.PlayerWithTeams;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserGender;
-import io.github.oasis.core.services.api.beans.BackendRepository;
-import io.github.oasis.core.services.api.beans.jdbc.JdbcRepository;
-import io.github.oasis.core.services.api.controllers.admin.PlayerController;
-import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
-import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.handlers.CacheClearanceListener;
+import io.github.oasis.core.services.api.handlers.events.BasePlayerRelatedEvent;
+import io.github.oasis.core.services.api.handlers.events.EntityChangeType;
+import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
 import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
 import io.github.oasis.core.services.api.to.TeamCreateRequest;
 import io.github.oasis.core.services.api.to.TeamUpdateRequest;
-import io.github.oasis.core.services.exceptions.OasisApiException;
+import org.apache.commons.collections4.SetUtils;
 import org.assertj.core.api.Assertions;
-import org.jdbi.v3.core.Jdbi;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -54,7 +58,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class PlayerTeamServiceTest extends AbstractServiceTest {
 
-    private PlayerController controller;
+    @SpyBean
+    private CacheClearanceListener cacheClearanceListener;
+
+    private final GameCreateRequest stackOverflow = GameCreateRequest.builder()
+            .name("Stack-overflow")
+            .description("Stackoverflow badges and points system")
+            .logoRef("https://oasis.io/assets/so.jpeg")
+            .motto("Help the community")
+            .build();
+
+    private final GameCreateRequest promotions = GameCreateRequest.builder()
+            .name("Promotions")
+            .description("Provides promotions for customers based on their loyality")
+            .logoRef("https://oasis.io/assets/pm.jpeg")
+            .motto("Serve your customers")
+            .build();
 
     private final PlayerCreateRequest reqAlice = PlayerCreateRequest.builder()
             .email("alice@oasis.io")
@@ -87,199 +106,296 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void addPlayer() {
-        assertFalse(engineRepo.existsPlayer(reqAlice.getEmail()));
-        assertFalse(adminRepo.existsPlayer(reqAlice.getEmail()));
+        doGetError("/players?email=" + reqAlice.getEmail(), HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
 
-        PlayerObject addedPlayer = controller.registerPlayer(reqAlice);
+        PlayerObject addedPlayer = callPlayerAdd(reqAlice);
         System.out.println(addedPlayer);
         assertFalse(addedPlayer.getId() <= 0);
-        assertTrue(engineRepo.existsPlayer(reqAlice.getEmail()));
-        assertTrue(adminRepo.existsPlayer(reqAlice.getEmail()));
+        PlayerObject aliceInDb = doGetSuccess("/players?email=" + reqAlice.getEmail(), PlayerObject.class);
+        System.out.println(aliceInDb);
+        assertNotNull(aliceInDb);
+        assertEquals(reqAlice.getEmail(), aliceInDb.getEmail());
 
-        assertThrows(OasisApiRuntimeException.class, () -> controller.registerPlayer(reqAlice));
+        doPostError("/players", reqAlice, HttpStatus.BAD_REQUEST, ErrorCodes.PLAYER_EXISTS);
     }
 
     @Test
     void readPlayer() {
-        PlayerObject bob = controller.registerPlayer(reqBob);
+        PlayerObject bob = callPlayerAdd(reqBob);
         System.out.println(bob);
         assertPlayerWithAnother(bob, reqBob);
 
-        PlayerObject bobById = controller.readPlayerProfile(bob.getId());
+        PlayerObject bobById = doGetSuccess("/players/" + bob.getId(), PlayerObject.class);
         System.out.println(bobById);
         assertPlayerWithAnother(bobById, reqBob);
 
-        PlayerObject nonExistencePlayer = controller.readPlayerProfile(Long.MAX_VALUE);
-        assertNull(nonExistencePlayer);
+        doGetError("/players/" + (Long.MAX_VALUE-1), HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
 
-        PlayerObject bobByEmail = controller.readPlayerProfileByEmail(bob.getEmail());
+        PlayerObject bobByEmail = doGetSuccess("/players?email=" + bob.getEmail(), PlayerObject.class);
         assertPlayerWithAnother(bobByEmail, bobById);
     }
 
     @Test
-    void updatePlayer() {
-        PlayerObject alice = controller.registerPlayer(reqAlice);
+    void readPlayerWithTeams() {
+        Integer gameId1 = callAddGame(stackOverflow).getId();
+        Integer gameId2 = callAddGame(promotions).getId();
+        PlayerObject bob = callPlayerAdd(reqBob);
+        System.out.println(bob);
+        assertPlayerWithAnother(bob, reqBob);
 
-        assertTrue(adminRepo.existsPlayer(reqAlice.getEmail()));
-        assertTrue(engineRepo.existsPlayer(reqAlice.getEmail()));
+        PlayerWithTeams playerObject = doGetSuccess("/players?verbose=true&email=" + bob.getEmail(), PlayerWithTeams.class);
+        Assertions.assertThat(playerObject.getTeams()).isEmpty();
+
+        TeamObject renegades = callTeamAdd(teamRenegades);
+        TeamObject warriors = callTeamAdd(teamWarriors);
+
+        callAddPlayerToTeam(bob.getId(), gameId1, renegades.getId());
+        callAddPlayerToTeam(bob.getId(), gameId2, warriors.getId());
+
+        PlayerWithTeams bobPlayer = doGetSuccess("/players?verbose=true&email=" + bob.getEmail(), PlayerWithTeams.class);
+        List<TeamObject> teams = bobPlayer.getTeams();
+        Assertions.assertThat(teams).hasSize(2);
+
+        TeamObject renegadesInDb = teams.stream().filter(t -> t.getName().equals(renegades.getName())).findFirst().orElseThrow();
+        assertTeamWithAnother(renegadesInDb, teamRenegades);
+        TeamObject warriorsInDb = teams.stream().filter(t -> t.getName().equals(warriors.getName())).findFirst().orElseThrow();
+        assertTeamWithAnother(warriorsInDb, teamWarriors);
+
+        doGetError("/players?verbose=true&email=nonexist@oasis.io", HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+    }
+
+    @Test
+    void updatePlayer() {
+        PlayerObject alice = callPlayerAdd(reqAlice);
+
+        assertNotNull(doGetSuccess("/players?verbose=true&email=" + reqAlice.getEmail(), PlayerWithTeams.class));
 
         PlayerUpdateRequest toUpdateAlice = PlayerUpdateRequest.builder()
                 .displayName("new alice name")
                 .avatarRef("https://oasis.io/assets/alice_new.jpg")
                 .build();
 
-        PlayerObject aliceUpdated = controller.updatePlayer(alice.getId(), toUpdateAlice);
+        Mockito.reset(cacheClearanceListener);
+        PlayerObject aliceUpdated = callPlayerUpdate(alice.getId(), toUpdateAlice);
+        assertOnceCacheClearanceCalled(aliceUpdated.getEmail(), EntityChangeType.MODIFIED);
+
         assertEquals(toUpdateAlice.getDisplayName(), aliceUpdated.getDisplayName());
         assertEquals(toUpdateAlice.getAvatarRef(), aliceUpdated.getAvatarRef());
         assertEquals(alice.getGender(), aliceUpdated.getGender());
-
-        {
-            PlayerObject engineAlice = engineRepo.readPlayer(reqAlice.getEmail());
-            assertPlayerWithAnother(engineAlice, aliceUpdated);
-        }
     }
 
     @Test
     void deactivatePlayer() {
-        PlayerObject bob = controller.registerPlayer(reqBob);
+        PlayerObject bob = callPlayerAdd(reqBob);
         System.out.println(bob);
         assertPlayerWithAnother(bob, reqBob);
 
-        assertTrue(adminRepo.existsPlayer(bob.getId()));
-        assertTrue(engineRepo.existsPlayer(bob.getId()));
-
-        PlayerObject deletedPlayer = controller.deactivatePlayer(bob.getId());
+        PlayerObject deletedPlayer = callPlayerDelete(bob.getId());
+        assertOnceCacheClearanceCalled(deletedPlayer.getEmail(), EntityChangeType.REMOVED);
         assertPlayerWithAnother(bob, deletedPlayer);
 
-        assertFalse(combinedRepo.existsPlayer(bob.getId()));
-        assertFalse(engineRepo.existsPlayer(bob.getId()));
-        assertFalse(engineRepo.existsPlayer(bob.getEmail()));
-        assertTrue(adminRepo.existsPlayer(bob.getId()));
-        assertTrue(adminRepo.existsPlayer(bob.getEmail()));
+        // delete already deleted player
+        Mockito.reset(cacheClearanceListener);
+        doDeletetError("/players/" + bob.getId(), HttpStatus.BAD_REQUEST, ErrorCodes.PLAYER_IS_DEACTIVATED);
+        assertNeverCacheClearanceCalled();
+
+        // delete non-existing player
+        Mockito.reset(cacheClearanceListener);
+        doDeletetError("/players/9999999", HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
+    }
+
+    @Test
+    void reactivatePlayer() {
+        PlayerObject bob = callPlayerAdd(reqBob);
+        System.out.println(bob);
+        assertPlayerWithAnother(bob, reqBob);
+
+        PlayerObject deletedPlayer = callPlayerDelete(bob.getId());
+        assertOnceCacheClearanceCalled(deletedPlayer.getEmail(), EntityChangeType.REMOVED);
+        assertPlayerWithAnother(bob, deletedPlayer);
+
+        // delete already deleted player
+        Mockito.reset(cacheClearanceListener);
+        doDeletetError("/players/" + bob.getId(), HttpStatus.BAD_REQUEST, ErrorCodes.PLAYER_IS_DEACTIVATED);
+        assertNeverCacheClearanceCalled();
+
+        {
+            PlayerObject playerObject = doGetSuccess("/players/" + bob.getId(), PlayerObject.class);
+            org.junit.jupiter.api.Assertions.assertFalse(playerObject.isActive());
+        }
+
+        PlayerUpdateRequest updateRequest = PlayerUpdateRequest.builder()
+                .isActive(true)
+                .build();
+        callPlayerUpdate(bob.getId(), updateRequest);
+
+        {
+            PlayerObject playerObject = doGetSuccess("/players/" + bob.getId(), PlayerObject.class);
+            org.junit.jupiter.api.Assertions.assertTrue(playerObject.isActive());
+        }
+
     }
 
     @Test
     void addTeam() {
-        assertFalse(adminRepo.existsTeam(teamWarriors.getName()));
-        assertFalse(engineRepo.existsTeam(teamWarriors.getName()));
-
-        TeamObject warriors = controller.addTeam(teamWarriors);
+        TeamObject warriors = callTeamAdd(teamWarriors);
         System.out.println(warriors);
 
-        TeamObject renegades = controller.addTeam(teamRenegades);
+        TeamObject renegades = callTeamAdd(teamRenegades);
         System.out.println(renegades);
 
-        assertTrue(adminRepo.existsTeam(teamWarriors.getName()));
-        assertTrue(engineRepo.existsTeam(teamWarriors.getName()));
-        assertTrue(adminRepo.existsTeam(warriors.getId()));
-        assertTrue(engineRepo.existsTeam(warriors.getId()));
+        assertTeamWithAnother(doGetSuccess("/teams/" + warriors.getId(), TeamObject.class), teamWarriors);
+        assertTeamWithAnother(doGetSuccess("/teams/" + renegades.getId(), TeamObject.class), teamRenegades);
 
-        assertThrows(OasisApiRuntimeException.class, () -> controller.addTeam(teamWarriors));
+        doPostError("/teams", teamWarriors, HttpStatus.BAD_REQUEST, ErrorCodes.TEAM_EXISTS);
     }
 
     @Test
-    void readTeam() throws OasisApiException {
-        TeamObject warriors = controller.addTeam(teamWarriors);
+    void readTeam() {
+        TeamObject warriors = callTeamAdd(teamWarriors);
         System.out.println(warriors);
         assertTeamWithAnother(warriors, teamWarriors);
 
         {
             // by name
-            TeamObject readWarriors = controller.readTeamInfoByName(teamWarriors.getName());
+            TeamObject readWarriors = doGetSuccess("/teams?name=" + teamWarriors.getName(), TeamObject.class);
             assertTeamWithAnother(readWarriors, teamWarriors);
         }
         {
             // by id
-            TeamObject readWarriors = controller.readTeamInfo(warriors.getId());
+            TeamObject readWarriors = doGetSuccess("/teams/" + warriors.getId(), TeamObject.class);
             assertTeamWithAnother(readWarriors, teamWarriors);
         }
 
-        Assertions.assertThatThrownBy(() -> controller.readTeamInfoByName("Non existing team"))
-                .isInstanceOf(OasisApiException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.TEAM_NOT_EXISTS)
-                .hasFieldOrPropertyWithValue("statusCode", HttpStatus.NOT_FOUND.value());
-        Assertions.assertThatThrownBy(() -> controller.readTeamInfo(999999))
-                .isInstanceOf(OasisApiException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.TEAM_NOT_EXISTS)
-                .hasFieldOrPropertyWithValue("statusCode", HttpStatus.NOT_FOUND.value());
+        doGetError("/teams?name=nonexistingteamname", HttpStatus.NOT_FOUND, ErrorCodes.TEAM_NOT_EXISTS);
+        doGetError("/teams/999999", HttpStatus.NOT_FOUND, ErrorCodes.TEAM_NOT_EXISTS);
     }
 
     @Test
     void updateTeam() {
-        TeamObject renegades = controller.addTeam(teamRenegades);
+        TeamObject renegades = callTeamAdd(teamRenegades);
         System.out.println(renegades);
 
         TeamUpdateRequest toBeUpdatedTeam = TeamUpdateRequest.builder()
                 .colorCode("#00ff00")
                 .avatarRef("https://oasis.io/assets/new_rr.jpeg")
                 .build();
-        TeamObject updatedTeam = controller.updateTeam(renegades.getId(), toBeUpdatedTeam);
+        TeamObject updatedTeam = callTeamUpdate(renegades.getId(), toBeUpdatedTeam);
         System.out.println(updatedTeam);
         assertTeamWithAnother(updatedTeam, toBeUpdatedTeam, renegades);
     }
 
     @Test
     void addPlayerToTeam() {
-        PlayerObject alice = controller.registerPlayer(reqAlice);
+        Integer gameId1 = callAddGame(stackOverflow).getId();
+        Integer gameId2 = callAddGame(promotions).getId();
+        PlayerObject alice = callPlayerAdd(reqAlice);
 
-        TeamObject renegades = controller.addTeam(teamRenegades);
-        TeamObject warriors = controller.addTeam(teamWarriors);
+        TeamObject renegades = callTeamAdd(teamRenegades);
+        TeamObject warriors = callTeamAdd(teamWarriors);
 
-        controller.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId()));
-        controller.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 101, warriors.getId()));
+        Mockito.reset(cacheClearanceListener);
+        callAddPlayerToTeam(alice.getId(), gameId1, renegades.getId());
+        assertOnceCacheClearanceCalled(alice.getEmail(), EntityChangeType.MODIFIED);
 
-        System.out.println(controller.browsePlayerTeams(alice.getId()));
+        callAddPlayerToTeam(alice.getId(), gameId2, warriors.getId());
+
+        List<TeamObject> teamObjects = doGetListSuccess("/players/" + alice.getId() + "/teams", TeamObject.class);
+        Assertions.assertThat(teamObjects).hasSize(2);
 
         // can't add same user in multiple teams of same game
-        Assertions.assertThatThrownBy(
-                () -> controller.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId())))
-            .isInstanceOf(OasisApiRuntimeException.class)
-            .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.PLAYER_ALREADY_IN_TEAM);
+        Mockito.reset(cacheClearanceListener);
+        doPostError("/players/" + alice.getId() + "/teams",
+                PlayerGameAssociationRequest.builder().gameId(gameId1).teamId(renegades.getId()).userId(alice.getId()).build(),
+                HttpStatus.BAD_REQUEST,
+                ErrorCodes.PLAYER_ALREADY_IN_TEAM);
+        assertNeverCacheClearanceCalled();
+    }
+
+    @Test
+    void addPlayerToTeamFailures() {
+        Integer gameId = callAddGame(stackOverflow).getId();
+        PlayerObject alice = callPlayerAdd(reqAlice);
+        TeamObject renegades = callTeamAdd(teamRenegades);
+
+        callAddPlayerToTeam(alice.getId(), gameId, renegades.getId());
+
+        // can't add non-existing user
+        Mockito.reset(cacheClearanceListener);
+        doPostError("/players/999999/teams",
+                PlayerGameAssociationRequest.builder().gameId(gameId).teamId(renegades.getId()).userId(999999L).build(),
+                HttpStatus.NOT_FOUND,
+                ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
+
+        // can't add non-existing team
+        Mockito.reset(cacheClearanceListener);
+        doPostError("/players/" + alice.getId() + "/teams",
+                PlayerGameAssociationRequest.builder().gameId(gameId).teamId(999999).userId(alice.getId()).build(),
+                HttpStatus.NOT_FOUND,
+                ErrorCodes.TEAM_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
+
+        // can't add non-existing game
+        Mockito.reset(cacheClearanceListener);
+        doPostError("/players/" + alice.getId() + "/teams",
+                PlayerGameAssociationRequest.builder().gameId(999999).teamId(renegades.getId()).userId(alice.getId()).build(),
+                HttpStatus.NOT_FOUND,
+                ErrorCodes.GAME_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
     }
 
     @Test
     void addPlayersToTeam() {
-        TeamObject warriors = controller.addTeam(teamWarriors);
+        TeamObject warriors = callTeamAdd(teamWarriors);
 
-        PlayerObject bob = controller.registerPlayer(reqBob);
-        PlayerObject alice = controller.registerPlayer(reqAlice);
-        PlayerObject candy = controller.registerPlayer(reqAlice.toBuilder()
+        PlayerObject bob = callPlayerAdd(reqBob);
+        PlayerObject alice = callPlayerAdd(reqAlice);
+        PlayerObject candy = callPlayerAdd(reqAlice.toBuilder()
                                 .displayName("Candy").email("candy@oasis.io")
                                 .avatarRef("https://oasis.io/assets/cnd.png")
                                 .build());
 
-        controller.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        Mockito.reset(cacheClearanceListener);
+        callAddPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        assertNTimesCacheClearanceCalled(2, EntityChangeType.MODIFIED, Set.of(bob.getEmail(), alice.getEmail()));
 
-        // if one user failed, other status will depend on order
-        Assertions.assertThatThrownBy(() -> controller.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), candy.getId())))
-                .isInstanceOf(OasisApiRuntimeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.PLAYER_ALREADY_IN_TEAM);
-        assertEquals(0, controller.browsePlayerTeams(candy.getId()).size());
+        List<PlayerObject> playerObjects = doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class);
+        Assertions.assertThat(playerObjects).hasSize(2);
+
+        // if one user failed, all should fail
+        Mockito.reset(cacheClearanceListener);
+        doPostError("/teams/" + warriors.getId() + "/players?playerIds=" + join(List.of(bob.getId(), candy.getId())), null,
+                HttpStatus.BAD_REQUEST,
+                ErrorCodes.PLAYER_ALREADY_IN_TEAM);
+        assertEquals(0, doGetListSuccess("/players/" + candy.getId() + "/teams", TeamObject.class).size());
+        assertNeverCacheClearanceCalled();
 
         // candy first in order
-        Assertions.assertThatThrownBy(() -> controller.addPlayersToTeam(warriors.getId(), List.of(candy.getId(), bob.getId())))
-                .isInstanceOf(OasisApiRuntimeException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCodes.PLAYER_ALREADY_IN_TEAM);
-        assertEquals(1, controller.browsePlayerTeams(candy.getId()).size());
+        doPostError("/teams/" + warriors.getId() + "/players?playerIds=" + join(List.of(candy.getId(), bob.getId())), null,
+                HttpStatus.BAD_REQUEST,
+                ErrorCodes.PLAYER_ALREADY_IN_TEAM);
+        assertEquals(0, doGetListSuccess("/players/" + candy.getId() + "/teams", TeamObject.class).size());
     }
-
 
     @Test
     void getTeamsOfPlayer() {
-        TeamObject warriors = controller.addTeam(teamWarriors);
-        TeamObject renegades = controller.addTeam(teamRenegades);
+        Integer gameId = callAddGame(stackOverflow).getId();
+        TeamObject warriors = callTeamAdd(teamWarriors);
+        TeamObject renegades = callTeamAdd(teamRenegades);
 
-        PlayerObject bob = controller.registerPlayer(reqBob);
-        PlayerObject alice = controller.registerPlayer(reqAlice);
+        PlayerObject bob = callPlayerAdd(reqBob);
+        PlayerObject alice = callPlayerAdd(reqAlice);
 
-        controller.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
-        controller.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId()));
+        callAddPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        callAddPlayerToTeam(alice.getId(), gameId, renegades.getId());
 
-        List<TeamObject> bobTeams = controller.browsePlayerTeams(bob.getId());
+        List<TeamObject> bobTeams = doGetListSuccess("/players/" + bob.getId() + "/teams", TeamObject.class);
         assertEquals(1, bobTeams.size());
         assertEquals(warriors.getName(), bobTeams.get(0).getName());
 
-        List<TeamObject> aliceTeams = controller.browsePlayerTeams(alice.getId());
+        List<TeamObject> aliceTeams = doGetListSuccess("/players/" + alice.getId() + "/teams", TeamObject.class);
         assertEquals(2, aliceTeams.size());
         assertTrue(aliceTeams.stream().anyMatch(t -> t.getName().equals(warriors.getName())));
         assertTrue(aliceTeams.stream().anyMatch(t -> t.getName().equals(renegades.getName())));
@@ -288,16 +404,17 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void listAllUsersInTeam() {
-        TeamObject warriors = controller.addTeam(teamWarriors);
-        TeamObject renegades = controller.addTeam(teamRenegades);
+        Integer gameId = callAddGame(stackOverflow).getId();
+        TeamObject warriors = callTeamAdd(teamWarriors);
+        TeamObject renegades = callTeamAdd(teamRenegades);
 
-        PlayerObject bob = controller.registerPlayer(reqBob);
-        PlayerObject alice = controller.registerPlayer(reqAlice);
+        PlayerObject bob = callPlayerAdd(reqBob);
+        PlayerObject alice = callPlayerAdd(reqAlice);
 
-        controller.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
-        controller.addPlayerToTeam(alice.getId(), new PlayerGameAssociationRequest(alice.getId(), 100, renegades.getId()));
+        callAddPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        callAddPlayerToTeam(alice.getId(), gameId, renegades.getId());
 
-        List<PlayerObject> playersInWarriors = controller.browsePlayers(warriors.getId());
+        List<PlayerObject> playersInWarriors = doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class);
         assertEquals(2, playersInWarriors.size());
         assertTrue(playersInWarriors.stream().anyMatch(p -> p.getEmail().equals(bob.getEmail())));
         assertTrue(playersInWarriors.stream().anyMatch(p -> p.getEmail().equals(alice.getEmail())));
@@ -305,49 +422,106 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
     @Test
     void removePlayerFromTeam() {
-        TeamObject warriors = controller.addTeam(teamWarriors);
+        Integer gameId = callAddGame(stackOverflow).getId();
+        TeamObject warriors = callTeamAdd(teamWarriors);
 
-        PlayerObject bob = controller.registerPlayer(reqBob);
-        PlayerObject alice = controller.registerPlayer(reqAlice);
+        PlayerObject bob = callPlayerAdd(reqBob);
+        PlayerObject alice = callPlayerAdd(reqAlice);
 
-        controller.addPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
+        callAddPlayersToTeam(warriors.getId(), List.of(bob.getId(), alice.getId()));
 
-        assertEquals(2, controller.browsePlayers(warriors.getId()).size());
-        assertEquals(1, controller.browsePlayerTeams(bob.getId()).size());
+        assertEquals(2, doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class).size());
+        assertEquals(1, doGetListSuccess("/players/" + bob.getId() + "/teams", TeamObject.class).size());
 
-        controller.removePlayerFromTeam(bob.getId(), warriors.getId());
+        Mockito.reset(cacheClearanceListener);
+        doDeleteSuccess("/teams/" + warriors.getId() + "/players/" + bob.getId(), null);
+        assertOnceCacheClearanceCalled(bob.getEmail(), EntityChangeType.MODIFIED);
 
-        assertEquals(1, controller.browsePlayers(warriors.getId()).size());
-        assertEquals(0, controller.browsePlayerTeams(bob.getId()).size());
+        assertEquals(1, doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class).size());
+        assertEquals(0, doGetListSuccess("/players/" + bob.getId() + "/teams", TeamObject.class).size());
+
+        // ability to add again
+        Mockito.reset(cacheClearanceListener);
+        callAddPlayerToTeam(bob.getId(), gameId, warriors.getId());
+        assertOnceCacheClearanceCalled(bob.getEmail(), EntityChangeType.MODIFIED);
+
+        assertEquals(2, doGetListSuccess("/teams/" + warriors.getId() + "/players", PlayerObject.class).size());
+        assertEquals(1, doGetListSuccess("/players/" + bob.getId() + "/teams", TeamObject.class).size());
     }
 
     @Test
-    void searchTeam() throws OasisApiException {
-        controller.addTeam(teamWarriors);
-        controller.addTeam(teamWarriors.toBuilder().name("wuh war").build());
-        controller.addTeam(teamWarriors.toBuilder().name("toronto tiq").build());
-        controller.addTeam(teamWarriors.toBuilder().name("WUHAN WAR").build());
-        controller.addTeam(teamWarriors.toBuilder().name("la liga").build());
+    void removePlayerFromTeamFailures() {
+        Integer gameId = callAddGame(stackOverflow).getId();
+        PlayerObject alice = callPlayerAdd(reqAlice);
+        TeamObject renegades = callTeamAdd(teamRenegades);
 
-        PaginatedResult<TeamMetadata> wuhResults = controller.searchTeams("wuh", "0", 5);
+        callAddPlayerToTeam(alice.getId(), gameId, renegades.getId());
+
+        // can't remove non-existing user
+        Mockito.reset(cacheClearanceListener);
+        doDeletetError("/teams/" + renegades.getId() + "/players/999999",
+                HttpStatus.NOT_FOUND,
+                ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
+
+        // can't remove from non-existing team
+        Mockito.reset(cacheClearanceListener);
+        doDeletetError("/teams/9999999/players/" + alice.getId(),
+                HttpStatus.NOT_FOUND,
+                ErrorCodes.TEAM_NOT_EXISTS);
+        assertNeverCacheClearanceCalled();
+    }
+
+    @Test
+    void searchTeam() {
+        callTeamAdd(teamWarriors);
+        callTeamAdd(teamWarriors.toBuilder().name("wuh war").build());
+        callTeamAdd(teamWarriors.toBuilder().name("toronto tiq").build());
+        callTeamAdd(teamWarriors.toBuilder().name("WUHAN WAR").build());
+        callTeamAdd(teamWarriors.toBuilder().name("la liga").build());
+
+        PaginatedResult<TeamMetadata> wuhResults = doGetPaginatedSuccess("/teams/search?name=wu&offset=0&pageSize=5", TeamMetadata.class);
         assertEquals(3, wuhResults.getRecords().size());
-        assertEquals(2, controller.searchTeams("wuh", "1", 5).getRecords().size());
-        assertEquals(0, controller.searchTeams("wuh", "4", 1).getRecords().size());
-        assertEquals(1, controller.searchTeams("wuh", "0", 1).getRecords().size());
+        assertEquals(2, doGetPaginatedSuccess("/teams/search?name=wuh&offset=1&pageSize=5", TeamMetadata.class).getRecords().size());
+        assertEquals(0, doGetPaginatedSuccess("/teams/search?name=wuh&offset=4&pageSize=1", TeamMetadata.class).getRecords().size());
+        assertEquals(1, doGetPaginatedSuccess("/teams/search?name=wuh&offset=0&pageSize=1", TeamMetadata.class).getRecords().size());
     }
 
-    @Override
-    protected JdbcRepository createJdbcRepository(Jdbi jdbi) {
-        return new JdbcRepository(null,
-                null,
-                null,
-                jdbi.onDemand(IPlayerTeamDao.class),
-                serializationSupport);
+    private PlayerObject callPlayerAdd(PlayerCreateRequest request) {
+        return doPostSuccess("/players", request, PlayerObject.class);
     }
 
-    @Override
-    protected void createServices(BackendRepository backendRepository) {
-        controller = new PlayerController(new PlayerTeamService(backendRepository));
+    private TeamObject callTeamAdd(TeamCreateRequest request) {
+        return doPostSuccess("/teams", request, TeamObject.class);
+    }
+
+    private PlayerObject callPlayerUpdate(long playerId, PlayerUpdateRequest request) {
+        return doPatchSuccess("/players/" + playerId, request, PlayerObject.class);
+    }
+
+    private PlayerObject callPlayerDelete(long playerId) {
+        return doDeleteSuccess("/players/" + playerId, PlayerObject.class);
+    }
+
+    private void callAddPlayerToTeam(long playerId, int gameId, int teamId) {
+        doPostSuccess("/players/" + playerId + "/teams", PlayerGameAssociationRequest.builder()
+                .teamId(teamId).gameId(gameId).userId(playerId).build(), null);
+    }
+
+    private void callAddPlayersToTeam(int teamId, List<Long> playerIds) {
+        doPostSuccess("/teams/" + teamId + "/players?playerIds=" + join(playerIds), null, null);
+    }
+
+    private TeamObject callTeamUpdate(int teamId, TeamUpdateRequest request) {
+        return doPatchSuccess("/teams/" + teamId, request, TeamObject.class);
+    }
+
+    private Game callAddGame(GameCreateRequest request) {
+        return doPostSuccess("/games", request, Game.class);
+    }
+
+    private String join(List<Long> ids) {
+        return ids.stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 
     private void assertPlayerWithAnother(PlayerObject player, PlayerCreateRequest request) {
@@ -394,5 +568,37 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         assertTrue(dbTeam.getCreatedAt() > 0);
         assertTrue(dbTeam.getUpdatedAt() > 0);
         assertTrue(dbTeam.isActive());
+    }
+
+    private void assertNTimesCacheClearanceCalled(int n, EntityChangeType changeType, Set<String> emails) {
+        ArgumentCaptor<BasePlayerRelatedEvent> captor = ArgumentCaptor.forClass(BasePlayerRelatedEvent.class);
+
+        Mockito.verify(cacheClearanceListener, Mockito.times(n))
+                .handlePlayerUpdateEvent(captor.capture());
+
+        List<BasePlayerRelatedEvent> allValues = captor.getAllValues();
+        allValues.forEach(v -> {
+            org.junit.jupiter.api.Assertions.assertEquals(changeType, v.getChangeType());
+        });
+        Set<String> collectedEmails = allValues.stream().map(BasePlayerRelatedEvent::getEmail).collect(Collectors.toSet());
+        org.junit.jupiter.api.Assertions.assertTrue(SetUtils.isEqualSet(emails, collectedEmails));
+        Mockito.reset(cacheClearanceListener);
+    }
+
+    private void assertOnceCacheClearanceCalled(String email, EntityChangeType changeType) {
+        ArgumentCaptor<BasePlayerRelatedEvent> captor = ArgumentCaptor.forClass(BasePlayerRelatedEvent.class);
+
+        Mockito.verify(cacheClearanceListener, Mockito.times(1))
+                .handlePlayerUpdateEvent(captor.capture());
+
+        org.junit.jupiter.api.Assertions.assertEquals(email, captor.getValue().getEmail());
+        assertEquals(changeType, captor.getValue().getChangeType());
+        Mockito.reset(cacheClearanceListener);
+    }
+
+    private void assertNeverCacheClearanceCalled() {
+        Mockito.verify(cacheClearanceListener, Mockito.never())
+                .handlePlayerUpdateEvent(Mockito.any(BasePlayerRelatedEvent.class));
+        Mockito.reset(cacheClearanceListener);
     }
 }

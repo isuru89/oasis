@@ -25,27 +25,27 @@ package io.github.oasis.elements.challenges;
 public final class ChallengeIDs {
 
     public static String getGameUseChallengesSummary(int gameId, long userId) {
-        return String.format("g%d:u%d:challenges", gameId, userId);
+        return String.format("{g%d}:u%d:challenges", gameId, userId);
     }
 
     public static String getGameUseChallengesLog(int gameId, long userId) {
-        return String.format("g%d:u%d:challengeslog", gameId, userId);
+        return String.format("{g%d}:u%d:challengeslog", gameId, userId);
     }
 
     public static String getGameChallengesKey(int gameId) {
-        return String.format("g%d:challenges", gameId);
+        return String.format("{g%d}:challenges", gameId);
     }
 
     public static String getGameChallengeKey(int gameId, String ruleId) {
-        return String.format("g%d:ch:%s", gameId, ruleId);
+        return String.format("{g%d}:ch:%s", gameId, ruleId);
     }
 
     public static String getGameChallengeEventsKey(int gameId, String ruleId) {
-        return String.format("g%d:challengeevents:%s", gameId, ruleId);
+        return String.format("{g%d}:challengeevents:%s", gameId, ruleId);
     }
 
     public static String getGameChallengeOOORefKey(int gameId, String ruleId) {
-        return String.format("g%d:challengeoooref:%s", gameId, ruleId);
+        return String.format("{g%d}:challengeoooref:%s", gameId, ruleId);
     }
 
     public static String getGameChallengeSubKey(String ruleId, String metaStatus) {

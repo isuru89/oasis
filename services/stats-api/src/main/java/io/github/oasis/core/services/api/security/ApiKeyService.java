@@ -69,11 +69,24 @@ public class ApiKeyService implements UserDetailsService {
 
     @PostConstruct
     public void init() {
-        String credentials = configs.get("oasis.defaultApiKey", null);
+        String credentials = configs.get("oasis.defaultApiKeys", configs.get("oasis.defaultApiKey", null));
         if (StringUtils.isNotBlank(credentials)) {
-            String[] parts = credentials.split("[:]");
-            LOG.info("Default credentials are going to be added for user {}", parts[0]);
-            dao.addNewApiKey(parts[0], parts[1], ROLE_ADMIN_FLAG + ROLE_CURATOR_FLAG + ROLE_PLAYER_FLAG);
+            String[] clients = credentials.split("[,]");
+
+            for (String client : clients) {
+                String[] parts = client.split("[:]");
+                int defaultPermissions = ROLE_ADMIN_FLAG | ROLE_CURATOR_FLAG | ROLE_PLAYER_FLAG;
+                if (parts.length > 2 && StringUtils.isNumeric(parts[2])) {
+                    defaultPermissions = Integer.parseInt(parts[2]);
+                }
+                LOG.info("Default credentials are going to be added for user {} with permissions {}", parts[0], defaultPermissions);
+                ApiKeyDto keyInDb = dao.readApiKey(parts[0]);
+                if (keyInDb == null) {
+                    dao.addNewApiKey(parts[0], parts[1], defaultPermissions);
+                } else {
+                    LOG.warn("API key already exists in db. Hence skipping.");
+                }
+            }
         }
     }
 

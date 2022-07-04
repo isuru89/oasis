@@ -11,4 +11,6 @@ class Constants {
     static final String ROUTE_BULK_EVENT_PUSH = "/api/events";
     static final String ROUTE_PING = "/ping";
 
+    static final String ROUTE_CACHE_DELETE = "/_cache/:cacheType/:cacheId";
+
 }

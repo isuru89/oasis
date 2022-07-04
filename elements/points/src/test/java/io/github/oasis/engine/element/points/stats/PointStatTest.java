@@ -20,6 +20,7 @@
 package io.github.oasis.engine.element.points.stats;
 
 import io.github.oasis.core.model.TimeScope;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.engine.element.points.stats.to.UserPointsRequest.PointRange;
 import io.github.oasis.engine.element.points.stats.to.UserPointsRequest.PointsFilterScope;
 import io.github.oasis.engine.element.points.stats.to.UserPointsRequest.ScopedTypes;
@@ -38,7 +39,7 @@ public class PointStatTest {
 
     @BeforeEach
     public void beforeEach() {
-        stats = new PointStats(null, null);
+        stats = new PointStats(new EngineDataReader(null), null);
     }
 
     @Test

@@ -1,30 +1,35 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *  * Licensed to the Apache Software Foundation (ASF) under one
+ *  * or more contributor license agreements.  See the NOTICE file
+ *  * distributed with this work for additional information
+ *  * regarding copyright ownership.  The ASF licenses this file
+ *  * to you under the Apache License, Version 2.0 (the
+ *  * "License"); you may not use this file except in compliance
+ *  * with the License.  You may obtain a copy of the License at
+ *  *
+ *  *    http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing,
+ *  * software distributed under the License is distributed on an
+ *  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  * KIND, either express or implied.  See the License for the
+ *  * specific language governing permissions and limitations
+ *  * under the License.
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ *
  */
 
-package io.github.oasis.core.services.api.services;
+package io.github.oasis.core.services.api.services.impl;
 
 import io.github.oasis.core.Game;
+import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.external.messages.GameState;
-import io.github.oasis.core.services.api.beans.BackendRepository;
+import io.github.oasis.core.services.annotations.AdminDbRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.services.IGameService;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
 import io.github.oasis.core.services.events.GameStatusChangeEvent;
@@ -46,6 +51,8 @@ import java.util.Objects;
 public class GameService extends AbstractOasisService implements IGameService {
 
     private final Map<String, GameState> availableStatuses = Map.of(
+            "create", GameState.CREATED,
+            "created", GameState.CREATED,
             "start", GameState.STARTED,
             "started", GameState.STARTED,
             "pause", GameState.PAUSED,
@@ -53,9 +60,9 @@ public class GameService extends AbstractOasisService implements IGameService {
             "stop", GameState.STOPPED,
             "stopped", GameState.STOPPED);
 
-    private final ApplicationEventPublisher publisher;
+    private ApplicationEventPublisher publisher;
 
-    public GameService(BackendRepository backendRepository, ApplicationEventPublisher eventPublisher) {
+    public GameService(@AdminDbRepository OasisRepository backendRepository, ApplicationEventPublisher eventPublisher) {
         super(backendRepository);
         this.publisher = eventPublisher;
     }
@@ -137,13 +144,13 @@ public class GameService extends AbstractOasisService implements IGameService {
     private GameState validateGameState(String status) throws OasisApiException {
         if (Objects.isNull(status)) {
             throw new OasisApiException(ErrorCodes.GAME_UNKNOWN_STATE,
-                    HttpStatus.BAD_REQUEST.value(), "Unknown game state!");
+                    HttpStatus.BAD_REQUEST.value(), "Game state cannot be null or empty!");
         }
 
         GameState gameState = availableStatuses.get(status.toLowerCase());
         if (Objects.isNull(gameState)) {
             throw new OasisApiException(ErrorCodes.GAME_UNKNOWN_STATE,
-                    HttpStatus.BAD_REQUEST.value(), "Unknown game state!");
+                    HttpStatus.BAD_REQUEST.value(), "Unknown game state for given status " + status + "!");
         }
         return gameState;
     }
@@ -161,5 +168,9 @@ public class GameService extends AbstractOasisService implements IGameService {
         } else if (Texts.isNotEmpty(game.getDescription()) && game.getDescription().length() > 255) {
             throw new DataValidationException(ErrorCodes.GAME_EXCEEDED_DESC_LEND);
         }
+    }
+
+    public void setPublisher(ApplicationEventPublisher publisher) {
+        this.publisher = publisher;
     }
 }

@@ -27,6 +27,7 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.core.services.annotations.OasisQueryService;
 import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
@@ -43,6 +44,7 @@ import io.github.oasis.elements.challenges.stats.to.UserChallengesLog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,8 +59,8 @@ public class ChallengeStats extends AbstractStatsApiService {
 
     private static final String SCRIPT_CHALLENGE_LOG = "O.CHLNGLOG";
 
-    public ChallengeStats(Db dbPool, OasisMetadataSupport contextSupport) {
-        super(dbPool, contextSupport);
+    public ChallengeStats(EngineDataReader dataReader, OasisMetadataSupport contextSupport) {
+        super(dataReader, contextSupport);
     }
 
     @OasisStatEndPoint(path = "/elements/challenges/game")
@@ -134,17 +136,16 @@ public class ChallengeStats extends AbstractStatsApiService {
             winLog.setGameId(request.getGameId());
             winLog.setUserId(request.getUserId());
 
-            String[] args = new String[] {
-                    mainKey,
-                    summaryRefKey,
+            List<Object> keys = new LinkedList<>();
+            keys.add(mainKey);
+            keys.add(summaryRefKey);
+            List<UserChallengesLog.ChallengeRecord> records = new ArrayList<>();
+            List<String> values = (List<String>) db.runScript(SCRIPT_CHALLENGE_LOG, keys,
                     String.valueOf(request.isBasedOnTimeRange() ? request.getStartTime() : request.getOffset()),
                     String.valueOf(request.isBasedOnTimeRange() ? request.getEndTime() : request.getLimit() + request.getOffset()),
                     request.isDescendingOrder() ? "rev" : "natural",
                     request.isBasedOnRanking() ? "byrank" : "bytime"
-            };
-
-            List<UserChallengesLog.ChallengeRecord> records = new ArrayList<>();
-            List<String> values = (List<String>) db.runScript(SCRIPT_CHALLENGE_LOG, 2, args);
+            );
             for (int i = 0; i < values.size(); i += 2) {
                 String[] parts = values.get(i).split(Constants.COLON);
                 long wonAt = Numbers.asLong(values.get(i + 1));

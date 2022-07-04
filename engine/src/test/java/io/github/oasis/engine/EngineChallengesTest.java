@@ -23,6 +23,7 @@ import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.elements.challenges.ChallengeIDs;
 import io.github.oasis.elements.challenges.ChallengeOverEvent;
 import io.github.oasis.elements.challenges.stats.ChallengeStats;
@@ -152,7 +153,7 @@ public class EngineChallengesTest extends OasisEngineTest {
                         "team:1", score));
 
 
-        ChallengeStats stats = new ChallengeStats(dbPool, metadataSupport);
+        ChallengeStats stats = new ChallengeStats(new EngineDataReader(dbPool), metadataSupport);
 
         compareStatReqRes("stats/challenges/user-log-req.json", UserChallengeRequest.class,
                 "stats/challenges/user-log-res.json", UserChallengesLog.class,
@@ -202,7 +203,7 @@ public class EngineChallengesTest extends OasisEngineTest {
         assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "d", "D20200324"), ofSortedEntries(U1, 300));
         assertSorted(dbPool, PointIDs.getGameLeaderboard(gameId, "d", "D20200325"), ofSortedEntries(U5, 100, U3, 200));
 
-        ChallengeStats stats = new ChallengeStats(dbPool, metadataSupport);
+        ChallengeStats stats = new ChallengeStats(new EngineDataReader(dbPool), metadataSupport);
 
         compareStatReqRes("stats/challenges/game-summary-req.json", GameChallengeRequest.class,
                 "stats/challenges/game-summary-res.json", GameChallengesSummary.class,

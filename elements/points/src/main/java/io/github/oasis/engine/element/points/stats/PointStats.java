@@ -28,6 +28,7 @@ import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.Sorted;
 import io.github.oasis.core.model.TimeScope;
 import io.github.oasis.core.services.AbstractStatsApiService;
+import io.github.oasis.core.services.EngineDataReader;
 import io.github.oasis.core.services.annotations.OasisQueryService;
 import io.github.oasis.core.services.annotations.OasisStatEndPoint;
 import io.github.oasis.core.services.annotations.QueryPayload;
@@ -73,8 +74,8 @@ public class PointStats extends AbstractStatsApiService {
     private static final String LEADERBOARD_RANK_REVERSE = "O.PLEADRANKSREV";
     private static final String WITH_CARDINALITY = "withcard";
 
-    public PointStats(Db pool, OasisMetadataSupport contextSupport) {
-        super(pool, contextSupport);
+    public PointStats(EngineDataReader dataReader, OasisMetadataSupport contextSupport) {
+        super(dataReader, contextSupport);
     }
 
     @ApiResponse(
@@ -85,7 +86,7 @@ public class PointStats extends AbstractStatsApiService {
             }
     )
     @OasisStatEndPoint(path = "/elements/points/summary")
-    public Object getUserPoints(@QueryPayload UserPointsRequest request) throws OasisApiException {
+    public UserPointSummary getUserPoints(@QueryPayload UserPointsRequest request) throws OasisApiException {
         Validators.checkPointRequest(request);
 
         try (DbContext db = getDbPool().createContext()) {
@@ -188,7 +189,7 @@ public class PointStats extends AbstractStatsApiService {
 
         try (DbContext db = getDbPool().createContext()) {
 
-            String[] keysToRead = Stream.of(TimeScope.values())
+            List<Object> keysToRead = Stream.of(TimeScope.values())
                     .map(timeScope -> {
                         String trait = timeScope.getTrait();
                         String duration = timeScope == TimeScope.ALL ? null : Timestamps.formatKey(LocalDate.parse(request.getDate()), timeScope);
@@ -197,18 +198,15 @@ public class PointStats extends AbstractStatsApiService {
                         }
                         return PointIDs.getGameLeaderboard(request.getGameId(), trait, duration);
                     })
-                    .toArray(String[]::new);
+                    .collect(Collectors.toList());
 
             UserRankingSummary summary = new UserRankingSummary();
             summary.setGameId(request.getGameId());
             summary.setUserId(request.getUserId());
 
-            String[] inputArray = new String[keysToRead.length + 2];
-            inputArray[0] = String.valueOf(request.getUserId());
-            inputArray[inputArray.length - 1] = request.isIncludeTotalCount() ? WITH_CARDINALITY : "";
-            System.arraycopy(keysToRead, 0, inputArray, 1, keysToRead.length);
+            String cardinality = request.isIncludeTotalCount() ? WITH_CARDINALITY : "";
             String scriptToRun = request.isDescendingOrder() ? LEADERBOARD_RANK_REVERSE : LEADERBOARD_RANK;
-            List<Object> values = (List<Object>) db.runScript(scriptToRun, inputArray.length - 1, inputArray);
+            List<Object> values = (List<Object>) db.runScript(scriptToRun, keysToRead, request.getUserId(), cardinality);
             for (int i = 0; i < values.size(); i += 3) {
                 Object rankVal = values.get(i);
                 if (rankVal == null) {
@@ -216,7 +214,7 @@ public class PointStats extends AbstractStatsApiService {
                 }
 
                 int keyIdx = i / 3;
-                String[] parts = keysToRead[keyIdx].split(COLON);
+                String[] parts = ((String) keysToRead.get(keyIdx)).split(COLON);
                 int rank = rankVal instanceof Number ? ((Number) rankVal).intValue() : Numbers.asInt(String.valueOf(rankVal));
                 BigDecimal score = new BigDecimal(String.valueOf(values.get(i + 1)));
                 Object totalVal = values.get(i + 2);

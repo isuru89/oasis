@@ -20,16 +20,18 @@
 package io.github.oasis.core.external;
 
 import io.github.oasis.core.utils.Texts;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
+@NoArgsConstructor
 public class PaginatedResult<T> {
 
-    private final String nextCursor;
-    private final List<T> records;
+    private String nextCursor;
+    private List<T> records;
 
     public PaginatedResult(String nextCursor, List<T> records) {
         this.nextCursor = nextCursor;

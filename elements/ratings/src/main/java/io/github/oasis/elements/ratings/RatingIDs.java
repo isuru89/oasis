@@ -25,15 +25,11 @@ package io.github.oasis.elements.ratings;
 public final class RatingIDs {
 
     public static String getGameUserRatingsLog(int gameId, long userId) {
-        return String.format("g%d:u%d:ratingslog", gameId, userId);
-    }
-
-    public static String getUserRatingsKey(int gameId, long userId, String ratingId) {
-        return String.format("u%d:g%d:rt:%s", userId, gameId, ratingId);
+        return String.format("{g%d}:u%d:ratingslog", gameId, userId);
     }
 
     public static String getGameRatingKey(int gameId, String ratingId) {
-        return String.format("g%d:rating:%s", gameId, ratingId);
+        return String.format("{g%d}:rating:%s", gameId, ratingId);
     }
 
     private RatingIDs() {}

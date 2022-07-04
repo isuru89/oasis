@@ -23,9 +23,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
+import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.parser.GameParserYaml;
 import io.github.oasis.core.services.api.to.ElementCreateRequest;
 
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,5 +71,28 @@ public class TestUtils {
                 .filter(req -> req.getMetadata().getId().equals(id))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Given rule id not found!"));
     }
+
+    public static void cleanRedisData(Db dbPool) throws IOException {
+        try (DbContext db = dbPool.createContext()) {
+            db.allKeys("*").forEach(db::removeKey);
+        }
+    }
+
+
+    public static void truncateData(DataSource ds) throws SQLException {
+        try (Connection connection = ds.getConnection()) {
+            connection.createStatement().execute("TRUNCATE TABLE OA_PLAYER");
+            connection.createStatement().execute("TRUNCATE TABLE OA_TEAM");
+            connection.createStatement().execute("TRUNCATE TABLE OA_PLAYER_TEAM");
+            connection.createStatement().execute("TRUNCATE TABLE OA_ELEMENT");
+            connection.createStatement().execute("TRUNCATE TABLE OA_ELEMENT_DATA");
+            connection.createStatement().execute("TRUNCATE TABLE OA_ATTRIBUTE_DEF");
+            connection.createStatement().execute("TRUNCATE TABLE OA_GAME");
+            connection.createStatement().execute("TRUNCATE TABLE OA_EVENT_SOURCE");
+            connection.createStatement().execute("TRUNCATE TABLE OA_EVENT_SOURCE_KEY");
+            connection.createStatement().execute("TRUNCATE TABLE OA_EVENT_SOURCE_GAME");
+        }
+    }
+
 
 }

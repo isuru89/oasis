@@ -25,39 +25,39 @@ package io.github.oasis.elements.badges;
 public final class BadgeIDs {
 
     public static String getGameRuleWiseBadgeLogKey(int gameId, String badgeId) {
-        return String.format("g%d:%s:badgelog", gameId, badgeId);
+        return String.format("{g%d}:%s:badgelog", gameId, badgeId);
     }
 
     public static String getGameUserBadgesSummary(int gameId, long userId) {
-        return String.format("g%d:u%d:badges", gameId, userId);
+        return String.format("{g%d}:u%d:badges", gameId, userId);
     }
 
     public static String getGameUserBadgesLog(int gameId, long userId) {
-        return String.format("g%d:u%d:badgeslog", gameId, userId);
+        return String.format("{g%d}:u%d:badgeslog", gameId, userId);
     }
 
     public static String getUserFirstEventsKey(int gameId, long userId) {
-        return String.format("u%d:g%d:firstevents", userId, gameId);
+        return String.format("u%d:{g%d}:firstevents", userId, gameId);
     }
 
     public static String getBadgeHistogramKey(int gameId, long userId, String badgeId) {
-        return String.format("u%d:g%d:badges:h:%s", userId, gameId, badgeId);
+        return String.format("u%d:{g%d}:badges:h:%s", userId, gameId, badgeId);
     }
 
     public static String getUserBadgeSpecKey(int gameId, long userId, String badgeId) {
-        return String.format("u%d:g%d:badges:%s", userId, gameId, badgeId);
+        return String.format("u%d:{g%d}:badges:%s", userId, gameId, badgeId);
     }
 
     public static String getUserBadgeStreakKey(int gameId, long userId, String badgeId) {
-        return String.format("u%d:g%d:%s:streak", userId, gameId, badgeId);
+        return String.format("u%d:{g%d}:%s:streak", userId, gameId, badgeId);
     }
 
     public static String getUserTemporalBadgeKey(int gameId, long userId, String badgeId) {
-        return String.format("u%d:g%d:%s:temporal", userId, gameId, badgeId);
+        return String.format("u%d:{g%d}:%s:temporal", userId, gameId, badgeId);
     }
 
     public static String getUserBadgesMetaKey(int gameId, long userId) {
-        return String.format("u%d:g%d:bgmeta", userId, gameId);
+        return String.format("u%d:{g%d}:bgmeta", userId, gameId);
     }
 
 

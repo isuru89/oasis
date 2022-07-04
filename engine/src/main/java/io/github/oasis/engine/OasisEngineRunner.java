@@ -52,7 +52,7 @@ public class OasisEngineRunner {
 
         discoverElements(builder);
 
-        Db dbPool = RedisDb.create(configs);
+        Db dbPool = RedisDb.create(configs, "oasis.redis");
         dbPool.init();
         builder.withDb(dbPool);
 

@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Basic interface to interact with engine database.
+ *
  * @author Isuru Weerarathna
  */
 public interface DbContext extends Closeable {
@@ -34,12 +36,8 @@ public interface DbContext extends Closeable {
     Set<String> allKeys(String pattern);
     void removeKey(String key);
 
-    BigDecimal incrementScoreInSorted(String contextKey, String member, BigDecimal byScore);
     void setValueInMap(String contextKey, String field, String value);
-    void setRawValueInMap(String contextKey, String field, byte[] value);
     String getValueFromMap(String contextKey, String key);
-    byte[] getValueFromMap(String contextKey, byte[] key);
-    List<byte[]> getRawValuesFromMap(String contextKey, String... keys);
     boolean removeKeyFromMap(String contextKey, String... keys);
     void addToSorted(String contextKey, String member, long value);
     boolean setIfNotExistsInMap(String contextKey, String key, String value);
@@ -53,8 +51,7 @@ public interface DbContext extends Closeable {
     void incrementAll(BigDecimal value, String baseKey, List<String> keys);
     void incrementAllInSorted(BigDecimal value, String commonMember, List<String> baseKeys);
     BigDecimal incrementCapped(BigDecimal value, String baseKey, String childKey, BigDecimal limit);
-    Object runScript(String scriptName, int noOfKeys, String... args);
+    Object runScript(String scriptName, List<Object> keys, Object... values);
 
     void queueOffer(String listName, String data);
-    List<String> queuePoll(String listName, int timeOut);
 }

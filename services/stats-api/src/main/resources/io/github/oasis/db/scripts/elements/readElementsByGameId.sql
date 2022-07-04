@@ -11,4 +11,4 @@ FROM
 WHERE
     game_id = :gameId
     AND
-    is_active = 1
+    is_active = true

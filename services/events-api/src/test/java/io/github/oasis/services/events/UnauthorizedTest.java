@@ -1,6 +1,5 @@
 package io.github.oasis.services.events;
 
-import io.github.oasis.services.events.utils.TestRedisDeployVerticle;
 import io.github.oasis.services.events.utils.TestUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -10,11 +9,12 @@ import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockserver.client.MockServerClient;
 
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,6 +58,11 @@ public class UnauthorizedTest extends AbstractEventPushTest {
     @Test
     @DisplayName("Event source does not exist")
     void sourceDoeNotExist(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        new MockServerClient("localhost", clientAndServer.getLocalPort())
+                .when(org.mockserver.model.HttpRequest.request("/api/admin/event-source")
+                                .withMethod("GET")
+                                .withQueryStringParameter("token", "pqrs")
+                ).respond(org.mockserver.model.HttpResponse.response().withStatusCode(404));
         KeyPair keyPair = TestUtils.createKeys();
         awaitRedisInitialization(vertx, testContext, createKnownSource(keyPair));
 
@@ -75,17 +80,15 @@ public class UnauthorizedTest extends AbstractEventPushTest {
     @DisplayName("The user does not exist")
     void successPublishForOnlyGames(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
         KeyPair keyPair = TestUtils.createKeys();
-        awaitRedisInitialization(vertx, testContext, new TestRedisDeployVerticle()
-                .addSource("abc", 1, keyPair.getPublic(), List.of(1, 2, 3))
-                .addUser("isuru@oasis.com", 500,
-                        Map.of("1", new JsonObject().put("team", 200), "2", new JsonObject().put("team", 201))
-                ));
+        String sourceToken = UUID.randomUUID().toString();
+        setPlayerDoesNotExists("unknown@oasis.com");
+        setSourceExists(sourceToken, createEventSource(sourceToken, 1, Set.of(1, 2, 3), keyPair.getPublic()));
 
-        JsonObject event = TestUtils.aEvent("unknown@oasis.com", System.currentTimeMillis(), "test.a", 100);
+        JsonObject event = TestUtils.aEvent("non.existing.user@oasis.com", System.currentTimeMillis(), "test.a", 100);
         JsonObject payload = new JsonObject().put("data", event);
         String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
 
-        callForEvent(vertx, KNOWN_SOURCE + ":" + hash)
+        callForEvent(vertx, sourceToken + ":" + hash)
                 .sendJson(
                         payload,
                         testContext.succeeding(res -> {
@@ -117,13 +120,6 @@ public class UnauthorizedTest extends AbstractEventPushTest {
     private HttpRequest<String> callForEvent(Vertx vertx) {
         return super.callPushEvent(vertx)
                 .as(BodyCodec.string());
-    }
-
-    private void assert401Response(HttpResponse<String> response, VertxTestContext ctx) {
-        ctx.verify(() -> {
-            assertThat(response.statusCode()).isEqualTo(401);
-            ctx.completeNow();
-        });
     }
 
     private void assert400Response(HttpResponse<String> response, VertxTestContext ctx) {

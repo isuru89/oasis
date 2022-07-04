@@ -1,5 +1,7 @@
 {
   "O.CHLNGLOG": {
-    "filename": "scripts/CHLNGLOG.lua"
+    "filename": "scripts/CHLNGLOG.lua",
+    "readOnly": true,
+    "returnType": "list"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "gameId": 1,
+  "userId": 1,
+  "filters": [
+    {
+      "type": "RULE",
+      "refId": "rule",
+      "values": ["test.reputation"],
+      "range": {
+        "type": "DAILY",
+        "from": "2021-10-01",
+        "to": "2021-10-15"
+      }
+    }
+  ]
+}

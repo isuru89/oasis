@@ -19,7 +19,13 @@
 
 package io.github.oasis.core.utils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -67,6 +73,18 @@ public class Utils {
             return new BigDecimal(value.toString());
         }
         return null;
+    }
+
+    public static boolean toBoolean(Object value, boolean defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        }
+
+        if (value instanceof Boolean) {
+            return (boolean) value;
+        } else {
+            return Boolean.parseBoolean(String.valueOf(value));
+        }
     }
 
     public static byte[] getBytesFromUUID(UUID uuid) {

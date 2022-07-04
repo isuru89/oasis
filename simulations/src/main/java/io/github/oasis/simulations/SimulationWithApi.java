@@ -108,6 +108,10 @@ public class SimulationWithApi extends Simulation {
             throw new IllegalStateException("Unable to associate game with event-source!");
         }
 
+        System.out.println(">>>>>>>>>>>");
+        System.out.println("  Event Source: " + eventSource);
+        System.out.println("<<<<<<<<<<<");
+
         return eventSource.getId();
     }
 

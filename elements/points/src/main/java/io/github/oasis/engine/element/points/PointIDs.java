@@ -27,22 +27,22 @@ import io.github.oasis.core.utils.Texts;
 public final class PointIDs {
 
     public static String getGameUserPointsSummary(int gameId, long userId) {
-        return String.format("g%d:u%d:points", gameId, userId);
+        return String.format("{g%d}:u%d:points", gameId, userId);
     }
 
     public static String getGameLeaderboard(int gameId, String trait, String duration) {
         if (Texts.isEmpty(duration)) {
-            return String.format("g%d:leaderboard:%s", gameId, trait);
+            return String.format("{g%d}:leaderboard:%s", gameId, trait);
         } else {
-            return String.format("g%d:leaderboard:%s:%s", gameId, trait, duration);
+            return String.format("{g%d}:leaderboard:%s:%s", gameId, trait, duration);
         }
     }
 
     public static String getGameTeamLeaderboard(int gameId, long teamId, String trait, String duration) {
         if (Texts.isEmpty(duration)) {
-            return String.format("g%d:t%d:leaderboard:%s", gameId, teamId, trait);
+            return String.format("{g%d}:t%d:leaderboard:%s", gameId, teamId, trait);
         } else {
-            return String.format("g%d:t%d:leaderboard:%s:%s", gameId, teamId, trait, duration);
+            return String.format("{g%d}:t%d:leaderboard:%s:%s", gameId, teamId, trait, duration);
         }
     }
 

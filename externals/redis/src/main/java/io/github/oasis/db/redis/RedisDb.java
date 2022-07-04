@@ -24,11 +24,13 @@ import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
+import io.github.oasis.core.utils.Utils;
+import org.redisson.Redisson;
+import org.redisson.api.RScript;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,40 +47,22 @@ public class RedisDb implements Db {
 
     private static final Logger LOG = LoggerFactory.getLogger(RedisDb.class);
 
-    private static final String LOCALHOST = "localhost";
-    private static final int DEFAULT_PORT = 6379;
-    private static final int POOL_MAX = 8;
-    private static final int POOL_MAX_IDLE = 2;
-    private static final int POOL_MIN_IDLE = 2;
-
-    private final JedisPool pool;
+    private final RedissonClient client;
     private final Map<String, RedisScript> scriptReferenceMap = new ConcurrentHashMap<>();
 
-    private RedisDb(JedisPool pool) {
-        this.pool = pool;
+    private RedisDb(RedissonClient client) {
+        this.client = client;
     }
 
-    public static RedisDb create(OasisConfigs configs) {
-        String host = configs.get("oasis.redis.host", LOCALHOST);
-        int port = configs.getInt("oasis.redis.port", DEFAULT_PORT);
-        int poolSize = configs.getInt("oasis.redis.pool.max", POOL_MAX);
-        int maxIdle = configs.getInt("oasis.redis.pool.maxIdle", POOL_MAX_IDLE);
-        int minIdle = configs.getInt("oasis.redis.pool.minIdle", POOL_MIN_IDLE);
-
-        LOG.debug("Connecting to redis in {}:{}...", host, port);
-        LOG.debug("  - With pool configs max: {}, maxIdle: {}, minIdle: {}", poolSize, maxIdle, minIdle);
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        if (maxIdle > 0) poolConfig.setMaxIdle(maxIdle);
-        if (minIdle > 0) poolConfig.setMinIdle(minIdle);
-        poolConfig.setMaxTotal(poolSize);
-        JedisPool pool = new JedisPool(poolConfig, host, port);
-        return new RedisDb(pool);
+    public static RedisDb create(OasisConfigs configs, String redisConfKey) {
+        Config config = RedisFactory.createRedissonConfigs(configs, redisConfKey);
+        RedissonClient redissonClient = Redisson.create(config);
+        return new RedisDb(redissonClient);
     }
 
-    public static RedisDb create(JedisPool pool) {
-        return new RedisDb(pool);
+    public static RedisDb create(RedissonClient client) {
+        return new RedisDb(client);
     }
-
 
     @Override
     public void init() {
@@ -109,23 +93,37 @@ public class RedisDb implements Db {
         String path = basePath + "/scripts.json";
 
         Map<String, Object> meta = (Map<String, Object>) Jsoner.deserialize(readClassPathEntry(path, classLoader));
-        try (Jedis jedis = pool.getResource()) {
-            for (Map.Entry<String, Object> entry : meta.entrySet()) {
-                String scriptName = entry.getKey();
-                if (scriptReferenceMap.containsKey(scriptName)) {
-                    LOG.warn("Script already exists! {}. Skipping registration for this script.", scriptName);
-                    continue;
-                }
 
-                Map<String, Object> ref = (Map<String, Object>) entry.getValue();
-                String scriptFullPath = basePath + '/' + ref.get("filename");
-                LOG.info("Loading script {}...", scriptFullPath);
-                String content = readClassPathEntry(scriptFullPath, classLoader);
-                String hash = jedis.scriptLoad(content);
-                LOG.debug("Script loaded {} with hash {}", scriptFullPath, hash);
-                RedisScript script = new RedisScript(hash);
-                scriptReferenceMap.put(scriptName, script);
+        RScript redissonScript = client.getScript();
+        for (Map.Entry<String, Object> entry : meta.entrySet()) {
+            String scriptName = entry.getKey();
+            if (scriptReferenceMap.containsKey(scriptName)) {
+                LOG.warn("Script already exists! {}. Skipping registration for this script.", scriptName);
+                continue;
             }
+
+            Map<String, Object> ref = (Map<String, Object>) entry.getValue();
+            String scriptFullPath = basePath + '/' + ref.get("filename");
+            LOG.info("Loading script {}...", scriptFullPath);
+            String content = readClassPathEntry(scriptFullPath, classLoader);
+            String hash = redissonScript.scriptLoad(content);
+            LOG.debug("Script loaded {} with hash {}", scriptFullPath, hash);
+            boolean isReadOnly = Utils.toBoolean(ref.get("readOnly"), true);
+            String returnType = (String) ref.get("returnType");
+            RedisScript script = new RedisScript(hash, isReadOnly, returnType);
+            script.setContent(content);
+            scriptReferenceMap.put(scriptName, script);
+        }
+    }
+
+    void loadScriptToRedis(RedisScript script) {
+        RScript rScript = client.getScript();
+        if (!rScript.scriptExists(script.sha).get(0)) {
+            LOG.warn("Seems Redis does not have the script {} at this time. Let's reload it again!", script.sha);
+            String sha1 = rScript.scriptLoad(script.getContent());
+            LOG.warn("Successfully reloaded redis script {}", sha1);
+        } else {
+            LOG.warn("Redis script already exist in db by id {}! Hence skipping.", script.sha);
         }
     }
 
@@ -143,21 +141,42 @@ public class RedisDb implements Db {
 
     @Override
     public DbContext createContext() {
-        return new RedisContext(this, pool.getResource());
+        return new RedisContext(this, client);
     }
 
     @Override
     public void close() {
-        if (pool != null) {
-            pool.close();
+        if (client != null) {
+            client.shutdown();
         }
     }
 
     static class RedisScript {
         private final String sha;
+        private final boolean readOnly;
+        private final String returnType;
+        private String content;
 
-        RedisScript(String sha) {
+        RedisScript(String sha, boolean isReadOnly, String returnType) {
             this.sha = sha;
+            this.readOnly = isReadOnly;
+            this.returnType = returnType;
+        }
+
+        String getContent() {
+            return content;
+        }
+
+        void setContent(String content) {
+            this.content = content;
+        }
+
+        public String getReturnType() {
+            return returnType;
+        }
+
+        public boolean isReadOnly() {
+            return readOnly;
         }
 
         public String getSha() {

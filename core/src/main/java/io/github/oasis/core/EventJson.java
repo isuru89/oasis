@@ -122,6 +122,8 @@ public class EventJson implements Event {
                 "id='" + id + '\'' +
                 ", type='" + type + '\'' +
                 ", ts=" + ts +
+                ", user=" + userId +
+                ", team=" + teamId +
                 '}';
     }
 }

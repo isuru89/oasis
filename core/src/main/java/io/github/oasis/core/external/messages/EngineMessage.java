@@ -20,8 +20,8 @@
 package io.github.oasis.core.external.messages;
 
 import io.github.oasis.core.Event;
-import io.github.oasis.core.elements.ElementDef;
 import lombok.Data;
+import io.github.oasis.core.elements.ElementDef;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

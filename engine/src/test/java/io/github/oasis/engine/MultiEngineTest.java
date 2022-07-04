@@ -60,7 +60,7 @@ public class MultiEngineTest {
     @Test
     public void testMultipleEngines() throws OasisException, IOException, ExecutionException, InterruptedException {
         OasisConfigs oasisConfigs = OasisConfigs.defaultConfigs();
-        dbPool = RedisDb.create(oasisConfigs);
+        dbPool = RedisDb.create(oasisConfigs, "oasis.redis");
         dbPool.init();
 
         metadataSupport = new RedisRepository(dbPool, new JsonSerializer(mapper));

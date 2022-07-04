@@ -8,4 +8,4 @@ FROM
 WHERE
     id = :id
     AND
-    is_active = 1
+    is_active = true
