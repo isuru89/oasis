@@ -24,7 +24,9 @@ import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -38,6 +40,13 @@ public abstract class ElementModule {
      */
     public void init(RuntimeContextSupport context) throws OasisException {
     }
+
+    /**
+     * Returns the id of this plugin module.
+     *
+     * @return string non-empty plugin id.
+     */
+    public abstract String getId();
 
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
         return List.of();
@@ -60,6 +69,10 @@ public abstract class ElementModule {
     public abstract AbstractSink createSink(Class<? extends AbstractSink> sinkReq, RuntimeContextSupport context);
 
     public abstract AbstractProcessor<? extends AbstractRule, ? extends Signal> createProcessor(AbstractRule rule, RuleExecutionContextSupport ruleExecutionContext);
+
+    public Map<String, Class<? extends Serializable>> getFeedDefinitions() {
+        return Map.of();
+    }
 
     /**
      * Loads scripts package under the given class.

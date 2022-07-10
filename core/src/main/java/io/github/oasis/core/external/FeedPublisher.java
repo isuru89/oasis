@@ -30,7 +30,7 @@ import java.io.Closeable;
  *
  * @author Isuru Weerarathna
  */
-public interface FeedHandler extends Closeable {
+public interface FeedPublisher extends Closeable {
 
     /**
      * Initialize feed handler by providing app configs instance.

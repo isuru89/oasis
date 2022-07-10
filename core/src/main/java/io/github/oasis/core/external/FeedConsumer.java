@@ -17,28 +17,34 @@
  *  * specific language governing permissions and limitations
  *  * under the License.
  *
- *
  */
 
-package io.github.oasis.elements.milestones.spec;
+package io.github.oasis.core.external;
 
-import io.github.oasis.core.annotations.DefinitionDetails;
-import io.github.oasis.core.elements.spec.AbstractFeedDataDef;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import io.github.oasis.core.configs.OasisConfigs;
+import io.github.oasis.core.elements.FeedEntry;
+
+import java.io.Closeable;
+import java.util.function.Consumer;
 
 /**
+ * Consumes {@link io.github.oasis.core.elements.FeedEntry} instances from published
+ * feed stream.
+ *
  * @author Isuru Weerarathna
  */
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
-public class MilestoneFeedData extends AbstractFeedDataDef {
+public interface FeedConsumer extends Closeable {
 
-    @DefinitionDetails(description = "Latest level achieved")
-    private int currentLevel;
-    @DefinitionDetails(description = "Previous level")
-    private int previousLevel;
+    /**
+     * Initialize feed consumer by providing app and stream configs instance.
+     *
+     * @param oasisConfigs oasis configs
+     */
+    void init(OasisConfigs oasisConfigs);
 
+    /**
+     * Start the consuming of feeds.
+     * @param handler handler to consume feed entries.
+     */
+    void run(Consumer<FeedEntry> handler);
 }

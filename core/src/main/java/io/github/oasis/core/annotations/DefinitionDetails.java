@@ -17,28 +17,21 @@
  *  * specific language governing permissions and limitations
  *  * under the License.
  *
- *
  */
 
-package io.github.oasis.elements.milestones.spec;
+package io.github.oasis.core.annotations;
 
-import io.github.oasis.core.annotations.DefinitionDetails;
-import io.github.oasis.core.elements.spec.AbstractFeedDataDef;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * @author Isuru Weerarathna
- */
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
-public class MilestoneFeedData extends AbstractFeedDataDef {
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DefinitionDetails {
 
-    @DefinitionDetails(description = "Latest level achieved")
-    private int currentLevel;
-    @DefinitionDetails(description = "Previous level")
-    private int previousLevel;
+    String description() default "";
+
+    String type() default "";
 
 }

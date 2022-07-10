@@ -37,6 +37,11 @@ public class RatingsModule extends ElementModule {
     private final ElementParser parser = new RatingParser();
 
     @Override
+    public String getId() {
+        return ID;
+    }
+
+    @Override
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
         return List.of(RatingDef.class);
     }

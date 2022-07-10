@@ -22,6 +22,7 @@
 
 package io.github.oasis.elements.challenges.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.spec.AbstractFeedDataDef;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -35,7 +36,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class ChallengeFeedData extends AbstractFeedDataDef {
 
+    @DefinitionDetails(description = "Rank of the winner")
     private int position;
+    @DefinitionDetails(description = "User id of the winner")
     private long userId;
 
 }

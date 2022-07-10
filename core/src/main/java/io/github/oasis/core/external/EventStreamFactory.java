@@ -52,4 +52,6 @@ public interface EventStreamFactory {
     default EngineManagerSubscription getEngineManagerSubscription() {
         return null;
     }
+
+    default FeedConsumer getFeedHandler() { return null; }
 }

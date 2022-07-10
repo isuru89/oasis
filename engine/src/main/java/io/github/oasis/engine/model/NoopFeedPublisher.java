@@ -21,7 +21,7 @@ package io.github.oasis.engine.model;
 
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.FeedEntry;
-import io.github.oasis.core.external.FeedHandler;
+import io.github.oasis.core.external.FeedPublisher;
 
 /**
  * his instance of feed handler would not be doing anything and shallows
@@ -29,11 +29,11 @@ import io.github.oasis.core.external.FeedHandler;
  *
  * @author Isuru Weerarathna
  */
-public final class NoopFeedHandler implements FeedHandler {
+public final class NoopFeedPublisher implements FeedPublisher {
 
-    public static final FeedHandler INSTANCE = new NoopFeedHandler();
+    public static final FeedPublisher INSTANCE = new NoopFeedPublisher();
 
-    private NoopFeedHandler() {}
+    private NoopFeedPublisher() {}
 
     @Override
     public void init(OasisConfigs oasisConfigs) {

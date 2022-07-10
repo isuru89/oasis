@@ -27,7 +27,7 @@ import io.github.oasis.core.elements.Registrar;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.EventReadWriteHandler;
-import io.github.oasis.core.external.FeedHandler;
+import io.github.oasis.core.external.FeedPublisher;
 import io.github.oasis.core.external.SignalSubscription;
 import io.github.oasis.engine.factory.Parsers;
 import io.github.oasis.engine.factory.Processors;
@@ -62,7 +62,7 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
     private final transient List<ElementModule> moduleList = new ArrayList<>();
 
     private SignalSubscription signalSubscription;
-    private FeedHandler feedHandler;
+    private FeedPublisher feedPublisher;
 
     public void init() throws OasisException {
         id = deriveEngineId();
@@ -90,8 +90,8 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
         sinks.init(this);
 
         // initialize feed handler, if specified
-        if (feedHandler != null) {
-            feedHandler.init(configs);
+        if (feedPublisher != null) {
+            feedPublisher.init(configs);
         }
     }
 
@@ -177,12 +177,12 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
         this.signalSubscription = signalSubscription;
     }
 
-    public void setFeedHandler(FeedHandler feedHandler) {
-        this.feedHandler = feedHandler;
+    public void setFeedHandler(FeedPublisher feedPublisher) {
+        this.feedPublisher = feedPublisher;
     }
 
-    public FeedHandler getFeedHandler() {
-        return feedHandler;
+    public FeedPublisher getFeedHandler() {
+        return feedPublisher;
     }
 
     public static class Builder {
@@ -221,8 +221,8 @@ public class EngineContext implements RuntimeContextSupport, Registrar {
             return this;
         }
 
-        public Builder withFeedHandler(FeedHandler feedHandler) {
-            ctx.setFeedHandler(feedHandler);
+        public Builder withFeedHandler(FeedPublisher feedPublisher) {
+            ctx.setFeedHandler(feedPublisher);
             return this;
         }
 

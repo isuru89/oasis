@@ -44,8 +44,11 @@ import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
 import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
+import io.github.oasis.elements.badges.spec.BadgeFeedData;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -57,6 +60,11 @@ public class BadgesModule extends ElementModule {
     private final List<String> keysSupported = List.of(ID);
     private final List<Class<? extends AbstractSink>> sinks = List.of(BadgeSink.class);
     private final ElementParser parser = new BadgeParser();
+
+    @Override
+    public String getId() {
+        return ID;
+    }
 
     @Override
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
@@ -91,6 +99,14 @@ public class BadgesModule extends ElementModule {
                     ruleExecutionContext.getSignalCollector());
         }
         return null;
+    }
+
+    @Override
+    public Map<String, Class<? extends Serializable>> getFeedDefinitions() {
+        return Map.of(
+                BadgeIDs.FEED_TYPE_BADGE_EARNED, BadgeFeedData.class,
+                BadgeIDs.FEED_TYPE_BADGE_REMOVED, BadgeFeedData.class
+        );
     }
 
     private AbstractProcessor<? extends AbstractRule, ? extends Signal> createBadgeProcessor(Db db, BadgeRule rule, SignalCollector collector) {

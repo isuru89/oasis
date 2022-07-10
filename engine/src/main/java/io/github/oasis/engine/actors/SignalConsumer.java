@@ -25,7 +25,7 @@ import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.exception.OasisRuntimeException;
-import io.github.oasis.core.external.FeedHandler;
+import io.github.oasis.core.external.FeedPublisher;
 import io.github.oasis.core.external.SignalSubscription;
 import io.github.oasis.engine.EngineContext;
 import io.github.oasis.engine.actors.cmds.SignalMessage;
@@ -51,7 +51,7 @@ public class SignalConsumer extends OasisBaseActor {
     private String logId;
     private final Sinks sinks;
     private final SignalSubscription signalSubscription;
-    private final FeedHandler feedHandler;
+    private final FeedPublisher feedPublisher;
     private final CircuitBreaker breaker;
 
     public SignalConsumer(EngineContext context) {
@@ -59,7 +59,7 @@ public class SignalConsumer extends OasisBaseActor {
 
         this.sinks = context.getSinks();
         signalSubscription = context.getSignalSubscription();
-        feedHandler = context.getFeedHandler();
+        feedPublisher = context.getFeedHandler();
         myId = C + COUNTER.incrementAndGet();
         logId = myId;
 
@@ -101,8 +101,8 @@ public class SignalConsumer extends OasisBaseActor {
                 newSignalList.forEach(newSignal -> getContext().getParent().tell(new SignalMessage(newSignal, context, rule), getSelf()));
             }
 
-            if (feedHandler != null) {
-                signal.generateFeedEntry().ifPresent(feedHandler::publish);
+            if (feedPublisher != null) {
+                signal.generateFeedEntry().ifPresent(feedPublisher::publish);
             }
 
             sinkLog.debug("[{}] {} notifying subscriber", logId, sink);

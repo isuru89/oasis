@@ -17,28 +17,19 @@
  *  * specific language governing permissions and limitations
  *  * under the License.
  *
- *
  */
 
-package io.github.oasis.elements.milestones.spec;
+package io.github.oasis.core.elements;
 
-import io.github.oasis.core.annotations.DefinitionDetails;
-import io.github.oasis.core.elements.spec.AbstractFeedDataDef;
-import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
-/**
- * @author Isuru Weerarathna
- */
-@SuperBuilder
-@AllArgsConstructor
+import java.io.Serializable;
+
+@Data
 @NoArgsConstructor
-public class MilestoneFeedData extends AbstractFeedDataDef {
+public class ModuleDefinition implements Serializable {
 
-    @DefinitionDetails(description = "Latest level achieved")
-    private int currentLevel;
-    @DefinitionDetails(description = "Previous level")
-    private int previousLevel;
+
 
 }

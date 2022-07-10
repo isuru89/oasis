@@ -20,10 +20,7 @@
 package io.github.oasis.core.elements;
 
 import io.github.oasis.core.EventScope;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -49,10 +46,31 @@ import java.io.Serializable;
 public class FeedEntry implements Serializable {
 
     private String byPlugin;
-    private String eventType;
+    private String type;
     private long eventTimestamp;
-    private EventScope scope;
+    private FeedScope scope;
 
     private Serializable data;
 
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class FeedScope implements Serializable {
+        private int gameId;
+        private int sourceId;
+        private long userId;
+        private long teamId;
+        private String ruleId;
+
+        public static FeedScope fromEventScope(EventScope scope, String ruleId) {
+            return FeedScope.builder()
+                    .gameId(scope.getGameId())
+                    .ruleId(ruleId)
+                    .sourceId(scope.getSourceId())
+                    .teamId(scope.getTeamId())
+                    .userId(scope.getUserId())
+                    .build();
+        }
+    }
 }

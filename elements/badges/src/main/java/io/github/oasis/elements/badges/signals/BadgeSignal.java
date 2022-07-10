@@ -28,6 +28,7 @@ import io.github.oasis.core.elements.FeedEntry;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCreatable;
 import io.github.oasis.core.utils.Texts;
+import io.github.oasis.elements.badges.BadgeIDs;
 import io.github.oasis.elements.badges.BadgePointsEvent;
 import io.github.oasis.elements.badges.BadgeSink;
 import io.github.oasis.elements.badges.BadgesModule;
@@ -106,8 +107,8 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
         return Optional.of(FeedEntry.builder()
                 .byPlugin(BadgesModule.ID)
                 .eventTimestamp(getOccurredTimestamp())
-                .eventType("BADGE_EARNED")
-                .scope(getEventScope())
+                .type(BadgeIDs.FEED_TYPE_BADGE_EARNED)
+                .scope(FeedEntry.FeedScope.fromEventScope(getEventScope(), getRuleId()))
                 .data(BadgeFeedData.builder()
                     .ruleId(getRuleId())
                     .attribute(attribute)

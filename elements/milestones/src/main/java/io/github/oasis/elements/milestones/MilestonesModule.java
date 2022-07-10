@@ -37,6 +37,11 @@ public class MilestonesModule extends ElementModule {
     private final ElementParser parser = new MilestoneParser();
 
     @Override
+    public String getId() {
+        return ID;
+    }
+
+    @Override
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
         return List.of(MilestoneDef.class);
     }

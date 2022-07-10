@@ -23,12 +23,11 @@ import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.ElementModuleFactory;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.external.FeedHandler;
+import io.github.oasis.core.external.FeedPublisher;
 import io.github.oasis.db.redis.RedisDb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -78,13 +77,13 @@ public class OasisEngineRunner {
         return OasisConfigs.defaultConfigs();
     }
 
-    private static Optional<FeedHandler> discoverFeedHandler(OasisConfigs configs) {
+    private static Optional<FeedPublisher> discoverFeedHandler(OasisConfigs configs) {
         Optional<String> providedFeedImplClz = findProvidedFeedImplClz(configs);
 
         if (providedFeedImplClz.isPresent()) {
             String providedImpl = providedFeedImplClz.get();
 
-            Class<? extends FeedHandler> foundClz = ServiceLoader.load(FeedHandler.class)
+            Class<? extends FeedPublisher> foundClz = ServiceLoader.load(FeedPublisher.class)
                     .stream()
                     .map(ServiceLoader.Provider::type)
                     .peek(clz -> LOG.info("Found feed handler implementation in classpath: {}", clz.getName()))

@@ -22,6 +22,7 @@
 
 package io.github.oasis.core.elements.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 public abstract class AbstractFeedDataDef implements Serializable {
 
+    @DefinitionDetails(description = "Rule id caused to generate the feed")
     private String ruleId;
 
 

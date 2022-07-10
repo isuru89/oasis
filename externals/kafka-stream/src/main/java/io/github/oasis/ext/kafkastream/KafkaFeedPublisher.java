@@ -22,11 +22,10 @@
 
 package io.github.oasis.ext.kafkastream;
 
-import io.github.oasis.core.EventScope;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.FeedEntry;
 import io.github.oasis.core.exception.OasisRuntimeException;
-import io.github.oasis.core.external.FeedHandler;
+import io.github.oasis.core.external.FeedPublisher;
 import io.github.oasis.core.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +38,9 @@ import java.util.Map;
  *
  * @author Isuru Weerarathna
  */
-public class KafkaFeedHandler extends KafkaPublisher implements FeedHandler {
+public class KafkaFeedPublisher extends KafkaPublisher implements FeedPublisher {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KafkaFeedHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaFeedPublisher.class);
 
     @Override
     public void init(OasisConfigs oasisConfigs) {
@@ -65,7 +64,7 @@ public class KafkaFeedHandler extends KafkaPublisher implements FeedHandler {
      */
     @Override
     public void publish(FeedEntry feedEntry) {
-        EventScope scope = feedEntry.getScope();
+        var scope = feedEntry.getScope();
         if (scope != null) {
             String key = String.valueOf(Utils.firstNonNull(scope.getGameId(), -1));
             try {

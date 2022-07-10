@@ -17,28 +17,51 @@
  *  * specific language governing permissions and limitations
  *  * under the License.
  *
- *
  */
 
-package io.github.oasis.elements.milestones.spec;
+package io.github.oasis.core.external;
 
-import io.github.oasis.core.annotations.DefinitionDetails;
-import io.github.oasis.core.elements.spec.AbstractFeedDataDef;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
-/**
- * @author Isuru Weerarathna
- */
-@SuperBuilder
+import java.io.Serializable;
+
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MilestoneFeedData extends AbstractFeedDataDef {
+@Builder
+public class FeedNotification implements Serializable {
 
-    @DefinitionDetails(description = "Latest level achieved")
-    private int currentLevel;
-    @DefinitionDetails(description = "Previous level")
-    private int previousLevel;
+    private String version;
+
+    private String plugin;
+    private String type;
+
+    private FeedScope scope;
+
+    private Serializable data;
+
+    @Data
+    public static class FeedScope implements Serializable {
+        private ReferencedId user;
+        private ReferencedId game;
+        private ReferencedId team;
+        private ReferencedId eventSource;
+        private ReferencedId rule;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ReferencedId implements Serializable {
+        private String id;
+        private String name;
+        private String description;
+        private String url;
+
+    }
 
 }

@@ -44,6 +44,11 @@ public class ChallengesModule extends ElementModule {
     }
 
     @Override
+    public String getId() {
+        return ID;
+    }
+
+    @Override
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
         return List.of(ChallengeDef.class);
     }

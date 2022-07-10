@@ -37,6 +37,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class PointFeedData extends AbstractFeedDataDef {
 
+    private String pointId;
     private BigDecimal pointsScored;
 
 }
