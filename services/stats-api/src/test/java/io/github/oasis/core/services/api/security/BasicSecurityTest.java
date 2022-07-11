@@ -166,7 +166,7 @@ class BasicSecurityTest {
     private void createSampleGameSuccessfully() {
         try {
             // clear all existing games
-            backendRepository.getEngineRepository().listGames("0", 100).getRecords()
+            backendRepository.getAdminRepository().listGames("0", 100).getRecords()
                 .forEach(g -> backendRepository.deleteGame(g.getId()));
 
             mvc.perform(MockMvcRequestBuilders.post("/games")

@@ -10,4 +10,6 @@ SELECT
     is_active As active
 FROM
     OA_GAME
+WHERE
+    is_active = true
 LIMIT :pageSize OFFSET :offset
