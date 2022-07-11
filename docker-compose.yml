@@ -79,3 +79,13 @@ services:
     depends_on:
       - enginedb
       - kafka
+
+  feeder:
+    image: oasis/feeder
+    environment:
+      - "WAIT_HOSTS=kafka:9092"
+    volumes:
+      - "./buildscripts/feeder.conf:/etc/oasis/feeder.conf"
+      - "./buildscripts/modules:/etc/oasis/modules"
+    depends_on:
+      - kafka

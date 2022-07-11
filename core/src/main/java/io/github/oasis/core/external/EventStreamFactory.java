@@ -53,5 +53,5 @@ public interface EventStreamFactory {
         return null;
     }
 
-    default FeedConsumer getFeedHandler() { return null; }
+    default FeedHandler getFeedHandler() { return null; }
 }

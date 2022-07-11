@@ -23,6 +23,7 @@ import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.ElementModuleFactory;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
+import io.github.oasis.core.external.EventStreamFactory;
 import io.github.oasis.core.external.FeedPublisher;
 import io.github.oasis.db.redis.RedisDb;
 import org.slf4j.Logger;
@@ -83,7 +84,7 @@ public class OasisEngineRunner {
         if (providedFeedImplClz.isPresent()) {
             String providedImpl = providedFeedImplClz.get();
 
-            Class<? extends FeedPublisher> foundClz = ServiceLoader.load(FeedPublisher.class)
+            Class<? extends EventStreamFactory> foundClz = ServiceLoader.load(EventStreamFactory.class)
                     .stream()
                     .map(ServiceLoader.Provider::type)
                     .peek(clz -> LOG.info("Found feed handler implementation in classpath: {}", clz.getName()))
@@ -92,7 +93,11 @@ public class OasisEngineRunner {
                     .orElseThrow();
 
             try {
-                return Optional.of(foundClz.getDeclaredConstructor().newInstance());
+                var streamFactory = foundClz.getDeclaredConstructor().newInstance();
+                var feedHandler = streamFactory.getFeedHandler();
+                if (feedHandler != null ) {
+                    return Optional.of(feedHandler.getFeedPublisher());
+                }
             } catch (ReflectiveOperationException e) {
                 LOG.error("Cannot initialize feed handler impl {} because a new instance cannot be created!", providedImpl);
                 LOG.error("Error: ", e);
@@ -103,7 +108,7 @@ public class OasisEngineRunner {
 
     private static Optional<String> findProvidedFeedImplClz(OasisConfigs configs) {
         try {
-            return Optional.ofNullable(configs.getConfigRef().getString("oasis.feedHandler"));
+            return Optional.ofNullable(configs.get(OasisConfigs.EVENT_STREAM_IMPL, null));
         } catch (Exception e) {
             LOG.warn("No feed handler is specified for this engine!");
             return Optional.empty();

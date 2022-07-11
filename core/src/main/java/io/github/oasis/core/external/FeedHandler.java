@@ -17,40 +17,19 @@
  *  * specific language governing permissions and limitations
  *  * under the License.
  *
- *
  */
 
 package io.github.oasis.core.external;
 
-import io.github.oasis.core.configs.OasisConfigs;
-import io.github.oasis.core.elements.FeedEntry;
-
-import java.io.Closeable;
-
 /**
- * This is the base interface for extending a custom feed messaging service
- * to the Oasis in the notification service.
+ * Facade interface for feed related services.
  *
  * @author Isuru Weerarathna
  */
-public interface FeedDeliverable extends Closeable {
+public interface FeedHandler {
 
-    /**
-     * Initialize this service once. If an exception is thrown, then
-     * the {@link #send(FeedNotification)} method will never be called.
-     *
-     * @param configs oasis configs.
-     * @throws Exception any initialization exception.
-     */
-    void init(OasisConfigs configs) throws Exception;
+    FeedConsumer getFeedConsumer();
 
-    /**
-     * For each feed message consumed by notification service will be provided
-     * here to send to the end user. If a user has cancelled the subscription,
-     * this method will never be called then.
-     *
-     * @param feedNotification feed notification event.
-     */
-    void send(FeedNotification feedNotification);
+    FeedPublisher getFeedPublisher();
 
 }

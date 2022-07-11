@@ -24,7 +24,7 @@ import io.github.oasis.core.elements.FeedEntry;
 import io.github.oasis.core.external.FeedPublisher;
 
 /**
- * his instance of feed handler would not be doing anything and shallows
+ * This instance of feed handler would not be doing anything and shallows
  * every feed entry.
  *
  * @author Isuru Weerarathna
