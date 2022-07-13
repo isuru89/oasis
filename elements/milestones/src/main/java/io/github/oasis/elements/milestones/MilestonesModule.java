@@ -30,11 +30,16 @@ import java.util.List;
  */
 public class MilestonesModule extends ElementModule {
 
-    private static final String MILESTONES = "core:milestone";
+    public static final String ID = "core:milestone";
 
-    private final List<String> keysSupported = List.of(MILESTONES);
+    private final List<String> keysSupported = List.of(ID);
     private final List<Class<? extends AbstractSink>> sinks = List.of(MilestonesSink.class);
     private final ElementParser parser = new MilestoneParser();
+
+    @Override
+    public String getId() {
+        return ID;
+    }
 
     @Override
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {

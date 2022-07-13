@@ -39,8 +39,8 @@ import java.io.IOException;
  */
 public class ApiKeyAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    protected ApiKeyAuthenticationFilter(RequestMatcher requiresAuthenticationRequestMatcher,
-                                         AuthenticationManager manager) {
+    ApiKeyAuthenticationFilter(RequestMatcher requiresAuthenticationRequestMatcher,
+                               AuthenticationManager manager) {
         super(requiresAuthenticationRequestMatcher);
 
         setAuthenticationManager(manager);

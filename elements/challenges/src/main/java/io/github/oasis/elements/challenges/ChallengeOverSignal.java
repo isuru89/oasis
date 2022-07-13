@@ -32,15 +32,15 @@ import java.util.Objects;
  */
 public class ChallengeOverSignal extends AbstractChallengeSignal {
 
-    private CompletionType completionType;
+    private CompletionReason completionReason;
 
-    public ChallengeOverSignal(String ruleId, EventScope eventScope, long completedTime, CompletionType completionType) {
+    public ChallengeOverSignal(String ruleId, EventScope eventScope, long completedTime, CompletionReason completionReason) {
         super(ruleId, eventScope, completedTime);
-        this.completionType = completionType;
+        this.completionReason = completionReason;
     }
 
-    public CompletionType getCompletionType() {
-        return completionType;
+    public CompletionReason getCompletionType() {
+        return completionReason;
     }
 
     @Override
@@ -48,12 +48,12 @@ public class ChallengeOverSignal extends AbstractChallengeSignal {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChallengeOverSignal that = (ChallengeOverSignal) o;
-        return getRuleId().equals(((ChallengeOverSignal) o).getRuleId()) && completionType == that.completionType;
+        return getRuleId().equals(((ChallengeOverSignal) o).getRuleId()) && completionReason == that.completionReason;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRuleId(), completionType);
+        return Objects.hash(getRuleId(), completionReason);
     }
 
     @Override
@@ -71,11 +71,11 @@ public class ChallengeOverSignal extends AbstractChallengeSignal {
     public String toString() {
         return "ChallengeOverSignal{" +
                 "ruleId=" + getRuleId() + ", " +
-                "completionType=" + completionType +
+                "completionType=" + completionReason +
                 '}';
     }
 
-    public enum CompletionType {
+    public enum CompletionReason {
         TIME_EXPIRED,
         ALL_WINNERS_FOUND
     }

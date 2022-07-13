@@ -28,6 +28,8 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.stereotype.Component;
 
 /**
+ * This provider class will authenticate user by validating given api key.
+ *
  * @author Isuru Weerarathna
  */
 @Component

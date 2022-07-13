@@ -21,23 +21,50 @@ package io.github.oasis.elements.badges;
 
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.elements.*;
+import io.github.oasis.core.elements.AbstractDef;
+import io.github.oasis.core.elements.AbstractProcessor;
+import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.AbstractSink;
+import io.github.oasis.core.elements.ElementModule;
+import io.github.oasis.core.elements.ElementParser;
+import io.github.oasis.core.elements.RuleContext;
+import io.github.oasis.core.elements.Signal;
+import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
-import io.github.oasis.elements.badges.processors.*;
-import io.github.oasis.elements.badges.rules.*;
+import io.github.oasis.elements.badges.processors.BadgeFirstEvent;
+import io.github.oasis.elements.badges.processors.ConditionalBadgeProcessor;
+import io.github.oasis.elements.badges.processors.PeriodicBadgeProcessor;
+import io.github.oasis.elements.badges.processors.PeriodicStreakNBadge;
+import io.github.oasis.elements.badges.processors.StreakNBadgeProcessor;
+import io.github.oasis.elements.badges.processors.TimeBoundedStreakNBadge;
+import io.github.oasis.elements.badges.rules.BadgeRule;
+import io.github.oasis.elements.badges.rules.ConditionalBadgeRule;
+import io.github.oasis.elements.badges.rules.FirstEventBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicBadgeRule;
+import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
+import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
+import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
+import io.github.oasis.elements.badges.spec.BadgeFeedData;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
 public class BadgesModule extends ElementModule {
 
-    private static final String BADGES = "core:badge";
+    public static final String ID = "core:badge";
 
-    private final List<String> keysSupported = List.of(BADGES);
+    private final List<String> keysSupported = List.of(ID);
     private final List<Class<? extends AbstractSink>> sinks = List.of(BadgeSink.class);
     private final ElementParser parser = new BadgeParser();
+
+    @Override
+    public String getId() {
+        return ID;
+    }
 
     @Override
     public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
@@ -72,6 +99,14 @@ public class BadgesModule extends ElementModule {
                     ruleExecutionContext.getSignalCollector());
         }
         return null;
+    }
+
+    @Override
+    public Map<String, Class<? extends Serializable>> getFeedDefinitions() {
+        return Map.of(
+                BadgeIDs.FEED_TYPE_BADGE_EARNED, BadgeFeedData.class,
+                BadgeIDs.FEED_TYPE_BADGE_REMOVED, BadgeFeedData.class
+        );
     }
 
     private AbstractProcessor<? extends AbstractRule, ? extends Signal> createBadgeProcessor(Db db, BadgeRule rule, SignalCollector collector) {

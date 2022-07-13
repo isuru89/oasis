@@ -32,15 +32,20 @@ import java.util.List;
  */
 public class ChallengesModule extends ElementModule {
 
-    private static final String CHALLENGES = "core:challenge";
+    public static final String ID = "core:challenge";
 
-    private final List<String> keysSupported = List.of(CHALLENGES);
+    private final List<String> keysSupported = List.of(ID);
     private final List<Class<? extends AbstractSink>> sinks = List.of(ChallengesSink.class);
     private final ElementParser parser = new ChallengeParser();
 
     @Override
     public void init(RuntimeContextSupport context) throws OasisException {
         loadScriptsUnderPackage(context.getDb(), ChallengeStats.class, Thread.currentThread().getContextClassLoader());
+    }
+
+    @Override
+    public String getId() {
+        return ID;
     }
 
     @Override

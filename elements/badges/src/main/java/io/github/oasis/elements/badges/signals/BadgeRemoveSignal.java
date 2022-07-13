@@ -21,8 +21,12 @@ package io.github.oasis.elements.badges.signals;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.EventScope;
+import io.github.oasis.core.elements.FeedEntry;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.utils.Texts;
+import io.github.oasis.elements.badges.BadgeIDs;
+import io.github.oasis.elements.badges.BadgesModule;
+import io.github.oasis.elements.badges.spec.BadgeFeedData;
 
 import java.util.Optional;
 
@@ -30,6 +34,7 @@ import java.util.Optional;
  * @author Isuru Weerarathna
  */
 public class BadgeRemoveSignal extends BadgeSignal {
+
     public BadgeRemoveSignal(String ruleId, EventScope event, int attribute, long st, long et, String sid, String eid) {
         super(ruleId, event, st, attribute, st, et, sid, eid);
     }
@@ -47,6 +52,20 @@ public class BadgeRemoveSignal extends BadgeSignal {
                 prevBadge.getEndTime(),
                 prevBadge.getStartId(),
                 prevBadge.getEndId());
+    }
+
+    @Override
+    public Optional<FeedEntry> generateFeedEntry() {
+        return Optional.of(FeedEntry.builder()
+                .byPlugin(BadgesModule.ID)
+                .eventTimestamp(getOccurredTimestamp())
+                .type(BadgeIDs.FEED_TYPE_BADGE_REMOVED)
+                .scope(FeedEntry.FeedScope.fromEventScope(getEventScope(), getRuleId()))
+                .data(BadgeFeedData.builder()
+                        .ruleId(getRuleId())
+                        .attribute(getAttribute())
+                        .build()
+                ).build());
     }
 
     @Override

@@ -43,7 +43,7 @@ public class PaginatedResult<T> {
     }
 
     public boolean isCompleted() {
-        return Texts.isEmpty(nextCursor);
+        return Texts.isEmpty(nextCursor) || "-1".equals(nextCursor);
     }
 
     public List<T> getRecords() {

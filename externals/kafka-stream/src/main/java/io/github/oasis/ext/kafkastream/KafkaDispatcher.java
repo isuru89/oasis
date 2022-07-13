@@ -26,18 +26,13 @@ import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Utils;
 import org.apache.kafka.clients.admin.Admin;
-import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.KafkaFuture;
-import org.apache.kafka.common.errors.TopicExistsException;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Event dispatcher for Kafka.
@@ -93,22 +88,9 @@ class KafkaDispatcher extends KafkaPublisher implements EventDispatcher {
     }
 
     private void createTopicsIfNotExists(Admin kafkaAdmin) throws IOException {
-        NewTopic gameAnnouncementTopic = new NewTopic(KafkaConstants.TOPIC_GAME_ANNOUNCEMENTS, Optional.empty(), Optional.empty());
+        NewTopic topic = new NewTopic(KafkaConstants.TOPIC_GAME_ANNOUNCEMENTS, Optional.empty(), Optional.empty());
 
-        createTopic(kafkaAdmin, gameAnnouncementTopic);
+        createTopic(kafkaAdmin, topic);
     }
 
-    private void createTopic(Admin kafkaAdmin, NewTopic topic) throws IOException {
-        try {
-            CreateTopicsResult creationResult = kafkaAdmin.createTopics(Collections.singletonList(topic));
-            KafkaFuture<Void> topicCreationFuture = creationResult.values().get(topic.name());
-
-            topicCreationFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-           if (e.getCause() instanceof TopicExistsException) {
-               return;
-           }
-            throw new IOException("Unable to create kafka topic " + topic.name() + "!", e);
-        }
-    }
 }

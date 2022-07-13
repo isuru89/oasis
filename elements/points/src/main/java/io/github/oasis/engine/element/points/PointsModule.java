@@ -40,9 +40,9 @@ import java.util.List;
  */
 public class PointsModule extends ElementModule {
 
-    private static final String POINTS = "core:point";
+    public static final String ID = "core:point";
 
-    private final List<String> keysSupported = List.of(POINTS);
+    private final List<String> keysSupported = List.of(ID);
     private final List<Class<? extends AbstractSink>> sinks = List.of(PointsSink.class);
     private final ElementParser parser = new PointParser();
 
@@ -51,6 +51,11 @@ public class PointsModule extends ElementModule {
         Db db = context.getDb();
 
         loadScriptsUnderPackage(db, PointStats.class, Thread.currentThread().getContextClassLoader());
+    }
+
+    @Override
+    public String getId() {
+        return ID;
     }
 
     @Override

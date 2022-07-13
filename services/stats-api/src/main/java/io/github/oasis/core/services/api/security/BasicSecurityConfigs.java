@@ -19,7 +19,10 @@
 
 package io.github.oasis.core.services.api.security;
 
+import io.github.oasis.core.services.api.configs.ErrorMessages;
 import org.jdbi.v3.core.Jdbi;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -28,7 +31,11 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
@@ -42,13 +49,20 @@ import javax.servlet.Filter;
 @EnableGlobalMethodSecurity(jsr250Enabled = true, securedEnabled = true, prePostEnabled = true)
 public class BasicSecurityConfigs extends WebSecurityConfigurerAdapter {
 
-    private final Jdbi jdbi;
+    @Autowired
+    private Jdbi jdbi;
+
+    @Autowired
     private ApiKeyAuthenticationProvider authenticationProvider;
 
-    public BasicSecurityConfigs(Jdbi jdbi, ApiKeyAuthenticationProvider authenticationProvider) {
-        this.jdbi = jdbi;
-        this.authenticationProvider = authenticationProvider;
-    }
+    @Autowired
+    private OasisAuthExceptionEntry oasisAuthExceptionEntry;
+
+    @Autowired
+    private AccessDeniedHandler accessDeniedHandler;
+
+    @Autowired
+    private AuthenticationFailureHandler authenticationFailureHandler;
 
     @Override
     public void configure(WebSecurity web) {
@@ -63,6 +77,9 @@ public class BasicSecurityConfigs extends WebSecurityConfigurerAdapter {
                 .antMatchers("/error").permitAll()
                 .anyRequest().authenticated()
                 .and()
+                .exceptionHandling()
+                .accessDeniedHandler(accessDeniedHandler)
+                .authenticationEntryPoint(oasisAuthExceptionEntry).and()
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(getFilter(), AnonymousAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -74,10 +91,12 @@ public class BasicSecurityConfigs extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(authenticationProvider);
     }
 
-    private Filter getFilter() throws Exception {
-        return new ApiKeyAuthenticationFilter(
+    private AbstractAuthenticationProcessingFilter getFilter() throws Exception {
+        ApiKeyAuthenticationFilter filter = new ApiKeyAuthenticationFilter(
                 new OrRequestMatcher(new AntPathRequestMatcher("/**")),
                 authenticationManager());
+        filter.setAuthenticationFailureHandler(authenticationFailureHandler);
+        return filter;
     }
 
 }

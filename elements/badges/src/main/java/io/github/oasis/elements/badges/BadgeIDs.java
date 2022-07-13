@@ -24,6 +24,9 @@ package io.github.oasis.elements.badges;
  */
 public final class BadgeIDs {
 
+    public static final String FEED_TYPE_BADGE_REMOVED = "BADGE_REMOVED";
+    public static final String FEED_TYPE_BADGE_EARNED = "BADGE_EARNED";
+
     public static String getGameRuleWiseBadgeLogKey(int gameId, String badgeId) {
         return String.format("{g%d}:%s:badgelog", gameId, badgeId);
     }

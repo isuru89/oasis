@@ -22,10 +22,7 @@
 
 package io.github.oasis.ext.kafkastream;
 
-import io.github.oasis.core.external.EngineManagerSubscription;
-import io.github.oasis.core.external.EventDispatcher;
-import io.github.oasis.core.external.EventStreamFactory;
-import io.github.oasis.core.external.SourceStreamProvider;
+import io.github.oasis.core.external.*;
 
 /**
  * Kafka support for all streams.
@@ -37,6 +34,8 @@ public class KafkaStreamFactory implements EventStreamFactory {
     private final KafkaDispatcher kafkaDispatcher = new KafkaDispatcher();
     private final KafkaStreamConsumer kafkaStreamConsumer = new KafkaStreamConsumer();
     private final KafkaEngineManagerSubscription engineManagerSubscription = new KafkaEngineManagerSubscription();
+    private final FeedHandler feedHandler = new KafkaFeedHandler();
+
 
     @Override
     public SourceStreamProvider getEngineEventSource() {
@@ -51,5 +50,22 @@ public class KafkaStreamFactory implements EventStreamFactory {
     @Override
     public EngineManagerSubscription getEngineManagerSubscription() {
         return engineManagerSubscription;
+    }
+
+    @Override
+    public FeedHandler getFeedHandler() {
+        return feedHandler;
+    }
+
+    private static class KafkaFeedHandler implements FeedHandler {
+            @Override
+            public FeedConsumer getFeedConsumer() {
+                return new KafkaFeedConsumer();
+            }
+
+            @Override
+            public FeedPublisher getFeedPublisher() {
+                return new KafkaFeedPublisher();
+            }
     }
 }

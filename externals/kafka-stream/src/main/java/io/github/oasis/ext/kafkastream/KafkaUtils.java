@@ -91,6 +91,33 @@ final class KafkaUtils {
         return props;
     }
 
+    static Properties getFeedConsumerProps(KafkaConfigs kafkaConfigs) {
+        Properties props = new Properties();
+        props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigs.getBrokerUrls());
+        props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+
+        // if user has specified custom kafka consumer props for broadcast topic.
+        String consumerGroupId = null;
+        if (kafkaConfigs.getFeedStreamConsumer() != null) {
+            if (Utils.isNotEmpty(kafkaConfigs.getFeedStreamConsumer().getProps())) {
+                props.putAll(kafkaConfigs.getFeedStreamConsumer().getProps());
+            }
+            consumerGroupId = kafkaConfigs.getFeedStreamConsumer().getGroupId();
+        }
+
+        if (Texts.isEmpty(consumerGroupId)) {
+            consumerGroupId = UUID.randomUUID().toString();
+        }
+        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId);
+        props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST);
+
+        // disable auto commit
+        props.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, KafkaConstants.ConsumerConstants.DEFAULT_FEED_AUTO_COMMIT);
+
+        return props;
+    }
+
     static Properties getBroadcastConsumerProps(KafkaConfigs kafkaConfigs, String engineId) {
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());

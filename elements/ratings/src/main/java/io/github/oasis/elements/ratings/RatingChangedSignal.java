@@ -20,11 +20,14 @@
 package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.Event;
+import io.github.oasis.core.elements.FeedEntry;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.elements.ratings.spec.RatingFeedData;
 import lombok.ToString;
 
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
@@ -57,6 +60,24 @@ public class RatingChangedSignal extends AbstractRatingSignal {
 
     public static RatingChangedSignal create(RatingRule rule, Event causedEvent, int previousRating, int newRating) {
         return new RatingChangedSignal(rule.getId(), previousRating, newRating, causedEvent.getTimestamp(), causedEvent);
+    }
+
+    @Override
+    public Optional<FeedEntry> generateFeedEntry() {
+        if (getPreviousRating() != getCurrentRating()) {
+            return Optional.of(FeedEntry.builder()
+                    .byPlugin(RatingsModule.ID)
+                    .scope(FeedEntry.FeedScope.fromEventScope(getEventScope(), getRuleId()))
+                    .type("RATING_CHANGED")
+                    .eventTimestamp(getOccurredTimestamp())
+                    .data(RatingFeedData.builder()
+                            .ruleId(getRuleId())
+                            .previousRating(getPreviousRating())
+                            .currentRating(getCurrentRating())
+                            .build()
+                    ).build());
+        }
+        return Optional.empty();
     }
 
     @Override

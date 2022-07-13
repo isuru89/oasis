@@ -43,6 +43,7 @@ class KafkaConfigs {
     private AnnounceConsumerConfigs broadcastConsumer;
     private DispatcherConfigs dispatcherConfigs;
     private EngineStatusTopicConsumerConfigs engineEventConsumer;
+    private FeedStreamConfigs feedStreamConsumer;
 
     @Data
     static class DispatcherConfigs {
@@ -53,6 +54,13 @@ class KafkaConfigs {
 
     @Data
     static class GameEventConsumerConfigs {
+        private String groupId;
+
+        private Map<String, String> props;
+    }
+
+    @Data
+    static class FeedStreamConfigs {
         private String groupId;
         private String instanceId;
 

@@ -24,6 +24,7 @@ import io.github.oasis.core.EventScope;
 
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author Isuru Weerarathna
@@ -45,6 +46,16 @@ public abstract class Signal implements Comparable<Signal>  {
     }
 
     public abstract Class<? extends AbstractSink> sinkHandler();
+
+    /**
+     * Optionally generates a feed event which will be notified to external parties,
+     * and not for internal execution.
+     *
+     * @return feed entry instance or empty reference if such cannot be generated.
+     */
+    public Optional<FeedEntry> generateFeedEntry() {
+        return Optional.empty();
+    }
 
     public String getRuleId() {
         return ruleId;

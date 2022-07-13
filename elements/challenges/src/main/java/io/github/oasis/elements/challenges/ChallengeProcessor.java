@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static io.github.oasis.elements.challenges.ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND;
+import static io.github.oasis.elements.challenges.ChallengeOverSignal.CompletionReason.ALL_WINNERS_FOUND;
 import static io.github.oasis.elements.challenges.ChallengeRule.OUT_OF_ORDER_WINNERS;
 import static io.github.oasis.elements.challenges.ChallengeRule.REPEATABLE_WINNERS;
 

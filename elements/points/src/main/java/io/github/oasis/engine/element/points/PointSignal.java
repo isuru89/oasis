@@ -22,7 +22,9 @@ package io.github.oasis.engine.element.points;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.EventCreatable;
+import io.github.oasis.core.elements.FeedEntry;
 import io.github.oasis.core.elements.Signal;
+import io.github.oasis.engine.element.points.spec.PointFeedData;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -65,6 +67,20 @@ public class PointSignal extends Signal implements EventCreatable {
     @Override
     public Class<? extends AbstractSink> sinkHandler() {
         return PointsSink.class;
+    }
+
+    @Override
+    public Optional<FeedEntry> generateFeedEntry() {
+        return Optional.of(FeedEntry.builder()
+                .byPlugin(PointsModule.ID)
+                        .eventTimestamp(getOccurredTimestamp())
+                        .type("POINT_SCORED")
+                        .scope(FeedEntry.FeedScope.fromEventScope(getEventScope(), getRuleId()))
+                        .data(PointFeedData.builder()
+                                .pointId(getPointId())
+                                .pointsScored(getScore())
+                                .build()
+                        ).build());
     }
 
     @Override

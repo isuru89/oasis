@@ -167,7 +167,7 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e4),
-                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), e5.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), e5.getTimestamp(), ChallengeOverSignal.CompletionReason.ALL_WINNERS_FOUND)
         );
     }
 
@@ -223,7 +223,7 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e4),
-                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), e5.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), e5.getTimestamp(), ChallengeOverSignal.CompletionReason.ALL_WINNERS_FOUND)
         );
     }
 
@@ -293,7 +293,7 @@ public class ChallengeTest extends AbstractRuleTest {
         assertStrict(signals,
                 new ChallengeWinSignal(rule.getId(), e2, 1, U2, e2.getTimestamp(), e2.getExternalId()),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
-                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), e5.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e5.asEventScope(), e5.getTimestamp(), ChallengeOverSignal.CompletionReason.ALL_WINNERS_FOUND)
         );
 
         ChallengeWinSignal signal = (ChallengeWinSignal) signals.stream().filter(s -> s instanceof ChallengeWinSignal).findFirst().orElse(null);
@@ -423,7 +423,7 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, new BigDecimal("300.00"), e2),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, new BigDecimal("200.00"), e3),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, new BigDecimal("100.00"), e7),
-                new ChallengeOverSignal(rule.getId(), e8.asEventScope(), e8.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e8.asEventScope(), e8.getTimestamp(), ChallengeOverSignal.CompletionReason.ALL_WINNERS_FOUND)
         );
     }
 
@@ -456,8 +456,8 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e2),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e3),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e4),
-                new ChallengeOverSignal(rule.getId(), e7.asEventScope(), e7.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND),
-                new ChallengeOverSignal(rule.getId(), e8.asEventScope(), e8.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e7.asEventScope(), e7.getTimestamp(), ChallengeOverSignal.CompletionReason.ALL_WINNERS_FOUND),
+                new ChallengeOverSignal(rule.getId(), e8.asEventScope(), e8.getTimestamp(), ChallengeOverSignal.CompletionReason.ALL_WINNERS_FOUND)
         );
     }
 
@@ -490,7 +490,7 @@ public class ChallengeTest extends AbstractRuleTest {
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e1),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e5),
                 new ChallengePointsAwardedSignal(rule.getId(), POINT_ID, AWARD, e6),
-                new ChallengeOverSignal(rule.getId(), e7.asEventScope(), e7.getTimestamp(), ChallengeOverSignal.CompletionType.ALL_WINNERS_FOUND)
+                new ChallengeOverSignal(rule.getId(), e7.asEventScope(), e7.getTimestamp(), ChallengeOverSignal.CompletionReason.ALL_WINNERS_FOUND)
         );
     }
 

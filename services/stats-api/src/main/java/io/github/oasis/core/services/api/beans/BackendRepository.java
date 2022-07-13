@@ -148,7 +148,11 @@ public class BackendRepository implements OasisRepository {
     public Game deleteGame(int gameId) {
         Game game = adminRepository.readGame(gameId);
         adminRepository.deleteGame(gameId);
-        engineRepository.deleteGame(gameId);
+        try {
+            engineRepository.deleteGame(gameId);
+        } catch (Exception e) {
+            // failure removal in cache is ignored
+        }
         return game;
     }
 
