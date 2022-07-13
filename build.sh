@@ -6,7 +6,7 @@ echo "==========================================================================
 mvn install -DskipTests
 
 cp externals/kafka-stream/target/libs/* buildscripts/modules
-cp externals/kafka-stream/target/oasis-ext-kafkastream-1.0-SNAPSHOT.jar buildscripts/modules
+cp externals/kafka-stream/target/oasis-ext-kafkastream.jar buildscripts/modules
 
 echo "==============================================================================="
 echo "Building Events API Docker Image..."

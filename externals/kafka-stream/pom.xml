@@ -39,6 +39,7 @@
     </dependencies>
 
     <build>
+        <finalName>oasis-ext-kafkastream</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>

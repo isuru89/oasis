@@ -27,6 +27,7 @@ import io.github.oasis.core.elements.FeedEntry;
 import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.FeedPublisher;
 import io.github.oasis.core.utils.Utils;
+import org.apache.kafka.clients.admin.Admin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,10 @@ public class KafkaFeedPublisher extends KafkaPublisher implements FeedPublisher 
             LOG.info("Initializing Kafka feed handler...");
             Map<String, Object> unwrappedConfigs = oasisConfigs.getConfigRef().getObject("oasis.eventstream.configs").unwrapped();
             KafkaConfigs kafkaConfigs = KafkaUtils.parseFrom(unwrappedConfigs);
+
+            try (Admin kafkaAdmin = Admin.create(KafkaUtils.createAdminProps(kafkaConfigs))) {
+                createTopicsIfNotExists(kafkaAdmin);
+            }
 
             super.initialize(kafkaConfigs);
 

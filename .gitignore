@@ -28,3 +28,5 @@ src/main/resources/io/github/isuru/oasis/db/.vscode/
 node_modules/
 
 .tmpdata
+
+buildscripts/modules/*.jar

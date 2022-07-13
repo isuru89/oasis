@@ -22,11 +22,18 @@
 
 package io.github.oasis.ext.kafkastream;
 
+import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.CreateTopicsResult;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.KafkaFuture;
+import org.apache.kafka.common.errors.TopicExistsException;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
@@ -68,4 +75,25 @@ class KafkaPublisher implements Closeable {
             kafkaProducer.close();
         }
     }
+
+    protected void createTopicsIfNotExists(Admin kafkaAdmin) throws IOException {
+        NewTopic feedsTopic = new NewTopic(KafkaConstants.TOPIC_FEEDS, Optional.empty(), Optional.empty());
+
+        createTopic(kafkaAdmin, feedsTopic);
+    }
+
+    protected void createTopic(Admin kafkaAdmin, NewTopic topic) throws IOException {
+        try {
+            CreateTopicsResult creationResult = kafkaAdmin.createTopics(Collections.singletonList(topic));
+            KafkaFuture<Void> topicCreationFuture = creationResult.values().get(topic.name());
+
+            topicCreationFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            if (e.getCause() instanceof TopicExistsException) {
+                return;
+            }
+            throw new IOException("Unable to create kafka topic " + topic.name() + "!", e);
+        }
+    }
+
 }
