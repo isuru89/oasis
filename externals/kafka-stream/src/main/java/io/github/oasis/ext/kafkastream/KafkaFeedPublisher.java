@@ -28,11 +28,13 @@ import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.FeedPublisher;
 import io.github.oasis.core.utils.Utils;
 import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Publishes feed entries from engine to kafka feed topic.
@@ -83,4 +85,9 @@ public class KafkaFeedPublisher extends KafkaPublisher implements FeedPublisher 
         }
     }
 
+    private void createTopicsIfNotExists(Admin kafkaAdmin) throws IOException {
+        NewTopic topic = new NewTopic(KafkaConstants.TOPIC_FEEDS, Optional.empty(), Optional.empty());
+
+        createTopic(kafkaAdmin, topic);
+    }
 }

@@ -26,10 +26,13 @@ import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Utils;
 import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Event dispatcher for Kafka.
@@ -82,6 +85,12 @@ class KafkaDispatcher extends KafkaPublisher implements EventDispatcher {
 
     private String getTopicForGameEvents(String gameId) {
         return KafkaConstants.TOPIC_GAME_EVENTS + KafkaConstants.TOPIC_DELIMITER + gameId;
+    }
+
+    private void createTopicsIfNotExists(Admin kafkaAdmin) throws IOException {
+        NewTopic topic = new NewTopic(KafkaConstants.TOPIC_GAME_ANNOUNCEMENTS, Optional.empty(), Optional.empty());
+
+        createTopic(kafkaAdmin, topic);
     }
 
 }
