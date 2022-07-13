@@ -22,6 +22,11 @@
 
     <build>
         <finalName>oasis-feeder</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 
 </project>

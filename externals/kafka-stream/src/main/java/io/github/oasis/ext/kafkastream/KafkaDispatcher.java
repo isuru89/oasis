@@ -94,8 +94,10 @@ class KafkaDispatcher extends KafkaPublisher implements EventDispatcher {
 
     private void createTopicsIfNotExists(Admin kafkaAdmin) throws IOException {
         NewTopic gameAnnouncementTopic = new NewTopic(KafkaConstants.TOPIC_GAME_ANNOUNCEMENTS, Optional.empty(), Optional.empty());
+        NewTopic feedsTopic = new NewTopic(KafkaConstants.TOPIC_GAME_ANNOUNCEMENTS, Optional.empty(), Optional.empty());
 
         createTopic(kafkaAdmin, gameAnnouncementTopic);
+        createTopic(kafkaAdmin, feedsTopic);
     }
 
     private void createTopic(Admin kafkaAdmin, NewTopic topic) throws IOException {

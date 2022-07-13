@@ -3,7 +3,10 @@
 echo "==============================================================================="
 echo "Building Oasis..."
 echo "==============================================================================="
-#mvn clean install -DskipTests
+mvn install -DskipTests
+
+cp externals/kafka-stream/target/libs/* buildscripts/modules
+cp externals/kafka-stream/target/oasis-ext-kafkastream-1.0-SNAPSHOT.jar buildscripts/modules
 
 echo "==============================================================================="
 echo "Building Events API Docker Image..."
@@ -39,6 +42,7 @@ cd ..
 
 mkdir -p .tmpdata/enginedb
 mkdir -p .tmpdata/cache
+
 
 echo "==============================================================================="
 echo "Starting Oasis..."

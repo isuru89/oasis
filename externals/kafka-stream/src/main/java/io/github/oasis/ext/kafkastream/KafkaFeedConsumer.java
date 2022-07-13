@@ -42,7 +42,7 @@ public class KafkaFeedConsumer implements FeedConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(KafkaFeedConsumer.class);
 
     private KafkaConsumer<String, String> consumer;
-    protected volatile boolean running = true;
+    protected volatile boolean running = false;
 
     @Override
     public void init(OasisConfigs oasisConfigs) {
@@ -63,6 +63,7 @@ public class KafkaFeedConsumer implements FeedConsumer {
     @Override
     public void run(Consumer<FeedEntry> handler) {
         if (running) {
+            LOG.error("Kafka Feed consumer is running. Cannot start again!");
             throw new OasisRuntimeException("Feed consumer is already running!");
         }
 
