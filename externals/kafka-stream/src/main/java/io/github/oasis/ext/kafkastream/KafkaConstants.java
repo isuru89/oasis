@@ -43,6 +43,7 @@ final class KafkaConstants {
     static final class ConsumerConstants {
 
         static final String DEFAULT_ANNOUNCEMENT_AUTO_COMMIT = "false";
+        static final String DEFAULT_FEED_AUTO_COMMIT = "false";
         static final String DEFAULT_ANNOUNCEMENT_FETCH_COUNT = "1";
 
     }

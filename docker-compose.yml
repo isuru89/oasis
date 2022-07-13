@@ -89,3 +89,4 @@ services:
       - "./buildscripts/modules:/etc/oasis/modules"
     depends_on:
       - kafka
+      - engine

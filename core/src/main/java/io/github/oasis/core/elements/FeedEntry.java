@@ -43,6 +43,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class FeedEntry implements Serializable {
 
     private String byPlugin;

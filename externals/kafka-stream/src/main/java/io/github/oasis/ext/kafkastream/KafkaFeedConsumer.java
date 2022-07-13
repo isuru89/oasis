@@ -34,7 +34,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Properties;
 import java.util.function.Consumer;
 
 public class KafkaFeedConsumer implements FeedConsumer {
@@ -69,12 +71,14 @@ public class KafkaFeedConsumer implements FeedConsumer {
 
         running = true;
         try {
+            LOG.debug("Subscribing to topic {}", KafkaConstants.TOPIC_FEEDS);
             consumer.subscribe(Collections.singletonList(KafkaConstants.TOPIC_FEEDS));
 
             while (running) {
                 ConsumerRecords<String, String> polledRecords = consumer.poll(Duration.ofSeconds(1));
 
                 if (!polledRecords.isEmpty()) {
+                    LOG.info("Reading #{} feed events...", polledRecords.count());
                     consumeFeedRecord(polledRecords, handler);
                 }
             }
@@ -94,8 +98,10 @@ public class KafkaFeedConsumer implements FeedConsumer {
                 String value = record.value();
 
                 entry = MessageSerializer.deserialize(value, FeedEntry.class);
+                LOG.trace("Feed event received: {}", value);
                 handler.accept(entry);
             }
+            consumer.commitSync();
 
         } catch (IOException e) {
             LOG.error("Error occurred while reading feed record! {}", entry);

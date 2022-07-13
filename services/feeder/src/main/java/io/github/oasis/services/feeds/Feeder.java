@@ -108,15 +108,20 @@ public class Feeder implements Consumer<FeedEntry>, Closeable {
     public void accept(FeedEntry feedEntry) {
         var scope = feedEntry.getScope();
 
-        feedDelivery.send(
-            FeedNotification.builder()
-                .version(VERSION)
-                .plugin(feedEntry.getByPlugin())
-                .type(feedEntry.getType())
-                .scope(createNotificationScope(scope))
-                .data(feedEntry.getData())
-                .build()
-        );
+        try {
+            feedDelivery.send(
+                    FeedNotification.builder()
+                            .version(VERSION)
+                            .plugin(feedEntry.getByPlugin())
+                            .type(feedEntry.getType())
+                            .scope(createNotificationScope(scope))
+                            .data(feedEntry.getData())
+                            .build()
+            );
+        } catch (Exception e) {
+            LOG.error("Cannot deliver feed record: {}", feedEntry);
+            LOG.error("Error occurred while delivering feed:", e);
+        }
     }
 
     private void addShutdownHook() {

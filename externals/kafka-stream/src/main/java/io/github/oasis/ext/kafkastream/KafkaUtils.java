@@ -112,6 +112,9 @@ final class KafkaUtils {
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId);
         props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST);
 
+        // disable auto commit
+        props.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, KafkaConstants.ConsumerConstants.DEFAULT_FEED_AUTO_COMMIT);
+
         return props;
     }
 
