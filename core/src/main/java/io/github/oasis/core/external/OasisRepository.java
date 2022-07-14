@@ -24,10 +24,7 @@ import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
-import io.github.oasis.core.model.EventSource;
-import io.github.oasis.core.model.EventSourceSecrets;
-import io.github.oasis.core.model.PlayerObject;
-import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.model.*;
 
 import java.util.List;
 
@@ -55,6 +52,8 @@ public interface OasisRepository {
     boolean existsGame(String gameName);
     Game readGameByName(String gameName);
     PaginatedResult<Game> listGames(String offset, int pageSize);
+    GameStatus readCurrentGameStatus(int gameId);
+    List<GameStatus> readGameStatusHistory(int gameId, long startFrom, long endTo);
 
     PlayerObject readPlayer(long userId);
     PlayerObject readPlayer(String email);

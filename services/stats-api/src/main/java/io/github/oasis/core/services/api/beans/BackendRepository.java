@@ -27,10 +27,7 @@ import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
-import io.github.oasis.core.model.EventSource;
-import io.github.oasis.core.model.EventSourceSecrets;
-import io.github.oasis.core.model.PlayerObject;
-import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.model.*;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import org.jdbi.v3.core.JdbiException;
@@ -169,6 +166,16 @@ public class BackendRepository implements OasisRepository {
     @Override
     public PaginatedResult<Game> listGames(String offset, int pageSize) {
         return adminRepository.listGames(offset, pageSize);
+    }
+
+    @Override
+    public GameStatus readCurrentGameStatus(int gameId) {
+        return adminRepository.readCurrentGameStatus(gameId);
+    }
+
+    @Override
+    public List<GameStatus> readGameStatusHistory(int gameId, long startFrom, long endTo) {
+        return adminRepository.readGameStatusHistory(gameId, startFrom, endTo);
     }
 
     //

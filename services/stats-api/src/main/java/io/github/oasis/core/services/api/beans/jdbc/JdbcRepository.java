@@ -27,21 +27,13 @@ import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
-import io.github.oasis.core.model.EventSource;
-import io.github.oasis.core.model.EventSourceSecrets;
-import io.github.oasis.core.model.PlayerObject;
-import io.github.oasis.core.model.TeamObject;
+import io.github.oasis.core.model.*;
 import io.github.oasis.core.services.SerializationSupport;
 import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.dao.IEventSourceDao;
 import io.github.oasis.core.services.api.dao.IGameDao;
 import io.github.oasis.core.services.api.dao.IPlayerTeamDao;
-import io.github.oasis.core.services.api.dao.dto.ElementDto;
-import io.github.oasis.core.services.api.dao.dto.ElementUpdateDto;
-import io.github.oasis.core.services.api.dao.dto.EventSourceDto;
-import io.github.oasis.core.services.api.dao.dto.EventSourceSecretsDto;
-import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
-import io.github.oasis.core.services.api.dao.dto.PlayerUpdatePart;
+import io.github.oasis.core.services.api.dao.dto.*;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import org.jdbi.v3.core.JdbiException;
@@ -242,6 +234,22 @@ public class JdbcRepository implements OasisRepository {
         return new PaginatedResult<>(String.valueOf(next), games);
     }
 
+    @Override
+    public GameStatus readCurrentGameStatus(int gameId) {
+        GameStatusDto dto = gameDao.readGameStatus(gameId);
+        if (dto == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.GAME_NOT_EXISTS);
+        }
+
+        return toGameStatus(gameId, dto);
+    }
+
+    @Override
+    public List<GameStatus> readGameStatusHistory(int gameId, long startFrom, long endTo) {
+        return gameDao.listGameStatusHistory(gameId, startFrom, endTo).stream()
+                .map(r -> toGameStatus(gameId, r))
+                .collect(Collectors.toList());
+    }
 
 
     @Override
@@ -482,5 +490,13 @@ public class JdbcRepository implements OasisRepository {
             resultDef.setData(serializationSupport.deserializeToMap(dto.getData()));
         }
         return resultDef;
+    }
+
+    private GameStatus toGameStatus(int gameId, GameStatusDto dto) {
+        var status = new GameStatus();
+        status.setStatus(dto.getStatus());
+        status.setGameId(gameId);
+        status.setUpdatedAt(dto.getUpdatedAt());
+        return status;
     }
 }

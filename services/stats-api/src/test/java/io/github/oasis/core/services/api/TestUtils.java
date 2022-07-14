@@ -88,6 +88,7 @@ public class TestUtils {
             connection.createStatement().execute("TRUNCATE TABLE OA_ELEMENT_DATA");
             connection.createStatement().execute("TRUNCATE TABLE OA_ATTRIBUTE_DEF");
             connection.createStatement().execute("TRUNCATE TABLE OA_GAME");
+            connection.createStatement().execute("TRUNCATE TABLE OA_GAME_STATUS");
             connection.createStatement().execute("TRUNCATE TABLE OA_EVENT_SOURCE");
             connection.createStatement().execute("TRUNCATE TABLE OA_EVENT_SOURCE_KEY");
             connection.createStatement().execute("TRUNCATE TABLE OA_EVENT_SOURCE_GAME");

@@ -4,7 +4,6 @@ SELECT
     description,
     motto,
     logo_ref AS logoRef,
-    status AS currentStatus,
     created_at AS createdAt,
     updated_at AS updatedAt,
     is_active As active

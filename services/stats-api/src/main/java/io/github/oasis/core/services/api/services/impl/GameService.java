@@ -26,6 +26,7 @@ import io.github.oasis.core.Game;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.external.messages.GameState;
+import io.github.oasis.core.model.GameStatus;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
@@ -34,13 +35,16 @@ import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
 import io.github.oasis.core.services.events.GameStatusChangeEvent;
 import io.github.oasis.core.services.exceptions.OasisApiException;
+import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Texts;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -68,13 +72,15 @@ public class GameService extends AbstractOasisService implements IGameService {
     }
 
     @Override
+    @Transactional
     public Game addGame(GameCreateRequest gameCreateRequest) throws OasisApiException {
         Game game = gameCreateRequest.createGame();
 
         validateGameObjectForCreation(game);
 
-        game.setCurrentStatus(GameState.CREATED.name());
-        return backendRepository.addNewGame(game);
+        Game dbGame = backendRepository.addNewGame(game);
+        backendRepository.updateGameStatus(dbGame.getId(), GameState.CREATED.name(), System.currentTimeMillis());
+        return dbGame;
     }
 
     @Override
@@ -120,25 +126,39 @@ public class GameService extends AbstractOasisService implements IGameService {
     }
 
     @Override
-    public Game changeStatusOfGameWithoutPublishing(int gameId, String newStatus, long updatedAt) throws OasisApiException {
+    public Game changeStatusOfGameWithoutPublishing(int gameId, String newStatus, Long updatedAt) throws OasisApiException {
         GameState gameState = validateGameState(newStatus);
+        long updatedTs = Numbers.ifNull(updatedAt, System.currentTimeMillis());
 
         Game game = backendRepository.readGame(gameId);
         if (game == null) {
             throw new OasisApiException(ErrorCodes.GAME_NOT_EXISTS, HttpStatus.NOT_FOUND.value(), "No game is found by id " + gameId);
         }
-        return backendRepository.updateGameStatus(gameId, gameState.name(), updatedAt);
+        return backendRepository.updateGameStatus(gameId, gameState.name(), updatedTs);
     }
 
     @Override
-    public Game changeStatusOfGame(int gameId, String newStatus, long updatedAt) throws OasisApiException {
+    public Game changeStatusOfGame(int gameId, String newStatus, Long updatedAt) throws OasisApiException {
         GameState gameState = validateGameState(newStatus);
+        long updatedTs = Numbers.ifNull(updatedAt, System.currentTimeMillis());
 
-        Game updatedGame = changeStatusOfGameWithoutPublishing(gameId, newStatus, updatedAt);
+        Game updatedGame = changeStatusOfGameWithoutPublishing(gameId, newStatus, updatedTs);
 
         GameStatusChangeEvent statusChangeEvent = new GameStatusChangeEvent(gameState, updatedGame);
         publisher.publishEvent(statusChangeEvent);
         return updatedGame;
+    }
+
+    @Override
+    public GameStatus getCurrentGameStatus(int gameId) {
+        return backendRepository.readCurrentGameStatus(gameId);
+    }
+
+    @Override
+    public List<GameStatus> listGameStatusHistory(int gameId, Long startFrom, Long endTo) {
+        long startTime = startFrom == null ? 0 : startFrom;
+        long endTime = endTo == null ? System.currentTimeMillis() : endTo;
+        return backendRepository.readGameStatusHistory(gameId, startTime, endTime);
     }
 
     private GameState validateGameState(String status) throws OasisApiException {

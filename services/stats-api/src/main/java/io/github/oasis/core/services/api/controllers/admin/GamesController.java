@@ -22,6 +22,7 @@ package io.github.oasis.core.services.api.controllers.admin;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.PaginatedResult;
+import io.github.oasis.core.model.GameStatus;
 import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
@@ -42,6 +43,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -119,6 +123,27 @@ public class GamesController extends AbstractController {
         return gameService.deleteGame(gameId);
     }
 
+    @Operation(
+            summary = "Gets the current status of game",
+            tags = {"player"}
+    )
+    @ForPlayer
+    @GetMapping(path = "/games/{gameId}/status")
+    public GameStatus readGameCurrentStatus(@PathVariable("gameId") Integer gameId) {
+        return gameService.getCurrentGameStatus(gameId);
+    }
+
+    @Operation(
+            summary = "Gets the status change history of a game",
+            tags = {"player"}
+    )
+    @ForPlayer
+    @GetMapping(path = "/games/{gameId}/status/history")
+    public List<GameStatus> readGameStatusHistory(@PathVariable("gameId") Integer gameId,
+                                                  @RequestParam(value = "startFrom", required = false) Long startFrom,
+                                                  @RequestParam(value = "endTo", required = false) Long endTo) {
+        return gameService.listGameStatusHistory(gameId, startFrom, endTo);
+    }
 
     @Operation(
             summary = "Updates the status of game",

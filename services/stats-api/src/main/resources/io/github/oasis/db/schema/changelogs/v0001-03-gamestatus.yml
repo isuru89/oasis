@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: drop_oa_game_status_column
+      author: isuruw
+      changes:
+        - dropColumn:
+            columnName: status
+            tableName: OA_GAME
+  - changeSet:
+      id: new_oa_game_status_column
+      author: isuruw
+      changes:
+        - createTable:
+            tableName: OA_GAME_STATUS
+            columns:
+              - column:
+                  name: game_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(32)
+              - column:
+                  name: updated_at
+                  type: bigint

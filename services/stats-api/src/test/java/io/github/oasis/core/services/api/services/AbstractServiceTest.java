@@ -83,6 +83,14 @@ public abstract class AbstractServiceTest {
         }
     }
 
+    protected void sleepSafe(long interval) {
+        try {
+            Thread.sleep(interval);
+        } catch (InterruptedException e) {
+            // ignored
+        }
+    }
+
     private ResultActions doCallWithBody(HttpMethod httpMethod, String pathUrl, Object body) throws Exception {
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.request(httpMethod, pathUrl)
                 .header(ApiConstants.APP_ID_HEADER, "root")

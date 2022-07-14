@@ -21,6 +21,7 @@ package io.github.oasis.core.services.api.dao;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.services.api.dao.configs.UseOasisSqlLocator;
+import io.github.oasis.core.services.api.dao.dto.GameStatusDto;
 import io.github.oasis.core.services.api.dao.dto.GameUpdatePart;
 import org.jdbi.v3.sqlobject.config.RegisterBeanMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;
@@ -36,11 +37,13 @@ import java.util.List;
  */
 @UseOasisSqlLocator("io/github/oasis/db/scripts/game")
 @RegisterBeanMapper(Game.class)
+@RegisterBeanMapper(GameStatusDto.class)
 public interface IGameDao {
 
     @SqlUpdate
     @GetGeneratedKeys("id")
-    int insertGame(@BindBean Game game, @Bind("ts") long timestamp);
+    int insertGame(@BindBean Game game,
+                   @Bind("ts") long timestamp);
 
     default int insertGame(Game game) {
         return insertGame(game, System.currentTimeMillis());
@@ -50,17 +53,30 @@ public interface IGameDao {
     Game readGame(@Bind("id") int gameId);
 
     @SqlUpdate
-    void updateGame(@Bind("id") int gameId, @BindBean GameUpdatePart gameNew, @Bind("ts") long ts);
+    void updateGame(@Bind("id") int gameId,
+                    @BindBean GameUpdatePart gameNew,
+                    @Bind("ts") long ts);
 
     @SqlUpdate
     void deleteGame(@Bind("id") int gameId);
 
     @SqlQuery
-    List<Game> listGames(@Bind("offset") int pageOffset, @Bind("pageSize") int pageSize);
+    List<Game> listGames(@Bind("offset") int pageOffset,
+                         @Bind("pageSize") int pageSize);
 
     @SqlQuery
     Game readGameByName(@Bind("name") String name);
 
     @SqlUpdate
-    void updateGameStatus(@Bind("id") int gameId, @Bind("newGameStatus") String newGameStatus, @Bind("ts") long statusChangedTs);
+    void updateGameStatus(@Bind("id") int gameId,
+                          @Bind("newGameStatus") String newGameStatus,
+                          @Bind("ts") long statusChangedTs);
+
+    @SqlQuery
+    GameStatusDto readGameStatus(@Bind("id") int gameId);
+
+    @SqlQuery
+    List<GameStatusDto> listGameStatusHistory(@Bind("id") int gameId,
+                                              @Bind("startTime") long startTime,
+                                              @Bind("endTime") long endTime);
 }

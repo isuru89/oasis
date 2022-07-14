@@ -35,12 +35,7 @@ import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
-import io.github.oasis.core.model.EventSource;
-import io.github.oasis.core.model.EventSourceMetadata;
-import io.github.oasis.core.model.EventSourceSecrets;
-import io.github.oasis.core.model.PlayerObject;
-import io.github.oasis.core.model.TeamObject;
-import io.github.oasis.core.model.UserAssociationInfo;
+import io.github.oasis.core.model.*;
 import io.github.oasis.core.services.SerializationSupport;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Texts;
@@ -252,7 +247,6 @@ public class RedisRepository implements OasisRepository {
     @Override
     public Game updateGameStatus(int gameId, String status, long updatedAt) {
         Game game = readGame(gameId);
-        game.setCurrentStatus(status);
         game.setUpdatedAt(updatedAt);
 
         return updateGame(gameId, game);
@@ -320,6 +314,16 @@ public class RedisRepository implements OasisRepository {
                     Texts.isEmpty(searchResult.getNextCursor()) ? null : searchResult.getNextCursor(),
                     games);
         });
+    }
+
+    @Override
+    public GameStatus readCurrentGameStatus(int gameId) {
+        throw new OasisRuntimeException("Redis does not support getting current status of game!");
+    }
+
+    @Override
+    public List<GameStatus> readGameStatusHistory(int gameId, long startFrom, long endTo) {
+        throw new OasisRuntimeException("Redis does not support getting history of status of a game!");
     }
 
     public Map<String, UserMetadata> readUsersByIdStrings(Collection<String> userIds) {

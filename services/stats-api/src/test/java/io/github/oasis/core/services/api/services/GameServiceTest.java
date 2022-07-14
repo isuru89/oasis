@@ -23,6 +23,7 @@ import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.model.EventSource;
+import io.github.oasis.core.model.GameStatus;
 import io.github.oasis.core.services.api.TestUtils;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.services.impl.GameService;
@@ -39,11 +40,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Isuru Weerarathna
@@ -62,7 +63,7 @@ public class GameServiceTest extends AbstractServiceTest {
     private ApplicationEventPublisher eventPublisher;
 
     private final GameCreateRequest stackOverflow = GameCreateRequest.builder()
-            .name("Stack-overflow")
+            .name("Stack-overflow \uD83D\uDC7D")
             .description("Stackoverflow badges and points system")
             .logoRef("https://oasis.io/assets/so.jpeg")
             .motto("Help the community")
@@ -81,12 +82,12 @@ public class GameServiceTest extends AbstractServiceTest {
         System.out.println(game);
         Assertions.assertNotNull(game);
         assertGame(game, stackOverflow);
-        assertEquals(GameState.CREATED.name(), game.getCurrentStatus());
+        assertCurrentGameStatus(game.getId(), "CREATED");
 
         System.out.println(promotions);
         Game pGame = doPostSuccess("/games", promotions, Game.class);
         assertGame(pGame, promotions);
-        assertEquals(GameState.CREATED.name(), pGame.getCurrentStatus());
+        assertCurrentGameStatus(game.getId(), "CREATED");
 
         doPostError("/games", stackOverflow, HttpStatus.BAD_REQUEST, ErrorCodes.GAME_ALREADY_EXISTS);
     }
@@ -120,7 +121,7 @@ public class GameServiceTest extends AbstractServiceTest {
                 .build();
         Game updatedGame = doPatchSuccess("/games/" + stackId, updateRequest, Game.class);
         assertGame(updatedGame, updateRequest);
-        assertEquals(GameState.CREATED.name(), updatedGame.getCurrentStatus());
+        assertCurrentGameStatus(stackId, "CREATED");
     }
 
     @Test
@@ -136,7 +137,7 @@ public class GameServiceTest extends AbstractServiceTest {
                 .build();
         Game updatedGame = doPatchSuccess("/games/" + stackId, updateRequest, Game.class);
         assertGame(updatedGame, updateRequest);
-        assertEquals(GameState.CREATED.name(), updatedGame.getCurrentStatus());
+        assertCurrentGameStatus(stackId, "CREATED");
     }
 
     @Test
@@ -145,7 +146,7 @@ public class GameServiceTest extends AbstractServiceTest {
         int stackId = stackGame.getId();
 
         Game updatedGame = doPutSuccess("/games/" + stackId + "/start", null, Game.class);
-        assertEquals(GameState.STARTED.name(), updatedGame.getCurrentStatus());
+        assertCurrentGameStatus(stackId, "STARTED");
     }
 
     @Test
@@ -191,6 +192,10 @@ public class GameServiceTest extends AbstractServiceTest {
         Mockito.reset(spy);
         assertNotNull(doDeleteSuccess("/games/" + stackId, Game.class));
 
+        // read back the game
+        var gameDeleted = doGetSuccess("/games/" + stackId, Game.class);
+        assertFalse(gameDeleted.isActive());
+
         assertTrue(doGetListSuccess("/admin/games/" + stackId + "/event-sources", EventSource.class).isEmpty());
         // but still event source must exist
 
@@ -202,7 +207,7 @@ public class GameServiceTest extends AbstractServiceTest {
 
         // game stopped message should dispatch
         ArgumentCaptor<GameStatusChangeEvent> eventArgumentCaptor = ArgumentCaptor.forClass(GameStatusChangeEvent.class);
-        assertEngineManagerOnceCalledWithState(spy, GameState.STOPPED, dbGame.toBuilder().currentStatus(GameState.STOPPED.name()).build(), eventArgumentCaptor);
+        assertEngineManagerOnceCalledWithState(spy, GameState.STOPPED, dbGame, eventArgumentCaptor);
     }
 
 
@@ -218,20 +223,55 @@ public class GameServiceTest extends AbstractServiceTest {
         ArgumentCaptor<GameStatusChangeEvent> eventArgumentCaptor = ArgumentCaptor.forClass(GameStatusChangeEvent.class);
 
         Mockito.reset(spy);
+        sleepSafe(10);
         Game gameRef = doPutSuccess("/games/" + stackId + "/start", null, Game.class);
         assertEngineManagerOnceCalledWithState(spy, GameState.STARTED, gameRef, eventArgumentCaptor);
 
         Mockito.reset(spy);
+        sleepSafe(10);
         gameRef = doPutSuccess("/games/" + stackId + "/stop", null, Game.class);
         assertEngineManagerOnceCalledWithState(spy, GameState.STOPPED, gameRef, eventArgumentCaptor);
 
         Mockito.reset(spy);
+        sleepSafe(10);
         gameRef = doPutSuccess("/games/" + stackId + "/pause", null, Game.class);
         assertEngineManagerOnceCalledWithState(spy, GameState.PAUSED, gameRef, eventArgumentCaptor);
+
+        assertCurrentGameStatus(stackId, "PAUSED");
 
         doPutError("/games/" + stackId + "/null", null, HttpStatus.BAD_REQUEST, ErrorCodes.GAME_UNKNOWN_STATE);
         doPutError("/games/" + stackId + "/", null, HttpStatus.METHOD_NOT_ALLOWED, null);
         doPutError("/games/" + stackId + "/hello", null, HttpStatus.BAD_REQUEST, ErrorCodes.GAME_UNKNOWN_STATE);
+
+        assertCurrentGameStatus(stackId, "PAUSED");
+    }
+
+    @Test
+    void testGameStatusHistory() {
+        int stackId = doPostSuccess("/games", stackOverflow, Game.class).getId();
+        doPutSuccess("/games/" + stackId + "/start", null, Game.class);
+        doPutSuccess("/games/" + stackId + "/pause", null, Game.class);
+
+        assertCurrentGameStatus(stackId, "PAUSED");
+        {
+            var list = doGetListSuccess("/games/" + stackId + "/status/history", GameStatus.class);
+            List<String> actual = list.stream()
+                    .sorted(Comparator.comparingLong(GameStatus::getUpdatedAt))
+                    .map(GameStatus::getStatus).collect(Collectors.toList());
+            List<String> expected = List.of("CREATED", "STARTED", "PAUSED");
+            assertEquals(expected, actual);
+        }
+
+        doPutSuccess("/games/" + stackId + "/start", null, Game.class);
+        assertCurrentGameStatus(stackId, "STARTED");
+        {
+            var list = doGetListSuccess("/games/" + stackId + "/status/history", GameStatus.class);
+            List<String> actual = list.stream()
+                    .sorted(Comparator.comparingLong(GameStatus::getUpdatedAt))
+                    .map(GameStatus::getStatus).collect(Collectors.toList());
+            List<String> expected = List.of("CREATED", "STARTED", "PAUSED", "STARTED");
+            assertEquals(expected, actual);
+        }
     }
 
     private void assertEngineManagerOnceCalledWithState(ApplicationEventPublisher publisher, GameState state, Game game, ArgumentCaptor<GameStatusChangeEvent> captor) {
@@ -243,6 +283,11 @@ public class GameServiceTest extends AbstractServiceTest {
         GameStatusChangeEvent value = captor.getValue();
         Assertions.assertEquals(state, value.getNewGameState());
         Assertions.assertEquals(game, value.getGameRef());
+    }
+
+    private void assertCurrentGameStatus(int gameId, String expectedStatus) {
+        var status = doGetSuccess("/games/" + gameId + "/status", GameStatus.class);
+        assertEquals(expectedStatus, status.getStatus());
     }
 
     private void assertGame(Game db, GameCreateRequest other) {

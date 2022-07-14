@@ -24,9 +24,12 @@ package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.external.PaginatedResult;
+import io.github.oasis.core.model.GameStatus;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
+
+import java.util.List;
 
 /**
  * Represents the functionality of the game related activities.
@@ -47,9 +50,11 @@ public interface IGameService {
 
     Game getGameByName(String name);
 
-    Game changeStatusOfGameWithoutPublishing(int gameId, String newStatus, long updatedAt) throws OasisApiException;
+    Game changeStatusOfGameWithoutPublishing(int gameId, String newStatus, Long updatedAt) throws OasisApiException;
 
-    Game changeStatusOfGame(int gameId, String newStatus, long updatedAt) throws OasisApiException;
+    Game changeStatusOfGame(int gameId, String newStatus, Long updatedAt) throws OasisApiException;
 
+    GameStatus getCurrentGameStatus(int gameId);
 
+    List<GameStatus> listGameStatusHistory(int gameId, Long startFrom, Long endTo);
 }
