@@ -105,6 +105,7 @@ public class PlayerTeamService extends AbstractOasisService implements IPlayerMa
             playerWithTeams.setTimeZone(playerObject.getTimeZone());
             playerWithTeams.setAvatarRef(playerObject.getAvatarRef());
             playerWithTeams.setActive(playerObject.isActive());
+            playerWithTeams.setVersion(playerObject.getVersion());
             playerWithTeams.setCreatedAt(playerObject.getCreatedAt());
             playerWithTeams.setUpdatedAt(playerObject.getUpdatedAt());
             List<TeamObject> teamsOfPlayer = getTeamsOfPlayer(playerObject.getId());
@@ -124,6 +125,7 @@ public class PlayerTeamService extends AbstractOasisService implements IPlayerMa
                 .gender(ObjectUtils.defaultIfNull(updatingUser.getGender(), dbPlayer.getGender()))
                 .timeZone(StringUtils.defaultIfBlank(updatingUser.getTimeZone(), dbPlayer.getTimeZone()))
                 .active(ObjectUtils.defaultIfNull(updatingUser.getIsActive(), Boolean.TRUE))
+                .version(updatingUser.getVersion())
                 .build();
 
         PlayerObject updatedPlayer = backendRepository.updatePlayer(playerId, playerUpdating);
@@ -176,6 +178,7 @@ public class PlayerTeamService extends AbstractOasisService implements IPlayerMa
         return backendRepository.updateTeam(teamId, dbTeam.toBuilder()
                 .avatarRef(ObjectUtils.defaultIfNull(request.getAvatarRef(), dbTeam.getAvatarRef()))
                 .colorCode(StringUtils.defaultIfBlank(request.getColorCode(), dbTeam.getColorCode()))
+                .version(request.getVersion())
                 .build());
     }
 

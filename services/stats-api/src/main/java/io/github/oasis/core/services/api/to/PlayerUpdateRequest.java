@@ -44,6 +44,7 @@ public class PlayerUpdateRequest implements Serializable {
     private String timeZone;
     private String avatarRef;
 
+    private int version;
     private Boolean isActive = Boolean.TRUE;
 
 }

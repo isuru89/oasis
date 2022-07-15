@@ -37,6 +37,7 @@ public class TeamObject {
     private String colorCode;
     private String avatarRef;
 
+    private int version;
     private long createdAt;
     private long updatedAt;
     private boolean active = true;

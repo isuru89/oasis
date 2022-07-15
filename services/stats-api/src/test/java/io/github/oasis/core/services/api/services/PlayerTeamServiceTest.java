@@ -173,6 +173,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         PlayerUpdateRequest toUpdateAlice = PlayerUpdateRequest.builder()
                 .displayName("new alice name")
                 .avatarRef("https://oasis.io/assets/alice_new.jpg")
+                .version(alice.getVersion())
                 .build();
 
         Mockito.reset(cacheClearanceListener);
@@ -182,6 +183,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         assertEquals(toUpdateAlice.getDisplayName(), aliceUpdated.getDisplayName());
         assertEquals(toUpdateAlice.getAvatarRef(), aliceUpdated.getAvatarRef());
         assertEquals(alice.getGender(), aliceUpdated.getGender());
+        assertEquals(alice.getVersion() + 1, aliceUpdated.getVersion());
     }
 
     @Test
@@ -227,6 +229,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
         PlayerUpdateRequest updateRequest = PlayerUpdateRequest.builder()
                 .isActive(true)
+                .version(bob.getVersion())
                 .build();
         callPlayerUpdate(bob.getId(), updateRequest);
 
@@ -280,10 +283,12 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         TeamUpdateRequest toBeUpdatedTeam = TeamUpdateRequest.builder()
                 .colorCode("#00ff00")
                 .avatarRef("https://oasis.io/assets/new_rr.jpeg")
+                .version(renegades.getVersion())
                 .build();
         TeamObject updatedTeam = callTeamUpdate(renegades.getId(), toBeUpdatedTeam);
         System.out.println(updatedTeam);
         assertTeamWithAnother(updatedTeam, toBeUpdatedTeam, renegades);
+        assertEquals(renegades.getVersion() + 1, updatedTeam.getVersion());
     }
 
     @Test

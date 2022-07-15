@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_col_version_element
+      author: isuruw
+      changes:
+        - addColumn:
+            tableName: OA_ELEMENT
+            columns:
+              - column:
+                  name: version
+                  type: int
+                  defaultValue: 1
+  - changeSet:
+      id: add_col_version_game
+      author: isuruw
+      changes:
+        - addColumn:
+            tableName: OA_GAME
+            columns:
+              - column:
+                  name: version
+                  type: int
+                  defaultValue: 1
+  - changeSet:
+      id: add_col_version_player
+      author: isuruw
+      changes:
+        - addColumn:
+            tableName: OA_PLAYER
+            columns:
+              - column:
+                  name: version
+                  type: int
+                  defaultValue: 1
+  - changeSet:
+      id: add_col_version_team
+      author: isuruw
+      changes:
+        - addColumn:
+            tableName: OA_TEAM
+            columns:
+              - column:
+                  name: version
+                  type: int
+                  defaultValue: 1

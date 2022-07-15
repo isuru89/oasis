@@ -43,6 +43,7 @@ public class Game implements Serializable {
     @EqualsAndHashCode.Include private String motto;
     @EqualsAndHashCode.Include private String description;
     @EqualsAndHashCode.Include private String logoRef;
+    @EqualsAndHashCode.Include private int version;
 
     private long createdAt;
     private long updatedAt;

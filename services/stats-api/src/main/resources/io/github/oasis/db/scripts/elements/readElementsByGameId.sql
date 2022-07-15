@@ -5,6 +5,7 @@ SELECT
     name AS elementName,
     def_id AS elementId,
     description AS elementDescription,
+    version AS version,
     is_active AS active
 FROM
     OA_ELEMENT

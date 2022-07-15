@@ -39,6 +39,8 @@ public class PlayerObject {
     private String timeZone;
     private String avatarRef;
 
+    private int version;
+
     private long createdAt;
     private Long updatedAt;
     private boolean active = true;

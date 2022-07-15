@@ -43,6 +43,7 @@ public class GameUpdateRequest implements Serializable {
     private String motto;
     private String description;
     private String logoRef;
+    private int version;
 
     public Game createGame() {
         return Game.builder()

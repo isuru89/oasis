@@ -6,6 +6,7 @@ SELECT
     oa.def_id AS elementId,
     oa.description AS elementDescription,
     oa.is_active AS active,
+    oa.version AS version,
     oad.def_data AS data
 FROM
     OA_ELEMENT oa

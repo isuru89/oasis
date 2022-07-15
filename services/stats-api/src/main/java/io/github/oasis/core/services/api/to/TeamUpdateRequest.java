@@ -38,4 +38,5 @@ public class TeamUpdateRequest implements Serializable {
     private String colorCode;
     private String avatarRef;
 
+    private int version;
 }
