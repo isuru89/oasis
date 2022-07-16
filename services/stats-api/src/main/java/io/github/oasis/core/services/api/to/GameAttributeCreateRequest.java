@@ -24,6 +24,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 /**
@@ -35,8 +38,13 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class GameAttributeCreateRequest implements Serializable {
 
+    @NotBlank(message = "Parameter 'name' is mandatory!")
+    @Size(message = "Game name must not exceed 32 characters in length!", min = 1, max = 32)
     private String name;
+
+    @Positive(message = "Parameter 'priority' must be a positive number!")
     private int priority;
+
     private String colorCode;
 
 }

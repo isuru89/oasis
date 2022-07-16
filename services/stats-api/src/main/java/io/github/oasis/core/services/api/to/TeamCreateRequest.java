@@ -24,6 +24,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 /**
@@ -35,8 +39,14 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class TeamCreateRequest implements Serializable {
 
+    @NotNull(message = "Parameter 'gameId' is mandatory")
+    @Positive(message = "Parameter 'gameId' must be a valid game id!")
     private Integer gameId;
+
+    @NotBlank(message = "Parameter 'name' is mandatory")
+    @Size(message = "Parameter 'name' must not exceed 255 characters", min = 1, max = 255)
     private String name;
+
     private String colorCode;
     private String avatarRef;
 

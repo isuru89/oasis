@@ -22,13 +22,14 @@ package io.github.oasis.core.services.api.services;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.elements.ElementDef;
-import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.api.TestUtils;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.to.ElementCreateRequest;
+import io.github.oasis.core.services.api.to.ElementCreateRequest.ElementMetadata;
 import io.github.oasis.core.services.api.to.ElementUpdateRequest;
 import io.github.oasis.core.services.api.to.GameAttributeCreateRequest;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -39,12 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Isuru Weerarathna
@@ -89,11 +85,46 @@ public class ElementServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    void testAddValidations() {
+        // game id validations
+        doPostError(DEF_ELEMENTS_URL, samplePoint.toBuilder().gameId(null).build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError(DEF_ELEMENTS_URL, samplePoint.toBuilder().gameId(-1).build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError(DEF_ELEMENTS_URL, samplePoint.toBuilder().gameId(0).build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        // type validations
+        doPostError(DEF_ELEMENTS_URL, samplePoint.toBuilder().type(null).build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError(DEF_ELEMENTS_URL, samplePoint.toBuilder().type("").build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        // metadata validations
+        doPostError(DEF_ELEMENTS_URL, samplePoint.toBuilder().metadata(null).build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError(DEF_ELEMENTS_URL, samplePoint.toBuilder()
+                .metadata(ElementMetadata.builder().name("point-name").build())
+                .build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError(DEF_ELEMENTS_URL, samplePoint.toBuilder()
+                        .metadata(ElementMetadata.builder().id("pointid").build())
+                        .build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        // data field
+        doPostError(DEF_ELEMENTS_URL, samplePoint.toBuilder().data(null).build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError(DEF_ELEMENTS_URL, samplePoint.toBuilder().data(Map.of()).build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+    }
+
+    @Test
     void testAddWithInvalidSpec() {
         doPostError(DEF_ELEMENTS_URL, ElementCreateRequest.builder()
                 .gameId(1)
                 .type("core:badge")
-                .metadata(new SimpleElementDefinition("test.badge", "Mega badge", "another description"))
+                .metadata(new ElementMetadata("test.badge", "Mega badge", "another description"))
                 .data(Map.of("f3", "v3", "f4", "v4", "f9", 3))
                 .build(),
                 HttpStatus.BAD_REQUEST, ErrorCodes.ELEMENT_SPEC_INVALID);
@@ -104,7 +135,7 @@ public class ElementServiceTest extends AbstractServiceTest {
         doPostError(DEF_ELEMENTS_URL, ElementCreateRequest.builder()
                         .gameId(1)
                         .type("core:unknown")
-                        .metadata(new SimpleElementDefinition("test.badge", "Mega badge", "another description"))
+                        .metadata(new ElementMetadata("test.badge", "Mega badge", "another description"))
                         .data(Map.of("f3", "v3", "f4", "v4", "f9", 3))
                         .build(),
                 HttpStatus.BAD_REQUEST, ErrorCodes.ELEMENT_SPEC_INVALID);
@@ -151,6 +182,7 @@ public class ElementServiceTest extends AbstractServiceTest {
         ElementUpdateRequest uReq = new ElementUpdateRequest();
         uReq.setName("unknown name");
         uReq.setDescription("unknown des");
+        uReq.setVersion(1);
         doPatchError("/games/" + GAME_ID + "/elements/non.existing.id", uReq, HttpStatus.NOT_FOUND, ErrorCodes.ELEMENT_NOT_EXISTS);
     }
 
@@ -167,9 +199,27 @@ public class ElementServiceTest extends AbstractServiceTest {
             doPatchError(
                     "/games/" + GAME_ID + "/elements/" + addedPoint.getElementId(),
                     request,
+                    HttpStatus.BAD_REQUEST,
+                    ErrorCodes.INVALID_PARAMETER);
+        }
+
+        {
+            ElementUpdateRequest request = new ElementUpdateRequest();
+            request.setName("Star Points 234");
+            request.setDescription("buha buha buha buha");
+            request.setVersion(addedPoint.getVersion() + 100);
+            assertNotEquals(request.getName(), addedPoint.getMetadata().getName());
+            assertNotEquals(request.getDescription(), addedPoint.getMetadata().getDescription());
+
+            doPatchError(
+                    "/games/" + GAME_ID + "/elements/" + addedPoint.getElementId(),
+                    request,
                     HttpStatus.CONFLICT,
                     ErrorCodes.ELEMENT_UPDATE_CONFLICT);
         }
+
+        var dbElement = callElementGet(GAME_ID, addedPoint.getMetadata().getId(), false);
+        assertElement(dbElement, samplePoint, false);
     }
 
     @Test
@@ -245,6 +295,21 @@ public class ElementServiceTest extends AbstractServiceTest {
 
         // can add same attribute to different game
         doPostSuccess("/games/2/attributes", gold, AttributeInfo.class);
+    }
+
+    @Test
+    void testAddAttributesValidations() {
+        doPostError("/games/" + GAME_ID + "/attributes",
+                gold.toBuilder().name(null).build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        doPostError("/games/" + GAME_ID + "/attributes",
+                gold.toBuilder().name("").build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        doPostError("/games/" + GAME_ID + "/attributes",
+                gold.toBuilder().name(RandomStringUtils.randomAscii(33)).build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
     }
 
     @Test

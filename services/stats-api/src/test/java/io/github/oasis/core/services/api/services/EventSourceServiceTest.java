@@ -28,6 +28,7 @@ import io.github.oasis.core.services.api.handlers.events.EntityChangeType;
 import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -39,11 +40,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Isuru Weerarathna
@@ -75,7 +72,20 @@ public class EventSourceServiceTest extends AbstractServiceTest {
         assertSource(dbSource, source, true);
 
         doPostError("/admin/event-sources", source, HttpStatus.BAD_REQUEST, ErrorCodes.EVENT_SOURCE_ALREADY_EXISTS);
-        doPostError("/admin/event-sources", new EventSourceCreateRequest(""), HttpStatus.BAD_REQUEST, ErrorCodes.EVENT_SOURCE_NO_NAME);
+    }
+
+    @Test
+    void testRegisterEventSourceValidations() {
+        EventSourceCreateRequest source = new EventSourceCreateRequest("test-1");
+        EventSource dbSource = doPostSuccess("/admin/event-sources", source, EventSource.class);
+
+        doPostError("/admin/event-sources", new EventSourceCreateRequest(""), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError("/admin/event-sources", new EventSourceCreateRequest(null), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError("/admin/event-sources", new EventSourceCreateRequest(RandomStringUtils.randomAscii(65)), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        doPostError("/admin/event-sources", new EventSourceCreateRequest("0numberstart"), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError("/admin/event-sources", new EventSourceCreateRequest("invalidchar@#"), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError("/admin/event-sources", new EventSourceCreateRequest("with space"), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
     }
 
     @Test

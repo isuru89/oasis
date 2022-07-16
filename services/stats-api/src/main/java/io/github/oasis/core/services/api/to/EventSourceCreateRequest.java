@@ -24,6 +24,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 /**
@@ -35,6 +38,10 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class EventSourceCreateRequest implements Serializable {
 
+    @NotBlank(message = "Parameter 'name' is mandatory!")
+    @Size(message = "Event source name must not exceed 64 characters in length!", min = 1, max = 64)
+    @Pattern(regexp = "[a-zA-Z][a-zA-Z\\d-_]+",
+            message = "Event source name should only contain alphanumeric, -, _ characters only")
     private String name;
 
 }

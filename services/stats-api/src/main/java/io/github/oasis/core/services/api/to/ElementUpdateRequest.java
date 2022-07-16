@@ -21,6 +21,7 @@ package io.github.oasis.core.services.api.to;
 
 import lombok.Data;
 
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 
 /**
@@ -31,6 +32,8 @@ public class ElementUpdateRequest implements Serializable {
 
     private String name;
     private String description;
+
+    @Positive(message = "The 'version' field must be specified to represent updating entity!")
     private int version;
 
 }

@@ -32,6 +32,7 @@ import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
 import io.github.oasis.core.services.events.GameStatusChangeEvent;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -93,6 +94,13 @@ public class GameServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    void addGameValidations() {
+        doPostError("/games", stackOverflow.toBuilder().name(null).build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError("/games", stackOverflow.toBuilder().name("").build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError("/games", stackOverflow.toBuilder().name(RandomStringUtils.randomAscii(256)).build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+    }
+
+    @Test
     void listGames() {
         assertEquals(0, doGetPaginatedSuccess("/games", Game.class).getRecords().size());
 
@@ -139,7 +147,7 @@ public class GameServiceTest extends AbstractServiceTest {
                     .description("new description")
                     .logoRef("new logo ref")
                     .build();
-            doPatchError("/games/" + stackId, updateRequest, HttpStatus.CONFLICT, ErrorCodes.GAME_UPDATE_CONFLICT);
+            doPatchError("/games/" + stackId, updateRequest, HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
         }
 
         {
@@ -243,6 +251,13 @@ public class GameServiceTest extends AbstractServiceTest {
         assertEngineManagerOnceCalledWithState(spy, GameState.STOPPED, dbGame, eventArgumentCaptor);
     }
 
+    @Test
+    void deleteNonExistingGame() {
+        int stackId = doPostSuccess("/games", stackOverflow, Game.class).getId();
+        doGetSuccess("/games/" + stackId, Game.class);
+
+        doDeletetError("/games/999999", HttpStatus.NOT_FOUND, ErrorCodes.GAME_NOT_EXISTS);
+    }
 
     @Test
     void updateGameStatus() {
@@ -283,6 +298,7 @@ public class GameServiceTest extends AbstractServiceTest {
     void testGameStatusHistory() {
         int stackId = doPostSuccess("/games", stackOverflow, Game.class).getId();
 
+        sleepSafe(10);
         doPutSuccess("/games/" + stackId + "/start", null, Game.class);
         sleepSafe(10);
         doPutSuccess("/games/" + stackId + "/pause", null, Game.class);

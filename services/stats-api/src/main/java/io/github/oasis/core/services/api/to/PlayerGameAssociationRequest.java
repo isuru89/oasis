@@ -24,6 +24,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 
 /**
@@ -36,7 +38,13 @@ import java.io.Serializable;
 public class PlayerGameAssociationRequest implements Serializable {
 
     private Long userId;
+
+    @NotNull(message = "Parameter 'gameId' is mandatory!")
+    @Positive(message = "Parameter 'gameId' must be a valid game id!")
     private Integer gameId;
+
+    @NotNull(message = "Parameter 'teamId' is mandatory!")
+    @Positive(message = "Parameter 'teamId' must be a valid team id!")
     private Integer teamId;
 
 }

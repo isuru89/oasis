@@ -30,13 +30,9 @@ import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.handlers.CacheClearanceListener;
 import io.github.oasis.core.services.api.handlers.events.BasePlayerRelatedEvent;
 import io.github.oasis.core.services.api.handlers.events.EntityChangeType;
-import io.github.oasis.core.services.api.to.GameCreateRequest;
-import io.github.oasis.core.services.api.to.PlayerCreateRequest;
-import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
-import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
-import io.github.oasis.core.services.api.to.TeamCreateRequest;
-import io.github.oasis.core.services.api.to.TeamUpdateRequest;
+import io.github.oasis.core.services.api.to.*;
 import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -48,10 +44,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Isuru Weerarathna
@@ -120,6 +113,41 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    void addPlayerValidations() {
+        // without name
+        doPostError("/players", PlayerCreateRequest.builder()
+                .email("alice@oasis.io")
+                .timeZone("America/New_York")
+                .avatarRef("https://oasis.io/assets/alice.png")
+                .gender(UserGender.FEMALE)
+                .build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        // without email
+        doPostError("/players", PlayerCreateRequest.builder()
+                .timeZone("America/New_York")
+                .displayName("alice88")
+                .avatarRef("https://oasis.io/assets/alice.png")
+                .gender(UserGender.FEMALE)
+                .build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        // without timezone
+        doPostError("/players", PlayerCreateRequest.builder()
+                .email("alice@oasis.io")
+                .displayName("alice88")
+                .avatarRef("https://oasis.io/assets/alice.png")
+                .gender(UserGender.FEMALE)
+                .build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        // without gender
+        doPostError("/players", PlayerCreateRequest.builder()
+                .email("alice@oasis.io")
+                .displayName("alice88")
+                .timeZone("America/New_York")
+                .avatarRef("https://oasis.io/assets/alice.png")
+                .build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+    }
+
+    @Test
     void readPlayer() {
         PlayerObject bob = callPlayerAdd(reqBob);
         System.out.println(bob);
@@ -184,6 +212,46 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         assertEquals(toUpdateAlice.getAvatarRef(), aliceUpdated.getAvatarRef());
         assertEquals(alice.getGender(), aliceUpdated.getGender());
         assertEquals(alice.getVersion() + 1, aliceUpdated.getVersion());
+    }
+
+    @Test
+    void updatePlayerWithoutVersion() {
+        PlayerObject alice = callPlayerAdd(reqAlice);
+
+        assertNotNull(doGetSuccess("/players?verbose=true&email=" + reqAlice.getEmail(), PlayerWithTeams.class));
+
+        doPatchError("/players/" + alice.getId(), PlayerUpdateRequest.builder()
+                .displayName("new alice name")
+                .avatarRef("https://oasis.io/assets/alice_new.jpg")
+                .build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        doPatchError("/players/" + alice.getId(), PlayerUpdateRequest.builder()
+                .displayName("new alice name")
+                .avatarRef("https://oasis.io/assets/alice_new.jpg")
+                .version(alice.getVersion() + 10)
+                .build(),
+                HttpStatus.CONFLICT, ErrorCodes.PLAYER_UPDATE_CONFLICT);
+
+        PlayerObject dbAlice = doGetSuccess("/players/" + alice.getId(), PlayerObject.class);
+        assertEquals(dbAlice.getDisplayName(), alice.getDisplayName());
+        assertEquals(dbAlice.getAvatarRef(), alice.getAvatarRef());
+    }
+
+    @Test
+    void updateNonExistPlayer() {
+        PlayerObject alice = callPlayerAdd(reqAlice);
+
+        doPatchError("/players/" + (alice.getId()+500), PlayerUpdateRequest.builder()
+                        .displayName("new alice name")
+                        .avatarRef("https://oasis.io/assets/alice_new.jpg")
+                        .version(alice.getVersion())
+                        .build(),
+                HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+
+        PlayerObject dbAlice = doGetSuccess("/players/" + alice.getId(), PlayerObject.class);
+        assertEquals(dbAlice.getDisplayName(), alice.getDisplayName());
+        assertEquals(dbAlice.getAvatarRef(), alice.getAvatarRef());
     }
 
     @Test
@@ -255,6 +323,19 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    void addTeamValidations() {
+        // name validations
+        doPostError("/teams", teamWarriors.toBuilder().name(null).build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError("/teams", teamWarriors.toBuilder().name("").build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError("/teams", teamWarriors.toBuilder().name(RandomStringUtils.randomAscii(256)).build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        // game id validations
+        doPostError("/teams", teamWarriors.toBuilder().gameId(null).build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError("/teams", teamWarriors.toBuilder().gameId(-1).build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        doPostError("/teams", teamWarriors.toBuilder().gameId(0).build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+    }
+
+    @Test
     void readTeam() {
         TeamObject warriors = callTeamAdd(teamWarriors);
         System.out.println(warriors);
@@ -292,6 +373,42 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    void updateTeamWithoutVersion() {
+        TeamObject renegades = callTeamAdd(teamRenegades);
+
+        doPatchError("/teams/" + renegades.getId(), TeamUpdateRequest.builder()
+                .colorCode("#00ff00")
+                .avatarRef("https://oasis.io/assets/new_rr.jpeg")
+                .build(),
+                HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+        doPatchError("/teams/" + renegades.getId(), TeamUpdateRequest.builder()
+                .colorCode("#00ff00")
+                .avatarRef("https://oasis.io/assets/new_rr.jpeg")
+                .version(renegades.getVersion() + 100)
+                .build(),
+                HttpStatus.CONFLICT, ErrorCodes.TEAM_UPDATE_CONFLICT);
+
+        TeamObject dbTeam = doGetSuccess("/teams/" + renegades.getId(), TeamObject.class);
+        assertTeamWithAnother(dbTeam, teamRenegades);
+    }
+
+    @Test
+    void updateNonExistTeam() {
+        TeamObject renegades = callTeamAdd(teamRenegades);
+
+        doPatchError("/teams/" + (renegades.getId() + 500), TeamUpdateRequest.builder()
+                        .colorCode("#00ff00")
+                        .avatarRef("https://oasis.io/assets/new_rr.jpeg")
+                        .version(renegades.getVersion())
+                        .build(),
+                HttpStatus.NOT_FOUND, ErrorCodes.TEAM_NOT_EXISTS);
+
+        TeamObject dbTeam = doGetSuccess("/teams/" + renegades.getId(), TeamObject.class);
+        assertTeamWithAnother(dbTeam, teamRenegades);
+    }
+
+    @Test
     void addPlayerToTeam() {
         Integer gameId1 = callAddGame(stackOverflow).getId();
         Integer gameId2 = callAddGame(promotions).getId();
@@ -323,6 +440,29 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
         Integer gameId = callAddGame(stackOverflow).getId();
         PlayerObject alice = callPlayerAdd(reqAlice);
         TeamObject renegades = callTeamAdd(teamRenegades);
+
+        // validations in request
+        {
+            doPostError("/players/" + alice.getId() + "/teams",
+                    PlayerGameAssociationRequest.builder().gameId(null).teamId(renegades.getId()).userId(alice.getId()).build(),
+                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+            doPostError("/players/" + alice.getId() + "/teams",
+                    PlayerGameAssociationRequest.builder().gameId(-1).teamId(renegades.getId()).userId(alice.getId()).build(),
+                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+            doPostError("/players/" + alice.getId() + "/teams",
+                    PlayerGameAssociationRequest.builder().gameId(0).teamId(renegades.getId()).userId(alice.getId()).build(),
+                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+
+            doPostError("/players/" + alice.getId() + "/teams",
+                    PlayerGameAssociationRequest.builder().gameId(gameId).teamId(null).userId(alice.getId()).build(),
+                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+            doPostError("/players/" + alice.getId() + "/teams",
+                    PlayerGameAssociationRequest.builder().gameId(gameId).teamId(-1).userId(alice.getId()).build(),
+                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+            doPostError("/players/" + alice.getId() + "/teams",
+                    PlayerGameAssociationRequest.builder().gameId(gameId).teamId(0).userId(alice.getId()).build(),
+                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+        }
 
         callAddPlayerToTeam(alice.getId(), gameId, renegades.getId());
 
