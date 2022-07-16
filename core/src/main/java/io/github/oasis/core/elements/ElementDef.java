@@ -40,6 +40,7 @@ public class ElementDef implements Serializable {
     private String type;
     private Integer gameId;
     private String elementId;
+    private int version;
     private SimpleElementDefinition metadata;
     private Map<String, Object> data;
 

@@ -47,6 +47,7 @@ public class ElementDto implements Serializable {
     private String elementName;
     private String elementDescription;
 
+    private int version;
     private boolean active;
 
     private byte[] data;
@@ -69,6 +70,7 @@ public class ElementDto implements Serializable {
                 .elementId(elementId)
                 .type(type)
                 .gameId(gameId)
+                .version(version)
                 .metadata(meta)
                 .build();
     }

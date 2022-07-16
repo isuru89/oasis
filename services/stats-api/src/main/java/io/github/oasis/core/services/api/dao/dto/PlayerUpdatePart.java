@@ -36,6 +36,7 @@ public class PlayerUpdatePart implements Serializable {
     private String avatarRef;
     private int gender;
     private boolean active;
+    private int version;
 
     public static PlayerUpdatePart from(PlayerObject playerObject) {
         PlayerUpdatePart part = new PlayerUpdatePart();
@@ -43,6 +44,7 @@ public class PlayerUpdatePart implements Serializable {
         part.setDisplayName(playerObject.getDisplayName());
         part.setAvatarRef(playerObject.getAvatarRef());
         part.setActive(playerObject.isActive());
+        part.setVersion(playerObject.getVersion());
         return part;
     }
 

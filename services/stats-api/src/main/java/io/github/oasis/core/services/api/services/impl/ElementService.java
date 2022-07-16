@@ -84,7 +84,11 @@ public class ElementService extends AbstractOasisService implements IElementServ
 
     @Override
     public ElementDef updateElement(int gameId, String elementId, ElementUpdateRequest updateRequest) {
-        SimpleElementDefinition metadata = new SimpleElementDefinition(elementId, updateRequest.getName(), updateRequest.getDescription());
+        SimpleElementDefinition metadata = new SimpleElementDefinition(
+                elementId,
+                updateRequest.getName(),
+                updateRequest.getDescription(),
+                updateRequest.getVersion());
         return backendRepository.updateElement(gameId, elementId, metadata);
     }
 

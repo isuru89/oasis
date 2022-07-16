@@ -22,6 +22,7 @@
 
 package io.github.oasis.core.services.api.beans;
 
+import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.model.PlayerObject;
@@ -110,7 +111,10 @@ public class MetadataReadTest extends AbstractServiceTest {
         Mockito.verify(spy, Mockito.never()).readPlayer(Mockito.anyLong());
 
         // npw update user, so cache should clear
-        PlayerUpdateRequest aliceUpdated = PlayerUpdateRequest.builder().displayName("alice updated").build();
+        PlayerUpdateRequest aliceUpdated = PlayerUpdateRequest.builder()
+                .displayName("alice updated")
+                .version(alice.getVersion())
+                .build();
         playerManagementService.updatePlayer(alice.getId(), aliceUpdated);
 
         Mockito.reset(spy);
@@ -149,7 +153,10 @@ public class MetadataReadTest extends AbstractServiceTest {
         Mockito.verify(spy, Mockito.never()).readTeam(Mockito.anyInt());
 
         // npw update team, so cache should clear
-        TeamUpdateRequest warriorUpdated = TeamUpdateRequest.builder().colorCode("#ff0000").build();
+        TeamUpdateRequest warriorUpdated = TeamUpdateRequest.builder()
+                .colorCode("#ff0000")
+                .version(warriors.getVersion())
+                .build();
         teamManagementService.updateTeam(warriors.getId(), warriorUpdated);
 
         Mockito.reset(spy);
@@ -197,8 +204,11 @@ public class MetadataReadTest extends AbstractServiceTest {
         ElementCreateRequest samplePoint = TestUtils.findById("testpoint", elementCreateRequests);
         ElementCreateRequest sampleBadge = TestUtils.findById("testbadge", elementCreateRequests);
 
-        String point1Id = elementService.addElement(1, samplePoint).getElementId();
-        String badge1Id = elementService.addElement(1, sampleBadge).getElementId();
+        ElementDef point1Ref = elementService.addElement(1, samplePoint);
+        ElementDef badge1Ref = elementService.addElement(1, sampleBadge);
+
+        String point1Id = point1Ref.getElementId();
+        String badge1Id = badge1Ref.getElementId();
 
         // single metadata element
 
@@ -231,6 +241,7 @@ public class MetadataReadTest extends AbstractServiceTest {
         ElementUpdateRequest pointUpdateReq = new ElementUpdateRequest();
         pointUpdateReq.setDescription("A updated description");
         pointUpdateReq.setName(samplePoint.getMetadata().getName());
+        pointUpdateReq.setVersion(point1Ref.getVersion());
         elementService.updateElement(1, samplePoint.getMetadata().getId(), pointUpdateReq);
 
         Mockito.reset(spy);

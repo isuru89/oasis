@@ -138,10 +138,11 @@ public class ElementServiceTest extends AbstractServiceTest {
             ElementUpdateRequest request = new ElementUpdateRequest();
             request.setName("Star Points 234");
             request.setDescription("buha buha buha buha");
+            request.setVersion(addedPoint.getVersion());
             assertNotEquals(request.getName(), addedPoint.getMetadata().getName());
             assertNotEquals(request.getDescription(), addedPoint.getMetadata().getDescription());
 
-            ElementDef updatedElements = callElementPatch(GAME_ID, samplePoint.getMetadata().getId(), request);
+            ElementDef updatedElements = callElementPatch(GAME_ID, addedPoint.getMetadata().getId(), request);
             assertEquals(request.getName(), updatedElements.getMetadata().getName());
             assertEquals(request.getDescription(), updatedElements.getMetadata().getDescription());
             assertEquals(samplePoint.getMetadata().getId(), updatedElements.getMetadata().getId());
@@ -151,6 +152,24 @@ public class ElementServiceTest extends AbstractServiceTest {
         uReq.setName("unknown name");
         uReq.setDescription("unknown des");
         doPatchError("/games/" + GAME_ID + "/elements/non.existing.id", uReq, HttpStatus.NOT_FOUND, ErrorCodes.ELEMENT_NOT_EXISTS);
+    }
+
+    @Test
+    void testUpdateFailWhenNoVersion() {
+        ElementDef addedPoint = callElementPost(GAME_ID, samplePoint);
+        {
+            ElementUpdateRequest request = new ElementUpdateRequest();
+            request.setName("Star Points 234");
+            request.setDescription("buha buha buha buha");
+            assertNotEquals(request.getName(), addedPoint.getMetadata().getName());
+            assertNotEquals(request.getDescription(), addedPoint.getMetadata().getDescription());
+
+            doPatchError(
+                    "/games/" + GAME_ID + "/elements/" + addedPoint.getElementId(),
+                    request,
+                    HttpStatus.CONFLICT,
+                    ErrorCodes.ELEMENT_UPDATE_CONFLICT);
+        }
     }
 
     @Test

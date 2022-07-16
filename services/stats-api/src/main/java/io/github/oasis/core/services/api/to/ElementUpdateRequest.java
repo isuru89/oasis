@@ -31,5 +31,6 @@ public class ElementUpdateRequest implements Serializable {
 
     private String name;
     private String description;
+    private int version;
 
 }

@@ -90,6 +90,7 @@ public class GameService extends AbstractOasisService implements IGameService {
                 .motto(StringUtils.defaultIfEmpty(updateRequest.getMotto(), dbGame.getMotto()))
                 .logoRef(ObjectUtils.defaultIfNull(updateRequest.getLogoRef(), dbGame.getLogoRef()))
                 .description(StringUtils.defaultIfEmpty(updateRequest.getDescription(), dbGame.getDescription()))
+                .version(updateRequest.getVersion())
                 .build();
 
         return backendRepository.updateGame(gameId, updatingGame);

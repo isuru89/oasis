@@ -188,6 +188,10 @@ public class JdbcRepository implements OasisRepository {
             throw new OasisApiRuntimeException(ErrorCodes.GAME_NOT_EXISTS);
         }
 
+        if (toBeUpdatedGame.getVersion() != game.getVersion()) {
+            throw new OasisApiRuntimeException(ErrorCodes.GAME_UPDATE_CONFLICT, HttpStatus.CONFLICT);
+        }
+
         GameUpdatePart gameUpdatePart = GameUpdatePart.from(game);
         gameDao.updateGame(gameId, gameUpdatePart, System.currentTimeMillis());
         return gameDao.readGame(gameId);
@@ -293,7 +297,11 @@ public class JdbcRepository implements OasisRepository {
     @CacheEvict(value = ID.CACHE_USERS_META, key = "#playerId")
     @Override
     public PlayerObject updatePlayer(long playerId, PlayerObject updatedPlayer) {
-        playerTeamDao.updatePlayer(playerId, PlayerUpdatePart.from(updatedPlayer));
+        int updatedRecords = playerTeamDao.updatePlayer(playerId, PlayerUpdatePart.from(updatedPlayer));
+        if (updatedRecords == 0) {
+            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_UPDATE_CONFLICT);
+        }
+
         return playerTeamDao.readPlayer(playerId);
     }
 
@@ -333,7 +341,11 @@ public class JdbcRepository implements OasisRepository {
     @CacheEvict(value = ID.CACHE_TEAMS_META, key = "#teamId")
     @Override
     public TeamObject updateTeam(int teamId, TeamObject updatedTeam) {
-        playerTeamDao.updateTeam(teamId, updatedTeam);
+        int updatedRecords = playerTeamDao.updateTeam(teamId, updatedTeam);
+        if (updatedRecords < 1) {
+            throw new OasisApiRuntimeException(ErrorCodes.TEAM_UPDATE_CONFLICT);
+        }
+
         return playerTeamDao.readTeam(teamId);
     }
 
@@ -407,9 +419,14 @@ public class JdbcRepository implements OasisRepository {
             throw new OasisApiRuntimeException(ErrorCodes.ELEMENT_NOT_EXISTS, HttpStatus.NOT_FOUND);
         }
 
+        if (dbDef.getVersion() != elementDef.getVersion()) {
+            throw new OasisApiRuntimeException(ErrorCodes.ELEMENT_UPDATE_CONFLICT, HttpStatus.CONFLICT);
+        }
+
         ElementUpdateDto dto = new ElementUpdateDto();
         dto.setName(elementDef.getName());
         dto.setDescription(elementDef.getDescription());
+        dto.setVersion(elementDef.getVersion());
 
         elementDao.updateElement(id, dto, System.currentTimeMillis());
         return toElementDef(elementDao.readElement(id));

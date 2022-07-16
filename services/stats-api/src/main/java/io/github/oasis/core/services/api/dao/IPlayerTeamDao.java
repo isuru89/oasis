@@ -57,10 +57,10 @@ public interface IPlayerTeamDao {
     }
 
     @SqlUpdate
-    void updatePlayer(@Bind("id") long playerId, @BindBean PlayerUpdatePart updateData, @Bind("ts") long ts);
+    int updatePlayer(@Bind("id") long playerId, @BindBean PlayerUpdatePart updateData, @Bind("ts") long ts);
 
-    default void updatePlayer(long playerId, PlayerUpdatePart updateData) {
-        updatePlayer(playerId, updateData, System.currentTimeMillis());
+    default int updatePlayer(long playerId, PlayerUpdatePart updateData) {
+        return updatePlayer(playerId, updateData, System.currentTimeMillis());
     }
 
     @Transaction
@@ -87,10 +87,10 @@ public interface IPlayerTeamDao {
     TeamObject readTeamByName(@Bind("name") String name);
 
     @SqlUpdate
-    void updateTeam(@Bind("id") int teamId, @BindBean TeamObject teamObject, @Bind("ts") long ts);
+    int updateTeam(@Bind("id") int teamId, @BindBean TeamObject teamObject, @Bind("ts") long ts);
 
-    default void updateTeam(int teamId, TeamObject teamObject) {
-        updateTeam(teamId, teamObject, System.currentTimeMillis());
+    default int updateTeam(int teamId, TeamObject teamObject) {
+        return updateTeam(teamId, teamObject, System.currentTimeMillis());
     }
 
     @SqlQuery

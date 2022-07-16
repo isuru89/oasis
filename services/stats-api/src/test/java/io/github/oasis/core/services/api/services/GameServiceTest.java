@@ -118,10 +118,41 @@ public class GameServiceTest extends AbstractServiceTest {
                 .motto("new motto")
                 .description("new description")
                 .logoRef("new logo ref")
+                .version(stackGame.getVersion())
                 .build();
         Game updatedGame = doPatchSuccess("/games/" + stackId, updateRequest, Game.class);
         assertGame(updatedGame, updateRequest);
+        assertEquals(stackGame.getVersion() + 1, updatedGame.getVersion());
         assertCurrentGameStatus(stackId, "CREATED");
+    }
+
+    @Test
+    void updateShouldFailWithoutGameVersion() {
+        Game stackGame = doPostSuccess("/games", stackOverflow, Game.class);
+        int stackId = stackGame.getId();
+
+        {
+            // no version
+            GameUpdateRequest updateRequest = GameUpdateRequest.builder()
+                    .id(stackId)
+                    .motto("new motto")
+                    .description("new description")
+                    .logoRef("new logo ref")
+                    .build();
+            doPatchError("/games/" + stackId, updateRequest, HttpStatus.CONFLICT, ErrorCodes.GAME_UPDATE_CONFLICT);
+        }
+
+        {
+            // incorrect version
+            GameUpdateRequest updateRequest = GameUpdateRequest.builder()
+                    .id(stackId)
+                    .motto("new motto")
+                    .description("new description")
+                    .logoRef("new logo ref")
+                    .version(stackGame.getVersion() + 1000)
+                    .build();
+            doPatchError("/games/" + stackId, updateRequest, HttpStatus.CONFLICT, ErrorCodes.GAME_UPDATE_CONFLICT);
+        }
     }
 
     @Test
@@ -134,9 +165,11 @@ public class GameServiceTest extends AbstractServiceTest {
                 .motto("new motto")
                 .description("new description")
                 .logoRef("new logo ref")
+                .version(stackGame.getVersion())
                 .build();
         Game updatedGame = doPatchSuccess("/games/" + stackId, updateRequest, Game.class);
         assertGame(updatedGame, updateRequest);
+        assertEquals(stackGame.getVersion() + 1, updatedGame.getVersion());
         assertCurrentGameStatus(stackId, "CREATED");
     }
 
@@ -249,7 +282,9 @@ public class GameServiceTest extends AbstractServiceTest {
     @Test
     void testGameStatusHistory() {
         int stackId = doPostSuccess("/games", stackOverflow, Game.class).getId();
+
         doPutSuccess("/games/" + stackId + "/start", null, Game.class);
+        sleepSafe(10);
         doPutSuccess("/games/" + stackId + "/pause", null, Game.class);
 
         assertCurrentGameStatus(stackId, "PAUSED");
@@ -262,6 +297,7 @@ public class GameServiceTest extends AbstractServiceTest {
             assertEquals(expected, actual);
         }
 
+        sleepSafe(10);
         doPutSuccess("/games/" + stackId + "/start", null, Game.class);
         assertCurrentGameStatus(stackId, "STARTED");
         {
