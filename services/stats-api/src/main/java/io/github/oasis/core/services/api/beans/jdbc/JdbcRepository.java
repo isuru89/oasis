@@ -297,9 +297,14 @@ public class JdbcRepository implements OasisRepository {
     @CacheEvict(value = ID.CACHE_USERS_META, key = "#playerId")
     @Override
     public PlayerObject updatePlayer(long playerId, PlayerObject updatedPlayer) {
-        int updatedRecords = playerTeamDao.updatePlayer(playerId, PlayerUpdatePart.from(updatedPlayer));
-        if (updatedRecords == 0) {
-            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_UPDATE_CONFLICT);
+        PlayerObject player = playerTeamDao.readPlayer(playerId);
+        if (player == null) {
+            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_DOES_NOT_EXISTS, HttpStatus.NOT_FOUND);
+        }
+
+        int updatedRecords = playerTeamDao.updatePlayer(player.getId(), PlayerUpdatePart.from(updatedPlayer));
+        if (updatedRecords < 1) {
+            throw new OasisApiRuntimeException(ErrorCodes.PLAYER_UPDATE_CONFLICT, HttpStatus.CONFLICT);
         }
 
         return playerTeamDao.readPlayer(playerId);
@@ -343,7 +348,7 @@ public class JdbcRepository implements OasisRepository {
     public TeamObject updateTeam(int teamId, TeamObject updatedTeam) {
         int updatedRecords = playerTeamDao.updateTeam(teamId, updatedTeam);
         if (updatedRecords < 1) {
-            throw new OasisApiRuntimeException(ErrorCodes.TEAM_UPDATE_CONFLICT);
+            throw new OasisApiRuntimeException(ErrorCodes.TEAM_UPDATE_CONFLICT, HttpStatus.CONFLICT);
         }
 
         return playerTeamDao.readTeam(teamId);

@@ -33,19 +33,10 @@ import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -69,7 +60,7 @@ public class GamesController extends AbstractController {
     )
     @ForAdmin
     @PostMapping(path = "/games", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Game addGame(@RequestBody GameCreateRequest request) throws OasisException {
+    public Game addGame(@Valid @RequestBody GameCreateRequest request) throws OasisException {
         return gameService.addGame(request);
     }
 
@@ -108,7 +99,7 @@ public class GamesController extends AbstractController {
     @ForAdmin
     @PatchMapping(path = "/games/{gameId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Game updateGame(@PathVariable("gameId") Integer gameId,
-                           @RequestBody GameUpdateRequest request) throws OasisException {
+                           @Valid @RequestBody GameUpdateRequest request) throws OasisException {
         return gameService.updateGame(gameId, request);
     }
 

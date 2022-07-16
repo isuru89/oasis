@@ -44,6 +44,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -53,6 +55,9 @@ import java.util.Objects;
  */
 @Service
 public class GameService extends AbstractOasisService implements IGameService {
+
+    private static final long FAR_FUTURE_EPOCH = LocalDate.of(3001, 1, 1).atStartOfDay()
+            .toInstant(ZoneOffset.UTC).toEpochMilli();
 
     private final Map<String, GameState> availableStatuses = Map.of(
             "create", GameState.CREATED,
@@ -158,7 +163,7 @@ public class GameService extends AbstractOasisService implements IGameService {
     @Override
     public List<GameStatus> listGameStatusHistory(int gameId, Long startFrom, Long endTo) {
         long startTime = startFrom == null ? 0 : startFrom;
-        long endTime = endTo == null ? System.currentTimeMillis() : endTo;
+        long endTime = endTo == null ? FAR_FUTURE_EPOCH : endTo;
         return backendRepository.readGameStatusHistory(gameId, startTime, endTime);
     }
 

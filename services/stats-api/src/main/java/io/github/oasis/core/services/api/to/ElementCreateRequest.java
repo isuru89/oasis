@@ -20,12 +20,13 @@
 package io.github.oasis.core.services.api.to;
 
 import io.github.oasis.core.elements.SimpleElementDefinition;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -39,12 +40,42 @@ import java.util.Map;
 @NoArgsConstructor
 public class ElementCreateRequest implements Serializable {
 
+    @NotNull(message = "Parameter 'gameId' is mandatory!")
+    @Positive(message = "Parameter 'gameId' must be a valid game id!")
     private Integer gameId;
 
+    @NotBlank(message = "Parameter 'type' is mandatory")
     private String type;
 
-    private SimpleElementDefinition metadata;
+    @NotNull(message = "Parameter 'metadata' is mandatory!")
+    @Valid
+    private ElementMetadata metadata;
 
+    @NotNull(message = "Parameter 'data' is mandatory!")
+    @NotEmpty(message = "Parameter 'data' must have at least one field!")
     private Map<String, Object> data;
 
+    @Data
+    @Builder(toBuilder = true)
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ElementMetadata implements Serializable {
+
+        @NotBlank(message = "Parameter 'metadata.id' is mandatory")
+        private String id;
+        @NotBlank(message = "Parameter 'metadata.name' is mandatory")
+        private String name;
+        private String description;
+        private Integer version;
+
+        public ElementMetadata(String id, String name, String description) {
+            this.id = id;
+            this.name = name;
+            this.description = description;
+        }
+
+        public SimpleElementDefinition toElementDefinition() {
+            return new SimpleElementDefinition(id, name, description, version);
+        }
+    }
 }

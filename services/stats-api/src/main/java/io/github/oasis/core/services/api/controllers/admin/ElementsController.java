@@ -30,16 +30,9 @@ import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -86,7 +79,7 @@ public class ElementsController extends AbstractController {
     @ForCurator
     @PostMapping(path = "/games/{gameId}/elements", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ElementDef add(@PathVariable("gameId") Integer gameId,
-                          @RequestBody ElementCreateRequest request) {
+                          @Valid @RequestBody ElementCreateRequest request) {
         return elementService.addElement(gameId, request);
     }
 
@@ -108,7 +101,7 @@ public class ElementsController extends AbstractController {
     @PatchMapping(path = "/games/{gameId}/elements/{elementId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ElementDef update(@PathVariable("gameId") Integer gameId,
                              @PathVariable("elementId") String elementId,
-                             @RequestBody ElementUpdateRequest updateRequest) {
+                             @Valid @RequestBody ElementUpdateRequest updateRequest) {
         return elementService.updateElement(gameId, elementId, updateRequest);
     }
 

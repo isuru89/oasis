@@ -20,12 +20,9 @@
 package io.github.oasis.core.services.api.to;
 
 import io.github.oasis.core.model.UserGender;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 
 /**
@@ -44,7 +41,9 @@ public class PlayerUpdateRequest implements Serializable {
     private String timeZone;
     private String avatarRef;
 
-    private int version;
     private Boolean isActive = Boolean.TRUE;
+
+    @Positive(message = "The 'version' field must be specified to represent updating entity!")
+    private int version;
 
 }

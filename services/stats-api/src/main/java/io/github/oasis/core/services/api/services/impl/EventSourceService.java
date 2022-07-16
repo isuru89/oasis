@@ -28,7 +28,6 @@ import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.model.EventSourceSecrets;
 import io.github.oasis.core.services.KeyGeneratorSupport;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
-import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
 import io.github.oasis.core.services.api.handlers.events.BaseEventSourceChangedEvent;
@@ -36,7 +35,6 @@ import io.github.oasis.core.services.api.handlers.events.EntityChangeType;
 import io.github.oasis.core.services.api.services.IEventSourceService;
 import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceKeysResponse;
-import io.github.oasis.core.utils.Texts;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -66,8 +64,6 @@ public class EventSourceService extends AbstractOasisService implements IEventSo
 
     @Override
     public EventSource registerEventSource(EventSourceCreateRequest request) throws OasisException {
-        validateEventSource(request);
-
         EventSource.EventSourceBuilder sourceBuilder = EventSource.builder()
                 .name(request.getName())
                 .token(generateRandomToken());
@@ -165,9 +161,4 @@ public class EventSourceService extends AbstractOasisService implements IEventSo
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    private void validateEventSource(EventSourceCreateRequest request) throws DataValidationException {
-        if (Texts.isEmpty(request.getName())) {
-            throw new DataValidationException(ErrorCodes.EVENT_SOURCE_NO_NAME);
-        }
-    }
 }

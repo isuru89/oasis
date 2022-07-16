@@ -22,7 +22,6 @@ package io.github.oasis.core.services.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.elements.GameDef;
-import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.parser.GameParserYaml;
@@ -56,7 +55,7 @@ public class TestUtils {
                 .map(def -> ElementCreateRequest.builder()
                         .type(def.getImpl())
                         .gameId(gameId)
-                        .metadata(new SimpleElementDefinition(
+                        .metadata(new ElementCreateRequest.ElementMetadata(
                                 def.getData().get("id").toString(),
                                 def.getData().get("name").toString(),
                                 def.getData().get("description").toString()

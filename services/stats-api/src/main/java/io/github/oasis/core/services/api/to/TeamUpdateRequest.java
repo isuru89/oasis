@@ -24,6 +24,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 
 /**
@@ -38,5 +39,6 @@ public class TeamUpdateRequest implements Serializable {
     private String colorCode;
     private String avatarRef;
 
+    @Positive(message = "The 'version' field must be specified to represent updating entity!")
     private int version;
 }

@@ -30,25 +30,14 @@ import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.IPlayerAssignmentService;
 import io.github.oasis.core.services.api.services.IPlayerManagementService;
 import io.github.oasis.core.services.api.services.ITeamManagementService;
-import io.github.oasis.core.services.api.to.PlayerCreateRequest;
-import io.github.oasis.core.services.api.to.PlayerGameAssociationRequest;
-import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
-import io.github.oasis.core.services.api.to.TeamCreateRequest;
-import io.github.oasis.core.services.api.to.TeamUpdateRequest;
+import io.github.oasis.core.services.api.to.*;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -79,7 +68,7 @@ public class PlayerController extends AbstractController {
     )
     @ForAdmin
     @PostMapping(value = "/players", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public PlayerObject registerPlayer(@RequestBody PlayerCreateRequest user) {
+    public PlayerObject registerPlayer(@Valid @RequestBody PlayerCreateRequest user) {
         return playerManagementService.addPlayer(user);
     }
 
@@ -118,7 +107,7 @@ public class PlayerController extends AbstractController {
     @ForCurator
     @PatchMapping(value = "/players/{playerId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public PlayerObject updatePlayer(@PathVariable("playerId") Long playerId,
-                                     @RequestBody PlayerUpdateRequest updateRequest) {
+                                     @Valid @RequestBody PlayerUpdateRequest updateRequest) {
         return playerManagementService.updatePlayer(playerId, updateRequest);
     }
 
@@ -138,7 +127,7 @@ public class PlayerController extends AbstractController {
     )
     @ForCurator
     @PostMapping(value = "/teams", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public TeamObject addTeam(@RequestBody TeamCreateRequest request) {
+    public TeamObject addTeam(@Valid @RequestBody TeamCreateRequest request) {
         return teamManagementService.addTeam(request);
     }
 
@@ -178,7 +167,7 @@ public class PlayerController extends AbstractController {
     @ForCurator
     @PatchMapping(value = "/teams/{teamId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public TeamObject updateTeam(@PathVariable("teamId") Integer teamId,
-                                 @RequestBody TeamUpdateRequest request) {
+                                 @Valid @RequestBody TeamUpdateRequest request) {
         return teamManagementService.updateTeam(teamId, request);
     }
 
@@ -189,7 +178,7 @@ public class PlayerController extends AbstractController {
     @ForCurator
     @PostMapping(value = "/players/{playerId}/teams", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void addPlayerToTeam(@PathVariable("playerId") Long playerId,
-                                @RequestBody PlayerGameAssociationRequest request) {
+                                @Valid @RequestBody PlayerGameAssociationRequest request) {
         playerAssignmentService.addPlayerToTeam(playerId, request.getGameId(), request.getTeamId());
     }
 

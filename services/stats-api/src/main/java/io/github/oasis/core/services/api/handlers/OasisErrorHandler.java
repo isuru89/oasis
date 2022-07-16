@@ -35,16 +35,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -52,7 +52,7 @@ import java.time.Instant;
  * @author Isuru Weerarathna
  */
 @RestControllerAdvice
-public class OasisErrorHandler extends ResponseEntityExceptionHandler {
+public class OasisErrorHandler {
 
     public static final HttpHeaders ERROR_HEADERS = new HttpHeaders();
 
@@ -125,6 +125,44 @@ public class OasisErrorHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<ErrorObject> handleParseError(OasisParseException ex, WebRequest request) {
         ErrorObject errorObject = new ErrorObject();
         String errorCode = StringUtils.defaultIfEmpty(ex.getErrorCode(), ErrorCodes.ELEMENT_SPEC_INVALID);
+        errorObject.setTimestamp(Instant.now().toString());
+        errorObject.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorObject.setErrorCode(errorCode);
+        errorObject.setErrorCodeDescription(errorMessages.getErrorMessage(errorCode));
+        errorObject.setMessage(ex.getMessage());
+        if (request instanceof ServletWebRequest) {
+            errorObject.setPath(((ServletWebRequest) request).getRequest().getServletPath());
+        } else {
+            errorObject.setPath(request.getContextPath());
+        }
+        request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
+        return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.valueOf(HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ResponseEntity<ErrorObject> handleConstraintError(ConstraintViolationException ex, WebRequest request) {
+        ErrorObject errorObject = new ErrorObject();
+        String errorCode = ErrorCodes.INVALID_PARAMETER;
+        errorObject.setTimestamp(Instant.now().toString());
+        errorObject.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorObject.setErrorCode(errorCode);
+        errorObject.setErrorCodeDescription(errorMessages.getErrorMessage(errorCode));
+        errorObject.setMessage(ex.getMessage());
+        if (request instanceof ServletWebRequest) {
+            errorObject.setPath(((ServletWebRequest) request).getRequest().getServletPath());
+        } else {
+            errorObject.setPath(request.getContextPath());
+        }
+        request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
+        return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.valueOf(HttpStatus.BAD_REQUEST.value()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorObject> onMethodArgError(MethodArgumentNotValidException ex, WebRequest request) {
+        ErrorObject errorObject = new ErrorObject();
+        String errorCode = ErrorCodes.INVALID_PARAMETER;
         errorObject.setTimestamp(Instant.now().toString());
         errorObject.setStatus(HttpStatus.BAD_REQUEST.value());
         errorObject.setErrorCode(errorCode);

@@ -73,7 +73,7 @@ public class ElementService extends AbstractOasisService implements IElementServ
                 .data(request.getData())
                 .gameId(request.getGameId())
                 .elementId(request.getMetadata().getId())
-                .metadata(request.getMetadata())
+                .metadata(request.getMetadata().toElementDefinition())
                 .type(request.getType())
                 .build();
 

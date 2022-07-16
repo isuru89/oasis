@@ -20,12 +20,10 @@
 package io.github.oasis.core.services.api.to;
 
 import io.github.oasis.core.Game;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 /**
@@ -38,6 +36,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class GameCreateRequest implements Serializable {
 
+    @NotBlank(message = "Parameter 'name' is mandatory!")
+    @Size(message = "Game name must not exceed 255 characters in length!", min = 1, max = 255)
     private String name;
     private String motto;
     private String description;

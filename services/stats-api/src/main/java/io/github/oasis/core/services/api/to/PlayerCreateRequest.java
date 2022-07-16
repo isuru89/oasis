@@ -25,6 +25,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -36,11 +38,15 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class PlayerCreateRequest implements Serializable {
 
-    private Long userId;
+    @NotBlank(message = "Parameter 'email' is mandatory")
     private String email;
+    @NotBlank(message = "Parameter 'displayName' is mandatory")
     private String displayName;
-    private String avatarRef;
+    @NotNull(message = "Parameter 'gender' is mandatory")
     private UserGender gender;
+    @NotBlank(message = "Parameter 'timeZone' is mandatory")
     private String timeZone;
+
+    private String avatarRef;
 
 }

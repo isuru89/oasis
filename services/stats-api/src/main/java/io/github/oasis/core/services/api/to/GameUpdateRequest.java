@@ -20,12 +20,9 @@
 package io.github.oasis.core.services.api.to;
 
 import io.github.oasis.core.Game;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 
 /**
@@ -43,6 +40,8 @@ public class GameUpdateRequest implements Serializable {
     private String motto;
     private String description;
     private String logoRef;
+
+    @Positive(message = "The 'version' field must be specified to represent updating entity!")
     private int version;
 
     public Game createGame() {
