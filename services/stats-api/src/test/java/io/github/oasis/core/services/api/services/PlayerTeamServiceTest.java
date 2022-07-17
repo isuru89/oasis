@@ -164,6 +164,22 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    void readPlayerByEmail() {
+        PlayerObject bob = callPlayerAdd(reqBob);
+        System.out.println(bob);
+        assertPlayerWithAnother(bob, reqBob);
+
+        {
+            PlayerWithTeams bobByEmail = doGetSuccess("/players?email=" + bob.getEmail(), PlayerWithTeams.class);
+            System.out.println(bobByEmail);
+            assertPlayerWithAnother(bobByEmail, reqBob);
+            assertNull(bobByEmail.getTeams());
+        }
+
+        doGetError("/players?email=nonexist@oasis.io", HttpStatus.NOT_FOUND, ErrorCodes.PLAYER_DOES_NOT_EXISTS);
+    }
+
+    @Test
     void readPlayerWithTeams() {
         Integer gameId1 = callAddGame(stackOverflow).getId();
         Integer gameId2 = callAddGame(promotions).getId();

@@ -113,7 +113,7 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
         }
     }
 
-    void initEngineStatusSubscription() {
+    private void initEngineStatusSubscription() {
         if (engineManagerSubscription != null) {
             LOG.info("Subscribing to engine status stream {}", engineManagerSubscription.getClass().getName());
             engineManagerSubscription.subscribe(this::consume);

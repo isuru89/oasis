@@ -84,17 +84,8 @@ public class PlayerTeamService extends AbstractOasisService implements IPlayerMa
     }
 
     @Override
-    public PlayerObject readPlayerByEmail(String userEmail) {
-        return backendRepository.readPlayer(userEmail);
-    }
-
-    @Override
     public PlayerObject readPlayerByEmail(String userEmail, boolean verbose) {
         PlayerObject playerObject = backendRepository.readPlayer(userEmail);
-
-        if (playerObject == null) {
-            throw new OasisApiRuntimeException("User by email " + userEmail + " not found!", HttpStatus.NOT_FOUND);
-        }
 
         if (verbose) {
             PlayerWithTeams playerWithTeams = new PlayerWithTeams();

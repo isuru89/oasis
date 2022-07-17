@@ -35,8 +35,6 @@ public interface IPlayerManagementService {
 
     PlayerObject readPlayer(long userId);
 
-    PlayerObject readPlayerByEmail(String userEmail);
-
     PlayerObject readPlayerByEmail(String userEmail, boolean verbose);
 
     PlayerObject updatePlayer(long userId, PlayerUpdateRequest updatingUser);
