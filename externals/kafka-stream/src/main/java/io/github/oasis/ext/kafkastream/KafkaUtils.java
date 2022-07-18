@@ -125,8 +125,10 @@ final class KafkaUtils {
 
         // if user has specified custom kafka consumer props for broadcast topic.
         String consumerGroupId = null;
-        if (kafkaConfigs.getBroadcastConsumer() != null && Utils.isNotEmpty(kafkaConfigs.getBroadcastConsumer().getProps())) {
-            props.putAll(kafkaConfigs.getBroadcastConsumer().getProps());
+        if (kafkaConfigs.getBroadcastConsumer() != null) {
+            if (Utils.isNotEmpty(kafkaConfigs.getBroadcastConsumer().getProps())) {
+                props.putAll(kafkaConfigs.getBroadcastConsumer().getProps());
+            }
             consumerGroupId = kafkaConfigs.getBroadcastConsumer().getGroupId();
         }
 
@@ -154,8 +156,10 @@ final class KafkaUtils {
 
         // if user has specified custom kafka configs for game event topics...
         String consumerGroupId = null;
-        if (kafkaConfigs.getGameEventsConsumer() != null && Utils.isNotEmpty(kafkaConfigs.getGameEventsConsumer().getProps())) {
-            props.putAll(kafkaConfigs.getGameEventsConsumer().getProps());
+        if (kafkaConfigs.getGameEventsConsumer() != null) {
+            if (Utils.isNotEmpty(kafkaConfigs.getGameEventsConsumer().getProps())) {
+                props.putAll(kafkaConfigs.getGameEventsConsumer().getProps());
+            }
             consumerGroupId = kafkaConfigs.getGameEventsConsumer().getGroupId();
         }
 

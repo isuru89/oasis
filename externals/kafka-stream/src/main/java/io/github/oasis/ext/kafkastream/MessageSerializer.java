@@ -23,6 +23,7 @@
 package io.github.oasis.ext.kafkastream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -55,4 +56,11 @@ public class MessageSerializer {
         }
     }
 
+    static <T> T deserialize(String message, TypeReference<T> typeReference) throws IOException {
+        try {
+            return MAPPER.readValue(message, typeReference);
+        } catch (JsonProcessingException e) {
+            throw new IOException("Provided kafka message cannot be read!", e);
+        }
+    }
 }

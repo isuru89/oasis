@@ -1,0 +1,72 @@
+{
+  "engineMgmtConfig-withGroupId": {
+    "brokerUrls": "localhost:9091,localhost:9092",
+    "gameEventsConsumer": {
+      "groupId": "test-consumer-group-01"
+    }
+  },
+  "engineMgmtConfig-withoutGroupId": {
+    "brokerUrls": "localhost:9091,localhost:9092",
+    "gameEventsConsumer": {
+    }
+  },
+  "engineMgmtConfig-withPropsOverridden": {
+    "brokerUrls": "localhost:9091,localhost:9092",
+    "gameEventsConsumer": {
+      "groupId": "test-consumer-group-01",
+      "props": {
+        "group.id": "overridden-group-id",
+        "auto.offset.reset": "latest",
+        "enable.auto.commit": "true"
+      }
+    }
+  },
+  "feedConsumerConfig-withGroupId": {
+    "brokerUrls": "localhost:9091,localhost:9092",
+    "feedStreamConsumer": {
+      "groupId": "test-consumer-group-01"
+    }
+  },
+  "feedConsumerConfig-withoutGroupIdAndProps": {
+    "brokerUrls": "localhost:9091,localhost:9092",
+    "feedStreamConsumer": {
+      "props": {
+        "max.poll.records": "500",
+        "auto.offset.reset": "latest",
+        "enable.auto.commit": "true"
+      }
+    }
+  },
+  "broadcastConsumer-withGroupId": {
+    "brokerUrls": "localhost:9091,localhost:9092",
+    "broadcastConsumer": {
+      "groupId": "test-consumer-group-01"
+    }
+  },
+  "broadcastConsumer-withoutGroupIdAndProps": {
+    "brokerUrls": "localhost:9091,localhost:9092",
+    "broadcastConsumer": {
+      "props": {
+        "max.poll.records": "500",
+        "auto.offset.reset": "latest",
+        "enable.auto.commit": "true"
+      }
+    }
+  },
+  "gameEventsConsumer-withGroupId": {
+    "brokerUrls": "localhost:9091,localhost:9092",
+    "gameEventsConsumer": {
+      "groupId": "test-consumer-group-01"
+    }
+  },
+  "gameEventsConsumer-withoutGroupIdAndProps": {
+    "brokerUrls": "localhost:9091,localhost:9092",
+    "gameEventsConsumer": {
+      "props": {
+        "max.poll.records": "500",
+        "auto.offset.reset": "latest",
+        "enable.auto.commit": "true"
+      }
+    }
+  }
+}
