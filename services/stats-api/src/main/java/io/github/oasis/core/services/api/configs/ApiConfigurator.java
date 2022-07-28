@@ -22,7 +22,6 @@ package io.github.oasis.core.services.api.configs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.services.annotations.OasisAdminService;
 import io.github.oasis.core.services.annotations.OasisQueryService;
-import io.github.oasis.core.services.api.handlers.QueryPayloadResolver;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.method.HandlerTypePredicate;

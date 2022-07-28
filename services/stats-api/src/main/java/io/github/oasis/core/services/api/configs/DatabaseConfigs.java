@@ -23,6 +23,7 @@ import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisDbException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.services.EngineDataReader;
+import io.github.oasis.core.services.annotations.EngineDbPool;
 import io.github.oasis.core.services.api.dao.IApiKeyDao;
 import io.github.oasis.core.services.api.dao.IElementDao;
 import io.github.oasis.core.services.api.dao.IEventSourceDao;
@@ -134,9 +135,8 @@ public class DatabaseConfigs {
         }
 
         LOG.info("Loading migration scripts from [Schema dir: {}]", changeLogLocation);
-        try {
-            DatabaseConnection databaseConnection = new JdbcConnection(connection);
-            Liquibase liquibase = new Liquibase(changeLogLocation, classPathAccessor, databaseConnection);
+        DatabaseConnection databaseConnection = new JdbcConnection(connection);
+        try (Liquibase liquibase = new Liquibase(changeLogLocation, classPathAccessor, databaseConnection)) {
             liquibase.update(new Contexts());
         } catch (Exception e) {
             LOG.error("Error occurred while executing db migration!", e);
@@ -157,7 +157,7 @@ public class DatabaseConfigs {
     }
 
     @Bean
-    public EngineDataReader createEngineDataReader(@Qualifier("enginedb") Db db) {
+    public EngineDataReader createEngineDataReader(@EngineDbPool Db db) {
         return new EngineDataReader(db);
     }
 

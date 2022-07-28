@@ -25,7 +25,6 @@ package io.github.oasis.core.services.api.services.impl;
 import io.github.oasis.core.elements.AttributeInfo;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
-import io.github.oasis.core.services.api.beans.BackendRepository;
 import io.github.oasis.core.services.api.services.IGameRankingService;
 import io.github.oasis.core.services.api.to.GameAttributeCreateRequest;
 import org.springframework.stereotype.Service;

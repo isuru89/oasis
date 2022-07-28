@@ -17,27 +17,28 @@
  *  * specific language governing permissions and limitations
  *  * under the License.
  *
- *
  */
 
-package io.github.oasis.core.services.api.handlers.events;
+package io.github.oasis.core.services.api.configs;
 
-import lombok.*;
+import io.github.oasis.core.services.annotations.QueryPayload;
+import org.springframework.core.MethodParameter;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor;
 
-import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Setter(AccessLevel.PRIVATE)
-public class BaseEventSourceChangedEvent implements Serializable {
+class QueryPayloadResolver extends RequestResponseBodyMethodProcessor {
 
-    private Integer sourceId;
-    private String token;
+    public QueryPayloadResolver(List<HttpMessageConverter<?>> converters) {
+        super(converters);
+    }
 
-    private EntityChangeType changeType;
+    @Override
+    public boolean supportsParameter(MethodParameter parameter) {
+        return parameter.hasParameterAnnotation(QueryPayload.class);
+    }
 }

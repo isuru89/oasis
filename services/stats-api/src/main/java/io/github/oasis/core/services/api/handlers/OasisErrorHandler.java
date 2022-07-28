@@ -23,11 +23,13 @@ import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.services.api.configs.ErrorMessages;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.handlers.events.BasePlayerRelatedEvent;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -65,17 +67,14 @@ public class OasisErrorHandler {
     @ExceptionHandler(value = { OasisApiException.class })
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     protected ResponseEntity<ErrorObject> handleValidationError(OasisApiException ex, WebRequest request) {
-        ErrorObject errorObject = new ErrorObject();
-        errorObject.setTimestamp(Instant.now().toString());
-        errorObject.setStatus(ex.getStatusCode());
-        errorObject.setErrorCode(ex.getErrorCode());
-        errorObject.setErrorCodeDescription(errorMessages.getErrorMessage(ex.getErrorCode()));
-        errorObject.setMessage(ex.getMessage());
-        if (request instanceof ServletWebRequest) {
-            errorObject.setPath(((ServletWebRequest) request).getRequest().getServletPath());
-        } else {
-            errorObject.setPath(request.getContextPath());
-        }
+        ErrorObject errorObject = new ErrorObject()
+                .setTimestamp(Instant.now().toString())
+                .setStatus(ex.getStatusCode())
+                .setErrorCode(ex.getErrorCode())
+                .setErrorCodeDescription(errorMessages.getErrorMessage(ex.getErrorCode()))
+                .setMessage(ex.getMessage())
+                .setPath(deriveRequestPath(request));
+
         request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
         return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.valueOf(ex.getStatusCode()));
     }
@@ -83,17 +82,14 @@ public class OasisErrorHandler {
     @ExceptionHandler(value = { OasisApiRuntimeException.class })
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     protected ResponseEntity<ErrorObject> handleApiRuntimeException(OasisApiRuntimeException ex, WebRequest request) {
-        ErrorObject errorObject = new ErrorObject();
-        errorObject.setTimestamp(Instant.now().toString());
-        errorObject.setStatus(ex.getStatus().value());
-        errorObject.setErrorCode(ex.getErrorCode());
-        errorObject.setErrorCodeDescription(errorMessages.getErrorMessage(ex.getErrorCode()));
-        errorObject.setMessage(ex.getMessage());
-        if (request instanceof ServletWebRequest) {
-            errorObject.setPath(((ServletWebRequest) request).getRequest().getServletPath());
-        } else {
-            errorObject.setPath(request.getContextPath());
-        }
+        ErrorObject errorObject = new ErrorObject()
+                .setTimestamp(Instant.now().toString())
+                .setStatus(ex.getStatus().value())
+                .setErrorCode(ex.getErrorCode())
+                .setErrorCodeDescription(errorMessages.getErrorMessage(ex.getErrorCode()))
+                .setMessage(ex.getMessage())
+                .setPath(deriveRequestPath(request));
+
         request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
         return new ResponseEntity<>(errorObject, ERROR_HEADERS, ex.getStatus());
     }
@@ -101,18 +97,15 @@ public class OasisErrorHandler {
     @ExceptionHandler(value = { OasisParseException.class })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<ErrorObject> handleParseError(OasisParseException ex, WebRequest request) {
-        ErrorObject errorObject = new ErrorObject();
         String errorCode = StringUtils.defaultIfEmpty(ex.getErrorCode(), ErrorCodes.ELEMENT_SPEC_INVALID);
-        errorObject.setTimestamp(Instant.now().toString());
-        errorObject.setStatus(HttpStatus.BAD_REQUEST.value());
-        errorObject.setErrorCode(errorCode);
-        errorObject.setErrorCodeDescription(errorMessages.getErrorMessage(errorCode));
-        errorObject.setMessage(ex.getMessage());
-        if (request instanceof ServletWebRequest) {
-            errorObject.setPath(((ServletWebRequest) request).getRequest().getServletPath());
-        } else {
-            errorObject.setPath(request.getContextPath());
-        }
+        ErrorObject errorObject = new ErrorObject()
+                .setTimestamp(Instant.now().toString())
+                .setStatus(HttpStatus.BAD_REQUEST.value())
+                .setErrorCode(errorCode)
+                .setErrorCodeDescription(errorMessages.getErrorMessage(errorCode))
+                .setMessage(ex.getMessage())
+                .setPath(deriveRequestPath(request));
+
         request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
         return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.valueOf(HttpStatus.BAD_REQUEST.value()));
     }
@@ -120,26 +113,32 @@ public class OasisErrorHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorObject> onMethodArgError(MethodArgumentNotValidException ex, WebRequest request) {
-        ErrorObject errorObject = new ErrorObject();
         String errorCode = ErrorCodes.INVALID_PARAMETER;
-        errorObject.setTimestamp(Instant.now().toString());
-        errorObject.setStatus(HttpStatus.BAD_REQUEST.value());
-        errorObject.setErrorCode(errorCode);
-        errorObject.setErrorCodeDescription(errorMessages.getErrorMessage(errorCode));
-        errorObject.setMessage(ex.getMessage());
-        if (request instanceof ServletWebRequest) {
-            errorObject.setPath(((ServletWebRequest) request).getRequest().getServletPath());
-        } else {
-            errorObject.setPath(request.getContextPath());
-        }
+        ErrorObject errorObject = new ErrorObject()
+                .setTimestamp(Instant.now().toString())
+                .setStatus(HttpStatus.BAD_REQUEST.value())
+                .setErrorCode(errorCode)
+                .setErrorCodeDescription(errorMessages.getErrorMessage(errorCode))
+                .setMessage(ex.getMessage())
+                .setPath(deriveRequestPath(request));
+
         request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
         return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.valueOf(HttpStatus.BAD_REQUEST.value()));
+    }
+
+    private String deriveRequestPath(WebRequest request) {
+        if (request instanceof ServletWebRequest) {
+            return ((ServletWebRequest) request).getRequest().getServletPath();
+        } else {
+            return request.getContextPath();
+        }
     }
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder(toBuilder = true)
+    @Accessors(chain = true)
     public static class ErrorObject implements Serializable {
         private String timestamp;
         private int status;

@@ -77,7 +77,7 @@ public class EventSourceServiceTest extends AbstractServiceTest {
     @Test
     void testRegisterEventSourceValidations() {
         EventSourceCreateRequest source = new EventSourceCreateRequest("test-1");
-        EventSource dbSource = doPostSuccess("/admin/event-sources", source, EventSource.class);
+        doPostSuccess("/admin/event-sources", source, EventSource.class);
 
         doPostError("/admin/event-sources", new EventSourceCreateRequest(""), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
         doPostError("/admin/event-sources", new EventSourceCreateRequest(null), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);

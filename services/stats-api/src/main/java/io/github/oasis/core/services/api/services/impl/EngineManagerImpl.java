@@ -31,6 +31,7 @@ import io.github.oasis.core.external.messages.EngineStatusChangedMessage;
 import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.services.api.exceptions.EngineManagerException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.services.IElementService;
 import io.github.oasis.core.services.api.services.IEngineManager;
 import io.github.oasis.core.services.api.services.IGameService;
 import io.github.oasis.core.services.exceptions.OasisApiException;
@@ -38,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
@@ -52,13 +54,13 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(EngineManagerImpl.class);
 
-    private final ElementService elementService;
+    private final IElementService elementService;
     private final IGameService gameService;
 
     private final EventDispatcher dispatchSupport;
     private final EngineManagerSubscription engineManagerSubscription;
 
-    public EngineManagerImpl(ElementService elementService,
+    public EngineManagerImpl(IElementService elementService,
                              IGameService gameService,
                              EventDispatcher eventDispatcher,
                              EngineManagerSubscription engineManagerSubscription) {
@@ -66,12 +68,15 @@ public class EngineManagerImpl implements IEngineManager, Closeable {
         this.gameService = gameService;
         this.dispatchSupport = eventDispatcher;
         this.engineManagerSubscription = engineManagerSubscription;
+    }
 
+    @PostConstruct
+    public void beforeInitialized() {
         this.initEngineStatusSubscription();
     }
 
     @Override
-    public void changeGameStatus(GameState state, Game game) throws EngineManagerException {
+    public void notifyGameStatusChange(GameState state, Game game) throws EngineManagerException {
         LOG.info("Announcing game (id: {}) state change to engine {}", game.getId(), state);
         try {
             if (state == GameState.STARTED) {

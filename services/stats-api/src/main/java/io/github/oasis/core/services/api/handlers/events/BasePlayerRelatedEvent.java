@@ -22,10 +22,7 @@
 
 package io.github.oasis.core.services.api.handlers.events;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -36,6 +33,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter(AccessLevel.PRIVATE)
 public class BasePlayerRelatedEvent implements Serializable {
 
     private Long userId;

@@ -68,6 +68,8 @@ public class EngineManagerImplTest {
         subscription = new MockedEngineSubscription();
 
         Mockito.when(gameService.readGame(Mockito.eq(GAME_ID))).thenReturn(TEST_GAME);
+        engineManager = new EngineManagerImpl(elementService, gameService, eventDispatcher, subscription);
+        engineManager.beforeInitialized();
     }
 
     @Test
@@ -77,8 +79,6 @@ public class EngineManagerImplTest {
 
     @Test
     void testGameEventConsumeGameExists() throws OasisApiException {
-        engineManager = new EngineManagerImpl(elementService, gameService, eventDispatcher, subscription);
-
         ArgumentCaptor<String> newGameStatusCapture = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Integer> gameIdCapture = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Long> updatedAtCapture = ArgumentCaptor.forClass(Long.class);
@@ -95,8 +95,6 @@ public class EngineManagerImplTest {
 
     @Test
     void testGameEventConsumeGameNotExists() throws OasisApiException {
-        engineManager = new EngineManagerImpl(elementService, gameService, eventDispatcher, subscription);
-
         var msg = new EngineStatusChangedMessage(9999, GameState.STOPPED, "engine-abcd", 234L, null);
         subscription.invoke(msg);
 
@@ -108,6 +106,7 @@ public class EngineManagerImplTest {
     void initEngineStatusSubscription() {
         subscription = Mockito.mock(MockedEngineSubscription.class);
         engineManager = new EngineManagerImpl(elementService, gameService, eventDispatcher, subscription);
+        engineManager.beforeInitialized();
         Mockito.verify(subscription, Mockito.times(1)).subscribe(Mockito.any());
 
         Mockito.clearInvocations(subscription);

@@ -30,6 +30,6 @@ import io.github.oasis.core.services.api.exceptions.EngineManagerException;
  */
 public interface IEngineManager {
 
-    void changeGameStatus(GameState state, Game game) throws EngineManagerException;
+    void notifyGameStatusChange(GameState state, Game game) throws EngineManagerException;
 
 }

@@ -21,6 +21,7 @@ package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
+import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.PlayerWithTeams;
@@ -30,6 +31,7 @@ import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.handlers.CacheClearanceListener;
 import io.github.oasis.core.services.api.handlers.events.BasePlayerRelatedEvent;
 import io.github.oasis.core.services.api.handlers.events.EntityChangeType;
+import io.github.oasis.core.services.api.services.impl.PlayerTeamService;
 import io.github.oasis.core.services.api.to.*;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -38,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
@@ -96,6 +99,10 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
             .colorCode("#FF0000")
             .build();
 
+    @Test
+    void mockCreation() {
+        new PlayerTeamService(Mockito.mock(OasisRepository.class), Mockito.mock(ApplicationEventPublisher.class));
+    }
 
     @Test
     void addPlayer() {
