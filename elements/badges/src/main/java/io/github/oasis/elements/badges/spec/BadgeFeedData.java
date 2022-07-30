@@ -32,6 +32,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class BadgeFeedData extends AbstractFeedDataDef {
 
-    private int attribute;
+    private int rank;
 
 }

@@ -220,12 +220,12 @@ the signature and will allow further processing.
 
 ## Game Elements
 
-All these game elements, except Attributes and Leaderboards, can be defined in yaml files and register to the engine.
-Attributes must be defined when a game is created through admin-api.
+All these game elements except ranks can be defined in yaml files and register to the engine.
+Ranks must be defined along with a game through admin-api.
 
-### [Attributes](docs/specs/attributes.md)
-Each game should define set of awarding attributes to rank some of game elements.
-For e.g. attributes equivalent in Stackoverflow are gold, silver and bronze.
+### [Ranks](docs/specs/ranks.md)
+Each game should define set of ranks so that can reward a variation.
+For e.g. ranks equivalent in Stackoverflow are gold, silver and bronze.
 
 ### [Points](docs/specs/points.md)
 
@@ -236,7 +236,7 @@ Sometimes, points can be negative, hence called penalties.
 ### [Badges](docs/specs/badges.md)
 
 A badge is a collectible achievement by a user based on correlating one or several
-events. Every badge can associate with an attribute.
+events. Every badge can associate with a rank.
 
 There are several kinds of badges supported by Oasis.
 

@@ -144,17 +144,17 @@ A comprehensive set of examples for badges can be viewed from [this directory](e
           condition: "e.score >= 100"
           rewards:
             badge:
-              attribute: 30
+              rank: 30
         - priority: 2
           condition: "e.score >= 25"
           rewards:
             badge:
-              attribute: 20
+              rank: 20
         - priority: 3
           condition: "e.score >= 10"
           rewards:
             badge:
-              attribute: 10
+              rank: 10
 ```
 
 * Badges based on continuous streaks
@@ -172,15 +172,15 @@ A comprehensive set of examples for badges can be viewed from [this directory](e
         - streak: 10
           rewards:
             badge:
-              attribute: 30
+              rank: 30
         - streak: 50
           rewards:
             badge:
-              attribute: 20
+              rank: 20
         - streak: 100
           rewards:
             badge:
-              attribute: 10
+              rank: 10
 ```
 
 * Badges based on periodic aggregations
@@ -202,15 +202,15 @@ A comprehensive set of examples for badges can be viewed from [this directory](e
         - value: 50        # 50 reputations
           rewards:
             badge:
-              attribute: 10
+              rank: 10
         - value: 100         # 100 reputations
           rewards:
             badge:
-              attribute: 20
+              rank: 20
         - value: 200       # 200 reputations
           rewards:
             badge:
-              attribute: 30
+              rank: 30
 ```
 
 * Badges based on periodic streaks
@@ -234,15 +234,15 @@ A comprehensive set of examples for badges can be viewed from [this directory](e
         - streak: 5         # 5 consecutive days
           rewards:
             badge:
-              attribute: 10
+              rank: 10
         - streak: 7         # 7 consecutive days
           rewards:
             badge:
-              attribute: 20
+              rank: 20
         - streak: 10        # 10 consecutive days
           rewards:
             badge:
-              attribute: 30
+              rank: 30
 ```
 
 * Badges which awards points
@@ -265,21 +265,21 @@ A comprehensive set of examples for badges can be viewed from [this directory](e
         - streak: 3
           rewards:
             badge:
-              attribute: 10
+              rank: 10
             points:
               id: star.points
               amount: 100
         - streak: 5
           rewards:
             badge:
-              attribute: 20
+              rank: 20
             points:
               id: star.points
               amount: 250
         - streak: 10
           rewards:
             badge:
-              attribute: 30
+              rank: 30
             points:
               id: star.points
               amount: 500

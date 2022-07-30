@@ -18,14 +18,14 @@ elements:
         - streak: 3
           rewards:
             badge:
-              attribute: 10
+              rank: 10
             points:
               id: star.points
               amount: 50
         - streak: 5
           rewards:
             badge:
-              attribute: 20
+              rank: 20
             points:
               id: star.points
               amount: 100

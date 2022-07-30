@@ -34,7 +34,7 @@ public class UserBadgeRequest extends AbstractStatsApiRequest {
 
     private Long userId;
 
-    private Set<Integer> attributeFilters;
+    private Set<Integer> rankFilters;
 
     private Set<String> ruleFilters;
 

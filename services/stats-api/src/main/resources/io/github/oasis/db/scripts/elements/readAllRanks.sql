@@ -5,8 +5,6 @@ SELECT
     color_code AS colorCode,
     priority
 FROM
-    OA_ATTRIBUTE_DEF
+    OA_RANK_DEF
 WHERE
     game_id = :gameId
-    AND
-    id = :id

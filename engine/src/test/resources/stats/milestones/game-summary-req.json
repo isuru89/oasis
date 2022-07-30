@@ -3,5 +3,5 @@
 
   "milestoneIds": ["MILE000001"],
   "teamIds": [1],
-  "attributeIds": [1, 2, 3]
+  "levels": [1, 2, 3]
 }

@@ -18,15 +18,15 @@ badges:
         - value: 50        # 50 reputations
           rewards:
             badge:
-              attribute: 10
+              rank: 10
         - value: 100         # 100 reputations
           rewards:
             badge:
-              attribute: 20
+              rank: 20
         - value: 200       # 200 reputations
           rewards:
             badge:
-              attribute: 30
+              rank: 30
 
   - id: BDG-P0002
     name: Daily-Uploads
@@ -42,25 +42,25 @@ badges:
       criteria: "['jpg', 'jpeg', 'png'].contains(e.fileType)"
       thresholds:
         - value: 50        # 5 uploads
-          attribute: 10
+          rank: 10
           pointAwards: 1
           rewards:
             badge:
-              attribute: 10
+              rank: 10
             points:
               id: extra.iops
               amount: 1
         - value: 100         # 20 uploads
           rewards:
             badge:
-              attribute: 20
+              rank: 20
             points:
               id: extra.iops
               amount: 2
         - value: 200       # 100 uploads
           rewards:
             badge:
-              attribute: 30
+              rank: 30
             points:
               id: extra.iops
               amount: 10

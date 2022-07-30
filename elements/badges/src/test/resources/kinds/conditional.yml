@@ -14,7 +14,7 @@ elements:
           condition: "e.value >= 50"
           rewards:
             badge:
-              attribute: 50
+              rank: 50
 
   - id: SINGLE_CONDITION_WITH_FILTER
     name: Question-Quality
@@ -31,7 +31,7 @@ elements:
           condition: "e.value >= 50"
           rewards:
             badge:
-              attribute: 50
+              rank: 50
 
   - id: SINGLE_CONDITION_ONLY_ONCE
     name: Question-Quality
@@ -47,7 +47,7 @@ elements:
           rewards:
             badge:
               maxAwardTimes: 1
-              attribute: 50
+              rank: 50
 
   - id: MULTIPLE_CONDITIONS
     name: Question-Quality
@@ -62,12 +62,12 @@ elements:
           condition: "e.value >= 75"
           rewards:
             badge:
-              attribute: 75
+              rank: 75
         - priority: 2
           condition: "e.value >= 50"
           rewards:
             badge:
-              attribute: 50
+              rank: 50
 
   - id: MULTIPLE_CONDITIONS_65
     name: Question-Quality
@@ -82,12 +82,12 @@ elements:
           condition: "e.value >= 50"
           rewards:
             badge:
-              attribute: 50
+              rank: 50
         - priority: 1
           condition: "e.value >= 65"
           rewards:
             badge:
-              attribute: 65
+              rank: 65
 
   - id: THREE_CONDITIONS
     name: Question-Quality
@@ -102,17 +102,17 @@ elements:
           condition: "e.value >= 85"
           rewards:
             badge:
-              attribute: 85
+              rank: 85
         - priority: 2
           condition: "e.value >= 75"
           rewards:
             badge:
-              attribute: 75
+              rank: 75
         - priority: 2
           condition: "e.value >= 50"
           rewards:
             badge:
-              attribute: 50
+              rank: 50
 
   - id: MULTIPLE_CONDITIONS_WRONG_ORDER
     name: Question-Quality
@@ -127,12 +127,12 @@ elements:
           condition: "e.value >= 75"
           rewards:
             badge:
-              attribute: 75
+              rank: 75
         - priority: 1
           condition: "e.value >= 50"
           rewards:
             badge:
-              attribute: 50
+              rank: 50
 
   - id: THREE_CONDITIONS_ONLY_ONCE
     name: Question-Quality
@@ -150,14 +150,14 @@ elements:
           condition: "e.value >= 85"
           rewards:
             badge:
-              attribute: 85
+              rank: 85
         - priority: 2
           condition: "e.value >= 75"
           rewards:
             badge:
-              attribute: 75
+              rank: 75
         - priority: 2
           condition: "e.value >= 50"
           rewards:
             badge:
-              attribute: 50
+              rank: 50

@@ -30,13 +30,13 @@ import lombok.Getter;
 public class FirstEventBadgeRule extends BadgeRule {
 
     private final String eventName;
-    private final int attributeId;
+    private final int rankId;
 
-    public FirstEventBadgeRule(String id, String eventName, int attributeId) {
+    public FirstEventBadgeRule(String id, String eventName, int rankId) {
         super(id);
 
         this.eventName = eventName;
-        this.attributeId = attributeId;
+        this.rankId = rankId;
     }
 
 }

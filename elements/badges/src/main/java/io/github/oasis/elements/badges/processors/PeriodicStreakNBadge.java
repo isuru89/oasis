@@ -124,7 +124,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
                     return Collections.singletonList(new HistogramBadgeSignal(rule.getId(),
                             event,
                             total,
-                            rule.findAttributeOfStreak(total),
+                            rule.findRankOfStreak(total),
                             ts - (ts % rule.getTimeUnit()),
                             lastTs,
                             event.getExternalId()));
@@ -164,7 +164,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
                     map.setValue(lastHitSubKey, event.getTimestamp() + COLON + event.getExternalId());
                     return Collections.singletonList(new HistogramBadgeRemovalSignal(rule.getId(),
                             event.asEventScope(),
-                            rule.findAttributeOfStreak(total + 1),
+                            rule.findRankOfStreak(total + 1),
                             ts - (ts % rule.getTimeUnit()),
                             lastTs));
                 }
@@ -255,7 +255,7 @@ public class PeriodicStreakNBadge extends AbstractBadgeProcessor<PeriodicStreakN
                             rule.getId(),
                             event,
                             streak,
-                            rule.findAttributeOfStreak(streak),
+                            rule.findRankOfStreak(streak),
                             startTs,
                             ts,
                             event.getExternalId()

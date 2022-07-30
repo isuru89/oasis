@@ -22,7 +22,6 @@ package io.github.oasis.elements.milestones.stats;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.SimpleElementDefinition;
-import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.external.Mapped;
 import io.github.oasis.core.services.AbstractStatsApiService;
@@ -78,7 +77,7 @@ public class MilestoneStats extends AbstractStatsApiService {
 
                 for (String milestoneId : request.getMilestoneIds()) {
                     String mainKey = MilestoneIDs.getGameMilestoneSummaryKey(request.getGameId(), milestoneId);
-                    for (Integer attr : request.getAttributeIds()) {
+                    for (Integer attr : request.getLevels()) {
                         subKeys.add("level:" + attr);
                         for (Integer teamId : request.getTeamIds()) {
                             subKeys.add("team:" + teamId + ":level:" + attr);

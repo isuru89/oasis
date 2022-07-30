@@ -24,7 +24,7 @@ import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.configs.OasisConfigs;
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
@@ -729,33 +729,33 @@ class RedisRepositoryTest {
     }
 
     @Test
-    void readAttributeInfo() {
-        redisRepository.addAttribute(1, new AttributeInfo(1, "Gold", 30));
-        redisRepository.addAttribute(1, new AttributeInfo(2, "Silver", 20));
-        redisRepository.addAttribute(1, new AttributeInfo(3, "Bronze", 10));
+    void readRankInfo() {
+        redisRepository.addRank(1, new RankInfo(1, "Gold", 30));
+        redisRepository.addRank(1, new RankInfo(2, "Silver", 20));
+        redisRepository.addRank(1, new RankInfo(3, "Bronze", 10));
 
     }
 
     @Test
-    void addAttribute() {
-        redisRepository.addAttribute(1, new AttributeInfo(1, "Gold", 30));
-        redisRepository.addAttribute(1, new AttributeInfo(2, "Silver", 20));
-        redisRepository.addAttribute(1, new AttributeInfo(3, "Bronze", 10));
+    void addRank() {
+        redisRepository.addRank(1, new RankInfo(1, "Gold", 30));
+        redisRepository.addRank(1, new RankInfo(2, "Silver", 20));
+        redisRepository.addRank(1, new RankInfo(3, "Bronze", 10));
 
         // already existing id
-        assertError(() -> redisRepository.addAttribute(1, new AttributeInfo(3, "Iron", 5)));
+        assertError(() -> redisRepository.addRank(1, new RankInfo(3, "Iron", 5)));
     }
 
     @Test
-    void listAllAttributes() {
-        List<AttributeInfo> attributeInfos = redisRepository.listAllAttributes(1);
-        Assertions.assertEquals(0, attributeInfos.size());
+    void listAllRank() {
+        List<RankInfo> rankInfos = redisRepository.listAllRanks(1);
+        Assertions.assertEquals(0, rankInfos.size());
 
-        redisRepository.addAttribute(1, new AttributeInfo(1, "Gold", 30));
-        redisRepository.addAttribute(1, new AttributeInfo(2, "Silver", 20));
-        redisRepository.addAttribute(1, new AttributeInfo(3, "Bronze", 10));
+        redisRepository.addRank(1, new RankInfo(1, "Gold", 30));
+        redisRepository.addRank(1, new RankInfo(2, "Silver", 20));
+        redisRepository.addRank(1, new RankInfo(3, "Bronze", 10));
 
-        List<AttributeInfo> infos = redisRepository.listAllAttributes(1);
+        List<RankInfo> infos = redisRepository.listAllRanks(1);
         Assertions.assertEquals(3, infos.size());
         Assertions.assertTrue(infos.stream().anyMatch(attr -> attr.getName().equals("Gold")));
         Assertions.assertTrue(infos.stream().anyMatch(attr -> attr.getName().equals("Silver")));

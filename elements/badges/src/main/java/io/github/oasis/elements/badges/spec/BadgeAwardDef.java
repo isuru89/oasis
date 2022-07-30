@@ -37,14 +37,14 @@ public class BadgeAwardDef implements Validator, Serializable {
     private Integer maxAwardTimes;
 
     /**
-     * Badge attribute id (like, Gold, Silver or Bronze)
+     * Badge rank id. (Refer {@link io.github.oasis.core.elements.RankInfo})
      */
-    private Integer attribute;
+    private Integer rank;
 
     @Override
     public void validate() throws OasisParseException {
-        if (maxAwardTimes == null && attribute == null) {
-            throw new OasisParseException("Either one of 'maxAwardTimes' or 'attributes' field must be specified!");
+        if (maxAwardTimes == null && rank == null) {
+            throw new OasisParseException("Either one of 'maxAwardTimes' or 'rank' field must be specified!");
         }
     }
 }

@@ -11,7 +11,7 @@ elements:
         matchEvent: app.user.registered
       rewards:
         badge:
-          attribute: 10
+          rank: 10
 
   - id: USER_REGISTRATION_WITH_CONDITION
     name: Initial-Registration-With-Points
@@ -25,7 +25,7 @@ elements:
           expression: e.value >= 50
       rewards:
         badge:
-          attribute: 1
+          rank: 1
 
   - id: BADGE_WITH_POINTS
     name: Initial-Registration-With-Points
@@ -37,7 +37,7 @@ elements:
         matchEvent: app.user.registered
       rewards:
         badge:
-          attribute: 1
+          rank: 1
         points:
           id: general.points
           amount: 50

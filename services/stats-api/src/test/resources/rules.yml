@@ -25,14 +25,14 @@ elements:
           condition: "e.score >= 100"
           rewards:
             badge:
-              attribute: 30
+              rank: 30
         - priority: 2
           condition: "e.score >= 25"
           rewards:
             badge:
-              attribute: 20
+              rank: 20
         - priority: 3
           condition: "e.score >= 10"
           rewards:
             badge:
-              attribute: 10
+              rank: 10

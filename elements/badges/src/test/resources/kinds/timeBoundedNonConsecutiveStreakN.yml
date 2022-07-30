@@ -22,4 +22,4 @@ elements:
         - streak: 3
           rewards:
             badge:
-              attribute: 10
+              rank: 10

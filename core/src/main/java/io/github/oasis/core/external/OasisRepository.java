@@ -21,7 +21,7 @@ package io.github.oasis.core.external;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.model.*;
@@ -84,8 +84,8 @@ public interface OasisRepository {
     List<ElementDef> readElementsByType(int gameId, String type);
     List<ElementDef> readElementsByGameId(int gameId);
 
-    AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute);
-    List<AttributeInfo> listAllAttributes(int gameId);
+    RankInfo addRank(int gameId, RankInfo newRank);
+    List<RankInfo> listAllRanks(int gameId);
 
 
 }

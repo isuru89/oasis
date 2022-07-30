@@ -19,7 +19,7 @@ elements:
         - streak: 3
           rewards:
             badge:
-              attribute: 10
+              rank: 10
 
   - id: MULTIPLE_THRESHOLDS
     name: Daily-Reputations
@@ -39,8 +39,8 @@ elements:
         - streak: 3
           rewards:
             badge:
-              attribute: 10
+              rank: 10
         - streak: 5
           rewards:
             badge:
-              attribute: 20
+              rank: 20

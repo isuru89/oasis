@@ -73,7 +73,7 @@ public class RewardDef implements Validator, Serializable {
 
     private static BadgeAwardDef merge(BadgeAwardDef to, BadgeAwardDef from) {
         BadgeAwardDef def = new BadgeAwardDef();
-        def.setAttribute(Utils.firstNonNull(from.getAttribute(), to.getAttribute()));
+        def.setRank(Utils.firstNonNull(from.getRank(), to.getRank()));
         def.setMaxAwardTimes(Utils.firstNonNull(from.getMaxAwardTimes(), to.getMaxAwardTimes()));
         return def;
     }
@@ -86,18 +86,18 @@ public class RewardDef implements Validator, Serializable {
         return def;
     }
 
-    public static RewardDef withAttribute(int attribute) {
+    public static RewardDef withRank(int rank) {
         RewardDef def = new RewardDef();
         BadgeAwardDef awardDef = new BadgeAwardDef();
-        awardDef.setAttribute(attribute);
+        awardDef.setRank(rank);
         def.setBadge(awardDef);
         return def;
     }
 
-    public static RewardDef attributeWithMax(int attribute, int maxAllowed) {
+    public static RewardDef rankWithMax(int rank, int maxAllowed) {
         RewardDef def = new RewardDef();
         BadgeAwardDef awardDef = new BadgeAwardDef();
-        awardDef.setAttribute(attribute);
+        awardDef.setRank(rank);
         awardDef.setMaxAwardTimes(maxAllowed);
         def.setBadge(awardDef);
         return def;

@@ -19,7 +19,7 @@
 
 package io.github.oasis.elements.badges.stats.to;
 
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractStatsApiResponse;
 import lombok.Data;
@@ -69,18 +69,18 @@ public class UserBadgeSummary extends AbstractStatsApiResponse {
         }
     }
 
-    public RuleSummaryStat addRuleStat(String ruleId, int attribute, AttributeSummaryStat stat) {
+    public RuleSummaryStat addRuleStat(String ruleId, int rank, RankSummaryStat stat) {
         if (stats == null) {
             stats = new HashMap<>();
         }
 
         if (stats.containsKey(ruleId)) {
             RuleSummaryStat ruleSummaryStat = (RuleSummaryStat) stats.get(ruleId);
-            ruleSummaryStat.addAttributeStat(String.valueOf(attribute), stat);
+            ruleSummaryStat.addRankStat(String.valueOf(rank), stat);
             return ruleSummaryStat;
         } else {
             RuleSummaryStat ruleSummaryStat = new RuleSummaryStat();
-            ruleSummaryStat.addAttributeStat(String.valueOf(attribute), stat);
+            ruleSummaryStat.addRankStat(String.valueOf(rank), stat);
             stats.put(ruleId, ruleSummaryStat);
             return ruleSummaryStat;
         }
@@ -103,27 +103,27 @@ public class UserBadgeSummary extends AbstractStatsApiResponse {
     @NoArgsConstructor
     public static class RuleSummaryStat extends BaseSummaryStat {
         private SimpleElementDefinition badgeMetadata;
-        private Map<String, AttributeSummaryStat> attributes;
+        private Map<String, RankSummaryStat> ranks;
 
-        public void addAttributeStat(String attrKey, AttributeSummaryStat stat) {
-            if (attributes == null) {
-                attributes = new HashMap<>();
+        public void addRankStat(String rankId, RankSummaryStat stat) {
+            if (ranks == null) {
+                ranks = new HashMap<>();
             }
-            attributes.put(attrKey, stat);
+            ranks.put(rankId, stat);
         }
     }
 
     @EqualsAndHashCode(callSuper = true)
     @Data
     @NoArgsConstructor
-    public static class AttributeSummaryStat extends BaseSummaryStat {
-        private int attribute;
-        private AttributeInfo attributeMetadata;
+    public static class RankSummaryStat extends BaseSummaryStat {
+        private int rank;
+        private RankInfo rankMetadata;
 
-        public AttributeSummaryStat(int attribute, AttributeInfo attributeInfo, int count, Long lastWonAt) {
+        public RankSummaryStat(int rank, RankInfo rankInfo, int count, Long lastWonAt) {
             super(count, lastWonAt);
-            this.attribute = attribute;
-            this.attributeMetadata = attributeInfo;
+            this.rank = rank;
+            this.rankMetadata = rankInfo;
         }
     }
 

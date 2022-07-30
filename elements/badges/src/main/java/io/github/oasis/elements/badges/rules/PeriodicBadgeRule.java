@@ -51,9 +51,9 @@ public class PeriodicBadgeRule extends BadgeRule {
 
     @Override
     public void derivePointsInTo(BadgeSignal signal) {
-        int attrId = signal.getAttribute();
+        int attrId = signal.getRank();
         Threshold matchedThreshold = thresholds.stream()
-                .filter(threshold -> threshold.getAttribute() == attrId)
+                .filter(threshold -> threshold.getRank() == attrId)
                 .findFirst()
                 .orElse(null);
 
@@ -74,17 +74,17 @@ public class PeriodicBadgeRule extends BadgeRule {
     @Getter
     @Builder
     public static class Threshold implements Comparable<Threshold> {
-        private final int attribute;
+        private final int rank;
         private final BigDecimal value;
         private final String pointId;
         private final BigDecimal pointAwards;
 
-        public Threshold(int attribute, BigDecimal value) {
-            this(attribute, value, null, null);
+        public Threshold(int rank, BigDecimal value) {
+            this(rank, value, null, null);
         }
 
-        public Threshold(int attribute, BigDecimal value, String pointId, BigDecimal pointAwards) {
-            this.attribute = attribute;
+        public Threshold(int rank, BigDecimal value, String pointId, BigDecimal pointAwards) {
+            this.rank = rank;
             this.value = value;
             this.pointId = pointId;
             this.pointAwards = pointAwards;

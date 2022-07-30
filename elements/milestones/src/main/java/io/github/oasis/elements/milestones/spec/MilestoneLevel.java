@@ -23,17 +23,14 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
 @Data
 public class MilestoneLevel implements Serializable {
+
     private int level;
     private BigDecimal milestone;
 
-    List<String> getSensitiveAttributes() {
-        return List.of(String.valueOf(level), milestone.toString());
-    }
 }

@@ -47,9 +47,9 @@ public class ConditionalBadgeRule extends BadgeRule {
 
     @Override
     public void derivePointsInTo(BadgeSignal signal) {
-        int attrId = signal.getAttribute();
+        int attrId = signal.getRank();
         Condition matchedCondition = conditions.stream()
-                .filter(condition -> condition.getAttribute() == attrId)
+                .filter(condition -> condition.getRank() == attrId)
                 .findFirst()
                 .orElse(null);
 
@@ -72,21 +72,21 @@ public class ConditionalBadgeRule extends BadgeRule {
     public static class Condition implements Comparable<Condition> {
         private final int priority;
         private final EventExecutionFilter condition;
-        private final int attribute;
+        private final int rank;
         private final int maxBadgesAllowed;
         private final String pointId;
         private final BigDecimal pointAwards;
 
-        public Condition(int priority, EventExecutionFilter condition, int attribute, Integer maxBadgesAllowed) {
-            this(priority, condition, attribute, maxBadgesAllowed, null, null);
+        public Condition(int priority, EventExecutionFilter condition, int rank, Integer maxBadgesAllowed) {
+            this(priority, condition, rank, maxBadgesAllowed, null, null);
         }
 
         public Condition(int priority, EventExecutionFilter condition,
-                         int attribute, Integer maxBadgesAllowed,
+                         int rank, Integer maxBadgesAllowed,
                          String pointId, BigDecimal pointAwards) {
             this.priority = priority;
             this.condition = condition;
-            this.attribute = attribute;
+            this.rank = rank;
             this.maxBadgesAllowed = Utils.firstNonNull(maxBadgesAllowed, Integer.MAX_VALUE);
             this.pointId = pointId;
             this.pointAwards = pointAwards;

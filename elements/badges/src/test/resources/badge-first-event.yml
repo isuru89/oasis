@@ -22,7 +22,7 @@ elements:
           expression: e.totalQuestions == 1
       rewards:
         badge:
-          attribute: 10
+          rank: 10
 
   - id: BDG00003
     name: Initial-Registration-With-Points

@@ -25,7 +25,7 @@ package io.github.oasis.core.services.api.beans.jdbc;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.UserMetadata;
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.OasisRepository;
@@ -155,11 +155,11 @@ public class JdbcMetadataProvider implements OasisMetadataSupport {
         return metadataMap;
     }
 
-    @Cacheable(ID.CACHE_ATTRIBUTES)
+    @Cacheable(ID.CACHE_RANKS)
     @Override
-    public Map<Integer, AttributeInfo> readAttributesInfo(int gameId) {
-        return adminDbRepository.listAllAttributes(gameId).stream()
-                .collect(Collectors.toMap(AttributeInfo::getId, Function.identity()));
+    public Map<Integer, RankInfo> readAllRankInfo(int gameId) {
+        return adminDbRepository.listAllRanks(gameId).stream()
+                .collect(Collectors.toMap(RankInfo::getId, Function.identity()));
     }
 
     public void setSelf(JdbcMetadataProvider self) {

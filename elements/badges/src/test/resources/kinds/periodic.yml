@@ -18,7 +18,7 @@ elements:
         - value: 100        # 50 reputations
           rewards:
             badge:
-              attribute: 1
+              rank: 1
 
   - id: SINGLE_THRESHOLD_WITH_FILTER
     name: Daily-Reputations
@@ -39,7 +39,7 @@ elements:
         - value: 100        # 50 reputations
           rewards:
             badge:
-              attribute: 1
+              rank: 1
 
   - id: MULTIPLE_THRESHOLDS
     name: Daily-Reputations
@@ -58,15 +58,15 @@ elements:
         - value: 100        # 50 reputations
           rewards:
             badge:
-              attribute: 1
+              rank: 1
         - value: 150         # 100 reputations
           rewards:
             badge:
-              attribute: 2
+              rank: 2
         - value: 200       # 200 reputations
           rewards:
             badge:
-              attribute: 4
+              rank: 4
 
   - id: MULTIPLE_THRESHOLDS_WITH_FILTER
     name: Daily-Reputations
@@ -87,12 +87,12 @@ elements:
         - value: 100        # 50 reputations
           rewards:
             badge:
-              attribute: 1
+              rank: 1
         - value: 150         # 100 reputations
           rewards:
             badge:
-              attribute: 2
+              rank: 2
         - value: 200       # 200 reputations
           rewards:
             badge:
-              attribute: 4
+              rank: 4

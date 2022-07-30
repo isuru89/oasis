@@ -84,7 +84,7 @@ public class BadgeParser extends AbstractElementParser {
         String id = def.getId();
         if (FIRST_EVENT_KIND.equals(kind)) {
             String event = spec.getSelector().getMatchEvent();
-            rule = new FirstEventBadgeRule(id, event, spec.getRewards().getBadge().getAttribute());
+            rule = new FirstEventBadgeRule(id, event, spec.getRewards().getBadge().getRank());
             AbstractDef.defToRule(def, rule);
         } else if (STREAK_N_KIND.equals(kind)) {
             StreakNBadgeRule temp = new StreakNBadgeRule(id);
@@ -182,11 +182,11 @@ public class BadgeParser extends AbstractElementParser {
                     streak -> {
                     RewardDef mergedRewards = RewardDef.merge(streak.getRewards(), def.getSpec().getRewards());
                     if (mergedRewards.getPoints() != null) {
-                        return new StreakNBadgeRule.StreakProps(mergedRewards.getBadge().getAttribute(),
+                        return new StreakNBadgeRule.StreakProps(mergedRewards.getBadge().getRank(),
                                 mergedRewards.getPoints().getId(),
                                 mergedRewards.getPoints().getAmount());
                     } else {
-                        return new StreakNBadgeRule.StreakProps(mergedRewards.getBadge().getAttribute());
+                        return new StreakNBadgeRule.StreakProps(mergedRewards.getBadge().getRank());
                     }
                 }));
     }

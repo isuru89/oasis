@@ -25,10 +25,10 @@ import io.github.oasis.core.Event;
  * @author Isuru Weerarathna
  */
 public class ConditionalBadgeSignal extends BadgeSignal {
-    public ConditionalBadgeSignal(String ruleId, Event event, int attributeId, long timestamp, String eventId) {
-        super(ruleId, event, event.getTimestamp(), attributeId, timestamp, timestamp, eventId, eventId);
+    public ConditionalBadgeSignal(String ruleId, Event event, int rankId, long timestamp, String eventId) {
+        super(ruleId, event, event.getTimestamp(), rankId, timestamp, timestamp, eventId, eventId);
     }
-    public static ConditionalBadgeSignal create(String ruleId, Event causedEvent, int attributeId) {
-        return new ConditionalBadgeSignal(ruleId, causedEvent, attributeId, causedEvent.getTimestamp(), causedEvent.getExternalId());
+    public static ConditionalBadgeSignal create(String ruleId, Event causedEvent, int rankId) {
+        return new ConditionalBadgeSignal(ruleId, causedEvent, rankId, causedEvent.getTimestamp(), causedEvent.getExternalId());
     }
 }

@@ -24,7 +24,7 @@ import io.github.oasis.core.ID;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.collect.Pair;
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisDbException;
@@ -65,7 +65,7 @@ public class RedisRepository implements OasisRepository {
 
     private static final String ALL_PATTERN = "*";
 
-    public static final String ALL_ATTRIBUTES_KEY = "attributes";
+    public static final String ALL_RANKS_KEY = "ranks";
 
     private final Db dbPool;
     private final SerializationSupport serializationSupport;
@@ -858,45 +858,45 @@ public class RedisRepository implements OasisRepository {
     }
 
     @Override
-    public AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute) {
+    public RankInfo addRank(int gameId, RankInfo newRank) {
         return withDbContext(db -> {
-            String baseKey = ID.getGameAttributesInfoKey(gameId);
-            String attrId = String.valueOf(newAttribute.getId());
-            String attributes = db.getValueFromMap(baseKey, ALL_ATTRIBUTES_KEY);
-            if (Texts.isEmpty(attributes)) {
-                db.setValueInMap(baseKey, ALL_ATTRIBUTES_KEY, attrId);
+            String baseKey = ID.getGameRanksInfoKey(gameId);
+            String attrId = String.valueOf(newRank.getId());
+            String ranks = db.getValueFromMap(baseKey, ALL_RANKS_KEY);
+            if (Texts.isEmpty(ranks)) {
+                db.setValueInMap(baseKey, ALL_RANKS_KEY, attrId);
             } else {
-                Set<String> attrs = splitToSet(attributes);
+                Set<String> attrs = splitToSet(ranks);
                 if (!attrs.add(attrId)) {
-                    throw new OasisRuntimeException("Attribute already exist by given id!");
+                    throw new OasisRuntimeException("Rank already exist by given id!");
                 }
-                db.setValueInMap(baseKey, ALL_ATTRIBUTES_KEY, String.join(COMMA, attrs));
+                db.setValueInMap(baseKey, ALL_RANKS_KEY, String.join(COMMA, attrs));
             }
 
-            db.setValueInMap(baseKey, attrId, serializationSupport.serialize(newAttribute));
-            return newAttribute;
+            db.setValueInMap(baseKey, attrId, serializationSupport.serialize(newRank));
+            return newRank;
         });
     }
 
     @Override
-    public List<AttributeInfo> listAllAttributes(int gameId) {
-        Map<Integer, AttributeInfo> attributeInfoMap = withDbContext(db -> {
-            String baseKey = ID.getGameAttributesInfoKey(gameId);
-            String attributes = db.getValueFromMap(baseKey, ALL_ATTRIBUTES_KEY);
-            if (Texts.isEmpty(attributes)) {
+    public List<RankInfo> listAllRanks(int gameId) {
+        Map<Integer, RankInfo> rankInfoMap = withDbContext(db -> {
+            String baseKey = ID.getGameRanksInfoKey(gameId);
+            String ranks = db.getValueFromMap(baseKey, ALL_RANKS_KEY);
+            if (Texts.isEmpty(ranks)) {
                 return new HashMap<>();
             }
 
-            List<String> elementValues = db.getValuesFromMap(baseKey, Stream.of(attributes.split(COMMA))
+            List<String> elementValues = db.getValuesFromMap(baseKey, Stream.of(ranks.split(COMMA))
                     .distinct().toArray(String[]::new));
-            Map<Integer, AttributeInfo> defs = new HashMap<>();
+            Map<Integer, RankInfo> defs = new HashMap<>();
             for (String elementValue : elementValues) {
-                AttributeInfo attributeInfo = serializationSupport.deserialize(elementValue, AttributeInfo.class);
-                defs.put(attributeInfo.getId(), attributeInfo);
+                RankInfo rankInfo = serializationSupport.deserialize(elementValue, RankInfo.class);
+                defs.put(rankInfo.getId(), rankInfo);
             }
             return defs;
         });
-        return new ArrayList<>(attributeInfoMap.values());
+        return new ArrayList<>(rankInfoMap.values());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////

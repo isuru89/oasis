@@ -33,8 +33,8 @@ public class TemporalBadgeSignal extends BadgeSignal {
 
     private long timestamp;
 
-    public TemporalBadgeSignal(String ruleId, Event causedEvent, int attributeId, long st, long et, long timestamp, String eventId) {
-        super(ruleId, causedEvent, timestamp, attributeId, st, et, eventId, null);
+    public TemporalBadgeSignal(String ruleId, Event causedEvent, int rankId, long st, long et, long timestamp, String eventId) {
+        super(ruleId, causedEvent, timestamp, rankId, st, et, eventId, null);
         this.timestamp = timestamp;
     }
 
@@ -46,7 +46,7 @@ public class TemporalBadgeSignal extends BadgeSignal {
     public int compareTo(Signal o) {
         Comparator<BadgeSignal> comparator = Comparator
                 .comparingLong(BadgeSignal::getStartTime)
-                .thenComparing(BadgeSignal::getAttribute)
+                .thenComparing(BadgeSignal::getRank)
                 .thenComparing(BadgeSignal::getRuleId)
                 .thenComparing(Signal::getEventScope)
                 .thenComparingLong(BadgeSignal::getEndTime)

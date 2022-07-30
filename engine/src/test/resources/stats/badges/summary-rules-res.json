@@ -8,10 +8,10 @@
         "name": "test.badge.rule",
         "description": "Awards badge if value is >= 50 for streaks"
       },
-      "attributes": {
+      "ranks": {
         "30": {
-          "attribute": 30,
-          "attributeMetadata": {
+          "rank": 30,
+          "rankMetadata": {
             "id": 30,
             "name": "Gold",
             "priority": 20
@@ -19,8 +19,8 @@
           "count": 0
         },
         "20": {
-          "attribute": 20,
-          "attributeMetadata": {
+          "rank": 20,
+          "rankMetadata": {
             "id": 20,
             "name": "Silver",
             "priority": 50
@@ -28,8 +28,8 @@
           "count": 1
         },
         "10": {
-          "attribute": 10,
-          "attributeMetadata": {
+          "rank": 10,
+          "rankMetadata": {
             "id": 10,
             "name": "Bronze",
             "priority": 100

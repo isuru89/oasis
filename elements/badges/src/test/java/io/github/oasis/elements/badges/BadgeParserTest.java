@@ -102,7 +102,7 @@ class BadgeParserTest {
                     .forEach(cond -> {
                         assertTrue(cond.getPriority() > 0);
                         assertNotNull(cond.getRewards());
-                        assertTrue(cond.getRewards().getBadge().getAttribute() > 0);
+                        assertTrue(cond.getRewards().getBadge().getRank() > 0);
                         assertTrue(Texts.isNotEmpty(cond.getCondition()));
                         assertNull(cond.getRewards().getPoints());
                     });
@@ -115,7 +115,7 @@ class BadgeParserTest {
             def.getSpec().getConditions()
                     .forEach(cond -> {
                         assertTrue(cond.getPriority() > 0);
-                        assertTrue(cond.getRewards().getBadge().getAttribute() > 0);
+                        assertTrue(cond.getRewards().getBadge().getRank() > 0);
                         assertTrue(Texts.isNotEmpty(cond.getCondition()));
                         assertNotNull(cond.getRewards().getPoints());
                         assertNotNull(cond.getRewards().getPoints().getAmount());
@@ -182,7 +182,7 @@ class BadgeParserTest {
 
         FirstEventBadgeRule rule = (FirstEventBadgeRule) abstractRule;
         assertEquals("event.a", rule.getEventName());
-        assertEquals(1, rule.getAttributeId());
+        assertEquals(1, rule.getRankId());
     }
 
     @Test
@@ -190,9 +190,9 @@ class BadgeParserTest {
         BadgeDef def = createBase();
         def.getSpec().setKind(BadgeDef.CONDITIONAL_KIND);
         def.getSpec().setConditions(List.of(
-                new Condition(1, "e.data.value > 100", RewardDef.attributeWithMax(1, 5)),
-                new Condition(4, "e.data.value > 300", RewardDef.attributeWithMax(3, 5)),
-                new Condition(2, "e.data.value > 200", RewardDef.attributeWithMax(2, 5))
+                new Condition(1, "e.data.value > 100", RewardDef.rankWithMax(1, 5)),
+                new Condition(4, "e.data.value > 300", RewardDef.rankWithMax(3, 5)),
+                new Condition(2, "e.data.value > 200", RewardDef.rankWithMax(2, 5))
         ));
 
         AbstractRule abstractRule = parser.convert(def);
@@ -221,9 +221,9 @@ class BadgeParserTest {
         def.getSpec().setRetainTime(TimeUnitDef.of(7L, "days"));
         def.getSpec().getSelector().setFilter(EventFilterDef.withExpression("e.data.value > 100"));
         def.getSpec().setStreaks(List.of(
-                new Streak(3, RewardDef.withAttribute(1)),
-                new Streak(5, RewardDef.withAttribute(2)),
-                new Streak(10, RewardDef.withAttribute(3))
+                new Streak(3, RewardDef.withRank(1)),
+                new Streak(5, RewardDef.withRank(2)),
+                new Streak(10, RewardDef.withRank(3))
         ));
 
         AbstractRule abstractRule = parser.convert(def);
@@ -234,10 +234,10 @@ class BadgeParserTest {
         assertEquals(86400000, rule.getTimeUnit());
         assertEquals(10, rule.getMaxStreak());
         assertEquals(3, rule.getMinStreak());
-        assertEquals(2, rule.getAttributeForStreak(5));
-        assertEquals(0, rule.getAttributeForStreak(0));
-        assertEquals(3, rule.getAttributeForStreak(10));
-        assertEquals(0, rule.getAttributeForStreak(11));
+        assertEquals(2, rule.getRankForStreak(5));
+        assertEquals(0, rule.getRankForStreak(0));
+        assertEquals(3, rule.getRankForStreak(10));
+        assertEquals(0, rule.getRankForStreak(11));
         assertEquals(def.getSpec() .getStreaks().size(), rule.getStreaks().size());
 
         // streaks must be ordered by priority
@@ -257,9 +257,9 @@ class BadgeParserTest {
         def.getSpec().setThreshold(BigDecimal.valueOf(100.0));
         def.getSpec().setAggregatorExtractor(new ValueExtractorDef("e.data.score"));
         def.getSpec().setStreaks(List.of(
-                new Streak(3, RewardDef.withAttribute(1)),
-                new Streak(5, RewardDef.withAttribute(2)),
-                new Streak(10, RewardDef.withAttribute(3))
+                new Streak(3, RewardDef.withRank(1)),
+                new Streak(5, RewardDef.withRank(2)),
+                new Streak(10, RewardDef.withRank(3))
         ));
 
         AbstractRule abstractRule = parser.convert(def);
@@ -292,9 +292,9 @@ class BadgeParserTest {
         def.getSpec().setThreshold(BigDecimal.valueOf(100.0));
         def.getSpec().getSelector().setFilter(EventFilterDef.withExpression("e.value > 50"));
         def.getSpec().setStreaks(List.of(
-                new Streak(3, RewardDef.withAttribute(1)),
-                new Streak(5, RewardDef.withAttribute(2)),
-                new Streak(10, RewardDef.withAttribute(3))
+                new Streak(3, RewardDef.withRank(1)),
+                new Streak(5, RewardDef.withRank(2)),
+                new Streak(10, RewardDef.withRank(3))
         ));
 
         AbstractRule abstractRule = parser.convert(def);
@@ -328,9 +328,9 @@ class BadgeParserTest {
         def.getSpec().setPeriod(TimeUnitDef.of(1234L, "ms"));
         def.getSpec().setAggregatorExtractor(new ValueExtractorDef("e.data.value"));
         def.getSpec().setThresholds(List.of(
-                new Threshold(BigDecimal.valueOf(100.0), RewardDef.withAttribute(1)),
-                new Threshold(BigDecimal.valueOf(300.0), RewardDef.withAttribute(3)),
-                new Threshold(BigDecimal.valueOf(200.0), RewardDef.withAttribute(2))
+                new Threshold(BigDecimal.valueOf(100.0), RewardDef.withRank(1)),
+                new Threshold(BigDecimal.valueOf(300.0), RewardDef.withRank(3)),
+                new Threshold(BigDecimal.valueOf(200.0), RewardDef.withRank(2))
         ));
 
         AbstractRule abstractRule = parser.convert(def);
@@ -359,9 +359,9 @@ class BadgeParserTest {
         def.getSpec().setPeriod(TimeUnitDef.of(1234L, "ms"));
         def.getSpec().getSelector().setFilter(EventFilterDef.withExpression("e.data.value > 100"));
         def.getSpec().setThresholds(List.of(
-                new Threshold(BigDecimal.valueOf(100.0), RewardDef.withAttribute(1)),
-                new Threshold(BigDecimal.valueOf(300.0), RewardDef.withAttribute(3)),
-                new Threshold(BigDecimal.valueOf(200.0), RewardDef.withAttribute(2))
+                new Threshold(BigDecimal.valueOf(100.0), RewardDef.withRank(1)),
+                new Threshold(BigDecimal.valueOf(300.0), RewardDef.withRank(3)),
+                new Threshold(BigDecimal.valueOf(200.0), RewardDef.withRank(2))
         ));
 
         AbstractRule abstractRule = parser.convert(def);
@@ -406,7 +406,7 @@ class BadgeParserTest {
         spec.setKind(BadgeDef.FIRST_EVENT_KIND);
         SelectorDef selectorDef = SelectorDef.singleEvent("event.a");
         spec.setSelector(selectorDef);
-        spec.setRewards(RewardDef.withAttribute(1));
+        spec.setRewards(RewardDef.withRank(1));
         def.setSpec(spec);
         return def;
     }
@@ -422,9 +422,9 @@ class BadgeParserTest {
         spec.getSelector().setFilter(EventFilterDef.withExpression("e.data.value > 100"));
         spec.setConsecutive(true);
         spec.setStreaks(List.of(
-                new Streak(3, RewardDef.withAttribute(1)),
-                new Streak(5, RewardDef.withAttribute(2)),
-                new Streak(10, RewardDef.withAttribute(3))
+                new Streak(3, RewardDef.withRank(1)),
+                new Streak(5, RewardDef.withRank(2)),
+                new Streak(10, RewardDef.withRank(3))
         ));
         def.setSpec(spec);
         return def;

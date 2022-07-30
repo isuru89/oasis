@@ -18,7 +18,7 @@ elements:
         - streak: 3
           rewards:
             badge:
-              attribute: 10
+              rank: 10
 
   - id: SINGLE_STREAK_WITH_POINTS
     name: Question-Score-Streak
@@ -37,7 +37,7 @@ elements:
         - streak: 3
           rewards:
             badge:
-              attribute: 10
+              rank: 10
             points:
               id: reputation
               amount: 10
@@ -59,11 +59,11 @@ elements:
         - streak: 3
           rewards:
             badge:
-              attribute: 10
+              rank: 10
         - streak: 5
           rewards:
             badge:
-              attribute: 20
+              rank: 20
 
   - id: MULTI_STREAK_WITH_POINTS
     name: Question-Score-Streak
@@ -82,14 +82,14 @@ elements:
         - streak: 3
           rewards:
             badge:
-              attribute: 10
+              rank: 10
             points:
               id: reputation
               amount: 10
         - streak: 5
           rewards:
             badge:
-              attribute: 20
+              rank: 20
             points:
               id: reputation
               amount: 50

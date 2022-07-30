@@ -136,7 +136,7 @@ public abstract class AbstractRuleTest {
     protected void assertSignal(Collection<Signal> signals, Signal signalRef) {
         Assertions.assertTrue(signals.contains(signalRef), "Signal not found!\n Expected: " + signalRef.toString());
         Optional<Signal> signal = signals.stream().filter(s -> s.compareTo(signalRef) == 0).findFirst();
-        Assertions.assertTrue(signal.isPresent(), "Provided signal has different attributes! " + signalRef.toString());
+        Assertions.assertTrue(signal.isPresent(), "Provided signal has different ranks! " + signalRef.toString());
     }
 
     protected void printSignals(Collection<Signal> signals) {

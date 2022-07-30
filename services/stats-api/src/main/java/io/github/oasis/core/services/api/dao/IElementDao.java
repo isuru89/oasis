@@ -19,7 +19,7 @@
 
 package io.github.oasis.core.services.api.dao;
 
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.services.api.dao.configs.UseOasisSqlLocator;
 import io.github.oasis.core.services.api.dao.dto.ElementDto;
 import io.github.oasis.core.services.api.dao.dto.ElementUpdateDto;
@@ -38,7 +38,7 @@ import java.util.List;
  */
 @UseOasisSqlLocator("io/github/oasis/db/scripts/elements")
 @RegisterBeanMapper(ElementDto.class)
-@RegisterBeanMapper(AttributeInfo.class)
+@RegisterBeanMapper(RankInfo.class)
 public interface IElementDao {
 
     @SqlUpdate
@@ -83,12 +83,12 @@ public interface IElementDao {
 
     @SqlUpdate
     @GetGeneratedKeys("id")
-    int insertAttribute(@Bind("gameId") int gameId, @BindBean AttributeInfo newAttr);
+    int insertRank(@Bind("gameId") int gameId, @BindBean RankInfo newAttr);
 
     @SqlQuery
-    AttributeInfo readAttribute(@Bind("gameId") int gameId, @Bind("id") int id);
+    RankInfo readRank(@Bind("gameId") int gameId, @Bind("id") int id);
 
     @SqlQuery
-    List<AttributeInfo> readAllAttributes(@Bind("gameId") int gameId);
+    List<RankInfo> readAllRanks(@Bind("gameId") int gameId);
 
 }

@@ -26,20 +26,18 @@ import java.io.Serializable;
 /**
  * @author Isuru Weerarathna
  */
-@Setter
-@Getter
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
-public class AttributeInfo implements Serializable {
+public class RankInfo implements Serializable {
 
     private Integer id;
     private String name;
     private int priority;
     private String colorCode;
 
-    public AttributeInfo(Integer id, String name, Integer priority) {
+    public RankInfo(Integer id, String name, Integer priority) {
         this(id, name, priority, null);
     }
 

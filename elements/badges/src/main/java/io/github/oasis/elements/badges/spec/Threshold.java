@@ -47,7 +47,7 @@ public class Threshold implements Validator, Serializable {
     public PeriodicBadgeRule.Threshold toRuleThreshold(BadgeDef def) {
         RewardDef mergedRewards = RewardDef.merge(rewards, def.getSpec().getRewards());
         PeriodicBadgeRule.Threshold.ThresholdBuilder builder = PeriodicBadgeRule.Threshold.builder()
-                .attribute(mergedRewards.getBadge().getAttribute())
+                .rank(mergedRewards.getBadge().getRank())
                 .value(this.value);
 
         if (mergedRewards.getPoints() != null) {

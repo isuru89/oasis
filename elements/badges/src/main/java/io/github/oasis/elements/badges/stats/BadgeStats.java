@@ -21,7 +21,7 @@ package io.github.oasis.elements.badges.stats;
 
 import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.collect.Record;
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisException;
@@ -83,7 +83,7 @@ public class BadgeStats extends AbstractStatsApiService {
     private static final String ATTR_PFX = "attr:";
     private static final String ZERO = "0";
 
-    private final Map<Integer, Map<Integer, AttributeInfo>> gameAttributes = new ConcurrentHashMap<>();
+    private final Map<Integer, Map<Integer, RankInfo>> gameRankings = new ConcurrentHashMap<>();
     private final Map<Integer, Map<String, BadgeDef>> gameWiseRuleCache = new ConcurrentHashMap<>();
 
     private final BadgeParser parser = new BadgeParser();
@@ -110,16 +110,16 @@ public class BadgeStats extends AbstractStatsApiService {
                 subKeys.addAll(request.getRuleFilters().stream().map(rule -> RULE_PFX + rule)
                         .collect(Collectors.toList()));
 
-                if (Utils.isNotEmpty(request.getAttributeFilters())) {
+                if (Utils.isNotEmpty(request.getRankFilters())) {
                     subKeys.addAll(request.getRuleFilters().stream()
-                            .flatMap(rule -> request.getAttributeFilters().stream().map(attr -> RULE_PFX + rule + COLON + attr))
+                            .flatMap(rule -> request.getRankFilters().stream().map(attr -> RULE_PFX + rule + COLON + attr))
                             .collect(Collectors.toList()));
                 }
 
                 elementDefinitions = getContextHelper().readElementDefinitions(request.getGameId(), request.getRuleFilters());
 
-            } else if (Utils.isNotEmpty(request.getAttributeFilters())) {
-                subKeys.addAll(request.getAttributeFilters().stream().map(attr -> ATTR_PFX + attr)
+            } else if (Utils.isNotEmpty(request.getRankFilters())) {
+                subKeys.addAll(request.getRankFilters().stream().map(attr -> ATTR_PFX + attr)
                         .collect(Collectors.toList()));
             }
 
@@ -129,22 +129,22 @@ public class BadgeStats extends AbstractStatsApiService {
 
             List<String> countValues = badgeSummary.getValues(subKeys.toArray(new String[0]));
             summary.setTotalBadges(Numbers.asInt(countValues.get(0)));
-            Map<Integer, AttributeInfo> gameAttributes = loadGameAttributes(request.getGameId());
+            Map<Integer, RankInfo> gameRanks = loadGameRanks(request.getGameId());
 
             for (int i = 1; i < subKeys.size(); i++) {
                 String key = subKeys.get(i);
                 String[] parts = key.split(COLON);
 
                 if ("attr".equals(parts[0])) {
-                    int attrId = Numbers.asInt(parts[1]);
-                    summary.addSummaryStat(parts[1], new UserBadgeSummary.AttributeSummaryStat(
-                            attrId, gameAttributes.get(attrId), Numbers.asInt(countValues.get(i)), null));
+                    int rankId = Numbers.asInt(parts[1]);
+                    summary.addSummaryStat(parts[1], new UserBadgeSummary.RankSummaryStat(
+                            rankId, gameRanks.get(rankId), Numbers.asInt(countValues.get(i)), null));
                 } else {
                     UserBadgeSummary.RuleSummaryStat ruleSummaryStat = null;
                     if (parts.length == 3) {
                         int attr = Numbers.asInt(parts[2]);
-                        ruleSummaryStat = summary.addRuleStat(parts[1], attr, new UserBadgeSummary.AttributeSummaryStat(
-                                attr, gameAttributes.get(attr), Numbers.asInt(countValues.get(i)), null));
+                        ruleSummaryStat = summary.addRuleStat(parts[1], attr, new UserBadgeSummary.RankSummaryStat(
+                                attr, gameRanks.get(attr), Numbers.asInt(countValues.get(i)), null));
 
                     } else if (parts.length == 2) {
                         ruleSummaryStat = summary.addRuleSummary(parts[1], Numbers.asInt(countValues.get(i)), null);
@@ -189,9 +189,9 @@ public class BadgeStats extends AbstractStatsApiService {
 
             if (Utils.isNotEmpty(badgeIds)) {
                 Map<String, SimpleElementDefinition> defMap = getContextHelper().readElementDefinitions(request.getGameId(), badgeIds);
-                Map<Integer, AttributeInfo> attributeInfoMap = loadGameAttributes(request.getGameId());
+                Map<Integer, RankInfo> rankInfoMap = loadGameRanks(request.getGameId());
                 for (BadgeLogRecord record : logRecords) {
-                    record.setAttributeMetadata(attributeInfoMap.get(record.getAttribute()));
+                    record.setRankMetadata(rankInfoMap.get(record.getRank()));
                     record.setBadgeMetadata(defMap.get(record.getBadgeId()));
                 }
             }
@@ -238,9 +238,9 @@ public class BadgeStats extends AbstractStatsApiService {
 
             if (Utils.isNotEmpty(userIds)) {
                 Map<String, UserMetadata> defMap = getContextHelper().readUsersByIdStrings(userIds);
-                Map<Integer, AttributeInfo> attributeInfoMap = loadGameAttributes(request.getGameId());
+                Map<Integer, RankInfo> rankInfoMap = loadGameRanks(request.getGameId());
                 for (RuleBadgeLogRecord record : logRecords) {
-                    record.setAttributeMetadata(attributeInfoMap.get(record.getAttribute()));
+                    record.setRankMetadata(rankInfoMap.get(record.getRank()));
                     record.setUserMetadata(defMap.get(String.valueOf(record.getUserId())));
                 }
             }
@@ -388,15 +388,15 @@ public class BadgeStats extends AbstractStatsApiService {
         return consecutive != null ? consecutive : true;
     }
 
-    private Map<Integer, AttributeInfo> loadGameAttributes(int gameId) {
-        return gameAttributes.computeIfAbsent(gameId, this::loadGameAttributesFromDb);
+    private Map<Integer, RankInfo> loadGameRanks(int gameId) {
+        return gameRankings.computeIfAbsent(gameId, this::loadGameRanksFromDb);
     }
 
-    private Map<Integer, AttributeInfo> loadGameAttributesFromDb(int gameId) {
+    private Map<Integer, RankInfo> loadGameRanksFromDb(int gameId) {
         try {
-            return getContextHelper().readAttributesInfo(gameId);
+            return getContextHelper().readAllRankInfo(gameId);
         } catch (OasisException e) {
-            throw new RuntimeException("Cannot load attributes!", e);
+            throw new RuntimeException("Cannot load game ranks!", e);
         }
     }
 }

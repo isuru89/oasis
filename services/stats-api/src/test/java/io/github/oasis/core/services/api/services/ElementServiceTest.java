@@ -20,14 +20,14 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.services.api.TestUtils;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.ElementCreateRequest.ElementMetadata;
 import io.github.oasis.core.services.api.to.ElementUpdateRequest;
-import io.github.oasis.core.services.api.to.GameAttributeCreateRequest;
+import io.github.oasis.core.services.api.to.RankCreationRequest;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,11 +54,11 @@ public class ElementServiceTest extends AbstractServiceTest {
     private ElementCreateRequest samplePoint;
     private ElementCreateRequest sampleBadge;
 
-    private final GameAttributeCreateRequest gold = GameAttributeCreateRequest.builder()
+    private final RankCreationRequest gold = RankCreationRequest.builder()
             .name("gold").colorCode("#FFD700").priority(1).build();
-    private final GameAttributeCreateRequest silver = GameAttributeCreateRequest.builder()
+    private final RankCreationRequest silver = RankCreationRequest.builder()
             .name("silver").colorCode("#C0C0C0").priority(2).build();
-    private final GameAttributeCreateRequest bronze = GameAttributeCreateRequest.builder()
+    private final RankCreationRequest bronze = RankCreationRequest.builder()
             .name("bronze").colorCode("#cd7f32").priority(3).build();
 
     @BeforeEach
@@ -287,52 +287,52 @@ public class ElementServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    void testAddAttributes() {
-        AttributeInfo dbGold = doPostSuccess("/games/" + GAME_ID + "/attributes", gold, AttributeInfo.class);
-        assertAttribute(dbGold, gold);
+    void testAddRanks() {
+        RankInfo dbGold = doPostSuccess("/games/" + GAME_ID + "/ranks", gold, RankInfo.class);
+        assertRank(dbGold, gold);
 
-        doPostError("/games/" + GAME_ID + "/attributes", gold, HttpStatus.BAD_REQUEST, ErrorCodes.ATTRIBUTE_EXISTS);
+        doPostError("/games/" + GAME_ID + "/ranks", gold, HttpStatus.BAD_REQUEST, ErrorCodes.RANK_EXISTS);
 
-        // can add same attribute to different game
-        doPostSuccess("/games/2/attributes", gold, AttributeInfo.class);
+        // can add same rank to different game
+        doPostSuccess("/games/2/ranks", gold, RankInfo.class);
     }
 
     @Test
-    void testAddAttributesValidations() {
-        doPostError("/games/" + GAME_ID + "/attributes",
+    void testAddRanksValidations() {
+        doPostError("/games/" + GAME_ID + "/ranks",
                 gold.toBuilder().name(null).build(),
                 HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
 
-        doPostError("/games/" + GAME_ID + "/attributes",
+        doPostError("/games/" + GAME_ID + "/ranks",
                 gold.toBuilder().name("").build(),
                 HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
 
-        doPostError("/games/" + GAME_ID + "/attributes",
+        doPostError("/games/" + GAME_ID + "/ranks",
                 gold.toBuilder().name(RandomStringUtils.randomAscii(33)).build(),
                 HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
     }
 
     @Test
-    void testListAttributes() {
-        doPostSuccess("/games/" + GAME_ID + "/attributes", gold, AttributeInfo.class);
-        doPostSuccess("/games/" + GAME_ID + "/attributes", silver, AttributeInfo.class);
-        doPostSuccess("/games/" + GAME_ID + "/attributes", bronze, AttributeInfo.class);
-        doPostSuccess("/games/2/attributes", gold, AttributeInfo.class);
-        doPostSuccess("/games/2/attributes", silver, AttributeInfo.class);
+    void testListRanks() {
+        doPostSuccess("/games/" + GAME_ID + "/ranks", gold, RankInfo.class);
+        doPostSuccess("/games/" + GAME_ID + "/ranks", silver, RankInfo.class);
+        doPostSuccess("/games/" + GAME_ID + "/ranks", bronze, RankInfo.class);
+        doPostSuccess("/games/2/ranks", gold, RankInfo.class);
+        doPostSuccess("/games/2/ranks", silver, RankInfo.class);
 
         {
-            List<AttributeInfo> attributeInfos = doGetListSuccess("/games/{gameId}/attributes", AttributeInfo.class, GAME_ID);
-            assertEquals(3, attributeInfos.size());
-            List<String> attrNames = attributeInfos.stream().map(AttributeInfo::getName).collect(Collectors.toList());
+            List<RankInfo> rankInfos = doGetListSuccess("/games/{gameId}/ranks", RankInfo.class, GAME_ID);
+            assertEquals(3, rankInfos.size());
+            List<String> attrNames = rankInfos.stream().map(RankInfo::getName).collect(Collectors.toList());
             assertTrue(attrNames.contains(gold.getName()));
             assertTrue(attrNames.contains(silver.getName()));
             assertTrue(attrNames.contains(bronze.getName()));
         }
 
         {
-            List<AttributeInfo> attributeInfos = doGetListSuccess("/games/{gameId}/attributes", AttributeInfo.class, 2);
-            assertEquals(2, attributeInfos.size());
-            List<String> attrNames = attributeInfos.stream().map(AttributeInfo::getName).collect(Collectors.toList());
+            List<RankInfo> rankInfos = doGetListSuccess("/games/{gameId}/ranks", RankInfo.class, 2);
+            assertEquals(2, rankInfos.size());
+            List<String> attrNames = rankInfos.stream().map(RankInfo::getName).collect(Collectors.toList());
             assertTrue(attrNames.contains(gold.getName()));
             assertTrue(attrNames.contains(silver.getName()));
             assertFalse(attrNames.contains(bronze.getName()));
@@ -359,7 +359,7 @@ public class ElementServiceTest extends AbstractServiceTest {
         return doGetSuccess("/games/" + gameId + "/elements/" + elementId + qParams, ElementDef.class);
     }
 
-    private void assertAttribute(AttributeInfo db, GameAttributeCreateRequest other) {
+    private void assertRank(RankInfo db, RankCreationRequest other) {
         assertTrue(db.getId() > 0);
         assertEquals(other.getColorCode(), db.getColorCode());
         assertEquals(other.getName(), db.getName());

@@ -20,15 +20,15 @@ badges:
         - streak: 5         # 5 consecutive days
           rewards:
             badge:
-              attribute: 10
+              rank: 10
         - streak: 7         # 7 consecutive days
           rewards:
             badge:
-              attribute: 20
+              rank: 20
         - streak: 10        # 10 consecutive days
           rewards:
             badge:
-              attribute: 30
+              rank: 30
 
   - id: BDG-PS0002
     name: Daily-Logins
@@ -47,12 +47,12 @@ badges:
         - streak: 30
           rewards:
             badge:
-              attribute: 10
+              rank: 10
         - streak: 60
           rewards:
             badge:
-              attribute: 20
+              rank: 20
         - streak: 100
           rewards:
             badge:
-              attribute: 30
+              rank: 30

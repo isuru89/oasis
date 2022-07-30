@@ -53,7 +53,7 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
     private final long endTime;
     private final String startId;
     private final String endId;
-    private final int attribute;
+    private final int rank;
 
     private String pointId;
     private BigDecimal points;
@@ -61,12 +61,12 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
     public BadgeSignal(String ruleId,
                 EventScope eventScope,
                 long occurredTs,
-                int attributeId,
+                int rankId,
                 long st, long et,
                 String sid, String eid) {
         super(ruleId, eventScope, occurredTs);
 
-        this.attribute = attributeId;
+        this.rank = rankId;
         startTime = st;
         endTime = et;
         startId = sid;
@@ -76,20 +76,20 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
     public BadgeSignal(String ruleId,
                        Event event,
                        long occurredTs,
-                       int attributeId,
+                       int rankId,
                        long st, long et,
                        String sid, String eid) {
         super(ruleId, event, occurredTs);
 
-        this.attribute = attributeId;
+        this.rank = rankId;
         this.startTime = st;
         this.endTime = et;
         this.startId = sid;
         this.endId = eid;
     }
 
-    public static BadgeSignal firstEvent(String ruleId, Event causedEvent, int attributeId) {
-        return new BadgeSignal(ruleId, causedEvent, causedEvent.getTimestamp(), attributeId,
+    public static BadgeSignal firstEvent(String ruleId, Event causedEvent, int rankId) {
+        return new BadgeSignal(ruleId, causedEvent, causedEvent.getTimestamp(), rankId,
                 causedEvent.getTimestamp(), causedEvent.getTimestamp(),
                 causedEvent.getExternalId(), causedEvent.getExternalId());
     }
@@ -111,7 +111,7 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
                 .scope(FeedEntry.FeedScope.fromEventScope(getEventScope(), getRuleId()))
                 .data(BadgeFeedData.builder()
                     .ruleId(getRuleId())
-                    .attribute(attribute)
+                    .rank(rank)
                     .build()
                 ).build());
     }
@@ -146,8 +146,8 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
         return endTime;
     }
 
-    public int getAttribute() {
-        return attribute;
+    public int getRank() {
+        return rank;
     }
 
     public String getStartId() {
@@ -159,7 +159,7 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
     }
 
     public String getUniqueId() {
-        return getRuleId() + ":" + attribute + ":" + startTime;
+        return getRuleId() + ":" + rank + ":" + startTime;
     }
 
     @Override
@@ -177,7 +177,7 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
 
     @Override
     public int hashCode() {
-        return Objects.hash(getRuleId(), startTime, attribute);
+        return Objects.hash(getRuleId(), startTime, rank);
     }
 
     @Override
@@ -186,7 +186,7 @@ public class BadgeSignal extends Signal implements EventCreatable, SignalCreatab
             Comparator<BadgeSignal> comparator = Comparator
                     .comparingLong(BadgeSignal::getStartTime)
                     .thenComparing(Signal::getEventScope)
-                    .thenComparing(BadgeSignal::getAttribute)
+                    .thenComparing(BadgeSignal::getRank)
                     .thenComparing(BadgeSignal::getRuleId)
                     .thenComparingLong(BadgeSignal::getEndTime)
                     .thenComparing(BadgeSignal::getStartId)

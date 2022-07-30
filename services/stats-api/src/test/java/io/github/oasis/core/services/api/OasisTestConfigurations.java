@@ -20,14 +20,11 @@
 package io.github.oasis.core.services.api;
 
 import io.github.oasis.core.ID;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.support.SimpleCacheManager;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 import java.util.stream.Collectors;
@@ -43,7 +40,7 @@ public class OasisTestConfigurations {
     @Bean
     public CacheManager createInMemoryCache() {
         var cache = new SimpleCacheManager();
-        cache.setCaches(Stream.of(ID.CACHE_ATTRIBUTES,
+        cache.setCaches(Stream.of(ID.CACHE_RANKS,
                     ID.CACHE_ELEMENTS,
                     ID.CACHE_ELEMENTS_BY_TYPE_META,
                     ID.CACHE_ELEMENTS_META,

@@ -19,12 +19,12 @@
 
 package io.github.oasis.core.services.api.controllers.admin;
 
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.annotations.ForPlayer;
 import io.github.oasis.core.services.api.controllers.AbstractController;
 import io.github.oasis.core.services.api.services.impl.GameRankingService;
-import io.github.oasis.core.services.api.to.GameAttributeCreateRequest;
+import io.github.oasis.core.services.api.to.RankCreationRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
@@ -40,33 +40,33 @@ import java.util.List;
 @RequestMapping(
         produces = MediaType.APPLICATION_JSON_VALUE
 )
-@Tag(name = "Attributes", description = "Game Attributes API")
-public class GameAttributesController extends AbstractController {
+@Tag(name = "Ranks", description = "Game Ranks API")
+public class RanksController extends AbstractController {
 
     private final GameRankingService gameRankingService;
 
-    public GameAttributesController(GameRankingService gameRankingService) {
+    public RanksController(GameRankingService gameRankingService) {
         this.gameRankingService = gameRankingService;
     }
 
     @Operation(
-            summary = "Creates a new element attribute (e.g. gold, silver, platinum) under a game",
+            summary = "Creates a new rank (e.g. gold, silver, platinum) under a game",
             tags = {"admin"}
     )
     @ForAdmin
-    @PostMapping(path = "/games/{gameId}/attributes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public AttributeInfo addAttribute(@PathVariable("gameId") Integer gameId,
-                                      @Valid @RequestBody GameAttributeCreateRequest request) {
-        return gameRankingService.addAttribute(gameId, request);
+    @PostMapping(path = "/games/{gameId}/ranks", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public RankInfo addRank(@PathVariable("gameId") Integer gameId,
+                            @Valid @RequestBody RankCreationRequest request) {
+        return gameRankingService.addRank(gameId, request);
     }
 
     @Operation(
-            summary = "Gets all attributes under a game",
+            summary = "Gets all defined ranks under a game",
             tags = {"admin"}
     )
     @ForPlayer
-    @GetMapping(path = "/games/{gameId}/attributes", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<AttributeInfo> listAttributes(@PathVariable("gameId") Integer gameId) {
-        return gameRankingService.listAttributes(gameId);
+    @GetMapping(path = "/games/{gameId}/ranks", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<RankInfo> listRanks(@PathVariable("gameId") Integer gameId) {
+        return gameRankingService.listRanks(gameId);
     }
 }

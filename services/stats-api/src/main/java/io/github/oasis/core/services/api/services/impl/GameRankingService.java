@@ -22,11 +22,11 @@
 
 package io.github.oasis.core.services.api.services.impl;
 
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
 import io.github.oasis.core.services.api.services.IGameRankingService;
-import io.github.oasis.core.services.api.to.GameAttributeCreateRequest;
+import io.github.oasis.core.services.api.to.RankCreationRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,19 +42,19 @@ public class GameRankingService extends AbstractOasisService implements IGameRan
     }
 
     @Override
-    public AttributeInfo addAttribute(int gameId, GameAttributeCreateRequest request) {
-        AttributeInfo attributeInfo = AttributeInfo.builder()
+    public RankInfo addRank(int gameId, RankCreationRequest request) {
+        RankInfo rankInfo = RankInfo.builder()
                 .name(request.getName())
                 .colorCode(request.getColorCode())
                 .priority(request.getPriority())
                 .build();
 
-        return backendRepository.addAttribute(gameId, attributeInfo);
+        return backendRepository.addRank(gameId, rankInfo);
     }
 
     @Override
-    public List<AttributeInfo> listAttributes(int gameId) {
-        return backendRepository.listAllAttributes(gameId);
+    public List<RankInfo> listRanks(int gameId) {
+        return backendRepository.listAllRanks(gameId);
     }
 
 }

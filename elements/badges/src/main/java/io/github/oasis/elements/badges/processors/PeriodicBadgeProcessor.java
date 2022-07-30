@@ -89,7 +89,7 @@ public class PeriodicBadgeProcessor extends AbstractBadgeProcessor<PeriodicBadge
     private BadgeSignal badgeCreation(PeriodicBadgeRule rule, PeriodicBadgeRule.Threshold threshold, Event event, long tsUnit) {
         return new TemporalBadgeSignal(rule.getId(),
                 event,
-                threshold.getAttribute(),
+                threshold.getRank(),
                 tsUnit,
                 tsUnit + rule.getTimeUnit(),
                 event.getTimestamp(),
@@ -99,7 +99,7 @@ public class PeriodicBadgeProcessor extends AbstractBadgeProcessor<PeriodicBadge
     private BadgeSignal badgeRemoval(PeriodicBadgeRule rule, PeriodicBadgeRule.Threshold threshold, Event event, long tsUnit) {
         return new BadgeRemoveSignal(rule.getId(),
                 event.asEventScope(),
-                threshold.getAttribute(),
+                threshold.getRank(),
                 tsUnit,
                 tsUnit + rule.getTimeUnit(),
                 event.getExternalId(),

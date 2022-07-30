@@ -35,19 +35,19 @@ import java.util.Optional;
  */
 public class BadgeRemoveSignal extends BadgeSignal {
 
-    public BadgeRemoveSignal(String ruleId, EventScope event, int attribute, long st, long et, String sid, String eid) {
-        super(ruleId, event, st, attribute, st, et, sid, eid);
+    public BadgeRemoveSignal(String ruleId, EventScope event, int rank, long st, long et, String sid, String eid) {
+        super(ruleId, event, st, rank, st, et, sid, eid);
     }
 
-    public BadgeRemoveSignal(String ruleId, EventScope eventScope, int attribute, long st) {
-        super(ruleId, eventScope, st, attribute, st, -1, null, null);
+    public BadgeRemoveSignal(String ruleId, EventScope eventScope, int rank, long st) {
+        super(ruleId, eventScope, st, rank, st, -1, null, null);
     }
 
     public BadgeRemoveSignal(BadgeSignal prevBadge) {
         super(prevBadge.getRuleId(),
                 prevBadge.getEventScope(),
                 prevBadge.getStartTime(),
-                prevBadge.getAttribute(),
+                prevBadge.getRank(),
                 prevBadge.getStartTime(),
                 prevBadge.getEndTime(),
                 prevBadge.getStartId(),
@@ -63,7 +63,7 @@ public class BadgeRemoveSignal extends BadgeSignal {
                 .scope(FeedEntry.FeedScope.fromEventScope(getEventScope(), getRuleId()))
                 .data(BadgeFeedData.builder()
                         .ruleId(getRuleId())
-                        .attribute(getAttribute())
+                        .rank(getRank())
                         .build()
                 ).build());
     }
@@ -83,7 +83,7 @@ public class BadgeRemoveSignal extends BadgeSignal {
                 "endTime=" + getEndTime() + ", " +
                 "startId=" + getStartId() + ", " +
                 "endId=" + getEndId() + ", " +
-                "attribute=" + getAttribute() +
+                "rank=" + getRank() +
                 "}";
     }
 }

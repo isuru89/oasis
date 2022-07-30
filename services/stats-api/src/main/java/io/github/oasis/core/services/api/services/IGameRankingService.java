@@ -22,8 +22,8 @@
 
 package io.github.oasis.core.services.api.services;
 
-import io.github.oasis.core.elements.AttributeInfo;
-import io.github.oasis.core.services.api.to.GameAttributeCreateRequest;
+import io.github.oasis.core.elements.RankInfo;
+import io.github.oasis.core.services.api.to.RankCreationRequest;
 
 import java.util.List;
 
@@ -32,8 +32,8 @@ import java.util.List;
  */
 public interface IGameRankingService {
 
-    AttributeInfo addAttribute(int gameId, GameAttributeCreateRequest request);
+    RankInfo addRank(int gameId, RankCreationRequest request);
 
-    List<AttributeInfo> listAttributes(int gameId);
+    List<RankInfo> listRanks(int gameId);
 
 }

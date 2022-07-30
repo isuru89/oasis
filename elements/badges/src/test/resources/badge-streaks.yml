@@ -14,15 +14,15 @@ elements:
         - streak: 10
           rewards:
             badge:
-              attribute: 30
+              rank: 30
         - streak: 50
           rewards:
             badge:
-              attribute: 20
+              rank: 20
         - streak: 100
           rewards:
             badge:
-              attribute: 10
+              rank: 10
 
   - id: BDG-S0002
     name: Loyality-Customer
@@ -42,21 +42,21 @@ elements:
         - streak: 3
           rewards:
             badge:
-              attribute: 10
+              rank: 10
             points:
               id: star.points
               amount: 100
         - streak: 5
           rewards:
             badge:
-              attribute: 20
+              rank: 20
             points:
               id: star.points
               amount: 250
         - streak: 10
           rewards:
             badge:
-              attribute: 30
+              rank: 30
             points:
               id: star.points
               amount: 500

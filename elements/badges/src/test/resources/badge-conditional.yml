@@ -14,17 +14,17 @@ elements:
           condition: "e.score >= 100"
           rewards:
             badge:
-              attribute: 30
+              rank: 30
         - priority: 2
           condition: "e.score >= 25"
           rewards:
             badge:
-              attribute: 20
+              rank: 20
         - priority: 3
           condition: "e.score >= 10"
           rewards:
             badge:
-              attribute: 10
+              rank: 10
 
   - id: BDG-C0002
     name: Question-Views-With-Points
@@ -39,7 +39,7 @@ elements:
           condition: "e.views >= 1000"
           rewards:
             badge:
-              attribute: 30
+              rank: 30
             points:
               id: reputation
               amount: 50
@@ -47,7 +47,7 @@ elements:
           condition: "e.views >= 2500"
           rewards:
             badge:
-              attribute: 20
+              rank: 20
             points:
               id: reputation
               amount: 30
@@ -55,7 +55,7 @@ elements:
           condition: "e.views >= 1000"
           rewards:
             badge:
-              attribute: 10
+              rank: 10
             points:
               id: reputation
               amount: 10

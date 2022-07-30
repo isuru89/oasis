@@ -22,7 +22,7 @@ package io.github.oasis.core.services.api.beans.jdbc;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.TeamMetadata;
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.OasisRepository;
@@ -483,20 +483,20 @@ public class JdbcRepository implements OasisRepository {
                 .collect(Collectors.toList());
     }
 
-    @CacheEvict(value = ID.CACHE_ATTRIBUTES, key = "#gameId")
+    @CacheEvict(value = ID.CACHE_RANKS, key = "#gameId")
     @Override
-    public AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute) {
+    public RankInfo addRank(int gameId, RankInfo newRank) {
         try {
-            int newAttrId = elementDao.insertAttribute(gameId, newAttribute);
-            return elementDao.readAttribute(gameId, newAttrId);
+            int newAttrId = elementDao.insertRank(gameId, newRank);
+            return elementDao.readRank(gameId, newAttrId);
         } catch (Exception e) {
-            throw new OasisApiRuntimeException(ErrorCodes.ATTRIBUTE_EXISTS, HttpStatus.BAD_REQUEST);
+            throw new OasisApiRuntimeException(ErrorCodes.RANK_EXISTS, HttpStatus.BAD_REQUEST);
         }
     }
 
     @Override
-    public List<AttributeInfo> listAllAttributes(int gameId) {
-        return elementDao.readAllAttributes(gameId);
+    public List<RankInfo> listAllRanks(int gameId) {
+        return elementDao.readAllRanks(gameId);
     }
 
     private ElementDto toElementDto(int gameId, ElementDef def) {

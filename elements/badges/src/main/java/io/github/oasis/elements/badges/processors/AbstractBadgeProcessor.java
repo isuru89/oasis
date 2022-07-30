@@ -60,7 +60,7 @@ public abstract class AbstractBadgeProcessor<R extends BadgeRule> extends Abstra
         negatePointsIfBadgeRemoval(signal);
 
         db.addToSorted(BadgeIDs.getUserBadgeSpecKey(event.getGameId(), event.getUser(), rule.getId()),
-                String.format(BADGE_HISTORY_FORMAT, signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getAttribute()),
+                String.format(BADGE_HISTORY_FORMAT, signal.getEndTime(), rule.getId(), signal.getStartTime(), signal.getRank()),
                 signal.getStartTime());
         String userBadgesMeta = BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser());
         Mapped map = db.MAP(userBadgesMeta);

@@ -37,14 +37,14 @@ public class GameMilestoneRequest extends AbstractStatsApiRequest {
     // summary related attributes
     private Set<String> milestoneIds;
     private Set<Integer> teamIds;
-    private Set<Integer> attributeIds;
+    private Set<Integer> levels;
 
     // range related attributes
     private String milestoneId;
     private Set<Long> userIds;
 
     public boolean hasSummaryDetails() {
-        return Utils.isNotEmpty(milestoneIds) && Utils.isNotEmpty(attributeIds);
+        return Utils.isNotEmpty(milestoneIds) && Utils.isNotEmpty(levels);
     }
 
     public boolean isMultiUserRequest() {

@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: rename_attribute_tbl_to_rank
+      author: isuruw
+      changes:
+        - renameTable:
+            oldTableName: OA_ATTRIBUTE_DEF
+            newTableName: OA_RANK_DEF

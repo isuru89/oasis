@@ -38,7 +38,7 @@ import io.github.oasis.core.services.api.services.IPlayerManagementService;
 import io.github.oasis.core.services.api.services.ITeamManagementService;
 import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.ElementUpdateRequest;
-import io.github.oasis.core.services.api.to.GameAttributeCreateRequest;
+import io.github.oasis.core.services.api.to.RankCreationRequest;
 import io.github.oasis.core.services.api.to.PlayerCreateRequest;
 import io.github.oasis.core.services.api.to.PlayerUpdateRequest;
 import io.github.oasis.core.services.api.to.TeamCreateRequest;
@@ -170,29 +170,29 @@ public class MetadataReadTest extends AbstractServiceTest {
 
     @Test
     public void testRankingCache() throws Exception {
-        final GameAttributeCreateRequest gold = GameAttributeCreateRequest.builder()
+        final RankCreationRequest gold = RankCreationRequest.builder()
                 .name("gold").colorCode("#FFD700").priority(1).build();
-        final GameAttributeCreateRequest silver = GameAttributeCreateRequest.builder()
+        final RankCreationRequest silver = RankCreationRequest.builder()
                 .name("silver").colorCode("#00ff00").priority(2).build();
 
         FunctionEx<Integer> invokeOnce = (size) -> {
             Mockito.reset(spy);
-            Assertions.assertEquals(size, metadataReader.readAttributesInfo(1).size());
-            Mockito.verify(spy, Mockito.times(1)).listAllAttributes(Mockito.anyInt());
+            Assertions.assertEquals(size, metadataReader.readAllRankInfo(1).size());
+            Mockito.verify(spy, Mockito.times(1)).listAllRanks(Mockito.anyInt());
         };
         FunctionEx<Integer> neverInvokedNow = (size) -> {
             Mockito.reset(spy);
-            Assertions.assertEquals(size, metadataReader.readAttributesInfo(1).size());
-            Mockito.verify(spy, Mockito.never()).listAllAttributes(Mockito.anyInt());
+            Assertions.assertEquals(size, metadataReader.readAllRankInfo(1).size());
+            Mockito.verify(spy, Mockito.never()).listAllRanks(Mockito.anyInt());
         };
 
-        rankingService.addAttribute(1, gold);
+        rankingService.addRank(1, gold);
 
         invokeOnce.with(1);
         neverInvokedNow.with(1);
 
-        // add a new attribute
-        rankingService.addAttribute(1, silver);
+        // add a new rank
+        rankingService.addRank(1, silver);
 
         invokeOnce.with(2);
         neverInvokedNow.with(2);

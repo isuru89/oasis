@@ -75,7 +75,7 @@ public class BadgeSink extends AbstractSink {
             String ruleId = signal.getRuleId();
             int addition = isRemoval ? -1 : 1;
 
-            String ruleWiseKey = String.format(RULE_WISE_KEY_FORMAT, signal.getEventScope().getUserId(), signal.getAttribute(), signal.getStartTime());
+            String ruleWiseKey = String.format(RULE_WISE_KEY_FORMAT, signal.getEventScope().getUserId(), signal.getRank(), signal.getStartTime());
 
             // badge log
             Sorted badgeLog = db.SORTED(BadgeIDs.getGameUserBadgesLog(gameId, userId));
@@ -107,7 +107,7 @@ public class BadgeSink extends AbstractSink {
             badgesMap.incrementByInt(ALL_PFX + tcx.getQuarter(), addition);
 
             // by type + attr
-            String rulePfx = RULE_PFX + ruleId + COLON + signal.getAttribute();
+            String rulePfx = RULE_PFX + ruleId + COLON + signal.getRank();
             badgesMap.incrementByInt(RULE_PFX + ruleId, addition);
             badgesMap.incrementByInt(rulePfx, addition);
             badgesMap.incrementByInt(rulePfx + COLON + tcx.getYear(), addition);
@@ -117,7 +117,7 @@ public class BadgeSink extends AbstractSink {
             badgesMap.incrementByInt(rulePfx + COLON + tcx.getQuarter(), addition);
 
             // by attr
-            String attrPfx = ATTR_PFX + signal.getAttribute();
+            String attrPfx = ATTR_PFX + signal.getRank();
             badgesMap.incrementByInt(attrPfx, addition);
             badgesMap.incrementByInt(attrPfx + COLON + tcx.getYear(), addition);
             badgesMap.incrementByInt(attrPfx + COLON + tcx.getMonth(), addition);
@@ -141,18 +141,18 @@ public class BadgeSink extends AbstractSink {
 
     private void removeFromBadgeLog(BadgeSignal signal, Sorted badgeLog, String ruleWiseKey, Sorted ruleWiseBadgeLog) {
         String ruleId = signal.getRuleId();
-        int attributeId = signal.getAttribute();
-        if (!badgeLog.remove(String.format(STREAK_BADGE_FORMAT, ruleId, attributeId, signal.getStartTime()))) {
-            badgeLog.remove(String.format(GENERAL_BADGE_FORMAT, ruleId, attributeId, signal.getEndId()));
+        int rankId = signal.getRank();
+        if (!badgeLog.remove(String.format(STREAK_BADGE_FORMAT, ruleId, rankId, signal.getStartTime()))) {
+            badgeLog.remove(String.format(GENERAL_BADGE_FORMAT, ruleId, rankId, signal.getEndId()));
         }
         ruleWiseBadgeLog.remove(ruleWiseKey);
     }
 
     private String getBadgeKey(BadgeSignal signal) {
         if (signal instanceof TemporalBadgeSignal || signal instanceof StreakBadgeSignal) {
-            return String.format(STREAK_BADGE_FORMAT, signal.getRuleId(), signal.getAttribute(), signal.getStartTime());
+            return String.format(STREAK_BADGE_FORMAT, signal.getRuleId(), signal.getRank(), signal.getStartTime());
         } else {
-            return String.format(GENERAL_BADGE_FORMAT, signal.getRuleId(), signal.getAttribute(), signal.getEndId());
+            return String.format(GENERAL_BADGE_FORMAT, signal.getRuleId(), signal.getRank(), signal.getEndId());
         }
     }
 }

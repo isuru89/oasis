@@ -21,7 +21,7 @@ package io.github.oasis.engine;
 
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.services.EngineDataReader;
@@ -53,10 +53,10 @@ public class EngineBadgesTest extends OasisEngineTest {
     public void setupDbBefore(DbContext db) throws IOException {
         super.setupDbBefore(db);
 
-        oasisRepository.addAttribute(TEvent.GAME_ID, new AttributeInfo(10, "Bronze", 100));
-        oasisRepository.addAttribute(TEvent.GAME_ID, new AttributeInfo(20, "Silver", 50));
-        oasisRepository.addAttribute(TEvent.GAME_ID, new AttributeInfo(30, "Gold", 20));
-        oasisRepository.addAttribute(TEvent.GAME_ID, new AttributeInfo(40, "Platinum", 10));
+        oasisRepository.addRank(TEvent.GAME_ID, new RankInfo(10, "Bronze", 100));
+        oasisRepository.addRank(TEvent.GAME_ID, new RankInfo(20, "Silver", 50));
+        oasisRepository.addRank(TEvent.GAME_ID, new RankInfo(30, "Gold", 20));
+        oasisRepository.addRank(TEvent.GAME_ID, new RankInfo(40, "Platinum", 10));
     }
 
     @Test

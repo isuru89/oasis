@@ -85,7 +85,7 @@ A sample feed will consist of below information.
 | Plugin           | Type              | Data Payload                                                                                                                               |
 |------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
 | `core:point`     | POINT_SCORED      | { "ruleId": number, "pointsScored": number }                                                                                               |
-| `core:badge`     | BADGE_EARNED      | { "ruleId": number, "attribute": number }                                                                                                  |
+| `core:badge`     | BADGE_EARNED      | { "ruleId": number, "rank": number }                                                                                                       |
 | `core:milestone` | MILESTONE_REACHED | { "ruleId": number, "currentLevel": number, "previousLevel": number }                                                                      |
 | `core:challenge` | CHALLENGE_WON     | { "ruleId": number, "position": number }                                                                                                   |
 | `core:challenge` | CHALLENGE_OVER    | { "ruleId": number, "reason": "\<string\>" }  <br><br>  The `reason` field can take two forms either `TIME_EXPIRED` or `ALL_WINNERS_FOUND` |

@@ -20,7 +20,7 @@
 package io.github.oasis.simulations;
 
 import io.github.oasis.core.Game;
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
@@ -136,9 +136,9 @@ public class SimulationWithApi extends Simulation {
         int gameId = mapper.readValue(result.body(), Game.class).getId();
         System.out.println("Game added: " + gameId);
 
-        AttributeInfo gold = AttributeInfo.builder().id(1).name("Gold").priority(1).build();
-        AttributeInfo silver = AttributeInfo.builder().id(2).name("Silver").priority(2).build();
-        AttributeInfo bronze = AttributeInfo.builder().id(3).name("Bronze").priority(3).build();
+        RankInfo gold = RankInfo.builder().id(1).name("Gold").priority(1).build();
+        RankInfo silver = RankInfo.builder().id(2).name("Silver").priority(2).build();
+        RankInfo bronze = RankInfo.builder().id(3).name("Bronze").priority(3).build();
 
         client.send(adminApiReq("/games/" + gameId + "/attributes")
                 .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(gold)))

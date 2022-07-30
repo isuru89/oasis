@@ -71,7 +71,7 @@ public class CacheConfigs {
 
         config.put(ID.CACHE_USERS_META, commonConfigs);
         config.put(ID.CACHE_TEAMS_META, commonConfigs);
-        config.put(ID.CACHE_ATTRIBUTES, commonConfigs);
+        config.put(ID.CACHE_RANKS, commonConfigs);
         config.put(ID.CACHE_ELEMENTS, commonConfigs);
         config.put(ID.CACHE_ELEMENTS_META, commonConfigs);
         config.put(ID.CACHE_ELEMENTS_BY_TYPE_META, commonConfigs);

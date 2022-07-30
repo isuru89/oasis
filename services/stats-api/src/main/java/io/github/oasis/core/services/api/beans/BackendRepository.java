@@ -22,7 +22,7 @@ package io.github.oasis.core.services.api.beans;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.configs.OasisConfigs;
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.external.OasisRepository;
@@ -328,17 +328,17 @@ public class BackendRepository implements OasisRepository {
     }
 
     @Override
-    public AttributeInfo addAttribute(int gameId, AttributeInfo newAttribute) {
+    public RankInfo addRank(int gameId, RankInfo newRank) {
         try {
-            return adminRepository.addAttribute(gameId, newAttribute);
+            return adminRepository.addRank(gameId, newRank);
         } catch (JdbiException e) {
-            throw new OasisApiRuntimeException(ErrorCodes.ATTRIBUTE_EXISTS, e);
+            throw new OasisApiRuntimeException(ErrorCodes.RANK_EXISTS, e);
         }
     }
 
     @Override
-    public List<AttributeInfo> listAllAttributes(int gameId) {
-        return adminRepository.listAllAttributes(gameId);
+    public List<RankInfo> listAllRanks(int gameId) {
+        return adminRepository.listAllRanks(gameId);
     }
 
     public OasisRepository getEngineRepository() {

@@ -31,8 +31,8 @@ public class StreakBadgeSignal extends BadgeSignal implements StreakSupport {
 
     private final int streak;
 
-    public StreakBadgeSignal(String ruleId, Event causedEvent, int streak, int attribute, long st, long et, String sid, String eid) {
-        super(ruleId, causedEvent, causedEvent.getTimestamp(), attribute, st, et, sid, eid);
+    public StreakBadgeSignal(String ruleId, Event causedEvent, int streak, int rank, long st, long et, String sid, String eid) {
+        super(ruleId, causedEvent, causedEvent.getTimestamp(), rank, st, et, sid, eid);
         this.streak = streak;
     }
 

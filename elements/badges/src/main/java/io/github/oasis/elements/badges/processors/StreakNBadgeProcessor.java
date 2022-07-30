@@ -144,7 +144,7 @@ public class StreakNBadgeProcessor extends AbstractBadgeProcessor<StreakNBadgeRu
                 BadgeSignal signal = new StreakBadgeSignal(rule.getId(),
                         event,
                         now,
-                        rule.getAttributeForStreak(now),
+                        rule.getRankForStreak(now),
                         asLong(startParts[0]),
                         asLong(parts[0]),
                         startParts[2],

@@ -53,14 +53,14 @@ public class Condition implements Validator, Serializable {
         if (mergedRewards.getPoints() != null) {
             return new ConditionalBadgeRule.Condition(priority,
                     filter,
-                    mergedRewards.getBadge().getAttribute(),
+                    mergedRewards.getBadge().getRank(),
                     mergedRewards.getBadge().getMaxAwardTimes(),
                     mergedRewards.getPoints().getId(),
                     mergedRewards.getPoints().getAmount());
         } else {
             return new ConditionalBadgeRule.Condition(priority,
                     filter,
-                    mergedRewards.getBadge().getAttribute(),
+                    mergedRewards.getBadge().getRank(),
                     mergedRewards.getBadge().getMaxAwardTimes());
         }
     }

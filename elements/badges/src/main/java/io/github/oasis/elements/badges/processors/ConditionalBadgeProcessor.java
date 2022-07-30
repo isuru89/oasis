@@ -67,7 +67,7 @@ public class ConditionalBadgeProcessor extends AbstractBadgeProcessor<Conditiona
                 .findFirst();
         if (first.isPresent()) {
             ConditionalBadgeRule.Condition condition = first.get();
-            int attrId = condition.getAttribute();
+            int attrId = condition.getRank();
             String badgeMetaKey = BadgeIDs.getUserBadgesMetaKey(event.getGameId(), event.getUser());
             String attrKey = rule.getId() + ATTR_DELIMETER + attrId;
             Mapped map = db.MAP(badgeMetaKey);

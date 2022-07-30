@@ -19,18 +19,14 @@
 
 package io.github.oasis.core.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
 
 import java.util.List;
 
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
-@ToString
+@Data
 public class PlayerWithTeams extends PlayerObject {
 
     private List<TeamObject> teams;

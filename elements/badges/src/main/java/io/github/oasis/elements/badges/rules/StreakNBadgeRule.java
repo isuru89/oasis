@@ -53,9 +53,9 @@ public class StreakNBadgeRule extends BadgeRule {
 
     @Override
     public void derivePointsInTo(BadgeSignal signal) {
-        int attrId = signal.getAttribute();
+        int attrId = signal.getRank();
         Map.Entry<Integer, StreakNBadgeRule.StreakProps> matchedStreak = streakProps.entrySet().stream()
-                .filter(entry -> entry.getValue().getAttribute() == attrId)
+                .filter(entry -> entry.getValue().getRank() == attrId)
                 .findFirst()
                 .orElse(null);
 
@@ -89,8 +89,8 @@ public class StreakNBadgeRule extends BadgeRule {
         return streak == null ? 0 : streak;
     }
 
-    public int getAttributeForStreak(int streak) {
-        return streakProps.getOrDefault(streak, DEFAULT_STREAK_PROPS).getAttribute();
+    public int getRankForStreak(int streak) {
+        return streakProps.getOrDefault(streak, DEFAULT_STREAK_PROPS).getRank();
     }
 
     public void setStreaks(Map<Integer, StreakProps> streaks) {
@@ -123,22 +123,22 @@ public class StreakNBadgeRule extends BadgeRule {
     @Getter
     @Builder(toBuilder = true)
     public static class StreakProps {
-        private final int attribute;
+        private final int rank;
         private final String pointId;
         private final BigDecimal points;
 
-        public StreakProps(int attribute) {
-            this(attribute, null);
+        public StreakProps(int rank) {
+            this(rank, null);
         }
 
-        public StreakProps(int attribute, BigDecimal points) {
-            this.attribute = attribute;
+        public StreakProps(int rank, BigDecimal points) {
+            this.rank = rank;
             this.points = points;
             this.pointId = null;
         }
 
-        public StreakProps(int attribute, String pointId, BigDecimal points) {
-            this.attribute = attribute;
+        public StreakProps(int rank, String pointId, BigDecimal points) {
+            this.rank = rank;
             this.pointId = pointId;
             this.points = points;
         }

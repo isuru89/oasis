@@ -19,7 +19,7 @@
 
 package io.github.oasis.elements.badges.stats.to;
 
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractAdminApiResponse;
 import lombok.Data;
@@ -44,22 +44,22 @@ public class UserBadgeLog extends AbstractAdminApiResponse {
     public static class BadgeLogRecord {
         private String badgeId;
         private SimpleElementDefinition badgeMetadata;
-        private int attribute;
-        private AttributeInfo attributeMetadata;
+        private int rank;
+        private RankInfo rankMetadata;
         private long streakStartedAt;
         private String causedEventId;
         private long awardedAt;
 
-        public BadgeLogRecord(String badgeId, int attribute, String causedEventId, long awardedAt) {
+        public BadgeLogRecord(String badgeId, int rank, String causedEventId, long awardedAt) {
             this.badgeId = badgeId;
-            this.attribute = attribute;
+            this.rank = rank;
             this.causedEventId = causedEventId;
             this.awardedAt = awardedAt;
         }
 
-        public BadgeLogRecord(String badgeId, int attribute, long streakStartedAt, long awardedAt) {
+        public BadgeLogRecord(String badgeId, int rank, long streakStartedAt, long awardedAt) {
             this.badgeId = badgeId;
-            this.attribute = attribute;
+            this.rank = rank;
             this.streakStartedAt = streakStartedAt;
             this.awardedAt = awardedAt;
         }

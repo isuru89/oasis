@@ -39,7 +39,7 @@ public final class ID {
     public static final String CACHE_ELEMENTS_META = "oasis:cache:elementmeta";
     public static final String CACHE_ELEMENTS_BY_TYPE_META = "oasis:cache:elementtypemeta";
     public static final String CACHE_ELEMENTS = "oasis:cache:elements";
-    public static final String CACHE_ATTRIBUTES = "oasis:cache:attrs";
+    public static final String CACHE_RANKS = "oasis:cache:ranks";
     public static final String ALL_TEAMS_INDEX = "oasis:teams:index";
     public static final String ALL_USERS_INDEX = "oasis:users:index";
     public static final String ALL_GAMES_INDEX = "oasis:games:index";
@@ -51,7 +51,7 @@ public final class ID {
     public static final String ALL_BASIC_ELEMENT_DEFINITIONS = "oasis:{g%d}:element:defs";
     public static final String ALL_DETAILED_ELEMENT_DEFINITIONS = "oasis:{g%d}:element:detailed";
     public static final String ALL_ELEMENTS_BY_TYPE = "oasis:{g%d}:elementtype:%s";
-    public static final String ALL_ATTRIBUTE_DEFINITIONS = "oasis:{g%d}:attributes:defs";
+    public static final String ALL_RANK_DEFINITIONS = "oasis:{g%d}:attributes:defs";
 
     public static String getDetailedElementDefKeyForGame(int gameId) {
         return String.format(ALL_DETAILED_ELEMENT_DEFINITIONS, gameId);
@@ -61,8 +61,8 @@ public final class ID {
         return String.format(ALL_BASIC_ELEMENT_DEFINITIONS, gameId);
     }
 
-    public static String getGameAttributesInfoKey(int gameId) {
-        return String.format(ALL_ATTRIBUTE_DEFINITIONS, gameId);
+    public static String getGameRanksInfoKey(int gameId) {
+        return String.format(ALL_RANK_DEFINITIONS, gameId);
     }
 
     public static String getElementMetadataByTypeForGame(int gameId, String type) {

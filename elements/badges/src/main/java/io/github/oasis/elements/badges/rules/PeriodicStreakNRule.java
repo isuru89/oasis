@@ -52,9 +52,9 @@ public class PeriodicStreakNRule extends BadgeRule {
 
     @Override
     public void derivePointsInTo(BadgeSignal signal) {
-        int attrId = signal.getAttribute();
+        int attrId = signal.getRank();
         Map.Entry<Integer, StreakNBadgeRule.StreakProps> matchedStreak = streakMap.entrySet().stream()
-                .filter(entry -> entry.getValue().getAttribute() == attrId)
+                .filter(entry -> entry.getValue().getRank() == attrId)
                 .findFirst()
                 .orElse(null);
 
@@ -103,8 +103,8 @@ public class PeriodicStreakNRule extends BadgeRule {
         return minStreak;
     }
 
-    public int findAttributeOfStreak(int streak) {
-        return streakMap.getOrDefault(streak, StreakNBadgeRule.DEFAULT_STREAK_PROPS).getAttribute();
+    public int findRankOfStreak(int streak) {
+        return streakMap.getOrDefault(streak, StreakNBadgeRule.DEFAULT_STREAK_PROPS).getRank();
     }
 
     public void setStreaks(Map<Integer, StreakNBadgeRule.StreakProps> streaks) {

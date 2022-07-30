@@ -36,7 +36,7 @@ import java.io.Serializable;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameAttributeCreateRequest implements Serializable {
+public class RankCreationRequest implements Serializable {
 
     @NotBlank(message = "Parameter 'name' is mandatory!")
     @Size(message = "Game name must not exceed 32 characters in length!", min = 1, max = 32)

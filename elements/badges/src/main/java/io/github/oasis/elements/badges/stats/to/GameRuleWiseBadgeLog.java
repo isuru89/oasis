@@ -20,7 +20,7 @@
 package io.github.oasis.elements.badges.stats.to;
 
 import io.github.oasis.core.UserMetadata;
-import io.github.oasis.core.elements.AttributeInfo;
+import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.services.AbstractAdminApiResponse;
 import lombok.Data;
@@ -46,14 +46,14 @@ public class GameRuleWiseBadgeLog extends AbstractAdminApiResponse {
     public static class RuleBadgeLogRecord {
         private long userId;
         private UserMetadata userMetadata;
-        private int attribute;
-        private AttributeInfo attributeMetadata;
+        private int rank;
+        private RankInfo rankMetadata;
         private long streakStartedAt;
         private long awardedAt;
 
-        public RuleBadgeLogRecord(long userId, int attribute, long streakStartedAt, long awardedAt) {
+        public RuleBadgeLogRecord(long userId, int rank, long streakStartedAt, long awardedAt) {
             this.userId = userId;
-            this.attribute = attribute;
+            this.rank = rank;
             this.streakStartedAt = streakStartedAt;
             this.awardedAt = awardedAt;
         }

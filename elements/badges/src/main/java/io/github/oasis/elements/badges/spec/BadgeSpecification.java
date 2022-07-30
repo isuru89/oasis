@@ -48,8 +48,7 @@ public class BadgeSpecification extends BaseSpecification {
     private Boolean consecutive;
 
     /**
-     * Any settings related to this badge rewards. Either badge attribute
-     * or points.
+     * Any settings related to this badge rewards. Either badge rank or points.
      */
     private RewardDef rewards;
 

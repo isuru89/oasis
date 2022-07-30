@@ -60,7 +60,7 @@ public final class ErrorCodes {
     public static final String ELEMENT_SPEC_INVALID = "EL0003";
     public static final String ELEMENT_UPDATE_CONFLICT = "EL0004";
 
-    public static final String ATTRIBUTE_EXISTS = "AT0001";
+    public static final String RANK_EXISTS = "RK0001";
 
     public static final String PLUGIN_DOES_NOT_EXISTS = "MOD404";
 }
