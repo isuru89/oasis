@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.elements.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Utils;
@@ -33,8 +34,12 @@ import java.util.List;
 @Data
 public class MatchEventsDef implements Validator, Serializable {
 
+    @DefinitionDetails(parameterizedType = String.class,
+            description = "List of event ids to match exactly as given. If at least one matches, event gets matched.")
     private List<String> anyOf;
 
+    @DefinitionDetails(parameterizedType = String.class,
+            description = "List of patterns to match by event ids. If at least one matches, event gets matched.")
     private List<String> patterns;
 
     @Override

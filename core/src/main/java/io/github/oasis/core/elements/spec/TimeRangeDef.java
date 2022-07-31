@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.elements.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Texts;
@@ -33,10 +34,23 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 public class TimeRangeDef implements Validator, Serializable {
+
+    @DefinitionDetails(valueSet = {"seasonal", "time", "weekly", "custom", "absolute"},
+            description = "Time range type")
     private String type;
+    @DefinitionDetails(possibleTypes = {"string", "number"},
+    description = "Time range start as a string or in epoch milliseconds")
     private Object from;
+    @DefinitionDetails(possibleTypes = {"string", "number"},
+            description = "Time range end as a string or in epoch milliseconds")
     private Object to;
+
+    @DefinitionDetails(possibleTypes = {"string"},
+            description = "Comma separated weekdays when 'weekly' type is specified")
     private Object when;
+
+    @DefinitionDetails(description =
+            "Custom script to filter out by event epoch millisecond timestamp which will be provided as 'ts' variable.")
     private Object expression;
 
     public TimeRangeDef(String type, Object from, Object to) {

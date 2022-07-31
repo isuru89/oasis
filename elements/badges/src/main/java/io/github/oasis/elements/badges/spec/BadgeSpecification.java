@@ -19,16 +19,20 @@
 
 package io.github.oasis.elements.badges.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.elements.spec.EventFilterDef;
 import io.github.oasis.core.elements.spec.TimeUnitDef;
 import io.github.oasis.core.exception.OasisParseException;
+import io.github.oasis.elements.badges.BadgeDef;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.Validate;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import static io.github.oasis.elements.badges.BadgeDef.*;
 
 /**
  * @author Isuru Weerarathna
@@ -37,39 +41,41 @@ import java.util.List;
 @Data
 public class BadgeSpecification extends BaseSpecification {
 
-    /**
-     * Kind of badge.
-     */
+    @DefinitionDetails(description = "Kind of badge.",
+        valueSet = {FIRST_EVENT_KIND, CONDITIONAL_KIND, STREAK_N_KIND, TIME_BOUNDED_STREAK_KIND,
+            PERIODIC_ACCUMULATIONS_KIND, PERIODIC_ACCUMULATIONS_STREAK_KIND,
+            PERIODIC_OCCURRENCES_KIND, PERIODIC_OCCURRENCES_STREAK_KIND})
     private String kind;
 
-    /**
-     * If the badge belongs to any streak types, should the streaks be consecutive.
-     */
+    @DefinitionDetails(description = "If the badge belongs to any streak types, should the streaks be consecutive.")
     private Boolean consecutive;
 
-    /**
-     * Any settings related to this badge rewards. Either badge rank or points.
-     */
+    @DefinitionDetails(description = "Any settings related to this badge rewards. Either badge rank or points.")
     private RewardDef rewards;
 
-    /**
-     * Indicates how to extract a value from a event.
-     */
+    @DefinitionDetails(description = "Indicates how to extract a value from an event.")
     private ValueExtractorDef aggregatorExtractor;
 
-    /**
-     * Condition for holding streak true.
-     */
+    @DefinitionDetails(description = "Condition for holding streak to be true.")
     private EventFilterDef condition;
 
+    @DefinitionDetails(description = "Retention period for events in time bounded streaks.")
     private TimeUnitDef retainTime;
+
+    @DefinitionDetails(description = "Time range for time bounded streaks.")
     private TimeUnitDef timeRange;
+
+    @DefinitionDetails(description = "Time period to accumulate for threshold based badges.")
     private TimeUnitDef period;
 
+    @DefinitionDetails(description = "Threshold value.")
     private BigDecimal threshold;
 
+    @DefinitionDetails(description = "Set of conditions.", parameterizedType = Condition.class)
     private List<Condition> conditions;
+    @DefinitionDetails(description = "Set of streaks.", parameterizedType = Streak.class)
     private List<Streak> streaks;
+    @DefinitionDetails(description = "Set of thresholds.", parameterizedType = Threshold.class)
     private List<Threshold> thresholds;
 
     @Override

@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.milestones.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -30,7 +31,10 @@ import java.math.BigDecimal;
 @Data
 public class MilestoneLevel implements Serializable {
 
+    @DefinitionDetails(description = "Level as a number.")
     private int level;
+
+    @DefinitionDetails(description = "Threshold value to reach this level.")
     private BigDecimal milestone;
 
 }

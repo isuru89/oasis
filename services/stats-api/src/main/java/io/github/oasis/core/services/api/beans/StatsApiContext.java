@@ -21,12 +21,7 @@ package io.github.oasis.core.services.api.beans;
 
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.elements.ElementDef;
-import io.github.oasis.core.elements.ElementModule;
-import io.github.oasis.core.elements.ElementModuleFactory;
-import io.github.oasis.core.elements.ElementParser;
-import io.github.oasis.core.elements.Registrar;
+import io.github.oasis.core.elements.*;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.exception.OasisParseException;
@@ -98,12 +93,9 @@ public class StatsApiContext implements RuntimeContextSupport, Registrar {
             .forEach(mod -> {
                 ElementParser elementParser = mod.getParser();
 
-                Stream.concat(
-                    mod.getSupportedDefinitionKeys().stream().map(String::toLowerCase),
-                    mod.getSupportedDefinitions().stream().map(Class::getName)
-                )
-                .peek(key -> LOG.info("Definition {} will be parsed with {}", key, elementParser.getClass().getName()))
-                .forEach(key -> parserCache.put(key, elementParser));
+                elementParser.getAcceptingDefinitions().getDefinitions().stream().map(AcceptedDefinitions.DefinitionEntry::getKey)
+                    .peek(key -> LOG.info("Definition {} will be parsed with {}", key, elementParser.getClass().getName()))
+                    .forEach(key -> parserCache.put(key, elementParser));
             });
     }
 

@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.badges.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.EventExecutionFilter;
 import io.github.oasis.core.elements.EventExecutionFilterFactory;
 import io.github.oasis.core.elements.Validator;
@@ -37,8 +38,12 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 public class Condition implements Validator, Serializable {
+
+    @DefinitionDetails(description = "Order of evaluating the set of conditions. Lower number will evaluate first.")
     private Integer priority;
+    @DefinitionDetails(description = "Conditional expression.")
     private String condition;
+    @DefinitionDetails(description = "Rewards when this condition satisfied.")
     private RewardDef rewards;
 
     public Condition(Integer priority, String condition, RewardDef rewards) {

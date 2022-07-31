@@ -20,11 +20,7 @@
 package io.github.oasis.engine.element.points.stats.to;
 
 import io.github.oasis.core.services.AbstractStatsApiResponse;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -53,6 +49,7 @@ public class UserPointSummary extends AbstractStatsApiResponse {
     }
 
     @Getter
+    @ToString
     public static class StatResults {
 
         private final List<PointRecord> records = new ArrayList<>();
@@ -65,6 +62,7 @@ public class UserPointSummary extends AbstractStatsApiResponse {
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
+    @ToString
     public static class PointRecord {
         private String key;
         private BigDecimal value;

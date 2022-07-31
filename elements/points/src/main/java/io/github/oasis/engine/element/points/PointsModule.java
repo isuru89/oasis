@@ -21,7 +21,6 @@ package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
@@ -42,7 +41,6 @@ public class PointsModule extends ElementModule {
 
     public static final String ID = "core:point";
 
-    private final List<String> keysSupported = List.of(ID);
     private final List<Class<? extends AbstractSink>> sinks = List.of(PointsSink.class);
     private final ElementParser parser = new PointParser();
 
@@ -56,16 +54,6 @@ public class PointsModule extends ElementModule {
     @Override
     public String getId() {
         return ID;
-    }
-
-    @Override
-    public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
-        return List.of(PointDef.class);
-    }
-
-    @Override
-    public List<String> getSupportedDefinitionKeys() {
-        return keysSupported;
     }
 
     @Override

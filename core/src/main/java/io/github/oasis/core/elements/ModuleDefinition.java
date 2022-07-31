@@ -25,11 +25,36 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
 public class ModuleDefinition implements Serializable {
 
+    private String id;
+    private Specs specs;
 
+    @Data
+    public static class Specs {
+        private Map<String, Object> feeds;
+        private Map<String, Object> rules;
 
+        public void addRuleSpec(String ruleId, Object spec) {
+            if (rules == null) {
+                rules = new HashMap<>();
+            }
+            rules.put(ruleId, spec);
+        }
+
+        public void addFeedSpec(String id, Object spec) {
+            if (feeds == null) {
+                feeds = new HashMap<>();
+            }
+            feeds.put(id, spec);
+        }
+
+    }
 }

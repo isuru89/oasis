@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.elements.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Texts;
@@ -36,21 +37,14 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class PointAwardDef implements Validator, Serializable {
 
+    @DefinitionDetails(description = "Referenced point id")
     private String id;
 
+    @DefinitionDetails(description = "Amount of points to reward")
     private BigDecimal amount;
 
+    @DefinitionDetails(description = "Scripted expression to derive rewarding points based on event data")
     private String expression;
-
-    public PointAwardDef(String id, BigDecimal amount) {
-        this.id = id;
-        this.amount = amount;
-    }
-
-    public PointAwardDef(String id, String expression) {
-        this.id = id;
-        this.expression = expression;
-    }
 
     @Override
     public void validate() throws OasisParseException {

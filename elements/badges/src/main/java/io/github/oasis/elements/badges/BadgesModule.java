@@ -21,7 +21,6 @@ package io.github.oasis.elements.badges;
 
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
@@ -57,23 +56,12 @@ public class BadgesModule extends ElementModule {
 
     public static final String ID = "core:badge";
 
-    private final List<String> keysSupported = List.of(ID);
     private final List<Class<? extends AbstractSink>> sinks = List.of(BadgeSink.class);
     private final ElementParser parser = new BadgeParser();
 
     @Override
     public String getId() {
         return ID;
-    }
-
-    @Override
-    public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
-        return List.of(BadgeDef.class);
-    }
-
-    @Override
-    public List<String> getSupportedDefinitionKeys() {
-        return keysSupported;
     }
 
     @Override

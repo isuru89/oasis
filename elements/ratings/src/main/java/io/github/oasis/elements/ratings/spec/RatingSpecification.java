@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.ratings.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Utils;
@@ -36,16 +37,18 @@ import java.util.List;
 public class RatingSpecification extends BaseSpecification {
 
     /**
-     * Default rating to award, when no criteria is satisfied.
+     * Default rating to award, when no criteria are satisfied.
      *
      * Note: by default, the default rating will not be set to all users unless
      * at least one event is processed against a user.
      */
+    @DefinitionDetails(description = "Default rating to award, when no criteria are satisfied.")
     private Integer defaultRating;
 
     /**
      * List of ratings.
      */
+    @DefinitionDetails(description = "Set of ratings.", parameterizedType = ARatingDef.class)
     private List<ARatingDef> ratings;
 
     @Override

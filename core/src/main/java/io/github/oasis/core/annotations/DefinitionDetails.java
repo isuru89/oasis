@@ -32,6 +32,11 @@ public @interface DefinitionDetails {
 
     String description() default "";
 
-    String type() default "";
+    boolean required() default true;
 
+    String[] possibleTypes() default {};
+
+    String[] valueSet() default {};
+
+    Class<?> parameterizedType() default Object.class;
 }

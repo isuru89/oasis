@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.ratings.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.elements.spec.AwardDef;
 import io.github.oasis.core.exception.OasisParseException;
@@ -32,9 +33,14 @@ import java.io.Serializable;
  */
 @Data
 public class ARatingDef implements Validator, Serializable {
+
+    @DefinitionDetails(description = "Order of evaluating the rating condition.")
     private Integer priority;
+    @DefinitionDetails(description = "Rating id")
     private Integer rating;
+    @DefinitionDetails(description = "Conditional expression to evaluate.")
     private String condition;
+    @DefinitionDetails(description = "Rewards when this rating is activated.")
     private AwardDef rewards;
 
     @Override

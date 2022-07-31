@@ -17,29 +17,18 @@
  *  * specific language governing permissions and limitations
  *  * under the License.
  *
- *
  */
 
-package io.github.oasis.elements.ratings.spec;
+package io.github.oasis.core.services.api.services;
 
-import io.github.oasis.core.annotations.DefinitionDetails;
-import io.github.oasis.core.elements.spec.AbstractFeedDataDef;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import io.github.oasis.core.elements.ModuleDefinition;
 
-/**
- * @author Isuru Weerarathna
- */
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
-public class RatingFeedData extends AbstractFeedDataDef {
+import java.util.List;
 
-    @DefinitionDetails(description = "Latest rating value.")
-    private int currentRating;
+public interface IModuleService {
 
-    @DefinitionDetails(description = "Previous rating value.")
-    private int previousRating;
+    List<ModuleDefinition> listAllModuleDefinitions();
+
+    ModuleDefinition getModuleDefinition(String moduleId);
 
 }

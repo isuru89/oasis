@@ -37,4 +37,5 @@ public interface ElementParser extends Serializable {
 
     AbstractRule convert(AbstractDef<? extends BaseSpecification> definition);
 
+    AcceptedDefinitions getAcceptingDefinitions();
 }

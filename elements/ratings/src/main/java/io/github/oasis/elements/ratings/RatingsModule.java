@@ -31,24 +31,12 @@ import java.util.List;
 public class RatingsModule extends ElementModule {
 
     public static final String ID = "core:rating";
-
-    private final List<String> keysSupported = List.of(ID);
     private final List<Class<? extends AbstractSink>> sinks = List.of(RatingsSink.class);
     private final ElementParser parser = new RatingParser();
 
     @Override
     public String getId() {
         return ID;
-    }
-
-    @Override
-    public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
-        return List.of(RatingDef.class);
-    }
-
-    @Override
-    public List<String> getSupportedDefinitionKeys() {
-        return keysSupported;
     }
 
     @Override

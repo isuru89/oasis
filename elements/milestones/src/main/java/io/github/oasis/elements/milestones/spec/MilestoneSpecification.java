@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.milestones.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Utils;
@@ -38,11 +39,14 @@ public class MilestoneSpecification extends BaseSpecification {
      * Optional expression to extract accumulation value from events.
      * When pointIds are specified, this field will be ignored.
      */
+    @DefinitionDetails(description = "Optional expression to extract accumulation value from events." +
+            "When pointIds are specified, this field will be ignored.")
     private ValueExtractorDef valueExtractor;
 
     /**
      * Mandatory Level list for this milestone.
      */
+    @DefinitionDetails(description = "Milestone levels", parameterizedType = MilestoneLevel.class)
     private List<MilestoneLevel> levels;
 
     @Override

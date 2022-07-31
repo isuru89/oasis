@@ -21,13 +21,13 @@ package io.github.oasis.elements.ratings;
 
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
+import io.github.oasis.elements.ratings.spec.RatingSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,9 +49,11 @@ class RatingsModuleTest {
 
     @Test
     void getSupportedDefinitions() {
-        List<Class<? extends AbstractDef>> supportedDefinitions = module.getSupportedDefinitions();
+        var supportedDefinitions = module.getParser().getAcceptingDefinitions().getDefinitions();
         Assertions.assertEquals(1, supportedDefinitions.size());
-        Assertions.assertTrue(supportedDefinitions.contains(RatingDef.class));
+        Assertions.assertEquals(supportedDefinitions.get(0).getKey(), RatingsModule.ID);
+        Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getDefinitionClz(), RatingDef.class);
+        Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getSpecificationClz(), RatingSpecification.class);
     }
 
     @Test

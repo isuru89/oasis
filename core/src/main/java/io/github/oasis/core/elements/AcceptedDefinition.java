@@ -17,29 +17,17 @@
  *  * specific language governing permissions and limitations
  *  * under the License.
  *
- *
  */
 
-package io.github.oasis.elements.ratings.spec;
+package io.github.oasis.core.elements;
 
-import io.github.oasis.core.annotations.DefinitionDetails;
-import io.github.oasis.core.elements.spec.AbstractFeedDataDef;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import io.github.oasis.core.elements.spec.BaseSpecification;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
-/**
- * @author Isuru Weerarathna
- */
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
-public class RatingFeedData extends AbstractFeedDataDef {
-
-    @DefinitionDetails(description = "Latest rating value.")
-    private int currentRating;
-
-    @DefinitionDetails(description = "Previous rating value.")
-    private int previousRating;
-
+@Data
+@Accessors(chain = true)
+public class AcceptedDefinition {
+    private Class<? extends AbstractDef> definitionClz;
+    private Class<? extends BaseSpecification> specificationClz;
 }

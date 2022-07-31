@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.challenges.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Texts;
@@ -36,16 +37,21 @@ public class ScopeDef implements Validator, Serializable {
     /**
      * type of scope (GAME, TEAM, USER)
      */
+    @DefinitionDetails(description = "Type of scope.",
+        valueSet = {"GAME", "TEAM", "USER"})
     private String type;
 
     /**
      * Single target id.
      */
+    @DefinitionDetails(description = "Reference id to scope the challenge for single entity.")
     private Long targetId;
 
     /**
      * Multiple target ids
      */
+    @DefinitionDetails(description = "Reference ids to scope the challenge for multiple entities.",
+            parameterizedType = Long.class)
     private Set<Long> targetIds;
 
     @Override

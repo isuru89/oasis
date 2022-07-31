@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.elements.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Texts;
@@ -32,9 +33,11 @@ import java.io.Serializable;
 @Data
 public class TimeUnitDef implements Validator, Serializable {
 
-    private Long duration;
-
+    @DefinitionDetails(description = "Time unit type.",
+    valueSet = {"days", "minutes", "hours", "seconds", "weekly", "month", "millis"})
     private String unit;
+    @DefinitionDetails(description = "Duration as a value for the specified unit")
+    private Long duration;
 
     @Override
     public void validate() throws OasisParseException {

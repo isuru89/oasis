@@ -20,17 +20,16 @@
 package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.VariableNames;
-import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.elements.AbstractElementParser;
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.Scripting;
+import io.github.oasis.core.elements.*;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.elements.spec.PointAwardDef;
 import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Utils;
+import io.github.oasis.elements.challenges.spec.ChallengeSpecification;
 import io.github.oasis.elements.challenges.spec.ScopeDef;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -52,6 +51,17 @@ public class ChallengeParser extends AbstractElementParser {
             return toRule((ChallengeDef) definition);
         }
         throw new IllegalArgumentException("Unknown definition type! " + definition);
+    }
+
+    @Override
+    public AcceptedDefinitions getAcceptingDefinitions() {
+        return new AcceptedDefinitions().addAcceptingDefinition(
+                ChallengesModule.ID,
+                new AcceptedDefinition()
+                        .setDefinitionClz(ChallengeDef.class)
+                        .setSpecificationClz(ChallengeSpecification.class)
+
+        );
     }
 
     private ChallengeRule toRule(ChallengeDef def) {

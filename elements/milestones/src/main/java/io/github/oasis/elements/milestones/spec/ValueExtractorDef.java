@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.milestones.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Texts;
@@ -33,10 +34,13 @@ import java.math.BigDecimal;
 @Data
 public class ValueExtractorDef implements Validator, Serializable {
 
+
+    @DefinitionDetails(description = "Expression to extract aggregating value from event data.")
     private String expression;
 
     private String className;
 
+    @DefinitionDetails(description = "Fixed amount of value to be aggregated when the event is matched.")
     private BigDecimal amount;
 
     @Override

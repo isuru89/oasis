@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.badges.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import lombok.AllArgsConstructor;
@@ -36,6 +37,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class ValueExtractorDef implements Validator, Serializable {
 
+    @DefinitionDetails(description = "Scripted expression to extract an aggregate-able value from event data.")
     private String expression;
 
     @Override

@@ -20,11 +20,7 @@
 package io.github.oasis.elements.badges;
 
 import io.github.oasis.core.VariableNames;
-import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.elements.AbstractElementParser;
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.EventExecutionFilterFactory;
-import io.github.oasis.core.elements.Scripting;
+import io.github.oasis.core.elements.*;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.elements.spec.TimeUnitDef;
 import io.github.oasis.core.external.messages.EngineMessage;
@@ -72,6 +68,16 @@ public class BadgeParser extends AbstractElementParser {
             return convertDef((BadgeDef) definition);
         }
         throw new IllegalArgumentException("Unknown definition type for badge parser! " + definition);
+    }
+
+    @Override
+    public AcceptedDefinitions getAcceptingDefinitions() {
+        return new AcceptedDefinitions().addAcceptingDefinition(
+                BadgesModule.ID,
+                new AcceptedDefinition()
+                        .setDefinitionClz(BadgeDef.class)
+                        .setSpecificationClz(BadgeSpecification.class)
+        );
     }
 
     private AbstractRule convertDef(BadgeDef def) {

@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.badges.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import lombok.Data;
@@ -33,7 +34,11 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 public class Streak implements Validator, Serializable {
+
+    @DefinitionDetails(description = "Number of events satisfying the matching criteria.")
     private Integer streak;
+
+    @DefinitionDetails(description = "Rewards when satisfying this streak")
     private RewardDef rewards;
 
     public Streak(Integer streak, RewardDef rewards) {

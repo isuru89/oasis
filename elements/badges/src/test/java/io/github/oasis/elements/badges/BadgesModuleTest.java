@@ -40,6 +40,7 @@ import io.github.oasis.elements.badges.rules.PeriodicOccurrencesStreakNRule;
 import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
+import io.github.oasis.elements.badges.spec.BadgeSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,9 +62,12 @@ class BadgesModuleTest {
 
     @Test
     void getSupportedDefinitions() {
-        List<Class<? extends AbstractDef>> supportedDefinitions = module.getSupportedDefinitions();
+        var supportedDefinitions = module.getParser().getAcceptingDefinitions().getDefinitions();
         Assertions.assertEquals(1, supportedDefinitions.size());
-        Assertions.assertTrue(supportedDefinitions.contains(BadgeDef.class));
+        Assertions.assertEquals(supportedDefinitions.get(0).getKey(), BadgesModule.ID);
+        Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getDefinitionClz(), BadgeDef.class);
+        Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getSpecificationClz(), BadgeSpecification.class);
+
     }
 
     @Test

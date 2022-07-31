@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.badges.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import lombok.Data;
@@ -31,14 +32,13 @@ import java.io.Serializable;
 @Data
 public class BadgeAwardDef implements Validator, Serializable {
 
-    /**
-     * Maximum how many time should a user be awarded this badge.
-     */
+    @DefinitionDetails(description = "Maximum how many time should a user be awarded this badge.")
     private Integer maxAwardTimes;
 
     /**
      * Badge rank id. (Refer {@link io.github.oasis.core.elements.RankInfo})
      */
+    @DefinitionDetails(description = "Rank id for this badge.")
     private Integer rank;
 
     @Override

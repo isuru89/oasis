@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.badges.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.elements.spec.PointAwardDef;
 import io.github.oasis.core.exception.OasisParseException;
@@ -40,8 +41,10 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class RewardDef implements Validator, Serializable {
 
+    @DefinitionDetails(description = "Rewards a badge with rank")
     private BadgeAwardDef badge;
 
+    @DefinitionDetails(description = "Rewards points optionally.")
     private PointAwardDef points;
 
     @Override

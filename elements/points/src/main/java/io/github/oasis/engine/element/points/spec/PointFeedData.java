@@ -22,6 +22,7 @@
 
 package io.github.oasis.engine.element.points.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.spec.AbstractFeedDataDef;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -37,7 +38,10 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class PointFeedData extends AbstractFeedDataDef {
 
+    @DefinitionDetails(description = "point rule id")
     private String pointId;
+
+    @DefinitionDetails(description = "Rewarded amount of points")
     private BigDecimal pointsScored;
 
 }

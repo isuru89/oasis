@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.challenges.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.exception.OasisParseException;
 import lombok.Data;
@@ -35,27 +36,32 @@ public class ChallengeSpecification extends BaseSpecification {
     /**
      * Start time to begin processing events.
      */
+    @DefinitionDetails(description = "Start time of the challenge in epoch milliseconds")
     private Long startAt;
     /**
      * End time to stop processing events and announce winners.
      */
+    @DefinitionDetails(description = "End time of the challenge in epoch milliseconds")
     private Long expireAt;
 
     /**
      * Maximum number of winners allowed to achieve this challenge.
      * Once this number reached, the challenge will auto stop.
      */
+    @DefinitionDetails(description = "Maximum number of winners eligible in winning this challenge.")
     private Integer winnerCount;
 
     /**
      * Rewards for winners
      */
+    @DefinitionDetails(description = "Rewards for winners")
     private ChallengeRewardDef rewards;
 
     /**
      * Scope of this challenge. Supports, per user, per team,
      * and by default, per game.
      */
+    @DefinitionDetails(description = "Scope of this challenge.")
     private ScopeDef scopeTo;
 
     @Override

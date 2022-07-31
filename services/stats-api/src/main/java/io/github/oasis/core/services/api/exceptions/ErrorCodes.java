@@ -62,5 +62,5 @@ public final class ErrorCodes {
 
     public static final String RANK_EXISTS = "RK0001";
 
-    public static final String PLUGIN_DOES_NOT_EXISTS = "MOD404";
+    public static final String MODULE_DOES_NOT_EXISTS = "MOD404";
 }

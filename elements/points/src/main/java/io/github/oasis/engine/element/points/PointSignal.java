@@ -40,10 +40,6 @@ public class PointSignal extends Signal implements EventCreatable {
     private BigDecimal score;
     private Event eventRef;
 
-    public PointSignal(String ruleId, BigDecimal score, Event eventRef) {
-        this(ruleId, ruleId, score, eventRef);
-    }
-
     public PointSignal(String ruleId, String pointId, BigDecimal score, Event eventRef) {
         super(ruleId, eventRef.asEventScope(), eventRef.getTimestamp());
 

@@ -19,16 +19,16 @@
 
 package io.github.oasis.elements.milestones;
 
-import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.elements.AbstractElementParser;
-import io.github.oasis.core.elements.Scripting;
+import io.github.oasis.core.elements.*;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.events.BasePointEvent;
 import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Texts;
+import io.github.oasis.elements.milestones.spec.MilestoneSpecification;
 import io.github.oasis.elements.milestones.spec.ValueExtractorDef;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.github.oasis.core.VariableNames.CONTEXT_VAR;
@@ -51,6 +51,16 @@ public class MilestoneParser extends AbstractElementParser {
             return toRule((MilestoneDef) definition);
         }
         throw new IllegalArgumentException("Unknown definition type! " + definition);
+    }
+
+    @Override
+    public AcceptedDefinitions getAcceptingDefinitions() {
+        return new AcceptedDefinitions().addAcceptingDefinition(
+                MilestonesModule.ID,
+                new AcceptedDefinition()
+                        .setDefinitionClz(MilestoneDef.class)
+                        .setSpecificationClz(MilestoneSpecification.class)
+        );
     }
 
     private MilestoneRule toRule(MilestoneDef def) {

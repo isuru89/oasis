@@ -39,6 +39,7 @@ public final class ID {
     public static final String CACHE_ELEMENTS_META = "oasis:cache:elementmeta";
     public static final String CACHE_ELEMENTS_BY_TYPE_META = "oasis:cache:elementtypemeta";
     public static final String CACHE_ELEMENTS = "oasis:cache:elements";
+    public static final String CACHE_MODULES = "oasis:cache:modules";
     public static final String CACHE_RANKS = "oasis:cache:ranks";
     public static final String ALL_TEAMS_INDEX = "oasis:teams:index";
     public static final String ALL_USERS_INDEX = "oasis:users:index";

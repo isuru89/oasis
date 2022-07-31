@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.elements.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Texts;
@@ -33,16 +34,21 @@ import java.util.Objects;
 @Data
 public class SelectorDef implements Validator, Serializable {
 
+    @DefinitionDetails(description = "Event id to match a single event")
     private String matchEvent;
+    @DefinitionDetails(description = "Criteria to match multiple events by event ids")
     private MatchEventsDef matchEvents;
 
     /**
      * Accepted point ids. These are same as event ids in game engine.
      */
+    @DefinitionDetails(description = "Criteria to match multiple events by point ids")
     private MatchEventsDef matchPointIds;
 
+    @DefinitionDetails(description = "Filter to match an event by its content.")
     private EventFilterDef filter;
 
+    @DefinitionDetails(description = "Criteria to match events by time or date range")
     private AcceptsWithinDef acceptsWithin;
 
     public static SelectorDef singleEvent(String matchEvent) {

@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.challenges.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.elements.spec.PointAwardDef;
 import io.github.oasis.core.exception.OasisParseException;
@@ -36,6 +37,7 @@ public class ChallengeRewardDef implements Validator, Serializable {
      * When a user wins, the type of point id to be awarded.
      * When not specified, challenge id will be used.
      */
+    @DefinitionDetails(description = "Points to be rewarded for a winning player")
     private PointAwardDef points;
 
     @Override

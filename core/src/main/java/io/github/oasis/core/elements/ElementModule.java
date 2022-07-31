@@ -25,6 +25,7 @@ import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
 
 import java.io.Serializable;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
@@ -48,18 +49,6 @@ public abstract class ElementModule {
      */
     public abstract String getId();
 
-    public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
-        return List.of();
-    }
-
-    /**
-     * Returns list of accepted keys eligible for parsing definitions using this module.
-     * These keys are case-insensitive.
-     *
-     * @return list of keys supported
-     */
-    public abstract List<String> getSupportedDefinitionKeys();
-
     public ElementParser getParser() {
         return null;
     }
@@ -72,6 +61,19 @@ public abstract class ElementModule {
 
     public Map<String, Class<? extends Serializable>> getFeedDefinitions() {
         return Map.of();
+    }
+
+    /**
+     * Customize the already parsed and derived module definition from the information given on this same class.
+     *
+     * This method could be used to modify any module specific data. If nothing needs to be changed,
+     * just return the same provided instance as return value.
+     *
+     * @param alreadyParsedDefinition definition already derived using existing provided information.
+     * @return module definition instance to be used.
+     */
+    public ModuleDefinition customizeModuleDef(ModuleDefinition alreadyParsedDefinition) {
+        return alreadyParsedDefinition;
     }
 
     /**

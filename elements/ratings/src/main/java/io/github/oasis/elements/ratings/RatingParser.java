@@ -19,19 +19,15 @@
 
 package io.github.oasis.elements.ratings;
 
-import io.github.oasis.core.elements.AbstractDef;
-import io.github.oasis.core.elements.AbstractElementParser;
-import io.github.oasis.core.elements.AbstractRule;
-import io.github.oasis.core.elements.EventExecutionFilter;
-import io.github.oasis.core.elements.EventExecutionFilterFactory;
-import io.github.oasis.core.elements.EventValueResolver;
-import io.github.oasis.core.elements.Scripting;
+import io.github.oasis.core.elements.*;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.elements.spec.PointAwardDef;
 import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.utils.Utils;
+import io.github.oasis.elements.ratings.spec.RatingSpecification;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -55,6 +51,16 @@ public class RatingParser extends AbstractElementParser {
             return toRule((RatingDef) definition);
         }
         throw new IllegalArgumentException("Unknown definition type! " + definition);
+    }
+
+    @Override
+    public AcceptedDefinitions getAcceptingDefinitions() {
+        return new AcceptedDefinitions().addAcceptingDefinition(
+                RatingsModule.ID,
+                new AcceptedDefinition()
+                        .setDefinitionClz(RatingDef.class)
+                        .setSpecificationClz(RatingSpecification.class)
+        );
     }
 
     private RatingRule toRule(RatingDef def) {

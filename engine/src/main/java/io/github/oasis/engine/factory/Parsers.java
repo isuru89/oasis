@@ -20,6 +20,7 @@
 package io.github.oasis.engine.factory;
 
 import io.github.oasis.core.elements.AbstractRule;
+import io.github.oasis.core.elements.AcceptedDefinitions;
 import io.github.oasis.core.elements.ElementParser;
 import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.engine.EngineContext;
@@ -28,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 /**
  * @author Isuru Weerarathna
@@ -49,13 +49,11 @@ public class Parsers {
         context.getModuleList()
                 .forEach(mod -> {
                     ElementParser elementParser = mod.getParser();
+                    var acceptingDefinitions = elementParser.getAcceptingDefinitions();
 
-                    Stream.concat(
-                        mod.getSupportedDefinitionKeys().stream().map(String::toLowerCase),
-                        mod.getSupportedDefinitions().stream().map(Class::getName)
-                    )
-                    .peek(key -> LOG.info("Definition {} will be parsed with {}", key, elementParser.getClass().getName()))
-                    .forEach(key -> parserCache.put(key, elementParser));
+                    acceptingDefinitions.getDefinitions().stream().map(AcceptedDefinitions.DefinitionEntry::getKey)
+                        .peek(key -> LOG.info("Definition {} will be parsed with {}", key, elementParser.getClass().getName()))
+                        .forEach(key -> parserCache.put(key, elementParser));
                 });
     }
 

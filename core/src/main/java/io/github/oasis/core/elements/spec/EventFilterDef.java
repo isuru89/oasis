@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.elements.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Texts;
@@ -32,6 +33,7 @@ import java.io.Serializable;
 @Data
 public class EventFilterDef implements Validator, Serializable {
 
+    @DefinitionDetails(description = "Expression as a script.")
     private String expression;
 
     private String className;

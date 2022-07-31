@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.elements.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import lombok.Data;
@@ -32,8 +33,11 @@ import java.util.Set;
 @Data
 public class BaseSpecification implements Validator, Serializable {
 
+    @DefinitionDetails(description = "Selection criteria")
     private SelectorDef selector;
 
+    @DefinitionDetails(parameterizedType = String.class,
+    description = "Feature flags for each element.")
     private Set<String> flags;
 
     @Override

@@ -33,8 +33,6 @@ import java.util.List;
 public class ChallengesModule extends ElementModule {
 
     public static final String ID = "core:challenge";
-
-    private final List<String> keysSupported = List.of(ID);
     private final List<Class<? extends AbstractSink>> sinks = List.of(ChallengesSink.class);
     private final ElementParser parser = new ChallengeParser();
 
@@ -46,16 +44,6 @@ public class ChallengesModule extends ElementModule {
     @Override
     public String getId() {
         return ID;
-    }
-
-    @Override
-    public List<Class<? extends AbstractDef>> getSupportedDefinitions() {
-        return List.of(ChallengeDef.class);
-    }
-
-    @Override
-    public List<String> getSupportedDefinitionKeys() {
-        return keysSupported;
     }
 
     @Override

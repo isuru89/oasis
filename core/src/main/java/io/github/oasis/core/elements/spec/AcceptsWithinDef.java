@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.elements.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.utils.Utils;
@@ -33,8 +34,14 @@ import java.util.List;
 @Data
 public class AcceptsWithinDef implements Validator, Serializable {
 
+    @DefinitionDetails(
+            description = "Filters an event if any of time range matched",
+            parameterizedType = TimeRangeDef.class)
     private List<TimeRangeDef> anyOf;
 
+    @DefinitionDetails(
+            description = "Filters an event only when all of the given time ranges matched",
+            parameterizedType = TimeRangeDef.class)
     private List<TimeRangeDef> allOf;
 
     @Override

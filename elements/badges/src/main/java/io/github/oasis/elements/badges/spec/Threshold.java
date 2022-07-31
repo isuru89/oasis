@@ -19,6 +19,7 @@
 
 package io.github.oasis.elements.badges.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.elements.badges.BadgeDef;
@@ -36,7 +37,10 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 public class Threshold implements Validator, Serializable {
+
+    @DefinitionDetails(description = "Amount of threshold.")
     private BigDecimal value;
+    @DefinitionDetails(description = "Rewards when passing this threshold")
     private RewardDef rewards;
 
     public Threshold(BigDecimal value, RewardDef rewards) {

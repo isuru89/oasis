@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.element.points.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.Validator;
 import io.github.oasis.core.exception.OasisParseException;
 import lombok.AllArgsConstructor;
@@ -37,8 +38,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class CappedDef implements Validator, Serializable {
 
+    @DefinitionDetails(description = "Fixed amount of points to be rewarded.",
+        valueSet = {"daily", "weekly", "monthly", "quarterly", "annually"})
     private String duration;
 
+    @DefinitionDetails(description = "Maximum number of points can be rewarded to a player for the specified duration.")
     private BigDecimal limit;
 
     @Override

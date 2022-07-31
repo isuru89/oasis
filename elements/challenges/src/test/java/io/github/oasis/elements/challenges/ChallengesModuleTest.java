@@ -28,6 +28,7 @@ import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
+import io.github.oasis.elements.challenges.spec.ChallengeSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,9 +50,11 @@ class ChallengesModuleTest {
 
     @Test
     void getSupportedDefinitions() {
-        List<Class<? extends AbstractDef>> supportedDefinitions = module.getSupportedDefinitions();
+        var supportedDefinitions = module.getParser().getAcceptingDefinitions().getDefinitions();
         Assertions.assertEquals(1, supportedDefinitions.size());
-        Assertions.assertTrue(supportedDefinitions.contains(ChallengeDef.class));
+        Assertions.assertEquals(supportedDefinitions.get(0).getKey(), ChallengesModule.ID);
+        Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getDefinitionClz(), ChallengeDef.class);
+        Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getSpecificationClz(), ChallengeSpecification.class);
     }
 
     @Test

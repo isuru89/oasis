@@ -17,29 +17,30 @@
  *  * specific language governing permissions and limitations
  *  * under the License.
  *
- *
  */
 
-package io.github.oasis.elements.ratings.spec;
+package io.github.oasis.core.elements;
 
-import io.github.oasis.core.annotations.DefinitionDetails;
-import io.github.oasis.core.elements.spec.AbstractFeedDataDef;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
-/**
- * @author Isuru Weerarathna
- */
-@SuperBuilder
-@AllArgsConstructor
-@NoArgsConstructor
-public class RatingFeedData extends AbstractFeedDataDef {
+import java.util.ArrayList;
+import java.util.List;
 
-    @DefinitionDetails(description = "Latest rating value.")
-    private int currentRating;
+@Data
+public class AcceptedDefinitions {
 
-    @DefinitionDetails(description = "Previous rating value.")
-    private int previousRating;
+    private final List<DefinitionEntry> definitions = new ArrayList<>();
 
+    public AcceptedDefinitions addAcceptingDefinition(String key, AcceptedDefinition supportingDefinition) {
+        definitions.add(new DefinitionEntry().setKey(key).setAcceptedDefinitions(supportingDefinition));
+        return this;
+    }
+
+    @Data
+    @Accessors(chain = true)
+    public static class DefinitionEntry {
+        private String key;
+        private AcceptedDefinition acceptedDefinitions;
+    }
 }

@@ -19,6 +19,7 @@
 
 package io.github.oasis.engine.element.points.spec;
 
+import io.github.oasis.core.annotations.DefinitionDetails;
 import io.github.oasis.core.elements.spec.BaseSpecification;
 import io.github.oasis.core.exception.OasisParseException;
 import lombok.Data;
@@ -32,16 +33,12 @@ import lombok.EqualsAndHashCode;
 @Data
 public class PointSpecification extends BaseSpecification {
 
-    /**
-     * Indicates how many points should be awarded to the user once condition satisfies.
-     * This can be a number or expression based on event data.
-     */
+    @DefinitionDetails(description = "Indicates how many points should be awarded to the user once condition satisfies."
+                    + "This can be a number or expression based on event data.")
     private PointRewardDef reward;
 
-    /**
-     * If specified, then this indicated how many maximum points can be earned
-     * from this rule for the specified constrained time period.
-     */
+    @DefinitionDetails(description = "If specified, then this indicates how many maximum points can be earned "
+            + "from this rule for the specified constrained time period.")
     private CappedDef cap;
 
     @Override
