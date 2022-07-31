@@ -38,7 +38,7 @@ public class ModuleDefinition implements Serializable {
     private Specs specs;
 
     @Data
-    public static class Specs {
+    public static class Specs implements Serializable {
         private Map<String, Object> feeds;
         private Map<String, Object> rules;
 

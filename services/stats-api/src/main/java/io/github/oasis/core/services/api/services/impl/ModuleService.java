@@ -56,7 +56,7 @@ public class ModuleService implements IModuleService {
                 .collect(Collectors.toList());
     }
 
-    @Cacheable(value = ID.CACHE_MODULES, key = "moduleId")
+    @Cacheable(value = ID.CACHE_MODULES, key = "#p0")
     @Override
     public ModuleDefinition getModuleDefinition(String moduleId) {
         return statsApiContext.getElementModules().stream()

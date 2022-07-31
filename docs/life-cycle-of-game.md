@@ -1,5 +1,15 @@
 # Life Cycle of a Game
 
+```mermaid
+graph TD
+    A[CREATED] -->|start| B(STARTED)
+    B --> |pause| D[PAUSED]
+    B --> |stop| E[REMOVED]
+    D --> |stop| E
+    D --> |resume| B
+```
+
+
 ### Starting a Game
  1. Admin defines a new game in the admin API
     1. This will cause to create a game record in admin db
