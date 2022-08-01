@@ -27,8 +27,12 @@ import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.ElementUpdateRequest;
 import io.github.oasis.core.services.exceptions.OasisApiException;
+import io.github.oasis.core.utils.Utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Base element services which allows CRUD operations related to all game rules.
@@ -44,6 +48,20 @@ public interface IElementService {
     ElementDef updateElement(int gameId, String elementId, ElementUpdateRequest updateRequest);
 
     ElementDef deleteElement(int gameId, String elementId);
+
+    default List<ElementDef> listElementsByTypes(int gameId, Set<String> types) {
+        List<ElementDef> elements = new ArrayList<>();
+
+        if (Utils.isNotEmpty(types)) {
+            for (String type : types) {
+                elements.addAll(listElementsByType(gameId, type));
+            }
+        }  else {
+            return listElementsFromGameId(gameId);
+        }
+
+        return elements;
+    }
 
     List<ElementDef> listElementsByType(int gameId, String type);
 

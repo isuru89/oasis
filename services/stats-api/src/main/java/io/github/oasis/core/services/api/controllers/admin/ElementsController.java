@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Isuru Weerarathna
@@ -49,16 +50,6 @@ public class ElementsController extends AbstractController {
 
     public ElementsController(ElementService elementService) {
         this.elementService = elementService;
-    }
-
-    @Operation(
-            summary = "Reads all game elements of a game by element type"
-    )
-    @ForPlayer
-    @GetMapping(path = "/games/{gameId}/elements/types/{elementType}")
-    public List<ElementDef> getElementsByType(@PathVariable("gameId") Integer gameId,
-                                              @PathVariable("elementType") String elementType) {
-        return elementService.listElementsByType(gameId, elementType);
     }
 
     @Operation(
@@ -89,8 +80,9 @@ public class ElementsController extends AbstractController {
     )
     @ForCurator
     @GetMapping(path = "/games/{gameId}/elements")
-    public List<ElementDef> getElementsOfGame(@PathVariable("gameId") Integer gameId) {
-        return elementService.listElementsFromGameId(gameId);
+    public List<ElementDef> getElementsOfGame(@PathVariable("gameId") Integer gameId,
+                                              @RequestParam(name = "types", required = false) Set<String> types) {
+        return elementService.listElementsByTypes(gameId, types);
     }
 
     @Operation(

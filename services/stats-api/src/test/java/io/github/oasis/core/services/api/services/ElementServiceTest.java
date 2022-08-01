@@ -223,15 +223,48 @@ public class ElementServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    void testReadByType() {
+    void testReadBySingleType() {
         callElementPost(GAME_ID, samplePoint);
         callElementPost(GAME_ID, sampleBadge);
 
-        List<ElementDef> badgeTypes = doGetListSuccess("/games/{gameId}/elements/types/{type}", ElementDef.class, GAME_ID, "core:badge");
+        List<ElementDef> badgeTypes = doGetListSuccess("/games/{gameId}/elements?types=core:badge" , ElementDef.class, GAME_ID);
         assertEquals(1, badgeTypes.size());
         assertTrue(badgeTypes.stream().anyMatch(t -> t.getElementId().equals(sampleBadge.getMetadata().getId())));
 
         doGetError("/games/" + GAME_ID + "/elements/non.existing.id?withData=true", HttpStatus.NOT_FOUND, ErrorCodes.ELEMENT_NOT_EXISTS);
+    }
+
+    @Test
+    void testReadByMultipleType() {
+        callElementPost(GAME_ID, samplePoint);
+        callElementPost(GAME_ID, sampleBadge);
+
+        List<ElementDef> badgeTypes = doGetListSuccess("/games/{gameId}/elements?types=core:badge,core:point" , ElementDef.class, GAME_ID);
+        assertEquals(2, badgeTypes.size());
+        assertTrue(badgeTypes.stream().anyMatch(t -> t.getElementId().equals(sampleBadge.getMetadata().getId())));
+        assertTrue(badgeTypes.stream().anyMatch(t -> t.getElementId().equals(samplePoint.getMetadata().getId())));
+    }
+
+    @Test
+    void testReadByMultipleTypeWithDuplicates() {
+        callElementPost(GAME_ID, samplePoint);
+        callElementPost(GAME_ID, sampleBadge);
+
+        List<ElementDef> badgeTypes = doGetListSuccess("/games/{gameId}/elements?types=core:badge,core:point,core:badge" , ElementDef.class, GAME_ID);
+        assertEquals(2, badgeTypes.size());
+        assertTrue(badgeTypes.stream().anyMatch(t -> t.getElementId().equals(sampleBadge.getMetadata().getId())));
+        assertTrue(badgeTypes.stream().anyMatch(t -> t.getElementId().equals(samplePoint.getMetadata().getId())));
+    }
+
+    @Test
+    void testReadByMultipleTypesWithUnknownType() {
+        callElementPost(GAME_ID, samplePoint);
+        callElementPost(GAME_ID, sampleBadge);
+
+        List<ElementDef> badgeTypes = doGetListSuccess("/games/{gameId}/elements?types=core:badge,core:point,unknown:type" , ElementDef.class, GAME_ID);
+        assertEquals(2, badgeTypes.size());
+        assertTrue(badgeTypes.stream().anyMatch(t -> t.getElementId().equals(sampleBadge.getMetadata().getId())));
+        assertTrue(badgeTypes.stream().anyMatch(t -> t.getElementId().equals(samplePoint.getMetadata().getId())));
     }
 
     @Test
@@ -272,7 +305,7 @@ public class ElementServiceTest extends AbstractServiceTest {
         assertElement(addedBadge, sampleBadge, true);
 
         {
-            List<ElementDef> elementsByType = doGetListSuccess("/games/{gameId}/elements/types/{type}", ElementDef.class, GAME_ID, samplePoint.getType());
+            List<ElementDef> elementsByType = doGetListSuccess("/games/{gameId}/elements?types={type}", ElementDef.class, GAME_ID, samplePoint.getType());
             assertEquals(1, elementsByType.size());
         }
 
@@ -280,7 +313,7 @@ public class ElementServiceTest extends AbstractServiceTest {
         assertElement(delete, samplePoint, false);
 
         {
-            List<ElementDef> elementsByType = doGetListSuccess("/games/{gameId}/elements/types/{type}", ElementDef.class, GAME_ID, samplePoint.getType());
+            List<ElementDef> elementsByType = doGetListSuccess("/games/{gameId}/elements?types={type}", ElementDef.class, GAME_ID, samplePoint.getType());
             assertEquals(0, elementsByType.size());
         }
         doGetError("/games/" + GAME_ID + "/elements/" + samplePoint.getMetadata().getId(), HttpStatus.NOT_FOUND, ErrorCodes.ELEMENT_NOT_EXISTS);
