@@ -151,7 +151,7 @@ class KafkaUtilsTest {
     @Test
     void getBroadcastConsumerProps_withGroupId() {
         var configs = readConfigs("broadcastConsumer-withGroupId");
-        var props = KafkaUtils.getBroadcastConsumerProps(configs, "engine-id");
+        var props = KafkaUtils.getBroadcastConsumerProps(configs);
 
         assertProps(props,
                 Map.of(BOOTSTRAP_SERVERS_CONFIG, "localhost:9091,localhost:9092",
@@ -166,7 +166,7 @@ class KafkaUtilsTest {
     @Test
     void getBroadcastConsumerProps_withoutGroupIdAndProps() {
         var configs = readConfigs("broadcastConsumer-withoutGroupIdAndProps");
-        var props = KafkaUtils.getBroadcastConsumerProps(configs, "engine-id");
+        var props = KafkaUtils.getBroadcastConsumerProps(configs);
 
         Assertions.assertEquals(7, props.size());
         Assertions.assertNotNull(props.getProperty(GROUP_ID_CONFIG));
@@ -182,31 +182,31 @@ class KafkaUtilsTest {
     }
 
     @Test
-    void createGameEventConsumerProps_withGroupId() {
+    void createGameEventConsumerProps_withEngineId() {
         var configs = readConfigs("gameEventsConsumer-withGroupId");
-        var props = KafkaUtils.createGameEventConsumerProps(configs, "engine-id");
+        var props = KafkaUtils.createGameEventConsumerProps(configs, 1,"engine-id");
 
         assertProps(props,
                 Map.of(BOOTSTRAP_SERVERS_CONFIG, "localhost:9091,localhost:9092",
                         KEY_DESERIALIZER_CLASS_CONFIG, DEF_STR_DESERIALIZER,
                         VALUE_DESERIALIZER_CLASS_CONFIG, DEF_STR_DESERIALIZER,
-                        GROUP_ID_CONFIG, "test-consumer-group-01",
+                        GROUP_ID_CONFIG, "oasis-game-event-consumer-1",
                         GROUP_INSTANCE_ID_CONFIG, "engine-id",
                         AUTO_OFFSET_RESET_CONFIG, KafkaConstants.EARLIEST));
     }
 
     @Test
-    void createGameEventConsumerProps_withoutGroupIdAndProps() {
+    void createGameEventConsumerProps_withoutEngineIdAndProps() {
         var configs = readConfigs("gameEventsConsumer-withoutGroupIdAndProps");
-        var props = KafkaUtils.createGameEventConsumerProps(configs, "engine-id");
+        var props = KafkaUtils.createGameEventConsumerProps(configs, 2,null);
 
         Assertions.assertEquals(8, props.size());
-        Assertions.assertNotNull(props.getProperty(GROUP_ID_CONFIG));
-        Assertions.assertEquals(props.getProperty(GROUP_ID_CONFIG).length(), UUID.randomUUID().toString().length());
+        Assertions.assertNotNull(props.getProperty(GROUP_INSTANCE_ID_CONFIG));
+        Assertions.assertEquals(props.getProperty(GROUP_INSTANCE_ID_CONFIG).length(), UUID.randomUUID().toString().length());
         Map.of(BOOTSTRAP_SERVERS_CONFIG, "localhost:9091,localhost:9092",
                 KEY_DESERIALIZER_CLASS_CONFIG, DEF_STR_DESERIALIZER,
                 VALUE_DESERIALIZER_CLASS_CONFIG, DEF_STR_DESERIALIZER,
-                GROUP_INSTANCE_ID_CONFIG, "engine-id",
+                GROUP_ID_CONFIG, "oasis-game-event-consumer-2",
                 AUTO_OFFSET_RESET_CONFIG, KafkaConstants.EARLIEST,
                 MAX_POLL_RECORDS_CONFIG, "500",
                 ENABLE_AUTO_COMMIT_CONFIG, "true").forEach((k, v) -> {

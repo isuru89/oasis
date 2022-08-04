@@ -86,7 +86,7 @@ class KafkaStreamConsumer implements SourceStreamProvider {
         consumerPool = Executors.newCachedThreadPool();
 
         LOG.debug("Initializing kafka broadcast topic consumer...");
-        Properties broadcastingProps = KafkaUtils.getBroadcastConsumerProps(kafkaConfigs, engineId);
+        Properties broadcastingProps = KafkaUtils.getBroadcastConsumerProps(kafkaConfigs);
         String instanceId = broadcastingProps.getProperty(ConsumerConfig.GROUP_ID_CONFIG);
         String uniqueId = engineId + "::" + instanceId;
         gameBroadcastConsumer = new KafkaBroadcastConsumerRunner(sinkRef, KafkaConstants.TOPIC_GAME_ANNOUNCEMENTS, uniqueId);
@@ -116,7 +116,7 @@ class KafkaStreamConsumer implements SourceStreamProvider {
                     gameEventsConsumers.put(gameId, gameReader);
                     GameEventHandler handler = new GameEventHandler(sinkRef);
 
-                    Properties thisConsumerProps = KafkaUtils.createGameEventConsumerProps(providedKafkaConfigs, engineId);
+                    Properties thisConsumerProps = KafkaUtils.createGameEventConsumerProps(providedKafkaConfigs, gameId, engineId);
                     LOG.info("Subscribing to game {} event topic with configs {}...", gameId, thisConsumerProps);
                     gameReader.init(thisConsumerProps, handler);
                     consumerPool.submit(gameReader);

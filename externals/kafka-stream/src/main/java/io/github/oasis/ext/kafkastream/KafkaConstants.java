@@ -27,6 +27,8 @@ package io.github.oasis.ext.kafkastream;
  */
 final class KafkaConstants {
 
+    static final String GAME_EVENT_CONSUMER_GROUP = "oasis-game-event-consumer-%d";
+
     static final String TOPIC_GAME_EVENTS = "oasis.game.events";
     static final String TOPIC_GAME_ANNOUNCEMENTS = "oasis.game.announcements";
     static final String TOPIC_ENGINE_RELATED_EVENTS = "oasis.engine.events";

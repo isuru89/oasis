@@ -162,29 +162,21 @@ public class OasisSupervisor extends OasisBaseActor {
         int gameId = gameCommand.getGameId();
         ExternalPartyImpl eventSource = ExternalParty.EXTERNAL_PARTY.get(getContext().getSystem());
         if (status == GameCommand.GameLifecycle.CREATE || status == GameCommand.GameLifecycle.START) {
-            if (acquireGameLock(gameId, engineContext.id())) {
-                createGameRuleRefNx(gameId);
+            createGameRuleRefNx(gameId);
 
-                if (gamesRunning.add(gameId)) {
-                    contextMap.put(gameId, loadGameContext(gameId));
-                    publishGameState(gameId, GameState.STARTED);
-                } else {
-                    mainLog.info("Game {} is already running in this engine. So skipping re-registration.", gameId);
-                }
-                eventSource.ackGameStateChanged(gameCommand);
-                mainLog.info("Successfully acquired the game {} to be run on this engine having id {}. Game Event: {}",
-                        gameId, engineContext.id(), status);
+            if (gamesRunning.add(gameId)) {
+                contextMap.put(gameId, loadGameContext(gameId));
+                publishGameState(gameId, GameState.STARTED);
             } else {
-                mainLog.warning("Cannot acquire game {} for this engine, because it is already owned by another engine!", gameId);
-                eventSource.nackGameStateChanged(gameCommand);
+                mainLog.info("Game {} is already running in this engine. So skipping re-registration.", gameId);
             }
+            eventSource.ackGameStateChanged(gameCommand);
+            mainLog.info("Game engine '{}' is ready to run the game id: {}. Ack game state: {}",
+                    engineContext.id(), gameId, status);
         } else if (status == GameCommand.GameLifecycle.REMOVE) {
-            if (releaseGameLock(gameId, engineContext.id())) {
-                gamesRunning.remove(gameId);
-                contextMap.remove(gameId);
-            } else {
-                mainLog.info("The game {} is not running in this engine. Skipping remove message.", gameId);
-            }
+            gamesRunning.remove(gameId);
+            contextMap.remove(gameId);
+
             publishGameState(gameId, GameState.STOPPED);
             eventSource.ackGameStateChanged(gameCommand);
         } else if (status == GameCommand.GameLifecycle.UPDATE) {
@@ -198,40 +190,6 @@ public class OasisSupervisor extends OasisBaseActor {
         } else {
             eventSource.ackGameStateChanged(gameCommand);
         }
-    }
-
-    private boolean releaseGameLock(int gameId, String myId) {
-        String gameIdStr = String.valueOf(gameId);
-        try (DbContext context = engineContext.getDb().createContext()) {
-            String owningEngine = context.getValueFromMap(ID.GAME_ENGINES, gameIdStr);
-            if (myId.equals(owningEngine)) {
-                mainLog.info("Removing game lock... (gameId: {})", gameId);
-                context.removeKeyFromMap(ID.GAME_ENGINES, gameIdStr);
-                publishGameState(gameId, GameState.STOPPED, context);
-                mainLog.info("Removed game lock! (gameId: {})", gameId);
-                return true;
-            }
-        } catch (IOException e) {
-            mainLog.error("Cannot acquire game lock! Unexpected error!", e);
-        }
-        return false;
-    }
-
-    private boolean acquireGameLock(int gameId, String myId) {
-        String gameIdStr = String.valueOf(gameId);
-        try (DbContext context = engineContext.getDb().createContext()) {
-            boolean locked = context.setIfNotExistsInMap(ID.GAME_ENGINES, gameIdStr, myId);
-            if (!locked) {
-                String currentEngineRunning = context.getValueFromMap(ID.GAME_ENGINES, gameIdStr);
-                mainLog.info("Game {} is currently run by the engine having id {}. My engine id = {}",
-                        gameId, currentEngineRunning, myId);
-                return myId.equals(currentEngineRunning);
-            }
-            return true;
-        } catch (IOException e) {
-            mainLog.error("Cannot acquire game lock! Unexpected error!", e);
-        }
-        return false;
     }
 
     private GameContext loadGameContext(int gameId) {

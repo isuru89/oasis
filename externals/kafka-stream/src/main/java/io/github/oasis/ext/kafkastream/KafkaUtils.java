@@ -118,7 +118,7 @@ final class KafkaUtils {
         return props;
     }
 
-    static Properties getBroadcastConsumerProps(KafkaConfigs kafkaConfigs, String engineId) {
+    static Properties getBroadcastConsumerProps(KafkaConfigs kafkaConfigs) {
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
@@ -148,23 +148,18 @@ final class KafkaUtils {
         return props;
     }
 
-    static Properties createGameEventConsumerProps(KafkaConfigs kafkaConfigs, String engineId) {
+    static Properties createGameEventConsumerProps(KafkaConfigs kafkaConfigs, int gameId, String engineId) {
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfigs.getBrokerUrls());
         props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
         // if user has specified custom kafka configs for game event topics...
-        String consumerGroupId = null;
+        String consumerGroupId = String.format(KafkaConstants.GAME_EVENT_CONSUMER_GROUP, gameId);
         if (kafkaConfigs.getGameEventsConsumer() != null) {
             if (Utils.isNotEmpty(kafkaConfigs.getGameEventsConsumer().getProps())) {
                 props.putAll(kafkaConfigs.getGameEventsConsumer().getProps());
             }
-            consumerGroupId = kafkaConfigs.getGameEventsConsumer().getGroupId();
-        }
-
-        if (Texts.isEmpty(consumerGroupId)) {
-            consumerGroupId = UUID.randomUUID().toString();
         }
         String consumerGroupInstanceId = Texts.isEmpty(engineId) ? UUID.randomUUID().toString() : engineId;
 

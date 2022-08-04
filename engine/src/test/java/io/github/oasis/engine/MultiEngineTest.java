@@ -89,7 +89,7 @@ public class MultiEngineTest {
 
         boolean gameRunningE1 = engine1.isGameRunning(1);
         boolean gameRunningE2 = engine2.isGameRunning(1);
-        Assertions.assertTrue(gameRunningE1 ^ gameRunningE2);
+        Assertions.assertTrue(gameRunningE1 && gameRunningE2);
 
         engine1.stopGame(1);
         engine2.stopGame(1);
