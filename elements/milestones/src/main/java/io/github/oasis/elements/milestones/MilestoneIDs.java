@@ -24,6 +24,8 @@ package io.github.oasis.elements.milestones;
  */
 public final class MilestoneIDs {
 
+    public static final String FEED_TYPE_MILESTONE_REACHED = "MILESTONE_REACHED";
+
     public static String getUserKeyUnderGameMilestone(long userId) {
         return String.valueOf(userId);
     }

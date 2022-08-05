@@ -70,7 +70,7 @@ public class ChallengeWinSignal extends AbstractChallengeSignal {
                         .byPlugin(ChallengesModule.ID)
                         .eventTimestamp(getOccurredTimestamp())
                         .scope(FeedEntry.FeedScope.fromEventScope(getEventScope(), getRuleId()))
-                        .type("CHALLENGE_WON")
+                        .type(ChallengeIDs.FEED_TYPE_CHALLENGE_WON)
                         .data(ChallengeFeedData.builder()
                                 .ruleId(getRuleId())
                                 .position(getPosition())

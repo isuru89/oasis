@@ -24,6 +24,8 @@ package io.github.oasis.elements.ratings;
  */
 public final class RatingIDs {
 
+    public static final String FEED_TYPE_RATING_CHANGED = "RATING_CHANGED";
+
     public static String getGameUserRatingsLog(int gameId, long userId) {
         return String.format("{g%d}:u%d:ratingslog", gameId, userId);
     }

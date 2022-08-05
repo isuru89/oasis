@@ -21,7 +21,6 @@ package io.github.oasis.elements.badges;
 
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.SignalCollector;
@@ -40,6 +39,7 @@ import io.github.oasis.elements.badges.rules.PeriodicOccurrencesStreakNRule;
 import io.github.oasis.elements.badges.rules.PeriodicStreakNRule;
 import io.github.oasis.elements.badges.rules.StreakNBadgeRule;
 import io.github.oasis.elements.badges.rules.TimeBoundedStreakNRule;
+import io.github.oasis.elements.badges.spec.BadgeFeedData;
 import io.github.oasis.elements.badges.spec.BadgeSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,6 +58,11 @@ class BadgesModuleTest {
     @BeforeEach
     void beforeEach() {
         module = new BadgesModule();
+    }
+
+    @Test
+    void shouldHaveCorrectId() {
+        Assertions.assertEquals(BadgesModule.ID, module.getId());
     }
 
     @Test
@@ -117,6 +122,16 @@ class BadgesModuleTest {
         RuleExecutionContextSupport contextSupport = Mockito.mock(RuleExecutionContextSupport.class);
 
         Assertions.assertNull(module.createProcessor(new UnknownRule("abc"), contextSupport));
+    }
+
+    @Test
+    void testFeedDefinitions() {
+        var def = module.getFeedDefinitions();
+        Assertions.assertEquals(2, def.size());
+        Assertions.assertTrue(def.containsKey(BadgeIDs.FEED_TYPE_BADGE_EARNED));
+        Assertions.assertTrue(def.containsKey(BadgeIDs.FEED_TYPE_BADGE_REMOVED));
+        Assertions.assertEquals(BadgeFeedData.class, def.get(BadgeIDs.FEED_TYPE_BADGE_REMOVED));
+        Assertions.assertEquals(BadgeFeedData.class, def.get(BadgeIDs.FEED_TYPE_BADGE_EARNED));
     }
 
     private static class UnknownRule extends AbstractRule {

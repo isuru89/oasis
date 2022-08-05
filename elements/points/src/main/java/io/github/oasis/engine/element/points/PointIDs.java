@@ -26,6 +26,8 @@ import io.github.oasis.core.utils.Texts;
  */
 public final class PointIDs {
 
+    public static final String FEED_TYPE_POINTS_SCORED = "POINTS_SCORED";
+
     public static String getGameUserPointsSummary(int gameId, long userId) {
         return String.format("{g%d}:u%d:points", gameId, userId);
     }

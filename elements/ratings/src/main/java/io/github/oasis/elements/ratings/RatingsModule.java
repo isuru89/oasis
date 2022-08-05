@@ -22,8 +22,11 @@ package io.github.oasis.elements.ratings;
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.elements.*;
+import io.github.oasis.elements.ratings.spec.RatingFeedData;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -61,5 +64,12 @@ public class RatingsModule extends ElementModule {
             return new RatingProcessor(ruleExecutionContext.getDb(), ruleContext);
         }
         return null;
+    }
+
+    @Override
+    public Map<String, Class<? extends Serializable>> getFeedDefinitions() {
+        return Map.of(
+            RatingIDs.FEED_TYPE_RATING_CHANGED, RatingFeedData.class
+        );
     }
 }

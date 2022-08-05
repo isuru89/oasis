@@ -22,8 +22,11 @@ package io.github.oasis.elements.milestones;
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.elements.*;
+import io.github.oasis.elements.milestones.spec.MilestoneFeedData;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -62,5 +65,12 @@ public class MilestonesModule extends ElementModule {
             return new MilestoneProcessor(ruleExecutionContext.getDb(), ruleContext);
         }
         return null;
+    }
+
+    @Override
+    public Map<String, Class<? extends Serializable>> getFeedDefinitions() {
+        return Map.of(
+            MilestoneIDs.FEED_TYPE_MILESTONE_REACHED, MilestoneFeedData.class
+        );
     }
 }

@@ -79,7 +79,7 @@ public class MilestoneSignal extends Signal {
             return Optional.of(FeedEntry.builder()
                     .byPlugin(MilestonesModule.ID)
                     .eventTimestamp(getOccurredTimestamp())
-                    .type("MILESTONE_REACHED")
+                    .type(MilestoneIDs.FEED_TYPE_MILESTONE_REACHED)
                     .scope(FeedEntry.FeedScope.fromEventScope(getEventScope(), getRuleId()))
                     .data(MilestoneFeedData.builder()
                             .ruleId(getRuleId())

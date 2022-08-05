@@ -28,6 +28,7 @@ import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
+import io.github.oasis.elements.milestones.spec.MilestoneFeedData;
 import io.github.oasis.elements.milestones.spec.MilestoneSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +57,19 @@ class MilestonesModuleTest {
         Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getDefinitionClz(), MilestoneDef.class);
         Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getSpecificationClz(), MilestoneSpecification.class);
 
+    }
+
+    @Test
+    void shouldHaveCorrectId() {
+        Assertions.assertEquals(MilestonesModule.ID, module.getId());
+    }
+
+    @Test
+    void shouldDeclareCorrectFeedDefinitions() {
+        var def = module.getFeedDefinitions();
+        Assertions.assertEquals(1, def.size());
+        Assertions.assertTrue(def.containsKey(MilestoneIDs.FEED_TYPE_MILESTONE_REACHED));
+        Assertions.assertEquals(MilestoneFeedData.class, def.get(MilestoneIDs.FEED_TYPE_MILESTONE_REACHED));
     }
 
     @Test

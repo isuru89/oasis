@@ -30,9 +30,12 @@ import io.github.oasis.core.elements.RuleContext;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
+import io.github.oasis.engine.element.points.spec.PointFeedData;
 import io.github.oasis.engine.element.points.stats.PointStats;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -78,6 +81,13 @@ public class PointsModule extends ElementModule {
             return new PointsProcessor(ruleExecutionContext.getDb(), ruleContext);
         }
         return null;
+    }
+
+    @Override
+    public Map<String, Class<? extends Serializable>> getFeedDefinitions() {
+        return Map.of(
+            PointIDs.FEED_TYPE_POINTS_SCORED, PointFeedData.class
+        );
     }
 
 

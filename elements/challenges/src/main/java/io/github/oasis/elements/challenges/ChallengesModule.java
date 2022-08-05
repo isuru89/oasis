@@ -23,9 +23,12 @@ import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.elements.*;
 import io.github.oasis.core.exception.OasisException;
+import io.github.oasis.elements.challenges.spec.ChallengeFeedData;
 import io.github.oasis.elements.challenges.stats.ChallengeStats;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
@@ -70,5 +73,12 @@ public class ChallengesModule extends ElementModule {
                     ruleContext);
         }
         return null;
+    }
+
+    @Override
+    public Map<String, Class<? extends Serializable>> getFeedDefinitions() {
+        return Map.of(
+            ChallengeIDs.FEED_TYPE_CHALLENGE_WON, ChallengeFeedData.class
+        );
     }
 }

@@ -21,13 +21,14 @@ package io.github.oasis.engine.element.points;
 
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
+import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
+import io.github.oasis.engine.element.points.spec.PointFeedData;
 import io.github.oasis.engine.element.points.spec.PointSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,12 +50,35 @@ class PointsModuleTest {
     }
 
     @Test
+    void testInit() throws OasisException {
+        var spy = Mockito.spy(pointsModule);
+        var ctx = Mockito.mock(RuntimeContextSupport.class);
+        var db = Mockito.mock(Db.class);
+        Mockito.when(ctx.getDb()).thenReturn(db);
+
+        spy.init(ctx);
+    }
+
+    @Test
     void getSupportedDefinitions() {
         var supportedDefinitions = pointsModule.getParser().getAcceptingDefinitions().getDefinitions();
         Assertions.assertEquals(1, supportedDefinitions.size());
         Assertions.assertEquals(supportedDefinitions.get(0).getKey(), PointsModule.ID);
         Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getDefinitionClz(), PointDef.class);
         Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getSpecificationClz(), PointSpecification.class);
+    }
+
+    @Test
+    void shouldHaveCorrectId() {
+        Assertions.assertEquals(PointsModule.ID, pointsModule.getId());
+    }
+
+    @Test
+    void shouldDeclareCorrectFeedDefinitions() {
+        var def = pointsModule.getFeedDefinitions();
+        Assertions.assertEquals(1, def.size());
+        Assertions.assertTrue(def.containsKey(PointIDs.FEED_TYPE_POINTS_SCORED));
+        Assertions.assertEquals(PointFeedData.class, def.get(PointIDs.FEED_TYPE_POINTS_SCORED));
     }
 
     @Test

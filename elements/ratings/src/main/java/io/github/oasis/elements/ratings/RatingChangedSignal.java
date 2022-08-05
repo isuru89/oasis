@@ -68,7 +68,7 @@ public class RatingChangedSignal extends AbstractRatingSignal {
             return Optional.of(FeedEntry.builder()
                     .byPlugin(RatingsModule.ID)
                     .scope(FeedEntry.FeedScope.fromEventScope(getEventScope(), getRuleId()))
-                    .type("RATING_CHANGED")
+                    .type(RatingIDs.FEED_TYPE_RATING_CHANGED)
                     .eventTimestamp(getOccurredTimestamp())
                     .data(RatingFeedData.builder()
                             .ruleId(getRuleId())

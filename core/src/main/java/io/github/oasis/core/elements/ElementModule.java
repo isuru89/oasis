@@ -59,6 +59,12 @@ public abstract class ElementModule {
 
     public abstract AbstractProcessor<? extends AbstractRule, ? extends Signal> createProcessor(AbstractRule rule, RuleExecutionContextSupport ruleExecutionContext);
 
+    /**
+     * Returns a mapping of possible feed definitions this module can generate.
+     * The returned map should contain, feed type as key and its spec class as value.
+     *
+     * @return a map of feed definitions.
+     */
     public Map<String, Class<? extends Serializable>> getFeedDefinitions() {
         return Map.of();
     }

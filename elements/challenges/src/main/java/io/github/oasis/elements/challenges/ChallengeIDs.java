@@ -24,6 +24,8 @@ package io.github.oasis.elements.challenges;
  */
 public final class ChallengeIDs {
 
+    public static final String FEED_TYPE_CHALLENGE_WON = "CHALLENGE_WON";
+
     public static String getGameUseChallengesSummary(int gameId, long userId) {
         return String.format("{g%d}:u%d:challenges", gameId, userId);
     }

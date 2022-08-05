@@ -70,7 +70,7 @@ public class PointSignal extends Signal implements EventCreatable {
         return Optional.of(FeedEntry.builder()
                 .byPlugin(PointsModule.ID)
                         .eventTimestamp(getOccurredTimestamp())
-                        .type("POINT_SCORED")
+                        .type(PointIDs.FEED_TYPE_POINTS_SCORED)
                         .scope(FeedEntry.FeedScope.fromEventScope(getEventScope(), getRuleId()))
                         .data(PointFeedData.builder()
                                 .pointId(getPointId())

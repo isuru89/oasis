@@ -21,13 +21,13 @@ package io.github.oasis.elements.challenges;
 
 import io.github.oasis.core.context.RuleExecutionContextSupport;
 import io.github.oasis.core.context.RuntimeContextSupport;
-import io.github.oasis.core.elements.AbstractDef;
 import io.github.oasis.core.elements.AbstractProcessor;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
+import io.github.oasis.elements.challenges.spec.ChallengeFeedData;
 import io.github.oasis.elements.challenges.spec.ChallengeSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,12 +49,25 @@ class ChallengesModuleTest {
     }
 
     @Test
+    void shouldHaveCorrectId() {
+        Assertions.assertEquals(ChallengesModule.ID, module.getId());
+    }
+
+    @Test
     void getSupportedDefinitions() {
         var supportedDefinitions = module.getParser().getAcceptingDefinitions().getDefinitions();
         Assertions.assertEquals(1, supportedDefinitions.size());
         Assertions.assertEquals(supportedDefinitions.get(0).getKey(), ChallengesModule.ID);
         Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getDefinitionClz(), ChallengeDef.class);
         Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getSpecificationClz(), ChallengeSpecification.class);
+    }
+
+    @Test
+    void shouldDeclareCorrectFeedDefinitions() {
+        var def = module.getFeedDefinitions();
+        Assertions.assertEquals(1, def.size());
+        Assertions.assertTrue(def.containsKey(ChallengeIDs.FEED_TYPE_CHALLENGE_WON));
+        Assertions.assertEquals(ChallengeFeedData.class, def.get(ChallengeIDs.FEED_TYPE_CHALLENGE_WON));
     }
 
     @Test

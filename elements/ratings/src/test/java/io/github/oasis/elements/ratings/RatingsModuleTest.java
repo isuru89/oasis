@@ -27,6 +27,7 @@ import io.github.oasis.core.elements.AbstractSink;
 import io.github.oasis.core.elements.Signal;
 import io.github.oasis.core.elements.SignalCollector;
 import io.github.oasis.core.external.Db;
+import io.github.oasis.elements.ratings.spec.RatingFeedData;
 import io.github.oasis.elements.ratings.spec.RatingSpecification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +55,20 @@ class RatingsModuleTest {
         Assertions.assertEquals(supportedDefinitions.get(0).getKey(), RatingsModule.ID);
         Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getDefinitionClz(), RatingDef.class);
         Assertions.assertEquals(supportedDefinitions.get(0).getAcceptedDefinitions().getSpecificationClz(), RatingSpecification.class);
+    }
+
+
+    @Test
+    void shouldHaveCorrectId() {
+        Assertions.assertEquals(RatingsModule.ID, module.getId());
+    }
+
+    @Test
+    void shouldDeclareCorrectFeedDefinitions() {
+        var def = module.getFeedDefinitions();
+        Assertions.assertEquals(1, def.size());
+        Assertions.assertTrue(def.containsKey(RatingIDs.FEED_TYPE_RATING_CHANGED));
+        Assertions.assertEquals(RatingFeedData.class, def.get(RatingIDs.FEED_TYPE_RATING_CHANGED));
     }
 
     @Test
