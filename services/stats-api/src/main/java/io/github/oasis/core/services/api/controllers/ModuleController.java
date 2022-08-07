@@ -19,7 +19,7 @@
  *
  */
 
-package io.github.oasis.core.services.api.controllers.admin;
+package io.github.oasis.core.services.api.controllers;
 
 import io.github.oasis.core.elements.ModuleDefinition;
 import io.github.oasis.core.services.api.controllers.AbstractController;

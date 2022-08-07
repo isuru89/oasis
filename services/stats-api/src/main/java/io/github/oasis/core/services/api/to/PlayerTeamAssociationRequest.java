@@ -35,13 +35,9 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlayerGameAssociationRequest implements Serializable {
+public class PlayerTeamAssociationRequest implements Serializable {
 
     private Long userId;
-
-    @NotNull(message = "Parameter 'gameId' is mandatory!")
-    @Positive(message = "Parameter 'gameId' must be a valid game id!")
-    private Integer gameId;
 
     @NotNull(message = "Parameter 'teamId' is mandatory!")
     @Positive(message = "Parameter 'teamId' must be a valid team id!")

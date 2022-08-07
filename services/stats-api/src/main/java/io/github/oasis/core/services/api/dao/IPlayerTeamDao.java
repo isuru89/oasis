@@ -97,13 +97,12 @@ public interface IPlayerTeamDao {
     List<TeamObject> readTeamsByName(@Bind("name") String teamName, @Bind("offset") int offset, @Bind("limit") int size);
 
     @SqlUpdate
-    void insertPlayerToTeam(@Bind("gameId") int gameId,
-                            @Bind("playerId") long playerId,
+    void insertPlayerToTeam(@Bind("playerId") long playerId,
                             @Bind("teamId") int teamId,
                             @Bind("ts") long timestamp);
 
-    default void insertPlayerToTeam(int gameId, long playerId, int teamId) {
-        insertPlayerToTeam(gameId, playerId, teamId, System.currentTimeMillis());
+    default void insertPlayerToTeam(long playerId, int teamId) {
+        insertPlayerToTeam(playerId, teamId, System.currentTimeMillis());
     }
 
     @SqlUpdate

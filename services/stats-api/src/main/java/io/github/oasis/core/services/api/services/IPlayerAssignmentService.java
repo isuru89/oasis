@@ -36,7 +36,7 @@ public interface IPlayerAssignmentService {
 
     List<TeamObject> getTeamsOfPlayer(long playerId);
 
-    void addPlayerToTeam(long playerId, int gameId, int teamId);
+    void addPlayerToTeam(long playerId, int teamId);
 
     void removePlayerFromTeam(long playerId, int teamId);
 

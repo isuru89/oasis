@@ -1,0 +1,127 @@
+//// -- LEVEL 1
+//// -- Schemas, Tables and References
+
+Table OA_PLAYER {
+  id int [pk, increment]
+  version int [default: 1]
+  display_name varchar(64)
+  email varchar(64)
+  avatar_ref varchar(255)
+  timezone varchar(64)
+  gender smallint
+  is_active boolean
+  created_at bigint
+  updated_at bigint
+}
+
+Table OA_TEAM {
+  id int [pk, increment]
+  version int
+  name varchar(64)
+  color_code varchar(10)
+  avatar_ref varchar(255)
+  game_id int
+  is_active boolean
+  created_at bigint
+  updated_at bigint
+}
+
+Table OA_PLAYER_TEAM {
+  game_id int
+  player_id int
+  team_id int
+  created_at bigint
+
+  Indexes {
+    (game_id, player_id) [pk]
+  }
+}
+
+Table OA_ELEMENT {
+  id int [pk, increment]
+  version int
+  name varchar(128)
+  type varchar(64)
+  description varchar(512)
+  game_id int
+  def_id varchar(128)
+  is_active boolean
+  created_at bigint
+  updated_at bigint
+}
+
+Table OA_ELEMENT_DATA {
+  element_id int [pk, unique]
+  def_data blob
+  is_active boolean
+}
+
+Table OA_RANK_DEF {
+  id int [pk]
+  name varchar(64)
+  priority int
+  color_code varchar(10)
+  game_id int [not null]
+}
+
+Table OA_GAME {
+  id int [pk, increment]
+  version int
+  name varchar(32)
+  motto varchar(128)
+  description varchar(512)
+  logo_ref varchar(255)
+  is_active boolean
+  created_at bigint
+  updated_at bigint
+}
+
+Table OA_GAME_STATUS {
+  game_id int [not null]
+  status varchar(32)
+  updated_at bigint
+}
+
+Table OA_EVENT_SOURCE {
+  id int [pk, increment]
+  token varchar(255)
+  display_name varchar(255)
+  download_count smallint
+  is_active boolean
+  created_at bigint
+  updated_at bigint
+}
+
+Table OA_EVENT_SOURCE_KEY {
+  event_source_id int [not null]
+  public_key text
+  private_key text
+  download_count smallint
+}
+
+Table OA_EVENT_SOURCE_GAME {
+  game_id int [ref: > OA_GAME.id]
+  event_source_id int
+
+  Indexes {
+    (game_id, event_source_id) [pk]
+  }
+}
+
+Table OA_API_KEY {
+  token varchar(128)
+  secret_key varchar(255)
+  roles int
+  is_active boolean
+}
+
+Ref: OA_RANK_DEF.game_id > OA_GAME.id
+Ref: OA_TEAM.game_id > OA_GAME.id
+REF: OA_PLAYER_TEAM.game_id > OA_GAME.id
+Ref: OA_PLAYER_TEAM.player_id > OA_PLAYER.id
+Ref: OA_PLAYER_TEAM.team_id > OA_TEAM.id
+Ref: OA_ELEMENT.game_id > OA_GAME.id
+Ref: OA_ELEMENT_DATA.element_id - OA_ELEMENT.id
+Ref: OA_EVENT_SOURCE_KEY.event_source_id - OA_EVENT_SOURCE.id
+Ref: OA_GAME_STATUS.game_id > OA_GAME.id
+Ref: OA_EVENT_SOURCE_GAME.event_source_id > OA_EVENT_SOURCE.id

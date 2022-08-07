@@ -451,8 +451,8 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
         // can't add same user in multiple teams of same game
         Mockito.reset(cacheClearanceListener);
-        doPostError("/players/" + alice.getId() + "/teams",
-                PlayerGameAssociationRequest.builder().gameId(gameId1).teamId(renegades.getId()).userId(alice.getId()).build(),
+        doPostError("/players/" + alice.getId() + "/teams/" + renegades.getId(),
+                null,
                 HttpStatus.BAD_REQUEST,
                 ErrorCodes.PLAYER_ALREADY_IN_TEAM);
         assertNeverCacheClearanceCalled();
@@ -466,51 +466,30 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
 
         // validations in request
         {
-            doPostError("/players/" + alice.getId() + "/teams",
-                    PlayerGameAssociationRequest.builder().gameId(null).teamId(renegades.getId()).userId(alice.getId()).build(),
-                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
-            doPostError("/players/" + alice.getId() + "/teams",
-                    PlayerGameAssociationRequest.builder().gameId(-1).teamId(renegades.getId()).userId(alice.getId()).build(),
-                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
-            doPostError("/players/" + alice.getId() + "/teams",
-                    PlayerGameAssociationRequest.builder().gameId(0).teamId(renegades.getId()).userId(alice.getId()).build(),
-                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
-
-            doPostError("/players/" + alice.getId() + "/teams",
-                    PlayerGameAssociationRequest.builder().gameId(gameId).teamId(null).userId(alice.getId()).build(),
-                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
-            doPostError("/players/" + alice.getId() + "/teams",
-                    PlayerGameAssociationRequest.builder().gameId(gameId).teamId(-1).userId(alice.getId()).build(),
-                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
-            doPostError("/players/" + alice.getId() + "/teams",
-                    PlayerGameAssociationRequest.builder().gameId(gameId).teamId(0).userId(alice.getId()).build(),
-                    HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+            doPostError("/players/" + alice.getId() + "/teams/-1",
+                    null,
+                    HttpStatus.NOT_FOUND, ErrorCodes.TEAM_NOT_EXISTS);
+            doPostError("/players/" + alice.getId() + "/teams/0",
+                    null,
+                    HttpStatus.NOT_FOUND, ErrorCodes.TEAM_NOT_EXISTS);
         }
 
         callAddPlayerToTeam(alice.getId(), gameId, renegades.getId());
 
         // can't add non-existing user
         Mockito.reset(cacheClearanceListener);
-        doPostError("/players/999999/teams",
-                PlayerGameAssociationRequest.builder().gameId(gameId).teamId(renegades.getId()).userId(999999L).build(),
+        doPostError("/players/999999/teams/" + renegades.getId(),
+                null,
                 HttpStatus.NOT_FOUND,
                 ErrorCodes.PLAYER_DOES_NOT_EXISTS);
         assertNeverCacheClearanceCalled();
 
         // can't add non-existing team
         Mockito.reset(cacheClearanceListener);
-        doPostError("/players/" + alice.getId() + "/teams",
-                PlayerGameAssociationRequest.builder().gameId(gameId).teamId(999999).userId(alice.getId()).build(),
+        doPostError("/players/" + alice.getId() + "/teams/9999999",
+                null,
                 HttpStatus.NOT_FOUND,
                 ErrorCodes.TEAM_NOT_EXISTS);
-        assertNeverCacheClearanceCalled();
-
-        // can't add non-existing game
-        Mockito.reset(cacheClearanceListener);
-        doPostError("/players/" + alice.getId() + "/teams",
-                PlayerGameAssociationRequest.builder().gameId(999999).teamId(renegades.getId()).userId(alice.getId()).build(),
-                HttpStatus.NOT_FOUND,
-                ErrorCodes.GAME_NOT_EXISTS);
         assertNeverCacheClearanceCalled();
     }
 
@@ -672,8 +651,7 @@ public class PlayerTeamServiceTest extends AbstractServiceTest {
     }
 
     private void callAddPlayerToTeam(long playerId, int gameId, int teamId) {
-        doPostSuccess("/players/" + playerId + "/teams", PlayerGameAssociationRequest.builder()
-                .teamId(teamId).gameId(gameId).userId(playerId).build(), null);
+        doPostSuccess("/players/" + playerId + "/teams/" + teamId, null, null);
     }
 
     private void callAddPlayersToTeam(int teamId, List<Long> playerIds) {

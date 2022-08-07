@@ -176,10 +176,10 @@ public class PlayerController extends AbstractController {
             tags = {"admin", "curator"}
     )
     @ForCurator
-    @PostMapping(value = "/players/{playerId}/teams", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/players/{playerId}/teams/{teamId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void addPlayerToTeam(@PathVariable("playerId") Long playerId,
-                                @Valid @RequestBody PlayerGameAssociationRequest request) {
-        playerAssignmentService.addPlayerToTeam(playerId, request.getGameId(), request.getTeamId());
+                                @PathVariable("teamId") Integer teamId) {
+        playerAssignmentService.addPlayerToTeam(playerId, teamId);
     }
 
     @Operation(

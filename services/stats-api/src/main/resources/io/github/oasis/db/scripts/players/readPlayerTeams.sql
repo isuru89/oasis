@@ -1,4 +1,4 @@
-SELECT
+ SELECT
     ot.id,
     ot.game_id AS gameId,
     ot.name,

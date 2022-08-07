@@ -384,7 +384,7 @@ public class JdbcRepository implements OasisRepository {
     @Override
     public void addPlayerToTeam(long playerId, int gameId, int teamId) {
         try {
-            playerTeamDao.insertPlayerToTeam(gameId, playerId, teamId);
+            playerTeamDao.insertPlayerToTeam(playerId, teamId);
         } catch (JdbiException e) {
             throw new OasisApiRuntimeException(ErrorCodes.PLAYER_ALREADY_IN_TEAM, HttpStatus.BAD_REQUEST);
         }

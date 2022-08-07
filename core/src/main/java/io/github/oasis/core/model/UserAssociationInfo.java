@@ -19,8 +19,7 @@
 
 package io.github.oasis.core.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -29,8 +28,7 @@ import java.util.Objects;
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
+@Data
 public class UserAssociationInfo implements Serializable {
 
     private String email;
@@ -38,8 +36,7 @@ public class UserAssociationInfo implements Serializable {
 
     private Map<Integer, GameAssociation> games;
 
-    @Getter
-    @Setter
+    @Data
     public static class GameAssociation implements Serializable {
         private int team;
 

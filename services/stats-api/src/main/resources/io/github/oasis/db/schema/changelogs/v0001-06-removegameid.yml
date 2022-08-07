@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: remove_col_gameid_player_teams
+      author: isuruw
+      changes:
+        - dropPrimaryKey:
+            tableName: OA_PLAYER_TEAM
+            dropIndex: true
+        - dropColumn:
+            tableName: OA_PLAYER_TEAM
+            columnName: game_id
+        - addPrimaryKey:
+            tableName: OA_PLAYER_TEAM
+            columnNames: team_id, player_id
+            constraintName: pk_oa_player_team

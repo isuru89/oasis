@@ -22,7 +22,6 @@
 
 package io.github.oasis.core.services.api.services.impl;
 
-import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.external.PaginatedResult;
@@ -189,11 +188,10 @@ public class PlayerTeamService extends AbstractOasisService implements IPlayerMa
     }
 
     @Override
-    public void addPlayerToTeam(long playerId, int gameId, int teamId) {
+    public void addPlayerToTeam(long playerId, int teamId) {
         PlayerObject playerRef = readPlayer(playerId);
         TeamObject teamRef = readTeam(teamId);
-        Game gameRef = backendRepository.readGame(gameId);
-        backendRepository.addPlayerToTeam(playerRef.getId(), gameRef.getId(), teamRef.getId());
+        backendRepository.addPlayerToTeam(playerRef.getId(), teamRef.getGameId(), teamRef.getId());
 
         eventPublisher.publishEvent(BasePlayerRelatedEvent.builder()
                 .changeType(EntityChangeType.MODIFIED)
