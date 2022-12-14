@@ -30,7 +30,7 @@
         <slf4j.version>1.7.33</slf4j.version>
         <redisson.version>3.16.3</redisson.version>
         <h2.db.version>2.0.206</h2.db.version>
-        <snakeyaml.version>1.30</snakeyaml.version>
+        <snakeyaml.version>1.32</snakeyaml.version>
         <mvel.version>2.4.12.Final</mvel.version>
         <hikari.version>5.0.1</hikari.version>
         <liquibase.version>4.11.0</liquibase.version>
