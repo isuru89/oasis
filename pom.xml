@@ -115,12 +115,6 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>junit</groupId>-->
-<!--                <artifactId>junit</artifactId>-->
-<!--                <version>4.13.2</version>-->
-<!--                <scope>test</scope>-->
-<!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
 
@@ -138,18 +132,13 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version>
+                <version>0.8.11</version>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
-                        <configuration>
-                            <destFile>
-                                ${project.build.directory}/coverage-reports/jacoco.exec
-                            </destFile>
-                            <propertyName>jacocoArgLine</propertyName>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>report</id>
@@ -157,10 +146,6 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        <configuration>
-                            <dataFile>${project.build.directory}/coverage-reports/jacoco.exec</dataFile>
-                            <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -207,8 +192,6 @@
                             <usePhrasedClassNameInTestCaseSummary>true</usePhrasedClassNameInTestCaseSummary>
                         </statelessTestsetInfoReporter>
                         <useSystemClassLoader>true</useSystemClassLoader>
-                        <forkMode>once</forkMode>
-                        <argLine>${jacocoArgLine}</argLine>
                     </configuration>
                 </plugin>
             </plugins>
