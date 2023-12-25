@@ -56,7 +56,10 @@ public class ConditionalBadgeProcessor extends AbstractBadgeProcessor<Conditiona
     }
 
     @Override
-    public List<BadgeSignal> process(Event event, ConditionalBadgeRule rule, ExecutionContext context, DbContext db) {
+    public List<BadgeSignal> process(Event event,
+                                     ConditionalBadgeRule rule,
+                                     ExecutionContext context,
+                                     DbContext db) {
         List<ConditionalBadgeRule.Condition> conditions = rule.getConditions();
         if (conditions.isEmpty()) {
             return null;

@@ -22,6 +22,7 @@ package io.github.oasis.core.services.api.security;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.services.api.dao.IApiKeyDao;
 import io.github.oasis.core.services.api.dao.dto.ApiKeyDto;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,19 +31,14 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author Isuru Weerarathna
  */
-@Service
+@Component
 public class ApiKeyService implements UserDetailsService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApiKeyService.class);
@@ -71,10 +67,10 @@ public class ApiKeyService implements UserDetailsService {
     public void init() {
         String credentials = configs.get("oasis.defaultApiKeys", configs.get("oasis.defaultApiKey", null));
         if (StringUtils.isNotBlank(credentials)) {
-            String[] clients = credentials.split("[,]");
+            String[] clients = credentials.split(",");
 
             for (String client : clients) {
-                String[] parts = client.split("[:]");
+                String[] parts = client.split(":");
                 int defaultPermissions = ROLE_ADMIN_FLAG | ROLE_CURATOR_FLAG | ROLE_PLAYER_FLAG;
                 if (parts.length > 2 && StringUtils.isNumeric(parts[2])) {
                     defaultPermissions = Integer.parseInt(parts[2]);
@@ -99,6 +95,16 @@ public class ApiKeyService implements UserDetailsService {
             throw new UsernameNotFoundException("The api key does not exist!");
         }
 
+        var authorityList = getGrantedAuthorities(apiKeyDto);
+
+        return new User(
+                apiKeyDto.getToken(),
+                apiKeyDto.getSecretKey(),
+                authorityList
+                );
+    }
+
+    private static List<SimpleGrantedAuthority> getGrantedAuthorities(ApiKeyDto apiKeyDto) {
         List<SimpleGrantedAuthority> authorityList;
         int roles = apiKeyDto.getRoles();
         if ((roles & ROLE_ADMIN_FLAG) == ROLE_ADMIN_FLAG) {
@@ -110,11 +116,6 @@ public class ApiKeyService implements UserDetailsService {
         } else {
             authorityList = new ArrayList<>();
         }
-
-        return new User(
-                apiKeyDto.getToken(),
-                apiKeyDto.getSecretKey(),
-                authorityList
-                );
+        return authorityList;
     }
 }

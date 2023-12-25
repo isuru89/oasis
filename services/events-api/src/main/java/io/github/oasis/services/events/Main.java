@@ -80,7 +80,7 @@ public class Main {
             vertx.deployVerticle(new EventsApi(), options, res -> {
                 if (!res.succeeded()) {
                     LOG.warn("Shutting down Events API. Try again later!");
-                    LOG.error("Error: {}", res.cause());
+                    LOG.error("Error:", res.cause());
                     vertx.close();
                 }
             });

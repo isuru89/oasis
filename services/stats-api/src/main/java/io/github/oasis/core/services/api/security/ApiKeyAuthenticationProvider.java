@@ -53,6 +53,8 @@ public class ApiKeyAuthenticationProvider implements AuthenticationProvider {
         throw new BadCredentialsException("Provided api key is incorrect!");
     }
 
+
+
     @Override
     public boolean supports(Class<?> authentication) {
         return PreAuthenticatedAuthenticationToken.class.equals(authentication);

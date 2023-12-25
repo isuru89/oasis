@@ -110,7 +110,7 @@ public class SignalConsumer extends OasisBaseActor {
 
             return true;
         } catch (OasisRuntimeException e) {
-            sinkLog.error("[{}] {} error while sinking signal {}", logId, sink, signal, e);
+            sinkLog.error(e,"[{}] {} error while sinking signal {}", logId, sink, signal);
             throw e;
         }
     }

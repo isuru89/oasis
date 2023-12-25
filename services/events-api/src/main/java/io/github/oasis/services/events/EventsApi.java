@@ -50,31 +50,21 @@ public class EventsApi extends AbstractVerticle {
         JsonObject httpConfigs = config().getJsonObject("http", new JsonObject());
 
         JsonObject cacheConfigs = oasisConfigs.getJsonObject("cache", new JsonObject());
-        Promise<String> cacheDeployment = Promise.promise();
         DeploymentOptions cacheOptions = new DeploymentOptions().setConfig(cacheConfigs.getJsonObject("configs"));
-        vertx.deployVerticle(cacheConfigs.getString("impl"), cacheOptions, cacheDeployment);
-
-        cacheDeployment.future()
+        vertx.deployVerticle(cacheConfigs.getString("impl"), cacheOptions)
             .compose(id -> {
-                Promise<String> clientDeployment = Promise.promise();
                 DeploymentOptions clientOptions = new DeploymentOptions().setConfig(oasisConfigs);
-                vertx.deployVerticle(ClientVerticle.class, clientOptions, clientDeployment);
-                return clientDeployment.future();
+                return vertx.deployVerticle(ClientVerticle.class, clientOptions);
             })
             .compose(id -> {
                 JsonObject dispatcherConf = oasisConfigs.getJsonObject(KEY_DISPATCHER);
-                Promise<String> dispatcherDeployment = Promise.promise();
                 DeploymentOptions dispatcherConfigs = new DeploymentOptions()
                         .setConfig(dispatcherConf.getJsonObject(KEY_DISPATCHER_CONFIGS));
-                vertx.deployVerticle(dispatcherConf.getString(KEY_DISPATCHER_IMPL), dispatcherConfigs, dispatcherDeployment);
-                return dispatcherDeployment.future();
+                return vertx.deployVerticle(dispatcherConf.getString(KEY_DISPATCHER_IMPL), dispatcherConfigs);
             })
             .compose(id -> {
-                Promise<String> httpDeployment = Promise.promise();
-                vertx.deployVerticle(HttpServiceVerticle.class,
-                        createHttpDeploymentOptions(httpConfigs),
-                        httpDeployment);
-                return httpDeployment.future();
+                DeploymentOptions deploymentOptions = createHttpDeploymentOptions(httpConfigs);
+                return vertx.deployVerticle(HttpServiceVerticle.class, deploymentOptions);
             }).onComplete(res -> {
                 if (res.succeeded()) {
                     LOG.info("Ready to accept events.");

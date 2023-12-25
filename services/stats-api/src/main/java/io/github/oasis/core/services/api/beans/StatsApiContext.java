@@ -29,12 +29,12 @@ import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.EventReadWriteHandler;
 import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.services.annotations.EngineDbPool;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +71,7 @@ public class StatsApiContext implements RuntimeContextSupport, Registrar {
                 .stream()
                 .map(ServiceLoader.Provider::type)
                 .peek(factory -> LOG.info("Found element factory: {}", factory.getName()))
-                .collect(Collectors.toList());
+                .toList();
 
         LOG.info("Found #{} element module factories.", factoryList.size());
         for (Class<? extends ElementModuleFactory> factory : factoryList) {

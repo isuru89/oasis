@@ -288,7 +288,7 @@ public class GameServiceTest extends AbstractServiceTest {
         assertCurrentGameStatus(stackId, "PAUSED");
 
         doPutError("/games/" + stackId + "/null", null, HttpStatus.BAD_REQUEST, ErrorCodes.GAME_UNKNOWN_STATE);
-        doPutError("/games/" + stackId + "/", null, HttpStatus.METHOD_NOT_ALLOWED, null);
+        doPutError("/games/" + stackId + "/", null, HttpStatus.NOT_FOUND, null);
         doPutError("/games/" + stackId + "/hello", null, HttpStatus.BAD_REQUEST, ErrorCodes.GAME_UNKNOWN_STATE);
 
         assertCurrentGameStatus(stackId, "PAUSED");

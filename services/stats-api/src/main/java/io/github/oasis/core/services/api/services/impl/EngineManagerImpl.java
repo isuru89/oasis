@@ -35,11 +35,11 @@ import io.github.oasis.core.services.api.services.IElementService;
 import io.github.oasis.core.services.api.services.IEngineManager;
 import io.github.oasis.core.services.api.services.IGameService;
 import io.github.oasis.core.services.exceptions.OasisApiException;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;

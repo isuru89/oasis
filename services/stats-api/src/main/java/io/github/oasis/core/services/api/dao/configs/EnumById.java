@@ -21,8 +21,6 @@ package io.github.oasis.core.services.api.dao.configs;
 
 import io.github.oasis.core.model.EnumIdSupport;
 import org.jdbi.v3.core.argument.Argument;
-import org.jdbi.v3.core.config.JdbiCache;
-import org.jdbi.v3.core.config.JdbiCaches;
 import org.jdbi.v3.core.mapper.ColumnMapper;
 import org.jdbi.v3.core.result.UnableToProduceResultException;
 import org.jdbi.v3.core.statement.StatementContext;
@@ -37,9 +35,9 @@ import java.util.Arrays;
  */
 public class EnumById<E extends Enum<E>> implements ColumnMapper<E>, Argument {
 
-    private static final JdbiCache<Class<? extends Enum<?>>, JdbiCache<Integer, Enum<?>>> BY_ID_CACHE =
-            JdbiCaches.declare(e -> JdbiCaches.declare(
-                    id -> e.cast(getValueById(e, id))));
+//    private static final JdbiCache<Class<? extends Enum<?>>, JdbiCache<Integer, Enum<?>>> BY_ID_CACHE =
+//            JdbiCaches.declare(e -> JdbiCaches.declare(
+//                    id -> e.cast(getValueById(e, id))));
 
     private final Class<E> enumClass;
 
@@ -55,14 +53,14 @@ public class EnumById<E extends Enum<E>> implements ColumnMapper<E>, Argument {
     public E map(ResultSet r, int columnNumber, StatementContext ctx) throws SQLException {
         int id = r.getInt(columnNumber);
 
-        return enumClass.cast(BY_ID_CACHE.get(enumClass, ctx).get(id, ctx));
+        return enumClass.cast(getValueById(enumClass, id));
     }
 
     @Override
     public E map(ResultSet r, String columnLabel, StatementContext ctx) throws SQLException {
         int id = r.getInt(columnLabel);
 
-        return enumClass.cast(BY_ID_CACHE.get(enumClass, ctx).get(id, ctx));
+        return enumClass.cast(getValueById(enumClass, id));
     }
 
     private static Object getValueById(Class<? extends Enum<?>> enumClass, int id) {

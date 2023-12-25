@@ -20,9 +20,9 @@
 package io.github.oasis.core.services.api.to;
 
 import io.github.oasis.core.Game;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
-import javax.validation.constraints.Positive;
 import java.io.Serializable;
 
 /**

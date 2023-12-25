@@ -21,9 +21,9 @@ package io.github.oasis.core.services.api.beans;
 
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.services.KeyGeneratorSupport;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;

@@ -33,6 +33,9 @@ import java.util.function.Function;
  * @author Isuru Weerarathna
  */
 public class OasisSqlLocator implements SqlLocator {
+
+    private final ClasspathSqlLocator sqlLocator = ClasspathSqlLocator.create();
+
     @Override
     public String locate(Class<?> sqlObjectType, Method method, ConfigRegistry config) {
         String path = config.get(SqlLocationConfigs.class).getSqlScriptPath();
@@ -61,6 +64,6 @@ public class OasisSqlLocator implements SqlLocator {
             clzBuilder.appendVerbatim(method.getName());
         }
         String fullPath = clzBuilder.setExtension("sql").build();
-        return ClasspathSqlLocator.getResourceOnClasspath(Thread.currentThread().getContextClassLoader(), fullPath);
+        return sqlLocator.getResource(Thread.currentThread().getContextClassLoader(), fullPath);
     }
 }

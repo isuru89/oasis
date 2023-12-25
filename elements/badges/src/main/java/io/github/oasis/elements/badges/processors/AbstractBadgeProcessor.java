@@ -68,8 +68,7 @@ public abstract class AbstractBadgeProcessor<R extends BadgeRule> extends Abstra
         int streak = 0;
         boolean supportStreak = false;
 
-        if (signal instanceof StreakSupport) {
-            StreakSupport streakSupport = (StreakSupport) signal;
+        if (signal instanceof StreakSupport streakSupport) {
             streak = streakSupport.getStreak();
             supportStreak = true;
         }
@@ -91,8 +90,7 @@ public abstract class AbstractBadgeProcessor<R extends BadgeRule> extends Abstra
     }
 
     private void negatePointsIfBadgeRemoval(Signal signalRef) {
-        if (signalRef instanceof BadgeRemoveSignal) {
-            BadgeRemoveSignal signal = (BadgeRemoveSignal) signalRef;
+        if (signalRef instanceof BadgeRemoveSignal signal) {
             if (signal.getPointId() != null) {
                 signal.setPointAwards(signal.getPointId(), signal.getPoints().negate());
             }

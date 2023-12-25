@@ -19,6 +19,7 @@
 
 package io.github.oasis.core.services.api.dao.configs;
 
+import org.jdbi.v3.core.extension.annotation.UseExtensionConfigurer;
 import org.jdbi.v3.sqlobject.config.ConfiguringAnnotation;
 
 import java.lang.annotation.ElementType;
@@ -29,7 +30,7 @@ import java.lang.annotation.Target;
 /**
  * @author Isuru Weerarathna
  */
-@ConfiguringAnnotation(UseOasisSqlLocatorImpl.class)
+@UseExtensionConfigurer(UseOasisSqlLocatorImpl.class)
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UseOasisSqlLocator {

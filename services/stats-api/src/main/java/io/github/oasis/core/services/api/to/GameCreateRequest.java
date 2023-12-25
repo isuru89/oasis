@@ -20,10 +20,10 @@
 package io.github.oasis.core.services.api.to;
 
 import io.github.oasis.core.Game;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 /**

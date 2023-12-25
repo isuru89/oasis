@@ -19,9 +19,9 @@
 
 package io.github.oasis.core.services.api.to;
 
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
-import javax.validation.constraints.Positive;
 import java.io.Serializable;
 
 /**

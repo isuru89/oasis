@@ -68,7 +68,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static io.github.oasis.core.utils.Constants.COLON;
 import static io.github.oasis.core.utils.Constants.DASH;
@@ -108,19 +107,19 @@ public class BadgeStats extends AbstractStatsApiService {
             Map<String, SimpleElementDefinition> elementDefinitions = new HashMap<>();
             if (Utils.isNotEmpty(request.getRuleFilters())) {
                 subKeys.addAll(request.getRuleFilters().stream().map(rule -> RULE_PFX + rule)
-                        .collect(Collectors.toList()));
+                        .toList());
 
                 if (Utils.isNotEmpty(request.getRankFilters())) {
                     subKeys.addAll(request.getRuleFilters().stream()
                             .flatMap(rule -> request.getRankFilters().stream().map(attr -> RULE_PFX + rule + COLON + attr))
-                            .collect(Collectors.toList()));
+                            .toList());
                 }
 
                 elementDefinitions = getContextHelper().readElementDefinitions(request.getGameId(), request.getRuleFilters());
 
             } else if (Utils.isNotEmpty(request.getRankFilters())) {
                 subKeys.addAll(request.getRankFilters().stream().map(attr -> ATTR_PFX + attr)
-                        .collect(Collectors.toList()));
+                        .toList());
             }
 
             UserBadgeSummary summary = new UserBadgeSummary();

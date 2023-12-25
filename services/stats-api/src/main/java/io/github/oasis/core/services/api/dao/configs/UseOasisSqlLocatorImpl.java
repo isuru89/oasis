@@ -20,6 +20,9 @@
 package io.github.oasis.core.services.api.dao.configs;
 
 import org.jdbi.v3.core.config.ConfigRegistry;
+import org.jdbi.v3.core.extension.ExtensionConfigurer;
+import org.jdbi.v3.core.extension.SimpleExtensionConfigurer;
+import org.jdbi.v3.core.extension.annotation.UseExtensionConfigurer;
 import org.jdbi.v3.sqlobject.SqlObjects;
 import org.jdbi.v3.sqlobject.config.Configurer;
 
@@ -29,15 +32,11 @@ import java.lang.reflect.Method;
 /**
  * @author Isuru Weerarathna
  */
-public class UseOasisSqlLocatorImpl implements Configurer {
+public class UseOasisSqlLocatorImpl extends SimpleExtensionConfigurer {
 
     @Override
-    public void configureForType(ConfigRegistry registry, Annotation annotation, Class<?> sqlObjectType) {
+    public void configure(ConfigRegistry registry, Annotation annotation, Class<?> extensionType) {
         registry.get(SqlObjects.class).setSqlLocator(new OasisSqlLocator());
     }
 
-    @Override
-    public void configureForMethod(ConfigRegistry registry, Annotation annotation, Class<?> sqlObjectType, Method method) {
-        configureForType(registry, annotation, sqlObjectType);
-    }
 }
