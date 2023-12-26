@@ -29,13 +29,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockserver.client.MockServerClient;
 
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -53,11 +53,10 @@ public class IntegrityDisableCheckTest extends AbstractEventPushTest {
     @Test
     @DisplayName("Integrity Disabled: Event source does not exist should still fail")
     void sourceDoeNotExist(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
-        new MockServerClient("localhost", clientAndServer.getLocalPort())
-                .when(org.mockserver.model.HttpRequest.request("/api/admin/event-source")
-                        .withMethod("GET")
-                        .withQueryStringParameter("token", "pqrs")
-                ).respond(org.mockserver.model.HttpResponse.response().withStatusCode(404));
+        stubFor(get(urlPathEqualTo("/api/admin/event-source"))
+            .withQueryParam("token", equalTo("pqrs"))
+            .willReturn(notFound()));
+
         KeyPair keyPair = TestUtils.createKeys();
         awaitRedisInitialization(vertx, testContext, createKnownSource(keyPair));
 

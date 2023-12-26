@@ -45,7 +45,7 @@ public class ApiKeyCredentials implements Credentials {
 
     @Override
     public <V> void checkValid(V arg) throws CredentialValidationException {
-        if (sourceId == null || sourceId.length() == 0) {
+        if (sourceId == null || sourceId.isEmpty()) {
             throw new CredentialValidationException("source ID cannot be null or empty");
         }
         if (sourceDigest == null) {

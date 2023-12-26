@@ -23,56 +23,44 @@ import io.github.oasis.services.events.model.ApiKeyCredentials;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.http.HttpHeaders;
-import io.vertx.ext.auth.authentication.Credentials;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.impl.AuthenticationHandlerImpl;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
+import io.vertx.ext.web.handler.HttpException;
+import io.vertx.ext.web.handler.impl.HTTPAuthorizationHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author Isuru Weerarathna
  */
-public class EventAuthHandler extends AuthenticationHandlerImpl<EventAuthProvider> {
+public class EventAuthHandler extends HTTPAuthorizationHandler<EventAuthProvider> {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventAuthHandler.class);
-
-    private static final String SPACE = " ";
     private static final String COLON = ":";
 
-    private static final HttpStatusException UNAUTHORIZED = new HttpStatusException(401);
-    private static final HttpStatusException BAD_HEADER = new HttpStatusException(401, "Bad Header provided");
-
-    private static final String BEARER = "Bearer";
+    private static final HttpException BAD_HEADER = new HttpException(401, "Bad Header provided");
 
     public EventAuthHandler(EventAuthProvider authProvider) {
-        super(authProvider);
+        super(authProvider, Type.BEARER, null);
     }
 
     @Override
-    public void parseCredentials(RoutingContext context, Handler<AsyncResult<Credentials>> handler) {
-        String authorization = context.request().headers().get(HttpHeaders.AUTHORIZATION);
-        if (authorization == null || authorization.isEmpty()) {
-            LOG.warn("No authorization header is provided!");
-            handler.handle(Future.failedFuture(UNAUTHORIZED));
-            return;
-        }
+    public void authenticate(RoutingContext context, Handler<AsyncResult<User>> handler) {
+        parseAuthorization(context, result -> {
+            if (result.succeeded()) {
+                String[] dataParts = result.result().split(COLON);
+                if (dataParts.length != 2) {
+                    LOG.warn("Authorization header is invalid!");
+                    handler.handle(Future.failedFuture(BAD_HEADER));
+                    return;
+                }
 
-        String[] parts = authorization.split(SPACE);
-        if (parts.length != 2 || !parts[0].equals(BEARER)) {
-            LOG.warn("No valid authorization header is provided!");
-            handler.handle(Future.failedFuture(BAD_HEADER));
-            return;
-        }
-        String[] dataParts = parts[1].split(COLON);
-        if (dataParts.length != 2) {
-            LOG.warn("Authorization header is invalid!");
-            handler.handle(Future.failedFuture(BAD_HEADER));
-            return;
-        }
-        String digest = dataParts[1];
-        context.put(AuthService.REQ_DIGEST, digest);
-        handler.handle(Future.succeededFuture(new ApiKeyCredentials(dataParts[0], digest)));
+                String digest = dataParts[1];
+                context.put(AuthService.REQ_DIGEST, digest);
+                this.authProvider.authenticate(new ApiKeyCredentials(dataParts[0], digest), handler);
+            } else {
+                handler.handle(Future.failedFuture(result.cause()));
+            }
+        });
     }
 }

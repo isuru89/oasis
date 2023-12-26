@@ -109,7 +109,7 @@ public class RedisServiceImpl implements RedisService {
         api.set(Arrays.asList(key, eventSource.toJson().encode()), res -> {
             if (res.succeeded()) {
                 if (Texts.isNotEmpty(ttlSeconds)) {
-                    api.expire(key, ttlSeconds, expireRes -> resultHandler.handle(Future.succeededFuture(eventSource)));
+                    api.expire(List.of(key, ttlSeconds), expireRes -> resultHandler.handle(Future.succeededFuture(eventSource)));
                 } else {
                     resultHandler.handle(Future.succeededFuture(eventSource));
                 }
@@ -128,7 +128,7 @@ public class RedisServiceImpl implements RedisService {
                 resultHandler.handle(Future.succeededFuture(true));
             } else {
                 LOG.error("Unable to clear Redis cache key! [Key: {}]", key);
-                res.cause().printStackTrace();
+                LOG.error(" Cause:", res.cause());
                 resultHandler.handle(Future.failedFuture(res.cause()));
             }
         });

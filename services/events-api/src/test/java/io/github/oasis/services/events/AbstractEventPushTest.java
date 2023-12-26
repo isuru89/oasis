@@ -23,7 +23,6 @@ import org.redisson.client.codec.StringCodec;
 
 import java.security.KeyPair;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,16 +68,8 @@ public abstract class AbstractEventPushTest extends AbstractTest {
     }
 
     protected TestRedisDeployVerticle createKnownSource(KeyPair keyPair) {
-        return new TestRedisDeployVerticle()
+        return new TestRedisDeployVerticle(redis.getRedisURI())
                 .addSource(KNOWN_SOURCE, 1, keyPair.getPublic(), List.of(1));
-    }
-
-    protected TestRedisDeployVerticle createKnownUser(TestRedisDeployVerticle verticle) {
-        return verticle
-                .addUser(KNOWN_USER,
-                        500,
-                        Map.of("1", new JsonObject().put("team", 200))
-                );
     }
 
     protected void assertSuccessWithInvocations(HttpResponse<String> response, VertxTestContext ctx, int invocations) {

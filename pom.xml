@@ -16,7 +16,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <jdbi.version>3.41.3</jdbi.version>
-        <vertx.version>4.0.2</vertx.version>
+        <vertx.version>4.5.1</vertx.version>
         <junit.version>5.8.2</junit.version>
         <lombok.version>1.18.30</lombok.version>
         <akka.version>2.8.5</akka.version>

@@ -32,15 +32,11 @@ import io.github.oasis.services.events.http.routers.PutEventRoute;
 import io.github.oasis.services.events.model.EventApiConfigs;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.AuthenticationHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,27 +62,27 @@ public class HttpServiceVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> promise) {
         LOG.info("Starting event api web service...");
-        JsonObject httpConf = config();
+        var httpConf = config();
         LOG.info("HTTP configs {}", httpConf.encodePrettily());
 
-        AuthService authService = AuthService.createProxy(vertx, AuthService.AUTH_SERVICE_QUEUE);
-        DataService clientService = DataService.createProxy(vertx, DataService.DATA_SERVICE_QUEUE);
-        RedisService redisService = RedisService.createProxy(vertx, RedisService.DB_SERVICE_QUEUE);
-        EventDispatcherService dispatcherService = EventDispatcherService.createProxy(vertx, EventDispatcherService.DISPATCHER_SERVICE_QUEUE);
+        var authService = AuthService.createProxy(vertx, AuthService.AUTH_SERVICE_QUEUE);
+        var clientService = DataService.createProxy(vertx, DataService.DATA_SERVICE_QUEUE);
+        var redisService = RedisService.createProxy(vertx, RedisService.DB_SERVICE_QUEUE);
+        var dispatcherService = EventDispatcherService.createProxy(vertx, EventDispatcherService.DISPATCHER_SERVICE_QUEUE);
 
-        AuthenticationHandler authHandler = new EventAuthHandler(new EventAuthProvider(authService));
+        var authHandler = new EventAuthHandler(new EventAuthProvider(authService));
 
-        HttpServerOptions serverOptions = new HttpServerOptions(httpConf);
+        var serverOptions = new HttpServerOptions(httpConf);
         server = vertx.createHttpServer(serverOptions);
 
-        Handler<RoutingContext> integrityHandler = EventIntegrityHandler.create(EventApiConfigs.create(httpConf));
-        EventErrorHandler eventErrorHandler = new EventErrorHandler();
+        var integrityHandler = EventIntegrityHandler.create(EventApiConfigs.create(httpConf));
+        var eventErrorHandler = new EventErrorHandler();
 
-        CacheRoute cacheRoute = new CacheRoute(redisService);
-        PutEventRoute putEventRoute = new PutEventRoute(clientService, dispatcherService);
-        PutBulkEventsRoute putBulkEventsRoute = new PutBulkEventsRoute(clientService, dispatcherService);
+        var cacheRoute = new CacheRoute(redisService);
+        var putEventRoute = new PutEventRoute(clientService, dispatcherService);
+        var putBulkEventsRoute = new PutBulkEventsRoute(clientService, dispatcherService);
 
-        Router router = Router.router(vertx);
+        var router = Router.router(vertx);
         router.get(ROUTE_PING)
                 .produces(APPLICATION_JSON)
                 .handler(PingRoute.create());

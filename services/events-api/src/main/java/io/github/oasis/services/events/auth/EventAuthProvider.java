@@ -25,7 +25,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
+import io.vertx.ext.web.handler.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public class EventAuthProvider implements AuthenticationProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventAuthProvider.class);
 
-    private static final HttpStatusException NO_SOURCE = new HttpStatusException(401);
+    private static final HttpException NO_SOURCE = new HttpException(401);
 
     private final AuthService authService;
 

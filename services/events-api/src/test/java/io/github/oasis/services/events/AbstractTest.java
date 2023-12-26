@@ -1,5 +1,11 @@
 package io.github.oasis.services.events;
 
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.http.Body;
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import com.redis.testcontainers.RedisContainer;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.collect.Pair;
 import io.github.oasis.services.events.db.RedisVerticle;
@@ -16,43 +22,57 @@ import io.vertx.ext.web.client.HttpRequest;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.integration.ClientAndServer;
-import org.mockserver.junit.jupiter.MockServerExtension;
-import org.mockserver.model.MediaType;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.client.codec.StringCodec;
 import org.redisson.config.Config;
+import org.springframework.http.MediaType;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.security.PublicKey;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+
 /**
  * @author Isuru Weerarathna
  */
-@ExtendWith({ VertxExtension.class, MockServerExtension.class})
+@ExtendWith({ VertxExtension.class })
+@Testcontainers
+@WireMockTest
 public abstract class AbstractTest {
 
     public static final int TEST_PORT = 8010;
 
+    @Container
+    protected static final RedisContainer redis = new RedisContainer(DockerImageName.parse("redis:5"));
+
+    @Rule
+    public WireMockRule wireMock = new WireMockRule(WireMockConfiguration.wireMockConfig().dynamicPort());
+
     protected TestDispatcherService dispatcherService;
 
-    protected ClientAndServer clientAndServer;
-
     @BeforeEach
-    void beforeEach(Vertx vertx, VertxTestContext testContext, ClientAndServer clientAndServer) {
-        this.clientAndServer = clientAndServer;
-
+    void beforeEach(Vertx vertx, VertxTestContext testContext, WireMockRuntimeInfo runtimeInfo) {
         cleanRedis();
 
-        JsonObject adminConfigs = getAdminApiConfigs(clientAndServer);
-        JsonObject cacheConfigs = new JsonObject().put("impl", RedisVerticle.class.getName());
+        // clear wiremock mockings
+        var wiremock = runtimeInfo.getWireMock();
+        wiremock.resetMappings();
+        wiremock.resetRequests();
+        wiremock.resetScenarios();
+
+        JsonObject adminConfigs = getAdminApiConfigs(runtimeInfo);
+        JsonObject cacheConfigs = new JsonObject().put("impl", RedisVerticle.class.getName())
+            .put("configs", new JsonObject().put("connectionString", redis.getRedisURI()));
         JsonObject dispatcherConf = new JsonObject().put("impl", "test:any").put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
@@ -63,7 +83,7 @@ public abstract class AbstractTest {
         TestDispatcherVerticle dispatcherVerticle = new TestDispatcherVerticle(dispatcherService);
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new TestDispatcherFactory(dispatcherVerticle));
-        vertx.deployVerticle(new EventsApi(), options, testContext.completing());
+        vertx.deployVerticle(new EventsApi(), options, testContext.succeedingThenComplete());
     }
 
     protected void modifyConfigs(JsonObject jsonObject) {
@@ -73,16 +93,18 @@ public abstract class AbstractTest {
     private void cleanRedis() {
         Config redisConfigs = new Config();
         redisConfigs.useSingleServer()
-                        .setAddress("redis://localhost:6379");
+            .setAddress(redis.getRedisURI())
+            .setConnectionMinimumIdleSize(1)
+            .setConnectionPoolSize(2);
         RedissonClient redissonClient = Redisson.create(redisConfigs);
         redissonClient.getMap(ID.EVENT_API_CACHE_USERS_KEY, StringCodec.INSTANCE).delete();
         redissonClient.getMap(ID.EVENT_API_CACHE_SOURCES_KEY, StringCodec.INSTANCE).delete();
         redissonClient.shutdown();
     }
 
-    private JsonObject getAdminApiConfigs(ClientAndServer clientAndServer) {
+    private JsonObject getAdminApiConfigs(WireMockRuntimeInfo wireMockRuntime) {
         return new JsonObject()
-                .put("baseUrl", "http://localhost:" + clientAndServer.getLocalPort() + "/api")
+                .put("baseUrl", "http://localhost:" + wireMockRuntime.getHttpPort() + "/api")
                 .put("eventSourceGet", "/admin/event-source")
                 .put("playerGet", "/players")
                 .put("apiKey", "eventapi")
@@ -90,45 +112,32 @@ public abstract class AbstractTest {
     }
 
     protected void setPlayerDoesNotExists(String email) {
-        new MockServerClient("localhost", clientAndServer.getLocalPort())
-                .when(org.mockserver.model.HttpRequest.request("/api/players")
-                        .withMethod("GET")
-                        .withQueryStringParameter("email", email)
-                        .withQueryStringParameter("verbose", "true")
-                ).respond(org.mockserver.model.HttpResponse.response().withStatusCode(404));
-    }
-
-    protected void setSourceDoesNotExists(String token) {
-        new MockServerClient("localhost", clientAndServer.getLocalPort())
-                .when(org.mockserver.model.HttpRequest.request("/api/admin/event-source")
-                        .withMethod("GET")
-                        .withQueryStringParameter("token", token)
-                        .withQueryStringParameter("withKey", "true")
-                ).respond(org.mockserver.model.HttpResponse.response().withStatusCode(404));
+        stubFor(get(urlPathEqualTo("/api/players"))
+            .withQueryParam("email", equalTo(email))
+            .withQueryParam("verbose", equalTo("true"))
+            .willReturn(notFound()));
     }
 
     protected void setPlayerExists(String email, JsonObject playerWithTeams) {
-        new MockServerClient("localhost", clientAndServer.getLocalPort())
-                .when(org.mockserver.model.HttpRequest.request("/api/players")
-                        .withMethod("GET")
-                        .withQueryStringParameter("email", email)
-                        .withQueryStringParameter("verbose", "true")
-                ).respond(org.mockserver.model.HttpResponse.response()
-                        .withStatusCode(200)
-                        .withBody(playerWithTeams.encode(), MediaType.APPLICATION_JSON)
-                );
+        stubFor(get(urlPathEqualTo("/api/players"))
+            .withQueryParam("email", equalTo(email))
+            .withQueryParam("verbose", equalTo("true"))
+            .willReturn(
+                ok()
+                    .withResponseBody(new Body(playerWithTeams.encode()))
+                    .withHeader("content-type", MediaType.APPLICATION_JSON.toString())
+            ));
     }
 
     protected void setSourceExists(String token, JsonObject eventSource) {
-        new MockServerClient("localhost", clientAndServer.getLocalPort())
-                .when(org.mockserver.model.HttpRequest.request("/api/admin/event-source")
-                        .withMethod("GET")
-                        .withQueryStringParameter("token", token)
-                        .withQueryStringParameter("withKey", "true")
-                ).respond(org.mockserver.model.HttpResponse.response()
-                        .withStatusCode(200)
-                        .withBody(eventSource.encode(), MediaType.APPLICATION_JSON)
-                );
+        stubFor(get(urlPathEqualTo("/api/admin/event-source"))
+            .withQueryParam("token", equalTo(token))
+            .withQueryParam("withKey", equalTo("true"))
+            .willReturn(
+                ok()
+                    .withResponseBody(new Body(eventSource.encode()))
+                    .withHeader("content-type", MediaType.APPLICATION_JSON.toString())
+            ));
     }
 
     protected JsonObject createEventSource(String token, Integer id, Set<Integer> games, PublicKey publicKey) {
@@ -137,18 +146,6 @@ public abstract class AbstractTest {
                 .put("games", games)
                 .put("id", id)
                 .put("secrets", new JsonObject().put("publicKey", Base64.getEncoder().encodeToString(publicKey.getEncoded())));
-    }
-
-    protected JsonObject createPlayerWithTeams(String email, long id, Pair<Integer, Integer>... teamToGameMapping) {
-        JsonArray array = new JsonArray();
-        for (Pair<Integer, Integer> pair : teamToGameMapping) {
-            array.add(new JsonObject().put("id", pair.getLeft()).put("gameId", pair.getRight()));
-        }
-
-        return new JsonObject()
-                .put("email", email)
-                .put("id", id)
-                .put("teams", array);
     }
 
     protected JsonObject createPlayerWith2Teams(String email, long id, Pair<Integer, Integer> pair1, Pair<Integer, Integer> pair2) {
@@ -187,7 +184,8 @@ public abstract class AbstractTest {
     }
 
     protected void awaitRedisInitialization(Vertx vertx, VertxTestContext testContext, TestRedisDeployVerticle verticle) {
-        vertx.deployVerticle(verticle, testContext.succeeding());
+        System.out.println(redis.getRedisURI());
+        vertx.deployVerticle(verticle, testContext.succeedingThenComplete());
         sleepWell();
     }
 

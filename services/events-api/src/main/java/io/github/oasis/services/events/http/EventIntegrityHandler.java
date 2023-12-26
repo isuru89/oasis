@@ -54,7 +54,7 @@ class EventIntegrityHandler implements Handler<RoutingContext> {
     public void handle(RoutingContext ctx) {
         EventSource eventSource = (EventSource) ctx.user();
         Optional<String> optHeader = Optional.ofNullable(ctx.get(AuthService.REQ_DIGEST));
-        if (optHeader.isPresent() && eventSource.verifyEvent(ctx.getBody(), optHeader.get())) {
+        if (optHeader.isPresent() && eventSource.verifyEvent(ctx.body().buffer(), optHeader.get())) {
             ctx.next();
         } else {
             LOG.warn("[Source={}] Payload verification failed!", eventSource.getSourceId());

@@ -52,6 +52,12 @@ public class TestRedisDeployVerticle extends AbstractVerticle {
     private Map<String, JsonObject> users = new HashMap<>();
     private RedisAPI api;
 
+    private final String redisUrl;
+
+    public TestRedisDeployVerticle(String redisUrl) {
+        this.redisUrl = redisUrl;
+    }
+
     public TestRedisDeployVerticle addUser(String email, long id, Map<String, Object> gameTeamIds) {
         users.put(email, new JsonObject()
                 .put("email", email)
@@ -78,7 +84,7 @@ public class TestRedisDeployVerticle extends AbstractVerticle {
     @Override
     public void start(Promise<Void> promise) {
         RedisOptions configs = new RedisOptions()
-                .setConnectionString("redis://localhost:6379")
+                .setConnectionString(redisUrl)
                 .setMaxPoolSize(4)
                 .setMaxWaitingHandlers(16);
 

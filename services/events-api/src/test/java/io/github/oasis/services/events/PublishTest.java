@@ -133,7 +133,7 @@ public class PublishTest extends AbstractEventPushTest {
 
         Config redisConfigs = new Config();
         redisConfigs.useSingleServer()
-                .setAddress("redis://localhost:6379");
+                .setAddress(redis.getRedisURI());
         RedissonClient redissonClient = Redisson.create(redisConfigs);
 
         callForEvent(vertx, token + ":" + hash)
