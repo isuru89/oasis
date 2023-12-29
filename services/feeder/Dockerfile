@@ -1,4 +1,4 @@
-FROM openjdk:11.0-jre-slim
+FROM oasis/base-java
 
 MAINTAINER Isuru Weerarathna <isuruw89@gmail.com>
 ## Add the wait script to the image

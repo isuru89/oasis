@@ -11,7 +11,7 @@ elements:
         matchEvent: stackoverflow.question.asked
       rewards:
         badge:
-          attribute: 3
+          rank: 3
 
   - name: First-Accepted
     id: B-FACC
@@ -25,7 +25,7 @@ elements:
           expression: e['userId'] == e['askedBy'];
       rewards:
         badge:
-          attribute: 3
+          rank: 3
 
   - name: Visit-Site
     id: B-VSITE
@@ -46,15 +46,15 @@ elements:
         - streak: 50
           rewards:
             badge:
-              attribute: 3
+              rank: 3
         - streak: 75
           rewards:
             badge:
-              attribute: 2
+              rank: 2
         - streak: 100
           rewards:
             badge:
-              attribute: 1
+              rank: 1
 
   - name: Popular-Question
     id: B-POPQ
@@ -69,17 +69,17 @@ elements:
           condition: e['votes'] == 100
           rewards:
             badge:
-              attribute: 1
+              rank: 1
         - priority: 2
           condition: e['votes'] == 50
           rewards:
             badge:
-              attribute: 2
+              rank: 2
         - priority: 3
           condition: e['votes'] == 30
           rewards:
             badge:
-              attribute: 3
+              rank: 3
 
   - name: Favourite-Question
     id: B-FAVQ
@@ -94,17 +94,17 @@ elements:
           condition: e['favourites'] == 50
           rewards:
             badge:
-              attribute: 1
+              rank: 1
         - priority: 2
           condition: e['favourites'] == 25
           rewards:
             badge:
-              attribute: 2
+              rank: 2
         - priority: 3
           condition: e['favourites'] == 10
           rewards:
             badge:
-              attribute: 3
+              rank: 3
 
   - name: Viewed-Question
     id: B-VIEWQ
@@ -119,17 +119,17 @@ elements:
           condition: e['views'] == 10000
           rewards:
             badge:
-              attribute: 1
+              rank: 1
         - priority: 2
           condition: e['views'] == 5000
           rewards:
             badge:
-              attribute: 2
+              rank: 2
         - priority: 3
           condition: e['views'] == 1000
           rewards:
             badge:
-              attribute: 3
+              rank: 3
 
   - name: Daily-Reputations
     id: B-DREP
@@ -148,15 +148,15 @@ elements:
         - value: 200
           rewards:
             badge:
-              attribute: 1
+              rank: 1
         - value: 150
           rewards:
             badge:
-              attribute: 2
+              rank: 2
         - value: 100
           rewards:
             badge:
-              attribute: 3
+              rank: 3
 
   - name: Max-Reputations
     id: B-MAXREP
@@ -176,12 +176,12 @@ elements:
         - streak: 2
           rewards:
             badge:
-              attribute: 3
+              rank: 3
         - streak: 5
           rewards:
             badge:
-              attribute: 2
+              rank: 2
         - streak: 10
           rewards:
             badge:
-              attribute: 1
+              rank: 1

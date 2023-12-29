@@ -235,8 +235,8 @@ public class SimulationWithApi extends Simulation {
                         "gameId", GAME_ID,
                         "teamId", teamId);
 
-                request = adminApiReq("/players/" + dbUser.getId() + "/teams")
-                        .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(dataReq)))
+                request = adminApiReq("/players/" + dbUser.getId() + "/teams/" + teamId)
+                        .POST(HttpRequest.BodyPublishers.noBody())
                         .build();
                 HttpResponse<Void> resultTeamAdd = client.send(request, HttpResponse.BodyHandlers.discarding());
                 if (resultTeamAdd.statusCode() >= 400) {

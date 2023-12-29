@@ -3,7 +3,12 @@
 echo "==============================================================================="
 echo "Building Oasis..."
 echo "==============================================================================="
-mvn install -DskipTests
+mvn clean install -DskipTests
+
+echo "==============================================================================="
+echo "Build the base java image"
+echo "==============================================================================="
+docker build -t oasis/base-java -f ./buildscripts/docker/Dockerfile-base-java .
 
 cp externals/kafka-stream/target/libs/* buildscripts/modules
 cp externals/kafka-stream/target/oasis-ext-kafkastream.jar buildscripts/modules
@@ -47,7 +52,7 @@ mkdir -p .tmpdata/cache
 echo "==============================================================================="
 echo "Starting Oasis..."
 echo "==============================================================================="
-docker compose up
+docker compose up --no-attach kafka --no-attach zookeeper --no-attach stats-api
 
 
 

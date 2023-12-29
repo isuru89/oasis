@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
  */
 public class Simulation implements Closeable {
 
-    static final String SOURCE_NAME = "oasis.simulation.internal";
+    static final String SOURCE_NAME = "oasis_simulation_internal";
     static String SOURCE_TOKEN;
     static int SOURCE_ID = 1;
     static int GAME_ID = 1001;
