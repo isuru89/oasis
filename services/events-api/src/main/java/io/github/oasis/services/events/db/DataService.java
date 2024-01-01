@@ -20,6 +20,7 @@
 package io.github.oasis.services.events.db;
 
 import io.github.oasis.services.events.model.EventSource;
+import io.github.oasis.services.events.model.GameInfo;
 import io.github.oasis.services.events.model.UserInfo;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyGen;
@@ -44,4 +45,7 @@ public interface DataService {
 
     @Fluent
     DataService readSourceInfo(String sourceId, Handler<AsyncResult<EventSource>> resultHandler);
+
+    @Fluent
+    DataService readGameInfo(int gameId, Handler<AsyncResult<GameInfo>> resultHandler);
 }

@@ -20,6 +20,7 @@
 package io.github.oasis.services.events.db;
 
 import io.github.oasis.services.events.model.EventSource;
+import io.github.oasis.services.events.model.GameInfo;
 import io.github.oasis.services.events.model.UserInfo;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.ProxyGen;
@@ -54,4 +55,10 @@ public interface RedisService {
 
     @Fluent
     RedisService deleteKey(String key, Handler<AsyncResult<Boolean>> resultHandler);
+
+    @Fluent
+    RedisService readGameInfo(int gameId, Handler<AsyncResult<GameInfo>> resultHandler);
+
+    @Fluent
+    RedisService persistGameInfo(int gameId, GameInfo gameInfo, Handler<AsyncResult<GameInfo>> resultHandler);
 }

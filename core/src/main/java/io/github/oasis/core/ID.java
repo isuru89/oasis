@@ -26,6 +26,7 @@ public final class ID {
 
     public static final String EVENT_API_CACHE_USERS_KEY = "oasis.eventapi.users";
     public static final String EVENT_API_CACHE_SOURCES_KEY = "oasis.eventapi.sources";
+    public static final String EVENT_API_CACHE_GAMES_KEY = "oasis.eventapi.games";
 
     public static final String ENGINE_STATUS_CHANNEL = "game.status.channel";
     public static final String GAME_ENGINES = "oasis.engines.games";

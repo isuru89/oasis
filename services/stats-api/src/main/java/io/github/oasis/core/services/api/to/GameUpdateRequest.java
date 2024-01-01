@@ -44,12 +44,7 @@ public class GameUpdateRequest implements Serializable {
     @Positive(message = "The 'version' field must be specified to represent updating entity!")
     private int version;
 
-    public Game createGame() {
-        return Game.builder()
-                .id(id)
-                .motto(motto)
-                .description(description)
-                .logoRef(logoRef)
-                .build();
-    }
+    private Long startTime;
+    private Long endTime;
+
 }

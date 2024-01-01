@@ -9,6 +9,7 @@ import com.redis.testcontainers.RedisContainer;
 import io.github.oasis.core.ID;
 import io.github.oasis.core.collect.Pair;
 import io.github.oasis.services.events.db.RedisVerticle;
+import io.github.oasis.services.events.model.GameInfo;
 import io.github.oasis.services.events.utils.TestDispatcherFactory;
 import io.github.oasis.services.events.utils.TestDispatcherService;
 import io.github.oasis.services.events.utils.TestDispatcherVerticle;
@@ -99,6 +100,7 @@ public abstract class AbstractTest {
         RedissonClient redissonClient = Redisson.create(redisConfigs);
         redissonClient.getMap(ID.EVENT_API_CACHE_USERS_KEY, StringCodec.INSTANCE).delete();
         redissonClient.getMap(ID.EVENT_API_CACHE_SOURCES_KEY, StringCodec.INSTANCE).delete();
+        redissonClient.getMap(ID.EVENT_API_CACHE_GAMES_KEY, StringCodec.INSTANCE).delete();
         redissonClient.shutdown();
     }
 
@@ -107,6 +109,7 @@ public abstract class AbstractTest {
                 .put("baseUrl", "http://localhost:" + wireMockRuntime.getHttpPort() + "/api")
                 .put("eventSourceGet", "/admin/event-source")
                 .put("playerGet", "/players")
+                .put("gameGet", "/games")
                 .put("apiKey", "eventapi")
                 .put("secretKey", "eventapi");
     }
@@ -140,12 +143,44 @@ public abstract class AbstractTest {
             ));
     }
 
+    protected void setGameExists(int gameId, JsonObject gameObj) {
+        stubFor(get(urlPathEqualTo("/api/games/" + gameId))
+            .willReturn(
+                ok()
+                    .withResponseBody(new Body(gameObj.encode()))
+                    .withHeader("content-type", MediaType.APPLICATION_JSON.toString())
+            ));
+    }
+
     protected JsonObject createEventSource(String token, Integer id, Set<Integer> games, PublicKey publicKey) {
         return new JsonObject()
                 .put("token", token)
                 .put("games", games)
                 .put("id", id)
                 .put("secrets", new JsonObject().put("publicKey", Base64.getEncoder().encodeToString(publicKey.getEncoded())));
+    }
+
+    protected JsonObject createGameInfo(int gameId, long startAt) {
+        return createGameInfo(gameId, startAt, Long.MAX_VALUE - 1);
+    }
+
+    protected JsonObject createGameInfo(int gameId, long startAt, long endAt) {
+        return new JsonObject()
+                .put(GameInfo.ID, gameId)
+                .put(GameInfo.START_TIME, startAt)
+                .put(GameInfo.END_TIME, endAt);
+    }
+
+    protected JsonObject createPlayerWithTeams(String email, long id, Pair<Integer, Integer>... teamToGameMapping) {
+        JsonArray array = new JsonArray();
+        for (Pair<Integer, Integer> pair : teamToGameMapping) {
+            array.add(new JsonObject().put("id", pair.getLeft()).put("gameId", pair.getRight()));
+        }
+
+        return new JsonObject()
+                .put("email", email)
+                .put("id", id)
+                .put("teams", array);
     }
 
     protected JsonObject createPlayerWith2Teams(String email, long id, Pair<Integer, Integer> pair1, Pair<Integer, Integer> pair2) {

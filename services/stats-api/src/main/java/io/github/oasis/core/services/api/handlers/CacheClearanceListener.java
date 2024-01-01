@@ -29,6 +29,7 @@ import io.github.oasis.core.services.annotations.OasisCache;
 import io.github.oasis.core.services.api.handlers.events.BaseEventSourceChangedEvent;
 import io.github.oasis.core.services.api.handlers.events.BasePlayerRelatedEvent;
 import io.github.oasis.core.services.api.handlers.events.EntityChangeType;
+import io.github.oasis.core.services.api.handlers.events.GameSpecChangedEvent;
 import io.github.oasis.core.utils.CacheUtils;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -67,6 +68,18 @@ public class CacheClearanceListener {
         if (playerRelatedEvent.getChangeType() != EntityChangeType.ADDED) {
             try (DbContext db = cache.createContext()) {
                 db.MAP(ID.EVENT_API_CACHE_USERS_KEY).remove(playerRelatedEvent.getEmail());
+
+            } catch (IOException e) {
+                // silently ignore cache clear failures
+            }
+        }
+    }
+
+    @EventListener
+    public void handleGameUpdateEvent(GameSpecChangedEvent gameChangedEvent) {
+        if (gameChangedEvent.getChangeType() != EntityChangeType.ADDED) {
+            try (DbContext db = cache.createContext()) {
+                db.MAP(ID.EVENT_API_CACHE_GAMES_KEY).remove(String.valueOf(gameChangedEvent.getGameId()));
 
             } catch (IOException e) {
                 // silently ignore cache clear failures

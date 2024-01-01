@@ -46,7 +46,7 @@ public interface IGameDao {
                    @Bind("ts") long timestamp);
 
     default int insertGame(Game game) {
-        return insertGame(game, System.currentTimeMillis());
+        return insertGame(game, game.getCreatedAt() > 0 ? game.getCreatedAt() : System.currentTimeMillis());
     }
 
     @SqlQuery

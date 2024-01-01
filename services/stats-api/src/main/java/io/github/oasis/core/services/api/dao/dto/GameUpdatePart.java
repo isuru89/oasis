@@ -40,12 +40,17 @@ public class GameUpdatePart implements Serializable {
     private String logoRef;
     private int version;
 
+    private long startTime;
+    private long endTime;
+
     public static GameUpdatePart from(Game game) {
         return GameUpdatePart.builder()
                 .name(game.getName())
                 .description(game.getDescription())
                 .motto(game.getMotto())
                 .logoRef(game.getLogoRef())
+                .startTime(game.getStartTime())
+                .endTime(game.getEndTime())
                 .version(game.getVersion())
                 .build();
     }

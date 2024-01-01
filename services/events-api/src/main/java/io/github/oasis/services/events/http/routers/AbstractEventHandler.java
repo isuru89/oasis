@@ -23,6 +23,7 @@ import io.github.oasis.services.events.db.DataService;
 import io.github.oasis.services.events.dispatcher.EventDispatcherService;
 import io.github.oasis.services.events.model.EventProxy;
 import io.github.oasis.services.events.model.EventSource;
+import io.github.oasis.services.events.model.GameInfo;
 import io.github.oasis.services.events.model.UserInfo;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AsyncResult;
@@ -33,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Isuru Weerarathna
@@ -67,18 +67,12 @@ public abstract class AbstractEventHandler {
 
                 List<Integer> gameIds = source.getGameIds().stream()
                         .filter(gId -> user.getTeamId(gId).isPresent())
-                        .collect(Collectors.toList());
+                        .toList();
 
                 for (int gameId : gameIds) {
                     user.getTeamId(gameId).ifPresent(teamId -> {
                         EventProxy gameEvent = event.copyForGame(gameId, source.getSourceId(), user.getId(), teamId);
-                        dispatcherService.pushEvent(gameEvent, dispatcherRes -> {
-                            if (dispatcherRes.succeeded()) {
-                                LOG.info("[{}] Event published.", event.getExternalId());
-                            } else {
-                                LOG.error("[{}] Unable to publish event!", event.getExternalId(), dispatcherRes.cause());
-                            }
-                        });
+                        dispatchEventToGameIfActive(gameEvent);
                     });
                 }
 
@@ -92,6 +86,38 @@ public abstract class AbstractEventHandler {
                 LOG.warn("[{}] Cannot access user info for user {} from cache or service!", event.getExternalId(), userEmail);
                 LOG.error("Error:", res.cause());
                 handler.handle(Future.failedFuture(new IllegalArgumentException("Cannot accept this event at this moment " + userEmail + "!")));
+            }
+        });
+    }
+
+    protected boolean isInGamePeriod(GameInfo gameInfo, EventProxy eventProxy) {
+        long startAt = gameInfo.getStartAt();
+        long endAt = gameInfo.getEndAt();
+
+        return startAt <= eventProxy.getTimestamp() && eventProxy.getTimestamp() <= endAt;
+    }
+
+    private void dispatchEventToGameIfActive(EventProxy gameEvent) {
+        String eventId = gameEvent.getExternalId();
+        LOG.info("[{}] Reading game {} status from server", gameEvent.getExternalId(), gameEvent.getGameId());
+        clientService.readGameInfo(gameEvent.getGameId(), gameInfoAsyncResult -> {
+            if (gameInfoAsyncResult.succeeded()) {
+                GameInfo gameInfo = gameInfoAsyncResult.result();
+
+                if (isInGamePeriod(gameInfo, gameEvent)) {
+                    dispatcherService.pushEvent(gameEvent, dispatcherRes -> {
+                        if (dispatcherRes.succeeded()) {
+                            LOG.info("[{}] Event published. {}", eventId, gameInfo);
+                        } else {
+                            LOG.error("[{}] Unable to publish event!", eventId, dispatcherRes.cause());
+                        }
+                    });
+                } else {
+                    LOG.error("[{}] Game has not yet started or already ended! Hence skipping event submission for game {}.",
+                            eventId, gameInfo);
+                }
+            } else {
+                LOG.error("[" + eventId + "] Unable to read game id=" + gameEvent.getGameId() + " status!", gameInfoAsyncResult.cause());
             }
         });
     }

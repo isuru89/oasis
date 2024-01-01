@@ -21,26 +21,35 @@ package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.ElementDef;
+import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.model.GameStatus;
 import io.github.oasis.core.services.api.TestUtils;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
+import io.github.oasis.core.services.api.handlers.CacheClearanceListener;
+import io.github.oasis.core.services.api.handlers.events.EntityChangeType;
+import io.github.oasis.core.services.api.handlers.events.GameSpecChangedEvent;
 import io.github.oasis.core.services.api.services.impl.GameService;
 import io.github.oasis.core.services.api.to.ElementCreateRequest;
 import io.github.oasis.core.services.api.to.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
 import io.github.oasis.core.services.events.GameStatusChangeEvent;
+import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,10 +64,16 @@ public class GameServiceTest extends AbstractServiceTest {
     @Autowired
     private IGameService gameService;
 
+    @SpyBean
+    private CacheClearanceListener cacheClearanceListener;
+
+    @SpyBean
+    private IEngineManager engineManager;
+
     public static final String TESTPOINT = "testpoint";
     public static final String TESTBADGE = "testbadge";
 
-    private final IEngineManager engineManager = Mockito.mock(IEngineManager.class);
+//    private final IEngineManager engineManager = Mockito.mock(IEngineManager.class);
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -94,6 +109,20 @@ public class GameServiceTest extends AbstractServiceTest {
     }
 
     @Test
+    void addGameWithStartAndEnd() {
+        var request = promotions.toBuilder()
+                .startTime(System.currentTimeMillis())
+                .endTime(LocalDate.of(2050, 1, 1).atStartOfDay()
+                        .toInstant(ZoneOffset.UTC).toEpochMilli())
+                .build();
+        Game game = doPostSuccess("/games", request, Game.class);
+        System.out.println(game);
+        Assertions.assertNotNull(game);
+        assertGame(game, request);
+        assertCurrentGameStatus(game.getId(), "CREATED");
+    }
+
+    @Test
     void addGameValidations() {
         doPostError("/games", stackOverflow.toBuilder().name(null).build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
         doPostError("/games", stackOverflow.toBuilder().name("").build(), HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
@@ -105,7 +134,9 @@ public class GameServiceTest extends AbstractServiceTest {
         assertEquals(0, doGetPaginatedSuccess("/games", Game.class).getRecords().size());
 
         doPostSuccess("/games", stackOverflow, Game.class);
-        assertEquals(1, doGetPaginatedSuccess("/games", Game.class).getRecords().size());
+        var records = doGetPaginatedSuccess("/games", Game.class).getRecords();
+        assertEquals(1, records.size());
+        assertGame(records.get(0), stackOverflow);
 
         doPostSuccess("/games", promotions, Game.class);
         assertEquals(2, doGetPaginatedSuccess("/games", Game.class).getRecords().size());
@@ -132,6 +163,27 @@ public class GameServiceTest extends AbstractServiceTest {
         assertGame(updatedGame, updateRequest);
         assertEquals(stackGame.getVersion() + 1, updatedGame.getVersion());
         assertCurrentGameStatus(stackId, "CREATED");
+
+        assertThirdPartyCacheClearanceForGame(stackId, EntityChangeType.MODIFIED);
+    }
+
+    @Test
+    void updateStartTimeOfGame() {
+        Game stackGame = doPostSuccess("/games", stackOverflow, Game.class);
+        int stackId = stackGame.getId();
+
+        GameUpdateRequest updateRequest = GameUpdateRequest.builder()
+                .id(stackId)
+                .version(stackGame.getVersion())
+                .startTime(LocalDate.of(2022, 1, 1).atStartOfDay()
+                        .toInstant(ZoneOffset.UTC).toEpochMilli())
+                .build();
+        Game updatedGame = doPatchSuccess("/games/" + stackId, updateRequest, Game.class);
+        assertGame(updatedGame, updateRequest);
+        assertEquals(stackGame.getVersion() + 1, updatedGame.getVersion());
+        assertCurrentGameStatus(stackId, "CREATED");
+
+        assertThirdPartyCacheClearanceForGame(stackId, EntityChangeType.MODIFIED);
     }
 
     @Test
@@ -148,6 +200,7 @@ public class GameServiceTest extends AbstractServiceTest {
                     .logoRef("new logo ref")
                     .build();
             doPatchError("/games/" + stackId, updateRequest, HttpStatus.BAD_REQUEST, ErrorCodes.INVALID_PARAMETER);
+            Mockito.verify(cacheClearanceListener, Mockito.never()).handleGameUpdateEvent(Mockito.any());
         }
 
         {
@@ -160,6 +213,7 @@ public class GameServiceTest extends AbstractServiceTest {
                     .version(stackGame.getVersion() + 1000)
                     .build();
             doPatchError("/games/" + stackId, updateRequest, HttpStatus.CONFLICT, ErrorCodes.GAME_UPDATE_CONFLICT);
+            Mockito.verify(cacheClearanceListener, Mockito.never()).handleGameUpdateEvent(Mockito.any());
         }
     }
 
@@ -185,6 +239,8 @@ public class GameServiceTest extends AbstractServiceTest {
     void updateGameStatusOnly() {
         Game stackGame = doPostSuccess("/games", stackOverflow, Game.class);
         int stackId = stackGame.getId();
+
+        sleepSafe(100);
 
         Game updatedGame = doPutSuccess("/games/" + stackId + "/start", null, Game.class);
         assertCurrentGameStatus(stackId, "STARTED");
@@ -236,6 +292,7 @@ public class GameServiceTest extends AbstractServiceTest {
         // read back the game
         var gameDeleted = doGetSuccess("/games/" + stackId, Game.class);
         assertFalse(gameDeleted.isActive());
+        assertCurrentGameStatus(stackId, GameState.STOPPED.name());
 
         assertTrue(doGetListSuccess("/admin/games/" + stackId + "/event-sources", EventSource.class).isEmpty());
         // but still event source must exist
@@ -246,10 +303,74 @@ public class GameServiceTest extends AbstractServiceTest {
         doGetError("/games/" + stackId + "/elements/" + TESTBADGE + "?withData=false", HttpStatus.NOT_FOUND, ErrorCodes.ELEMENT_NOT_EXISTS);
         doGetError("/games/" + stackId + "/elements/" + TESTPOINT + "?withData=false", HttpStatus.NOT_FOUND, ErrorCodes.ELEMENT_NOT_EXISTS);
 
-        // game stopped message should dispatch
-        ArgumentCaptor<GameStatusChangeEvent> eventArgumentCaptor = ArgumentCaptor.forClass(GameStatusChangeEvent.class);
-        assertEngineManagerOnceCalledWithState(spy, GameState.STOPPED, dbGame, eventArgumentCaptor);
+        // game removed message should dispatch
+        ArgumentCaptor<Object> eventArgumentCaptor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(spy, Mockito.times(1)).publishEvent(eventArgumentCaptor.capture());
+        {
+            GameSpecChangedEvent specChangedEvent = (GameSpecChangedEvent) eventArgumentCaptor.getValue();
+            assertEquals(EntityChangeType.REMOVED, specChangedEvent.getChangeType());
+            assertEquals(stackId, specChangedEvent.getGameId());
+        }
+
+        Mockito.verify(engineManager, Mockito.times(1))
+                .notifyGameStatusChange(Mockito.eq(GameState.STOPPED), Mockito.any());
     }
+
+
+    @Test
+    void deleteGameTransactional() {
+        Mockito.reset(engineManager);
+        ApplicationEventPublisher spy = Mockito.mock(ApplicationEventPublisher.class);
+        if (gameService instanceof GameService) {
+            // we know this is the service
+            ((GameService) gameService).setPublisher(spy);
+        }
+
+        int stackId = doPostSuccess("/games", stackOverflow, Game.class).getId();
+        Game dbGame = doGetSuccess("/games/" + stackId, Game.class);
+        EventSource eventSource = doPostSuccess("/admin/event-sources", EventSourceCreateRequest.builder().name("test-1").build(), EventSource.class);
+        doPostSuccess("/admin/games/" + stackId + "/event-sources/" + eventSource.getId(), null, null);
+
+        List<ElementCreateRequest> elementCreateRequests = TestUtils.parseElementRules("rules.yml", stackId);
+        ElementDef elementPoint = doPostSuccess("/games/" + stackId + "/elements", TestUtils.findById(TESTPOINT, elementCreateRequests), ElementDef.class);
+        ElementDef elementBadge = doPostSuccess("/games/" + stackId + "/elements", TestUtils.findById(TESTBADGE, elementCreateRequests), ElementDef.class);
+
+        assertEquals(1, doGetListSuccess("/admin/games/" + stackId + "/event-sources", EventSource.class).size());
+
+        assertEquals(elementBadge.getElementId(), doGetSuccess("/games/" + stackId + "/elements/" + TESTBADGE + "?withData=false", ElementDef.class).getElementId());
+        assertEquals(elementPoint.getElementId(), doGetSuccess("/games/" + stackId + "/elements/" + TESTPOINT + "?withData=false", ElementDef.class).getElementId());
+
+        Mockito.reset(spy);
+        Mockito.doThrow(new OasisApiRuntimeException(ErrorCodes.UNABLE_TO_CHANGE_GAME_STATE))
+                .when(spy).publishEvent(Mockito.eq(GameSpecChangedEvent.builder()
+                        .gameId(stackId)
+                        .changeType(EntityChangeType.REMOVED)
+                        .build()));
+        doDeletetError("/games/" + stackId, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCodes.UNABLE_TO_CHANGE_GAME_STATE);
+
+        // read back the game
+        var gameDeleted = doGetSuccess("/games/" + stackId, Game.class);
+        assertTrue(gameDeleted.isActive());
+        assertCurrentGameStatus(stackId, GameState.CREATED.name());
+
+        assertEquals(doGetListSuccess("/admin/games/" + stackId + "/event-sources", EventSource.class).size(), 1);
+
+        EventSource dbSource = doGetSuccess("/admin/event-sources/" + eventSource.getId(), EventSource.class);
+        assertNotNull(dbSource);
+        assertTrue(dbSource.isActive());
+        assertNotNull(doGetSuccess("/games/" + stackId + "/elements/" + TESTBADGE + "?withData=false", ElementDef.class));
+        assertNotNull(doGetSuccess("/games/" + stackId + "/elements/" + TESTPOINT + "?withData=false", ElementDef.class));
+
+        // game stopped message should dispatch
+        ArgumentCaptor<Object> eventArgumentCaptor = ArgumentCaptor.forClass(Object.class);
+        Mockito.verify(spy, Mockito.times(1)).publishEvent(eventArgumentCaptor.capture());
+        {
+            var value = (GameSpecChangedEvent) eventArgumentCaptor.getAllValues().get(0);
+            Assertions.assertEquals(EntityChangeType.REMOVED, value.getChangeType());
+            Assertions.assertEquals(stackId, value.getGameId());
+        }
+    }
+
 
     @Test
     void deleteNonExistingGame() {
@@ -348,12 +469,43 @@ public class GameServiceTest extends AbstractServiceTest {
         assertEquals(other.getDescription(), db.getDescription());
         assertEquals(other.getLogoRef(), db.getLogoRef());
         assertEquals(other.getMotto(), db.getMotto());
+        if (other.getStartTime() == null) {
+            assertEquals(db.getStartTime(), db.getCreatedAt());
+        }
+        if (other.getEndTime() == null) {
+            assertEquals(db.getEndTime(), LocalDate.of(3001, 1, 1).atStartOfDay()
+                    .toInstant(ZoneOffset.UTC).toEpochMilli());
+        }
     }
 
     private void assertGame(Game db, GameUpdateRequest other) {
         assertTrue(db.getId() > 0);
-        assertEquals(other.getDescription(), db.getDescription());
-        assertEquals(other.getLogoRef(), db.getLogoRef());
-        assertEquals(other.getMotto(), db.getMotto());
+        if (other.getDescription() != null) {
+            assertEquals(other.getDescription(), db.getDescription());
+        }
+        if (other.getLogoRef() != null) {
+            assertEquals(other.getLogoRef(), db.getLogoRef());
+        }
+        if (other.getMotto() != null) {
+            assertEquals(other.getMotto(), db.getMotto());
+        }
+        if (other.getStartTime() != null) {
+            assertEquals(other.getStartTime(), db.getStartTime());
+        } else {
+            assertTrue(db.getStartTime() >= 0);
+        }
+        if (other.getEndTime() != null) {
+            assertEquals(other.getEndTime(), db.getEndTime());
+        } else {
+            assertTrue(db.getEndTime() >= 0);
+        }
+    }
+
+    private void assertThirdPartyCacheClearanceForGame(int gameId, EntityChangeType changeType) {
+        ArgumentCaptor<GameSpecChangedEvent> captor = ArgumentCaptor.forClass(GameSpecChangedEvent.class);
+        Mockito.verify(cacheClearanceListener, Mockito.times(1))
+                .handleGameUpdateEvent(captor.capture());
+        assertEquals(gameId, captor.getValue().getGameId());
+        assertEquals(EntityChangeType.MODIFIED, captor.getValue().getChangeType());
     }
 }

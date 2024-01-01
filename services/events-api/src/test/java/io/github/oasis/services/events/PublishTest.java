@@ -26,6 +26,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.redisson.Redisson;
@@ -49,6 +50,7 @@ public class PublishTest extends AbstractEventPushTest {
         KeyPair keyPair = TestUtils.createKeys();
         String token = UUID.randomUUID().toString();
         setSourceExists(token, createEventSource(token, 1, Set.of(1), keyPair.getPublic()));
+        setGameExists(1, createGameInfo(1, 0));
         setPlayerExists(KNOWN_USER, createPlayerWithTeam(KNOWN_USER, 500, Pair.of(200, 1)));
 
         String hash = TestUtils.signPayload(VALID_PAYLOAD, keyPair.getPrivate());
@@ -66,6 +68,9 @@ public class PublishTest extends AbstractEventPushTest {
         KeyPair keyPair = TestUtils.createKeys();
         String token = UUID.randomUUID().toString();
         setSourceExists(token, createEventSource(token, 1, Set.of(1,2,3), keyPair.getPublic()));
+        setGameExists(1, createGameInfo(1, 0));
+        setGameExists(2, createGameInfo(2, 0));
+        setGameExists(3, createGameInfo(3, 0));
         setPlayerExists("isuru@oasis.com", createPlayerWith2Teams("isuru@oasis.com", 500, Pair.of(200,1), Pair.of(201, 2)));
 
         JsonObject event = TestUtils.aEvent("isuru@oasis.com", System.currentTimeMillis(), "test.a", 100);
@@ -88,6 +93,8 @@ public class PublishTest extends AbstractEventPushTest {
         String sourceToken = UUID.randomUUID().toString();
         String userEmail = "success.publish@oasis.io";
         setSourceExists(sourceToken, createEventSource(sourceToken, 1, Set.of(1,2), keyPair.getPublic()));
+        setGameExists(1, createGameInfo(1, 0));
+        setGameExists(2, createGameInfo(2, 0));
         setPlayerExists(userEmail, createPlayerWith2Teams(userEmail, 500, Pair.of(200,1), Pair.of(201, 3)));
 
         JsonObject event = TestUtils.aEvent(userEmail, System.currentTimeMillis(), "test.a", 100);
@@ -105,6 +112,8 @@ public class PublishTest extends AbstractEventPushTest {
         dispatcherService.setReturnSuccess(false);
         String token = UUID.randomUUID().toString();
         setSourceExists(token, createEventSource(token, 1, Set.of(1,2), keyPair.getPublic()));
+        setGameExists(1, createGameInfo(1, 0));
+        setGameExists(2, createGameInfo(2, 0));
         setPlayerExists(KNOWN_USER, createPlayerWithTeam(KNOWN_USER, 500, Pair.of(200,1)));
 
 
@@ -117,6 +126,79 @@ public class PublishTest extends AbstractEventPushTest {
                 );
     }
 
+    @Test
+    @DisplayName("When game is not started, any events should not be published")
+    void whenGameIsNotYetStartedEventsShouldNotPublished(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        String sourceToken = UUID.randomUUID().toString();
+        String userEmail = "success.publish@oasis.io";
+        setSourceExists(sourceToken, createEventSource(sourceToken, 1, Set.of(1), keyPair.getPublic()));
+        setGameExists(1, createGameInfo(1, Long.MAX_VALUE - 1));
+        setPlayerExists(userEmail, createPlayerWithTeam(userEmail, 500, Pair.of(200,1)));
+
+        JsonObject event = TestUtils.aEvent(userEmail, System.currentTimeMillis(), "test.a", 100);
+        JsonObject payload = new JsonObject().put("data", event);
+        String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
+
+        callForEvent(vertx, sourceToken + ":" + hash)
+                .sendJson(payload, testContext.succeeding(res -> assertSuccessWithInvocations(res, testContext, 0)));
+    }
+
+    @Test
+    @DisplayName("When game is expired, any events should not be published")
+    void whenGameIsExpiredEventsShouldNotPublished(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        String sourceToken = UUID.randomUUID().toString();
+        long ts = System.currentTimeMillis();
+        String userEmail = "success.publish@oasis.io";
+        setSourceExists(sourceToken, createEventSource(sourceToken, 1, Set.of(1), keyPair.getPublic()));
+        setGameExists(1, createGameInfo(1, 0, ts - 1));
+        setPlayerExists(userEmail, createPlayerWithTeam(userEmail, 500, Pair.of(200,1)));
+
+        JsonObject event = TestUtils.aEvent(userEmail, ts, "test.a", 100);
+        JsonObject payload = new JsonObject().put("data", event);
+        String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
+
+        callForEvent(vertx, sourceToken + ":" + hash)
+                .sendJson(payload, testContext.succeeding(res -> assertSuccessWithInvocations(res, testContext, 0)));
+    }
+
+    @Test
+    @DisplayName("When some bounded games expired for a token, any events should not be published to those games")
+    void whenSomeGamesAreExpiredThoseShouldNotPublish(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        String sourceToken = UUID.randomUUID().toString();
+        String userEmail = "success.publish@oasis.io";
+        setSourceExists(sourceToken, createEventSource(sourceToken, 1, Set.of(1, 2), keyPair.getPublic()));
+        setGameExists(1, createGameInfo(1, Long.MAX_VALUE - 1));
+        setGameExists(2, createGameInfo(2, 0));
+        setPlayerExists(userEmail, createPlayerWith2Teams(userEmail, 500, Pair.of(200,1), Pair.of(201,2)));
+
+        JsonObject event = TestUtils.aEvent(userEmail, System.currentTimeMillis(), "test.a", 100);
+        JsonObject payload = new JsonObject().put("data", event);
+        String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
+
+        callForEvent(vertx, sourceToken + ":" + hash)
+                .sendJson(payload, testContext.succeeding(res -> assertSuccessWithInvocations(res, testContext, 1)));
+    }
+
+    @Test
+    @DisplayName("When some games does not exist for a token, any events should not be published to those games")
+    void whenNonExistentGamesThoseShouldNotPublish(Vertx vertx, VertxTestContext testContext) throws NoSuchAlgorithmException {
+        KeyPair keyPair = TestUtils.createKeys();
+        String sourceToken = UUID.randomUUID().toString();
+        String userEmail = "success.publish@oasis.io";
+        setSourceExists(sourceToken, createEventSource(sourceToken, 1, Set.of(1, 2), keyPair.getPublic()));
+        setGameExists(1, createGameInfo(1, 0));
+        setPlayerExists(userEmail, createPlayerWith2Teams(userEmail, 500, Pair.of(200,1), Pair.of(201,2)));
+
+        JsonObject event = TestUtils.aEvent(userEmail, System.currentTimeMillis(), "test.a", 100);
+        JsonObject payload = new JsonObject().put("data", event);
+        String hash = TestUtils.signPayload(payload, keyPair.getPrivate());
+
+        callForEvent(vertx, sourceToken + ":" + hash)
+                .sendJson(payload, testContext.succeeding(res -> assertSuccessWithInvocations(res, testContext, 1)));
+    }
 
     @Test
     @DisplayName("Cache clear for event source reference")
@@ -125,6 +207,7 @@ public class PublishTest extends AbstractEventPushTest {
         String token = UUID.randomUUID().toString();
         String userId = "temp.source.cache@oasis.io";
         setSourceExists(token, createEventSource(token, 1, Set.of(1), keyPair.getPublic()));
+        setGameExists(1, createGameInfo(1, 0));
         setPlayerExists(userId, createPlayerWithTeam(userId, 500, Pair.of(200, 1)));
 
         JsonObject validPayload = new JsonObject()

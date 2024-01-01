@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_col_game_start_end_time
+      author: isuruw
+      changes:
+        - addColumn:
+            tableName: OA_GAME
+            columns:
+              - column:
+                  name: start_at
+                  type: bigint
+                  defaultValue: 0
+              - column:
+                  name: end_at
+                  type: bigint
+                  defaultValue: 9223372036854775
+
+  - changeSet:
+      id: run_mig_populate_startend_time
+      author: isuruw
+      comment: "Updates game's start and end time to its created time and far future date respectively"
+      changes:
+        - sql:
+            sql: "UPDATE OA_GAME SET start_at = created_at, end_at = 9223372036854775;"

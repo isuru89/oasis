@@ -45,6 +45,9 @@ public class Game implements Serializable {
     @EqualsAndHashCode.Include private String logoRef;
     @EqualsAndHashCode.Include private int version;
 
+    private Long startTime;
+    private Long endTime;
+
     private long createdAt;
     private long updatedAt;
     @EqualsAndHashCode.Include private boolean active;

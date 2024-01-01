@@ -21,6 +21,9 @@
 
 package io.github.oasis.core.services.api.handlers;
 
+import io.github.oasis.core.external.messages.GameState;
+import io.github.oasis.core.services.api.handlers.events.EntityChangeType;
+import io.github.oasis.core.services.api.handlers.events.GameSpecChangedEvent;
 import io.github.oasis.core.services.api.services.IEngineManager;
 import io.github.oasis.core.services.api.services.impl.GameService;
 import io.github.oasis.core.services.events.GameStatusChangeEvent;
@@ -46,6 +49,13 @@ public class GameStatusListener {
     @EventListener
     public void handleGameStatusChangedEvent(GameStatusChangeEvent event) {
         engineManager.notifyGameStatusChange(event.getNewGameState(), event.getGameRef());
+    }
+
+    @EventListener
+    public void handleGameStatusChangedEvent(GameSpecChangedEvent event) {
+        if (event.getChangeType() == EntityChangeType.REMOVED) {
+            engineManager.notifyGameStatusChange(GameState.STOPPED, event.getGame());
+        }
     }
 
 }

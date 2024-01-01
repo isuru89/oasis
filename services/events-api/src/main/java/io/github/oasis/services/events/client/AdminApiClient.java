@@ -22,6 +22,7 @@
 
 package io.github.oasis.services.events.client;
 
+import io.github.oasis.core.Game;
 import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.model.PlayerWithTeams;
 import io.github.oasis.core.model.TeamObject;
@@ -29,13 +30,14 @@ import io.github.oasis.core.utils.Texts;
 import io.github.oasis.core.utils.Utils;
 import io.github.oasis.services.events.db.DataService;
 import io.github.oasis.services.events.model.EventSource;
+import io.github.oasis.services.events.model.GameInfo;
 import io.github.oasis.services.events.model.UserInfo;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +54,8 @@ import static io.github.oasis.services.events.client.AdminConstants.QUERY_PARAM_
 import static io.github.oasis.services.events.client.AdminConstants.STATUS_NOT_FOUND;
 import static io.github.oasis.services.events.client.AdminConstants.STATUS_SUCCESS;
 import static io.github.oasis.services.events.client.AdminConstants.TRUE;
+import static io.vertx.core.Future.failedFuture;
+import static io.vertx.core.Future.succeededFuture;
 
 /**
  * @author Isuru Weerarathna
@@ -66,6 +70,7 @@ public class AdminApiClient implements DataService {
 
     private final String getPlayerInfoUrl;
     private final String getEventSourceInfoUrl;
+    private final String getGameInfoUrl;
 
     private final String apiKey;
     private final String secretKey;
@@ -80,6 +85,8 @@ public class AdminApiClient implements DataService {
 
         getPlayerInfoUrl = baseUrl + adminApiConf.getString("playerGet");
         getEventSourceInfoUrl = baseUrl + adminApiConf.getString("eventSourceGet");
+        getGameInfoUrl = baseUrl + adminApiConf.getString("gameGet", "/games");
+
         apiKey = adminApiConf.getString("apiKey");
         secretKey = adminApiConf.getString("secretKey");
     }
@@ -96,11 +103,11 @@ public class AdminApiClient implements DataService {
                 .onSuccess(res -> {
                     if (res.statusCode() == STATUS_NOT_FOUND) {
                         // no user exists
-                        resultHandler.handle(Future.failedFuture("No user exists by given email " + email));
+                        resultHandler.handle(failedFuture("No user exists by given email " + email));
                         return;
                     } else if (res.statusCode() != STATUS_SUCCESS) {
                         // service down
-                        resultHandler.handle(Future.failedFuture("Unable to connect to admin api!"));
+                        resultHandler.handle(failedFuture("Unable to connect to admin api!"));
                         return;
                     }
 
@@ -120,9 +127,9 @@ public class AdminApiClient implements DataService {
                     }
 
                     UserInfo userInfo = UserInfo.create(email, jsonObject);
-                    resultHandler.handle(Future.succeededFuture(userInfo));
+                    resultHandler.handle(succeededFuture(userInfo));
 
-                }).onFailure(err -> resultHandler.handle(Future.failedFuture(err)));
+                }).onFailure(err -> resultHandler.handle(failedFuture(err)));
         return this;
     }
 
@@ -138,11 +145,11 @@ public class AdminApiClient implements DataService {
                 .onSuccess(res -> {
                     if (res.statusCode() == STATUS_NOT_FOUND) {
                         // no user exists
-                        resultHandler.handle(Future.failedFuture("No event source exists by given token " + token));
+                        resultHandler.handle(failedFuture("No event source exists by given token " + token));
                         return;
                     } else if (res.statusCode() != STATUS_SUCCESS) {
                         // service down
-                        resultHandler.handle(Future.failedFuture("Unable to connect to admin api!"));
+                        resultHandler.handle(failedFuture("Unable to connect to admin api!"));
                         return;
                     }
 
@@ -154,11 +161,40 @@ public class AdminApiClient implements DataService {
                     if (eventSource.getSecrets() != null && Texts.isNotEmpty(eventSource.getSecrets().getPublicKey())) {
                         jsonObject.put(EventSource.KEY, eventSource.getSecrets().getPublicKey());
                         EventSource info = EventSource.create(token, jsonObject);
-                        resultHandler.handle(Future.succeededFuture(info));
+                        resultHandler.handle(succeededFuture(info));
                     } else {
-                        resultHandler.handle(Future.failedFuture(new OasisRuntimeException("The public key not received for source " + token)));
+                        resultHandler.handle(failedFuture(new OasisRuntimeException("The public key not received for source " + token)));
                     }
-                }).onFailure(err -> resultHandler.handle(Future.failedFuture(err)));
+                }).onFailure(err -> resultHandler.handle(failedFuture(err)));
+        return this;
+    }
+
+    @Override
+    public DataService readGameInfo(int gameId, Handler<AsyncResult<GameInfo>> resultHandler) {
+        webClient.getAbs(getGameInfoUrl + "/" + gameId)
+                .putHeader(HEADER_APP_ID, apiKey)
+                .putHeader(HEADER_APP_KEY, secretKey)
+                .putHeader(HEADER_ACCEPT, MEDIA_TYPE_JSON)
+                .send()
+                .onSuccess(res -> {
+                    if (res.statusCode() == STATUS_NOT_FOUND) {
+                        // no user exists
+                        resultHandler.handle(failedFuture("No game exists by given game id " + gameId));
+                        return;
+                    } else if (res.statusCode() != STATUS_SUCCESS) {
+                        // service down
+                        resultHandler.handle(failedFuture("Unable to connect to admin api to get game info!"));
+                        return;
+                    }
+
+                    var game = res.bodyAsJson(Game.class);
+                    JsonObject jsonObject = new JsonObject()
+                            .put(GameInfo.ID, game.getId())
+                            .put(GameInfo.START_TIME, ObjectUtils.firstNonNull(game.getStartTime(), game.getCreatedAt()))
+                            .put(GameInfo.END_TIME, ObjectUtils.firstNonNull(game.getEndTime(), Long.MAX_VALUE - 1));
+                    GameInfo gameInfo = GameInfo.create(game.getId(), jsonObject);
+                    resultHandler.handle(succeededFuture(gameInfo));
+                }).onFailure(err -> resultHandler.handle(failedFuture(err)));
         return this;
     }
 }

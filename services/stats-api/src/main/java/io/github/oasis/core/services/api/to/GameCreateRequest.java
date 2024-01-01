@@ -43,12 +43,17 @@ public class GameCreateRequest implements Serializable {
     private String description;
     private String logoRef;
 
+    private Long startTime;
+    private Long endTime;
+
     public Game createGame() {
         return Game.builder()
                 .name(name)
                 .motto(motto)
                 .description(description)
                 .logoRef(logoRef)
+                .startTime(startTime)
+                .endTime(endTime)
                 .build();
     }
 }

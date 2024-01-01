@@ -26,13 +26,16 @@ import io.github.oasis.services.events.auth.AuthService;
 import io.github.oasis.services.events.db.DataService;
 import io.github.oasis.services.events.db.RedisService;
 import io.github.oasis.services.events.model.EventSource;
+import io.github.oasis.services.events.model.GameInfo;
 import io.github.oasis.services.events.model.UserInfo;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.vertx.core.Future.failedFuture;
+import static io.vertx.core.Future.succeededFuture;
 
 /**
  * @author Isuru Weerarathna
@@ -56,7 +59,7 @@ public class CachedApiClient implements DataService, AuthService {
                 UserInfo user = res.result();
                 if (user != null) {
                     // cache hit
-                    resultHandler.handle(Future.succeededFuture(user));
+                    resultHandler.handle(succeededFuture(user));
                     return;
                 }
 
@@ -66,7 +69,7 @@ public class CachedApiClient implements DataService, AuthService {
                 persistBackToCache(email, promise, resultHandler);
 
             } else {
-                resultHandler.handle(Future.failedFuture(res.cause()));
+                resultHandler.handle(failedFuture(res.cause()));
             }
         });
         return this;
@@ -83,10 +86,31 @@ public class CachedApiClient implements DataService, AuthService {
                     loadEventSourceFromApi(sourceToken, apiPromise);
                     persistEventSourceBackToCache(sourceToken, apiPromise, resultHandler);
                 } else {
-                    resultHandler.handle(Future.succeededFuture(resultInCache));
+                    resultHandler.handle(succeededFuture(resultInCache));
                 }
             } else {
-                resultHandler.handle(Future.failedFuture(res.cause()));
+                resultHandler.handle(failedFuture(res.cause()));
+            }
+        });
+        return this;
+    }
+
+    @Override
+    public DataService readGameInfo(int gameId, Handler<AsyncResult<GameInfo>> resultHandler) {
+        cacheService.readGameInfo(gameId, res -> {
+            if (res.succeeded()) {
+                GameInfo resultInCache = res.result();
+                if (resultInCache == null) {
+                    LOG.debug("Game by id '{}' not found in cache!", gameId);
+                    Promise<GameInfo> apiPromise = Promise.promise();
+                    loadGameInfoFromApi(gameId, apiPromise);
+                    persistGameInfoBackToCache(gameId, apiPromise, resultHandler);
+                } else {
+                    resultHandler.handle(succeededFuture(resultInCache));
+                }
+            } else {
+                LOG.error("Failed to load from cache!", res.cause());
+                resultHandler.handle(failedFuture(res.cause()));
             }
         });
         return this;
@@ -95,13 +119,26 @@ public class CachedApiClient implements DataService, AuthService {
     private void persistEventSourceBackToCache(String sourceToken, Promise<EventSource> apiPromise, Handler<AsyncResult<EventSource>> handler) {
         apiPromise.future().onSuccess(eventSource -> cacheService.persistSourceInfo(sourceToken, eventSource, res -> {
             if (res.succeeded()) {
-                handler.handle(Future.succeededFuture(eventSource));
+                handler.handle(succeededFuture(eventSource));
             } else {
-                handler.handle(Future.failedFuture(res.cause()));
+                handler.handle(failedFuture(res.cause()));
             }
         })).onFailure(err -> {
             LOG.error("Unable to persist source details to the cache!", err);
-            handler.handle(Future.failedFuture(err));
+            handler.handle(failedFuture(err));
+        });
+    }
+
+    private void persistGameInfoBackToCache(int gameId, Promise<GameInfo> apiPromise, Handler<AsyncResult<GameInfo>> handler) {
+        apiPromise.future().onSuccess(gameInfo -> cacheService.persistGameInfo(gameId, gameInfo, res -> {
+            if (res.succeeded()) {
+                handler.handle(succeededFuture(gameInfo));
+            } else {
+                handler.handle(failedFuture(res.cause()));
+            }
+        })).onFailure(err -> {
+            LOG.error("Unable to fetch game details from api server!", err);
+            handler.handle(failedFuture(err));
         });
     }
 
@@ -115,16 +152,26 @@ public class CachedApiClient implements DataService, AuthService {
         });
     }
 
+    private void loadGameInfoFromApi(int gameId, Promise<GameInfo> promise) {
+        apiClient.readGameInfo(gameId, res -> {
+            if (res.succeeded()) {
+                promise.complete(res.result());
+            } else {
+                promise.fail(res.cause());
+            }
+        });
+    }
+
     private void persistBackToCache(String email, Promise<UserInfo> promise, Handler<AsyncResult<UserInfo>> finalHandler) {
         promise.future().onSuccess(userInfo -> cacheService.persistUserInfo(email, userInfo, resultHandler -> {
             if (resultHandler.succeeded()) {
-                finalHandler.handle(Future.succeededFuture(userInfo));
+                finalHandler.handle(succeededFuture(userInfo));
             } else {
-                finalHandler.handle(Future.failedFuture(resultHandler.cause()));
+                finalHandler.handle(failedFuture(resultHandler.cause()));
             }
         })).onFailure(err -> {
             LOG.error("Unable to persist user details into the cache!", err);
-            finalHandler.handle(Future.failedFuture(err));
+            finalHandler.handle(failedFuture(err));
         });
     }
 

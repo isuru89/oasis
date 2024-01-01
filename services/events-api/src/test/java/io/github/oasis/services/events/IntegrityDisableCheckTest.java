@@ -77,6 +77,7 @@ public class IntegrityDisableCheckTest extends AbstractEventPushTest {
         String sourceToken = UUID.randomUUID().toString();
         String userEmail = "mom.attack@oasis.io";
         setSourceExists(sourceToken, createEventSource(sourceToken, 1, Set.of(1), keyPair.getPublic()));
+        setGameExists(1, createGameInfo(1, 0));
         setPlayerExists(userEmail, createPlayerWithTeam(userEmail, 500, Pair.of(200,1)));
 
         JsonObject validPayload = new JsonObject()
@@ -100,6 +101,7 @@ public class IntegrityDisableCheckTest extends AbstractEventPushTest {
         KeyPair keyPair = TestUtils.createKeys();
         String sourceToken = UUID.randomUUID().toString();
         String userEmail = "mom.attack@oasis.io";
+        setGameExists(1, createGameInfo(1, 0));
         setSourceExists(sourceToken, createEventSource(sourceToken, 1, Set.of(1), keyPair.getPublic()));
         setPlayerExists(userEmail, createPlayerWithTeam(userEmail, 500, Pair.of(200,1)));
 

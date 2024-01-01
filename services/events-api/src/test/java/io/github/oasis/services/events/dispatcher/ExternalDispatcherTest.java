@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.events.dispatcher;
 
+import com.redis.testcontainers.RedisContainer;
 import io.github.oasis.core.external.EventAsyncDispatcher;
 import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.EngineMessage;
@@ -39,6 +40,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 
@@ -49,7 +53,11 @@ import static io.github.oasis.services.events.AbstractTest.TEST_PORT;
  */
 @DisplayName("External Dispatcher Test")
 @ExtendWith(VertxExtension.class)
+@Testcontainers
 public class ExternalDispatcherTest {
+
+    @Container
+    protected static final RedisContainer redis = new RedisContainer(DockerImageName.parse("redis:5"));
 
     public static final int SLEEP_MS = 2000;
 
@@ -282,7 +290,8 @@ public class ExternalDispatcherTest {
     }
 
     private JsonObject getDefaultRedisCacheConfigs() {
-        return new JsonObject().put("impl", RedisVerticle.class.getName());
+        return new JsonObject().put("impl", RedisVerticle.class.getName())
+            .put("configs", new JsonObject().put("connectionString", redis.getRedisURI()));
     }
 
     private void sleepFor(long ms) {

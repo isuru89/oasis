@@ -30,6 +30,8 @@ import io.github.oasis.core.model.GameStatus;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
+import io.github.oasis.core.services.api.handlers.events.EntityChangeType;
+import io.github.oasis.core.services.api.handlers.events.GameSpecChangedEvent;
 import io.github.oasis.core.services.api.services.IGameService;
 import io.github.oasis.core.services.api.to.GameCreateRequest;
 import io.github.oasis.core.services.api.to.GameUpdateRequest;
@@ -83,6 +85,8 @@ public class GameService extends AbstractOasisService implements IGameService {
 
         validateGameObjectForCreation(game);
 
+        populateDefaultGameFieldsIfNeeded(game);
+
         Game dbGame = backendRepository.addNewGame(game);
         backendRepository.updateGameStatus(dbGame.getId(), GameState.CREATED.name(), System.currentTimeMillis());
         return dbGame;
@@ -95,15 +99,25 @@ public class GameService extends AbstractOasisService implements IGameService {
                 .motto(StringUtils.defaultIfEmpty(updateRequest.getMotto(), dbGame.getMotto()))
                 .logoRef(ObjectUtils.defaultIfNull(updateRequest.getLogoRef(), dbGame.getLogoRef()))
                 .description(StringUtils.defaultIfEmpty(updateRequest.getDescription(), dbGame.getDescription()))
+                .startTime(ObjectUtils.defaultIfNull(updateRequest.getStartTime(), dbGame.getStartTime()))
+                .endTime(ObjectUtils.defaultIfNull(updateRequest.getEndTime(), dbGame.getEndTime()))
                 .version(updateRequest.getVersion())
                 .build();
 
-        return backendRepository.updateGame(gameId, updatingGame);
+        var updatedGame = backendRepository.updateGame(gameId, updatingGame);
+
+        publisher.publishEvent(GameSpecChangedEvent.builder()
+                .changeType(EntityChangeType.MODIFIED)
+                .game(updatedGame)
+                .gameId(gameId)
+                .build());
+
+        return updatedGame;
     }
 
     @Override
+    @Transactional
     public Game deleteGame(int gameId) throws OasisApiException {
-        changeStatusOfGame(gameId, GameState.STOPPED.name(), System.currentTimeMillis());
 
         // deleting game elements
         backendRepository.readElementsByGameId(gameId)
@@ -113,7 +127,17 @@ public class GameService extends AbstractOasisService implements IGameService {
         backendRepository.listAllEventSourcesOfGame(gameId)
                 .forEach(eventSource -> backendRepository.removeEventSourceFromGame(eventSource.getId(), gameId));
 
-        return backendRepository.deleteGame(gameId);
+        var deletedGame = backendRepository.deleteGame(gameId);
+
+        changeStatusOfGameWithoutPublishing(gameId, GameState.STOPPED.name(), System.currentTimeMillis());
+
+        publisher.publishEvent(GameSpecChangedEvent.builder()
+                .gameId(gameId)
+                .game(deletedGame)
+                .changeType(EntityChangeType.REMOVED)
+                .build());
+
+        return deletedGame;
     }
 
     @Override
@@ -165,6 +189,17 @@ public class GameService extends AbstractOasisService implements IGameService {
         long startTime = startFrom == null ? 0 : startFrom;
         long endTime = endTo == null ? FAR_FUTURE_EPOCH : endTo;
         return backendRepository.readGameStatusHistory(gameId, startTime, endTime);
+    }
+
+    private void populateDefaultGameFieldsIfNeeded(Game game) {
+        game.setCreatedAt(System.currentTimeMillis());
+        game.setUpdatedAt(game.getCreatedAt());
+        if (game.getStartTime() == null) {
+            game.setStartTime(game.getCreatedAt());
+        }
+        if (game.getEndTime() == null) {
+            game.setEndTime(FAR_FUTURE_EPOCH);
+        }
     }
 
     private GameState validateGameState(String status) throws OasisApiException {
