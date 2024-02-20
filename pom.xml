@@ -31,7 +31,7 @@
         <redisson.version>3.16.3</redisson.version>
         <h2.db.version>2.2.224</h2.db.version>
         <snakeyaml.version>2.2</snakeyaml.version>
-        <mvel.version>2.5.0.Final</mvel.version>
+        <mvel.version>2.5.2.Final</mvel.version>
         <hikari.version>5.1.0</hikari.version>
         <liquibase.version>4.24.0</liquibase.version>
         <springdoc.version>1.7.0</springdoc.version>

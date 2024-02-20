@@ -28,8 +28,6 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.Delivery;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.external.MessageReceiver;
 import io.github.oasis.core.external.SourceStreamProvider;
@@ -71,9 +69,8 @@ public class RabbitSource implements SourceStreamProvider, Closeable {
         engineId = context.id();
         String id = UUID.randomUUID().toString();
         LOG.info("Rabbit consumer id: {}", id);
-        Config configs = context.getConfigs().getConfigRef();
-        ConfigObject configRef = configs.getObject("oasis.eventstream.configs");
-        ConnectionFactory factory = FactoryInitializer.createFrom(configRef.toConfig());
+        var configRef = context.getConfigs().getObject("oasis.eventstream.configs");
+        ConnectionFactory factory = FactoryInitializer.createFrom(configRef);
         sourceRef = source;
 
         connection = factory.newConnection();

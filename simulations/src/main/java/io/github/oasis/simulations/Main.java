@@ -21,8 +21,6 @@ package io.github.oasis.simulations;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.GameDef;
@@ -81,10 +79,10 @@ public class Main {
     private static void bareSetup() throws Exception {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        OasisConfigs configs = OasisConfigs.defaultConfigs();
+        OasisConfigs configs = new OasisConfigs.Builder().buildFromYamlResource("simulation-configs.yml", Thread.currentThread().getContextClassLoader());
 
         // initialize dispatcher first
-        EventDispatcher dispatcher = initializeDispatcher(configs.getConfigRef());
+        EventDispatcher dispatcher = initializeDispatcher(configs);
 
         SimulationContext simulationContext = new SimulationContext();
         simulationContext.setGameDataDir(new File("./simulations/stackoverflow"));
@@ -207,7 +205,7 @@ public class Main {
     }
 
     private static void runToEngine() throws Exception {
-        OasisConfigs configs = OasisConfigs.defaultConfigs();
+        OasisConfigs configs = new OasisConfigs.Builder().buildFromYamlResource("simulation-configs.yml", Thread.currentThread().getContextClassLoader());
         EngineContext.Builder builder = EngineContext.builder()
                 .withConfigs(configs)
                 .installModule(PointsModuleFactory.class);
@@ -216,7 +214,7 @@ public class Main {
         builder.withDb(dbPool);
 
         // initialize dispatcher first
-        EventDispatcher dispatcher = initializeDispatcher(configs.getConfigRef());
+        EventDispatcher dispatcher = initializeDispatcher(configs);
 
         OasisEngine engine = new OasisEngine(builder.build());
         engine.start();
@@ -228,12 +226,11 @@ public class Main {
         simulation.run(simulationContext);
     }
 
-    private static EventDispatcher initializeDispatcher(Config configs) throws Exception {
+    private static EventDispatcher initializeDispatcher(OasisConfigs configs) throws Exception {
         KafkaStreamFactory streamFactory = new KafkaStreamFactory();
         EventDispatcher dispatcher = streamFactory.getDispatcher();
-        ConfigObject dispatcherConfigs = configs.getObject("oasis.dispatcher.configs");
-        Map<String, Object> conf = dispatcherConfigs.unwrapped();
-        dispatcher.init(() -> conf);
+        var dispatcherConfigs = configs.getObject("oasis.dispatcher.configs");
+        dispatcher.init(() -> dispatcherConfigs);
         return dispatcher;
     }
 

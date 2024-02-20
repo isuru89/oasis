@@ -36,12 +36,12 @@ import org.springframework.context.annotation.Profile;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
  */
 @Configuration
-@Profile("!test")
 public class CacheConfigs {
 
     // later move these to a different configurations
@@ -50,13 +50,15 @@ public class CacheConfigs {
     private static final int MAX_SIZE = 1000;
 
     @Bean(destroyMethod = "shutdown")
+    @Profile("!test")
     public RedissonClient createRedisson(OasisConfigs oasisConfigs) {
+        String url = oasisConfigs.get("oasis.cache.url", null);
         String host = oasisConfigs.get("oasis.cache.host", "localhost");
         int port = oasisConfigs.getInt("oasis.cache.port", 6379);
 
         Config config = new Config();
         config.useSingleServer()
-                .setAddress("redis://" + host + ":" + port);
+                .setAddress(Objects.toString(url, "redis://" + host + ":" + port));
         return Redisson.create(config);
     }
 

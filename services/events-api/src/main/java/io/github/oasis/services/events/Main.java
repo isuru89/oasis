@@ -46,7 +46,7 @@ public class Main {
         ConfigStoreOptions jvmConfigs = new ConfigStoreOptions().setType("sys");
         ConfigStoreOptions fileConfigs = new ConfigStoreOptions()
                 .setType("file")
-                .setFormat("hocon")
+                .setFormat("yaml")
                 .setConfig(new JsonObject().put("path", resolveConfigFileLocation()));
 
         ConfigRetrieverOptions retrieverOptions = new ConfigRetrieverOptions()

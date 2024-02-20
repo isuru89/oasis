@@ -50,7 +50,7 @@ public class KafkaFeedConsumer implements FeedConsumer {
     public void init(OasisConfigs oasisConfigs) {
         try {
             LOG.info("Initializing Kafka feed consumer...");
-            Map<String, Object> unwrappedConfigs = oasisConfigs.getConfigRef().getObject("oasis.eventstream.configs").unwrapped();
+            Map<String, Object> unwrappedConfigs = oasisConfigs.getObject("oasis.eventstream.configs");
             KafkaConfigs kafkaConfigs = KafkaUtils.parseFrom(unwrappedConfigs);
 
             Properties props = KafkaUtils.getFeedConsumerProps(kafkaConfigs);

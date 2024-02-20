@@ -215,14 +215,18 @@ public class Feeder implements Consumer<FeedEntry>, Closeable {
 
     private static OasisConfigs loadConfigs() {
         var oasisConfigFilePath = resolveConfigFileLocation();
+        System.out.println(oasisConfigFilePath);
         if (Texts.isEmpty(oasisConfigFilePath)) {
-            LOG.warn("Loading default configurations bundled with artifacts!");
-            return OasisConfigs.defaultConfigs();
+            LOG.error("Loading default configurations bundled with artifacts!");
+            throw new IllegalStateException("Cannot load Oasis feeder configurations! Config location is unspecified!");
+        } else if (StringUtils.startsWithIgnoreCase(oasisConfigFilePath, "classpath:")) {
+            LOG.info("Loading configuration file in {}...", oasisConfigFilePath);
+            return new OasisConfigs.Builder().buildFromYamlResource(oasisConfigFilePath.substring(10));
         } else {
             File file = new File(oasisConfigFilePath);
             if (file.exists()) {
                 LOG.info("Loading configuration file in {}...", oasisConfigFilePath);
-                return OasisConfigs.create(oasisConfigFilePath);
+                return new OasisConfigs.Builder().buildFromYamlFile(oasisConfigFilePath);
             }
             throw new IllegalStateException("Cannot load Oasis configurations! Config file not found in " + oasisConfigFilePath + "!");
         }
@@ -238,7 +242,7 @@ public class Feeder implements Consumer<FeedEntry>, Closeable {
         if (Objects.nonNull(confPath) && !confPath.isEmpty()) {
             return confPath;
         }
-        return "application.conf";
+        return "classpath:application.yml";
     }
 
     @Override

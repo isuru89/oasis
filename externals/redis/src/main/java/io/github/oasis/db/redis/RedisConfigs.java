@@ -44,6 +44,7 @@ public class RedisConfigs implements Serializable {
     private static final int DEF_RETRY_INTERVAL = 2000;
     private static final String MODE_DEFAULT = "default";
 
+    private String url;
     private String host;
     private Integer port = DEFAULT_PORT;
 

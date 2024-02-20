@@ -34,6 +34,8 @@ import io.github.oasis.engine.actors.routers.UserRouting;
 import io.github.oasis.engine.model.ActorSignalCollector;
 import io.github.oasis.engine.model.RuleExecutionContext;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -62,8 +64,9 @@ public class RuleSupervisor extends OasisBaseActor {
         collector = new ActorSignalCollector(signalExchanger);
         ruleExecutionContext = RuleExecutionContext.from(collector);
 
-        engineTimezone = context.getConfigs().getEngineTimezone();
-        engineTzOffset = context.getConfigs().getEngineTimeOffset();
+        var defaultZone = ZoneId.systemDefault();
+        engineTimezone = context.getConfigs().get("oasis.timeZone", defaultZone.getId());
+        engineTzOffset = ZoneId.of(engineTimezone).getRules().getOffset(Instant.now()).getTotalSeconds();
     }
 
     @Override

@@ -20,6 +20,7 @@
 package io.github.oasis.core.services.api.beans;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redis.testcontainers.RedisContainer;
 import io.github.oasis.core.Game;
 import io.github.oasis.core.TeamMetadata;
 import io.github.oasis.core.UserMetadata;
@@ -45,6 +46,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -57,16 +61,23 @@ import java.util.UUID;
 /**
  * @author Isuru Weerarathna
  */
+@Testcontainers
 class RedisRepositoryTest {
 
     private static final int DEF_GAME_ID = 1;
+
+    @Container
+    private static final RedisContainer redisContainer = new RedisContainer(DockerImageName.parse("redis:5"));
 
     private static RedisRepository redisRepository;
     private static Db dbPool;
 
     @BeforeAll
     public static void beforeAll() {
-        RedisDb redisDb = RedisDb.create(OasisConfigs.defaultConfigs(), "oasis.cache");
+        var configs = new OasisConfigs.Builder()
+                .withCustomEnvOverrides(Map.of("OASIS_OASIS_CACHE_URL", redisContainer.getRedisURI()))
+                .buildFromYamlResource("test-configs.yml", Thread.currentThread().getContextClassLoader());
+        RedisDb redisDb = RedisDb.create(configs, "oasis.cache");
         redisDb.init();
         dbPool = redisDb;
         ObjectMapper jsonMapper = new SerializingConfigs().createSerializer();

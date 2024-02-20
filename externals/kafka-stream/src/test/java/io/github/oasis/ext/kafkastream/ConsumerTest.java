@@ -266,7 +266,7 @@ public class ConsumerTest extends BaseKafkaTest {
         append(configs, "oasis.eventstream.configs.brokerUrls", kafkaContainer.getBootstrapServers());
         append(configs, "oasis.eventstream.configs.maxConsumerThreadPoolSize", 5);
 
-        return OasisConfigs.create(configs);
+        return new OasisConfigs.Builder().buildWithConfigs(configs);
     }
 
     private List<EngineStatusChangedMessage> readAllEngineMessages(String inTopic) throws IOException {

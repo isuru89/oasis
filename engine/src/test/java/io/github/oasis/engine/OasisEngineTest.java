@@ -101,7 +101,7 @@ public class OasisEngineTest {
         var jsonSerializer = new JsonSerializer(mapper);
 
         EngineContext.Builder builder = EngineContext.builder();
-        OasisConfigs oasisConfigs = OasisConfigs.defaultConfigs();
+        OasisConfigs oasisConfigs = new OasisConfigs.Builder().buildFromYamlResource("test-defaults.yml");
         dbPool = RedisDb.create(oasisConfigs, "oasis.redis");
         dbPool.init();
 

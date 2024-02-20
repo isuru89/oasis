@@ -25,8 +25,13 @@ package io.github.oasis.ext.rabbitstream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabbitmq.client.*;
-import com.typesafe.config.ConfigObject;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.ConsumerShutdownSignalCallback;
+import com.rabbitmq.client.DeliverCallback;
+import com.rabbitmq.client.Delivery;
+import com.rabbitmq.client.ShutdownSignalException;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.external.EngineManagerSubscription;
@@ -40,7 +45,10 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
-import static io.github.oasis.ext.rabbitstream.RabbitConstants.*;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_RETRY_COUNT;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.CONFIG_RETRY_DELAY;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.ENGINE_STATUS_QUEUE;
+import static io.github.oasis.ext.rabbitstream.RabbitConstants.RETRY_SEED;
 
 /**
  * @author Isuru Weerarathna
@@ -60,14 +68,13 @@ public class RabbitEngineManagerSubscription implements EngineManagerSubscriptio
     public void init(OasisConfigs appConfigs) {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        ConfigObject rabbitConfigs = appConfigs.getConfigRef().getObject("oasis.dispatcher.configs");
+        Map<String, Object> rabbitConfigs = appConfigs.getObject("oasis.dispatcher.configs");
 
         try {
-            ConnectionFactory factory = FactoryInitializer.createFrom(rabbitConfigs.toConfig());
+            ConnectionFactory factory = FactoryInitializer.createFrom(rabbitConfigs);
 
-            Map<String, Object> unwrapped = rabbitConfigs.unwrapped();
-            int maxRetries = (int) unwrapped.getOrDefault(CONFIG_RETRY_COUNT, RabbitConstants.DEFAULT_RETRY_COUNT);
-            int delay = (int) unwrapped.getOrDefault(CONFIG_RETRY_DELAY, RabbitConstants.DEFAULT_RETRY_DELAY);
+            int maxRetries = (int) rabbitConfigs.getOrDefault(CONFIG_RETRY_COUNT, RabbitConstants.DEFAULT_RETRY_COUNT);
+            int delay = (int) rabbitConfigs.getOrDefault(CONFIG_RETRY_DELAY, RabbitConstants.DEFAULT_RETRY_DELAY);
             connection = RabbitUtils.retryRabbitConnection(RETRY_SEED, maxRetries, delay, factory);
 
             channel = connection.createChannel();

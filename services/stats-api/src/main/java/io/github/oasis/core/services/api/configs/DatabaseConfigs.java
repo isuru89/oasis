@@ -45,11 +45,11 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
 import javax.sql.DataSource;
@@ -78,15 +78,19 @@ public class DatabaseConfigs {
     private String dbSchemaDir;
 
     @Bean
+    @Profile("!test")
     public OasisConfigs loadOasisConfigs() {
         if (Texts.isEmpty(oasisConfigFilePath)) {
             LOG.warn("Loading default configurations bundled with artifacts!");
-            return OasisConfigs.defaultConfigs();
+            throw new IllegalStateException("Cannot load Oasis configurations! Config file not specified!");
+        } else if (StringUtils.startsWithIgnoreCase(oasisConfigFilePath, "classpath:")) {
+            LOG.info("Loading configuration file in {}...", oasisConfigFilePath);
+            return new OasisConfigs.Builder().buildFromYamlResource(oasisConfigFilePath.substring(10));
         } else {
             File file = new File(oasisConfigFilePath);
             if (file.exists()) {
                 LOG.info("Loading configuration file in {}...", oasisConfigFilePath);
-                return OasisConfigs.create(oasisConfigFilePath);
+                return new OasisConfigs.Builder().buildFromYamlFile(oasisConfigFilePath);
             }
             throw new IllegalStateException("Cannot load Oasis configurations! Config file not found in " + oasisConfigFilePath + "!");
         }

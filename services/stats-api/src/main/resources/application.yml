@@ -1,0 +1,23 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /api
+
+# Documentation related properties
+springdoc:
+  swagger-ui:
+    path: /oasis-api-spec.html
+    operationsSorter: alpha
+    tagsSorter: alpha
+
+# Liquibase configs
+spring:
+  liquibase:
+    enabled: false
+
+# Oasis configurations
+oasis:
+  configs:
+    path:
+  schema:
+    dir: "classpath:io/github/oasis/db/schema/oasis-changelog-master.yml"

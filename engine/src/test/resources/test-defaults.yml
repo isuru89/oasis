@@ -1,0 +1,23 @@
+oasis:
+  supervisors:
+    game: 1
+    rule: 1
+    signal: 1
+
+  executors:
+    rule: 1
+    signal: 2
+
+  eventstream:
+    impl: "io.github.oasis.engine.TestEventStreamFactory"
+
+  redis:
+    host: localhost
+    port: 6379
+
+    pool:
+      max: 128
+      maxIdle: 64
+      minIdle: 64
+
+  timeZone: UTC

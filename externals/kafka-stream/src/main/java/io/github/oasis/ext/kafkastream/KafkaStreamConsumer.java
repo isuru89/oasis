@@ -22,8 +22,6 @@
 
 package io.github.oasis.ext.kafkastream;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigObject;
 import io.github.oasis.core.context.RuntimeContextSupport;
 import io.github.oasis.core.external.MessageReceiver;
 import io.github.oasis.core.external.SourceStreamProvider;
@@ -72,9 +70,7 @@ class KafkaStreamConsumer implements SourceStreamProvider {
     public void init(RuntimeContextSupport context, MessageReceiver sinkRef) throws Exception {
         this.sinkRef = sinkRef;
 
-        Config configRef = context.getConfigs().getConfigRef();
-        ConfigObject configs = configRef.getObject("oasis.eventstream.configs");
-        Map<String, Object> allConfigs = configs.unwrapped();
+        var allConfigs = context.getConfigs().getObject("oasis.eventstream.configs");
 
         engineId = context.id();
         KafkaConfigs kafkaConfigs = KafkaUtils.parseFrom(allConfigs);

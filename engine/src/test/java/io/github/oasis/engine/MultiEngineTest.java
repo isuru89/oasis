@@ -59,7 +59,7 @@ public class MultiEngineTest {
 
     @Test
     public void testMultipleEngines() throws OasisException, IOException, ExecutionException, InterruptedException {
-        OasisConfigs oasisConfigs = OasisConfigs.defaultConfigs();
+        OasisConfigs oasisConfigs = new OasisConfigs.Builder().buildFromYamlResource("test-defaults.yml");
         dbPool = RedisDb.create(oasisConfigs, "oasis.redis");
         dbPool.init();
 

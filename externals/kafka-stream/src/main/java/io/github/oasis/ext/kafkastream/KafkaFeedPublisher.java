@@ -49,7 +49,7 @@ public class KafkaFeedPublisher extends KafkaPublisher implements FeedPublisher 
     public void init(OasisConfigs oasisConfigs) {
         try {
             LOG.info("Initializing Kafka feed handler...");
-            Map<String, Object> unwrappedConfigs = oasisConfigs.getConfigRef().getObject("oasis.eventstream.configs").unwrapped();
+            Map<String, Object> unwrappedConfigs = oasisConfigs.getObject("oasis.eventstream.configs");
             KafkaConfigs kafkaConfigs = KafkaUtils.parseFrom(unwrappedConfigs);
 
             try (Admin kafkaAdmin = Admin.create(KafkaUtils.createAdminProps(kafkaConfigs))) {

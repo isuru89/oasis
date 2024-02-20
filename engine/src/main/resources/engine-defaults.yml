@@ -1,0 +1,35 @@
+oasis:
+  eventstream:
+    impl: ""
+    configs:
+      host: localhost
+      port: 5672
+      # user:
+      # password:
+      # virtualHost:
+      automaticRecoveryEnabled: true
+      connectionRetries: 5
+      connectionRetryDelay: 5000
+
+      eventExchange:
+        type: direct
+        durable: true
+        autoDelete: false
+
+      broadcastExchange:
+        durable: true
+        autoDelete: false
+
+      ssl:
+        enabled: false
+        trustAll: true
+        protocol: "TLSv1.2"
+
+  redis:
+    host: localhost
+    port: 6379
+
+    pool:
+      max: 16
+      maxIdle: 8
+      minIdle: 4

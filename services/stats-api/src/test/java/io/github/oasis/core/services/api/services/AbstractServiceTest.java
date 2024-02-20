@@ -23,19 +23,22 @@ import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.services.ApiConstants;
 import io.github.oasis.core.services.SerializationSupport;
-import io.github.oasis.core.services.annotations.EngineDbPool;
 import io.github.oasis.core.services.api.TestUtils;
+import io.github.oasis.core.services.api.beans.TestEngineConfigs;
 import io.github.oasis.core.services.api.handlers.OasisErrorHandler;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -53,15 +56,21 @@ import java.util.List;
  * @author Isuru Weerarathna
  */
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
+@Import(TestEngineConfigs.class)
 public abstract class AbstractServiceTest {
 
     @Autowired
     private DataSource dataSource;
 
     @Autowired
-    @EngineDbPool
+    @Qualifier("enginedb")
     private Db dbPool;
+
+    @Autowired
+    @Qualifier("cache")
+    private Db dbCache;
 
     @Autowired
     protected SerializationSupport serializationSupport;
@@ -72,6 +81,7 @@ public abstract class AbstractServiceTest {
     @BeforeEach
     public void beforeEach() throws IOException, SQLException {
         TestUtils.cleanRedisData(dbPool);
+        TestUtils.cleanRedisData(dbCache);
         TestUtils.truncateData(dataSource);
     }
 

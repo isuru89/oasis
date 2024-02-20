@@ -63,19 +63,14 @@ public class OasisEngineRunner {
     }
 
     private static OasisConfigs loadConfigs() {
-        String confPath = System.getenv(ENGINE_CONFIG_FILE_ENV);
+        String confPath = Objects.toString(System.getenv(ENGINE_CONFIG_FILE_ENV), System.getProperty(ENGINE_CONFIG_FILE_SYS));
         if (Objects.nonNull(confPath) && !confPath.isEmpty()) {
             LOG.info("Reading configurations from {}", confPath);
-            return OasisConfigs.create(confPath);
-        }
-        confPath = System.getProperty(ENGINE_CONFIG_FILE_SYS);
-        if (Objects.nonNull(confPath) && !confPath.isEmpty()) {
-            LOG.info("Reading configurations from {}", confPath);
-            return OasisConfigs.create(confPath);
+            return new OasisConfigs.Builder().buildFromYamlFile(confPath);
         }
 
         LOG.warn("Reading default config file bundled with engine, because none of env or system configuration path is specified!");
-        return OasisConfigs.defaultConfigs();
+        return new OasisConfigs.Builder().buildFromYamlResource("engine-defaults.yml", Thread.currentThread().getContextClassLoader());
     }
 
     private static Optional<FeedPublisher> discoverFeedHandler(OasisConfigs configs) {

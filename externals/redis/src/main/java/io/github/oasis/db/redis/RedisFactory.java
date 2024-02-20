@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Isuru Weerarathna
@@ -77,7 +78,7 @@ class RedisFactory {
                     .setMasterConnectionMinimumIdleSize(redisConfigs.getPool().getMinIdle());
         } else {
             config.useSingleServer()
-                    .setAddress("redis://" + redisConfigs.getHost() + ":" + redisConfigs.getPort())
+                    .setAddress(Objects.toString(redisConfigs.getUrl(), "redis://" + redisConfigs.getHost() + ":" + redisConfigs.getPort()))
                     .setRetryAttempts(redisConfigs.getRetryCount())
                     .setRetryInterval(redisConfigs.getRetryInterval())
                     .setConnectionPoolSize(redisConfigs.getPool().getMax())
@@ -92,7 +93,7 @@ class RedisFactory {
     }
 
     public static RedisConfigs convertToRedisConfigs(OasisConfigs configs, String configKeyPrefix) {
-        Map<String, Object> unwrapped = configs.getConfigRef().getObject(configKeyPrefix).unwrapped();
+        Map<String, Object> unwrapped = configs.getObject(configKeyPrefix);
 
         return DESERIALIZER.convertValue(unwrapped, RedisConfigs.class);
     }

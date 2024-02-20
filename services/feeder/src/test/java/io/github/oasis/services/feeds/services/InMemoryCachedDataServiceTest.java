@@ -30,9 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class InMemoryCachedDataServiceTest {
 
@@ -44,7 +42,7 @@ class InMemoryCachedDataServiceTest {
         delegate = Mockito.mock(DataService.class);
         inMemoryService = new InMemoryCachedDataService(delegate);
 
-        OasisConfigs configs = OasisConfigs.create(Map.of());
+        OasisConfigs configs = new OasisConfigs.Builder().buildFromYamlResource("application.yml");
         inMemoryService.init(configs);
     }
 

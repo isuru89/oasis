@@ -69,7 +69,7 @@ public class StreamConfigs {
 
         LOG.info("Dispatcher loaded from {}", dispatcherImpl);
         EventDispatcher dispatcher = eventStreamFactory.getDispatcher();
-        Map<String, Object> config = toMap(oasisConfigs.getConfigRef().getConfig("oasis.dispatcher.configs"));
+        Map<String, Object> config = oasisConfigs.getObject("oasis.dispatcher.configs");
         EventDispatcher.DispatcherContext context = () -> config;
         dispatcher.init(context);
         LOG.info("Dispatcher {} successfully loaded!", dispatcherImpl);

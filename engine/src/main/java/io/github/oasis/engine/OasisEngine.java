@@ -25,6 +25,7 @@ import akka.actor.ActorSystem;
 import akka.actor.CoordinatedShutdown;
 import akka.actor.Props;
 import akka.pattern.Patterns;
+import com.typesafe.config.ConfigFactory;
 import io.github.oasis.core.Event;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.GameDef;
@@ -73,8 +74,9 @@ public class OasisEngine implements MessageReceiver {
     public void start() throws OasisException {
         context.init();
 
-        String engineName = context.getConfigs().getEngineName();
-        oasisEngine = ActorSystem.create(engineName, context.getConfigs().getConfigRef());
+        String engineName = context.getConfigs().get("oasis.name", "oasis-engine");
+        var allConfigs =  context.getConfigs().getAll();
+        oasisEngine = ActorSystem.create(engineName, ConfigFactory.parseMap(allConfigs));
         supervisor = oasisEngine.actorOf(Props.create(OasisSupervisor.class, context), ActorNames.OASIS_SUPERVISOR);
         LOG.info("Oasis engine initialization invoked...");
 

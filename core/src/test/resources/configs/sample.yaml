@@ -1,0 +1,26 @@
+oasis:
+  engine:
+    id: engine-name-test
+    autoRestart: true
+    interval: 3
+    pi: 3.147
+
+  cache:
+    url: redis://localhost:6379
+    user: root
+    pass: admin123
+    printSql: true
+
+
+
+item-array:
+  - item 1
+  - item 2
+
+it-obj-array:
+  - obj1:
+      key1: val1
+      key2: val2
+      longVal: 1709384324489
+  - obj2:
+      key1: val1

@@ -1,0 +1,44 @@
+http:
+  port: 8050
+  ssl: false
+
+oasis:
+  db:
+    engine: redis
+    admin: jdbc
+
+  jdbc:
+    url: "jdbc:h2:mem:test"
+    driver: org.h2.Driver
+    user: sa
+    password: sa
+
+  defaultApiKeys: "root:root,admin:admin:7,guest:guest:0"
+
+  cache:
+    url: redis://localhost:6390
+
+    connectionRetries: 5
+    connectionRetryDelay: 5000
+
+    pool:
+      max: 16
+      maxIdle: 16
+      minIdle: 4
+
+  enginedb:
+    url: redis://localhost:6379
+
+    connectionRetries: 5
+    connectionRetryDelay: 5000
+
+    pool:
+      max: 16
+      maxIdle: 16
+      minIdle: 4
+
+  dispatcher:
+    impl: "classpath:io.github.oasis.core.services.api.beans.TestDispatcherFactory"
+    configs:
+      brokerUrls: "localhost:29092"
+

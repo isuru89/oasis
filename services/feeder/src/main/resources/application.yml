@@ -1,6 +1,5 @@
-oasis = {
-
-  adminApi = {
+oasis:
+  adminApi:
     baseUrl: "http://localhost:8081/api"
 
     eventSourceGet: "/admin/event-sources/"
@@ -14,51 +13,39 @@ oasis = {
 
     connectTimeout: 15
     requestTimeout: 15
-  }
 
-  delivery = {
+  delivery:
     # Specify the implementation class of FeedDeliverable
-    impl = "io.github.oasis.services.feeds.impl.ConsoleFeedDeliverable"
+    impl: "io.github.oasis.services.feeds.impl.ConsoleFeedDeliverable"
 
-    configs = {
+    configs:
       # specific configurations for above mentioned implementation
-    }
-  }
 
-  eventstream = {
-    impl = "io.github.oasis.ext.kafkastream.KafkaStreamFactory"
-    configs = {
+  eventstream:
+    impl: "io.github.oasis.ext.kafkastream.KafkaStreamFactory"
+    configs:
       brokerUrls: "localhost:29092"
 
-      feedStreamConsumer = {
+      feedStreamConsumer:
         # groupId = ""
 
         # These props will directly feed to Kafka property configs
         # Check kafka consumer documentation for supported props.
-        props = {
-            #"max.poll.records": 10,
-            #"session.timeout.ms": 86400000
-        }
-      }
-    }
-  }
+        props:
+        #"max.poll.records": 10,
+        #"session.timeout.ms": 86400000
 
-  cache = {
-    configs = {
+  cache:
+    configs:
 
       # Maximum number of seconds to keep a record once written to cache.
       # Set zero (0) to keep the object indefinitely.
       # Default: 15 minutes
       expireAfter: 900
-
+  
       # Maximum number of players to be kept in memory at a time.
-      maxEntries = {
+      maxEntries:
         games: 10
         eventSources: 10
         teams: 100
         players: 250
-      }
-
-    }
-  }
-}

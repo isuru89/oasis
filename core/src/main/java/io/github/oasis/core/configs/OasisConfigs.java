@@ -19,129 +19,214 @@
 
 package io.github.oasis.core.configs;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigException;
-import com.typesafe.config.ConfigFactory;
+import com.github.cliftonlabs.json_simple.JsonObject;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
+import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * @author Isuru Weerarathna
  */
 public class OasisConfigs implements Serializable {
 
+    private static final String DEFAULT_ENV_PREFIX = "OASIS_";
+
     public static final String GAME_SUPERVISOR_COUNT = "oasis.supervisors.game";
     public static final String RULE_SUPERVISOR_COUNT = "oasis.supervisors.rule";
-    public static final String SIGNAL_SUPERVISOR_COUNT = "oasis.supervisors.signal";
     public static final String RULE_EXECUTOR_COUNT = "oasis.executors.rule";
     public static final String SIGNAL_EXECUTOR_COUNT = "oasis.executors.signal";
     public static final String EVENT_STREAM_IMPL = "oasis.eventstream.impl";
-    public static final String OASIS_ENGINE_NAME = "oasis.name";
-    public static final String OASIS_ENGINE_TIMEZONE = "oasis.timeZone";
 
-    private static final String DEFAULT_ENGINE_NAME = "oasis-engine";
+    private static final Supplier<Map<String, String>> defaultEnvVarSupplier = System::getenv;
 
-    private final Config props;
+    private final String envVarPrefix;
+    private final Map<String, Object> configValues;
+    private Map<String, String> envVars;
 
-    private final ZoneId engineZoneId = ZoneId.systemDefault();
-    private int tzOffset = Integer.MAX_VALUE;
+    private final Configuration jsonPathConf = Configuration.builder()
+            .options(Option.DEFAULT_PATH_LEAF_TO_NULL)
+            .build();
 
-    private OasisConfigs(Config configs) {
-        props = configs;
+    private DocumentContext ctx;
+
+    private OasisConfigs(Map<String, Object> configValues, String envVarPrefix, Supplier<Map<String, String>> envVarSupplier) {
+        this.envVarPrefix = Objects.toString(envVarPrefix, DEFAULT_ENV_PREFIX);
+        this.configValues = configValues;
+
+        this.loadEnvVariables(Objects.requireNonNullElse(envVarSupplier, defaultEnvVarSupplier));
+        this.createConfigContext(configValues);
     }
 
-    public static OasisConfigs create(Map<String, Object> configMap) {
-        Config config = ConfigFactory.parseMap(configMap);
-        return new OasisConfigs(config);
+    private void createConfigContext(Map<String, Object> configValues) {
+        var jsonObject = new JsonObject(configValues);
+        ctx = JsonPath.parse(jsonObject.toJson(), jsonPathConf);
     }
 
-    public static OasisConfigs create(Config config) {
-        return new OasisConfigs(config);
+    private void loadEnvVariables(Supplier<Map<String, String>> envVarSupplier) {
+        var envVarsTmp = envVarSupplier.get();
+        this.envVars = new HashMap<>();
+
+        envVarsTmp.forEach((k, v) -> {
+            if (k.startsWith(this.envVarPrefix)) {
+                envVars.put(k.substring(this.envVarPrefix.length()), v);
+            }
+        });
     }
 
-    public static OasisConfigs create(String filePath) {
-        Config config = ConfigFactory.parseFile(new File(filePath));
-        return new OasisConfigs(config);
+    private Optional<String> readFromEnvVar(String prop) {
+        String envProp = prop.replaceAll("\\.", "_").toUpperCase();
+        return Optional.ofNullable(this.envVars.get(envProp));
     }
 
-    public static OasisConfigs defaultConfigs() {
-        Config config = ConfigFactory.load();
-        return new OasisConfigs(config);
+    public Map<String, Object> getAll() {
+        return Collections.unmodifiableMap(configValues);
     }
 
-    public String getEngineTimezone() {
-        String zoneId = get(OASIS_ENGINE_TIMEZONE, engineZoneId.getId());
-        if (tzOffset == Integer.MAX_VALUE) {
-            tzOffset = ZoneId.of(zoneId).getRules().getOffset(Instant.now()).getTotalSeconds();
-        }
-        return zoneId;
-    }
-
-    public int getEngineTimeOffset() {
-        if (tzOffset == Integer.MAX_VALUE) {
-            getEngineTimezone();
-        }
-        return tzOffset;
-    }
-
-    public String getEngineName() {
-        try {
-            return props.getString(OASIS_ENGINE_NAME);
-        } catch (ConfigException.Missing missing) {
-            return DEFAULT_ENGINE_NAME;
-        }
-
+    private String getValue(String property, String defaultValue) {
+        return readFromEnvVar(property).orElseGet(() -> {
+            String value = ctx.read(toQuery(property));
+            return value != null ? value : defaultValue;
+        });
     }
 
     public int getInt(String property, int defaultValue) {
-        try {
-            return props.getInt(property);
-        } catch (ConfigException.Missing missing) {
-            return defaultValue;
-        }
+        return readFromEnvVar(property).map(Integer::parseInt).orElseGet(() -> {
+            Integer value = ctx.read(toQuery(property));
+            return value != null ? value : defaultValue;
+        });
+    }
+
+    public long getLong(String property, long defaultValue) {
+        return readFromEnvVar(property).map(Long::parseLong).orElseGet(() -> {
+            Long value = ctx.read(toQuery(property));
+            return value != null ? value : defaultValue;
+        });
+    }
+
+    public float getFloat(String property, float defaultValue) {
+        return readFromEnvVar(property).map(Float::parseFloat).orElseGet(() -> {
+            Float value = ctx.read(toQuery(property));
+            return value != null ? value : defaultValue;
+        });
+    }
+
+    public double getDouble(String property, double defaultValue) {
+        return readFromEnvVar(property).map(Double::parseDouble).orElseGet(() -> {
+            Double value = ctx.read(toQuery(property));
+            return value != null ? value : defaultValue;
+        });
+    }
+
+    public boolean getBoolean(String property, boolean defaultValue) {
+        return readFromEnvVar(property).map(Boolean::parseBoolean).orElseGet(() -> {
+            Boolean value = ctx.read(toQuery(property));
+            return value != null ? value : defaultValue;
+        });
     }
 
     public String get(String property, String defaultVal) {
-        try {
-            return props.getString(property);
-        } catch (ConfigException.Missing missing) {
-            return defaultVal;
-        }
+        return getValue(property, defaultVal);
     }
 
-    public Config getConfigRef() {
-        return props;
+    public Map<String, Object> getObject(String property) {
+        Map<String, Object> value = ctx.read(toQuery(property));
+        return resolveWithEnvVars(value, property);
+    }
+
+    private Map<String, Object> resolveWithEnvVars(Map<String, Object> configs, String baseProperty) {
+        var result = new HashMap<String, Object>();
+
+        configs.forEach((k, v) -> {
+            if (v instanceof Boolean) {
+                result.put(k, getBoolean(concat(baseProperty, k), (Boolean) v));
+            } else if (v instanceof String) {
+                result.put(k, getValue(concat(baseProperty, k), (String) v));
+            } else if (v instanceof Integer) {
+                result.put(k, getInt(concat(baseProperty, k), (Integer) v));
+            } else if (v instanceof Long) {
+                result.put(k, getLong(concat(baseProperty, k), (Long) v));
+            } else if (v instanceof Float) {
+                result.put(k, getFloat(concat(baseProperty, k), (Float) v));
+            } else if (v instanceof Double) {
+                result.put(k, getDouble(concat(baseProperty, k), (Double) v));
+            } else {
+                result.put(k, v);
+            }
+        });
+
+        return result;
+    }
+
+    private String toQuery(String property) {
+        return concat(null, property);
+    }
+
+    private String concat(String base, String property) {
+        if (base == null) {
+            return "$." + property;
+        } else {
+            return base + "." + property;
+        }
     }
 
     public static class Builder {
         private final Map<String, Object> map = new HashMap<>();
+        private String envVariablePrefix;
+        private Supplier<Map<String, String>> envSupplier = null;
 
         public OasisConfigs build() {
-            return OasisConfigs.create(map);
+            return new OasisConfigs(map, envVariablePrefix, envSupplier);
         }
 
-        public OasisConfigs minimum() {
-            return withSupervisors(1, 1, 1)
-                    .withExecutors(1, 1)
-                    .build();
+        public OasisConfigs buildWithConfigs(Map<String, Object> configs) {
+            return new OasisConfigs(configs, envVariablePrefix, envSupplier);
         }
 
-        public Builder withSupervisors(int gameSupervisors, int ruleSupervisors, int signalSupervisors) {
-            map.put(GAME_SUPERVISOR_COUNT, gameSupervisors);
-            map.put(RULE_SUPERVISOR_COUNT, ruleSupervisors);
-            map.put(SIGNAL_SUPERVISOR_COUNT, signalSupervisors);
+        public OasisConfigs buildFromYamlResource(String resourcePath) {
+            return buildFromYamlResource(resourcePath, Thread.currentThread().getContextClassLoader());
+        }
+
+        public OasisConfigs buildFromYamlResource(String resourcePath, ClassLoader clzLoader) {
+            Yaml yaml = new Yaml();
+            try (var inputStream = clzLoader.getResourceAsStream(resourcePath)) {
+                Map<String, Object> map = yaml.load(inputStream);
+                return buildWithConfigs(map);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Error parsing config file!", e);
+            }
+        }
+
+        public OasisConfigs buildFromYamlFile(String filePath) {
+            Yaml yaml = new Yaml();
+            try (var inputStream = new FileInputStream(filePath)) {
+                Map<String, Object> map = yaml.load(inputStream);
+                return buildWithConfigs(map);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Error parsing config file!", e);
+            }
+        }
+
+        public Builder withCustomEnvOverrides(Map<String, String> map) {
+            envSupplier = () -> map;
             return this;
         }
 
-        public Builder withExecutors(int ruleExecutors, int signalExecutors) {
-            map.put(RULE_EXECUTOR_COUNT, ruleExecutors);
-            map.put(SIGNAL_EXECUTOR_COUNT, signalExecutors);
+        public Builder withEnvVariablePrefix(String prefix) {
+            this.envVariablePrefix = prefix;
             return this;
         }
+
     }
 }

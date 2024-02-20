@@ -1,0 +1,59 @@
+akka:
+  loggers:
+    - "akka.event.slf4j.Slf4jLogger"
+  loglevel: "INFO"
+  logging-filter: "akka.event.slf4j.Slf4jLoggingFilter"
+
+
+oasis:
+  supervisors:
+    game: 1
+    rule: 2
+    signal: 2
+  executors:
+    rule: 5
+    signal: 10
+
+  redis:
+    host: "localhost"
+    port: 6379
+
+    pool:
+      max: 16
+      maxIdle: 8
+      minIdle: 4
+
+  dispatcher:
+    configs:
+      brokerUrls: "kafka:9092"
+
+      maxConsumerThreadPoolSize: 4
+
+      gameEventsConsumer:
+        # groupId = ""
+
+        # If not specified, this will take engine id
+        # instanceId = ""
+
+        # These props will directly feed to Kafka property configs
+        # Check kafka consumer documentation for supported props.
+        props:
+          #"max.poll.records": 10,
+          #"session.timeout.ms": 86400000
+
+      broadcastConsumer:
+        # groupId = ""
+
+        # These props will directly feed to Kafka property configs
+        # Check kafka consumer documentation for supported props.
+        #props:
+
+      #dispatcherConfigs:
+      #  props:
+
+
+      #engineEventConsumer:
+      #  props:
+
+eventstream:
+  impl: "io.github.oasis.ext.kafkastream.KafkaStreamFactory"
