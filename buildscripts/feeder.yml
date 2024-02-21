@@ -1,6 +1,5 @@
-oasis = {
-
-  adminApi = {
+oasis:
+  adminApi:
     baseUrl: "http://stats-api:8010/api"
 
     eventSourceGet: "/admin/event-sources/"
@@ -11,37 +10,30 @@ oasis = {
     # authentication details of admin api
     apiKey: "feeder"
     secretKey: "feeder"
-  }
 
-  delivery = {
+  delivery:
     # Specify the implementation class of FeedDeliverable
-    impl = "io.github.oasis.services.feeds.impl.ConsoleFeedDeliverable"
+    impl: "io.github.oasis.services.feeds.impl.ConsoleFeedDeliverable"
 
-    configs = {
-      # specific configurations for above mentioned implementation
-    }
-  }
+    configs:
+    # specific configurations for above mentioned implementation
 
-  eventstream = {
-    impl = "io.github.oasis.ext.kafkastream.KafkaStreamFactory"
-    configs = {
+  eventstream:
+    impl: "io.github.oasis.ext.kafkastream.KafkaStreamFactory"
+    configs:
       brokerUrls: "kafka:9092"
 
-      feedStreamConsumer = {
-        groupId = "feed-consumer-group"
+      feedStreamConsumer:
+        groupId: feed-consumer-group
 
         # These props will directly feed to Kafka property configs
         # Check kafka consumer documentation for supported props.
-        props = {
-            #"max.poll.records": 10,
-            #"session.timeout.ms": 86400000
-        }
-      }
-    }
-  }
+        props:
+        #"max.poll.records": 10,
+        #"session.timeout.ms": 86400000
 
-  cache = {
-    configs = {
+  cache:
+    configs:
 
       # Maximum number of seconds to keep a record once written to cache.
       # Set zero (0) to keep the object indefinitely.
@@ -49,13 +41,8 @@ oasis = {
       expireAfter: 900
 
       # Maximum number of players to be kept in memory at a time.
-      maxEntries = {
+      maxEntries:
         games: 10
         eventSources: 10
         teams: 100
         players: 250
-      }
-
-    }
-  }
-}

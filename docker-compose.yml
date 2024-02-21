@@ -48,7 +48,7 @@ services:
     ports:
       - "8050:8050"
     volumes:
-      - "./buildscripts/events-api.conf:/etc/oasis/events-api.conf"
+      - "./buildscripts/events-api.yml:/etc/oasis/events-api.yml"
     environment:
       - "WAIT_HOSTS=apicache:6381,kafka:9092"
     depends_on:
@@ -60,8 +60,8 @@ services:
     ports:
       - "8010:8010"
     volumes:
-      - "./buildscripts/stats-api.conf:/etc/oasis/stats-api.conf"
-      - "./buildscripts/stats-api.properties:/etc/oasis/stats-api.properties"
+      - "./buildscripts/stats-api.yml:/etc/oasis/stats-api.yml"
+      - "./buildscripts/stats-api-spring.yml:/etc/oasis/stats-api-spring.yml"
       - "./buildscripts/modules:/etc/oasis/modules"
     environment:
       - "WAIT_HOSTS=apicache:6381,kafka:9092"
@@ -74,7 +74,7 @@ services:
     environment:
       - "WAIT_HOSTS=enginedb:6379,kafka:9092"
     volumes:
-      - "./buildscripts/engine.conf:/etc/oasis/engine.conf"
+      - "./buildscripts/engine.yml:/etc/oasis/engine.yml"
       - "./buildscripts/modules:/etc/oasis/modules"
     depends_on:
       - enginedb
@@ -85,7 +85,7 @@ services:
     environment:
       - "WAIT_HOSTS=kafka:9092"
     volumes:
-      - "./buildscripts/feeder.conf:/etc/oasis/feeder.conf"
+      - "./buildscripts/feeder.yml:/etc/oasis/feeder.yml"
       - "./buildscripts/modules:/etc/oasis/modules"
     depends_on:
       - kafka

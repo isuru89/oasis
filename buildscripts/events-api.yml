@@ -1,6 +1,6 @@
-http = {
-  port = 8050
-  ssl = false
+http:
+  port: 8050
+  ssl: false
 
   # Set this to true, if you want to disable event integrity check against valid event sources registered
   # through admin api. By default, this will be set to false and it means, event integrity will be enforced.
@@ -8,12 +8,11 @@ http = {
   # Beware: Disabling integrity check should be done only if you can guarantee that this event api will
   #         never be exposed as a public api. Otherwise, external users may send events which causes the
   #         bad impact to the integrity of game play.
-  skipEventIntegrityCheck = false
-}
+  skipEventIntegrityCheck: false
 
-oasis = {
-
-  adminApi = {
+oasis:
+  
+  adminApi:
     baseUrl: "http://stats-api:8010/api"
 
     eventSourceGet: "/admin/event-source"
@@ -22,16 +21,16 @@ oasis = {
     # authentication details of admin api
     apiKey: "eventapi"
     secretKey: "eventapi"
-  }
 
-  dispatcher = {
-    impl = "oasis:io.github.oasis.ext.kafkastream.KafkaStreamFactory"
-    configs = {
+
+  dispatcher:
+    impl: "oasis:io.github.oasis.ext.kafkastream.KafkaStreamFactory"
+    configs:
       brokerUrls: "kafka:9092"
 
       maxConsumerThreadPoolSize: 4
-
-      gameEventsConsumer = {
+  
+      gameEventsConsumer:
         # groupId = ""
 
         # If not specified, this will take engine id
@@ -39,45 +38,33 @@ oasis = {
 
         # These props will directly feed to Kafka property configs
         # Check kafka consumer documentation for supported props.
-        props = {
-            #"max.poll.records": 10,
-            #"session.timeout.ms": 86400000
-        }
-      }
+        props:
+        #"max.poll.records": 10,
+        #"session.timeout.ms": 86400000
 
-      broadcastConsumer = {
+      broadcastConsumer:
         # groupId = ""
 
         # These props will directly feed to Kafka property configs
         # Check kafka consumer documentation for supported props.
-        props = {
-        }
-      }
+        props:
 
-      dispatcherConfigs = {
-        props = {}
-      }
+      dispatcherConfigs:
+        props:
 
-      engineEventConsumer = {
-        props = {}
-      }
+      engineEventConsumer:
+        props:
 
-    }
-  }
-
-  cache = {
-    impl = "oasis:io.github.oasis.services.events.db.RedisVerticle"
-    configs = {
-        connectionString: "redis://apicache:6381"
-        maxPoolSize: 16
-        maxWaitingHandlers: 16
+  cache:
+    impl: "oasis:io.github.oasis.services.events.db.RedisVerticle"
+    configs:
+      connectionString: "redis://apicache:6381"
+      maxPoolSize: 16
+      maxWaitingHandlers: 16
 
         # expiration seconds for once cached event source data.
         # Better to have a ttl based on your domain.
         # Longer TTLs will suffer from event source updates in admin api.
         # Shorter TTLs will suffer from unnecessary invocations to admin api.
         # If this value is not set, no expiration will set for cached entries.
-        eventSourcesTTL: 900
-    }
-  }
-}
+      eventSourcesTTL: 900

@@ -1,8 +1,3 @@
-http:
-  port: 8050
-  ssl: false
-
-
 oasis:
   db:
     engine: redis
@@ -14,10 +9,10 @@ oasis:
     user: "sa"
     password: "sa"
 
-  defaultApiKeys: "root:root,eventapi:eventapi"
-    
+  defaultApiKey: "root:root,eventapi:eventapi,feeder:feeder:7"
+
   cache:
-    host: "localhost"
+    host: "apicache"
     port: 6379
 
     connectionRetries: 5
@@ -29,12 +24,12 @@ oasis:
       minIdle: 4
 
   enginedb:
-    host: "localhost"
+    host: "enginedb"
     port: 6379
 
     connectionRetries: 5
     connectionRetryDelay: 5000
-    
+
     pool:
       max: 16
       maxIdle: 16
@@ -43,24 +38,24 @@ oasis:
   dispatcher:
     impl: "io.github.oasis.ext.kafkastream.KafkaStreamFactory"
     configs:
-      brokerUrls: "localhost:29092"
+      brokerUrls: "kafka:9092"
 
       maxConsumerThreadPoolSize: 4
 
       gameEventsConsumer:
-        # groupId = ""
+      # groupId: ""
 
-        # If not specified, this will take engine id
-        # instanceId = ""
+      # If not specified, this will take engine id
+      # instanceId: ""
 
-        # These props will directly feed to Kafka property configs
-        # Check kafka consumer documentation for supported props.
-        # props:
-        #"max.poll.records": 10,
-        #"session.timeout.ms": 86400000
+      # These props will directly feed to Kafka property configs
+      # Check kafka consumer documentation for supported props.
+      # props:
+      #"max.poll.records": 10,
+      #"session.timeout.ms": 86400000
 
       broadcastConsumer:
-        # groupId = ""
+        # groupId: ""
 
         # These props will directly feed to Kafka property configs
         # Check kafka consumer documentation for supported props.

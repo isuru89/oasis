@@ -21,7 +21,7 @@ package io.github.oasis.ext.rabbitstream;
 
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.RecoveryDelayHandler;
-import com.typesafe.config.Config;
+import io.github.oasis.core.configs.OasisConfigs;
 
 import javax.net.ssl.SSLSocketFactory;
 import java.util.Map;
@@ -72,19 +72,19 @@ class FactoryInitializer {
         return factory;
     }
 
-    static ConnectionFactory createFrom(Config configs) throws Exception {
+    static ConnectionFactory createFrom(OasisConfigs configs) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(getStringOrDefault(configs, CONFIG_HOST, DEFAULT_HOST));
         factory.setPort(getIntOrDefault(configs, CONFIG_PORT, DEFAULT_PORT));
         factory.setAutomaticRecoveryEnabled(true);
 
-        if (configs.hasPath(CONFIG_VIRTUAL_HOST)) {
-            factory.setVirtualHost(configs.getString(CONFIG_VIRTUAL_HOST));
+        if (configs.hasProperty(CONFIG_VIRTUAL_HOST)) {
+            factory.setVirtualHost(configs.get(CONFIG_VIRTUAL_HOST, null));
         }
 
-        if (configs.hasPath(CONFIG_USER)) {
-            factory.setUsername(configs.getString(CONFIG_USER));
-            factory.setPassword(configs.getString(CONFIG_PASSWORD));
+        if (configs.hasProperty(CONFIG_USER)) {
+            factory.setUsername(configs.get(CONFIG_USER, null));
+            factory.setPassword(configs.get(CONFIG_PASSWORD, null));
         }
 
         factory.setNetworkRecoveryInterval(getIntOrDefault(configs, RabbitConstants.CONFIG_RETRY_DELAY, 5000));
@@ -93,42 +93,30 @@ class FactoryInitializer {
         return factory;
     }
 
-    private static void setupSSL(ConnectionFactory factory, Config config) throws Exception {
-        if (config.hasPath(RabbitConstants.CONFIG_SSL)) {
-            Config sslConfigs = config.getObject(RabbitConstants.CONFIG_SSL).toConfig();
-            if (sslConfigs.getBoolean(RabbitConstants.CONFIG_SSL_ENABLED)) {
-                String protocol = getStringOrDefault(sslConfigs, RabbitConstants.CONFIG_SSL_PROTOCOL, "TLSv1.2");
-                boolean trustAll = getBoolOrDefault(sslConfigs, RabbitConstants.CONFIG_SSL_TRUSTALL, false);
-                if (trustAll) {
-                    factory.useSslProtocol(protocol);
-                    factory.setSocketFactory(SSLSocketFactory.getDefault());
-                } else {
+    private static void setupSSL(ConnectionFactory factory, OasisConfigs config) throws Exception {
+        if (config.hasProperty(RabbitConstants.CONFIG_SSL) && config.getBoolean("ssl.enabled", false)) {
+            String protocol = config.get("ssl.protocol", "TLSv1.2");
+            boolean trustAll = config.getBoolean("ssl.trustAll", false);
+            if (trustAll) {
+                factory.useSslProtocol(protocol);
+                factory.setSocketFactory(SSLSocketFactory.getDefault());
+            } else {
 
-                    // @TODO create ssl context
+                // @TODO create ssl context
 
-                }
             }
         }
     }
 
-    private static String getStringOrDefault(Config configs, String key, String defValue) {
-        if (configs.hasPath(key)) {
-            return configs.getString(key);
-        }
-        return defValue;
+    private static String getStringOrDefault(OasisConfigs configs, String key, String defValue) {
+        return configs.get(key, defValue);
     }
 
-    private static int getIntOrDefault(Config configs, String key, int defValue) {
-        if (configs.hasPath(key)) {
-            return configs.getInt(key);
-        }
-        return defValue;
+    private static int getIntOrDefault(OasisConfigs configs, String key, int defValue) {
+       return configs.getInt(key, defValue);
     }
 
-    private static boolean getBoolOrDefault(Config configs, String key, boolean defValue) {
-        if (configs.hasPath(key)) {
-            return configs.getBoolean(key);
-        }
-        return defValue;
+    private static boolean getBoolOrDefault(OasisConfigs configs, String key, boolean defValue) {
+        return configs.getBoolean(key, defValue);
     }
 }

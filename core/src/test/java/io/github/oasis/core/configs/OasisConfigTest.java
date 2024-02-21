@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OasisConfigTest {
@@ -15,7 +16,10 @@ public class OasisConfigTest {
         var oc = new OasisConfigs.Builder().buildFromYamlResource("configs/sample.yaml", clsLoader);
 
         assertEquals("engine-name-test", oc.get("oasis.engine.id", "abc"));
+        assertFalse(oc.hasProperty("oasis.engine.idnx"));
         assertEquals("abc", oc.get("oasis.engine.idnx", "abc"));
+        assertFalse(oc.hasProperty("oasis.engine.id.name.ref"));
+        assertEquals("abc", oc.get("oasis.engine.id.name.ref", "abc"));
     }
 
     @Test
@@ -29,8 +33,10 @@ public class OasisConfigTest {
 
         assertEquals("overridden-value", oc.get("oasis.engine.id", "abc"));
         assertEquals("abc", oc.get("oasis.engine.idnx", "abc"));
+        assertFalse(oc.hasProperty("oasis.engine.idnx"));
         assertTrue(oc.getBoolean("oasis.cache.printSql", false));
         assertEquals("value-2", oc.get("nx.in.file", "xxx"));
+        assertTrue(oc.hasProperty("nx.in.file"));
         assertEquals(3, oc.getInt("oasis.engine.interval", 99));
         assertEquals("item 2", oc.get("item-array[1]", "xxx"));
         assertEquals("val1", oc.get("it-obj-array[1].obj2.key1", "xxx"));

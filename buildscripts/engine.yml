@@ -1,0 +1,28 @@
+oasis:
+  engine:
+    id: "local.engine"
+
+  eventstream:
+    impl: "io.github.oasis.ext.kafkastream.KafkaStreamFactory"
+    configs:
+      brokerUrls: "kafka:9092"
+
+      maxConsumerThreadPoolSize: 4
+
+      gameEventsConsumer:
+        props:
+      broadcastConsumer:
+        props:
+      dispatcherConfigs:
+        props:
+      engineEventConsumer:
+        props:
+
+  redis:
+    host: enginedb
+    port: 6379
+
+    pool:
+      max: 16
+      maxIdle: 8
+      minIdle: 4

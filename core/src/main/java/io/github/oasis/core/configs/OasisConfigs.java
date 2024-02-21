@@ -57,6 +57,7 @@ public class OasisConfigs implements Serializable {
 
     private final Configuration jsonPathConf = Configuration.builder()
             .options(Option.DEFAULT_PATH_LEAF_TO_NULL)
+            .options(Option.SUPPRESS_EXCEPTIONS)
             .build();
 
     private DocumentContext ctx;
@@ -92,6 +93,10 @@ public class OasisConfigs implements Serializable {
 
     public Map<String, Object> getAll() {
         return Collections.unmodifiableMap(configValues);
+    }
+
+    public boolean hasProperty(String property) {
+        return readFromEnvVar(property).orElseGet(() -> ctx.read(toQuery(property))) != null;
     }
 
     private String getValue(String property, String defaultValue) {

@@ -22,8 +22,6 @@
 
 package io.github.oasis.core.services.api.configs;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigValue;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.external.EngineManagerSubscription;
 import io.github.oasis.core.external.EventDispatcher;
@@ -34,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 
@@ -103,14 +100,5 @@ public class StreamConfigs {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Unknown dispatcher implementation provided! " + dispatcherImpl));
     }
-
-    private Map<String, Object> toMap(Config config) {
-        Map<String, Object> destination = new HashMap<>();
-        for (Map.Entry<String, ConfigValue> entry : config.entrySet()) {
-            destination.put(entry.getKey(), entry.getValue().unwrapped());
-        }
-        return destination;
-    }
-
 
 }

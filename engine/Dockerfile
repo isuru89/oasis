@@ -2,15 +2,11 @@ FROM oasis/base-java
 
 MAINTAINER Isuru Weerarathna <isuruw89@gmail.com>
 
-## Add the wait script to the image
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.8.0/wait /wait
-RUN chmod +x /wait
-
 WORKDIR /usr/share/oasis-engine
 CMD /wait && exec java -classpath ./*:libs/*:/etc/oasis/modules/* io.github.oasis.engine.OasisEngineRunner
 
 RUN mkdir -p /etc/oasis
-ENV ENGINE_CONFIG_FILE "/etc/oasis/engine.conf"
+ENV ENGINE_CONFIG_FILE "/etc/oasis/engine.yml"
 
 # Add dependency library files
 ADD target/libs /usr/share/oasis-engine

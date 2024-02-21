@@ -2,16 +2,12 @@ FROM oasis/base-java
 
 MAINTAINER Isuru Weerarathna <isuruw89@gmail.com>
 
-## Add the wait script to the image
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.8.0/wait /wait
-RUN chmod +x /wait
-
 WORKDIR /usr/share/oasis-stats-api
-CMD /wait && exec java -classpath ./*:libs/*:/etc/oasis/modules/* io.github.oasis.core.services.api.StatsApiApplication --spring.config.location=file:/etc/oasis/stats-api.properties
+CMD /wait && exec java -classpath ./*:libs/*:/etc/oasis/modules/* io.github.oasis.core.services.api.StatsApiApplication --spring.config.location=file:/etc/oasis/stats-api-spring.yml
 EXPOSE 8010
 
 RUN mkdir -p /etc/oasis/schema
-ENV OASIS_CONFIG_FILE "/etc/oasis/stats-api.conf"
+ENV OASIS_CONFIG_FILE "/etc/oasis/stats-api.yml"
 ADD src/main/resources/io/github/oasis/db/schema /etc/oasis/schema
 RUN chmod -R 777 /etc/oasis
 

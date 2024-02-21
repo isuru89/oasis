@@ -1,0 +1,21 @@
+server:
+  servlet:
+    context-path: /api
+  port: 8010
+  
+# Oasis config file path
+oasis:
+  configs:
+    path: /etc/oasis/stats-api.yml
+  db:
+    engine: redis
+    admin: jdbc
+  schema:
+    dir: "file:/etc/oasis/schema/oasis-changelog-master.yml"
+
+spring:
+  h2:
+    console:
+      enabled: false
+  liquibase:
+    enabled: false

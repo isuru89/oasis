@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 echo "==============================================================================="
 echo "Building Oasis..."
@@ -8,7 +8,7 @@ mvn clean install -DskipTests
 echo "==============================================================================="
 echo "Build the base java image"
 echo "==============================================================================="
-docker build -t oasis/base-java -f ./buildscripts/docker/Dockerfile-base-java .
+docker build -t oasis/base-java -f ./buildscripts/docker/base-java.dockerfile .
 
 cp externals/kafka-stream/target/libs/* buildscripts/modules
 cp externals/kafka-stream/target/oasis-ext-kafkastream.jar buildscripts/modules

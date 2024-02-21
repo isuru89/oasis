@@ -78,4 +78,5 @@
         <appender-ref ref="EVENT-FILE"/>
     </logger>
     <logger name="org.redisson" level="INFO"/>
+    <logger name="org.apache.kafka" level="WARN"/>
 </configuration>
