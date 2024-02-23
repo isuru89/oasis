@@ -1,6 +1,6 @@
 oasis:
   adminApi:
-    baseUrl: "http://stats-api:8010/api"
+    baseUrl: "http://localhost:8010/api"
 
     eventSourceGet: "/admin/event-sources/"
     playerGet: "/players/"
@@ -21,7 +21,7 @@ oasis:
   eventstream:
     impl: "io.github.oasis.ext.kafkastream.KafkaStreamFactory"
     configs:
-      brokerUrls: "kafka:9092"
+      brokerUrls: "localhost:9092"
 
       feedStreamConsumer:
         groupId: feed-consumer-group

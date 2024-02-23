@@ -11,7 +11,7 @@ http:
   skipEventIntegrityCheck: false
 
 oasis:
-  
+
   adminApi:
     baseUrl: "http://localhost:8010/api"
 
@@ -29,7 +29,7 @@ oasis:
       brokerUrls: "localhost:9092"
 
       maxConsumerThreadPoolSize: 4
-  
+
       gameEventsConsumer:
         # groupId = ""
 
@@ -66,5 +66,5 @@ oasis:
         # Better to have a ttl based on your domain.
         # Longer TTLs will suffer from event source updates in admin api.
         # Shorter TTLs will suffer from unnecessary invocations to admin api.
-        # If this value is not set, no expiration will set for cached entries.
+      # If this value is not set, no expiration will set for cached entries.
       eventSourcesTTL: 900

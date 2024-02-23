@@ -215,7 +215,6 @@ public class Feeder implements Consumer<FeedEntry>, Closeable {
 
     private static OasisConfigs loadConfigs() {
         var oasisConfigFilePath = resolveConfigFileLocation();
-        System.out.println(oasisConfigFilePath);
         if (Texts.isEmpty(oasisConfigFilePath)) {
             LOG.error("Loading default configurations bundled with artifacts!");
             throw new IllegalStateException("Cannot load Oasis feeder configurations! Config location is unspecified!");

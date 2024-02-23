@@ -76,6 +76,7 @@ public class AdminApiClient implements DataService {
         JsonObject adminApiConf = configs.getJsonObject("adminApi", new JsonObject());
 
         String baseUrl = adminApiConf.getString("baseUrl");
+        LOG.info("Admin api base url: {}", baseUrl);
 
         getPlayerInfoUrl = baseUrl + adminApiConf.getString("playerGet");
         getEventSourceInfoUrl = baseUrl + adminApiConf.getString("eventSourceGet");

@@ -9,9 +9,9 @@ public final class Constants {
 
     static final String SYS_CONFIG_FILE = "oasis.config.file";
 
-    static final String KEY_DISPATCHER = "dispatcher";
-    static final String KEY_DISPATCHER_IMPL = "impl";
-    static final String KEY_DISPATCHER_CONFIGS = "configs";
+    static final String KEY_EVENTSTREAM = "eventstream";
+    static final String KEY_EVENTSTREAM_IMPL = "impl";
+    static final String KEY_EVENTSTREAM_CONFIGS = "configs";
 
     public static final int DEFAULT_TTL_EVENT_SOURCE = 900;
 

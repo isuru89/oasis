@@ -29,6 +29,8 @@ import io.github.oasis.core.exception.OasisRuntimeException;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -42,6 +44,8 @@ import static io.github.oasis.services.feeds.Constants.DEF_REQUEST_TIMEOUT;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public class  ApiDataService implements DataService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ApiDataService.class);
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -71,8 +75,10 @@ public class  ApiDataService implements DataService {
         this.urlTeamGet = configs.get("oasis.adminApi.teamGet", EMPTY);
 
         this.requestTimeout = configs.getInt("oasis.adminApi.requestTimeout", DEF_REQUEST_TIMEOUT);
-
         int connectTimeout = configs.getInt("oasis.adminApi.connectTimeout", DEF_CONNECT_TIMEOUT);
+
+        LOG.info("Creating admin api client via: {}", adminApiBaseUrl);
+
         this.client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.NORMAL)

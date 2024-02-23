@@ -26,8 +26,8 @@ public class OasisConfigTest {
     void testConfigsWithEnvVariablesDefaultPrefix() {
         ClassLoader clsLoader = Thread.currentThread().getContextClassLoader();
         var envVars = new HashMap<String, String>();
-        envVars.put("OASIS_OASIS_ENGINE_ID", "overridden-value");
-        envVars.put("OASIS_NX_IN_FILE", "value-2");
+        envVars.put("O_OASIS_ENGINE_ID", "overridden-value");
+        envVars.put("O_NX_IN_FILE", "value-2");
         var oc = new OasisConfigs.Builder().withCustomEnvOverrides(envVars)
                 .buildFromYamlResource("configs/sample.yaml", clsLoader);
 
@@ -49,10 +49,10 @@ public class OasisConfigTest {
     void testGetResolvedObject() {
         ClassLoader clsLoader = Thread.currentThread().getContextClassLoader();
         var envVars = new HashMap<String, String>();
-        envVars.put("OASIS_OASIS_ENGINE_ID", "overridden-value");
-        envVars.put("OASIS_OASIS_ENGINE_AUTORESTART", "false");
-        envVars.put("OASIS_OASIS_ENGINE_INTERVAL", "100");
-        envVars.put("OASIS_OASIS_ENGINE_PI", "4.124");
+        envVars.put("O_OASIS_ENGINE_ID", "overridden-value");
+        envVars.put("O_OASIS_ENGINE_AUTORESTART", "false");
+        envVars.put("O_OASIS_ENGINE_INTERVAL", "100");
+        envVars.put("O_OASIS_ENGINE_PI", "4.124");
         var oc = new OasisConfigs.Builder().withCustomEnvOverrides(envVars)
                 .buildFromYamlResource("configs/sample.yaml", clsLoader);
 
@@ -61,6 +61,24 @@ public class OasisConfigTest {
         assertEquals(4.124, engineConf.get("pi"));
         assertEquals(100, engineConf.get("interval"));
         assertEquals("overridden-value", engineConf.get("id"));
+    }
+
+    @Test
+    void testGetAllResolved() {
+        ClassLoader clsLoader = Thread.currentThread().getContextClassLoader();
+        var envVars = new HashMap<String, String>();
+        envVars.put("O_OASIS_ENGINE_ID", "overridden-value");
+        envVars.put("O_OASIS_ENGINE_AUTORESTART", "false");
+        envVars.put("O_OASIS_ENGINE_INTERVAL", "100");
+        envVars.put("O_OASIS_ENGINE_PI", "4.124");
+        var oc = new OasisConfigs.Builder().withCustomEnvOverrides(envVars)
+                .buildFromYamlResource("configs/sample.yaml", clsLoader);
+
+        var engineConf = new OasisConfigs.Builder().buildWithConfigs(oc.getAll());
+        assertFalse(engineConf.getBoolean("oasis.engine.autoRestart", true));
+        assertEquals(4.124, engineConf.getDouble("oasis.engine.pi", 0.0));
+        assertEquals(100, engineConf.getInt("oasis.engine.interval", 0));
+        assertEquals("overridden-value", engineConf.get("oasis.engine.id", null));
     }
 
     @Test

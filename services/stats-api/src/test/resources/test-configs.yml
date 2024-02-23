@@ -16,7 +16,7 @@ oasis:
   defaultApiKeys: "root:root,admin:admin:7,guest:guest:0"
 
   cache:
-    url: redis://localhost:6390
+    url: redis://localhost:6379
 
     connectionRetries: 5
     connectionRetryDelay: 5000
@@ -37,7 +37,7 @@ oasis:
       maxIdle: 16
       minIdle: 4
 
-  dispatcher:
+  eventstream:
     impl: "classpath:io.github.oasis.core.services.api.beans.TestDispatcherFactory"
     configs:
       brokerUrls: "localhost:29092"

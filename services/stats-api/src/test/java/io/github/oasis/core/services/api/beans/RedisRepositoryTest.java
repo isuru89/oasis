@@ -75,7 +75,7 @@ class RedisRepositoryTest {
     @BeforeAll
     public static void beforeAll() {
         var configs = new OasisConfigs.Builder()
-                .withCustomEnvOverrides(Map.of("OASIS_OASIS_CACHE_URL", redisContainer.getRedisURI()))
+                .withCustomEnvOverrides(Map.of("O_OASIS_CACHE_URL", redisContainer.getRedisURI()))
                 .buildFromYamlResource("test-configs.yml", Thread.currentThread().getContextClassLoader());
         RedisDb redisDb = RedisDb.create(configs, "oasis.cache");
         redisDb.init();

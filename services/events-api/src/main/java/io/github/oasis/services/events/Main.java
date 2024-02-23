@@ -19,6 +19,7 @@
 
 package io.github.oasis.services.events;
 
+import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.services.events.dispatcher.DispatcherFactory;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
@@ -42,31 +43,27 @@ public class Main {
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        ConfigStoreOptions envConfigs = new ConfigStoreOptions().setType("env");
-        ConfigStoreOptions jvmConfigs = new ConfigStoreOptions().setType("sys");
-        ConfigStoreOptions fileConfigs = new ConfigStoreOptions()
-                .setType("file")
-                .setFormat("yaml")
-                .setConfig(new JsonObject().put("path", resolveConfigFileLocation()));
+        var configs = resolveConfigs();
+        var jsonObject = new JsonObject(configs.getAll());
+        var vertxOptions = new ConfigStoreOptions()
+                .setType("json")
+                .setConfig(jsonObject);
 
-        ConfigRetrieverOptions retrieverOptions = new ConfigRetrieverOptions()
-                .addStore(jvmConfigs)
-                .addStore(envConfigs)
-                .addStore(fileConfigs);
+        ConfigRetrieverOptions retrieverOptions = new ConfigRetrieverOptions().addStore(vertxOptions);
 
         deploy(retrieverOptions);
     }
 
-    private static String resolveConfigFileLocation() {
+    private static OasisConfigs resolveConfigs() {
         String confPath = System.getenv(ENV_CONFIG_FILE);
         if (Objects.nonNull(confPath) && !confPath.isEmpty()) {
-            return confPath;
+            return new OasisConfigs.Builder().buildFromYamlFile(confPath);
         }
         confPath = System.getProperty(SYS_CONFIG_FILE);
         if (Objects.nonNull(confPath) && !confPath.isEmpty()) {
-            return confPath;
+            return new OasisConfigs.Builder().buildFromYamlFile(confPath);
         }
-        return "application.conf";
+        return new OasisConfigs.Builder().buildFromYamlResource("defaults.yml");
     }
 
     public static void deploy(ConfigRetrieverOptions configOptions) {

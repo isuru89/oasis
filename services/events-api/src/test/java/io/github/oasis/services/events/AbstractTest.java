@@ -76,7 +76,7 @@ public abstract class AbstractTest {
         JsonObject dispatcherConf = new JsonObject().put("impl", "test:any").put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
-                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf)
+                .put("oasis", new JsonObject().put("eventstream", dispatcherConf)
                 .put("cache", cacheConfigs).put("adminApi", adminConfigs));
         modifyConfigs(testConfigs);
         dispatcherService = Mockito.spy(new TestDispatcherService());

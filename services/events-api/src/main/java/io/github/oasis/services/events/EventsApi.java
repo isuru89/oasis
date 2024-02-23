@@ -31,9 +31,9 @@ import io.vertx.core.json.jackson.DatabindCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.github.oasis.services.events.Constants.KEY_DISPATCHER;
-import static io.github.oasis.services.events.Constants.KEY_DISPATCHER_CONFIGS;
-import static io.github.oasis.services.events.Constants.KEY_DISPATCHER_IMPL;
+import static io.github.oasis.services.events.Constants.KEY_EVENTSTREAM;
+import static io.github.oasis.services.events.Constants.KEY_EVENTSTREAM_CONFIGS;
+import static io.github.oasis.services.events.Constants.KEY_EVENTSTREAM_IMPL;
 
 /**
  * @author Isuru Weerarathna
@@ -57,10 +57,10 @@ public class EventsApi extends AbstractVerticle {
                 return vertx.deployVerticle(ClientVerticle.class, clientOptions);
             })
             .compose(id -> {
-                JsonObject dispatcherConf = oasisConfigs.getJsonObject(KEY_DISPATCHER);
+                JsonObject dispatcherConf = oasisConfigs.getJsonObject(KEY_EVENTSTREAM);
                 DeploymentOptions dispatcherConfigs = new DeploymentOptions()
-                        .setConfig(dispatcherConf.getJsonObject(KEY_DISPATCHER_CONFIGS));
-                return vertx.deployVerticle(dispatcherConf.getString(KEY_DISPATCHER_IMPL), dispatcherConfigs);
+                        .setConfig(dispatcherConf.getJsonObject(KEY_EVENTSTREAM_CONFIGS));
+                return vertx.deployVerticle(dispatcherConf.getString(KEY_EVENTSTREAM_IMPL), dispatcherConfigs);
             })
             .compose(id -> {
                 DeploymentOptions deploymentOptions = createHttpDeploymentOptions(httpConfigs);

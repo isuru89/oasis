@@ -26,8 +26,8 @@ public class TestEngineConfigs {
     @Bean
     public OasisConfigs createOasisConfigs(RedisContainer redisContainer) {
         var overriddenMap = Map.of(
-                "OASIS_OASIS_CACHE_URL", redisContainer.getRedisURI(),
-                "OASIS_OASIS_ENGINEDB_URL", redisContainer.getRedisURI());
+                "O_OASIS_CACHE_URL", redisContainer.getRedisURI(),
+                "O_OASIS_ENGINEDB_URL", redisContainer.getRedisURI());
         return new OasisConfigs.Builder()
                 .withCustomEnvOverrides(overriddenMap)
                 .buildFromYamlResource("test-configs.yml");

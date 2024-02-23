@@ -40,7 +40,7 @@ oasis:
       maxIdle: 16
       minIdle: 4
 
-  dispatcher:
+  eventstream:
     impl: "io.github.oasis.ext.kafkastream.KafkaStreamFactory"
     configs:
       brokerUrls: "localhost:29092"

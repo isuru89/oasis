@@ -11,9 +11,9 @@ http:
   skipEventIntegrityCheck: false
 
 oasis:
-  
+
   adminApi:
-    baseUrl: "http://localhost:8010/api"
+    baseUrl: "http://localhost:18050/api"
 
     eventSourceGet: "/admin/event-source"
     playerGet: "/players"
@@ -24,12 +24,12 @@ oasis:
 
 
   eventstream:
-    impl: "oasis:io.github.oasis.ext.kafkastream.KafkaStreamFactory"
+    impl: "oasis:io.github.oasis.services.events.dispatcher.RabbitMQVerticle"
     configs:
       brokerUrls: "localhost:9092"
 
       maxConsumerThreadPoolSize: 4
-  
+
       gameEventsConsumer:
         # groupId = ""
 
@@ -65,6 +65,6 @@ oasis:
         # expiration seconds for once cached event source data.
         # Better to have a ttl based on your domain.
         # Longer TTLs will suffer from event source updates in admin api.
-        # Shorter TTLs will suffer from unnecessary invocations to admin api.
-        # If this value is not set, no expiration will set for cached entries.
+      # Shorter TTLs will suffer from unnecessary invocations to admin api.
+      # If this value is not set, no expiration will set for cached entries.
       eventSourcesTTL: 900

@@ -60,7 +60,7 @@ public class ExternalDispatcherTest {
         JsonObject dispatcherConf = new JsonObject().put("impl", "oasis:" + impl).put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
-                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf).put("cache", getDefaultRedisCacheConfigs()));
+                .put("oasis", new JsonObject().put("eventstream", dispatcherConf).put("cache", getDefaultRedisCacheConfigs()));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
         vertx.deployVerticle(new EventsApi(), options, testContext.succeedingThenComplete());
@@ -75,7 +75,7 @@ public class ExternalDispatcherTest {
         JsonObject dispatcherConf = new JsonObject().put("impl", "oasis:" + impl).put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
-                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf).put("cache", getDefaultRedisCacheConfigs()));
+                .put("oasis", new JsonObject().put("eventstream", dispatcherConf).put("cache", getDefaultRedisCacheConfigs()));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
         vertx.deployVerticle(new EventsApi(), options, testContext.succeedingThenComplete());
@@ -90,7 +90,7 @@ public class ExternalDispatcherTest {
         JsonObject dispatcherConf = new JsonObject().put("impl", "oasis:" + impl).put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
-                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf).put("cache", getDefaultRedisCacheConfigs()));
+                .put("oasis", new JsonObject().put("eventstream", dispatcherConf).put("cache", getDefaultRedisCacheConfigs()));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
         vertx.deployVerticle(new EventsApi(), options, testContext.succeedingThenComplete());
@@ -105,7 +105,7 @@ public class ExternalDispatcherTest {
         JsonObject dispatcherConf = new JsonObject().put("impl", "oasis:" + impl).put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
-                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
+                .put("oasis", new JsonObject().put("eventstream", dispatcherConf));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
         vertx.deployVerticle(new EventsApi(), options, testContext.failing(e -> {}));
@@ -120,7 +120,7 @@ public class ExternalDispatcherTest {
         JsonObject dispatcherConf = new JsonObject().put("impl", "oasis:" + impl).put("configs", new JsonObject());
         JsonObject testConfigs = new JsonObject()
                 .put("http", new JsonObject().put("instances", 1).put("port", TEST_PORT))
-                .put("oasis", new JsonObject().put("dispatcher", dispatcherConf));
+                .put("oasis", new JsonObject().put("eventstream", dispatcherConf));
         DeploymentOptions options = new DeploymentOptions().setConfig(testConfigs);
         vertx.registerVerticleFactory(new DispatcherFactory());
         vertx.deployVerticle(new EventsApi(), options, testContext.failing(e -> {}));

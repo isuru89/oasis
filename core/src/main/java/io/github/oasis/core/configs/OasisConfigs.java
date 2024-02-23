@@ -41,7 +41,7 @@ import java.util.function.Supplier;
  */
 public class OasisConfigs implements Serializable {
 
-    private static final String DEFAULT_ENV_PREFIX = "OASIS_";
+    private static final String DEFAULT_ENV_PREFIX = "O_";
 
     public static final String GAME_SUPERVISOR_COUNT = "oasis.supervisors.game";
     public static final String RULE_SUPERVISOR_COUNT = "oasis.supervisors.rule";
@@ -62,12 +62,20 @@ public class OasisConfigs implements Serializable {
 
     private DocumentContext ctx;
 
-    private OasisConfigs(Map<String, Object> configValues, String envVarPrefix, Supplier<Map<String, String>> envVarSupplier) {
-        this.envVarPrefix = Objects.toString(envVarPrefix, DEFAULT_ENV_PREFIX);
+    private OasisConfigs(Map<String, Object> configValues, String theEnvVarPrefix, Supplier<Map<String, String>> envVarSupplier) {
+        this.envVarPrefix = deriveEnvVarPrefix(theEnvVarPrefix);
         this.configValues = configValues;
 
         this.loadEnvVariables(Objects.requireNonNullElse(envVarSupplier, defaultEnvVarSupplier));
         this.createConfigContext(configValues);
+    }
+
+    private String deriveEnvVarPrefix(String theEnvVarPrefix) {
+        if (theEnvVarPrefix != null) {
+            return theEnvVarPrefix;
+        }
+
+        return System.getProperty("oasis.config.env.prefix", DEFAULT_ENV_PREFIX);
     }
 
     private void createConfigContext(Map<String, Object> configValues) {
@@ -92,7 +100,7 @@ public class OasisConfigs implements Serializable {
     }
 
     public Map<String, Object> getAll() {
-        return Collections.unmodifiableMap(configValues);
+        return Collections.unmodifiableMap(resolveWithEnvVars(configValues, null));
     }
 
     public boolean hasProperty(String property) {
@@ -150,6 +158,7 @@ public class OasisConfigs implements Serializable {
         return resolveWithEnvVars(value, property);
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, Object> resolveWithEnvVars(Map<String, Object> configs, String baseProperty) {
         var result = new HashMap<String, Object>();
 
@@ -166,6 +175,8 @@ public class OasisConfigs implements Serializable {
                 result.put(k, getFloat(concat(baseProperty, k), (Float) v));
             } else if (v instanceof Double) {
                 result.put(k, getDouble(concat(baseProperty, k), (Double) v));
+            } else if (v instanceof Map<?,?>) {
+                result.put(k, resolveWithEnvVars((Map<String, Object>) v, concat(baseProperty, k)));
             } else {
                 result.put(k, v);
             }
@@ -182,6 +193,9 @@ public class OasisConfigs implements Serializable {
         if (base == null) {
             return "$." + property;
         } else {
+            if (base.startsWith("$.")) {
+                return base.substring(2) + "." + property;
+            }
             return base + "." + property;
         }
     }

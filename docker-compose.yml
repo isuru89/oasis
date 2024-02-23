@@ -51,6 +51,9 @@ services:
       - "./buildscripts/events-api.yml:/etc/oasis/events-api.yml"
     environment:
       - "WAIT_HOSTS=apicache:6381,kafka:9092"
+      - "O_OASIS_CACHE_CONFIGS_CONNECTIONSTRING=redis://apicache:6381"
+      - "O_OASIS_EVENTSTREAM_CONFIGS_BROKERURLS=kafka:9092"
+      - "O_OASIS_ADMINAPI_BASEURL=http://stats-api:8010/api"
     depends_on:
       - apicache
       - kafka
@@ -65,6 +68,9 @@ services:
       - "./buildscripts/modules:/etc/oasis/modules"
     environment:
       - "WAIT_HOSTS=apicache:6381,kafka:9092"
+      - "O_OASIS_ENGINEDB_URL=redis://enginedb:6379"
+      - "O_OASIS_CACHE_URL=redis://apicache:6381"
+      - "O_OASIS_EVENTSTREAM_CONFIGS_BROKERURLS=kafka:9092"
     depends_on:
       - apicache
       - kafka
@@ -73,6 +79,9 @@ services:
     image: oasis/engine
     environment:
       - "WAIT_HOSTS=enginedb:6379,kafka:9092"
+      - "O_OASIS_ENGINE_ID=engine_in_docker_compose"
+      - "O_OASIS_ENGINEDB_CONFIGS_URL=redis://enginedb:6379"
+      - "O_OASIS_EVENTSTREAM_CONFIGS_BROKERURLS=kafka:9092"
     volumes:
       - "./buildscripts/engine.yml:/etc/oasis/engine.yml"
       - "./buildscripts/modules:/etc/oasis/modules"
@@ -84,6 +93,8 @@ services:
     image: oasis/feeder
     environment:
       - "WAIT_HOSTS=kafka:9092"
+      - "O_OASIS_EVENTSTREAM_CONFIGS_BROKERURLS=kafka:9092"
+      - "O_OASIS_ADMINAPI_BASEURL=http://stats-api:8010/api"
     volumes:
       - "./buildscripts/feeder.yml:/etc/oasis/feeder.yml"
       - "./buildscripts/modules:/etc/oasis/modules"

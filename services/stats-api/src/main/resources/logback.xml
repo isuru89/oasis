@@ -24,17 +24,17 @@
             <level>INFO</level>
         </filter>
         <encoder>
-            <pattern>[%date{ISO8601}] [%level] [%-30logger{10}] [%thread] - %msg%n</pattern>
+            <pattern>[%date{ISO8601}] [%-5level] [%-38logger{10}] - %msg%n</pattern>
         </encoder>
     </appender>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>stats-test.log</file>
+        <file>myapp.log</file>
         <immediateFlush>false</immediateFlush>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>myapp_%d{yyyy-MM-dd}.log</fileNamePattern>
         </rollingPolicy>
         <encoder>
-            <pattern>[%date{ISO8601}] [%level] [%-30logger{10}] [%thread] - %msg%n</pattern>
+            <pattern>[%date{ISO8601}] [%-5level] [%-30logger{10}] - %msg%n</pattern>
         </encoder>
     </appender>
 
