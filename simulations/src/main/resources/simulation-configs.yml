@@ -14,16 +14,16 @@ oasis:
     rule: 5
     signal: 10
 
-  redis:
-    host: "localhost"
-    port: 6379
+  enginedb:
+    configs:
+      url: "redis://localhost:6379"
 
-    pool:
-      max: 16
-      maxIdle: 8
-      minIdle: 4
+      pool:
+        max: 16
+        maxIdle: 8
+        minIdle: 4
 
-  dispatcher:
+  eventstream:
     configs:
       brokerUrls: "kafka:9092"
 
@@ -54,6 +54,3 @@ oasis:
 
       #engineEventConsumer:
       #  props:
-
-eventstream:
-  impl: "io.github.oasis.ext.kafkastream.KafkaStreamFactory"

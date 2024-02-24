@@ -209,7 +209,7 @@ public class Main {
         EngineContext.Builder builder = EngineContext.builder()
                 .withConfigs(configs)
                 .installModule(PointsModuleFactory.class);
-        Db dbPool = RedisDb.create(configs, "oasis.redis");
+        Db dbPool = RedisDb.create(configs, "oasis.enginedb.configs");
         dbPool.init();
         builder.withDb(dbPool);
 

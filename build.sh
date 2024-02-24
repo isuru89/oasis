@@ -63,7 +63,7 @@ else
 fi
 
 if [ "$(proj_build_status stats-api)" == "true" ]; then
-  do_log "🛠  Building Admin/Stats API Docker Image..."
+  do_log "🛠️  Building Admin/Stats API Docker Image..."
   cd services/stats-api || exit 1
   docker build -t oasis/stats-api .
   cd ../..
