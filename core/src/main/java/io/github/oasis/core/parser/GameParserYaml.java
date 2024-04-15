@@ -90,9 +90,7 @@ public class GameParserYaml implements GameParseSupport {
                     engineMessage.setImpl(elementPluginType);
                     engineMessage.setData(elementDef);
                     gameDef.addRuleDefinition(engineMessage);
-                } else if (def instanceof String) {
-                    String refPath = (String) def;
-
+                } else if (def instanceof String refPath) {
                     String fullPath = parserContext.manipulateFullPath(refPath);
                     parserContext.pushCurrentLocation(fullPath);
                     InputStream refData = parserContext.loadPath(fullPath);

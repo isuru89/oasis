@@ -19,6 +19,7 @@
 
 package io.github.oasis.core;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,6 +45,7 @@ public class EventJson implements Event {
     }
 
     public EventJson(Map<String, Object> ref) {
+        this.ref = ref;
         this.id = (String) ref.get(Event.ID);
         this.type = (String) ref.get(Event.EVENT_TYPE);
         this.userName = (String) ref.get(Event.USER_NAME);
@@ -53,7 +55,24 @@ public class EventJson implements Event {
         this.sourceId = ((Number)ref.get(Event.SOURCE_ID)).intValue();
         this.gameId = ((Number)ref.get(Event.GAME_ID)).intValue();
         this.tz = (String) ref.get((Event.TIMEZONE));
-        this.ref = ref;
+    }
+
+    public EventJson duplicate() {
+        if (this.ref != null) {
+            return new EventJson(this.ref);
+        }
+
+        var fields = new HashMap<String, Object>();
+        fields.put(Event.ID, id);
+        fields.put(Event.EVENT_TYPE, type);
+        fields.put(Event.USER_NAME, userName);
+        fields.put(Event.SOURCE_ID, sourceId);
+        fields.put(Event.GAME_ID, gameId);
+        fields.put(Event.TEAM_ID, teamId);
+        fields.put(Event.TIMESTAMP, ts);
+        fields.put(Event.TIMEZONE, tz);
+        fields.put(Event.USER_ID, userId);
+        return new EventJson(fields);
     }
 
     @Override

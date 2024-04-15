@@ -37,6 +37,7 @@ import io.github.oasis.core.services.api.to.ElementUpdateRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.beans.Transient;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +54,7 @@ public class ElementService extends AbstractOasisService implements IElementServ
         this.statsApiContext = statsApiContext;
     }
 
+    @Transient
     @Override
     public ElementDef readElement(int gameId, String elementId, boolean withData) {
         ElementDef def;

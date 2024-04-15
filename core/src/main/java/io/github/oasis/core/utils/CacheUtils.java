@@ -28,11 +28,11 @@ import io.github.oasis.core.ID;
 /**
  * @author Isuru Weerarathna
  */
-public final class CacheUtils {
+public interface CacheUtils {
 
-    private static final String DOT = ".";
+    static final String DOT = ".";
 
-    public static String getSourceCacheKey(String sourceToken) {
+    static String getSourceCacheKey(String sourceToken) {
         return ID.EVENT_API_CACHE_SOURCES_KEY + DOT + sourceToken;
     }
 

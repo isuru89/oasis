@@ -6,6 +6,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>api-core</module>
+        <module>events-api-old</module>
         <module>events-api</module>
 	    <module>stats-api</module>
         <module>feeder</module>
