@@ -20,6 +20,7 @@
 package io.github.oasis.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.redis.testcontainers.RedisContainer;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.external.Db;
@@ -38,14 +39,22 @@ import io.github.oasis.engine.element.points.PointsModuleFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
  * @author Isuru Weerarathna
  */
+@Testcontainers
 public class MultiEngineTest {
+
+    @Container
+    protected static final RedisContainer REDIS_CONTAINER = new RedisContainer(DockerImageName.parse("redis:5"));
 
     protected final ObjectMapper mapper = new ObjectMapper();
 
@@ -59,7 +68,9 @@ public class MultiEngineTest {
 
     @Test
     public void testMultipleEngines() throws OasisException, IOException, ExecutionException, InterruptedException {
-        OasisConfigs oasisConfigs = new OasisConfigs.Builder().buildFromYamlResource("test-defaults.yml");
+        OasisConfigs oasisConfigs = new OasisConfigs.Builder()
+            .withCustomEnvOverrides(Map.of("O_OASIS_REDIS_URL", REDIS_CONTAINER.getRedisURI()))
+            .buildFromYamlResource("test-defaults.yml");
         dbPool = RedisDb.create(oasisConfigs, "oasis.redis");
         dbPool.init();
 

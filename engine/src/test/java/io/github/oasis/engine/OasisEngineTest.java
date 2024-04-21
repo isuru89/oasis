@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.redis.testcontainers.RedisContainer;
 import io.github.oasis.core.configs.OasisConfigs;
 import io.github.oasis.core.elements.AbstractRule;
 import io.github.oasis.core.elements.ElementDef;
@@ -55,6 +56,9 @@ import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -63,11 +67,16 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Isuru Weerarathna
  */
+@Testcontainers
 public class OasisEngineTest {
+
+    @Container
+    protected static final RedisContainer REDIS_CONTAINER = new RedisContainer(DockerImageName.parse("redis:5"));
 
     static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -101,7 +110,9 @@ public class OasisEngineTest {
         var jsonSerializer = new JsonSerializer(mapper);
 
         EngineContext.Builder builder = EngineContext.builder();
-        OasisConfigs oasisConfigs = new OasisConfigs.Builder().buildFromYamlResource("test-defaults.yml");
+        OasisConfigs oasisConfigs = new OasisConfigs.Builder()
+            .withCustomEnvOverrides(Map.of("O_OASIS_REDIS_URL", REDIS_CONTAINER.getRedisURI()))
+            .buildFromYamlResource("test-defaults.yml");
         dbPool = RedisDb.create(oasisConfigs, "oasis.redis");
         dbPool.init();
 

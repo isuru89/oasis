@@ -12,8 +12,7 @@ oasis:
     impl: "io.github.oasis.engine.TestEventStreamFactory"
 
   redis:
-    host: localhost
-    port: 6379
+    url: redis://localhost:6379
 
     pool:
       max: 128
