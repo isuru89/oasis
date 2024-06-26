@@ -25,7 +25,7 @@ package io.github.oasis.core.services.api;
 import io.github.oasis.core.services.ApiConstants;
 import io.github.oasis.core.services.SerializationSupport;
 import io.github.oasis.core.services.api.services.AbstractServiceTest;
-import io.github.oasis.core.services.api.to.GameCreateRequest;
+import io.github.oasis.core.services.api.app.request.GameCreateRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

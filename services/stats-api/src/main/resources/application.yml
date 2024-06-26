@@ -14,8 +14,12 @@ springdoc:
 spring:
   liquibase:
     enabled: false
+  jpa:
+    generate-ddl: false
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
-# Oasis configurations
 oasis:
   configs:
     path:

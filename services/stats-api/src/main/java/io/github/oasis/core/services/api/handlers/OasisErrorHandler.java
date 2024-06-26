@@ -20,10 +20,9 @@
 package io.github.oasis.core.services.api.handlers;
 
 import io.github.oasis.core.exception.OasisParseException;
-import io.github.oasis.core.services.api.configs.ErrorMessages;
+import io.github.oasis.core.services.api.infrastructure.beans.configs.ErrorMessages;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import io.github.oasis.core.services.api.handlers.events.BasePlayerRelatedEvent;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

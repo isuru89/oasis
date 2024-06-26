@@ -28,12 +28,12 @@ import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
-import io.github.oasis.core.services.api.beans.StatsApiContext;
+import io.github.oasis.core.services.api.infrastructure.beans.StatsApiContext;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import io.github.oasis.core.services.api.services.IElementService;
-import io.github.oasis.core.services.api.to.ElementCreateRequest;
-import io.github.oasis.core.services.api.to.ElementUpdateRequest;
+import io.github.oasis.core.services.api.domain.services.IElementService;
+import io.github.oasis.core.services.api.app.request.ElementCreateRequest;
+import io.github.oasis.core.services.api.app.request.ElementUpdateRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 

@@ -1,11 +1,11 @@
 package io.github.oasis.core.services.api.security;
 
 import io.github.oasis.core.services.api.TestUtils;
-import io.github.oasis.core.services.api.beans.BackendRepository;
+import io.github.oasis.core.services.api.infrastructure.beans.BackendRepository;
 import io.github.oasis.core.services.api.beans.TestEngineConfigs;
-import io.github.oasis.core.services.api.dao.IApiKeyDao;
+import io.github.oasis.core.services.api.domain.dao.IApiKeyDao;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
-import io.github.oasis.core.services.api.to.GameCreateRequest;
+import io.github.oasis.core.services.api.app.request.GameCreateRequest;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,9 +25,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static io.github.oasis.core.services.ApiConstants.APP_ID_HEADER;
 import static io.github.oasis.core.services.ApiConstants.APP_KEY_HEADER;
-import static io.github.oasis.core.services.api.security.ApiKeyService.ROLE_ADMIN_FLAG;
-import static io.github.oasis.core.services.api.security.ApiKeyService.ROLE_CURATOR_FLAG;
-import static io.github.oasis.core.services.api.security.ApiKeyService.ROLE_PLAYER_FLAG;
+import static io.github.oasis.core.services.api.infrastructure.beans.security.ApiKeyService.ROLE_ADMIN_FLAG;
+import static io.github.oasis.core.services.api.infrastructure.beans.security.ApiKeyService.ROLE_CURATOR_FLAG;
+import static io.github.oasis.core.services.api.infrastructure.beans.security.ApiKeyService.ROLE_PLAYER_FLAG;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;

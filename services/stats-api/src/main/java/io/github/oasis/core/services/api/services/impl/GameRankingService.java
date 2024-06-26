@@ -25,8 +25,8 @@ package io.github.oasis.core.services.api.services.impl;
 import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.external.OasisRepository;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
-import io.github.oasis.core.services.api.services.IGameRankingService;
-import io.github.oasis.core.services.api.to.RankCreationRequest;
+import io.github.oasis.core.services.api.domain.services.IGameRankingService;
+import io.github.oasis.core.services.api.app.request.RankCreationRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

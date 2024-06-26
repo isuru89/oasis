@@ -17,6 +17,18 @@ spring:
   liquibase:
     enabled: false
 
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: weAimHigh
+    url: "jdbc:mysql://localhost:33070/oasis?createDatabaseIfNotExist=true"
+
+  jpa:
+    generate-ddl: false
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
 # Oasis configurations
 oasis:
   configs:

@@ -22,7 +22,7 @@
 package io.github.oasis.core.services.api.services;
 
 import io.github.oasis.core.elements.ModuleDefinition;
-import io.github.oasis.core.services.api.beans.JsonSerializer;
+import io.github.oasis.core.services.api.infrastructure.beans.JsonSerializer;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.elements.badges.BadgesModule;
 import io.github.oasis.elements.challenges.ChallengesModule;

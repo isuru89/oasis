@@ -50,6 +50,7 @@ public final class ErrorCodes {
     public static final String PLAYER_DOES_NOT_EXISTS = "PL0003";
     public static final String PLAYER_IS_DEACTIVATED = "PL0004";
     public static final String PLAYER_UPDATE_CONFLICT = "PL0005";
+    public static final String PLAYER_DOES_NOT_EXISTS_IN_TEAM = "PL0006";
 
     public static final String TEAM_EXISTS = "TM0001";
     public static final String TEAM_NOT_EXISTS = "TM0002";

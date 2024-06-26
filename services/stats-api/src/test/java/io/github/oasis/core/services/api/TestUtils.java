@@ -25,7 +25,7 @@ import io.github.oasis.core.elements.GameDef;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
 import io.github.oasis.core.parser.GameParserYaml;
-import io.github.oasis.core.services.api.to.ElementCreateRequest;
+import io.github.oasis.core.services.api.app.request.ElementCreateRequest;
 
 import javax.sql.DataSource;
 import java.io.IOException;

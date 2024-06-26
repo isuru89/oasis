@@ -21,7 +21,7 @@
 
 package io.github.oasis.core.services.api.handlers;
 
-import io.github.oasis.core.services.api.services.IEngineManager;
+import io.github.oasis.core.services.api.domain.services.IEngineManager;
 import io.github.oasis.core.services.api.services.impl.GameService;
 import io.github.oasis.core.services.events.GameStatusChangeEvent;
 import org.springframework.context.event.EventListener;

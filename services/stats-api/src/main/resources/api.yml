@@ -6,7 +6,7 @@ http:
 oasis:
   db:
     engine: redis
-    admin: jdbc
+    admin: jpa
 
   jdbc:
     url: "jdbc:h2:mem:test"

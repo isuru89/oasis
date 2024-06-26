@@ -5,13 +5,13 @@ http:
 oasis:
   db:
     engine: redis
-    admin: jdbc
+    admin: jpa
 
   jdbc:
-    url: "jdbc:h2:mem:test"
-    driver: org.h2.Driver
-    user: sa
-    password: sa
+    url: "jdbc:mysql://localhost:33070/oasis?createDatabaseIfNotExist=true"
+    driver: com.mysql.cj.jdbc.Driver
+    user: root
+    password: weAimHigh
 
   defaultApiKeys: "root:root,admin:admin:7,guest:guest:0"
 

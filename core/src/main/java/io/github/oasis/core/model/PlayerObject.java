@@ -21,6 +21,8 @@ package io.github.oasis.core.model;
 
 import lombok.*;
 
+import java.util.Set;
+
 /**
  * @author Isuru Weerarathna
  */
@@ -44,6 +46,8 @@ public class PlayerObject {
     private long createdAt;
     private Long updatedAt;
     private boolean active = true;
+
+    private Set<Integer> teamIds;
 
     public PlayerObject() {}
 

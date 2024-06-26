@@ -21,16 +21,14 @@
 
 package io.github.oasis.core.services.api.services.impl;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import io.github.oasis.core.ID;
-import io.github.oasis.core.elements.AcceptedDefinition;
 import io.github.oasis.core.elements.ElementModule;
 import io.github.oasis.core.elements.ModuleDefinition;
 import io.github.oasis.core.elements.SpecAttributeSchema;
-import io.github.oasis.core.services.api.beans.StatsApiContext;
+import io.github.oasis.core.services.api.infrastructure.beans.StatsApiContext;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import io.github.oasis.core.services.api.services.IModuleService;
+import io.github.oasis.core.services.api.domain.services.IModuleService;
 import io.github.oasis.core.utils.ReflectionUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
