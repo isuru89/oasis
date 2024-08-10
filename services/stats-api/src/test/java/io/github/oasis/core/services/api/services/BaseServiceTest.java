@@ -9,15 +9,19 @@ import io.github.oasis.core.model.GameState;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.model.UserGender;
+import io.github.oasis.core.services.ApiConstants;
 import io.github.oasis.core.services.KeyGeneratorSupport;
+import io.github.oasis.core.services.api.app.request.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.beans.TestEngineConfigs;
-import io.github.oasis.core.services.api.infrastructure.beans.jdbc.JpaBasedRepository;
-import io.github.oasis.core.services.api.infrastructure.repository.jpa.ApplicationRepository;
+import io.github.oasis.core.services.api.infrastructure.beans.jpa.JpaBasedDao;
+import io.github.oasis.core.services.api.infrastructure.repository.jpa.EventSourceRepository;
 import io.github.oasis.core.services.api.infrastructure.repository.jpa.GameRepository;
 import io.github.oasis.core.services.api.infrastructure.repository.jpa.PlayerRepository;
-import io.github.oasis.core.services.api.infrastructure.repository.jpa.RegistrationRepository;
+import io.github.oasis.core.services.api.infrastructure.repository.jpa.AssignmentRepository;
 import io.github.oasis.core.services.api.infrastructure.repository.jpa.TeamRepository;
 import io.github.oasis.core.services.api.infrastructure.repository.dto.GameDto;
+import jakarta.annotation.Nonnull;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +29,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.security.KeyPair;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -38,148 +46,104 @@ import java.util.UUID;
 public class BaseServiceTest {
 
     @LocalServerPort
-    private int port;
+    protected int port;
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    protected TestRestTemplate restTemplate;
 
     @Autowired
     private PlayerRepository playerRepository;
 
     @Autowired
-    private GameRepository gameRepository;
+    protected GameRepository gameRepository;
 
     @Autowired
     private TeamRepository teamRepository;
 
     @Autowired
-    private RegistrationRepository registrationRepository;
+    private AssignmentRepository assignmentRepository;
 
     @Autowired
-    private ApplicationRepository applicationRepository;
+    private EventSourceRepository eventSourceRepository;
 
 
     @Autowired
-    private JpaBasedRepository jpaBasedRepository;
+    private JpaBasedDao dao;
 
     @Autowired
     private KeyGeneratorSupport keyGenerator;
 
+    protected String baseUrl;
+
     @BeforeEach
     public void beforeEach() {
-        gameRepository.deleteAll();
-        applicationRepository.deleteAll();
+        baseUrl = "http://localhost:" + port;
 
-        registrationRepository.deleteAll();
+        gameRepository.deleteAll();
+        eventSourceRepository.deleteAll();
+
+        assignmentRepository.deleteAll();
         playerRepository.deleteAll();
         teamRepository.deleteAll();
         gameRepository.deleteAll();
     }
 
-    @Test
-    void testRanks() {
-        var game = Game.builder()
-                .name("rank-test-game")
-                .build();
-        game = jpaBasedRepository.addNewGame(game);
+    HttpEntity<?> withAdminReq() {
+        var headers = new HttpHeaders();
+        headers.add(ApiConstants.APP_ID_HEADER, "root");
+        headers.add(ApiConstants.APP_KEY_HEADER, "root");
 
-        jpaBasedRepository.addRank(game.getId(), RankInfo.builder().name("gold").priority(1).build());
-        jpaBasedRepository.addRank(game.getId(), RankInfo.builder().name("silver").priority(2).build());
-        jpaBasedRepository.addRank(game.getId(), RankInfo.builder().name("platinum").priority(3).build());
+        return new HttpEntity<>(headers);
+    }
 
-        var allRanks = jpaBasedRepository.listAllRanks(game.getId());
-        System.out.println(allRanks);
+    <T> HttpEntity<T> withAdminReq(T body) {
+        var headers = new HttpHeaders();
+        headers.add(ApiConstants.APP_ID_HEADER, "root");
+        headers.add(ApiConstants.APP_KEY_HEADER, "root");
 
-        jpaBasedRepository.readGame(game.getId());
+        return new HttpEntity<>(body, headers);
+    }
+
+    @Nonnull
+    <R> R mustPostSuccess(String url, HttpEntity<?> req, Class<R> responseClz) {
+        var response = restTemplate.postForEntity(url, req, responseClz);
+        System.out.println(response.getStatusCode().value());
+        Assertions.assertTrue(response.getStatusCode().is2xxSuccessful(), "expected ");
+        Assertions.assertNotNull(response.getBody());
+
+        return response.getBody();
+    }
+
+    @Nonnull
+    <R> R mustGetSuccess(String url, HttpEntity<?> req, Class<R> responseClz) {
+        var response = restTemplate.exchange(url, HttpMethod.GET, req, responseClz);
+        Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
+        Assertions.assertNotNull(response.getBody());
+
+        return response.getBody();
+    }
+
+    void mustDeleteSuccess(String url, HttpEntity<?> req) {
+        var response = restTemplate.exchange(url, HttpMethod.DELETE, req, Void.class);
+        Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
     }
 
     @Test
-    void testGameState() {
-        var game = Game.builder()
-                .name("status-test-game")
-                .build();
-        game = jpaBasedRepository.addNewGame(game);
+    void testEventSourceCreation() {
+        var request = new EventSourceCreateRequest("test-eventsource");
 
-        jpaBasedRepository.updateGameStatus(game.getId(), GameState.CREATED.name(), Instant.now().toEpochMilli());
+        {
+            var response = mustPostSuccess(baseUrl + "/api/admin/event-sources", withAdminReq(request), EventSource.class);
+            System.out.println(response.toString());
+        }
 
-    }
-
-    @Test
-    void testEventApps() throws OasisException {
-        KeyPair oasisKeyPair = keyGenerator.generate("es-1");
-        EventSourceSecrets sourceSecrets = new EventSourceSecrets();
-        sourceSecrets.setPublicKey(Base64.getEncoder().encodeToString(oasisKeyPair.getPublic().getEncoded()));
-        sourceSecrets.setPrivateKey(Base64.getEncoder().encodeToString(oasisKeyPair.getPrivate().getEncoded()));
-
-        var app = jpaBasedRepository.addEventSource(EventSource.builder()
-                        .name("es-1")
-                        .token(UUID.randomUUID().toString())
-                        .secrets(sourceSecrets)
-                .build());
-
-        var g1 = gameRepository.save(GameDto.builder()
-                .name("g1")
-                .build());
-
-        jpaBasedRepository.addEventSourceToGame(app.getId(), g1.getId());
-
-        System.out.println(g1);
-
-        System.out.println(app);
-    }
-
-    @Test
-    void testAddPlayer() {
-        var game = jpaBasedRepository.addNewGame(Game.builder()
-                        .name("Test Game 1")
-                        .description("Game description")
-                .build());
-        System.out.println(game);
-
-        var team = jpaBasedRepository.addTeam(TeamObject.builder()
-                        .name("team warriors")
-                        .colorCode("#ff0000")
-                        .avatarRef("https://logo.io/team1.jpg")
-                        .gameId(game.getId())
-                .build());
-        System.out.println(team);
-
-        var team2 = jpaBasedRepository.addTeam(TeamObject.builder()
-                .name("team jaguar")
-                .colorCode("#00ff00")
-                .avatarRef("https://logo.io/team2.jpg")
-                .gameId(game.getId())
-                .build());
-        System.out.println(team2);
-        System.out.println(jpaBasedRepository.updateTeam(team2.getId(), TeamObject.builder()
-                        .avatarRef("new avatar link")
-                .build()));
-        jpaBasedRepository.updateTeam(team2.getId(), TeamObject.builder()
-                .colorCode("#000fff")
-                .build());
-
-        System.out.println(jpaBasedRepository.readTeam("team jaguar"));
-
-
-        var player = jpaBasedRepository.addPlayer(PlayerObject.builder()
-                        .email("isuru@oasis.io")
-                        .displayName("Isuru wee")
-                        .gender(UserGender.MALE)
-                        .timeZone("Asia/Colombo")
-                        .active(true)
-                .build());
-        System.out.println(player);
-
-        jpaBasedRepository.addPlayerToTeam(player.getId(), game.getId(), team.getId());
-
-
-       var dbTeam = jpaBasedRepository.readTeam(team.getId());
-
-        System.out.println(dbTeam);
-
-        System.out.println(jpaBasedRepository.readPlayer(player.getId()));
-
-        //jpaBasedRepository.addPlayerToTeam(player.getId(), game.getId(), team2.getId());
+        {
+            var response = mustGetSuccess(baseUrl + "/api/admin/event-sources", withAdminReq(), EventSource[].class);
+            for (var es : response) {
+                System.out.println(es.toString());
+                mustDeleteSuccess(baseUrl + "/api/admin/event-sources/" + es.getId(), withAdminReq());
+            }
+        }
     }
 
 }

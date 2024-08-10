@@ -27,6 +27,8 @@ import io.github.oasis.core.external.EngineManagerSubscription;
 import io.github.oasis.core.external.EventDispatcher;
 import io.github.oasis.core.external.messages.EngineStatusChangedMessage;
 import io.github.oasis.core.external.messages.GameState;
+import io.github.oasis.core.services.api.domain.services.ElementService;
+import io.github.oasis.core.services.api.domain.services.EngineManagerImpl;
 import io.github.oasis.core.services.api.domain.services.IGameService;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import org.junit.jupiter.api.Assertions;

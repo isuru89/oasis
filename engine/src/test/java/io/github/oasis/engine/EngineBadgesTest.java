@@ -53,10 +53,10 @@ public class EngineBadgesTest extends OasisEngineTest {
     public void setupDbBefore(DbContext db) throws IOException {
         super.setupDbBefore(db);
 
-        oasisRepository.addRank(TEvent.GAME_ID, new RankInfo(10, "Bronze", 100));
-        oasisRepository.addRank(TEvent.GAME_ID, new RankInfo(20, "Silver", 50));
-        oasisRepository.addRank(TEvent.GAME_ID, new RankInfo(30, "Gold", 20));
-        oasisRepository.addRank(TEvent.GAME_ID, new RankInfo(40, "Platinum", 10));
+        oasisDao.addRank(TEvent.GAME_ID, new RankInfo(10, "Bronze", 100));
+        oasisDao.addRank(TEvent.GAME_ID, new RankInfo(20, "Silver", 50));
+        oasisDao.addRank(TEvent.GAME_ID, new RankInfo(30, "Gold", 20));
+        oasisDao.addRank(TEvent.GAME_ID, new RankInfo(40, "Platinum", 10));
     }
 
     @Test

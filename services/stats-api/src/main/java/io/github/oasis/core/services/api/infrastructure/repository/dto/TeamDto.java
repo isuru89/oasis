@@ -48,6 +48,6 @@ public class TeamDto extends BaseDto {
     private GameDto game;
 
     @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
-    private Set<PlayerRegistration> players;
+    private Set<AssignmentDto> players;
 
 }

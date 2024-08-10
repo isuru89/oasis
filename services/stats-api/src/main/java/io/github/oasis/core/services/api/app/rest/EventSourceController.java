@@ -22,17 +22,23 @@ package io.github.oasis.core.services.api.app.rest;
 import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.model.EventSource;
 import io.github.oasis.core.services.annotations.ForAdmin;
-import io.github.oasis.core.services.api.app.rest.AbstractController;
-import io.github.oasis.core.services.api.services.impl.EventSourceService;
 import io.github.oasis.core.services.api.app.request.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.app.response.EventSourceKeysResponse;
+import io.github.oasis.core.services.api.domain.services.IEventSourceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -46,9 +52,9 @@ import java.util.List;
 @Tag(name = "Event-Sources", description = "Event source manipulation API")
 public class EventSourceController extends AbstractController {
 
-    private final EventSourceService eventSourceService;
+    private final IEventSourceService eventSourceService;
 
-    public EventSourceController(EventSourceService eventSourceService) {
+    public EventSourceController(IEventSourceService eventSourceService) {
         this.eventSourceService = eventSourceService;
     }
 
@@ -56,7 +62,6 @@ public class EventSourceController extends AbstractController {
             summary = "Register a new event source",
             tags = {"admin"}
     )
-    @ForAdmin
     @PostMapping(path = "/admin/event-sources", consumes = MediaType.APPLICATION_JSON_VALUE)
     public EventSource registerEventSource(@Valid @RequestBody EventSourceCreateRequest request) throws OasisException {
         return eventSourceService.registerEventSource(request);
@@ -123,7 +128,10 @@ public class EventSourceController extends AbstractController {
     )
     @ForAdmin
     @GetMapping("/admin/event-sources")
-    public List<EventSource> getAllEventSources() {
+    public List<EventSource> getAllEventSources(@RequestParam(name = "active", defaultValue = "true") Boolean isActive) {
+        if (isActive) {
+            return eventSourceService.listAllActiveEventSources();
+        }
         return eventSourceService.listAllEventSources();
     }
 

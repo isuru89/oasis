@@ -20,12 +20,11 @@
  *
  */
 
-package io.github.oasis.core.services.api.services.impl;
+package io.github.oasis.core.services.api.domain.services;
 
 import io.github.oasis.core.elements.RankInfo;
-import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.external.storage.OasisDao;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
-import io.github.oasis.core.services.api.domain.services.IGameRankingService;
 import io.github.oasis.core.services.api.app.request.RankCreationRequest;
 import org.springframework.stereotype.Service;
 
@@ -37,8 +36,8 @@ import java.util.List;
 @Service
 public class GameRankingService extends AbstractOasisService implements IGameRankingService {
 
-    public GameRankingService(@AdminDbRepository OasisRepository backendRepository) {
-        super(backendRepository);
+    public GameRankingService(@AdminDbRepository OasisDao dao) {
+        super(dao);
     }
 
     @Override
@@ -49,12 +48,12 @@ public class GameRankingService extends AbstractOasisService implements IGameRan
                 .priority(request.getPriority())
                 .build();
 
-        return backendRepository.addRank(gameId, rankInfo);
+        return dao.getRankDao().addRank(gameId, rankInfo);
     }
 
     @Override
     public List<RankInfo> listRanks(int gameId) {
-        return backendRepository.listAllRanks(gameId);
+        return dao.getRankDao().listAllRanks(gameId);
     }
 
 }

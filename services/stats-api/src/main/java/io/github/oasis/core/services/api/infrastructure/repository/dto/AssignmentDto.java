@@ -24,10 +24,10 @@ import java.time.Instant;
 @NoArgsConstructor
 @Entity
 @Table(name = "OA_PLAYER_TEAM")
-public class PlayerRegistration {
+public class AssignmentDto {
 
     @EmbeddedId
-    private RegistrationKey id;
+    private AssignmentKey id;
 
     @ManyToOne
     @MapsId("gameId")

@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 @Import(TestEngineConfigs.class)
 class BasicSecurityTest {
 
@@ -168,8 +168,8 @@ class BasicSecurityTest {
     private void createSampleGameSuccessfully() {
         try {
             // clear all existing games
-            backendRepository.getAdminRepository().listGames("0", 100).getRecords()
-                .forEach(g -> backendRepository.deleteGame(g.getId()));
+            backendRepository.getGameDao().listGames("0", 100).getRecords()
+                .forEach(g -> backendRepository.getGameDao().deleteGame(g.getId()));
 
             mvc.perform(MockMvcRequestBuilders.post("/games")
                     .contentType(MediaType.APPLICATION_JSON)

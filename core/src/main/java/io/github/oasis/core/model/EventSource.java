@@ -49,6 +49,7 @@ public class EventSource implements Serializable {
 
     private EventSourceSecrets secrets;
     private boolean active;
+    private int version;
 
     public EventSourceMetadata createCopyOfMeta() {
         EventSourceMetadata source = new EventSourceMetadata();
@@ -59,7 +60,7 @@ public class EventSource implements Serializable {
         } else {
             source.setGames(new HashSet<>());
         }
-        source.setKey(secrets.getPublicKey());
+        source.setKey(secrets.publicKey());
         return source;
     }
 }

@@ -20,7 +20,7 @@
  *
  */
 
-package io.github.oasis.core.services.api.services.impl;
+package io.github.oasis.core.services.api.domain.services;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.ElementDef;
@@ -31,9 +31,6 @@ import io.github.oasis.core.external.messages.EngineStatusChangedMessage;
 import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.services.api.exceptions.EngineManagerException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
-import io.github.oasis.core.services.api.domain.services.IElementService;
-import io.github.oasis.core.services.api.domain.services.IEngineManager;
-import io.github.oasis.core.services.api.domain.services.IGameService;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;

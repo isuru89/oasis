@@ -25,7 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "OA_RANK_DEF")
-public class AttributeDto {
+public class RankDto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

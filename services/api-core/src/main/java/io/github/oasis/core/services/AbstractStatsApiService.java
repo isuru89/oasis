@@ -20,7 +20,7 @@
 package io.github.oasis.core.services;
 
 import io.github.oasis.core.external.Db;
-import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.external.storage.OasisDao;
 import io.github.oasis.core.services.helpers.OasisMetadataSupport;
 
 /**
@@ -30,19 +30,19 @@ public abstract class AbstractStatsApiService {
 
     private final Db db;
     private final OasisMetadataSupport contextHelper;
-    private final OasisRepository adminRepo;
+    private final OasisDao adminRepo;
 
     public AbstractStatsApiService(EngineDataReader dataReader, OasisMetadataSupport contextHelper) {
         this(dataReader, contextHelper, null);
     }
 
-    public AbstractStatsApiService(EngineDataReader dataReader, OasisMetadataSupport contextHelper, OasisRepository adminRepo) {
+    public AbstractStatsApiService(EngineDataReader dataReader, OasisMetadataSupport contextHelper, OasisDao adminRepo) {
         this.db = dataReader.getDbPool();
         this.contextHelper = contextHelper;
         this.adminRepo = adminRepo;
     }
 
-    public OasisRepository getAdminRepo() {
+    public OasisDao getAdminRepo() {
         return adminRepo;
     }
 

@@ -97,7 +97,7 @@ public class EventSourceServiceTest extends AbstractServiceTest {
 
         EventSourceKeysResponse keyset = doGetSuccess("/admin/event-sources/" + dbSource.getId() + "/keys", EventSourceKeysResponse.class);
         assertNotNull(keyset);
-        assertEquals(dbSource.getSecrets().getPrivateKey(), keyset.getPrivateKeyB64Encoded());
+        assertEquals(dbSource.getSecrets().privateKey(), keyset.privateKeyEncoded());
 
         doGetError("/admin/event-sources/" + dbSource.getId() + "/keys", HttpStatus.FORBIDDEN, ErrorCodes.EVENT_SOURCE_DOWNLOAD_LIMIT_EXCEEDED);
     }
@@ -131,8 +131,8 @@ public class EventSourceServiceTest extends AbstractServiceTest {
         EventSource eventSource = doGetSuccess("/admin/event-source?token=" + dbSource.getToken(), EventSource.class);
         System.out.println(eventSource);
         assertNotNull(eventSource.getSecrets());
-        assertNotNull(eventSource.getSecrets().getPublicKey());
-        assertNull(eventSource.getSecrets().getPrivateKey());
+        assertNotNull(eventSource.getSecrets().publicKey());
+        assertNull(eventSource.getSecrets().privateKey());
         Assertions.assertEquals(1, eventSource.getGames().size());
         Assertions.assertTrue(eventSource.getGames().contains(gameId1));
 

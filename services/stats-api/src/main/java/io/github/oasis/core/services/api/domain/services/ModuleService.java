@@ -19,7 +19,7 @@
  *
  */
 
-package io.github.oasis.core.services.api.services.impl;
+package io.github.oasis.core.services.api.domain.services;
 
 import io.github.oasis.core.ID;
 import io.github.oasis.core.elements.ElementModule;

@@ -22,16 +22,23 @@ package io.github.oasis.core.services.api.app.rest;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.services.annotations.ForCurator;
 import io.github.oasis.core.services.annotations.ForPlayer;
-import io.github.oasis.core.services.api.app.rest.AbstractController;
-import io.github.oasis.core.services.api.services.impl.ElementService;
 import io.github.oasis.core.services.api.app.request.ElementCreateRequest;
 import io.github.oasis.core.services.api.app.request.ElementUpdateRequest;
+import io.github.oasis.core.services.api.domain.services.IElementService;
 import io.github.oasis.core.services.exceptions.OasisApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Set;
@@ -46,9 +53,9 @@ import java.util.Set;
 @Tag(name = "Game Elements", description = "Game elements API")
 public class ElementsController extends AbstractController {
 
-    private final ElementService elementService;
+    private final IElementService elementService;
 
-    public ElementsController(ElementService elementService) {
+    public ElementsController(IElementService elementService) {
         this.elementService = elementService;
     }
 

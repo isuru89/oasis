@@ -28,7 +28,7 @@ import io.github.oasis.core.UserMetadata;
 import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
-import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.external.storage.OasisDao;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
@@ -54,13 +54,13 @@ import java.util.stream.Collectors;
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class JdbcMetadataProvider implements OasisMetadataSupport {
 
-    private OasisRepository adminDbRepository;
+    private OasisDao adminDbRepository;
 
     // we use this self reference to activate caching within instance itself.
     @Autowired
     private JdbcMetadataProvider self;
 
-    public JdbcMetadataProvider(@AdminDbRepository OasisRepository adminDbRepository) {
+    public JdbcMetadataProvider(@AdminDbRepository OasisDao adminDbRepository) {
         this.adminDbRepository = adminDbRepository;
     }
 
@@ -85,7 +85,7 @@ public class JdbcMetadataProvider implements OasisMetadataSupport {
     @Cacheable(ID.CACHE_USERS_META)
     @Override
     public UserMetadata readUserMetadata(long userId) {
-        PlayerObject playerObject = adminDbRepository.readPlayer(userId);
+        PlayerObject playerObject = adminDbRepository.getPlayerDao().readPlayer(userId);
 
         return new UserMetadata(
                 playerObject.getId(),
@@ -98,7 +98,7 @@ public class JdbcMetadataProvider implements OasisMetadataSupport {
     @Cacheable(ID.CACHE_TEAMS_META)
     @Override
     public TeamMetadata readTeamMetadata(int teamId) {
-        TeamObject teamObject = adminDbRepository.readTeam(teamId);
+        TeamObject teamObject = adminDbRepository.getTeamDao().readTeam(teamId);
 
         TeamMetadata metadata = new TeamMetadata();
         metadata.setTeamId(teamObject.getId());
@@ -128,13 +128,13 @@ public class JdbcMetadataProvider implements OasisMetadataSupport {
     @Cacheable(value = ID.CACHE_ELEMENTS, key = "{#gameId, #id}", unless = "#result == null")
     @Override
     public ElementDef readFullElementDef(int gameId, String id) {
-        return adminDbRepository.readElement(gameId, id);
+        return adminDbRepository.getElementDao().readElement(gameId, id);
     }
 
     @Cacheable(value = ID.CACHE_ELEMENTS_META, key = "{#gameId, #id}", unless = "#result == null")
     @Override
     public SimpleElementDefinition readElementDefinition(int gameId, String id) {
-        ElementDef elementDef = adminDbRepository.readElement(gameId, id);
+        ElementDef elementDef = adminDbRepository.getElementDao().readElement(gameId, id);
         if (elementDef == null) {
             return null;
         }
@@ -158,7 +158,7 @@ public class JdbcMetadataProvider implements OasisMetadataSupport {
     @Cacheable(ID.CACHE_RANKS)
     @Override
     public Map<Integer, RankInfo> readAllRankInfo(int gameId) {
-        return adminDbRepository.listAllRanks(gameId).stream()
+        return adminDbRepository.getRankDao().listAllRanks(gameId).stream()
                 .collect(Collectors.toMap(RankInfo::getId, Function.identity()));
     }
 
@@ -166,7 +166,7 @@ public class JdbcMetadataProvider implements OasisMetadataSupport {
         this.self = self;
     }
 
-    public void setAdminDbRepository(OasisRepository adminDbRepository) {
+    public void setAdminDbRepository(OasisDao adminDbRepository) {
         this.adminDbRepository = adminDbRepository;
     }
 }

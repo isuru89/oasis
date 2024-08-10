@@ -22,7 +22,7 @@
 package io.github.oasis.core.services.api.app.rest;
 
 import io.github.oasis.core.elements.ModuleDefinition;
-import io.github.oasis.core.services.api.services.impl.ModuleService;
+import io.github.oasis.core.services.api.domain.services.IModuleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
@@ -40,9 +40,9 @@ import java.util.List;
 @Tag(name = "Module Metadata", description = "Module Metadata API")
 public class ModuleController extends AbstractController {
 
-    private final ModuleService moduleService;
+    private final IModuleService moduleService;
 
-    public ModuleController(ModuleService moduleService) {
+    public ModuleController(IModuleService moduleService) {
         this.moduleService = moduleService;
     }
 

@@ -22,9 +22,8 @@ package io.github.oasis.core.services.api.app.rest;
 import io.github.oasis.core.elements.RankInfo;
 import io.github.oasis.core.services.annotations.ForAdmin;
 import io.github.oasis.core.services.annotations.ForPlayer;
-import io.github.oasis.core.services.api.app.rest.AbstractController;
-import io.github.oasis.core.services.api.services.impl.GameRankingService;
 import io.github.oasis.core.services.api.app.request.RankCreationRequest;
+import io.github.oasis.core.services.api.domain.services.IGameRankingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -43,9 +42,9 @@ import java.util.List;
 @Tag(name = "Ranks", description = "Game Ranks API")
 public class RanksController extends AbstractController {
 
-    private final GameRankingService gameRankingService;
+    private final IGameRankingService gameRankingService;
 
-    public RanksController(GameRankingService gameRankingService) {
+    public RanksController(IGameRankingService gameRankingService) {
         this.gameRankingService = gameRankingService;
     }
 

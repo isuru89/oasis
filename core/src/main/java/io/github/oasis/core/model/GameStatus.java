@@ -22,14 +22,12 @@
 package io.github.oasis.core.model;
 
 import lombok.Data;
+import lombok.With;
 
 import java.io.Serializable;
 
-@Data
-public class GameStatus implements Serializable {
-
-    private int gameId;
-    private String status;
-    private long updatedAt;
+@With
+public record GameStatus(int gameId, String status, long updatedAt)
+{
 
 }

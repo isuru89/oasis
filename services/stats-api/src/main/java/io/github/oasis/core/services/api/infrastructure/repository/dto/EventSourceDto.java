@@ -1,68 +1,98 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 package io.github.oasis.core.services.api.infrastructure.repository.dto;
 
 import io.github.oasis.core.model.EventSource;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.With;
+import org.hibernate.annotations.SQLDelete;
 
-import java.io.Serializable;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-/**
- * @author Isuru Weerarathna
- */
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
+@EqualsAndHashCode
 @AllArgsConstructor
-public class EventSourceDto implements Serializable {
+@NoArgsConstructor
+@With
+@Entity
+@Table(name = "OA_EVENT_SOURCE")
+@SQLDelete(sql = "UPDATE OA_EVENT_SOURCE SET display_name = concat(display_name, '_', sysdate()), is_active = false WHERE id = ? AND version = ? AND is_active = true")
+public class EventSourceDto {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String token;
-    private String name;
 
+    @EqualsAndHashCode.Include
+    @Column(unique = true, updatable = false, nullable = false)
+    private String token;
+
+    @Column(name = "display_name")
+    private String displayName;
+
+    @OneToOne(mappedBy = "application", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private EventSourceSecretsDto secrets;
-    private boolean active;
+
+    @ManyToMany
+    @JoinTable(
+            name = "OA_EVENT_SOURCE_GAME",
+            joinColumns = @JoinColumn(name = "event_source_id"),
+            inverseJoinColumns = @JoinColumn(name = "game_id")
+    )
+    private Set<GameDto> games;
+
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    @Version
+    private Integer version;
+
+    @PrePersist
+    protected void onCreate() {
+        isActive = true;
+        version = 1;
+    }
 
     public static EventSourceDto from(EventSource eventSource) {
-        EventSourceDtoBuilder dto = EventSourceDto.builder()
-                .id(eventSource.getId())
-                .active(eventSource.isActive())
-                .name(eventSource.getName())
-                .token(eventSource.getToken());
-        if (eventSource.getSecrets() != null) {
-            dto.secrets(EventSourceSecretsDto.from(eventSource.getSecrets()));
-        }
-        return dto.build();
+        return new EventSourceDto()
+                .withId(eventSource.getId())
+                .withDisplayName(eventSource.getName())
+                .withToken(eventSource.getToken())
+                .withIsActive(eventSource.isActive())
+                .withVersion(eventSource.getVersion());
     }
 
     public EventSource toEventSource() {
-        EventSource.EventSourceBuilder dto = EventSource.builder()
-                .name(name)
+        var builder = EventSource.builder()
                 .id(id)
+                .name(displayName)
                 .token(token)
-                .active(this.active);
-        if (secrets != null) {
-            dto.secrets(secrets.toSecrets());
+                .active(isActive)
+                .version(version);
+
+        if (games != null) {
+            builder = builder.games(games.stream().map(GameDto::getId).collect(Collectors.toSet()));
         }
-        return dto.build();
+
+        return builder.build();
     }
 
 }

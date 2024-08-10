@@ -20,19 +20,19 @@
  *
  */
 
-package io.github.oasis.core.services.api.services.impl;
+package io.github.oasis.core.services.api.domain.services;
 
-import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.external.storage.OasisDao;
 
 /**
  * @author Isuru Weerarathna
  */
 public abstract class AbstractOasisService {
 
-    protected final OasisRepository backendRepository;
+    protected final OasisDao dao;
 
-    AbstractOasisService(OasisRepository backendRepository) {
-        this.backendRepository = backendRepository;
+    AbstractOasisService(OasisDao dao) {
+        this.dao = dao;
     }
 
 }

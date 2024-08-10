@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.oasis.core.services.annotations.OasisAdminService;
 import io.github.oasis.core.services.annotations.OasisQueryService;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.method.HandlerTypePredicate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -46,5 +47,10 @@ public class ApiConfigurator implements WebMvcConfigurer {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new QueryPayloadResolver(List.of(new MappingJackson2HttpMessageConverter(new ObjectMapper()))));
+    }
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        WebMvcConfigurer.super.addFormatters(registry);
     }
 }

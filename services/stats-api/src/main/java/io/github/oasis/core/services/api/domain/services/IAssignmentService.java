@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * @author Isuru Weerarathna
  */
-public interface IPlayerAssignmentService {
+public interface IAssignmentService {
 
     List<PlayerObject> listAllUsersInTeam(int teamId);
 

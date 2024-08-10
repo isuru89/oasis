@@ -28,7 +28,7 @@ import io.github.oasis.core.services.api.TestUtils;
 import io.github.oasis.core.services.api.domain.services.IEngineManager;
 import io.github.oasis.core.services.api.domain.services.IGameService;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
-import io.github.oasis.core.services.api.services.impl.GameService;
+import io.github.oasis.core.services.api.domain.services.GameService;
 import io.github.oasis.core.services.api.app.request.ElementCreateRequest;
 import io.github.oasis.core.services.api.app.request.EventSourceCreateRequest;
 import io.github.oasis.core.services.api.app.request.GameCreateRequest;
@@ -309,8 +309,8 @@ public class GameServiceTest extends AbstractServiceTest {
         {
             var list = doGetListSuccess("/games/" + stackId + "/status/history", GameStatus.class);
             List<String> actual = list.stream()
-                    .sorted(Comparator.comparingLong(GameStatus::getUpdatedAt))
-                    .map(GameStatus::getStatus).collect(Collectors.toList());
+                    .sorted(Comparator.comparingLong(GameStatus::updatedAt))
+                    .map(GameStatus::status).collect(Collectors.toList());
             List<String> expected = List.of("CREATED", "STARTED", "PAUSED");
             assertEquals(expected, actual);
         }
@@ -321,8 +321,8 @@ public class GameServiceTest extends AbstractServiceTest {
         {
             var list = doGetListSuccess("/games/" + stackId + "/status/history", GameStatus.class);
             List<String> actual = list.stream()
-                    .sorted(Comparator.comparingLong(GameStatus::getUpdatedAt))
-                    .map(GameStatus::getStatus).collect(Collectors.toList());
+                    .sorted(Comparator.comparingLong(GameStatus::updatedAt))
+                    .map(GameStatus::status).collect(Collectors.toList());
             List<String> expected = List.of("CREATED", "STARTED", "PAUSED", "STARTED");
             assertEquals(expected, actual);
         }
@@ -341,7 +341,7 @@ public class GameServiceTest extends AbstractServiceTest {
 
     private void assertCurrentGameStatus(int gameId, String expectedStatus) {
         var status = doGetSuccess("/games/" + gameId + "/status", GameStatus.class);
-        assertEquals(expectedStatus, status.getStatus());
+        assertEquals(expectedStatus, status.status());
     }
 
     private void assertGame(Game db, GameCreateRequest other) {

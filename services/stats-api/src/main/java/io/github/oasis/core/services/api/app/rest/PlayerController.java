@@ -30,7 +30,7 @@ import io.github.oasis.core.services.api.app.request.PlayerCreateRequest;
 import io.github.oasis.core.services.api.app.request.PlayerUpdateRequest;
 import io.github.oasis.core.services.api.app.request.TeamCreateRequest;
 import io.github.oasis.core.services.api.app.request.TeamUpdateRequest;
-import io.github.oasis.core.services.api.domain.services.IPlayerAssignmentService;
+import io.github.oasis.core.services.api.domain.services.IAssignmentService;
 import io.github.oasis.core.services.api.domain.services.IPlayerManagementService;
 import io.github.oasis.core.services.api.domain.services.ITeamManagementService;
 import io.github.oasis.core.services.exceptions.OasisApiException;
@@ -53,11 +53,11 @@ import java.util.List;
 public class PlayerController extends AbstractController {
 
     private final IPlayerManagementService playerManagementService;
-    private final IPlayerAssignmentService playerAssignmentService;
+    private final IAssignmentService playerAssignmentService;
     private final ITeamManagementService teamManagementService;
 
     public PlayerController(IPlayerManagementService playerManagementService,
-                            IPlayerAssignmentService assignmentService,
+                            IAssignmentService assignmentService,
                             ITeamManagementService teamManagementService) {
         this.playerAssignmentService = assignmentService;
         this.playerManagementService = playerManagementService;

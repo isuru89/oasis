@@ -1,56 +1,61 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 package io.github.oasis.core.services.api.infrastructure.repository.dto;
 
 import io.github.oasis.core.model.EventSourceSecrets;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.With;
 
-import java.io.Serializable;
+import java.util.Base64;
 
-/**
- * @author Isuru Weerarathna
- */
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
+@Builder(toBuilder = true)
+@With
 @AllArgsConstructor
-public class EventSourceSecretsDto implements Serializable {
+@NoArgsConstructor
+@Entity
+@Table(name = "OA_EVENT_SOURCE_KEY")
+public class EventSourceSecretsDto {
 
-    private String publicKey;
-    private String privateKey;
+    @Id
+    private Integer id;
 
-    private int downloadCount;
+    @MapsId
+    @OneToOne
+    @JoinColumn(name = "event_source_id")
+    private EventSourceDto application;
 
-    public static EventSourceSecretsDto from(EventSourceSecrets secrets) {
-        return EventSourceSecretsDto.builder()
-                .privateKey(secrets.getPrivateKey())
-                .publicKey(secrets.getPublicKey())
-                .build();
-    }
+    @Lob
+    @Column(name = "public_key", columnDefinition = "BLOB")
+    private byte[] publicKey;
+    @Lob
+    @Column(name = "private_key", columnDefinition = "BLOB")
+    private byte[] privateKey;
 
-    public EventSourceSecrets toSecrets() {
-        EventSourceSecrets secrets = new EventSourceSecrets();
-        secrets.setPrivateKey(privateKey);
-        secrets.setPublicKey(publicKey);
-        return secrets;
+    @Column(name = "download_count")
+    private Integer downloadCount;
+
+    public EventSourceSecrets toEventSourceSecrets(boolean withPrivateKey) {
+        var secrets = EventSourceSecrets.builder()
+                .publicKey(Base64.getEncoder().encodeToString(publicKey))
+                .viewedTimes(downloadCount);
+
+        if (withPrivateKey) {
+            secrets = secrets.privateKey(Base64.getEncoder().encodeToString(privateKey));
+        }
+
+        return secrets.build();
     }
 
 }

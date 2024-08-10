@@ -20,6 +20,7 @@
 package io.github.oasis.core.services.api.handlers;
 
 import io.github.oasis.core.exception.OasisParseException;
+import io.github.oasis.core.services.api.exceptions.OasisEntityNotFoundException;
 import io.github.oasis.core.services.api.infrastructure.beans.configs.ErrorMessages;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
@@ -76,6 +77,20 @@ public class OasisErrorHandler {
 
         request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
         return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.valueOf(ex.getStatusCode()));
+    }
+
+    @ExceptionHandler(value = { OasisEntityNotFoundException.class })
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ResponseEntity<ErrorObject> handleEntityNotFoundException(OasisEntityNotFoundException ex, WebRequest request) {
+        ErrorObject errorObject = new ErrorObject()
+                .setTimestamp(Instant.now().toString())
+                .setErrorCode(ex.getErrorCode())
+                .setErrorCodeDescription(errorMessages.getErrorMessage(ex.getErrorCode()))
+                .setMessage(ex.getMessage())
+                .setPath(deriveRequestPath(request));
+
+        request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
+        return new ResponseEntity<>(errorObject, ERROR_HEADERS, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = { OasisApiRuntimeException.class })

@@ -52,6 +52,8 @@ public interface IEventSourceService {
 
     List<EventSource> listAllEventSources();
 
+    List<EventSource> listAllActiveEventSources();
+
     List<EventSource> listAllEventSourcesOfGame(int gameId);
 
 }

@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -52,20 +53,19 @@ public class GameDto extends BaseDto {
     private List<GameStateDto> status;
 
     @OneToMany(mappedBy = "game")
-    private Set<AttributeDto> ranks;
+    private Set<RankDto> ranks;
 
-    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "game", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TeamDto> teams;
 
     @OneToMany(mappedBy = "game" ,fetch = FetchType.LAZY)
-    private Set<PlayerRegistration> players;
+    private Set<AssignmentDto> players;
 
     @ManyToMany(mappedBy = "games", fetch = FetchType.LAZY)
-    private Set<ApplicationDto> eventSources;
+    private Set<EventSourceDto> eventSources;
 
     @OneToMany(mappedBy = "game", fetch = FetchType.LAZY)
     private Set<RuleDto> rules;
-
 
     public Game toGame() {
         return Game.builder()

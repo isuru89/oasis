@@ -1,4 +1,4 @@
-package io.github.oasis.core.services.api.infrastructure.repository.dto;
+package io.github.oasis.core.services.api.infrastructure.repository.configs;
 
 import io.github.oasis.core.model.UserGender;
 import jakarta.persistence.AttributeConverter;

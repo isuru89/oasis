@@ -20,10 +20,12 @@
 package io.github.oasis.core.services.exceptions;
 
 import io.github.oasis.core.exception.OasisException;
+import lombok.Getter;
 
 /**
  * @author Isuru Weerarathna
  */
+@Getter
 public class OasisApiException extends OasisException {
 
     private final String errorCode;
@@ -39,13 +41,5 @@ public class OasisApiException extends OasisException {
         super(message, cause);
         this.errorCode = errorCode;
         this.statusCode = statusCode;
-    }
-
-    public String getErrorCode() {
-        return errorCode;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
     }
 }

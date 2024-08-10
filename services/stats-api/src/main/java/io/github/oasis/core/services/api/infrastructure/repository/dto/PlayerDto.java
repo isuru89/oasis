@@ -22,7 +22,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
@@ -47,6 +47,6 @@ public class PlayerDto extends BaseDto {
     private UserGender gender;
 
     @OneToMany(mappedBy = "player", fetch = FetchType.LAZY)
-    private Set<PlayerRegistration> teams;
+    private Set<AssignmentDto> teams;
 
 }

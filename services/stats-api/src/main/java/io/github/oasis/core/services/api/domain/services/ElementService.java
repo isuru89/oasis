@@ -20,18 +20,19 @@
  *
  */
 
-package io.github.oasis.core.services.api.services.impl;
+package io.github.oasis.core.services.api.domain.services;
 
 import io.github.oasis.core.Game;
 import io.github.oasis.core.elements.ElementDef;
 import io.github.oasis.core.elements.SimpleElementDefinition;
 import io.github.oasis.core.exception.OasisParseException;
-import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.external.storage.ElementDao;
+import io.github.oasis.core.external.storage.OasisDao;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
+import io.github.oasis.core.services.api.exceptions.OasisEntityNotFoundException;
 import io.github.oasis.core.services.api.infrastructure.beans.StatsApiContext;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
 import io.github.oasis.core.services.api.exceptions.OasisApiRuntimeException;
-import io.github.oasis.core.services.api.domain.services.IElementService;
 import io.github.oasis.core.services.api.app.request.ElementCreateRequest;
 import io.github.oasis.core.services.api.app.request.ElementUpdateRequest;
 import org.springframework.http.HttpStatus;
@@ -47,9 +48,12 @@ import java.util.Optional;
 public class ElementService extends AbstractOasisService implements IElementService {
 
     private final StatsApiContext statsApiContext;
+    private final ElementDao elementDao;
 
-    public ElementService(@AdminDbRepository OasisRepository backendRepository, StatsApiContext statsApiContext) {
-        super(backendRepository);
+    public ElementService(@AdminDbRepository OasisDao dao, StatsApiContext statsApiContext) {
+        super(dao);
+
+        this.elementDao = dao.getElementDao();
         this.statsApiContext = statsApiContext;
     }
 
@@ -57,14 +61,12 @@ public class ElementService extends AbstractOasisService implements IElementServ
     public ElementDef readElement(int gameId, String elementId, boolean withData) {
         ElementDef def;
         if (withData) {
-            def = backendRepository.readElement(gameId, elementId);
+            def = elementDao.readElement(gameId, elementId);
         } else {
-            def = backendRepository.readElementWithoutData(gameId, elementId);
+            def = elementDao.readElementWithoutData(gameId, elementId);
         }
         return Optional.ofNullable(def)
-                .orElseThrow(() -> new OasisApiRuntimeException(
-                        ErrorCodes.ELEMENT_NOT_EXISTS,
-                        HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new OasisEntityNotFoundException(ErrorCodes.ELEMENT_NOT_EXISTS));
     }
 
     @Override
@@ -79,7 +81,7 @@ public class ElementService extends AbstractOasisService implements IElementServ
 
         statsApiContext.validateElement(elementDef);
 
-        return backendRepository.addNewElement(gameId, elementDef);
+        return elementDao.addNewElement(gameId, elementDef);
     }
 
     @Override
@@ -89,26 +91,26 @@ public class ElementService extends AbstractOasisService implements IElementServ
                 updateRequest.getName(),
                 updateRequest.getDescription(),
                 updateRequest.getVersion());
-        return backendRepository.updateElement(gameId, elementId, metadata);
+        return elementDao.updateElement(gameId, elementId, metadata);
     }
 
     @Override
     public ElementDef deleteElement(int gameId, String elementId) {
-        return backendRepository.deleteElement(gameId, elementId);
+        return elementDao.deleteElement(gameId, elementId);
     }
 
     @Override
     public List<ElementDef> listElementsByType(int gameId, String type) {
-        return backendRepository.readElementsByType(gameId, type);
+        return elementDao.readElementsByType(gameId, type);
     }
 
     @Override
     public List<ElementDef> listElementsFromGameId(int gameId) {
-        Game game = backendRepository.readGame(gameId);
+        Game game = dao.getGameDao().readGame(gameId);
         if (game == null) {
             throw new OasisApiRuntimeException(ErrorCodes.GAME_NOT_EXISTS, HttpStatus.NOT_FOUND);
         }
 
-        return backendRepository.readElementsByGameId(gameId);
+        return elementDao.readElementsByGameId(gameId);
     }
 }

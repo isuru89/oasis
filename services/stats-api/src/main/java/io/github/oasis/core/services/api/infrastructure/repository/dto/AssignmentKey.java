@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
-public class RegistrationKey {
+public class AssignmentKey {
 
     @Column(name = "game_id")
     private Integer gameId;

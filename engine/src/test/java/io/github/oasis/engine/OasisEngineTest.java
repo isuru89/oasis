@@ -33,7 +33,7 @@ import io.github.oasis.core.exception.OasisException;
 import io.github.oasis.core.exception.OasisParseException;
 import io.github.oasis.core.external.Db;
 import io.github.oasis.core.external.DbContext;
-import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.external.storage.OasisDao;
 import io.github.oasis.core.external.messages.EngineMessage;
 import io.github.oasis.core.model.PlayerObject;
 import io.github.oasis.core.model.TeamObject;
@@ -90,7 +90,7 @@ public class OasisEngineTest {
 
     protected Db dbPool;
     protected OasisMetadataSupport metadataSupport;
-    protected OasisRepository oasisRepository;
+    protected OasisDao oasisDao;
 
     @BeforeEach
     public void setup() throws IOException, OasisException {
@@ -106,8 +106,8 @@ public class OasisEngineTest {
         dbPool.init();
 
         RedisRepository redisRepository = new RedisRepository(dbPool, jsonSerializer);
-        oasisRepository = redisRepository;
-        var metadataProvider = new JdbcMetadataProvider(oasisRepository);
+        oasisDao = redisRepository;
+        var metadataProvider = new JdbcMetadataProvider(oasisDao);
         metadataProvider.setSelf(metadataProvider);
         metadataSupport = metadataProvider;
 
@@ -127,13 +127,15 @@ public class OasisEngineTest {
         try (DbContext db = dbPool.createContext()) {
             db.allKeys("*").forEach(db::removeKey);
 
-            redisRepository.addPlayer(new PlayerObject(1, "Jakob Floyd", "jakob@oasis.io"));
-            redisRepository.addPlayer(new PlayerObject(2, "Thierry Hines", "thierry@oasis.io"));
-            redisRepository.addPlayer(new PlayerObject(3, "Ray Glenn", "ray@oasis.io"));
-            redisRepository.addPlayer(new PlayerObject(4, "Lilia Stewart", "lilia@oasis.io"));
-            redisRepository.addPlayer(new PlayerObject(5, "Archer Roberts", "archer@oasis.io"));
+            var playerDao = redisRepository.getPlayerDao();
 
-            redisRepository.addTeam(TeamObject.builder().id(1).gameId(1).name("Warriors").build());
+            playerDao.addPlayer(new PlayerObject(1, "Jakob Floyd", "jakob@oasis.io"));
+            playerDao.addPlayer(new PlayerObject(2, "Thierry Hines", "thierry@oasis.io"));
+            playerDao.addPlayer(new PlayerObject(3, "Ray Glenn", "ray@oasis.io"));
+            playerDao.addPlayer(new PlayerObject(4, "Lilia Stewart", "lilia@oasis.io"));
+            playerDao.addPlayer(new PlayerObject(5, "Archer Roberts", "archer@oasis.io"));
+
+            redisRepository.getTeamDao().addTeam(TeamObject.builder().id(1).gameId(1).name("Warriors").build());
 
             setupDbBefore(db);
         }
@@ -192,7 +194,7 @@ public class OasisEngineTest {
                 elementDef.data(message.getData());
             }
 
-            oasisRepository.addNewElement(gameId, elementDef.build());
+            oasisDao.addNewElement(gameId, elementDef.build());
         }
     }
 
@@ -208,7 +210,7 @@ public class OasisEngineTest {
                     .gameId(gameId)
                     .metadata(new SimpleElementDefinition(rule.getId(), rule.getName(), rule.getDescription()))
                     .build();
-            oasisRepository.addNewElement(gameId, elementDef);
+            oasisDao.addNewElement(gameId, elementDef);
             engine.submit(Messages.createRuleAddMessage(gameId, rule, null));
             rules.add(rule);
         }

@@ -20,17 +20,17 @@
  *
  */
 
-package io.github.oasis.core.services.api.services.impl;
+package io.github.oasis.core.services.api.domain.services;
 
 import io.github.oasis.core.Game;
-import io.github.oasis.core.external.OasisRepository;
+import io.github.oasis.core.external.storage.GameDao;
+import io.github.oasis.core.external.storage.OasisDao;
 import io.github.oasis.core.external.PaginatedResult;
 import io.github.oasis.core.external.messages.GameState;
 import io.github.oasis.core.model.GameStatus;
 import io.github.oasis.core.services.annotations.AdminDbRepository;
 import io.github.oasis.core.services.api.exceptions.DataValidationException;
 import io.github.oasis.core.services.api.exceptions.ErrorCodes;
-import io.github.oasis.core.services.api.domain.services.IGameService;
 import io.github.oasis.core.services.api.app.request.GameCreateRequest;
 import io.github.oasis.core.services.api.app.request.GameUpdateRequest;
 import io.github.oasis.core.services.events.GameStatusChangeEvent;
@@ -39,6 +39,7 @@ import io.github.oasis.core.utils.Numbers;
 import io.github.oasis.core.utils.Texts;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -69,10 +70,14 @@ public class GameService extends AbstractOasisService implements IGameService {
             "stop", GameState.STOPPED,
             "stopped", GameState.STOPPED);
 
+    private final GameDao gameDao;
+
     private ApplicationEventPublisher publisher;
 
-    public GameService(@AdminDbRepository OasisRepository backendRepository, ApplicationEventPublisher eventPublisher) {
-        super(backendRepository);
+    public GameService(@Qualifier("jpa") OasisDao dao, ApplicationEventPublisher eventPublisher) {
+        super(dao);
+
+        this.gameDao = dao.getGameDao();
         this.publisher = eventPublisher;
     }
 
@@ -83,14 +88,15 @@ public class GameService extends AbstractOasisService implements IGameService {
 
         validateGameObjectForCreation(game);
 
-        Game dbGame = backendRepository.addNewGame(game);
-        backendRepository.updateGameStatus(dbGame.getId(), GameState.CREATED.name(), System.currentTimeMillis());
+        Game dbGame = gameDao.addNewGame(game);
+        gameDao.updateGameStatus(dbGame.getId(), GameState.CREATED.name(), System.currentTimeMillis());
         return dbGame;
     }
 
+    @Transactional
     @Override
     public Game updateGame(int gameId, GameUpdateRequest updateRequest) {
-        Game dbGame = backendRepository.readGame(gameId);
+        Game dbGame = gameDao.readGame(gameId);
         Game updatingGame = dbGame.toBuilder()
                 .motto(StringUtils.defaultIfEmpty(updateRequest.getMotto(), dbGame.getMotto()))
                 .logoRef(ObjectUtils.defaultIfNull(updateRequest.getLogoRef(), dbGame.getLogoRef()))
@@ -98,37 +104,38 @@ public class GameService extends AbstractOasisService implements IGameService {
                 .version(updateRequest.getVersion())
                 .build();
 
-        return backendRepository.updateGame(gameId, updatingGame);
+        return gameDao.updateGame(gameId, updatingGame);
     }
 
+    @Transactional
     @Override
     public Game deleteGame(int gameId) throws OasisApiException {
         changeStatusOfGame(gameId, GameState.STOPPED.name(), System.currentTimeMillis());
 
         // deleting game elements
-        backendRepository.readElementsByGameId(gameId)
-                .forEach(def -> backendRepository.deleteElement(gameId, def.getElementId()));
+        dao.getElementDao().readElementsByGameId(gameId)
+                .forEach(def -> dao.getElementDao().deleteElement(gameId, def.getElementId()));
 
         // deleting event sources
-        backendRepository.listAllEventSourcesOfGame(gameId)
-                .forEach(eventSource -> backendRepository.removeEventSourceFromGame(eventSource.getId(), gameId));
+        dao.getEventSourceDao().listAllEventSourcesOfGame(gameId)
+                .forEach(eventSource -> dao.getEventSourceDao().removeEventSourceFromGame(eventSource.getId(), gameId));
 
-        return backendRepository.deleteGame(gameId);
+        return gameDao.deleteGame(gameId);
     }
 
     @Override
     public Game readGame(int gameId) {
-        return backendRepository.readGame(gameId);
+        return gameDao.readGame(gameId);
     }
 
     @Override
     public PaginatedResult<Game> listAllGames(String offset, int pageSize) {
-        return backendRepository.listGames(offset, pageSize);
+        return gameDao.listGames(offset, pageSize);
     }
 
     @Override
     public Game getGameByName(String name) {
-        return backendRepository.readGameByName(name);
+        return gameDao.readGameByName(name);
     }
 
     @Override
@@ -136,11 +143,11 @@ public class GameService extends AbstractOasisService implements IGameService {
         GameState gameState = validateGameState(newStatus);
         long updatedTs = Numbers.ifNull(updatedAt, System.currentTimeMillis());
 
-        Game game = backendRepository.readGame(gameId);
+        Game game = gameDao.readGame(gameId);
         if (game == null) {
             throw new OasisApiException(ErrorCodes.GAME_NOT_EXISTS, HttpStatus.NOT_FOUND.value(), "No game is found by id " + gameId);
         }
-        return backendRepository.updateGameStatus(gameId, gameState.name(), updatedTs);
+        return gameDao.updateGameStatus(gameId, gameState.name(), updatedTs);
     }
 
     @Override
@@ -157,14 +164,14 @@ public class GameService extends AbstractOasisService implements IGameService {
 
     @Override
     public GameStatus getCurrentGameStatus(int gameId) {
-        return backendRepository.readCurrentGameStatus(gameId);
+        return gameDao.readCurrentGameStatus(gameId);
     }
 
     @Override
     public List<GameStatus> listGameStatusHistory(int gameId, Long startFrom, Long endTo) {
         long startTime = startFrom == null ? 0 : startFrom;
         long endTime = endTo == null ? FAR_FUTURE_EPOCH : endTo;
-        return backendRepository.readGameStatusHistory(gameId, startTime, endTime);
+        return gameDao.readGameStatusHistory(gameId, startTime, endTime);
     }
 
     private GameState validateGameState(String status) throws OasisApiException {

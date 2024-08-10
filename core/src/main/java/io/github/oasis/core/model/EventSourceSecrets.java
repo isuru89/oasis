@@ -31,15 +31,8 @@ import java.io.Serializable;
 /**
  * @author Isuru Weerarathna
  */
-@Getter
-@Setter
 @Builder(toBuilder = true)
-@AllArgsConstructor
-@NoArgsConstructor
-public class EventSourceSecrets implements Serializable {
-
-    private String publicKey;
-    private String privateKey;
+public record EventSourceSecrets(String publicKey, String privateKey, int viewedTimes) {
 
     public boolean isValid() {
         return Texts.isNotEmpty(privateKey) && Texts.isNotEmpty(publicKey);

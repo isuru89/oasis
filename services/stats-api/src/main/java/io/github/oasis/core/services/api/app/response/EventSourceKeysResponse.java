@@ -28,12 +28,7 @@ import java.io.Serializable;
 /**
  * @author Isuru Weerarathna
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class EventSourceKeysResponse implements Serializable {
-
-    public String privateKeyB64Encoded;
-
-
+public record EventSourceKeysResponse(
+        String privateKeyEncoded
+) {
 }
