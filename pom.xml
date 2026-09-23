@@ -34,7 +34,7 @@
         <mvel.version>2.5.2.Final</mvel.version>
         <hikari.version>5.1.0</hikari.version>
         <liquibase.version>4.24.0</liquibase.version>
-        <springdoc.version>1.7.0</springdoc.version>
+        <springdoc.version>2.2.0</springdoc.version>
         <testcontainers.version>1.16.0</testcontainers.version>
         <kafkaclient.version>2.8.1</kafkaclient.version>
     </properties>

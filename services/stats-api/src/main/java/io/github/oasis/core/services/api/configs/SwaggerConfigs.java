@@ -31,7 +31,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.springdoc.core.customizers.OpenApiCustomiser;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -67,7 +67,7 @@ public class SwaggerConfigs {
     }
 
     @Bean
-    public OpenApiCustomiser customizeOpenApi() {
+    public OpenApiCustomizer customizeOpenApi() {
         OasisErrorHandler.ErrorObject errorObject400 = new OasisErrorHandler.ErrorObject().toBuilder()
                 .path("/context/path")
                 .errorCode("E00001")
